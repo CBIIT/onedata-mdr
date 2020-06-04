@@ -1932,8 +1932,6 @@ delete from NCI_FORM_TA;
 commit;
 delete from NCI_INSTR;
 commit;
-delete from NCI_CS_ITEM_REL;
-commit;
 delete from NCI_QUEST_VV_REP;
 commit;
 delete from NCI_ADMIN_ITEM_REL_ALT_KEY;
