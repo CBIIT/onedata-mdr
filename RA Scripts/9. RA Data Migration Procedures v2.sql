@@ -85,6 +85,7 @@ delete from obj_typ;
 commit;
 
 end;
+/
 
 create or replace procedure sp_insert_all 
 as
