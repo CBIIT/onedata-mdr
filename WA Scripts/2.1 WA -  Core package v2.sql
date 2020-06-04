@@ -2,10 +2,33 @@ create or replace PACKAGE template_11179 AS
 
 procedure spChangeStatus (v_stus_typ_id number, v_to_stus_id number, v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure spCreateVer (v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_params in varchar2);
-procedure spDeleteItem (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure spShowValueMeaningDependency (v_data_in in clob, v_data_out out clob);
 procedure spShowVMDependencyLimit (v_data_in in clob, v_data_out out clob, v_Mode in number);
 procedure spPreHookCheckDE (a_table_name in varchar2, a_transaction_type in varchar2, a_data in raw, a_user in varchar2);
+function getParsedAdminItemsData (originalRowset in t_actionRowset) return tab_admin_item_pk;
+function getColumnCount(v_table_name in varchar2) return number;
+function getSelectSql(v_table_name in varchar2) return varchar2;
+
+
+END;
+/
+		
+
+create or replace PACKAGE nci_11179 AS
+function getWordCount(v_nm in varchar2) return integer;
+function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
+FUNCTION get_concepts(v_item_id in number, v_ver_nr in number) return varchar2;
+ Function get_concept_order(v_item_id in number, v_ver_nr in number) return varchar2 ;
+ function cmr_guid return varchar2;
+procedure spAddToCart ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spRemoveFromCart (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spAddConceptRel (v_data_in in clob, v_data_out out clob);
+procedure spCreateVerNCI (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure getConcatNmDef(v_item_id in number, v_ver_nr in number, v_nm out varchar2, v_long_nm out varchar2,v_def out varchar2);
+procedure spCopyModuleNCI (actions in out t_actions, v_from_module_id in number,v_from_module_ver in number,  v_from_form_id in number, v_from_form_ver number, v_to_form_id number, v_to_form_ver number);
+
+function getItemId return integer;
+procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm out varchar2, v_def out varchar2);
 
 END;
 /
@@ -632,6 +655,8 @@ begin
     action := t_actionRowset(action_rows, v_table_name, 10, 'insert');
     actions.extend; actions(actions.last) := action;
 
+
+
  if v_admin_item.admin_item_typ_id = 3 then -- Add Perm Val
 
   action_rows := t_rows();
@@ -639,7 +664,7 @@ begin
   v_table_name := 'PERM_VAL';
   v_meta_col_cnt := getColumnCount(v_table_name);
 
-  for pv_cur in
+   for pv_cur in
   (select val_id from perm_val where 
   val_dom_item_id = v_admin_item.item_id and val_dom_ver_nr = v_admin_item.ver_nr) loop
 
@@ -676,9 +701,368 @@ begin
 
  end if;
 
+ 
+ 
+ if v_admin_item.admin_item_typ_id = 1 then -- Conceptual Domain then add CD-VM relationship
+
+  action_rows := t_rows();
+
+  v_table_name := 'CONC_DOM_VAL_MEAN';
+  v_meta_col_cnt := getColumnCount(v_table_name);
+
+   for cdvm_cur in
+  (select CONC_DOM_VER_NR, CONC_DOM_ITEM_ID, NCI_VAL_MEAN_ITEM_ID, NCI_VAL_MEAN_VER_NR from conc_dom_val_mean where 
+  conc_dom_item_id = v_admin_item.item_id and conc_dom_ver_nr = v_admin_item.ver_nr) loop
+
+      v_sql := getSelectSql(v_table_name) || ' where CONC_DOM_VER_NR = :conc_dom_ver_nr and CONC_DOM_ITEM_ID = :conc_dom_item_id and NCI_VAL_MEAN_ITEM_ID = :nci_val_mean_item_id and NCI_VAL_MEAN_VER_NR = :nci_val_mean_ver_nr';
+
+      v_cur := dbms_sql.open_cursor;
+   dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
+   dbms_sql.bind_variable(v_cur, ':conc_dom_ver_nr', cdvm_cur.conc_dom_ver_nr);
+   dbms_sql.bind_variable(v_cur, ':conc_dom_item_id', cdvm_cur.conc_dom_item_id);
+   dbms_sql.bind_variable(v_cur, ':nci_val_mean_ver_nr', cdvm_cur.nci_val_mean_ver_nr);
+   dbms_sql.bind_variable(v_cur, ':nci_val_mean_item_id', cdvm_cur.nci_val_mean_item_id);
+
+   for i in 1..v_meta_col_cnt loop
+       dbms_sql.define_column(v_cur, i, '', 4000);
+   end loop;
+
+      v_temp := dbms_sql.execute_and_fetch(v_cur);
+      dbms_sql.describe_columns(v_cur, v_meta_col_cnt, v_meta_desc_tab);
+
+      row := t_row();
+
+   for i in 1..v_meta_col_cnt loop
+    dbms_sql.column_value(v_cur, i, v_col_val);
+    ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
+   end loop;
+
+   dbms_sql.close_cursor(v_cur);
+
+      ihook.setColumnValue(row, 'CONC_DOM_VER_NR', spGetNextVer (v_admin_item.ver_nr, v_major_ver));
+      action_rows.extend; action_rows(action_rows.last) := row;
+
+  end loop;
+
+  action := t_actionRowset(action_rows, v_table_name, 12, 'insert');
+     actions.extend; actions(actions.last) := action;
+
+ end if;
+ 
+
+if v_admin_item.admin_item_typ_id = 4 then -- DE then add Derived DE components
+
+  action_rows := t_rows();
+
+  v_table_name := 'NCI_ADMIN_ITEM_REL';
+  v_meta_col_cnt := getColumnCount(v_table_name);
+
+   for de_cur in
+  (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where 
+  P_item_id = v_admin_item.item_id and p_ITEM_ver_nr = v_admin_item.ver_nr and rel_typ_id = 65) loop
+
+      v_sql := getSelectSql(v_table_name) || ' where P_ITEM_ID = :P_ITEM_ID and P_ITEM_VER_NR = :P_ITEM_VER_NR and C_ITEM_ID = :C_ITEM_ID and C_ITEM_VER_NR = :C_ITEM_VER_NR and REL_TYP_ID=65';
+
+      v_cur := dbms_sql.open_cursor;
+   dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
+   dbms_sql.bind_variable(v_cur, ':P_ITEM_ID', de_cur.P_ITEM_ID);
+   dbms_sql.bind_variable(v_cur, ':P_ITEM_VER_NR', de_cur.P_ITEM_VER_NR);
+   dbms_sql.bind_variable(v_cur, ':C_ITEM_ID', de_cur.C_ITEM_ID);
+   dbms_sql.bind_variable(v_cur, ':C_ITEM_VER_NR', de_cur.C_ITEM_VER_NR);
+
+   for i in 1..v_meta_col_cnt loop
+       dbms_sql.define_column(v_cur, i, '', 4000);
+   end loop;
+
+      v_temp := dbms_sql.execute_and_fetch(v_cur);
+      dbms_sql.describe_columns(v_cur, v_meta_col_cnt, v_meta_desc_tab);
+
+      row := t_row();
+
+   for i in 1..v_meta_col_cnt loop
+    dbms_sql.column_value(v_cur, i, v_col_val);
+    ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
+   end loop;
+
+   dbms_sql.close_cursor(v_cur);
+
+      ihook.setColumnValue(row, 'P_ITEM_VER_NR', spGetNextVer (v_admin_item.ver_nr, v_major_ver));
+      action_rows.extend; action_rows(action_rows.last) := row;
+
+  end loop;
+
+  action := t_actionRowset(action_rows, v_table_name, 12, 'insert');
+     actions.extend; actions(actions.last) := action;
+
+ end if;
+ 
 end;
 
+
+
+procedure spCreateCommonChildren (actions in out t_actions, v_admin_item admin_item%rowtype, v_major_ver boolean) as
+
+
+action           t_actionRowset;
+action_rows              t_rows := t_rows();
+action_rows_csi              t_rows := t_rows();
+row          t_row;
+v_table_name varchar2(30);
+v_sql        varchar2(4000);
+
+v_cur        number;
+v_temp        number;
+
+v_col_val       varchar2(4000);
+
+v_meta_col_cnt      integer;
+v_meta_desc_tab      dbms_sql.desc_tab;
+
+begin
+
+
+--Alt names
+
+ action_rows := t_rows();
+ action_rows_csi := t_rows();
+  v_table_name := 'ALT_NMS';
+  v_meta_col_cnt := getColumnCount(v_table_name);
+
+  for an_cur in
+  (select nm_id from alt_nms where 
+  item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr) loop
+
+      v_sql := getSelectSql(v_table_name) || ' where nm_id = :nm_id';
+
+      v_cur := dbms_sql.open_cursor;
+   dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
+   dbms_sql.bind_variable(v_cur, ':nm_id', an_cur.nm_id);
+
+   for i in 1..v_meta_col_cnt loop
+       dbms_sql.define_column(v_cur, i, '', 4000);
+   end loop;
+
+      v_temp := dbms_sql.execute_and_fetch(v_cur);
+      dbms_sql.describe_columns(v_cur, v_meta_col_cnt, v_meta_desc_tab);
+
+      row := t_row();
+
+   for i in 1..v_meta_col_cnt loop
+    dbms_sql.column_value(v_cur, i, v_col_val);
+    ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
+   end loop;
+   dbms_sql.close_cursor(v_cur);
+
+     select od_seq_ALT_NMS.nextval into v_temp from dual;
+      ihook.setColumnValue(row, 'nm_ID',v_temp);
+      ihook.setColumnValue(row, 'VER_NR', spGetNextVer (v_admin_item.ver_nr, v_major_ver));
+      action_rows.extend; action_rows(action_rows.last) := row;
+          for csi_cur in (select nci_pub_id, nci_ver_nr, typ_nm from NCI_CSI_ALT_DEFNMS where nmdef_id = an_cur.nm_id) loop
+            row:= t_row();
+            ihook.setColumnValue(row, 'nmdef_ID',v_temp);
+            ihook.setColumnValue(row, 'NCI_PUB_ID', csi_cur.NCI_PUB_ID);
+            ihook.setColumnValue(row, 'NCI_VER_NR', csi_cur.NCI_VER_NR);
+           ihook.setColumnValue(row, 'TYP_NM', csi_cur.TYP_NM);
+           action_rows_csi.extend; action_rows_csi(action_rows_Csi.last) := row;
+         end loop;
+
+
+  end loop;
+  
+  action := t_actionRowset(action_rows, v_table_name, 12, 'insert');
+     actions.extend; actions(actions.last) := action;
+
+-- Alternate Definitions
+
+ action_rows := t_rows();
+
+  v_table_name := 'ALT_DEF';
+  v_meta_col_cnt := getColumnCount(v_table_name);
+
+  for ad_cur in
+  (select def_id from alt_def where 
+  item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr) loop
+
+      v_sql := getSelectSql(v_table_name) || ' where def_id = :def_id';
+
+      v_cur := dbms_sql.open_cursor;
+   dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
+   dbms_sql.bind_variable(v_cur, ':def_id', ad_cur.def_id);
+
+   for i in 1..v_meta_col_cnt loop
+       dbms_sql.define_column(v_cur, i, '', 4000);
+   end loop;
+
+      v_temp := dbms_sql.execute_and_fetch(v_cur);
+      dbms_sql.describe_columns(v_cur, v_meta_col_cnt, v_meta_desc_tab);
+
+      row := t_row();
+
+   for i in 1..v_meta_col_cnt loop
+    dbms_sql.column_value(v_cur, i, v_col_val);
+    ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
+   end loop;
+
+   dbms_sql.close_cursor(v_cur);
+   select od_seq_ALT_DEF.nextval into v_temp from dual;
+      ihook.setColumnValue(row, 'def_ID', v_temp);
+      ihook.setColumnValue(row, 'VER_NR', spGetNextVer (v_admin_item.ver_nr, v_major_ver));
+      action_rows.extend; action_rows(action_rows.last) := row;
+
+        for csi_cur in (select nci_pub_id, nci_ver_nr, typ_nm from NCI_CSI_ALT_DEFNMS where nmdef_id = ad_cur.def_id) loop
+            row:= t_row();
+            ihook.setColumnValue(row, 'nmdef_ID',v_temp);
+            ihook.setColumnValue(row, 'NCI_PUB_ID', csi_cur.NCI_PUB_ID);
+            ihook.setColumnValue(row, 'NCI_VER_NR', csi_cur.NCI_VER_NR);
+           ihook.setColumnValue(row, 'TYP_NM', csi_cur.TYP_NM);
+           action_rows_csi.extend; action_rows_csi(action_rows_Csi.last) := row;
+         end loop;
+
+  end loop;
+  
+  action := t_actionRowset(action_rows, v_table_name, 13, 'insert');
+     actions.extend; actions(actions.last) := action;
+
+
+  action := t_actionRowset(action_rows_csi, 'Classification level Name/Definition 2',2, 25, 'insert');
+     actions.extend; actions(actions.last) := action;
+
+--- Reference Documents
+
+ action_rows := t_rows();
+
+  v_table_name := 'REF';
+  v_meta_col_cnt := getColumnCount(v_table_name);
+
+  for ref_cur in
+  (select ref_id from ref where 
+  item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr) loop
+
+      v_sql := getSelectSql(v_table_name) || ' where ref_id = :ref_id';
+
+      v_cur := dbms_sql.open_cursor;
+   dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
+   dbms_sql.bind_variable(v_cur, ':ref_id', ref_cur.ref_id);
+
+   for i in 1..v_meta_col_cnt loop
+       dbms_sql.define_column(v_cur, i, '', 4000);
+   end loop;
+
+      v_temp := dbms_sql.execute_and_fetch(v_cur);
+      dbms_sql.describe_columns(v_cur, v_meta_col_cnt, v_meta_desc_tab);
+
+      row := t_row();
+
+   for i in 1..v_meta_col_cnt loop
+    dbms_sql.column_value(v_cur, i, v_col_val);
+    ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
+   end loop;
+
+   dbms_sql.close_cursor(v_cur);
+
+      ihook.setColumnValue(row, 'ref_ID', -1);
+      ihook.setColumnValue(row, 'VER_NR', spGetNextVer (v_admin_item.ver_nr, v_major_ver));
+      action_rows.extend; action_rows(action_rows.last) := row;
+
+  end loop;
+
+  action := t_actionRowset(action_rows, v_table_name, 14, 'insert');
+     actions.extend; actions(actions.last) := action;
+
+
+ action_rows := t_rows();
+
+-- Concepts
+
+  v_table_name := 'CNCPT_ADMIN_ITEM';
+  v_meta_col_cnt := getColumnCount(v_table_name);
+
+  for ref_cur in
+  (select CNCPT_AI_ID from CNCPT_ADMIN_ITEM where 
+  item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr) loop
+
+      v_sql := getSelectSql(v_table_name) || ' where CNCPT_AI_ID = :CNCPT_AI_ID';
+
+      v_cur := dbms_sql.open_cursor;
+   dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
+   dbms_sql.bind_variable(v_cur, ':CNCPT_AI_ID', ref_cur.CNCPT_AI_ID);
+
+   for i in 1..v_meta_col_cnt loop
+       dbms_sql.define_column(v_cur, i, '', 4000);
+   end loop;
+
+      v_temp := dbms_sql.execute_and_fetch(v_cur);
+      dbms_sql.describe_columns(v_cur, v_meta_col_cnt, v_meta_desc_tab);
+
+      row := t_row();
+
+   for i in 1..v_meta_col_cnt loop
+    dbms_sql.column_value(v_cur, i, v_col_val);
+    ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
+   end loop;
+
+   dbms_sql.close_cursor(v_cur);
+
+      ihook.setColumnValue(row, 'CNCPT_AI_ID', -1);
+      ihook.setColumnValue(row, 'VER_NR', spGetNextVer (v_admin_item.ver_nr, v_major_ver));
+      action_rows.extend; action_rows(action_rows.last) := row;
+
+  end loop;
+
+  action := t_actionRowset(action_rows, v_table_name, 14, 'insert');
+     actions.extend; actions(actions.last) := action;
+
+
+
+--- Classifications
+
+ action_rows := t_rows();
+
+  v_table_name := 'NCI_ALT_KEY_ADMIN_ITEM_REL';
+  v_meta_col_cnt := getColumnCount(v_table_name);
+
+  for ref_cur in
+  (select NCI_PUB_ID,NCI_VER_NR, REL_TYP_ID from NCI_ALT_KEY_ADMIN_ITEM_REL where 
+  c_item_id = v_admin_item.item_id and c_item_ver_nr = v_admin_item.ver_nr) loop
+
+      v_sql := getSelectSql(v_table_name) || ' where NCI_PUB_ID = :NCI_PUB_ID and NCI_VER_NR = :NCI_VER_NR and c_item_id = :c_item_id and c_item_ver_nr = :c_item_ver_nr and rel_typ_id = :rel_typ_id';
+
+      v_cur := dbms_sql.open_cursor;
+   dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
+   dbms_sql.bind_variable(v_cur, ':nci_pub_id', ref_cur.nci_pub_id);
+    dbms_sql.bind_variable(v_cur, ':nci_ver_nr', ref_cur.nci_ver_nr);
+    dbms_sql.bind_variable(v_cur, ':c_item_id', v_admin_item.item_id);
+    dbms_sql.bind_variable(v_cur, ':c_item_ver_nr', v_admin_item.ver_nr);
+    dbms_sql.bind_variable(v_cur, ':rel_typ_id', ref_cur.rel_typ_id);
+
+   for i in 1..v_meta_col_cnt loop
+       dbms_sql.define_column(v_cur, i, '', 4000);
+   end loop;
+
+      v_temp := dbms_sql.execute_and_fetch(v_cur);
+      dbms_sql.describe_columns(v_cur, v_meta_col_cnt, v_meta_desc_tab);
+
+      row := t_row();
+
+   for i in 1..v_meta_col_cnt loop
+    dbms_sql.column_value(v_cur, i, v_col_val);
+    ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
+   end loop;
+
+   dbms_sql.close_cursor(v_cur);
+
+       ihook.setColumnValue(row, 'c_item_VER_NR', spGetNextVer (v_admin_item.ver_nr, v_major_ver));
+      action_rows.extend; action_rows(action_rows.last) := row;
+
+  end loop;
+
+  action := t_actionRowset(action_rows, 'NCI_ALT_KEY_ADMIN_ITEM_REL (Hook)',2, 15, 'insert');
+    actions.extend; actions(actions.last) := action;
+
+end;
 /***********************************************/
+
+
 
 procedure spCreateVer (v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_params in varchar2) as
 
@@ -731,6 +1115,7 @@ begin
 
  hookOutput.invocationNumber := hookInput.invocationNumber;
  hookOutput.originalRowset := hookInput.originalRowset;
+
 
  v_tab_admin_item := getParsedAdminItemsData(hookInput.originalRowset);
 
@@ -814,6 +1199,7 @@ begin
         ai_audit_action_rows.extend; ai_audit_action_rows(ai_audit_action_rows.last) := row;
 
   spCreateSubtypeVer(actions, v_admin_item, v_major_ver);
+  spCreateCommonChildren(actions, v_admin_item, v_major_ver);
 
  end loop;
 
@@ -835,593 +1221,6 @@ begin
 end;
 
 /***********************************************/
-
-procedure spDeleteItem (v_data_in in clob, v_data_out out clob, v_user_id varchar2)
-as
-
-hookInput           t_hookInput;
-hookOutput           t_hookOutput := t_hookOutput();
-actions           t_actions := t_actions();
-action           t_actionRowset;
-action_rows     t_rows;
-row          t_row;
-
-v_admin_item                admin_item%rowtype;
-v_tab_admin_item            tab_admin_item_pk;
-v_delete_flag               boolean;
-
-AI_ITEM_NM_COL_LENGTH  number := 175;
-AI_ITEM_LONG_NM_COL_LENGTH number := 255;
-
-v_delete_status_mask    number;
-
-begin
-
-    hookInput := ihook.getHookInput(v_data_in);
-
- hookOutput.invocationNumber := hookInput.invocationNumber;
- hookOutput.originalRowset := hookInput.originalRowset;
-
- v_tab_admin_item := getParsedAdminItemsData(hookInput.originalRowset);
-
-    for i in 1 .. v_tab_admin_item.count loop
-
-        v_delete_flag := false;
-
-        select * into v_admin_item from admin_item
-        where item_id=v_tab_admin_item(i).item_id and ver_nr=v_tab_admin_item(i).ver_nr
-  for update nowait;
-
-  if v_admin_item.regstr_stus_id is not null then
-      select to_number(substr(stus_msk,3,1))
-            into v_delete_status_mask
-      from stus_mstr
-      where stus_id = v_admin_item.regstr_stus_id;
-     end if;
-
-        if v_admin_item.regstr_stus_id is null or v_delete_status_mask = 1 then
-
-            if v_admin_item.admin_item_typ_id = 1 then
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from conc_dom
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr
-                   and not exists (
-                           select *
-                             from de_conc
-                            where conc_dom_item_id = v_admin_item.item_id
-                              and conc_dom_ver_nr = v_admin_item.ver_nr
-                              and nvl (de_conc.fld_delete, 0) = 0)
-                   and not exists (
-                           select *
-                             from value_dom
-                            where conc_dom_item_id = v_admin_item.item_id
-                              and conc_dom_ver_nr = v_admin_item.ver_nr
-                              and nvl (value_dom.fld_delete, 0) = 0)) loop
-
-                    row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'CONC_DOM', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-        for rec1 in
-           (select
-                 val_mean_id
-           from conc_dom_val_mean
-                 where conc_dom_item_id = v_admin_item.item_id
-                    and conc_dom_ver_nr = v_admin_item.ver_nr) loop
-
-                     row := t_row();
-                  ihook.setColumnValue(row, 'VAL_MEAN_ID', rec1.val_mean_id);
-                  ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', v_admin_item.item_id);
-                  ihook.setColumnValue(row, 'CONC_DOM_VER_NR', v_admin_item.ver_nr);
-                     action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                     action := t_actionRowset(action_rows, 'CONC_DOM_VAL_MEAN', 0, 'delete');
-         actions.extend; actions(actions.last) := action;
-
-           end loop;
-
-          end loop;
-
-                v_err_str := 'Dependent Data Element Concepts and/or Value Domains found. Conceptual Domain(s) cannot be deleted.';
-
-            elsif v_admin_item.admin_item_typ_id = 2 then
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from de_conc
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr
-                   and not exists (
-                           select *
-                             from de
-                            where de_conc_item_id = v_admin_item.item_id
-                              and de_conc_ver_nr = v_admin_item.ver_nr
-                              and nvl (de.fld_delete, 0) = 0)) loop
-
-                    row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'DE_CONC', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-                v_err_str := 'Dependent Data Elements found. Data Element Concept(s) cannot be deleted.';
-
-            elsif v_admin_item.admin_item_typ_id = 3 then
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from value_dom
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr
-                   and not exists (
-                           select *
-                             from de
-                            where val_dom_item_id = v_admin_item.item_id
-                              and val_dom_ver_nr = v_admin_item.ver_nr
-                              and nvl (de.fld_delete, 0) = 0)) loop
-
-                    row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'VALUE_DOM', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-        for rec1 in
-           (select
-                 val_id
-           from perm_val
-                 where val_dom_item_id = v_admin_item.item_id
-                    and val_dom_ver_nr = v_admin_item.ver_nr) loop
-
-                     row := t_row();
-                  ihook.setColumnValue(row, 'VAL_ID', rec1.val_id);
-                     action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                     action := t_actionRowset(action_rows, 'PERM_VAL', 0, 'delete');
-         actions.extend; actions(actions.last) := action;
-
-     end loop;
-
-          end loop;
-
-                v_err_str := 'Dependent Data Elements found. Value Domain(s) cannot be deleted.';
-
-            elsif v_admin_item.admin_item_typ_id = 4 then
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from de
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr
-                   and not exists (
-                           select *
-                             from de_derv
-                            where SCNDRY_DE_ITEM_ID = v_admin_item.item_id
-                              and SCNDRY_DE_VER_NR = v_admin_item.ver_nr
-                              and nvl (de_derv.fld_delete, 0) = 0)) loop
-
-                    row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'DE', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-                v_err_str := 'Data Element used as a derived component for other Data Elements. Data Element(s) cannot be deleted.';
-
-            elsif v_admin_item.admin_item_typ_id = 5 then
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from obj_cls
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr
-                   and not exists (
-                           select *
-                             from de_conc
-                            where obj_cls_item_id = v_admin_item.item_id
-                              and obj_cls_ver_nr = v_admin_item.ver_nr
-                              and nvl (de_conc.fld_delete, 0) = 0)) loop
-
-                    row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'OBJ_CLS', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-                v_err_str := 'Dependent Data Element Concepts found. Object Class(es) cannot be deleted.';
-
-            elsif v_admin_item.admin_item_typ_id = 6 then
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from prop
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr
-                   and not exists (
-                           select *
-                             from de_conc
-                            where prop_item_id = v_admin_item.item_id
-                              and prop_ver_nr = v_admin_item.ver_nr
-                              and nvl (de_conc.fld_delete, 0) = 0)) loop
-
-                    row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'PROP', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-                v_err_str := 'Dependent Data Element Concepts found. Property(ies) cannot be deleted.';
-
-            elsif v_admin_item.admin_item_typ_id = 7 then
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from rep_cls
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr
-                   and not exists (
-                           select *
-                             from de
-                            where rep_cls_item_id = v_admin_item.item_id
-                              and rep_cls_ver_nr = v_admin_item.ver_nr
-                              and nvl (de.fld_delete, 0) = 0)
-                   and not exists (
-                           select *
-                             from value_dom
-                            where rep_cls_item_id = v_admin_item.item_id
-                              and rep_cls_ver_nr = v_admin_item.ver_nr
-                              and nvl (value_dom.fld_delete, 0) = 0)) loop
-
-                    row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'REP_CLS', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-                v_err_str := 'Dependent Data Elements found. Representation Class(es) cannot be deleted.';
-
-            elsif v_admin_item.admin_item_typ_id = 8 then
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from cntxt
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr
-                   and not exists (
-                           select *
-                             from admin_item
-                            where cntxt_item_id = v_admin_item.item_id
-                              and cntxt_ver_nr = v_admin_item.ver_nr
-                              and nvl (admin_item.fld_delete, 0) = 0)) loop
-
-                    row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'CNTXT', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-                v_err_str := 'Dependent Administered Items found. Context(s) cannot be deleted.';
-
-            elsif v_admin_item.admin_item_typ_id = 9 then
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from clsfctn_schm
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr
-                   and not exists (
-                           select *
-                             from clsfctn_schm_item
-                            where clsfctn_schm_id = v_admin_item.item_id
-                              and clsfctn_schm_ver_nr = v_admin_item.ver_nr
-                              and nvl (clsfctn_schm_item.fld_delete, 0) = 0)) loop
-
-                    row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'CLSFCTN_SCHM', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-                v_err_str := 'Dependent Classification Scheme Items found. Classification Scheme(s) cannot be deleted.';
-
-            elsif v_admin_item.admin_item_typ_id = 10 then
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from derv_rul
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr
-                   and not exists (
-                           select *
-                             from de_derv
-                            where derv_rul_item_id = v_admin_item.item_id
-                              and derv_rul_ver_nr = v_admin_item.ver_nr
-                              and nvl (de_derv.fld_delete, 0) = 0)) loop
-
-                    row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'DERV_RUL', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-                v_err_str := 'Dependent derived Data Elements found. Derivation Rule(s) cannot be deleted.';
-
-            elsif v_admin_item.admin_item_typ_id = 49 then /* Concept  added 2/5/2008*/
-
-
-
-       for rec in
-          (select
-                item_id, ver_nr
-          from CNCPT
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr) loop
-
-        row := t_row();
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'CNCPT', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-    for rec in
-          (select
-                cncpt_item_id, cncpt_ver_nr, item_id, ver_nr
-          from CNCPT_ADMIN_ITEM
-                where cncpt_item_id = v_admin_item.item_id
-                   and cncpt_ver_nr = v_admin_item.ver_nr) loop
-
-        row := t_row();
-                 ihook.setColumnValue(row, 'CNCPT_ITEM_ID', rec.cncpt_item_id);
-                 ihook.setColumnValue(row, 'CNCPT_VER_NR', rec.cncpt_ver_nr);
-                 ihook.setColumnValue(row, 'ITEM_ID', rec.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'CNCPT_ADMIN_ITEM', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-    for rec in
-          (select
-                cncpt_item_id, cncpt_ver_nr, CLSFCTN_SCHM_ITEM_ID
-          from CNCPT_CSI
-                where cncpt_item_id = v_admin_item.item_id
-                   and cncpt_ver_nr = v_admin_item.ver_nr) loop
-
-        row := t_row();
-                 ihook.setColumnValue(row, 'CNCPT_ITEM_ID', rec.cncpt_item_id);
-                 ihook.setColumnValue(row, 'CNCPT_VER_NR', rec.cncpt_ver_nr);
-                 ihook.setColumnValue(row, 'CLSFCTN_SCHM_ITEM_ID', rec.CLSFCTN_SCHM_ITEM_ID);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'CNCPT_CSI', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-    for rec in
-          (select
-                cncpt_item_id, cncpt_ver_nr, VAL_MEAN_ID
-          from CNCPT_VAL_MEAN
-                where cncpt_item_id = v_admin_item.item_id
-                   and cncpt_ver_nr = v_admin_item.ver_nr) loop
-
-        row := t_row();
-                 ihook.setColumnValue(row, 'CNCPT_ITEM_ID', rec.cncpt_item_id);
-                 ihook.setColumnValue(row, 'CNCPT_VER_NR', rec.cncpt_ver_nr);
-                 ihook.setColumnValue(row, 'VAL_MEAN_ID', rec.VAL_MEAN_ID);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'CNCPT_VAL_MEAN', 0, 'delete');
-        actions.extend; actions(actions.last) := action;
-
-                    v_delete_flag := true;
-
-          end loop;
-
-              --  v_err_str := 'Dependent Data Element Concepts found. Object Class(es) cannot be deleted.';
-
-
-            end if;
-
-            if v_delete_flag then
-
-                row := t_row();
-                ihook.setColumnValue(row, 'ITEM_ID', v_admin_item.item_id);
-                ihook.setColumnValue(row, 'VER_NR', v_admin_item.ver_nr);
-
-    -- changed to concatenate ITEM_ID/VER_NR to allow deletions of multiple versions to the same item_id
-                ihook.setColumnValue(row, 'ITEM_NM', substr('$DEL ' || v_admin_item.item_id || '-' || v_admin_item.ver_nr || ' ' ||  v_admin_item.item_nm, 1, AI_ITEM_NM_COL_LENGTH));
-                ihook.setColumnValue(row, 'ITEM_LONG_NM', substr('$DEL ' || v_admin_item.item_id || ' ' || v_admin_item.ver_nr || ' '||  v_admin_item.item_long_nm, 1, AI_ITEM_LONG_NM_COL_LENGTH));
-                action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                action := t_actionRowset(action_rows, 'ADMIN_ITEM', 0, 'update');
-          actions.extend; actions(actions.last) := action;
-
-                row := t_row();
-                ihook.setColumnValue(row, 'ITEM_ID', v_admin_item.item_id);
-                ihook.setColumnValue(row, 'VER_NR', v_admin_item.ver_nr);
-                action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                action := t_actionRowset(action_rows, 'ADMIN_ITEM', 1, 'delete');
-          actions.extend; actions(actions.last) := action;
-
-                -- Set latest version flag to true if earlier version existsi
-    -- Change as per Novartis issue list
-
-    for rec in
-          (select
-                item_id, max(ver_nr) ver_nr
-          from ADMIN_ITEM
-                where item_id = v_admin_item.item_id and ver_nr <> v_admin_item.ver_nr
-    and nvl(fld_delete,0) = 0 group by item_id) loop
-       row := t_row();
-                   ihook.setColumnValue(row, 'ITEM_ID', v_admin_item.item_id);
-                   ihook.setColumnValue(row, 'VER_NR', rec.ver_nr);
-       ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-                   action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                   action := t_actionRowset(action_rows, 'ADMIN_ITEM', 2, 'update');
-             actions.extend; actions(actions.last) := action;
-
-    end loop;
-
-                for rec in
-          (select
-                nm_id
-          from alt_nms
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr) loop
-
-                    row := t_row();
-                  ihook.setColumnValue(row, 'NM_ID', rec.nm_id);
-                  ihook.setColumnValue(row, 'ITEM_ID', v_admin_item.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', v_admin_item.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'ALT_NMS', 0, 'delete');
-              actions.extend; actions(actions.last) := action;
-
-          end loop;
-
-                for rec in
-          (select
-                ref_id
-          from ref
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr) loop
-
-                    row := t_row();
-                  ihook.setColumnValue(row, 'REF_ID', rec.ref_id);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'REF', 0, 'delete');
-              actions.extend; actions(actions.last) := action;
-
-          end loop;
-
-                for rec in
-          (select
-                clsfctn_schm_item_id
-          from admin_item_clsfctn_schm_item
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr) loop
-
-                    row := t_row();
-                  ihook.setColumnValue(row, 'CLSFCTN_SCHM_ITEM_ID', rec.clsfctn_schm_item_id);
-                  ihook.setColumnValue(row, 'ITEM_ID', v_admin_item.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', v_admin_item.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'ADMIN_ITEM_CLSFCTN_SCHM_ITEM', 0, 'delete');
-              actions.extend; actions(actions.last) := action;
-
-          end loop;
-
-                for rec in
-          (select
-                ref_doc_id
-          from admin_item_ref_doc
-                where item_id = v_admin_item.item_id
-                   and ver_nr = v_admin_item.ver_nr) loop
-
-                    row := t_row();
-                  ihook.setColumnValue(row, 'REF_DOC_ID', rec.ref_doc_id);
-                  ihook.setColumnValue(row, 'ITEM_ID', v_admin_item.item_id);
-                 ihook.setColumnValue(row, 'VER_NR', v_admin_item.ver_nr);
-                    action_rows := t_rows(); action_rows.extend; action_rows(action_rows.last) := row;
-                    action := t_actionRowset(action_rows, 'ADMIN_ITEM_REF_DOC', 0, 'delete');
-              actions.extend; actions(actions.last) := action;
-
-          end loop;
-
-            else
-
-                hookOutput.message := v_err_str;
-                v_data_out := ihook.getHookOutput(hookOutput);
-       return;
-
-            end if;
-
-        else -- Registration status is not null & is not in the list of allowed for deletion statuses
-
-            hookOutput.message := 'Cannot delete Administered Item(s) with the specified registration status.';
-            v_data_out := ihook.getHookOutput(hookOutput);
-         return;
-
-        end if;
-
-    end loop;
-
-    hookOutput.actions := actions;
-
-    hookOutput.message := 'Administered Item(s) deleted successfully.';
-
-    v_data_out := ihook.getHookOutput(hookOutput);
-
-end;
-
-
 
 /***********************************************/
 
@@ -1826,26 +1625,6 @@ BEGIN
 END;
 
 /***********************************************/
-
-END;
-/
-		
-
-create or replace PACKAGE nci_11179 AS
-function getWordCount(v_nm in varchar2) return integer;
-function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
-FUNCTION get_concepts(v_item_id in number, v_ver_nr in number) return varchar2;
- Function get_concept_order(v_item_id in number, v_ver_nr in number) return varchar2 ;
- function cmr_guid return varchar2;
-procedure spAddToCart ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
-procedure spRemoveFromCart (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
-procedure spAddConceptRel (v_data_in in clob, v_data_out out clob);
-procedure spCreateVerNCI (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
-procedure getConcatNmDef(v_item_id in number, v_ver_nr in number, v_nm out varchar2, v_long_nm out varchar2,v_def out varchar2);
-procedure spCopyModuleNCI (actions in out t_actions, v_from_module_id in number,v_from_module_ver in number,  v_from_form_id in number, v_from_form_ver number, v_to_form_id number, v_to_form_ver number);
-
-function getItemId return integer;
-procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm out varchar2, v_def out varchar2);
 
 END;
 /
