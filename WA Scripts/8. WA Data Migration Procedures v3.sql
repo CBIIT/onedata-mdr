@@ -793,43 +793,46 @@ delete from admin_item where admin_item_typ_id =49;
 commit;
 
 
---Added context to concept as per tracker - 6/2/2020
-insert  /*+ APPEND */  into admin_item ( NCI_IDSEQ, 
+--Added context to concept as per tracker 214- 6/8/2020
+
+insert  /*+ APPEND */ into admin_item (  NCI_IDSEQ, 
 ADMIN_ITEM_TYP_ID, 
- EFF_DT, CHNG_DESC_TXT,
- UNTL_DT, CURRNT_VER_IND, ITEM_LONG_NM, ORIGIN,
-ITEM_DESC,ITEM_ID,
-ITEM_NM,
+ADMIN_STUS_ID, 
+ADMIN_STUS_NM_DN,
+EFF_DT, CHNG_DESC_TXT,
 CNTXT_ITEM_ID, CNTXT_VER_NR, 
-CNTXT_NM_DN, 
+CNTXT_NM_DN, UNTL_DT, CURRNT_VER_IND, ITEM_LONG_NM, ORIGIN,
+ITEM_DESC,ITEM_ID, 
+ITEM_NM,
 --STEWRD_ORG_ID
 VER_NR,
-CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID,
-DEF_SRC)
-select ac.con_idseq,
+CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select  ac.con_idseq,
 49,
- ac.begin_date,ac.change_note,
+s.stus_id, 
+s.nci_stus, ac.begin_date,ac.change_note,
 --conte_idseq,
+cntxt.item_id,
+cntxt.ver_nr,
+cntxt.item_nm,
 ac.end_date,
 decode(upper(ac.latest_version_ind),'YES', 1,'NO',0),
 ac.preferred_name,
 ac.origin,
 ac.preferred_definition,
 ac.con_id,
-nvl(ac.long_name, ac.preferred_name),
-cntxt.item_id,
-cntxt.ver_nr,
-cntxt.item_nm,
+nvl(ac.long_name,ac.preferred_name),
 --stewa_idseq,
 ac.version,
 ac.created_by, ac.date_created,
-nvl(ac.date_modified, ac.date_created), ac.modified_by,
-ac.definition_source
-from sbrext.concepts_ext ac, admin_item cntxt where
-ac.conte_idseq = cntxt.nci_idseq and 
+nvl(ac.date_modified, ac.date_created), ac.modified_by
+from sbrext.concepts_ext ac,  admin_item cntxt, stus_mstr s
+where ac.conte_idseq = cntxt.nci_idseq and 
+trim(ac.asl_name) = trim(s.nci_STUS) and
 cntxt.admin_item_typ_id = 8;
-
 commit;
+
+
 
 insert into cncpt (item_id, ver_nr, evs_src_id, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select con_id, version, ok.obj_key_id,
