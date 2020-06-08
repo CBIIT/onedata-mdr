@@ -806,7 +806,7 @@ ITEM_DESC,ITEM_ID,
 ITEM_NM,
 --STEWRD_ORG_ID
 VER_NR,
-CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID, DEF_SRC)
 select  ac.con_idseq,
 49,
 s.stus_id, 
@@ -825,7 +825,8 @@ nvl(ac.long_name,ac.preferred_name),
 --stewa_idseq,
 ac.version,
 ac.created_by, ac.date_created,
-nvl(ac.date_modified, ac.date_created), ac.modified_by
+nvl(ac.date_modified, ac.date_created), ac.modified_by,
+ac.DEFINITION_SOURCE
 from sbrext.concepts_ext ac,  admin_item cntxt, stus_mstr s
 where ac.conte_idseq = cntxt.nci_idseq and 
 trim(ac.asl_name) = trim(s.nci_STUS) and
