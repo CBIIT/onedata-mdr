@@ -109,7 +109,7 @@ if (:new.nci_idseq is null) then
  :new.nci_idseq := nci_11179.cmr_guid();
 end if;
  END ;
-
+/
 create or replace trigger TR_AI_EXT_TAB_INS
   AFTER INSERT
   on ADMIN_ITEM
