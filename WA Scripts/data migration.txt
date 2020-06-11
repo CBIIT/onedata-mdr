@@ -90,8 +90,6 @@ analyze table PERM_VAL compute statistics;
 
 --- Run in Release Area
 
-alter trigger TR_NCI_ALT_NMS_DENORM_INS disable;
-alter trigger TR_NCI_AI_DENORM_INS disable;
 alter trigger TR_AI_EXT_TAB_INS disable;
 
 truncate table NCI_CSI_ALT_DEFNMS;
@@ -134,8 +132,6 @@ truncate table obj_typ;
 
 exec onedata_ra.sp_insert_all;
 
-alter trigger TR_NCI_ALT_NMS_DENORM_INS enable;
-alter trigger TR_NCI_AI_DENORM_INS enable;
 alter trigger TR_AI_EXT_TAB_INS enable;
 
 analyze table admin_item compute statistics;
