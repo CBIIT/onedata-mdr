@@ -10,7 +10,7 @@ SAG-MIGR-VAL-AC-ST-LOV.sql
 ## onedata_wa.OBJ_KEY where obj_typ_id = 18 sbrext.sources_ext 'CONCEPT_SOURCE'
 SAG-MIGR-VAL-CONCEPT-SOURCE-LOV.sql
 
-#$ Classification Scheme Type sbr.CS_TYPES_LOV onedata_wa.OBJ_KEY obj_typ_id = 3 'CS_TYPE'
+## Classification Scheme Type sbr.CS_TYPES_LOV onedata_wa.OBJ_KEY obj_typ_id = 3 'CS_TYPE'
 SAG-MIGR-VAL-CS-TYPES-LOV.sql
 
 ## CSI Type sbr.CSI_TYPES_LOV onedata_wa.OBJ_KEY where obj_typ_id = 20 'CSI_TYPE'
@@ -46,7 +46,7 @@ SAG-MIGR-VAL-ORIGIN-LOV.sql
 ## Program Area  onedata_wa.OBJ_KEY where obj_typ_id = 14 sbr.PROGRAM_AREAS_LOV PA'
 SAG-MIGR-VAL-PA-LOV.sql
 
-# Form Category display onedata_wa.OBJ_KEY OBJ_TYP_ID=22 SBREXT.QC_DISPLAY_LOV_EXT  'QCDL_TYPE'
+## Form Category display onedata_wa.OBJ_KEY OBJ_TYP_ID=22 SBREXT.QC_DISPLAY_LOV_EXT  'QCDL_TYPE'
 SAG-MIGR-VAL-QCDL-LOV.sql
 
 ## onedata_wa.stus_mstr where stus_typ_id = 1 sbr.reg_status_lov 'REGISTRATION_STATUS'
