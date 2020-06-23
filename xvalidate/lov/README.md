@@ -55,5 +55,11 @@ SAG-MIGR-VAL-REG-ST-LOV.sql
 ## UOM 'UOM'
 SAG-MIGR-VAL-UOM-LOV.sql
 
+## call all DDLs LoV Validation
+SBREXT-MIGR-VAL-LOV-FULL.sql
+
 ## perform validation block
 SBREXT-SAG-MIGR-VAL-LOV.sql
+
+
+
