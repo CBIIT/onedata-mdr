@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION MAP_DATA_TYPE
 RETURN VARCHAR2 IS
 mapped_type varchar2(20);
 BEGIN
+-- maps caDSR Legacy datatype to Standard datatype
 	mapped_type :=
 	CASE cadsr_data_type
 		WHEN 'ALPHANUMERIC' THEN 'Character'
@@ -102,7 +103,7 @@ BEGIN
 		WHEN 'ISO21090ANYv1.0' THEN 'Character'
 		WHEN 'ISO21090BAGv1.0' THEN 'Character'
 		WHEN 'ISO21090BLNTNULv1.0' THEN cadsr_data_type
-		WHEN 'ISO21090BLv1.0' THEN cadsr_data_type
+		WHEN 'ISO21090BLv1.0' THEN 'Boolean'
 		WHEN 'ISO21090CDBasev1.0' THEN cadsr_data_type
 		WHEN 'ISO21090CDCVv1.0' THEN cadsr_data_type
 		WHEN 'ISO21090CDv1.0' THEN cadsr_data_type
@@ -230,7 +231,7 @@ BEGIN
 		WHEN 'evs.domain.Role' THEN cadsr_data_type
 		WHEN 'evs.domain.Source' THEN cadsr_data_type
 		WHEN 'evs.domain.TreeNode' THEN cadsr_data_type
-		WHEN 'java.lang.Boolean' THEN cadsr_data_type
+		WHEN 'java.lang.Boolean' THEN 'Boolean'
 		WHEN 'java.lang.Byte' THEN 'Character'
 		WHEN 'java.lang.Character' THEN 'Character'
 		WHEN 'java.lang.Double' THEN 'Real'
