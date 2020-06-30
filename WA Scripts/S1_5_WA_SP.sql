@@ -74,6 +74,673 @@ end;
 
 /
 
+
+create or replace PROCEDURE            sp_create_ai_1
+AS
+    v_cnt   INTEGER;
+BEGIN
+    -- Context creation
+    DELETE FROM cntxt;
+
+    COMMIT;
+
+    DELETE FROM admin_item
+          WHERE admin_item_typ_id = 8;
+
+    COMMIT;
+
+    -- Default version applied to context
+    INSERT INTO admin_item (admin_item_typ_id,
+                            NCI_iDSEQ,
+                            ITEM_DESC,
+                            ITEM_NM,
+                            ITEM_LONG_NM,
+                            VER_NR,
+                            CNTXT_NM_DN,
+                            CREAT_USR_ID,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID)
+        SELECT 8,
+               TRIM (conte_idseq),
+               description,
+               name,
+               name,
+               version,
+               name,
+               created_by,
+               date_created,
+               NVL (date_modified, date_created),
+               modified_by
+          FROM sbr.contexts;
+
+    COMMIT;
+
+    -- Language is not used in context
+    INSERT INTO cntxt (ITEM_ID,
+                       VER_NR,
+                       LANG_ID,
+                       NCI_PRG_AREA_ID,
+                       CREAT_USR_ID,
+                       CREAT_DT,
+                       LST_UPD_DT,
+                       LST_UPD_USR_ID)
+        SELECT ai.ITEM_ID,
+               ai.VER_NR,
+               1000,
+               ok.OBJ_KEY_ID,
+               c.created_by,
+               c.date_created,
+               NVL (c.date_modified, c.date_created),
+               c.modified_by
+          FROM sbr.contexts c, admin_item ai, obj_key ok
+         WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.conte_idseq)
+               AND TRIM (c.pal_name) = TRIM (ok.NCI_CD)
+               AND ok.obj_typ_id = 14
+               AND ai.admin_item_typ_id = 8;
+
+    COMMIT;
+
+    -- Conceptual Domain Creation
+    DELETE FROM conc_dom;
+
+    COMMIT;
+
+    DELETE FROM admin_item
+          WHERE admin_item_typ_id = 1;
+
+    COMMIT;
+
+
+    INSERT INTO admin_item (NCI_IDSEQ,
+                            ADMIN_ITEM_TYP_ID,
+                            ADMIN_STUS_ID,
+                            ADMIN_STUS_NM_DN,
+                            EFF_DT,
+                            CHNG_DESC_TXT,
+                            CNTXT_ITEM_ID,
+                            CNTXT_VER_NR,
+                            CNTXT_NM_DN,
+                            UNTL_DT,
+                            CURRNT_VER_IND,
+                            ITEM_LONG_NM,
+                            ORIGIN,
+                            ITEM_DESC,
+                            ITEM_ID,
+                            ITEM_NM,
+                            --STEWRD_ORG_ID
+                 --           UNRSLVD_ISSUE,
+                            VER_NR,
+                            CREAT_USR_ID,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID)
+        SELECT ac.cd_idseq,
+               1,
+               s.stus_id,
+               s.nci_stus,
+               ac.begin_date,
+               ac.change_note,
+               --conte_idseq,
+               cntxt.item_id,
+               cntxt.ver_nr,
+               cntxt.item_nm,
+               ac.end_date,
+               DECODE (UPPER (ac.latest_version_ind),  'YES', 1,  'NO', 0),
+               ac.preferred_name,
+               ac.origin,
+               ac.preferred_definition,
+               ac.cd_id,
+               NVL (ac.long_name, ac.preferred_name),
+               --stewa_idseq,
+               --ac.unresolved_issue,
+               ac.version,
+               ac.created_by,
+               ac.date_created,
+               NVL (ac.date_modified, ac.date_created),
+               ac.modified_by
+          FROM sbr.conceptual_domains  ac,
+               admin_item                   cntxt,
+               stus_mstr                    s
+         WHERE     ac.conte_idseq = cntxt.nci_idseq
+               AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
+               AND cntxt.admin_item_typ_id = 8;
+
+    COMMIT;
+
+    INSERT INTO conc_dom (item_id,
+                          ver_nr,
+                          DIMNSNLTY,
+                          CREAT_USR_ID,
+                          CREAT_DT,
+                          LST_UPD_DT,
+                          LST_UPD_USR_ID)
+        SELECT ai.item_id,
+               ai.ver_nr,
+               cd.dimensionality,
+               cd.created_by,
+               cd.date_created,
+               NVL (cd.date_modified, cd.date_created),
+               cd.modified_by
+          FROM sbr.conceptual_domains cd, admin_item ai
+         WHERE ai.NCI_IDSEQ = cd.CD_IDSEQ;
+
+    COMMIT;
+
+    -- Object class and Property creation. Need to confirm the OC and Property specific attributes
+    DELETE FROM obj_cls;
+
+    COMMIT;
+
+    DELETE FROM prop;
+
+    COMMIT;
+
+    DELETE FROM admin_item
+          WHERE admin_item_typ_id IN (5, 6);
+
+    COMMIT;
+
+    INSERT /*+ APPEND */
+           INTO admin_item (NCI_IDSEQ,
+                            ADMIN_ITEM_TYP_ID,
+                            ADMIN_STUS_ID,
+                            ADMIN_STUS_NM_DN,
+                            EFF_DT,
+                            CHNG_DESC_TXT,
+                            CNTXT_ITEM_ID,
+                            CNTXT_VER_NR,
+                            CNTXT_NM_DN,
+                            UNTL_DT,
+                            CURRNT_VER_IND,
+                            ITEM_LONG_NM,
+                            ORIGIN,
+                            ITEM_DESC,
+                            ITEM_ID,
+                            ITEM_NM,
+                            --STEWRD_ORG_ID
+                            VER_NR,
+                            CREAT_USR_ID,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID,
+                            DEF_SRC)
+        SELECT ac.oc_idseq,
+               5,
+               s.stus_id,
+               s.nci_stus,
+               ac.begin_date,
+               ac.change_note,
+               --conte_idseq,
+               cntxt.item_id,
+               cntxt.ver_nr,
+               cntxt.item_nm,
+               ac.end_date,
+               DECODE (UPPER (ac.latest_version_ind),  'YES', 1,  'NO', 0),
+               ac.preferred_name,
+               ac.origin,
+               ac.preferred_definition,
+               ac.oc_id,
+               NVL (ac.long_name, ac.preferred_name),
+               --stewa_idseq,
+               ac.version,
+               ac.created_by,
+               ac.date_created,
+               NVL (ac.date_modified, ac.date_created),
+               ac.modified_by,
+               ac.definition_source
+          FROM admin_item cntxt, stus_mstr s, sbrext.object_classes_ext ac
+         WHERE     ac.conte_idseq = cntxt.nci_idseq
+               AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
+               AND cntxt.admin_item_typ_id = 8;
+
+    COMMIT;
+
+
+    INSERT /*+ APPEND */
+           INTO admin_item (NCI_IDSEQ,
+                            ADMIN_ITEM_TYP_ID,
+                            ADMIN_STUS_ID,
+                            ADMIN_STUS_NM_DN,
+                            EFF_DT,
+                            CHNG_DESC_TXT,
+                            CNTXT_ITEM_ID,
+                            CNTXT_VER_NR,
+                            CNTXT_NM_DN,
+                            UNTL_DT,
+                            CURRNT_VER_IND,
+                            ITEM_LONG_NM,
+                            ORIGIN,
+                            ITEM_DESC,
+                            ITEM_ID,
+                            ITEM_NM,
+                            --STEWRD_ORG_ID
+                            VER_NR,
+                            CREAT_USR_ID,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID,
+                            DEF_SRC)
+        SELECT ac.prop_idseq,
+               6,
+               s.stus_id,
+               s.nci_stus,
+               ac.begin_date,
+               ac.change_note,
+               --conte_idseq,
+               cntxt.item_id,
+               cntxt_ver_nr,
+               cntxt.item_nm,
+               ac.end_date,
+               DECODE (UPPER (ac.latest_version_ind),  'YES', 1,  'NO', 0),
+               ac.preferred_name,
+               ac.origin,
+               ac.preferred_definition,
+               ac.prop_id,
+               NVL (ac.long_name, ac.preferred_name),
+               --stewa_idseq,
+               ac.version,
+               ac.created_by,
+               ac.date_created,
+               NVL (ac.date_modified, ac.date_created),
+               ac.modified_by,
+               ac.definition_source
+          FROM admin_item cntxt, stus_mstr s, sbrext.properties_ext ac
+         WHERE     ac.conte_idseq = cntxt.nci_idseq
+               AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
+               AND cntxt.admin_item_typ_id = 8;
+
+    COMMIT;
+
+
+    INSERT INTO obj_cls (item_id,
+                         ver_nr,
+                         CREAT_USR_ID,
+                         CREAT_DT,
+                         LST_UPD_DT,
+                         LST_UPD_USR_ID)
+        SELECT ai.item_id,
+               ai.ver_nr,
+               cd.created_by,
+               cd.date_created,
+               NVL (cd.date_modified, cd.date_created),
+               cd.modified_by
+          FROM sbrext.object_classes_ext cd, admin_item ai
+         WHERE ai.NCI_IDSEQ = cd.OC_IDSEQ;
+
+    COMMIT;
+
+
+    INSERT INTO prop (item_id,
+                      ver_nr,
+                      CREAT_USR_ID,
+                      CREAT_DT,
+                      LST_UPD_DT,
+                      LST_UPD_USR_ID)
+        SELECT ai.item_id,
+               ai.ver_nr,
+               cd.created_by,
+               cd.date_created,
+               NVL (cd.date_modified, cd.date_created),
+               cd.modified_by
+          FROM sbrext.properties_ext cd, admin_item ai
+         WHERE ai.NCI_IDSEQ = cd.PROP_IDSEQ;
+
+    COMMIT;
+
+    -- Default OC and Property for DECs that do not have OC or Property
+    INSERT INTO admin_item (item_id,
+                            ver_nr,
+                            nci_idseq,
+                            admin_item_typ_id,
+                            ITEM_LONG_NM,
+                            ITEM_DESC,
+                            ITEM_NM)
+         VALUES (-20000,
+                 1,
+                 '1',
+                 5,
+                 'Default Object Class',
+                 'Default Object Class',
+                 'Default Object Class');
+
+    COMMIT;
+
+    INSERT INTO admin_item (item_id,
+                            ver_nr,
+                            nci_idseq,
+                            admin_item_typ_id,
+                            ITEM_LONG_NM,
+                            ITEM_DESC,
+                            ITEM_NM)
+         VALUES (-20001,
+                 1,
+                 '2',
+                 6,
+                 'Default Property',
+                 'Default Property',
+                 'Default Property');
+
+    COMMIT;
+
+    INSERT INTO obj_cls (item_id, ver_nr)
+         VALUES (-20000, 1);
+
+    INSERT INTO prop (item_id, ver_nr)
+         VALUES (-20001, 1);
+
+    COMMIT;
+
+    -- Classification Scheme and Representation Class creation
+    DELETE FROM CLSFCTN_SCHM;
+
+    COMMIT;
+
+    DELETE FROM REP_CLS;
+
+    COMMIT;
+
+    DELETE FROM admin_item
+          WHERE admin_item_typ_id IN (7, 9);
+
+    COMMIT;
+
+    INSERT INTO admin_item (NCI_IDSEQ,
+                            ADMIN_ITEM_TYP_ID,
+                            ADMIN_STUS_ID,
+                            ADMIN_STUS_NM_DN,
+                            EFF_DT,
+                            CHNG_DESC_TXT,
+                            CNTXT_ITEM_ID,
+                            CNTXT_VER_NR,
+                            CNTXT_NM_DN,
+                            UNTL_DT,
+                            CURRNT_VER_IND,
+                            ITEM_LONG_NM,
+                            ORIGIN,
+                            ITEM_DESC,
+                            ITEM_ID,
+                            ITEM_NM,
+                            --STEWRD_ORG_ID
+                   --         UNRSLVD_ISSUE,
+                            VER_NR,
+                            CREAT_USR_ID,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID)
+        SELECT ac.cs_idseq,
+              9,
+               s.stus_id,
+               s.nci_stus,
+               ac.begin_date,
+               ac.change_note,
+               --conte_idseq,
+               cntxt.item_id,
+               cntxt.ver_nr,
+               cntxt.item_nm,
+               ac.end_date,
+               DECODE (UPPER (ac.latest_version_ind),  'YES', 1,  'NO', 0),
+               ac.preferred_name,
+               ac.origin,
+               ac.preferred_definition,
+               ac.cs_id,
+               NVL (ac.long_name, ac.preferred_name),
+               --stewa_idseq,
+               --ac.unresolved_issue,
+               ac.version,
+               ac.created_by,
+               ac.date_created,
+               NVL (ac.date_modified, ac.date_created),
+               ac.modified_by
+          FROM sbr.classification_schemes  ac,
+               admin_item                   cntxt,
+               stus_mstr                    s
+         WHERE     ac.conte_idseq = cntxt.nci_idseq
+               AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
+               AND cntxt.admin_item_typ_id = 8;
+
+    COMMIT;
+
+    INSERT INTO admin_item (NCI_IDSEQ,
+                            ADMIN_ITEM_TYP_ID,
+                            ADMIN_STUS_ID,
+                            ADMIN_STUS_NM_DN,
+                            EFF_DT,
+                            CHNG_DESC_TXT,
+                            CNTXT_ITEM_ID,
+                            CNTXT_VER_NR,
+                            CNTXT_NM_DN,
+                            UNTL_DT,
+                            CURRNT_VER_IND,
+                            ITEM_LONG_NM,
+                            ORIGIN,
+                            ITEM_DESC,
+                            ITEM_ID,
+                            ITEM_NM,
+                            --STEWRD_ORG_ID
+                            --UNRSLVD_ISSUE,
+                            VER_NR,
+                            CREAT_USR_ID,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID,
+                            DEF_SRC)
+        SELECT ac.rep_idseq,
+               7,
+               s.stus_id,
+               s.nci_stus,
+               ac.begin_date,
+               ac.change_note,
+               --conte_idseq,
+               cntxt.item_id,
+               cntxt.ver_nr,
+               cntxt.item_nm,
+               ac.end_date,
+               DECODE (UPPER (ac.latest_version_ind),  'YES', 1,  'NO', 0),
+               ac.preferred_name,
+               ac.origin,
+               ac.preferred_definition,
+               ac.rep_id,
+               NVL (ac.long_name, ac.preferred_name),
+               --stewa_idseq,
+               --ac.unresolved_issue,
+               ac.version,
+               ac.created_by,
+               ac.date_created,
+               NVL (ac.date_modified, ac.date_created),
+               ac.modified_by,
+               ac.definition_source
+          FROM sbrext.representations_ext  ac,
+               obj_key                      ait,
+               admin_item                   cntxt,
+               stus_mstr                    s
+         WHERE     ac.conte_idseq = cntxt.nci_idseq
+               AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
+               AND cntxt.admin_item_typ_id = 8;
+               
+    COMMIT;
+
+    INSERT INTO clsfctn_schm (item_id,
+                              ver_nr,
+                              CLSFCTN_SCHM_TYP_ID,
+                              NCI_LABEL_TYP_FLG,
+                              CREAT_USR_ID,
+                              CREAT_DT,
+                              LST_UPD_DT,
+                              LST_UPD_USR_ID)
+        SELECT ai.item_id,
+               ai.ver_nr,
+               ok.obj_key_id,
+               label_type_flag,
+               cd.created_by,
+               cd.date_created,
+               NVL (cd.date_modified, cd.date_created),
+               cd.modified_by
+          FROM sbr.classification_schemes cd, admin_item ai, obj_key ok
+         WHERE     ai.NCI_IDSEQ = cd.CS_IDSEQ
+               AND TRIM (cstl_name) = ok.nci_cd
+               AND ok.obj_typ_id = 3;
+
+    COMMIT;
+
+
+
+    INSERT INTO rep_cls (item_id,
+                         ver_nr,
+                         CREAT_USR_ID,
+                         CREAT_DT,
+                         LST_UPD_DT,
+                         LST_UPD_USR_ID)
+        SELECT ai.item_id,
+               ai.ver_nr,
+               cd.created_by,
+               cd.date_created,
+               NVL (cd.date_modified, cd.date_created),
+               cd.modified_by
+          FROM sbrext.representations_ext cd, admin_item ai
+         WHERE ai.NCI_IDSEQ = cd.REP_IDSEQ;
+
+    COMMIT;
+
+
+    INSERT INTO admin_item (item_id,
+                            ver_nr,
+                            admin_item_typ_id,
+                            item_nm,
+                            ITEM_LONG_NM,
+                            ITEM_DESC)
+         VALUES (-20002,
+                 1,
+                 5,
+                 'Default CD',
+                 'Default CD',
+                 'Default CD');
+
+    COMMIT;
+
+    INSERT INTO conc_dom (item_id, ver_nr)
+         VALUES (-20002, 1);
+
+    COMMIT;
+END;
+
+/
+
+create or replace PROCEDURE            sp_create_ai_4
+AS
+    v_cnt   INTEGER;
+BEGIN
+    DELETE FROM nci_oc_recs;
+
+    COMMIT;
+
+    DELETE FROM admin_item
+          WHERE admin_item_typ_id = 56;
+
+    COMMIT;
+
+    INSERT INTO admin_item (NCI_IDSEQ,
+                            ADMIN_ITEM_TYP_ID,
+                            ADMIN_STUS_ID,
+                            ADMIN_STUS_NM_DN,
+                            EFF_DT,
+                            CHNG_DESC_TXT,
+                            CNTXT_ITEM_ID,
+                            CNTXT_VER_NR,
+                            CNTXT_NM_DN,
+                            UNTL_DT,
+                            CURRNT_VER_IND,
+                            ITEM_LONG_NM,
+                            ORIGIN,
+                            ITEM_DESC,
+                            ITEM_ID,
+                            ITEM_NM,
+                            --STEWRD_ORG_ID
+                 --           UNRSLVD_ISSUE,
+                            VER_NR,
+                            CREAT_USR_ID,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID)
+        SELECT ac.ocr_idseq,
+               56,
+               s.stus_id,
+               s.nci_stus,
+               ac.begin_date,
+               ac.change_note,
+               --conte_idseq,
+               cntxt.item_id,
+               cntxt.ver_nr,
+               cntxt.item_nm,
+               ac.end_date,
+               DECODE (UPPER (ac.latest_version_ind),  'YES', 1,  'NO', 0),
+               ac.preferred_name,
+               ac.origin,
+               ac.preferred_definition,
+               ac.ocr_id,
+               NVL (ac.long_name, ac.preferred_name),
+               --stewa_idseq,
+               --ac.unresolved_issue,
+               ac.version,
+               ac.created_by,
+               ac.date_created,
+               NVL (ac.date_modified, ac.date_created),
+               ac.modified_by
+          FROM sbrext.oc_recs_ext ac, admin_item cntxt, stus_mstr s
+         WHERE     ac.conte_idseq = cntxt.nci_idseq
+               AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
+               AND --ac.end_date is not null and
+                   cntxt.admin_item_typ_id = 8;
+
+    COMMIT;
+
+
+    INSERT INTO NCI_OC_RECS (ITEM_ID,
+                             VER_NR,
+                             TRGT_OBJ_CLS_ITEM_ID,
+                             TRGT_OBJ_CLS_VER_NR,
+                             SRC_OBJ_CLS_ITEM_ID,
+                             SRC_OBJ_CLS_VER_NR,
+                             REL_TYP_NM,
+                             SRC_ROLE,
+                             TRGT_ROLE,
+                             DRCTN,
+                             SRC_LOW_MULT,
+                             SRC_HIGH_MULT,
+                             TRGT_LOW_MULT,
+                             TRGT_HIGH_MULT,
+                             DISP_ORD,
+                             DIMNSNLTY,
+                             ARRAY_IND)
+        SELECT ocr.ocr_id,
+               ocr.version,
+               toc.item_id,
+               toc.ver_nr,
+               soc.item_id,
+               soc.ver_nr,
+               rl_name,
+               source_role,
+               target_role,
+               direction,
+               source_low_multiplicity,
+               source_high_multiplicity,
+               target_low_multiplicity,
+               target_high_multiplicity,
+               display_order,
+               dimensionality,
+               array_ind
+          FROM sbrext.oc_recs_ext ocr, admin_item soc, admin_item toc
+         WHERE     soc.admin_item_typ_id = 5
+               AND toc.admin_item_typ_id = 5
+               AND ocr.t_oc_idseq = toc.nci_idseq
+               AND ocr.s_oc_idseq = soc.nci_idseq;
+
+    COMMIT;
+END;
+
+/
+
+
 create or replace procedure sp_migrate_lov 
 as
 v_cnt integer;
@@ -276,10 +943,10 @@ update data_typ set NCI_DTTYPE_MAP = 'Bit String' where DTTYPE_NM = 'binary';
 update data_typ set NCI_DTTYPE_MAP = 'Boolean' where DTTYPE_NM = 'BOOLEAN';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'CHARACTER';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'CLOB';
-update data_typ set NCI_DTTYPE_MAP = 'Time' where DTTYPE_NM = 'DATE';
+update data_typ set NCI_DTTYPE_MAP = 'Date' where DTTYPE_NM = 'DATE';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'Date Alpha DVG';
-update data_typ set NCI_DTTYPE_MAP = 'Time' where DTTYPE_NM = 'DATE/TIME';
-update data_typ set NCI_DTTYPE_MAP = 'Time' where DTTYPE_NM = 'DATETIME';
+update data_typ set NCI_DTTYPE_MAP = 'Date-and-Time' where DTTYPE_NM = 'DATE/TIME';
+update data_typ set NCI_DTTYPE_MAP = 'Date-and-Time' where DTTYPE_NM = 'DATETIME';
 update data_typ set NCI_DTTYPE_MAP = 'Class' where DTTYPE_NM = 'Derived';
 update data_typ set NCI_DTTYPE_MAP = 'Class' where DTTYPE_NM = 'HL7CDv3';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'HL7EDv3';
@@ -333,11 +1000,11 @@ update data_typ set NCI_DTTYPE_MAP = 'Boolean' where DTTYPE_NM = 'java.lang.Bool
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'java.lang.Byte';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'java.lang.Character';
 update data_typ set NCI_DTTYPE_MAP = 'Real' where DTTYPE_NM = 'java.lang.Double';
-update data_typ set NCI_DTTYPE_MAP = 'Real' where DTTYPE_NM = 'java.lang.Float';
+update data_typ set NCI_DTTYPE_MAP = 'Floating-point' where DTTYPE_NM = 'java.lang.Float';
 update data_typ set NCI_DTTYPE_MAP = 'Integer' where DTTYPE_NM = 'java.lang.Integer';
 update data_typ set NCI_DTTYPE_MAP = 'Integer' where DTTYPE_NM = 'java.lang.Integer[]';
 update data_typ set NCI_DTTYPE_MAP = 'Integer' where DTTYPE_NM = 'java.lang.Long';
-update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'java.lang.Object';
+update data_typ set NCI_DTTYPE_MAP = 'Bit String' where DTTYPE_NM = 'java.lang.Object';
 update data_typ set NCI_DTTYPE_MAP = 'Integer' where DTTYPE_NM = 'java.lang.Short';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'java.lang.String';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'java.lang.String[]';
@@ -347,11 +1014,11 @@ update data_typ set NCI_DTTYPE_MAP = 'Date-and-Time' where DTTYPE_NM = 'java.uti
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'java.util.Map';
 update data_typ set NCI_DTTYPE_MAP = 'Real' where DTTYPE_NM = 'NUMBER';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'Numeric Alpha DVG';
-update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'OBJECT';
+update data_typ set NCI_DTTYPE_MAP = 'Bit String' where DTTYPE_NM = 'OBJECT';
 update data_typ set NCI_DTTYPE_MAP = 'Integer' where DTTYPE_NM = 'SAS Date';
 update data_typ set NCI_DTTYPE_MAP = 'Integer' where DTTYPE_NM = 'SAS Time';
 update data_typ set NCI_DTTYPE_MAP = 'Time' where DTTYPE_NM = 'TIME';
-update data_typ set NCI_DTTYPE_MAP = 'Octet' where DTTYPE_NM = 'UMLBinaryv1.0';
+update data_typ set NCI_DTTYPE_MAP = 'Bit String' where DTTYPE_NM = 'UMLBinaryv1.0';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'UMLCodev1.0';
 update data_typ set NCI_DTTYPE_MAP = 'Octet' where DTTYPE_NM = 'UMLOctetv1.0';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'UMLUidv1.0';
@@ -361,6 +1028,9 @@ update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'varchar';
 update data_typ set NCI_DTTYPE_MAP = 'Boolean' where DTTYPE_NM = 'xsd:boolean';
 update data_typ set NCI_DTTYPE_MAP = 'Date-and-Time' where DTTYPE_NM = 'xsd:dateTime';
 update data_typ set NCI_DTTYPE_MAP = 'Character' where DTTYPE_NM = 'xsd:string';
+commit;
+
+update data_typ set NCI_DTTYPE_MAP = 'Character' where NCI_DTTYPE_MAP is null;
 commit;
 
 -- insert standard datatypes
@@ -442,6 +1112,7 @@ where e.ASL_NAME = s.nci_stus and s.stus_typ_id = 2 and e.ACTL_NAME = 'QUEST_CON
 commit;
 
 end;
+
 /
 
 create or replace procedure sp_org_contact
