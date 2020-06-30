@@ -1301,7 +1301,7 @@ begin
 
   END LOOP;
      v_tab_admin_item_nm.extend();
-     v_tab_admin_item_nm(v_tab_admin_item_nm.count) := ihook.getColumnValue(row_cur,'ITEM_ID') || ':' || ihook.getColumnValue(row_cur,'ITEM_LONG_NM');
+     v_tab_admin_item_nm(v_tab_admin_item_nm.count) := ihook.getColumnValue(row_cur,'ITEM_ID') || ':' || ihook.getColumnValue(row_cur,'ITEM_NM');
 end loop;
 
     -- populating val means/perm vals
@@ -1412,7 +1412,7 @@ begin
 
   END LOOP;
      v_tab_admin_item_nm.extend();
-     v_tab_admin_item_nm(v_tab_admin_item_nm.count) := ihook.getColumnValue(row_cur,'ITEM_ID') || ':' || ihook.getColumnValue(row_cur,'ITEM_LONG_NM');
+     v_tab_admin_item_nm(v_tab_admin_item_nm.count) := ihook.getColumnValue(row_cur,'ITEM_ID') || ':' || ihook.getColumnValue(row_cur,'ITEM_NM');
 end loop;
 
     -- populating val means/perm vals
@@ -1453,4 +1453,38 @@ end loop;
     v_data_out := ihook.getHookOutput(hookOutput);
 
 end;
+/
+
+create or replace procedure sp_postprocess
+as
+v_cnt integer;
+begin
+
+delete from NCI_ADMIN_ITEM_EXT;
+commit;
+
+delete from onedata_ra.NCI_ADMIN_ITEM_EXT;
+commit;
+
+insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR, USED_BY, CNCPT_CONCAT, CNCPT_CONCAT_NM, cncpt_concat_def)
+select ai.item_id, ai.ver_nr, a.used_by, b.cncpt_cd, b.CNCPT_nm, b.cncpt_def
+from  admin_item ai,
+(SELECT item_id, ver_nr, LISTAGG(item_nm, ',') WITHIN GROUP (ORDER by ITEM_ID) AS USED_BY
+FROM (select distinct an.item_id,an.ver_nr, ai.item_nm from alt_nms an, admin_item ai where an.cntxt_item_id = ai.item_id ) 
+GROUP BY item_id, ver_nr) a,
+(SELECT cai.item_id, cai.ver_nr, LISTAGG(ai.item_long_nm, ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_CD ,
+LISTAGG(ai.item_nm, ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_NM ,
+ LISTAGG(substr(ai.item_desc,1, 750), ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_DEF 
+from cncpt_admin_item cai, admin_item ai where ai.item_id = cai.cncpt_item_id and ai.ver_nr = cai.cncpt_ver_nr
+group by cai.item_id, cai.ver_nr) b
+where ai.item_id = b.item_id (+) and ai.ver_nr = b.ver_nr (+)
+and ai.item_id = a.item_id (+) and ai.ver_nr = a.ver_nr(+);
+commit;
+
+
+insert into onedata_ra.NCI_ADMIN_ITEM_EXT select * from NCI_ADMIN_ITEM_EXT;
+
+commit;
+end;
+
 /
