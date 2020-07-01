@@ -551,7 +551,6 @@ BEGIN
                ac.modified_by,
                ac.definition_source
           FROM sbrext.representations_ext  ac,
-               obj_key                      ait,
                admin_item                   cntxt,
                stus_mstr                    s
          WHERE     ac.conte_idseq = cntxt.nci_idseq
