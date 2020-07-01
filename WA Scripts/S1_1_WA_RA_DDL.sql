@@ -313,3 +313,7 @@ and frm_mod.rel_typ_id in (61,62)
 and frm.admin_item_typ_id in ( 54,55) ;
 
 
+-- Missing in core MDR.
+
+alter table ref_doc add (BLOB_COL BLOB);
+
