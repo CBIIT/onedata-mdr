@@ -69,7 +69,7 @@ create table NCI_ENTTY_COMM
    primary key (ENTTY_ID, COMM_TYP_ID, RNK_ORD));
 
 create table NCI_ENTTY_ADDR
-( ENTTY_ID number not null primary key,
+( ENTTY_ID number not null,
   ADDR_TYP_ID integer not null, 
   RNK_ORD number(3,0) not null,
   ADDR_LINE1  varchar2(80) not null,
@@ -84,7 +84,8 @@ create table NCI_ENTTY_ADDR
        FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
        LST_DEL_DT           DATE DEFAULT sysdate NULL,
        S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NOT NULL);
+       LST_UPD_DT           DATE DEFAULT sysdate NOT NULL,
+   primary key (ENTTY_ID, ADDR _TYP_ID, RNK_ORD));
 
 
 create table NCI_CHANGE_HISTORY
