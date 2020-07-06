@@ -1113,7 +1113,6 @@ commit;
 end;
 
 /
-
 create or replace procedure sp_org_contact
 as
 v_cnt integer;
@@ -1195,6 +1194,24 @@ insert into nci_entty_comm (ENTTY_ID,COMM_TYP_ID,RNK_ORD,CYB_ADDR,CREAT_DT,CREAT
 select o.entty_id, ok.obj_key_id, RANK_ORDER,CYBER_ADDRESS,DATE_CREATED,CREATED_BY,nvl(DATE_MODIFIED, date_created),MODIFIED_BY
 from sbr.CONTACT_COMMS c, obj_key ok, nci_entty o where
 per_IDSEQ is not null and c.per_idseq = o.nci_idseq and ok.nci_cd = CTL_NAME and ok.obj_typ_id = 26 ;
+commit;
+
+
+insert into nci_entty_addr (ENTTY_ID,ADDR_TYP_ID,RNK_ORD,ADDR_LINE1,ADDR_LINE2,CITY,STATE_PROV,POSTAL_CD,CNTRY,
+CREAT_DT,CREAT_USR_ID,LST_UPD_DT,LST_UPD_USR_ID)
+select o.entty_id, ok.obj_key_id, RANK_ORDER,ADDR_LINE1,ADDR_LINE2,CITY,STATE_PROV,POSTAL_CODE,COUNTRY,
+DATE_CREATED,CREATED_BY,nvl(DATE_MODIFIED,date_created), MODIFIED_BY
+from sbr.CONTACT_ADDRESSES c, obj_key ok, nci_entty o where
+ORG_IDSEQ is not null and c.org_idseq = o.nci_idseq and ok.nci_cd = ATL_NAME and ok.obj_typ_id = 25;
+commit;
+
+
+insert into nci_entty_addr (ENTTY_ID,ADDR_TYP_ID,RNK_ORD,ADDR_LINE1,ADDR_LINE2,CITY,STATE_PROV,POSTAL_CD,CNTRY,
+CREAT_DT,CREAT_USR_ID,LST_UPD_DT,LST_UPD_USR_ID)
+select o.entty_id, ok.obj_key_id, RANK_ORDER,ADDR_LINE1,ADDR_LINE2,CITY,STATE_PROV,POSTAL_CODE,COUNTRY,
+DATE_CREATED,CREATED_BY,nvl(DATE_MODIFIED,date_created), MODIFIED_BY
+from sbr.CONTACT_ADDRESSES c, obj_key ok, nci_entty o where
+PER_IDSEQ is not null and c.per_idseq = o.nci_idseq and ok.nci_cd = ATL_NAME and ok.obj_typ_id = 25;
 commit;
 
 update admin_item ai set submt_org_id = (select distinct entty_id from nci_entty e, sbr.ac_contacts a where e.nci_idseq = a.org_idseq and a.org_idseq is not null
@@ -1486,4 +1503,481 @@ insert into onedata_ra.NCI_ADMIN_ITEM_EXT select * from NCI_ADMIN_ITEM_EXT;
 commit;
 end;
 
+/
+
+
+create or replace procedure            sp_migrate_change_log
+as
+v_cnt integer;
+begin
+
+for cur in (select ac_idseq from sbr.administered_components) loop
+insert into nci_change_history (ACCH_IDSEQ,
+AC_IDSEQ,CHANGE_DATETIMESTAMP,CHANGE_ACTION,CHANGED_BY,
+CHANGED_TABLE,CHANGED_TABLE_IDSEQ,CHANGED_COLUMN,OLD_VALUE,NEW_VALUE)
+select ACCH_IDSEQ,
+AC_IDSEQ,CHANGE_DATETIMESTAMP,CHANGE_ACTION,CHANGED_BY,
+CHANGED_TABLE,CHANGED_TABLE_IDSEQ,CHANGED_COLUMN,OLD_VALUE,NEW_VALUE
+from sbrext.AC_CHANGE_HISTORY_EXT
+where ac_idseq = cur.ac_idseq;
+commit;
+end loop;
+end;
+/
+
+create or replace procedure sp_test_all 
+as
+v_cnt integer;
+begin
+
+delete from test_results;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'DE', 
+(select count(*)-1 from onedata_wa.de) WA_CNT,
+(select count(*)-1 from onedata_ra.de) RA_CNT,
+(select count(*) from sbr.data_elements) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'DE Concept', 
+(select count(*)-1 from onedata_wa.de_conc) WA_CNT,
+(select count(*)-1 from onedata_ra.de_conc) RA_CNT,
+(select count(*) from sbr.data_element_concepts) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Format', 
+(select count(*) from onedata_wa.fmt) WA_CNT,
+(select count(*) from onedata_ra.fmt) RA_CNT,
+(select count(*) from sbr.formats_lov) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Data type', 
+(select count(*) from onedata_wa.data_typ where nci_dttype_typ_id = 1) WA_CNT,
+(select count(*) from onedata_ra.data_typ where nci_dttype_typ_id = 1) RA_CNT,
+(select count(*) from sbr.datatypes_lov) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Registration Status', 
+(select count(*) from onedata_wa.stus_mstr where stus_typ_id = 1) WA_CNT,
+(select count(*) from onedata_ra.stus_mstr where stus_typ_id = 1) RA_CNT,
+(select count(*) from sbr.reg_status_lov) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Workflow Status', 
+(select count(*) from onedata_wa.stus_mstr where stus_typ_id = 2) WA_CNT,
+(select count(*) from onedata_ra.stus_mstr where stus_typ_id = 2) RA_CNT,
+(select count(*) from sbr.ac_status_lov) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'UOM', 
+(select count(*) from onedata_wa.UOM) WA_CNT,
+(select count(*) from onedata_ra.UOM) RA_CNT,
+(select count(*) from sbr.unit_of_measures_lov) caDSR_CNT
+from dual;
+commit;
+
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'VV Repetition', 
+(select count(*) from onedata_wa.NCI_QUEST_VV_REP) WA_CNT,
+(select count(*) from onedata_ra.NCI_QUEST_VV_REP) RA_CNT,
+(select count(*) from sbrext.quest_vv_ext ) caDSR_CNT
+from dual;
+commit;
+
+
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Conceptual Domain', 
+(select count(*)-1 from onedata_wa.conc_dom) WA_CNT,
+(select count(*)-1 from onedata_ra.conc_dom) RA_CNT,
+(select count(*) from sbr.conceptual_domains) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Object Class', 
+(select count(*)-1 from onedata_wa.obj_cls) WA_CNT,
+(select count(*)-1 from onedata_ra.obj_cls) RA_CNT,
+(select count(*) from sbrext.object_classes_ext) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Property', 
+(select count(*)-1 from onedata_wa.prop) WA_CNT,
+(select count(*)-1 from onedata_ra.prop) RA_CNT,
+(select count(*) from sbrext.properties_ext) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Value Domain', 
+(select count(*)-1 from onedata_wa.value_dom) WA_CNT,
+(select count(*)-1 from onedata_ra.value_dom) RA_CNT,
+(select count(*) from sbr.value_domains) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Concept', 
+(select count(*) from onedata_wa.CNCPT) WA_CNT,
+(select count(*) from onedata_ra.CNCPT) RA_CNT,
+(select count(*) from sbrext.concepts_ext) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'CSI', 
+(select count(*) from onedata_wa.NCI_CLSFCTN_SCHM_ITEM) WA_CNT,
+(select count(*) from onedata_ra.NCI_CLSFCTN_SCHM_ITEM) RA_CNT,
+(select count(*) from sbr.cs_items) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Classification Scheme', 
+(select count(*) from onedata_wa.CLSFCTN_SCHM) WA_CNT,
+(select count(*) from onedata_ra.CLSFCTN_SCHM) RA_CNT,
+(select count(*) from sbr.classification_schemes) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Representation Class', 
+(select count(*) from onedata_wa.REP_CLS) WA_CNT,
+(select count(*) from onedata_ra.REP_CLS) RA_CNT,
+(select count(*) from SBREXT.representations_ext) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Value Meaning', 
+(select count(*) from onedata_wa.NCI_VAL_MEAN) WA_CNT,
+(select count(*) from onedata_ra.NCI_VAL_MEAN) RA_CNT,
+(select count(*) from SBR.value_meanings) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Protocol', 
+(select count(*) from onedata_wa.NCI_PROTCL) WA_CNT,
+(select count(*) from onedata_ra.NCI_PROTCL) RA_CNT,
+(select count(*) from sbrext.protocols_ext) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'OC Recs', 
+(select count(*) from onedata_wa.NCI_OC_RECS) WA_CNT,
+(select count(*) from onedata_ra.NCI_OC_RECS) RA_CNT,
+(select count(*) from SBREXT.oc_recs_ext) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Context', 
+(select count(*) from onedata_wa.CNTXT) WA_CNT,
+(select count(*) from onedata_ra.CNTXT) RA_CNT,
+(select count(*) from sbr.contexts) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'CD-VM', 
+(select count(*) from onedata_wa.conc_dom_val_mean) WA_CNT,
+(select count(*) from onedata_ra.conc_dom_val_mean) RA_CNT,
+(select count(*) from sbr.cd_vms) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'PV', 
+(select count(*) from onedata_wa.PERM_VAL) WA_CNT,
+(select count(*) from onedata_ra.PERM_VAL) RA_CNT,
+(select count(*) from sbr.vd_pvs) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Concept - AI', 
+(select count(*) from onedata_wa.CNCPT_ADMIN_ITEM) WA_CNT,
+(select count(*) from onedata_ra.CNCPT_ADMIN_ITEM) RA_CNT,
+(select count(*) from sbrext.COMPONENT_CONCEPTS_EXT) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Designations', 
+(select count(*) from onedata_wa.ALT_NMS) WA_CNT,
+(select count(*) from onedata_ra.ALT_NMS) RA_CNT,
+(select count(*) from sbr.designations) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Definitions', 
+(select count(*) from onedata_wa.ALT_DEF) WA_CNT,
+(select count(*) from onedata_ra.ALT_DEF) RA_CNT,
+(select count(*) from sbr.definitions) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Reference Documents', 
+(select count(*) from onedata_wa.REF) WA_CNT,
+(select count(*) from onedata_ra.REF) RA_CNT,
+(select count(*) from SBR.reference_documents) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Trigger Actions', 
+(select count(*) from onedata_wa.NCI_FORM_TA) WA_CNT,
+(select count(*) from onedata_ra.NCI_FORM_TA) RA_CNT,
+(select count(*) from sbrext.triggered_actions_ext) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Trigger Actions Protocol/CSI', 
+(select count(*) from onedata_wa.NCI_FORM_TA_REL) WA_CNT,
+(select count(*) from onedata_ra.NCI_FORM_TA_REL) RA_CNT,
+(select count(*) from sbrext.ta_proto_csi_ext) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Organization', 
+(select count(*) from onedata_wa.NCI_ORG) WA_CNT,
+(select count(*) from onedata_ra.NCI_ORG) RA_CNT,
+(select count(*) from sbr.ORGANIZATIONS) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Person', 
+(select count(*) from onedata_wa.NCI_PRSN) WA_CNT,
+(select count(*) from onedata_ra.NCI_PRSN) RA_CNT,
+(select count(*) from sbr.persons) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Addresses', 
+(select count(*) from onedata_wa.NCI_ENTTY_ADDR) WA_CNT,
+(select count(*) from onedata_ra.NCI_ENTTY_ADDR) RA_CNT,
+(select count(*) from sbr.contact_addresses) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Communications', 
+(select count(*) from onedata_wa.NCI_ENTTY_COMM) WA_CNT,
+(select count(*) from onedata_ra.NCI_ENTTY_COMM) RA_CNT,
+(select count(*) from sbr.contact_comms) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Form', 
+(select count(*) from onedata_wa.ADMIN_ITEM where admin_item_typ_id = 54) WA_CNT,
+(select count(*) from onedata_ra.ADMIN_ITEM where admin_item_typ_id = 54) RA_CNT,
+(select count(*) from sbrext.quest_contents_ext where qtl_name in ( 'CRF','TEMPLATE')) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Module', 
+(select count(*) from onedata_wa.ADMIN_ITEM where admin_item_typ_id = 52) WA_CNT,
+(select count(*) from onedata_ra.ADMIN_ITEM where admin_item_typ_id = 52) RA_CNT,
+(select count(*) from sbrext.quest_contents_ext where qtl_name = 'MODULE') caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Question', 
+(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL_ALT_KEY where rel_typ_id = 63) WA_CNT,
+(select count(*) from onedata_ra.NCI_ADMIN_ITEM_REL_ALT_KEY where rel_typ_id = 63) RA_CNT,
+(select count(*) from sbrext.quest_contents_ext where qtl_name = 'QUESTION') caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Question VV', 
+(select count(*) from onedata_wa.NCI_QUEST_VALID_VALUE ) WA_CNT,
+(select count(*) from onedata_ra.NCI_QUEST_VALID_VALUE ) RA_CNT,
+(select count(*) from sbrext.quest_contents_ext where qtl_name = 'VALID_VALUE') caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'CS CSI', 
+(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL_ALT_KEY where rel_typ_id = 64) WA_CNT,
+(select count(*) from onedata_ra.NCI_ADMIN_ITEM_REL_ALT_KEY where rel_typ_id = 64 ) RA_CNT,
+(select count(*) from sbr.cs_csi) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'CS CSI DE Relationship', 
+(select count(*) from onedata_wa.NCI_ALT_KEY_ADMIN_ITEM_REL) WA_CNT,
+(select count(*) from onedata_ra.NCI_ALT_KEY_ADMIN_ITEM_REL ) RA_CNT,
+(select count(*) from sbr.ac_csi) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Program Area', 
+(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 14) WA_CNT,
+(select count(*) from onedata_ra.OBJ_KEY where obj_typ_id = 14 ) RA_CNT,
+(select count(*) from sbr.PROGRAM_AREAS_LOV) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Designation Type', 
+(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 11) WA_CNT,
+(select count(*) from onedata_ra.OBJ_KEY where obj_typ_id = 11 ) RA_CNT,
+(select count(*) from sbr.DESIGNATION_TYPES_LOV) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Address Type', 
+(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 25) WA_CNT,
+(select count(*) from onedata_ra.OBJ_KEY where obj_typ_id = 25 ) RA_CNT,
+(select count(*) from sbr.ADDR_TYPES_LOV) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Communication Type', 
+(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 26) WA_CNT,
+(select count(*) from onedata_ra.OBJ_KEY where obj_typ_id = 26 ) RA_CNT,
+(select count(*) from sbr.COMM_TYPES_LOV) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Status-Admin Type Relationship', 
+(select count(*) from onedata_wa.NCI_AI_TYP_VALID_STUS ) WA_CNT,
+(select count(*) from onedata_ra.NCI_AI_TYP_VALID_STUS  ) RA_CNT,
+(select count(*) from sbrext.ASL_ACTL_EXT) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Derivation Type', 
+(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 21) WA_CNT,
+(select count(*) from onedata_ra.OBJ_KEY where obj_typ_id = 21 ) RA_CNT,
+(select count(*) from sbr.complex_rep_type_lov) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Document Type', 
+(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 1) WA_CNT,
+(select count(*) from onedata_ra.OBJ_KEY where obj_typ_id = 1 ) RA_CNT,
+(select count(*) from sbr.document_TYPES_LOV) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Classification Scheme Type', 
+(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 3) WA_CNT,
+(select count(*) from onedata_ra.OBJ_KEY where obj_typ_id = 3 ) RA_CNT,
+(select count(*) from sbr.CS_TYPES_LOV) caDSR_CNT
+from dual;
+commit;
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'CSI Type', 
+(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 20) WA_CNT,
+(select count(*) from onedata_ra.OBJ_KEY where obj_typ_id = 20 ) RA_CNT,
+(select count(*) from sbr.CSI_TYPES_LOV ) caDSR_CNT
+from dual;
+commit;
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Definition Type', 
+(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 15) WA_CNT,
+(select count(*) from onedata_ra.OBJ_KEY where obj_typ_id = 15 ) RA_CNT,
+(select count(*) from sbrext.definition_types_lov_ext) caDSR_CNT
+from dual;
+commit;
+
+
+
+insert into test_results (TABLE_NAME, WA_CNT, RA_CNT, caDSR_CNT)
+select 'Origin', 
+(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 18) WA_CNT,
+(select count(*) from onedata_ra.OBJ_KEY where obj_typ_id = 18 ) RA_CNT,
+(select count(*) from sbrext.sources_ext) caDSR_CNT
+from dual;
+commit;
+
+
+end;
 /
