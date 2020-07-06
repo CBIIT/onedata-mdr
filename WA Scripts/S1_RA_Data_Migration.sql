@@ -16,6 +16,7 @@ truncate table NCI_QUEST_VV_REP;
 truncate table NCI_ADMIN_ITEM_REL_ALT_KEY;
 truncate table NCI_QUEST_VALID_VALUE;
 truncate table NCI_ADMIN_ITEM_REL;
+truncate table NCI_AI_TYP_VALID_STUS;
 truncate table NCI_CLSFCTN_SCHM_ITEM;
 truncate table NCI_OC_RECS;
 truncate table NCI_FORM;

@@ -16,6 +16,7 @@ truncate table REF_DOC;
 truncate table NCI_CHANGE_HISTORY;
 truncate table ADMIN_ITEM_AUDIT;
 truncate table NCI_ADMIN_ITEM_EXT;
+truncate table NCI_AI_TYP_VALID_STUS;
 truncate table NCI_FORM_TA;
 truncate table NCI_INSTR;
 truncate table NCI_QUEST_VV_REP;
