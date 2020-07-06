@@ -739,7 +739,6 @@ END;
 
 /
 
-
 create or replace procedure sp_migrate_lov 
 as
 v_cnt integer;
@@ -899,15 +898,6 @@ commit;
 
 
 
--- Origin
-delete from obj_key where obj_typ_id = 18;  -- 
-commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
-select 18, SRC_NAME, description, SRC_NAME,  created_by, date_created,
-                    nvl(date_modified,date_created), modified_by from sbrext.sources_ext;
-
-
-commit;
 
 
 -- Origin
@@ -1038,19 +1028,6 @@ select distinct NCI_DTTYPE_MAP, 2 from data_typ where NCI_DTTYPE_MAP is not null
 commit;
 
 
-delete from org;
-commit;
-
-insert into org (NCI_IDSEQ, ORG_NM, RA_IND,ORG_MAIL_ADR,CREAT_USR_ID,CREAT_DT,
-LST_UPD_USR_ID, LST_UPD_DT)
-select ORG_IDSEQ,NAME,
-decode(RA_IND, 'No',0,'Yes',1),
-MAIL_ADDRESS,CREATED_BY,
-DATE_CREATED,
-MODIFIED_BY,
-nvl(date_modified,date_created)
-from sbr.organizations;
-commit;
 
 delete from lang;
 commit;
@@ -1111,7 +1088,6 @@ where e.ASL_NAME = s.nci_stus and s.stus_typ_id = 2 and e.ACTL_NAME = 'QUEST_CON
 commit;
 
 end;
-
 /
 create or replace procedure sp_org_contact
 as
