@@ -79,6 +79,7 @@ analyze table admin_item compute statistics;
 exec onedata_wa.sp_create_ai_children;
 exec onedata_wa.sp_org_contact;
 exec onedata_wa.sp_migrate_change_log;
+exec onedata_wa.sp_postprocess;
 
 alter trigger TR_NCI_ALT_NMS_DENORM_INS enable;
 alter trigger TR_NCI_AI_DENORM_INS enable;
