@@ -1,0 +1,22 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="S1-NCI" id="67A949AA-AC8C-DA79-1408-BE4F09436A8E" version="3.5">
+<createdBy>manatharad2</createdBy>
+<createdTime>2020-05-28 21:28:13 UTC</createdTime>
+<ownerDesignName>OneData_WA</ownerDesignName>
+<capitalNames>false</capitalNames>
+<designId>67A949AA-AC8C-DA79-1408-BE4F09436A8E</designId>
+<usedDesignStorageDescriptors>
+<designDescr class="oracle.dbtools.crest.model.design.Design$DesignStorageDesc" id="C793D36F-0FDE-5670-72DF-E22F0EF01519">
+<designStoragePath>H:\S1_1_WA_RA_DDL</designStoragePath>
+</designDescr>
+<designDescr class="oracle.dbtools.crest.model.design.Design$DesignStorageDesc" id="69AF8651-B446-654C-D034-745367146CFB">
+<designStoragePath>H:\S1_1_WA_RA_DDL</designStoragePath>
+</designDescr>
+<designDescr class="oracle.dbtools.crest.model.design.Design$DesignStorageDesc" id="D039D243-8642-2A60-7299-5CADEC79269B">
+<designStoragePath>H:\S1_1_WA_RA_DDL</designStoragePath>
+</designDescr>
+<designDescr class="oracle.dbtools.crest.model.design.Design$DesignStorageDesc" id="730AEB93-2456-CD79-209B-F01BDD5E0CFC">
+<designStoragePath>H:\S1_1_WA_RA_DDL</designStoragePath>
+</designDescr>
+</usedDesignStorageDescriptors>
+</OSDM_Design>
