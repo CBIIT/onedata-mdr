@@ -1,4 +1,4 @@
-#SP_AI_VALIDATION procedure
+# SP_AI_VALIDATION procedure
 procedure validates the following items in ADMIN_ITEM table.
 1 - CONCEPTUAL DOMAIN
 2 - DATA ELEMENT CONCEPT
