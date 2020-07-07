@@ -85,7 +85,7 @@ create table NCI_ENTTY_ADDR
        LST_DEL_DT           DATE DEFAULT sysdate NULL,
        S2P_TRN_DT           DATE DEFAULT sysdate NULL,
        LST_UPD_DT           DATE DEFAULT sysdate NOT NULL,
-   primary key (ENTTY_ID, ADDR _TYP_ID, RNK_ORD));
+   primary key (ENTTY_ID, ADDR_TYP_ID, RNK_ORD));
 
 
 create table NCI_CHANGE_HISTORY
