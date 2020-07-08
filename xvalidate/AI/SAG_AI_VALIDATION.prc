@@ -11,6 +11,7 @@ AS
         *****************************************************/
     -- Validate sbr.data_elements
     vSQL   VARCHAR2 (4000);
+    ITEM_CODE NUMBER;
 BEGIN
     -- get the list of tables and their corresponding distinct columns from the table
     FOR Y
@@ -22,7 +23,54 @@ BEGIN
                    CONDITION
               FROM ONEDATA_WA.AI_INPUT_TAB)
     LOOP
+        ITEM_CODE:=Y.ITEM_TYPE_CODE;
+        
+        CASE
+        WHEN ITEM_CODE=1 OR ITEM_CODE=7 OR ITEM_CODE=9 OR ITEM_CODE=56 THEN
         vSQL :=
+               'BEGIN
+           FOR X in (Select /*+ PARALLEL(12) */ DISTINCT NCI_IDSEQ, ITEM_LONG_NM,
+ITEM_ID,VER_NR from 
+(select NCI_IDSEQ, ADMIN_ITEM_TYP_ID,EFF_DT,CHNG_DESC_TXT,UNTL_DT,CURRNT_VER_IND,ITEM_LONG_NM,
+CASE WHEN ORIGIN_ID IS NULL 
+THEN ORIGIN 
+ELSE ORIGIN_ID_DN END ORIGIN,
+ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
+ from ONEDATA_WA.ADMIN_ITEM
+ where ADMIN_ITEM_TYP_ID = '
+            || Y.ITEM_TYPE_CODE
+            || ' and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
+ UNION ALL
+ select '
+            || Y.IDSEQ_NAME
+            || ' , '
+            || Y.ITEM_TYPE_CODE
+            || ' ,SB.BEGIN_DATE,AC.CHANGE_NOTE,AC.END_DATE,
+DECODE(UPPER(AC.LATEST_VERSION_IND),''YES'', 1,''NO'',0) LATEST_VERSION_IND,AC.PREFERRED_NAME,
+AC.ORIGIN,AC.PREFERRED_DEFINITION, '
+            || Y.ITEMID_NAME
+            || ' ,
+NVL(AC.LONG_NAME,AC.PREFERRED_NAME),AC.VERSION,
+SB.CREATED_BY, SB.DATE_CREATED,
+NVL(SB.DATE_MODIFIED, SB.DATE_CREATED), SB.MODIFIED_BY
+FROM '
+            || Y.TAB_NAME
+            || ' AC ' ||
+Y.CONDITION || ')
+ GROUP BY NCI_IDSEQ, ADMIN_ITEM_TYP_ID,EFF_DT,CHNG_DESC_TXT,UNTL_DT,CURRNT_VER_IND,ITEM_LONG_NM,ORIGIN,
+ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
+              HAVING COUNT (*) <> 2
+            ORDER BY ITEM_ID, VER_NR)
+            LOOP
+--            DBMS_OUTPUT.PUT_LINE(X.NCI_IDSEQ || '' | '' || X.ITEM_ID || '' | '' || X.VER_NR || '' | '' || X.ITEM_LONG_NM);
+            INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR VALUES
+            (SBREXT.ERR_SEQ.NEXTVAL,X.NCI_IDSEQ,X.ITEM_ID,X.VER_NR,'''||Y.ITEM_TYPE||''',X.ITEM_LONG_NM,''DATA MISMATCH'',SYSDATE,USER,''ADMIN_ITEM'');
+            COMMIT;
+            END LOOP;
+            END;';
+ELSE
+
+vSQL :=
                'BEGIN
            FOR X in (Select /*+ PARALLEL(12) */ DISTINCT NCI_IDSEQ, ITEM_LONG_NM,
 ITEM_ID,VER_NR from 
@@ -63,7 +111,7 @@ ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
             COMMIT;
             END LOOP;
             END;';
-
+END CASE;            
         --DBMS_OUTPUT.PUT_LINE(vSQL);
         EXECUTE IMMEDIATE vSQL;
     END LOOP;
