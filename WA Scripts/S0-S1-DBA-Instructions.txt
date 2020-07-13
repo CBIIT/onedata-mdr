@@ -2,7 +2,7 @@
 Create two SQL PLus sessions connecting to ONEDATA DB as ONEDATA_WA and as ONEDATA_RA users.
 Keep both sessions open. 
 Please run following the order exactly. 
-The scrippts with _WA_ token in a name run in ONEDATA_WA only, 
+The scripts with _WA_ token in a name run in ONEDATA_WA only, 
 the scripts with _RA_ in a name run in ONEDATA_WA only, 
 the scripts with _WA_RA_ in a name run in both ONEDATA_WA and ONEDATA_RA
 */
