@@ -1,0 +1,12 @@
+@@S0_1_WA_RA_DDL.sql
+@@S0_3_RA_Grants.sql
+@@S0_4_WA_RA_DML.sql
+@@S0_7_RA_Triggers.sql
+@@S0_8_WA_RA_Views.sql
+@@S0_10_RA_SP.sql
+@@S1_1_WA_RA_DDL.sql
+@@S1_3_RA_Grants.sql
+@@S1_4_WA_RA_DML.sql
+@@S1_7_RA_Triggers.sql
+@@S1_8_RA_SP.sql
+@@S1_RA_Data_Migration.sql

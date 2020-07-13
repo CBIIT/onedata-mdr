@@ -1,0 +1,14 @@
+@@S0_1_WA_RA_DDL.sql
+@@S0_2_WA_Grants.sql
+@@S0_4_WA_RA_DML.sql
+@@S0_5_WA_Core_Package.sql
+@@S0_6_WA_Triggers.sql
+@@S0_8_WA_RA_Views.sql
+@@S0_9_WA_SP.sql
+@@S1_1_WA_RA_DDL.sql
+@@S1_2_WA_Grants.sql
+@@S1_4_WA_RA_DML.sql
+@@S1_5_WA_SP.sql
+@@S1_6_WA_Triggers.sql
+@@S1_9_SBREXT_DDL.sql
+@@S1_WA_Data_Migration.sql
