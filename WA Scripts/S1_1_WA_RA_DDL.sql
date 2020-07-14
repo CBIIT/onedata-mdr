@@ -317,4 +317,22 @@ and frm.admin_item_typ_id in ( 54,55) ;
 -- Missing in core MDR.
 
 alter table ref_doc add (BLOB_COL BLOB);
+		
+		
+  CREATE OR REPLACE VIEW VW_NCI_CSI_NODE AS
+  SELECT NODE.NCI_PUB_ID, NODE.NCI_VER_NR, CSI.ITEM_ID, CSI.VER_NR, CSI.ITEM_NM, CSI.ITEM_LONG_NM, CSI.ITEM_DESC, 
+CSI.CNTXT_NM_DN, CSI.CURRNT_VER_IND, CSI.REGSTR_STUS_NM_DN, CSI.ADMIN_STUS_NM_DN, NODE.CREAT_DT, 
+NODE.CREAT_USR_ID, NODE.LST_UPD_USR_ID, NODE.FLD_DELETE, NODE.LST_DEL_DT, NODE.S2P_TRN_DT, 
+NODE.LST_UPD_DT,
+cs.item_id cs_item_id, cs.ver_nr cs_ver_nr , cs.item_long_nm cs_long_nm, cs.item_desc cs_item_desc,
+pcsi.item_id pcsi_item_id, pcsi.ver_nr pcsi_ver_nr, pcsi.item_long_nm pcsi_long_nm
+FROM ADMIN_ITEM CSI, NCI_ADMIN_ITEM_REL_ALT_KEY NODE, ADMIN_ITEM CS, ADMIN_ITEM PCSI
+       WHERE csi.ADMIN_ITEM_TYP_ID = 51 and node.c_item_id = csi.item_id and node.c_item_ver_nr = csi.ver_nr
+       and node.cntxt_cs_item_id = cs.item_id and node.cntxt_cs_Ver_nr = cs.ver_nr
+       and node.rel_typ_id = 64
+       and node.p_item_id = pcsi.item_id (+)
+       and node.p_item_ver_nr = pcsi.ver_nr (+)
+       and pcsi.admin_item_typ_id (+) = 51
+       and cs.admin_item_typ_id = 9;
+
 
