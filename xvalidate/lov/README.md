@@ -60,7 +60,9 @@ SAG-MIGR-VAL-UOM-LOV.sql
 SBREXT-MIGR-VAL-LOV-FULL.sql
 
 ## perform validation block
+This script shall be run in SBREXT schema.
 SBREXT-SAG-MIGR-VAL-LOV.sql
+
 
 
 

@@ -279,3 +279,4 @@ BEGIN
 	RETURN (mapped_type);
 END MAP_DATA_TYPE;
 /
+GRANT EXECUTE ON MAP_DATA_TYPE to public;
