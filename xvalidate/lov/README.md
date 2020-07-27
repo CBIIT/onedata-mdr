@@ -1,5 +1,6 @@
 # Validate Migration LoVs
-These are scripts related to data migration validation caDSR to OneData List of Values
+These are scripts related to data migration validation caDSR to OneData List of Values.
+These scripts shall be run in ONEDATA_WA schema.
 
 ## create sequence and table
 SBREXT-MIGR-VAL-DDL.sql

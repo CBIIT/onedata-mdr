@@ -300,29 +300,6 @@ END;
 /
 SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'ORG';
 
---DATA_TYPE
-DECLARE
- cur SYS_REFCURSOR;
- curval VARCHAR2(80);
-BEGIN
-  dbms_output.put_line('----LoV Migration Validation DATA_TYPE ----');
-  Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'DATA_TYPE';
-  Commit;
- cur := ONEDATA_WA.SAG_FUNC_MIGR_DATA_TP_LOV();   -- Get ref cursor from function
- LOOP 
-   FETCH cur into curval;
-   EXIT WHEN cur%NOTFOUND;
-      dbms_output.put_line('DATA_TYPE Error on Value: '||curval);
-      Insert Into Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, Error_Text)
-      Values(substr(curval, 1, 50),'DATA_TYPE','Migration error');
-      COMMIT;
- END LOOP;
- CLOSE cur;
- dbms_output.put_line('----Finished LoV Migration Validation DATA_TYPE ----');
-END;
-/
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DATA_TYPE';
-
 --FORMAT
 DECLARE
  cur SYS_REFCURSOR;
@@ -389,7 +366,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation LANGUAGE ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'LANGUAGE'
+SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'LANGUAGE';
 
 --UOM
 DECLARE
@@ -412,7 +389,31 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation UOM ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'UOM'
+SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'UOM';
+
+--DATA_TYPE
+DECLARE
+ cur SYS_REFCURSOR;
+ curval VARCHAR2(80);
+BEGIN
+  dbms_output.put_line('----LoV Migration Validation DATA_TYPE ----');
+  Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'DATA_TYPE';
+  Commit;
+ cur := ONEDATA_WA.SAG_FUNC_MIGR_DATA_TP_LOV();   -- Get ref cursor from function
+ LOOP 
+   FETCH cur into curval;
+   EXIT WHEN cur%NOTFOUND;
+      dbms_output.put_line('DATA_TYPE Error on Value: '||curval);
+      Insert Into Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, Error_Text)
+      Values(substr(curval, 1, 50),'DATA_TYPE','Migration error');
+      COMMIT;
+ END LOOP;
+ CLOSE cur;
+ dbms_output.put_line('----Finished LoV Migration Validation DATA_TYPE ----');
+END;
+/
+
+SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DATA_TYPE';
 
 spool off;
 

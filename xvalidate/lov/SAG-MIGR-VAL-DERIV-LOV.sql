@@ -17,7 +17,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              Nvl (LST_UPD_DT, CREAT_DT) DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=18) t
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=21) t
       GROUP BY CRTL_NAME,
                      DESCRIPTION,
                      CREATED_BY,
