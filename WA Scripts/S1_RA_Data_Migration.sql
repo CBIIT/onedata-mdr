@@ -49,7 +49,7 @@ truncate table obj_key;
 truncate table obj_typ;
 
 
-exec onedata_ra.sp_insert_all;
+exec sp_insert_all;
 
 alter trigger TR_AI_EXT_TAB_INS enable;
 
