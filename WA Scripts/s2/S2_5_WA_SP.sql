@@ -134,8 +134,6 @@ commit;
 update admin_item set creat_usr_id_x = creat_usr_id, lst_upd_usr_id_x = lst_upd_usr_id;
 commit;
 
-
-
 end;
 /
 create or replace PROCEDURE            sp_create_form_question_rel
@@ -573,7 +571,7 @@ BEGIN
 
     COMMIT;
 
-
+/*
     UPDATE de
        SET PREF_QUEST_TXT = ( select name     FROM sbr.reference_documents  d,
                        obj_key                    ok,
@@ -1225,3 +1223,621 @@ BEGIN
     */
 END;
 /
+create or replace procedure sp_postprocess
+as
+v_cnt integer;
+begin
+
+delete from NCI_ADMIN_ITEM_EXT;
+commit;
+
+delete from onedata_ra.NCI_ADMIN_ITEM_EXT;
+commit;
+
+insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR, USED_BY, CNCPT_CONCAT, CNCPT_CONCAT_NM, cncpt_concat_def)
+select ai.item_id, ai.ver_nr, a.used_by, b.cncpt_cd, b.CNCPT_nm, b.cncpt_def
+from  admin_item ai,
+(SELECT item_id, ver_nr, LISTAGG(item_nm, ',') WITHIN GROUP (ORDER by ITEM_ID) AS USED_BY
+FROM (select distinct an.item_id,an.ver_nr, ai.item_nm from alt_nms an, admin_item ai, obj_key ok where an.cntxt_item_id = ai.item_id and an.cntxt_ver_nr = ai.ver_nr and an.NM_TYP_ID = ok.obj_key_id and ok.obj_typ_id = 11
+and ok.nci_cd = 'USED_BY' and an.NM_DESC=ai.item_nm) 
+GROUP BY item_id, ver_nr) a,
+(SELECT cai.item_id, cai.ver_nr, LISTAGG(ai.item_long_nm, ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_CD ,
+LISTAGG(ai.item_nm, ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_NM ,
+ LISTAGG(substr(ai.item_desc,1, 750), ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_DEF 
+from cncpt_admin_item cai, admin_item ai where ai.item_id = cai.cncpt_item_id and ai.ver_nr = cai.cncpt_ver_nr
+group by cai.item_id, cai.ver_nr) b
+where ai.item_id = b.item_id (+) and ai.ver_nr = b.ver_nr (+)
+and ai.item_id = a.item_id (+) and ai.ver_nr = a.ver_nr(+);
+commit;
+
+update nci_admin_item_ext e set (cncpt_concat, cncpt_concat_nm) = (select item_nm, item_nm from admin_item ai where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.admin_item_typ_id = 53)
+where e.cncpt_concat is null and 
+(e.item_id, e.ver_nr) in (select item_id, ver_nr from admin_item where admin_item_typ_id= 53);
+
+commit;
+insert into onedata_ra.NCI_ADMIN_ITEM_EXT select * from NCI_ADMIN_ITEM_EXT;
+commit;
+
+delete from vw_cntxt;
+commit;
+insert into vw_cntxt
+  SELECT ADMIN_ITEM.ITEM_ID, ADMIN_ITEM.VER_NR, ADMIN_ITEM.ITEM_NM, ADMIN_ITEM.ITEM_LONG_NM, ADMIN_ITEM.ITEM_DESC,
+ADMIN_ITEM.CNTXT_NM_DN, ADMIN_ITEM.CURRNT_VER_IND, ADMIN_ITEM.REGSTR_STUS_NM_DN, ADMIN_ITEM.ADMIN_STUS_NM_DN, ADMIN_ITEM.CREAT_DT, 
+ADMIN_ITEM.CREAT_USR_ID, ADMIN_ITEM.LST_UPD_USR_ID, ADMIN_ITEM.FLD_DELETE, ADMIN_ITEM.LST_DEL_DT, ADMIN_ITEM.S2P_TRN_DT, 
+ADMIN_ITEM.LST_UPD_DT, C.NCI_PRG_AREA_ID
+FROM ADMIN_ITEM, CNTXT C
+       WHERE ADMIN_ITEM_TYP_ID = 8 and ADMIN_ITEM.ITEM_ID = C.ITEM_ID and ADMIN_ITEM.VER_NR = C.VER_NR;
+commit;
+delete from onedata_ra.vw_cntxt;
+commit;
+insert into onedata_ra.vw_cntxt select * from vw_cntxt;
+commit;
+end;
+/
+
+create or replace procedure            sp_create_form_vv_inst_2
+as
+v_cnt integer;
+begin
+
+delete from nci_instr;
+commit;
+
+insert into NCI_INSTR
+(NCI_PUB_ID, NCI_LVL, NCI_TYP, NCI_VER_NR, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF,
+CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select ai.item_id, 'FORM', 'INSTRUCTION',ai.VER_NR, display_order, qc.LONG_NAME,qc.preferred_name, qc.preferred_definition,
+qc.created_by, qc.date_created,
+nvl(qc.date_modified, qc.date_created), qc.modified_by
+from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FORM_INSTR' and 
+qc.dn_crf_idseq = ai.nci_idseq;
+
+commit;
+
+
+insert into NCI_INSTR
+(NCI_PUB_ID, NCI_LVL, NCI_TYP, NCI_VER_NR, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF,
+CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select ai.item_id, 'FORM', 'FOOTER',ai.VER_NR, display_order, qc.LONG_NAME,qc.preferred_name, qc.preferred_definition,
+qc.created_by, qc.date_created,
+nvl(qc.date_modified, qc.date_created), qc.modified_by
+from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and 
+qc.dn_crf_idseq = ai.nci_idseq;
+
+commit;
+
+insert into NCI_INSTR
+(NCI_PUB_ID, NCI_LVL, NCI_TYP, NCI_VER_NR, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF,
+CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select ai.item_id, 'MODULE', 'INSTRUCTION',ai.VER_NR, display_order, qc.LONG_NAME,qc.preferred_name, qc.preferred_definition,
+qc.created_by, qc.date_created,
+nvl(qc.date_modified, qc.date_created), qc.modified_by
+from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'MODULE_INSTR' and 
+qc.p_mod_idseq = ai.nci_idseq;
+
+commit;
+
+insert into NCI_INSTR
+(NCI_PUB_ID, NCI_LVL, NCI_TYP, NCI_VER_NR, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF,
+CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select ai.nci_pub_id, 'QUESTION', 'INSTRUCTION',ai.NCI_VER_NR, display_order, qc.LONG_NAME,qc.preferred_name, qc.preferred_definition,
+qc.created_by, qc.date_created,
+nvl(qc.date_modified, qc.date_created), qc.modified_by
+from sbrext.quest_contents_ext qc, Nci_admin_item_rel_alt_key ai where qc.qtl_name = 'QUESTION_INSTR' and ai.rel_typ_id = 63 and
+qc.p_qst_idseq = ai.nci_idseq;
+
+commit;
+
+
+insert into NCI_INSTR
+(NCI_PUB_ID, NCI_LVL, nci_ver_nr, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF, NCI_TYP, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select ai.nci_pub_id, 'VALUE',1, display_order, qc.LONG_NAME,qc.preferred_name, qc.preferred_definition, 'INSTRUCTION',
+qc.created_by, qc.date_created,
+nvl(qc.date_modified, qc.date_created), qc.modified_by
+from sbrext.quest_contents_ext qc, Nci_QUEST_VALID_VALUE ai where qc.qtl_name = 'VALUE_INSTR' and
+qc.p_val_idseq = ai.nci_idseq ;
+commit;
+
+/*
+insert into NCI_QUEST_VALID_VALUE
+(NCI_PUB_ID, Q_PUB_ID, QVV_VM_NM, QVV_VM_LNM, QVV_VALUE, QVV_CMNTS, QVV_EDIT_IND, QVV_SEQ_NBR)
+select qc.qc_id, qc1.qc_id, qc.preferred_name, qc.preferred_definition 
+from  sbrext.quest_contents_ext qc, sbrext.quest_contents_ext qc1
+where qc.qtl_name = 'VALID_VALUE' and and qc1.qtl_name = 'QUESTION' and qc1.qc_idseq = qc.p_qst_idseq;
+
+*/
+
+end;
+/
+create or replace PROCEDURE            sp_create_form_vv_inst
+AS
+    v_cnt   INTEGER;
+BEGIN
+    DELETE FROM NCI_QUEST_VALID_VALUE;
+
+    COMMIT;
+
+    INSERT INTO NCI_QUEST_VALID_VALUE (NCI_PUB_ID,
+                                       Q_PUB_ID,
+                                       Q_VER_NR,
+                                       VM_NM,
+                                       VM_DEF,
+                                       VALUE,
+                                       NCI_IDSEQ,
+                                       DESC_TXT,
+                                       MEAN_TXT,
+                                       CREAT_USR_ID,
+                                       CREAT_DT,
+                                       LST_UPD_DT,
+                                       LST_UPD_USR_ID)
+        SELECT qc.qc_id,
+               qc1.qc_id,
+               qc1.VERSION,
+               qc.preferred_name,
+               qc.preferred_definition,
+               qc.long_name,
+               qc.qc_idseq,
+               vv.description_text,
+               vv.meaning_text,
+               qc.created_by,
+               qc.date_created,
+               NVL (qc.date_modified, qc.date_created),
+               qc.modified_by
+          FROM sbrext.quest_contents_ext    qc,
+               sbrext.quest_contents_ext    qc1,
+               sbrext.valid_values_att_ext  vv
+         WHERE     qc.qtl_name = 'VALID_VALUE'
+               AND qc1.qtl_name = 'QUESTION'
+               AND qc1.qc_idseq = qc.p_qst_idseq
+               AND qc.qc_idseq = vv.qc_idseq(+);
+
+    COMMIT;
+
+    DELETE FROM NCI_QUEST_VV_REP;
+
+    COMMIT;
+
+    INSERT INTO NCI_QUEST_VV_REP (QUEST_PUB_ID,
+                                  QUEST_VER_NR,
+                                  VV_PUB_ID,
+                                  VV_VER_NR,
+                                  VAL,
+                                  EDIT_IND,
+                                  REP_SEQ,
+                                  CREAT_USR_ID,
+                                  CREAT_DT,
+                                  LST_UPD_DT,
+                                  LST_UPD_USR_ID)
+        SELECT q.NCI_PUB_ID,
+               q.NCI_VER_NR,
+               vv.NCI_PUB_ID,
+               vv.NCI_VER_NR,
+               qvv.VALUE,
+               DECODE (editable_ind,  'Yes', 1,  'No', 0),
+               repeat_sequence,
+               qvv.created_by,
+               qvv.date_created,
+               NVL (qvv.date_modified, qvv.date_created),
+               qvv.modified_by
+          FROM sbrext.quest_vv_ext         qvv,
+               NCI_ADMIN_ITEM_REL_ALT_KEY  q,
+               NCI_QUEST_VALID_VALUE       vv
+         WHERE     qvv.quest_idseq = q.NCI_IDSEQ
+               AND qvv.vv_idseq = vv.NCI_IDSEQ(+);
+
+    COMMIT;
+END;
+/
+create or replace PROCEDURE            sp_create_form_ext
+AS
+    v_cnt   INTEGER;
+BEGIN
+    -- Create AI for TEmplate, Form, Protocol, Module
+
+
+
+    DELETE FROM nci_form;
+
+    COMMIT;
+
+    DELETE FROM nci_protcl;
+
+    COMMIT;
+
+    DELETE FROM admin_item
+          WHERE admin_item_typ_id IN (50,
+                                      52,
+                                      54,
+                                      55);
+
+    COMMIT;
+
+
+    INSERT /*+ APPEND */
+           INTO admin_item (NCI_IDSEQ,
+                            ADMIN_ITEM_TYP_ID,
+                            ADMIN_STUS_ID,
+                            ADMIN_STUS_NM_DN,
+                            EFF_DT,
+                            CHNG_DESC_TXT,
+                            CNTXT_ITEM_ID,
+                            CNTXT_VER_NR,
+                            CNTXT_NM_DN,
+                            UNTL_DT,
+                            CURRNT_VER_IND,
+                            ITEM_LONG_NM,
+                            ORIGIN,
+                            ITEM_DESC,
+                            ITEM_ID,
+                            ITEM_NM,
+                            UNRSLVD_ISSUE,
+                            VER_NR,
+                            CREAT_USR_ID,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID)
+        SELECT qc.qc_idseq,
+               54,
+               s.stus_id,
+               s.nci_STUS,
+               qc.begin_date,
+               qc.change_note,
+               cntxt.item_id,
+               cntxt.ver_nr,
+               cntxt.item_nm,
+               qc.end_date,
+               DECODE (UPPER (qc.latest_version_ind),  'YES', 1,  'NO', 0),
+               qc.preferred_name,
+               qc.origin,
+               qc.preferred_definition,
+               qc.qc_id,
+               NVL (qc.long_name, qc.preferred_name),
+               ac.unresolved_issue,
+               qc.version,
+               qc.created_by,
+               qc.date_created,
+               NVL (qc.date_modified, qc.date_created),
+               qc.modified_by
+          FROM sbr.administered_components  ac,
+               admin_item                   cntxt,
+               stus_mstr                    s,
+               sbrext.quest_contents_ext    qc
+         WHERE     qc.conte_idseq = cntxt.nci_idseq
+               AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
+               AND ac.actl_name = 'QUEST_CONTENT'
+               AND   cntxt.admin_item_typ_id = 8
+               AND ac.ac_idseq = qc.qc_idseq
+               AND qc.qtl_name IN ('TEMPLATE', 'CRF');
+
+    COMMIT;
+
+    DELETE FROM nci_form;
+
+    COMMIT;
+
+
+    INSERT INTO nci_form (item_id,
+                          ver_nr,
+                          catgry_id,
+                          form_typ_id,
+                          CREAT_USR_ID,
+                          CREAT_DT,
+                          LST_UPD_DT,
+                          LST_UPD_USR_ID)
+        SELECT qc_id,
+               version,
+               ok.obj_key_id,
+               DECODE (qc.qtl_name,  'CRF', 70,  'TEMPLATE', 71),
+               created_by,
+               date_created,
+               NVL (date_modified, date_created),
+               modified_by
+          FROM sbrext.quest_contents_ext qc, obj_key ok
+         WHERE     qc.qcdl_name = ok.nci_cd(+)
+               AND ok.obj_typ_id(+) = 22
+               AND qc.qtl_name IN ('TEMPLATE', 'CRF');
+
+    COMMIT;
+
+INSERT /*+ APPEND */
+           INTO admin_item (NCI_IDSEQ,
+                            ADMIN_ITEM_TYP_ID,
+                            ADMIN_STUS_ID,
+                            ADMIN_STUS_NM_DN,
+                            EFF_DT,
+                            CHNG_DESC_TXT,
+                            CNTXT_ITEM_ID,
+                            CNTXT_VER_NR,
+                            CNTXT_NM_DN,
+                            UNTL_DT,
+                            CURRNT_VER_IND,
+                            ITEM_LONG_NM,
+                            ORIGIN,
+                            ITEM_DESC,
+                            ITEM_NM,
+                            ITEM_ID,
+                            UNRSLVD_ISSUE,
+                            VER_NR,
+                            CREAT_USR_ID,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID)
+        SELECT qc.qc_idseq,
+               52,
+               s.stus_id,
+               s.NCI_STUS,
+               qc.begin_date,
+               qc.change_note,
+               cntxt.item_id,
+               cntxt.ver_nr,
+               cntxt.item_nm,
+               qc.end_date,
+               DECODE (UPPER (qc.latest_version_ind),  'YES', 1,  'NO', 0),
+               qc.preferred_name,
+               qc.origin,
+               qc.preferred_definition,
+               substr(NVL (qc.long_name, qc.preferred_name),1,255),
+               qc.qc_id,
+               ac.unresolved_issue,
+               qc.version,
+               qc.created_by,
+               qc.date_created,
+               NVL (qc.date_modified, qc.date_created),
+               qc.modified_by
+          FROM sbr.administered_components  ac,
+               admin_item                   cntxt,
+               stus_mstr                    s,
+               sbrext.quest_contents_ext    qc
+         WHERE     qc.conte_idseq = cntxt.nci_idseq
+               AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
+               AND ac.actl_name = 'QUEST_CONTENT'
+               AND cntxt.admin_item_typ_id = 8
+               AND ac.ac_idseq = qc.qc_idseq
+               AND qc.qtl_name = 'MODULE';
+
+
+    COMMIT;
+
+    INSERT /*+ APPEND */
+           INTO admin_item (NCI_IDSEQ,
+                            ADMIN_ITEM_TYP_ID,
+                            ADMIN_STUS_ID,
+                            ADMIN_STUS_NM_DN,
+                            EFF_DT,
+                            CHNG_DESC_TXT,
+                            CNTXT_ITEM_ID,
+                            CNTXT_VER_NR,
+                            CNTXT_NM_DN,
+                            UNTL_DT,
+                            CURRNT_VER_IND,
+                            ITEM_LONG_NM,
+                            ORIGIN,
+                            ITEM_DESC,
+                            ITEM_ID,
+                            ITEM_NM,
+                            UNRSLVD_ISSUE,
+                            VER_NR,
+                            CREAT_USR_ID,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID)
+        SELECT p.proto_IDSEQ,
+               50,
+               s.stus_id,
+               s.nci_stus,
+               p.begin_date,
+               p.change_note,
+               cntxt.item_id,
+               cntxt.ver_nr,
+               cntxt.item_nm,
+               p.end_date,
+               DECODE (UPPER (p.latest_version_ind),  'YES', 1,  'NO', 0),
+               p.preferred_name,
+               p.origin,
+               p.preferred_definition,
+               p.proto_id,
+               NVL (p.long_name, p.preferred_name),
+               ac.unresolved_issue,
+               p.version,
+               p.created_by,
+               p.date_created,
+               NVL (p.date_modified, p.date_created),
+               p.modified_by
+          FROM sbr.administered_components ac, admin_item cntxt,
+               stus_mstr s      ,sbrext.protocols_ext p
+         WHERE     p.conte_idseq = cntxt.nci_idseq
+               AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
+               AND ac.actl_name = 'PROTOCOL'
+               AND p.proto_IDSEQ = ac.ac_idseq
+               AND cntxt.admin_item_typ_id = 8;
+
+
+    COMMIT;
+
+
+    INSERT INTO nci_protcl (item_id,
+                            ver_nr,
+                            PROTCL_TYP_ID,
+                            PROTCL_ID,
+                            LEAD_ORG,
+                            PROTCL_PHASE,
+                            creat_usr_id,
+                            CREAT_DT,
+                            LST_UPD_DT,
+                            LST_UPD_USR_ID,
+                            CHNG_TYP,
+                            CHNG_NBR,
+                            RVWD_DT,
+                            RVWD_USR_ID,
+                            APPRVD_DT,
+                            APPRVD_USR_ID)
+        SELECT ai.item_id,
+               ai.ver_nr,
+               ok.obj_key_id,
+               protocol_id,
+               LEAD_ORG,
+               PHASE,
+               cd.created_by,
+               cd.date_created,
+               NVL (cd.date_modified, cd.date_created),
+               cd.modified_by,
+               CHANGE_TYPE,
+               CHANGE_NUMBER,
+               REVIEWED_DATE,
+               REVIEWED_BY,
+               APPROVED_DATE,
+               APPROVED_BY
+          FROM sbrext.protocols_ext cd, admin_item ai, obj_key ok
+         WHERE     ai.NCI_IDSEQ = cd.proto_IDSEQ
+               AND TRIM (TYPE) = ok.nci_cd(+)
+               AND ok.obj_typ_id(+) = 19
+               AND ai.admin_item_typ_id = 50;
+
+    COMMIT;
+END;
+/
+
+create or replace PROCEDURE            sp_create_form_rel
+AS
+    v_cnt   INTEGER;
+BEGIN
+    DELETE FROM nci_admin_item_rel
+          WHERE rel_typ_id IN (61, 60);
+
+    COMMIT;
+
+
+    -- new table for Protocol-form relationship
+    -- Do not add audit columns
+
+    INSERT INTO nci_admin_item_rel (P_ITEM_ID,
+                                    P_ITEM_VER_NR,
+                                    C_ITEM_ID,
+                                    C_ITEM_VER_NR,
+                                    --CNTXT_ITEM_ID, CNTXT_VER_NR,
+                                    REL_TYP_ID)
+        SELECT DISTINCT pro.item_id,
+                        pro.ver_nr,
+                        frm.item_id,
+                        frm.ver_nr,
+                        60
+          --, qc.DISPLAY_ORDER
+          FROM admin_item pro, admin_item frm, sbrext.protocol_qc_ext qc
+         WHERE     pro.nci_idseq = qc.proto_idseq
+               AND frm.nci_idseq = qc.qc_idseq
+               AND pro.admin_item_typ_id = 50
+               AND frm.admin_item_typ_id = 54;
+
+    COMMIT;
+
+    -- Form-module relationship
+    INSERT INTO nci_admin_item_rel (P_ITEM_ID,
+                                    P_ITEM_VER_NR,
+                                    C_ITEM_ID,
+                                    C_ITEM_VER_NR,
+                                    --CNTXT_ITEM_ID, CNTXT_VER_NR,
+                                    REL_TYP_ID,
+                                    DISP_ORD,
+                                    REP_NO,
+                                    --DISP_LBL,
+                                    CREAT_DT,
+                                    CREAT_USR_ID,
+                                    LST_UPD_USR_ID,
+                                    LST_UPD_DT)
+        SELECT DISTINCT frm.item_id,
+                        frm.ver_nr,
+                        MOD.item_id,
+                        MOD.ver_nr,
+                        61,
+                        qc.DISPLAY_ORDER,
+                        qc.REPEAT_NO,
+                        qc.DATE_CREATED,
+                        qc.CREATED_BY,
+                        NVL (qc.MODIFIED_BY, qc.date_created),
+                        DATE_MODIFIED
+          FROM admin_item MOD, admin_item frm, sbrext.quest_contents_ext qc
+         WHERE     MOD.nci_idseq = qc.qc_idseq
+               AND frm.nci_idseq = qc.dn_crf_idseq
+               AND qc.qtl_name = 'MODULE'
+               AND MOD.admin_item_typ_id = 52
+               AND frm.admin_item_typ_id = 54;
+
+    COMMIT;
+END;
+/
+create or replace procedure            sp_create_form_vv_inst_2
+as
+v_cnt integer;
+begin
+
+delete from nci_instr;
+commit;
+
+insert into NCI_INSTR
+(NCI_PUB_ID, NCI_LVL, NCI_TYP, NCI_VER_NR, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF,
+CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select ai.item_id, 'FORM', 'INSTRUCTION',ai.VER_NR, display_order, qc.LONG_NAME,qc.preferred_name, qc.preferred_definition,
+qc.created_by, qc.date_created,
+nvl(qc.date_modified, qc.date_created), qc.modified_by
+from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FORM_INSTR' and 
+qc.dn_crf_idseq = ai.nci_idseq;
+
+commit;
+
+
+insert into NCI_INSTR
+(NCI_PUB_ID, NCI_LVL, NCI_TYP, NCI_VER_NR, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF,
+CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select ai.item_id, 'FORM', 'FOOTER',ai.VER_NR, display_order, qc.LONG_NAME,qc.preferred_name, qc.preferred_definition,
+qc.created_by, qc.date_created,
+nvl(qc.date_modified, qc.date_created), qc.modified_by
+from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and 
+qc.dn_crf_idseq = ai.nci_idseq;
+
+commit;
+
+insert into NCI_INSTR
+(NCI_PUB_ID, NCI_LVL, NCI_TYP, NCI_VER_NR, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF,
+CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select ai.item_id, 'MODULE', 'INSTRUCTION',ai.VER_NR, display_order, qc.LONG_NAME,qc.preferred_name, qc.preferred_definition,
+qc.created_by, qc.date_created,
+nvl(qc.date_modified, qc.date_created), qc.modified_by
+from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'MODULE_INSTR' and 
+qc.p_mod_idseq = ai.nci_idseq;
+
+commit;
+
+insert into NCI_INSTR
+(NCI_PUB_ID, NCI_LVL, NCI_TYP, NCI_VER_NR, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF,
+CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select ai.nci_pub_id, 'QUESTION', 'INSTRUCTION',ai.NCI_VER_NR, display_order, qc.LONG_NAME,qc.preferred_name, qc.preferred_definition,
+qc.created_by, qc.date_created,
+nvl(qc.date_modified, qc.date_created), qc.modified_by
+from sbrext.quest_contents_ext qc, Nci_admin_item_rel_alt_key ai where qc.qtl_name = 'QUESTION_INSTR' and ai.rel_typ_id = 63 and
+qc.p_qst_idseq = ai.nci_idseq;
+
+commit;
+
+
+insert into NCI_INSTR
+(NCI_PUB_ID, NCI_LVL, nci_ver_nr, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF, NCI_TYP, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
+select ai.nci_pub_id, 'VALUE',1, display_order, qc.LONG_NAME,qc.preferred_name, qc.preferred_definition, 'INSTRUCTION',
+qc.created_by, qc.date_created,
+nvl(qc.date_modified, qc.date_created), qc.modified_by
+from sbrext.quest_contents_ext qc, Nci_QUEST_VALID_VALUE ai where qc.qtl_name = 'VALUE_INSTR' and
+qc.p_val_idseq = ai.nci_idseq ;
+commit;
+
+/*
+insert into NCI_QUEST_VALID_VALUE
+(NCI_PUB_ID, Q_PUB_ID, QVV_VM_NM, QVV_VM_LNM, QVV_VALUE, QVV_CMNTS, QVV_EDIT_IND, QVV_SEQ_NBR)
+select qc.qc_id, qc1.qc_id, qc.preferred_name, qc.preferred_definition 
+from  sbrext.quest_contents_ext qc, sbrext.quest_contents_ext qc1
+where qc.qtl_name = 'VALID_VALUE' and and qc1.qtl_name = 'QUESTION' and qc1.qc_idseq = qc.p_qst_idseq;
+
+*/
+
+end;
+/
+
+
