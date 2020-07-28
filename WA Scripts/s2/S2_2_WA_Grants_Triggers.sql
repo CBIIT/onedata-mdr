@@ -52,7 +52,7 @@ BEGIN
   end if;
 */  
 END TR_DE_AUD_TS;
-
+/
 
 
 create or replace trigger TR_NCI_AI_DENORM_INS
@@ -137,5 +137,4 @@ end loop;
 END AFTER STATEMENT;
 
 END;
-/
 /
