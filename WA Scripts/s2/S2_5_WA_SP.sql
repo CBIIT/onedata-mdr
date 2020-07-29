@@ -1839,5 +1839,62 @@ where qc.qtl_name = 'VALID_VALUE' and and qc1.qtl_name = 'QUESTION' and qc1.qc_i
 
 end;
 /
+ 
+                                                      create or replace procedure spNCICompareDE (v_data_in in clob, v_data_out out clob)
+as
+
+hookInput           t_hookInput;
+hookOutput           t_hookOutput := t_hookOutput();
+showRowset     t_showableRowset;
+
+rows      t_rows;
+row          t_row;
+row_cur t_row;
+
+v_admin_item                admin_item%rowtype;
+v_tab_admin_item            tab_admin_item_pk;
+
+v_found      boolean;
+
+
+v_tab_val_dom    tab_admin_item_pk := tab_admin_item_pk();
+
+type      t_admin_item_nm is table of admin_item.item_nm%type;
+v_tab_admin_item_nm   t_admin_item_nm := t_admin_item_nm();
+
+v_val_mean_desc    val_mean.val_mean_desc%type;
+v_perm_val_nm    perm_val.perm_val_nm%type;
+v_item_id		 number;
+v_ver_nr		 number;
+
+begin
+
+    hookInput := ihook.getHookInput(v_data_in);
+
+ hookOutput.invocationNumber := hookInput.invocationNumber;
+ hookOutput.originalRowset := hookInput.originalRowset;
+
+rows := t_rows();
+
+
+    for i in 1 .. hookInput.originalRowset.Rowset.count loop
+row := t_row();
+    row_cur := hookInput.originalRowset.Rowset(i);
+    ihook.setColumnValue(row,'ITEM_ID', ihook.getColumnValue(row_cur,'ITEM_ID'));
+    ihook.setColumnValue(row,'VER_NR', ihook.getColumnValue(row_cur,'VER_NR'));  
+    rows.extend; rows(rows.last) := row;
+
+ end loop;
+
+    showRowset := t_showableRowset(rows, 'NCI Data Element Details (for Compare)',2, 'unselectable');
+    hookOutput.showRowset := showRowset;
+
+    hookOutput.message := 'Data Element Compare';
+
+    v_data_out := ihook.getHookOutput(hookOutput);
+
+end;
+/                                                      
+                                                     
 
 
