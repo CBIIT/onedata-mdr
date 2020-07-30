@@ -64,7 +64,7 @@ ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
             LOOP
 --            DBMS_OUTPUT.PUT_LINE(X.NCI_IDSEQ || '' | '' || X.ITEM_ID || '' | '' || X.VER_NR || '' | '' || X.ITEM_LONG_NM);
             INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR VALUES
-            (SBREXT.ERR_SEQ.NEXTVAL,X.NCI_IDSEQ,X.ITEM_ID,X.VER_NR,'''||Y.ITEM_TYPE||''',X.ITEM_LONG_NM,''DATA MISMATCH'',SYSDATE,USER,''ADMIN_ITEM'');
+            (SBREXT.ERR_SEQ.NEXTVAL,X.NCI_IDSEQ,X.ITEM_ID,X.VER_NR,'''||Y.ITEM_TYPE||''',X.ITEM_LONG_NM,''DATA MISMATCH'',SYSDATE,USER,''ADMIN_ITEM'',''ONEDATA_WA'');
             COMMIT;
             END LOOP;
             END;';
@@ -107,7 +107,7 @@ ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
             LOOP
 --            DBMS_OUTPUT.PUT_LINE(X.NCI_IDSEQ || '' | '' || X.ITEM_ID || '' | '' || X.VER_NR || '' | '' || X.ITEM_LONG_NM);
             INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR VALUES
-            (SBREXT.ERR_SEQ.NEXTVAL,X.NCI_IDSEQ,X.ITEM_ID,X.VER_NR,'''||Y.ITEM_TYPE||''',X.ITEM_LONG_NM,''DATA MISMATCH'',SYSDATE,USER,''ADMIN_ITEM'');
+            (SBREXT.ERR_SEQ.NEXTVAL,X.NCI_IDSEQ,X.ITEM_ID,X.VER_NR,'''||Y.ITEM_TYPE||''',X.ITEM_LONG_NM,''DATA MISMATCH'',SYSDATE,USER,''ADMIN_ITEM'',''ONEDATA_WA'');
             COMMIT;
             END LOOP;
             END;';
@@ -133,7 +133,7 @@ END CASE;
                                CREAT_DT,
                                LST_UPD_DT,
                                LST_UPD_USR_ID
-                          FROM onedata_wa.admin_item    --11/8/2019 4:41:54 PM
+                          FROM ONEDATA_WA.ADMIN_ITEM    --11/8/2019 4:41:54 PM
                          WHERE ADMIN_ITEM_TYP_ID = '8'
                         --and NCI_IDSEQ='B2C9F513-4346-6519-E034-0003BA12F5E7'
                         UNION ALL
@@ -173,7 +173,8 @@ END CASE;
                      'DATA MISMATCH',
                      SYSDATE,
                      USER,
-                     'ADMIN_ITEM');
+                     'ADMIN_ITEM',
+                     'ONEDATA_WA');
 
         COMMIT;
     END LOOP;
