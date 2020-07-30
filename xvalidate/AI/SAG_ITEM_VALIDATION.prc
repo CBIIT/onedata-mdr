@@ -52,7 +52,8 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'DE'
+                   'DE',
+                   'ONEDATA_WA'
               FROM sbr.data_elements
              WHERE CDE_id = x.ITEM_ID AND VERSION = x.VER_NR;
 
@@ -69,7 +70,7 @@ BEGIN
                                CREAT_DT,
                                LST_UPD_DT,
                                LST_UPD_USR_ID
-                          FROM onedata_wa.CNTXT
+                          FROM ONEDATA_WA.CNTXT
                          WHERE item_id <> -20005
                         UNION ALL
                         SELECT ai.ITEM_ID,
@@ -79,7 +80,7 @@ BEGIN
                                date_created,
                                NVL (date_modified, date_created),
                                modified_by
-                          FROM sbr.contexts c, admin_item ai
+                          FROM sbr.contexts c, ONEDATA_WA.admin_item ai
                          WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.conte_idseq)
                           and ai.admin_item_typ_id = 8) t
               GROUP BY ITEM_ID,
@@ -102,8 +103,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'CNTXT'
-              FROM sbr.contexts c, admin_item ai
+                   'CNTXT',
+                   'ONEDATA_WA'
+              FROM sbr.contexts c, ONEDATA_WA.admin_item ai
              WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.conte_idseq)
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -131,7 +133,7 @@ BEGIN
                                date_created,
                                NVL (date_modified, date_created),
                                modified_by
-                          FROM sbr.conceptual_domains c, admin_item ai
+                          FROM sbr.conceptual_domains c, ONEDATA_WA.admin_item ai
                          WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.cd_idseq)) t
               GROUP BY ITEM_ID,
                        VER_NR,
@@ -153,8 +155,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'CONC_DOM'
-              FROM sbr.conceptual_domains c, admin_item ai
+                   'CONC_DOM',
+                   'ONEDATA_WA'
+              FROM sbr.conceptual_domains c, ONEDATA_WA.admin_item ai
              WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.cd_idseq)
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -180,7 +183,7 @@ BEGIN
                                date_created,
                                NVL (date_modified, date_created),
                                modified_by
-                          FROM sbrext.OBJECT_CLASSES_EXT c, admin_item ai
+                          FROM sbrext.OBJECT_CLASSES_EXT c, ONEDATA_WA.admin_item ai
                          WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.oc_idseq)) t
               GROUP BY ITEM_ID,
                        VER_NR,
@@ -201,8 +204,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'OBJ_CLS'
-              FROM sbrext.object_classes_ext c, admin_item ai
+                   'OBJ_CLS',
+                   'ONEDATA_WA'
+              FROM sbrext.object_classes_ext c, ONEDATA_WA.admin_item ai
              WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.oc_idseq)
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -228,7 +232,7 @@ BEGIN
                                date_created,
                                NVL (date_modified, date_created),
                                modified_by
-                          FROM sbrext.properties_ext c, admin_item ai
+                          FROM sbrext.properties_ext c, ONEDATA_WA.admin_item ai
                          WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.PROP_idseq)) t
               GROUP BY ITEM_ID,
                        VER_NR,
@@ -249,8 +253,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'PROP'
-              FROM sbrext.properties_ext c, admin_item ai
+                   'PROP',
+                   'ONEDATA_WA'
+              FROM sbrext.properties_ext c, ONEDATA_WA.admin_item ai
              WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.PROP_idseq)
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -281,8 +286,8 @@ BEGIN
                              NVL (date_modified, date_created),
                              modified_by
                         FROM sbr.classification_schemes c,
-                             admin_item                ai,
-                             obj_key                   ok
+                             ONEDATA_WA.admin_item                ai,
+                             ONEDATA_WA.obj_key                   ok
                        WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.CS_idseq)
                              AND TRIM (cstl_name) = ok.nci_cd
                              AND ok.obj_typ_id = 3) t
@@ -307,8 +312,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'CLSFCTN_SCHM'
-              FROM sbr.CLASSIFICATION_SCHEMES c, admin_item ai
+                   'CLSFCTN_SCHM',
+                   'ONEDATA_WA'
+              FROM sbr.CLASSIFICATION_SCHEMES c, ONEDATA_WA.admin_item ai
              WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.cs_idseq)
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -335,7 +341,7 @@ BEGIN
                              date_created,
                              NVL (date_modified, date_created),
                              modified_by
-                        FROM sbrext.representations_ext c, admin_item ai
+                        FROM sbrext.representations_ext c, ONEDATA_WA.admin_item ai
                        WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.REP_idseq)) t
             GROUP BY ITEM_ID,
                      VER_NR,
@@ -356,8 +362,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'REP_CLS'
-              FROM sbrext.REPRESENTATIONS_EXT c, admin_item ai
+                   'REP_CLS',
+                   'ONEDATA_WA'
+              FROM sbrext.REPRESENTATIONS_EXT c, ONEDATA_WA.admin_item ai
              WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.REP_idseq)
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -388,7 +395,7 @@ BEGIN
                                date_created,
                                NVL (date_modified, date_created),
                                modified_by
-                          FROM sbr.DATA_ELEMENT_CONCEPTS c, admin_item ai
+                          FROM sbr.DATA_ELEMENT_CONCEPTS c, ONEDATA_WA.admin_item ai
                          WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.dec_idseq)) t
               GROUP BY ITEM_ID,
                        VER_NR,
@@ -411,8 +418,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'DE_CONC'
-              FROM sbr.data_element_concepts c, admin_item ai
+                   'DE_CONC',
+                   'ONEDATA_WA'
+              FROM sbr.data_element_concepts c, ONEDATA_WA.admin_item ai
              WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.DEC_idseq)
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -449,7 +457,7 @@ BEGIN
                                date_created,
                                NVL (date_modified, date_created),
                                modified_by
-                          FROM sbr.VALUE_DOMAINS c, admin_item ai
+                          FROM sbr.VALUE_DOMAINS c, ONEDATA_WA.admin_item ai
                          WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.vd_idseq)) t
               GROUP BY ITEM_ID,
                        VER_NR,
@@ -475,8 +483,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'VALUE_DOM'
-              FROM sbr.value_domains c, admin_item ai
+                   'VALUE_DOM',
+                   'ONEDATA_WA'
+              FROM sbr.value_domains c, ONEDATA_WA.admin_item ai
              WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.vd_idseq)
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -517,7 +526,7 @@ BEGIN
                              display_order,
                              dimensionality,
                              array_ind
-                        FROM sbrext.oc_recs_ext c, admin_item ai
+                        FROM sbrext.oc_recs_ext c, ONEDATA_WA.admin_item ai
                        WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.t_oc_idseq)) t
             GROUP BY ITEM_ID,
                      VER_NR,
@@ -545,8 +554,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'NCI_OC_RECS'
-              FROM sbrext.OC_RECS_EXT c, admin_item ai
+                   'NCI_OC_RECS',
+                   'ONEDATA_WA'
+              FROM sbrext.OC_RECS_EXT c, ONEDATA_WA.admin_item ai
              WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.t_oc_idseq)
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -575,7 +585,7 @@ BEGIN
                              date_created,
                              NVL (date_modified, date_created),
                              modified_by
-                        FROM sbrext.CONCEPTS_EXT c, obj_key ok
+                        FROM sbrext.CONCEPTS_EXT c, ONEDATA_WA.obj_key ok
                        WHERE     c.evs_source = ok.obj_key_desc(+)
                              AND ok.obj_typ_id(+) = 23) t
             GROUP BY ITEM_ID,
@@ -598,7 +608,8 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'CNCPT'
+                   'CNCPT',
+                   'ONEDATA_WA'
               FROM sbrext.CONCEPTS_EXT c
              WHERE con_id = x.ITEM_ID AND VERSION = x.VER_NR;
 
@@ -628,7 +639,7 @@ BEGIN
                              date_created,
                              NVL (date_modified, date_created),
                              modified_by
-                        FROM sbr.cs_items cd, admin_item ai
+                        FROM sbr.cs_items cd, ONEDATA_WA.admin_item ai
                        WHERE ai.NCI_IDSEQ = cd.CSI_IDSEQ) t
             GROUP BY ITEM_ID,
                      VER_NR,
@@ -651,8 +662,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'NCI_CLSFCTN_SCHM_ITEM'
-              FROM sbr.CS_ITEMS cd, admin_item ai
+                   'NCI_CLSFCTN_SCHM_ITEM',
+                   'ONEDATA_WA'
+              FROM sbr.CS_ITEMS cd, ONEDATA_WA.admin_item ai
              WHERE     ai.NCI_IDSEQ = cd.CSI_IDSEQ
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -683,7 +695,7 @@ BEGIN
                              date_created,
                              NVL (date_modified, date_created),
                              modified_by
-                        FROM sbr.VALUE_MEANINGS cd, admin_item ai
+                        FROM sbr.VALUE_MEANINGS cd, ONEDATA_WA.admin_item ai
                        WHERE ai.NCI_IDSEQ = cd.VM_IDSEQ) t
             GROUP BY ITEM_ID,
                      VER_NR,
@@ -706,8 +718,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'NCI_VAL_MEAN'
-              FROM sbr.value_meanings cd, admin_item ai
+                   'NCI_VAL_MEAN',
+                   'ONEDATA_WA'
+              FROM sbr.value_meanings cd, ONEDATA_WA.admin_item ai
              WHERE     ai.NCI_IDSEQ = cd.VM_IDSEQ
                    AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -738,7 +751,7 @@ BEGIN
                              date_created,
                              NVL (date_modified, date_created),
                              modified_by
-                        FROM sbrext.quest_contents_ext qc, obj_key ok
+                        FROM sbrext.quest_contents_ext qc, ONEDATA_WA.obj_key ok
                        WHERE     qc.qcdl_name = ok.nci_cd(+)
                              AND ok.obj_typ_id(+) = 22
                              AND qc.qtl_name IN ('TEMPLATE', 'CRF')) t
@@ -763,7 +776,8 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'NCI_FORM'
+                   'NCI_FORM',
+                   'ONEDATA_WA'
               FROM sbrext.QUEST_CONTENTS_EXT
              WHERE qc_id = x.ITEM_ID AND VERSION = x.VER_NR;
 
@@ -809,7 +823,7 @@ BEGIN
                              REVIEWED_BY,
                              APPROVED_DATE,
                              APPROVED_BY
-                        FROM sbrext.PROTOCOLS_EXT cd, admin_item ai, obj_key ok
+                        FROM sbrext.PROTOCOLS_EXT cd, ONEDATA_WA.admin_item ai, ONEDATA_WA.obj_key ok
                        WHERE     ai.NCI_IDSEQ = cd.proto_IDSEQ
                              AND TRIM (TYPE) = ok.nci_cd(+)
                              AND ok.obj_typ_id(+) = 19
@@ -843,8 +857,9 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'NCI_PROTCL'
-              FROM sbrext.protocols_ext cd, admin_item ai
+                   'NCI_PROTCL',
+                   'ONEDATA_WA'
+              FROM sbrext.protocols_ext cd, ONEDATA_WA.admin_item ai
              WHERE     ai.NCI_IDSEQ = cd.proto_IDSEQ
                    AND proto_IDSEQ = x.ITEM_ID
                    AND VERSION = x.VER_NR;
@@ -917,7 +932,8 @@ BEGIN
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
-                   'NCI_QUEST_VALID_VALUE'
+                   'NCI_QUEST_VALID_VALUE',
+                   'ONEDATA_WA'
               FROM sbrext.valid_values_att_ext  vv,
                    sbrext.quest_contents_ext    qc
              WHERE     qc.qc_idseq = vv.qc_idseq
