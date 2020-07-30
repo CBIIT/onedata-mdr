@@ -1,9 +1,7 @@
-
-
+set serveroutput on size 1000000
+SPOOL S1_RA_DATA_MIGRATION.log
 --- Run in Release Area
-
 alter trigger TR_AI_EXT_TAB_INS disable;
-
 truncate table NCI_CSI_ALT_DEFNMS;
 truncate table NCI_ALT_KEY_ADMIN_ITEM_REL;
 truncate table NCI_FORM_TA_REL;
@@ -47,11 +45,18 @@ truncate table NCI_ORG;
 truncate table NCI_ENTTY;
 truncate table obj_key;
 truncate table obj_typ;
-
-
+/
+begin
+dbms_output.put_line('tables truncated');
+end;
+/
 exec sp_insert_all;
-
+/
+begin
+dbms_output.put_line('sp_insert_all is completed');
+end;
+/
 alter trigger TR_AI_EXT_TAB_INS enable;
-
 analyze table admin_item compute statistics;
 analyze table nci_admin_item_rel_alt_key compute statistics;
+SPOOL OFF

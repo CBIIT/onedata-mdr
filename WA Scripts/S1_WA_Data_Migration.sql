@@ -1,5 +1,7 @@
+set serveroutput on size 1000000
+SPOOL S1_WA_DATA_MIGRATION.log
+create index SBREXT.AC_CHANGE_HISTORY_IDX on SBREXT.AC_CHANGE_HISTORY_EXT (AC_IDSEQ);
 exec sp_preprocess;
-
 alter trigger TR_NCI_ALT_NMS_DENORM_INS disable;
 alter trigger TR_NCI_AI_DENORM_INS disable;
 alter trigger TR_AI_AUD_TS disable;
@@ -51,13 +53,21 @@ truncate table NCI_ENTTY_COMM;
 truncate table NCI_PRSN;
 truncate table NCI_ORG;
 truncate table NCI_ENTTY;
-
-
+/
+begin
+dbms_output.put_line('tables truncated!!!');
+end;
+/
 exec sp_migrate_lov;
 exec sp_create_ai_1;
 exec sp_create_ai_2;
 exec sp_create_ai_3;
 exec sp_create_ai_4;
+/
+begin
+dbms_output.put_line('sp_migrate_lov-sp_create_ai_4 are completed!!!!');
+end;
+/
 analyze table admin_item compute statistics;
 exec sp_create_pv;
 analyze table admin_item compute statistics;
@@ -70,17 +80,41 @@ analyze table admin_item compute statistics;
 exec sp_create_form_rel;
 analyze table nci_admin_item_rel compute statistics;
 exec sp_create_form_question_rel;
+/
+begin
+dbms_output.put_line('SP_FORMS are completed!!!');
+end;
+/
 analyze table nci_admin_item_rel_alt_key compute statistics;
 exec sp_create_form_vv_inst;
 exec sp_create_form_vv_inst_2;
 exec sp_create_form_ta;
 exec sp_create_csi_2;
+/
+begin
+dbms_output.put_line('sp_create_form_vv_inst-p_create_csi_2 are completed!!!!');
+end;
+/
 analyze table admin_item compute statistics;
 exec sp_create_ai_children;
 exec sp_org_contact;
+/
+begin
+dbms_output.put_line('sp_create_ai_children-sp_org_contact are completed!!!!');
+end;
+/
 exec sp_migrate_change_log;
+/
+begin
+dbms_output.put_line('sp_migrate_change_log are completed!!!!');
+end;
+/
 exec sp_postprocess;
-
+/
+begin
+dbms_output.put_line('all sps are completed!!!!');
+end;
+/
 alter trigger TR_NCI_ALT_NMS_DENORM_INS enable;
 alter trigger TR_NCI_AI_DENORM_INS enable;
 alter trigger OD_TR_ADMIN_ITEM enable;
@@ -90,11 +124,9 @@ alter trigger TR_DE_AUD_TS enable;
 alter trigger TR_VAL_DOM_AUD_TS enable;
 alter trigger  NCI_TR_ENTTY_ORG enable;
 alter trigger NCI_TR_ENTTY_PRSN enable;
-
-
-
-
 analyze table admin_item compute statistics;
 analyze table nci_admin_item_rel_alt_key compute statistics;
 analyze table PERM_VAL compute statistics;
+drop  index SBREXT.AC_CHANGE_HISTORY_IDX;
+SPOOL OFF;
 
