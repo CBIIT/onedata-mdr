@@ -1,6 +1,6 @@
 set serveroutput on size 1000000
 SPOOL S1_WA_DATA_MIGRATION.log
-create index SBREXT.AC_CHANGE_HISTORY_IDX on SBREXT.AC_CHANGE_HISTORY_EXT (AC_IDSEQ);
+--create index SBREXT.AC_CHANGE_HISTORY_IDX on SBREXT.AC_CHANGE_HISTORY_EXT (AC_IDSEQ);
 exec sp_preprocess;
 alter trigger TR_NCI_ALT_NMS_DENORM_INS disable;
 alter trigger TR_NCI_AI_DENORM_INS disable;
@@ -127,6 +127,6 @@ alter trigger NCI_TR_ENTTY_PRSN enable;
 analyze table admin_item compute statistics;
 analyze table nci_admin_item_rel_alt_key compute statistics;
 analyze table PERM_VAL compute statistics;
-drop  index SBREXT.AC_CHANGE_HISTORY_IDX;
+--drop  index SBREXT.AC_CHANGE_HISTORY_IDX;
 SPOOL OFF;
 
