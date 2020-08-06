@@ -374,7 +374,7 @@ BEGIN
 
     --Validate DATA_ELEMENT_CONCEPTS
 
-    FOR x IN (  SELECT DISTINCT ITEM_ID,                        --Primary Keys
+    FOR x IN (SELECT DISTINCT ITEM_ID,                        --Primary Keys
                                          VER_NR
                   FROM (SELECT ITEM_ID,
                                VER_NR,
@@ -388,15 +388,16 @@ BEGIN
                          WHERE item_id NOT IN -20003
                         UNION ALL
                         SELECT ai.ITEM_ID,
-                               version,
+                               c.version,
                                OBJ_CLASS_QUALIFIER,
                                PROPERTY_QUALIFIER,
-                               created_by,
-                               date_created,
-                               NVL (date_modified, date_created),
-                               modified_by
-                          FROM sbr.DATA_ELEMENT_CONCEPTS c, ONEDATA_WA.admin_item ai
-                         WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.dec_idseq)) t
+                               c.created_by,
+                               c.date_created,
+                               NVL (c.date_modified, c.date_created),
+                               c.modified_by
+                          FROM sbr.DATA_ELEMENT_CONCEPTS c, ONEDATA_WA.admin_item ai, sbr.Administered_Components ac 
+                         WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.dec_idseq)
+                         and c.CD_IDSEQ=ac_idseq and public_id>0) t
               GROUP BY ITEM_ID,
                        VER_NR,
                        OBJ_CLS_QUAL,
@@ -411,19 +412,20 @@ BEGIN
         INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
             SELECT SBREXT.ERR_SEQ.NEXTVAL,
                    DEC_IDSEQ,
-                   ITEM_ID,
-                   VERSION,
+                   ai.ITEM_ID,
+                   c.VERSION,
                    'DATA_ELEMENT_CONCEPTS',
-                   PREFERRED_NAME,
+                   c.PREFERRED_NAME,
                    'DATA MISMATCH',
                    SYSDATE,
                    USER,
                    'DE_CONC',
                    'ONEDATA_WA'
-              FROM sbr.data_element_concepts c, ONEDATA_WA.admin_item ai
-             WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.DEC_idseq)
-                   AND ITEM_ID = x.ITEM_ID
-                   AND VERSION = x.VER_NR;
+              FROM sbr.data_element_concepts c, ONEDATA_WA.admin_item ai, sbr.Administered_Components ac 
+                         WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.dec_idseq)
+                         and c.CD_IDSEQ=ac_idseq and public_id>0
+                   AND ai.ITEM_ID = x.ITEM_ID
+                   AND c.VERSION = x.VER_NR;
 
         COMMIT;
     END LOOP;
