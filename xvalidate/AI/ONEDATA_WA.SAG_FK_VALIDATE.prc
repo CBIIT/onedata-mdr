@@ -294,11 +294,12 @@ SELECT /*+ PARALEL(12)*/
                 ai3.Ver_Nr,
                 ai3.NCI_IDSEQ,
                 ai3.ITEM_LONG_NM
-  FROM SBR.DEFINITIONS  dae
-       INNER JOIN ONEDATA_WA.admin_item ai3
-           ON     ai3.nci_idseq = CONTE_IDSEQ --FK
-           AND    ai3.admin_item_typ_id = 8
-              WHERE NOT EXISTS
+  FROM SBR.DEFINITIONS  dae, sbr.Administered_Components  ac, ONEDATA_WA.admin_item ai3
+           WHERE     ai3.nci_idseq = dae.CONTE_IDSEQ --FK
+           AND dae.AC_IDSEQ=ac.AC_IDSEQ
+           AND ai3.admin_item_typ_id = 8
+           AND PUBLIC_ID>0
+              AND NOT EXISTS
                           (SELECT 1
                              FROM ONEDATA_WA.admin_item  ai2
                                   INNER JOIN ONEDATA_WA.ALT_DEF dec
@@ -367,12 +368,12 @@ SELECT /*+ PARALEL(12)*/
                 ai3.Ver_Nr,
                 ai3.NCI_IDSEQ,
                 ai3.ITEM_LONG_NM
-  FROM SBR.REFERENCE_DOCUMENTS  dae
-       INNER JOIN ONEDATA_WA.admin_item ai3
-           ON     ai3.nci_idseq = CONTE_IDSEQ --FK
-           and ai3.admin_item_typ_id = 8
-           --and nci_idseq='99BA9DC8-2095-4E69-E034-080020C9C0E0'
-              WHERE NOT EXISTS
+  FROM SBR.REFERENCE_DOCUMENTS  dae, sbr.Administered_Components  ac, ONEDATA_WA.admin_item ai3
+           WHERE     ai3.nci_idseq = dae.CONTE_IDSEQ --FK
+           AND dae.AC_IDSEQ=ac.AC_IDSEQ
+           AND ai3.admin_item_typ_id = 8
+           AND PUBLIC_ID>0
+              AND NOT EXISTS
                           (SELECT 1
                              FROM ONEDATA_WA.admin_item  ai2
                                   INNER JOIN ONEDATA_WA.REF dec
