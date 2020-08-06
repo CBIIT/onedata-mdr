@@ -70,9 +70,37 @@ S1_7_RA_Triggers.sql
 /* Run in ONEDATA_RA */
 S1_8_RA_SP.sql
 
-/* Run in ONEDATA_WA */
+/* Open connection and Run in SBREXT */
 S1_9_SBREXT_DDL.sql
 
+/***** s2 ************/
+/* Open connection and Run in SBREXT and ignore if you see index exists error message */
+S2_1-1_SBREXT_DDL.sql
+
+/* Open connection and Run in SBR */
+S2_2-1_SBR_Grants.sql
+
+/* Run in ONEDATA_WA */
+S2_1_WA_RA_DDL.sql
+/* Run in ONEDATA_RA */
+S2_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_WA */
+S2_2_WA_Grants_Triggers.sql
+
+/* Run in ONEDATA_RA */
+S2_3_RA_Grants.sql
+
+/* Run in ONEDATA_WA */
+S2_5_WA_SP.sql
+
+/* Open connection and Run in ONEDATA_MD */
+S2_6_MD_SP.sql
+
+/* Run in ONEDATA_WA */
+S2_8_WA_Triggers.sql
+
+/***** W2_Scripts ************/
 /* This is migration. When ready run in ONEDATA_WA */
 S1_WA_Data_Migration.sql
 
