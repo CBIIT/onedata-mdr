@@ -345,29 +345,6 @@ END;
 /
 SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'FORMATS';
 
---LANGUAGE
-DECLARE
- cur SYS_REFCURSOR;
- curval VARCHAR2(80);
-BEGIN
-  dbms_output.put_line('----LoV Migration Validation LANGUAGE ----');
-  Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'LANGUAGE';
-  Commit;
- cur := ONEDATA_WA.SAG_FUNC_MIGR_LANG_LOV();   -- Get ref cursor from function
- LOOP 
-   FETCH cur into curval;
-   EXIT WHEN cur%NOTFOUND;
-      dbms_output.put_line('LANGUAGE Error on Value: '||curval);
-      Insert Into Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, Error_Text)
-      Values(substr(curval, 1, 50),'LANGUAGE','Migration error');
-      COMMIT;
- END LOOP;
- CLOSE cur;
- dbms_output.put_line('----Finished LoV Migration Validation LANGUAGE ----');
-END;
-/
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'LANGUAGE';
-
 --UOM
 DECLARE
  cur SYS_REFCURSOR;
