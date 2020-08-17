@@ -1,0 +1,29 @@
+BEGIN
+  DBMS_SCHEDULER.DROP_PROGRAM
+    (program_name          => 'ONEDATA_WA.VALIDATE_DATA_MIGRATION_STEPS');
+END;
+/
+
+BEGIN
+  SYS.DBMS_SCHEDULER.CREATE_PROGRAM
+    (
+      program_name         => 'ONEDATA_WA.VALIDATE_DATA_MIGRATION_STEPS'
+     ,program_type         => 'PLSQL_BLOCK'
+     ,program_action       => 'Begin
+SAG_AI_VALIDATION;
+SAG_FK_VALIDATE;
+SAG_ITEM_VALIDATION;
+END;
+'
+     ,number_of_arguments  => 0
+     ,enabled              => FALSE
+     ,comments             => 'Execute the following procedures 
+ONEDATA_WA.SAG_AI_VALIDATION;
+ONEDATA_WA.SAG_FK_VALIDATE;
+ONEDATA_WA.SAG_ITEM_VALIDATION;'
+    );
+
+  SYS.DBMS_SCHEDULER.ENABLE
+    (name                  => 'ONEDATA_WA.VALIDATE_DATA_MIGRATION_STEPS');
+END;
+/
