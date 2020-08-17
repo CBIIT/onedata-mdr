@@ -1557,6 +1557,14 @@ delete from onedata_ra.vw_cntxt;
 commit;
 insert into onedata_ra.vw_cntxt select * from vw_cntxt;
 commit;
+
+
+delete from nci_usr_cart where CNTCT_SECU_ID = 'GUEST';
+commit;
+
+delete from onedata_ra.nci_usr_cart where CNTCT_SECU_ID = 'GUEST';
+commit;
+
 end;
 /
 
