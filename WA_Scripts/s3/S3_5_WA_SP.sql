@@ -5168,3 +5168,424 @@ commit;
 end;
 /
 
+create or replace PROCEDURE spAddConceptRel
+  (
+    v_data_in IN CLOB,
+    v_data_out OUT CLOB)
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+  rowde t_row;
+  rowvd  t_row;
+  rowdec  t_row;
+  v_temp integer;
+  v_stg_ai_id number;
+  v_nm  varchar2(255);
+  v_oc_nm varchar2(255);
+  v_prop_nm  varchar2(255);
+  v_add integer :=0;
+  v_word_cnt integer :=0;
+  v_word  varchar2(100);
+  i integer := 0;
+  column  t_column;
+  msg varchar2(4000);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+    rows := t_rows();  
+
+   for i in 1..hookinput.originalrowset.rowset.count loop
+    row_ori := hookInput.originalRowset.rowset(i);
+    v_stg_ai_id := ihook.getColumnValue(row_ori, 'STG_AI_ID');
+    v_nm := ihook.getColumnValue(row_ori, 'OBJ_CLS_LONG_NM');
+    v_prop_nm := ihook.getColumnValue(row_ori, 'PROP_LONG_NM');
+    
+    delete from nci_stg_ai_cncpt where stg_ai_id = v_stg_ai_id;
+    commit;
+    
+    
+    delete from onedata_ra.nci_stg_ai_cncpt where stg_ai_id = v_stg_ai_id;
+    commit;
+    
+    if v_nm is not null then
+ --  raise_application_error(-20000, 'here');
+    v_word_cnt := nci_11179.getWordCount(v_nm); 
+   --  raise_application_error(-20000, v_word_cnt);
+   msg := '';
+   for j in 1..v_word_cnt+1 loop
+     v_word := nci_11179.getWord(v_nm, j, v_word_cnt+1);
+     for cur in (select item_id, ver_nr from admin_item where admin_item_typ_id = 49 and upper(item_nm) = v_word) loop
+        row := t_row ();
+        ihook.setColumnValue(row,'CNCPT_ITEM_ID', cur.item_id);
+    ihook.setColumnValue(row,'CNCPT_VER_NR', cur.ver_nr);
+     ihook.setColumnValue(row,'STG_AI_ID', v_stg_ai_id);
+     ihook.setColumnValue(row,'NCI_ORD', v_word_cnt - j+1);
+     ihook.setColumnValue(row,'LVL_NM', 'OC');
+     msg := msg || cur.item_id || ';' || to_char(v_word_cnt - j+1) ||';' ;
+    rows.extend;
+    rows(rows.last) := row;
+   v_add := v_add + 1;
+     end loop;
+    -- msg := msg || v_word || j || ';';
+  end loop;  
+  end if;
+    v_nm := ihook.getColumnValue(row_ori, 'PROP_LONG_NM');
+    if v_nm is not null then
+    v_word_cnt := nci_11179.getWordCount(v_nm);
+   --  raise_application_error(-20000, v_word_cnt);
+   msg := '';
+   for j in 1..v_word_cnt+1 loop
+     v_word := nci_11179.getWord(v_nm, j, v_word_cnt+1);
+     for cur in (select item_id, ver_nr from admin_item where admin_item_typ_id = 49 and upper(item_nm) = v_word) loop
+        row := t_row ();
+        ihook.setColumnValue(row,'CNCPT_ITEM_ID', cur.item_id);
+    ihook.setColumnValue(row,'CNCPT_VER_NR', cur.ver_nr);
+     ihook.setColumnValue(row,'STG_AI_ID', v_stg_ai_id);
+     ihook.setColumnValue(row,'NCI_ORD', v_word_cnt - j+1);
+     ihook.setColumnValue(row,'LVL_NM', 'PROP');
+     msg := msg || cur.item_id || ';' || to_char(v_word_cnt - j+1) ||';' ;
+    rows.extend;
+    rows(rows.last) := row;
+   v_add := v_add + 1;
+     end loop;
+    -- msg := msg || v_word || j || ';';
+   end loop;
+    end if;
+   end loop; 
+  --raise_application_error(-20000,'TO add' || v_add);
+  if (v_add > 0) then 
+    --action := t_actionrowset(rows, 'NCI_STG_AI_CNCPT (Hook)', 2,0,'insert');
+    action := t_actionrowset(rows, 'Stage Associated Concepts', 2,0,'insert');
+    actions.extend;
+    actions(actions.last) := action;
+    hookoutput.actions := actions;
+
+   -- hookoutput.message := v_add || ' concepts added.';
+   hookoutput.message := msg;
+    end if;
+    
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+/
+create or replace PROCEDURE spCreateDEC
+  (
+    v_data_in IN CLOB,
+    v_data_out OUT CLOB,
+    v_user in varchar,
+    v_mode in char)
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+  question t_question;
+  answer t_answer;
+  answers t_answers;
+  forms t_forms;
+  form1 t_form;
+  showRowset t_showableRowset;
+  row t_row;
+  rows  t_rows;
+  row_ori t_row;
+  rowset            t_rowset;
+  v_oc_item_id number;
+  v_oc_ver_nr number;
+  v_oc_long_nm varchar2(255);
+  v_oc_def  varchar2(2000);
+  v_prop_item_id number;
+  v_prop_ver_nr number;
+  v_prop_long_nm varchar2(255);
+  v_prop_def  varchar2(2000);
+  v_dec_item_id number;
+  v_oc_nm  varchar2(175);
+  v_prop_nm  varchar2(175);
+  
+    actions t_actions := t_actions();
+  action t_actionRowset;
+  v_msg varchar2(1000);
+  i integer := 0;
+  v_err  integer;
+  column  t_column;
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ 
+  
+    rows := t_rows();
+ 
+   --for i in 1..hookinput.originalrowset.rowset.count loop
+    row_ori := hookInput.originalRowset.rowset(1);
+    v_msg := '';
+    v_err := 0;
+ 
+   if (ihook.getColumnValue(row_ori, 'CTL_USR_ID')<> v_user) then
+       raise_application_error(-20000, 'You are not authorized to create or validate this record.');
+   end if;
+
+   if (ihook.getColumnValue(row_ori, 'CTL_REC_STUS') = 'SUCCESSFUL') then
+       raise_application_error(-20000, 'DEC already created. Delete the record');
+   end if;
+    
+    
+  if (  ihook.getColumnValue(row_ori, 'OBJ_CLS_ITEM_ID') is null) then -- create OC
+    
+        select LISTAGG(cncpt.item_long_nm, ':')WITHIN GROUP (ORDER by stg.nci_ord desc) into v_oc_nm 
+        from admin_item cncpt, nci_stg_ai_cncpt stg where stg.cncpt_item_id = cncpt.item_id and stg.cncpt_ver_nr = cncpt.ver_nr and 
+        STG_AI_ID = ihook.getColumnValue(row_ori,'STG_AI_ID') and lvl_nm ='OC' and stg.fld_delete <> 1;
+    
+        if (v_oc_nm is null) then 
+            v_msg := v_msg || 'Need at least one concept for OC; ' ; v_err := v_err + 1; 
+        else
+            nci_11179.CncptCombExists(v_oc_nm,5,v_oc_item_id, v_oc_ver_nr,v_oc_long_nm, v_oc_def);
+            
+            if (v_oc_item_id is not null) then 
+                v_msg := v_msg || 'OC concept combination exists.' || chr(10);
+            else
+                   v_msg := v_msg || 'Creating new OC.' || chr(10);
+                        for cur in ( select LISTAGG(cncpt.item_long_nm, ' ')WITHIN GROUP (ORDER by stg.nci_ord desc) CNCPT_CONCAT_NM,
+                                LISTAGG(cncpt.item_desc, ':')WITHIN GROUP (ORDER by stg.nci_ord desc) CNCPT_CONCAT_DEF
+                                from admin_item cncpt, nci_stg_ai_cncpt stg where stg.cncpt_item_id = cncpt.item_id and stg.cncpt_ver_nr = cncpt.ver_nr and 
+                                STG_AI_ID = ihook.getColumnValue(row_ori,'STG_AI_ID') and lvl_nm ='OC' and stg.fld_delete <> 1) loop
+                                        v_oc_long_nm := cur.cncpt_concat_nm;
+                                        v_oc_def := cur.cncpt_concat_def;
+                        end loop;   
+
+            end if;
+        end if;
+  else -- OC specified
+        v_msg := v_msg || 'OC Specified.' || chr(10);
+    
+        v_oc_item_id := ihook.getColumnValue(row_ori,'OBJ_CLS_ITEM_ID');
+        v_oc_ver_nr := ihook.getColumnValue(row_ori,'OBJ_CLS_VER_NR');
+        nci_11179.getConcatNmDef(v_oc_item_id, v_oc_ver_nr, v_oc_nm, v_oc_long_nm,v_oc_def);
+   --     raise_application_error (-20000, 'OC' || v_oc_nm || v_oc_long_nm);
+        
+        
+        
+  end if;   
+  
+     
+     
+  if (  ihook.getColumnValue(row_ori, 'PROP_ITEM_ID') is null) then -- create Prop
+    
+        select LISTAGG(cncpt.item_long_nm, ':')WITHIN GROUP (ORDER by stg.nci_ORD desc) into v_prop_nm 
+        from admin_item cncpt, nci_stg_ai_cncpt stg where stg.cncpt_item_id = cncpt.item_id and stg.cncpt_ver_nr = cncpt.ver_nr and 
+        STG_AI_ID = ihook.getColumnValue(row_ori,'STG_AI_ID') and lvl_nm ='PROP' and stg.fld_delete <> 1;
+        if (v_prop_nm is null) then 
+            v_msg := v_msg || 'Need at least one concept for Prop; ' ; v_err := v_err + 1; 
+        else
+            nci_11179.CncptCombExists(v_prop_nm,6,v_prop_item_id, v_prop_ver_nr, v_prop_long_nm, v_prop_def);
+          --raise_application_error(-20000, v_prop_nm || v_prop_item_id );
+            if (v_prop_item_id is not null) then 
+                v_msg := v_msg || 'Property concept combination exists.' || chr(10);
+            else
+                   v_msg := v_msg || 'Creating new Property.' || chr(10);
+                   for cur in ( select LISTAGG(cncpt.item_nm, ' ')WITHIN GROUP (ORDER by stg.nci_ord desc) CNCPT_CONCAT_NM,
+                                LISTAGG(cncpt.item_desc, ':')WITHIN GROUP (ORDER by stg.nci_ord desc) CNCPT_CONCAT_DEF
+                                from admin_item cncpt, nci_stg_ai_cncpt stg where stg.cncpt_item_id = cncpt.item_id and stg.cncpt_ver_nr = cncpt.ver_nr and 
+                                STG_AI_ID = ihook.getColumnValue(row_ori,'STG_AI_ID') and lvl_nm ='PROP' and stg.fld_delete <> 1) loop
+                                        v_prop_long_nm := cur.cncpt_concat_nm;
+                                        v_prop_def := substr(cur.cncpt_concat_def,1,2000);
+                        end loop;
+            end if;
+        end if;
+    else
+        v_prop_item_id := ihook.getColumnValue(row_ori,'PROP_ITEM_ID');
+        v_prop_ver_nr := ihook.getColumnValue(row_ori,'PROP_VER_NR');
+        v_msg := v_msg || 'Property Specified.' || chr(10);
+        nci_11179.getConcatNmDef(v_prop_item_id, v_prop_ver_nr, v_prop_nm, v_prop_long_nm,v_prop_def);
+    
+    
+  end if;   
+ 
+  
+  if v_err = 0 and v_mode = 'C' and v_oc_item_id is null then --- no errors found, create mode, no OC found
+       row := t_row();
+       rows := t_rows();
+       
+        v_oc_item_id := nci_11179.getItemId;
+        v_oc_ver_nr := 1;
+        ihook.setColumnValue(row,'ITEM_ID', v_oc_item_id);
+        ihook.setColumnValue(row,'VER_NR', 1);
+        ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
+        ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 5);
+        ihook.setColumnValue(row,'ITEM_NM', v_oc_nm);
+        ihook.setColumnValue(row,'ITEM_DESC', v_oc_def);
+        ihook.setColumnValue(row,'ADMIN_STUS_ID',ihook.getColumnValue(row_ori,'ADMIN_STUS_ID') );
+        ihook.setColumnValue(row,'ITEM_LONG_NM', v_oc_long_nm);
+        ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID'));
+        ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(row_ori,'CNTXT_VER_NR'));
+        rows.extend;
+        rows(rows.last) := row;
+             
+        action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+    
+        action := t_actionrowset(rows, 'Object Class', 2,2,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+      
+       rows := t_rows();
+   --     raise_application_error(-20000,'OC');
+       
+        for cur in (select cncpt_item_id, cncpt_ver_nr, nci_ord, nci_prmry_ind from nci_stg_ai_cncpt stg where stg.STG_AI_ID = ihook.getColumnValue(row_ori,'STG_AI_ID') and lvl_nm ='OC' and fld_delete <> 1) loop
+            row := t_row();
+            ihook.setColumnValue(row,'ITEM_ID', v_oc_item_id);
+            ihook.setColumnValue(row,'VER_NR', 1);
+            ihook.setColumnValue(row,'CNCPT_ITEM_ID', cur.cncpt_item_id);
+            ihook.setColumnValue(row,'CNCPT_VER_NR', cur.cncpt_ver_nr);
+            ihook.setColumnValue(row,'NCI_ORD', cur.nci_ord);
+            ihook.setColumnValue(row,'NCI_PRMRY_IND', cur.nci_prmry_ind);
+            rows.extend;
+            rows(rows.last) := row;
+        end loop;
+       action := t_actionrowset(rows, 'CNCPT_ADMIN_ITEM', 1,6,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+    
+        
+    end if;
+    rows := t_rows();
+    
+if v_err = 0 and v_mode = 'C' and v_prop_item_id is null then --- no errors found, create mode, no OC found
+       row := t_row();
+        v_prop_item_id := nci_11179.getItemId;
+        v_prop_ver_nr := 1;
+        ihook.setColumnValue(row,'ITEM_ID', v_prop_item_id);
+        ihook.setColumnValue(row,'VER_NR', 1);
+        ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
+        ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 6);
+        ihook.setColumnValue(row,'ADMIN_STUS_ID',ihook.getColumnValue(row_ori,'ADMIN_STUS_ID') );
+        ihook.setColumnValue(row,'ITEM_NM', v_prop_nm);
+        ihook.setColumnValue(row,'ITEM_DESC', v_prop_def);
+        ihook.setColumnValue(row,'ITEM_LONG_NM', v_prop_long_nm);
+        ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID'));
+        ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(row_ori,'CNTXT_VER_NR'));
+        rows.extend;
+        rows(rows.last) := row;
+             
+        action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,3,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+    
+        action := t_actionrowset(rows, 'Property', 2,4,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+      --   raise_application_error(-20000,'Property');
+       
+ 
+        
+       rows := t_rows();
+        
+        for cur in (select cncpt_item_id, cncpt_ver_nr, nci_ord,NCI_PRMRY_IND from nci_stg_ai_cncpt stg where stg.STG_AI_ID = ihook.getColumnValue(row_ori,'STG_AI_ID') and lvl_nm ='PROP' and fld_delete <> 1) loop
+            row := t_row();
+            ihook.setColumnValue(row,'ITEM_ID', v_prop_item_id);
+            ihook.setColumnValue(row,'VER_NR', 1);
+            ihook.setColumnValue(row,'CNCPT_ITEM_ID', cur.cncpt_item_id);
+            ihook.setColumnValue(row,'CNCPT_VER_NR', cur.cncpt_ver_nr);
+            ihook.setColumnValue(row,'NCI_ORD', cur.nci_ord);
+            ihook.setColumnValue(row,'NCI_PRMRY_IND', cur.nci_prmry_ind);
+            rows.extend;
+            rows(rows.last) := row;
+        end loop;
+        action := t_actionrowset(rows, 'CNCPT_ADMIN_ITEM', 1,5,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+    end if;
+  
+  --raise_application_error(-20000,v_mode);
+       
+  rows := t_rows();
+    if v_err = 0 and v_mode = 'C' then  
+       row := t_row();
+   --    raise_application_error(-20000,'Inside');
+        v_dec_item_id := nci_11179.getItemId;
+        ihook.setColumnValue(row,'ITEM_ID', v_dec_item_id);
+     
+        ihook.setColumnValue(row,'VER_NR', 1);
+        ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
+        ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 2);
+        ihook.setColumnValue(row,'ITEM_NM', v_oc_nm || ':' || v_prop_nm);
+        ihook.setColumnValue(row,'ITEM_LONG_NM',  v_oc_long_nm || ':' || v_prop_long_nm);
+        ihook.setColumnValue(row,'ITEM_DESC', v_oc_def || ':' || v_prop_def);
+        ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID'));
+        ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(row_ori,'CNTXT_VER_NR'));
+        ihook.setColumnValue(row,'ADMIN_STUS_ID',ihook.getColumnValue(row_ori,'ADMIN_STUS_ID') );
+        ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',ihook.getColumnValue(row_ori,'CONC_DOM_ITEM_ID') );
+        ihook.setColumnValue(row,'CONC_DOM_VER_NR',ihook.getColumnValue(row_ori,'CONC_DOM_VER_NR') );
+        ihook.setColumnValue(row,'OBJ_CLS_ITEM_ID',v_oc_item_id );
+        ihook.setColumnValue(row,'OBJ_CLS_VER_NR',v_oc_ver_nr );
+        ihook.setColumnValue(row,'PROP_ITEM_ID',v_prop_item_id );
+        ihook.setColumnValue(row,'PROP_VER_NR',v_prop_ver_nr );
+        ihook.setColumnValue(row,'LST_UPD_DT',sysdate );
+        rows.extend;
+        rows(rows.last) := row;
+--raise_application_error(-20000, 'Deep' || ihook.getColumnValue(row,'CNTXT_ITEM_ID') || 'ggg'|| ihook.getColumnValue(row,'ADMIN_STUS_ID') || 'GGGG' || ihook.getColumnValue(row,'ITEM_ID'));
+             
+        action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,7,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+    
+      action := t_actionrowset(rows, 'Data Element Concept', 2,8,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+  
+--raise_application_error(-20000, 'Deep' || ihook.getColumnValue(row, 'ITEM_NM') || 'ggg'||  ihook.getColumnValue(row,'ITEM_LONG_NM') || 'GGGG' || ihook.getColumnValue(row,'ITEM_ID')|| 'FFF' || v_prop_item_id || 'hhh' || v_dec_item_id);
+   
+       ihook.setColumnValue(row_ori, 'CTL_REC_STUS', 'SUCCESSFUL');
+       rows := t_rows();
+        rows.extend;
+        rows(rows.last) := row_ori;
+      action := t_actionrowset(rows, 'DEC Creation', 2,9,'update');
+        actions.extend;
+        actions(actions.last) := action;
+--raise_application_error(-20000, actions.count || 'FFF' || v_oc_ver_nr || 'ggg'||  v_prop_ver_nr || 'GGGG' || v_oc_item_id || 'FFF' || v_prop_item_id || 'hhh' || v_dec_item_id);
+  
+       hookoutput.actions := actions;
+     v_msg := 'AI Created';  
+    end if;
+    if (v_mode <> 'C' and v_err = 0) then -- validation mode
+    
+       ihook.setColumnValue(row_ori, 'CTL_REC_STUS', 'VALIDATED');
+       ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', v_msg);
+       
+       rows := t_rows();
+        rows.extend;
+        rows(rows.last) := row_ori;
+      action := t_actionrowset(rows, 'DEC Creation', 2,7,'update');
+       actions.extend;
+        actions(actions.last) := action;
+-- raise_application_error(-20000,'Here');
+ --   raise_application_error (-20000, actions.count);
+   
+    hookoutput.actions := actions;
+     v_msg := 'AI Validated';  
+     end if;
+     
+     if (v_err > 0) then
+        v_msg := to_char(v_err) || ' validation errors found. ' || chr(10) || v_msg;
+    
+    end if;
+    
+    
+  hookoutput.message := v_msg;
+--  raise_application_error(-20000,actions.count || ' ' ||  ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID') || ' ' || ihook.getColumnValue(row_ori,'CNTXT_VER_NR')
+ -- || ' ' ||ihook.getColumnValue(row_ori,'CONC_DOM_ITEM_ID') || ' ' || v_oc_item_id );
+
+--end if;
+
+--end if;
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+/
+
