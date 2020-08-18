@@ -5588,4 +5588,109 @@ if v_err = 0 and v_mode = 'C' and v_prop_item_id is null then --- no errors foun
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 /
+create or replace procedure spNCIChangeLatestVer (v_data_in in clob, v_data_out out clob)
+as
 
+hookInput           t_hookInput;
+hookOutput           t_hookOutput := t_hookOutput();
+showRowset     t_showableRowset;
+
+rows      t_rows;
+row          t_row;
+row_cur t_row;
+row_sel t_row;
+question    t_question;
+answer     t_answer;
+answers     t_answers;
+
+actions           t_actions := t_actions();
+action           t_actionRowset;
+
+
+v_found      boolean;
+
+v_item_id		 number;
+v_ver_nr		 number;
+
+begin
+
+    hookInput := ihook.getHookInput(v_data_in);
+
+ hookOutput.invocationNumber := hookInput.invocationNumber;
+ hookOutput.originalRowset := hookInput.originalRowset;
+
+
+    row_cur := hookInput.originalRowset.Rowset(1);
+
+    rows := t_rows();
+    
+    
+    if hookInput.invocationNumber = 0 then
+
+	   
+
+  for cur in (
+  select item_id, ver_nr from admin_item where item_id = ihook.getColumnValue(row_cur,'ITEM_ID')) loop
+
+        row := t_row();
+        ihook.setColumnValue(row, 'ITEM_ID', cur.item_id);
+        ihook.setColumnValue(row, 'VER_NR', cur.ver_nr);
+
+        rows.extend; rows(rows.last) := row;
+
+ end loop;
+ -- raise_application_error (-20000, 
+    showRowset := t_showableRowset(rows, 'Administered Item (Steward Assignment)',2, 'single');
+    hookOutput.showRowset := showRowset;
+       	 answers := t_answers();
+  	   	 answer := t_answer(1, 1, 'Select new latest version.');
+  	   	 answers.extend; answers(answers.last) := answer;
+
+	   	 question := t_question('Select option to proceed', answers);
+       	 hookOutput.question := question;
+
+   -- hookOutput.message := 'Select version to set latest';
+
+	elsif hookInput.invocationNumber = 1 then
+		  if hookInput.answerId = 1 then -- selected form
+               row_sel := hookInput.selectedRowset.rowset(1);
+            rows :=         t_rows();
+
+
+        hookOutput.message := 'Already latest version.';
+        
+       if (ihook.getColumnValue(row_sel,'CURRNT_VER_IND') = 0) then --- only if not already latest
+       
+           row := t_row();
+           ihook.setColumnValue(row, 'ITEM_ID', ihook.getColumnValue(row_sel, 'ITEM_ID'));
+           ihook.setColumnValue(row, 'VER_NR', ihook.getColumnValue(row_sel, 'VER_NR'));
+           ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
+
+          rows.extend; rows(rows.last) := row;
+         for cur in (select item_id, ver_nr from admin_item where item_id = ihook.getColumnValue(row_sel, 'ITEM_ID') and currnt_ver_ind = 1) loop
+           row := t_row();
+           ihook.setColumnValue(row, 'ITEM_ID', cur.item_id);
+           ihook.setColumnValue(row, 'VER_NR', cur.ver_nr);
+           ihook.setColumnValue(row, 'CURRNT_VER_IND', 0);
+
+          rows.extend; rows(rows.last) := row;
+          end loop;
+        
+         action := t_actionRowset(rows, 'ADMIN_ITEM', 0, 'update');
+        actions.extend; actions(actions.last) := action;
+        
+        hookOutput.actions := actions;
+        
+        hookOutput.message := 'Successfully changed latest version.';
+
+          
+       end if;
+       
+       end if;
+       
+     end if;	   
+
+    v_data_out := ihook.getHookOutput(hookOutput);
+
+end;
+/
