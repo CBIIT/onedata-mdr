@@ -1,3 +1,7 @@
+update OD_MD_OBJTYPPROP set PROP_VAL = CONCAT((Select PROP_VAL from OD_MD_OBJTYPPROP where PROP_ID = 3037), ',customHtml') where PROP_ID = 3037;
+commit;
+
+
 create or replace procedure sp_create_user
 as
 v_cnt integer;
