@@ -5783,7 +5783,7 @@ begin
           rows.extend; rows(rows.last) := row;
           end loop;
         
-         action := t_actionRowset(rows, 'ADMIN_ITEM', 0, 'update');
+         action := t_actionRowset(rows, 'Administered Item', 2,1, 'update');
         actions.extend; actions(actions.last) := action;
         
         hookOutput.actions := actions;
