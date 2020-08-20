@@ -64,7 +64,7 @@ ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
             LOOP
 --            DBMS_OUTPUT.PUT_LINE(X.NCI_IDSEQ || '' | '' || X.ITEM_ID || '' | '' || X.VER_NR || '' | '' || X.ITEM_LONG_NM);
             INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR VALUES
-            (SBREXT.ERR_SEQ.NEXTVAL,X.NCI_IDSEQ,X.ITEM_ID,X.VER_NR,'''||Y.ITEM_TYPE||''',X.ITEM_LONG_NM,''DATA MISMATCH'',SYSDATE,USER,''ADMIN_ITEM'',''ONEDATA_WA'');
+            (SBREXT.ERR_SEQ.NEXTVAL,X.NCI_IDSEQ,X.ITEM_ID,X.VER_NR,'''||Y.ITEM_TYPE||''',SUBSTR(X.ITEM_LONG_NM,50),''DATA MISMATCH'',SYSDATE,USER,''ADMIN_ITEM'',''ONEDATA_WA'');
             COMMIT;
             END LOOP;
             END;';
@@ -107,7 +107,7 @@ ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
             LOOP
 --            DBMS_OUTPUT.PUT_LINE(X.NCI_IDSEQ || '' | '' || X.ITEM_ID || '' | '' || X.VER_NR || '' | '' || X.ITEM_LONG_NM);
             INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR VALUES
-            (SBREXT.ERR_SEQ.NEXTVAL,X.NCI_IDSEQ,X.ITEM_ID,X.VER_NR,'''||Y.ITEM_TYPE||''',X.ITEM_LONG_NM,''DATA MISMATCH'',SYSDATE,USER,''ADMIN_ITEM'',''ONEDATA_WA'');
+            (SBREXT.ERR_SEQ.NEXTVAL,X.NCI_IDSEQ,X.ITEM_ID,X.VER_NR,'''||Y.ITEM_TYPE||''',SUBSTR(X.ITEM_LONG_NM,50),''DATA MISMATCH'',SYSDATE,USER,''ADMIN_ITEM'',''ONEDATA_WA'');
             COMMIT;
             END LOOP;
             END;';
@@ -166,10 +166,10 @@ END CASE;
         INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
              VALUES (SBREXT.ERR_SEQ.NEXTVAL,
                      X.NCI_iDSEQ,
-                     X.ITEM_DESC,
+                     NULL, --No ITEM_ID in caDSR for CONTEXTS
                      X.VER_NR,
-                     'CONTEXT',
-                     X.ITEM_NM,
+                     'CONTEXTS',
+                     SUBSTR(X.ITEM_NM,0,50),
                      'DATA MISMATCH',
                      SYSDATE,
                      USER,
