@@ -26,11 +26,13 @@ BEGIN
                       UNION ALL
                       SELECT CDE_ID,
                              VERSION,
-                             DATE_CREATED,
-                             CREATED_BY,
-                             MODIFIED_BY,
+                             NVL (DATE_CREATED,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (CREATED_BY, 'ONEDATA'),
+                             NVL (MODIFIED_BY, 'ONEDATA'),
                              DELETED_IND,
-                             NVL (DATE_MODIFIED, DATE_CREATED)
+                             NVL (NVL (DATE_MODIFIED, DATE_CREATED),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy'))
                         FROM sbr.data_elements) t
             GROUP BY ITEM_ID,
                      VER_NR,
@@ -61,37 +63,40 @@ BEGIN
     END LOOP;
 
     --Validate CONTEXTS
-    FOR x IN (  SELECT DISTINCT ITEM_ID,                        --Primary Keys
-                                         VER_NR
-                  FROM (SELECT ITEM_ID,
-                               VER_NR,
-                               LANG_ID,
-                               CREAT_USR_ID,
-                               CREAT_DT,
-                               LST_UPD_DT,
-                               LST_UPD_USR_ID
-                          FROM ONEDATA_WA.CNTXT
-                         WHERE item_id <> -20005
-                        UNION ALL
-                        SELECT ai.ITEM_ID,
-                               version,
-                               1000,
-                               created_by,
-                               date_created,
-                               NVL (date_modified, date_created),
-                               modified_by
-                          FROM sbr.contexts c, ONEDATA_WA.admin_item ai
-                         WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.conte_idseq)
-                          and ai.admin_item_typ_id = 8) t
-              GROUP BY ITEM_ID,
-                       VER_NR,
-                       LANG_ID,
-                       CREAT_USR_ID,
-                       CREAT_DT,
-                       LST_UPD_DT,
-                       LST_UPD_USR_ID
-                HAVING COUNT (*) <> 2
-              ORDER BY ITEM_ID, VER_NR)
+    FOR x
+        IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                       VER_NR
+                FROM (SELECT ITEM_ID,
+                             VER_NR,
+                             LANG_ID,
+                             CREAT_USR_ID,
+                             CREAT_DT,
+                             LST_UPD_DT,
+                             LST_UPD_USR_ID
+                        FROM ONEDATA_WA.CNTXT
+                       WHERE item_id <> -20005
+                      UNION ALL
+                      SELECT ai.ITEM_ID,
+                             version,
+                             1000,
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
+                        FROM sbr.contexts c, ONEDATA_WA.admin_item ai
+                       WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.conte_idseq)
+                             AND ai.admin_item_typ_id = 8) t
+            GROUP BY ITEM_ID,
+                     VER_NR,
+                     LANG_ID,
+                     CREAT_USR_ID,
+                     CREAT_DT,
+                     LST_UPD_DT,
+                     LST_UPD_USR_ID
+              HAVING COUNT (*) <> 2
+            ORDER BY ITEM_ID, VER_NR)
     LOOP
         INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
             SELECT SBREXT.ERR_SEQ.NEXTVAL,
@@ -114,36 +119,39 @@ BEGIN
     END LOOP;
 
     -- Validate CONCEPTUAL_DOMAINS
-    FOR x IN (  SELECT DISTINCT ITEM_ID,                        --Primary Keys
-                                         VER_NR
-                  FROM (SELECT ITEM_ID,
-                               VER_NR,
-                               DIMNSNLTY,
-                               CREAT_USR_ID,
-                               CREAT_DT,
-                               LST_UPD_DT,
-                               LST_UPD_USR_ID
-                          FROM onedata_wa.CONC_DOM
-                         WHERE item_id <> -20002
-                        UNION ALL
-                        SELECT ai.ITEM_ID,
-                               version,
-                               dimensionality,
-                               created_by,
-                               date_created,
-                               NVL (date_modified, date_created),
-                               modified_by
-                          FROM sbr.conceptual_domains c, ONEDATA_WA.admin_item ai
-                         WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.cd_idseq)) t
-              GROUP BY ITEM_ID,
-                       VER_NR,
-                       DIMNSNLTY,
-                       CREAT_USR_ID,
-                       CREAT_DT,
-                       LST_UPD_DT,
-                       LST_UPD_USR_ID
-                HAVING COUNT (*) <> 2
-              ORDER BY ITEM_ID, VER_NR)
+    FOR x
+        IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                       VER_NR
+                FROM (SELECT ITEM_ID,
+                             VER_NR,
+                             DIMNSNLTY,
+                             CREAT_USR_ID,
+                             CREAT_DT,
+                             LST_UPD_DT,
+                             LST_UPD_USR_ID
+                        FROM onedata_wa.CONC_DOM
+                       WHERE item_id <> -20002
+                      UNION ALL
+                      SELECT ai.ITEM_ID,
+                             version,
+                             dimensionality,
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
+                        FROM sbr.conceptual_domains c, ONEDATA_WA.admin_item ai
+                       WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.cd_idseq)) t
+            GROUP BY ITEM_ID,
+                     VER_NR,
+                     DIMNSNLTY,
+                     CREAT_USR_ID,
+                     CREAT_DT,
+                     LST_UPD_DT,
+                     LST_UPD_USR_ID
+              HAVING COUNT (*) <> 2
+            ORDER BY ITEM_ID, VER_NR)
     LOOP
         INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
             SELECT SBREXT.ERR_SEQ.NEXTVAL,
@@ -166,33 +174,37 @@ BEGIN
     END LOOP;
 
     -- Validate OBJECT_CLASSES_EXT
-    FOR x IN (  SELECT DISTINCT ITEM_ID,                        --Primary Keys
-                                         VER_NR
-                  FROM (SELECT ITEM_ID,
-                               VER_NR,
-                               CREAT_USR_ID,
-                               CREAT_DT,
-                               LST_UPD_DT,
-                               LST_UPD_USR_ID
-                          FROM onedata_wa.OBJ_CLS
-                         WHERE item_id <> -20000
-                        UNION ALL
-                        SELECT ai.ITEM_ID,
-                               version,
-                               created_by,
-                               date_created,
-                               NVL (date_modified, date_created),
-                               modified_by
-                          FROM sbrext.OBJECT_CLASSES_EXT c, ONEDATA_WA.admin_item ai
-                         WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.oc_idseq)) t
-              GROUP BY ITEM_ID,
-                       VER_NR,
-                       CREAT_USR_ID,
-                       CREAT_DT,
-                       LST_UPD_DT,
-                       LST_UPD_USR_ID
-                HAVING COUNT (*) <> 2
-              ORDER BY ITEM_ID, VER_NR)
+    FOR x
+        IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                       VER_NR
+                FROM (SELECT ITEM_ID,
+                             VER_NR,
+                             CREAT_USR_ID,
+                             CREAT_DT,
+                             LST_UPD_DT,
+                             LST_UPD_USR_ID
+                        FROM onedata_wa.OBJ_CLS
+                       WHERE item_id <> -20000
+                      UNION ALL
+                      SELECT ai.ITEM_ID,
+                             version,
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
+                        FROM sbrext.OBJECT_CLASSES_EXT c,
+                             ONEDATA_WA.admin_item    ai
+                       WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.oc_idseq)) t
+            GROUP BY ITEM_ID,
+                     VER_NR,
+                     CREAT_USR_ID,
+                     CREAT_DT,
+                     LST_UPD_DT,
+                     LST_UPD_USR_ID
+              HAVING COUNT (*) <> 2
+            ORDER BY ITEM_ID, VER_NR)
     LOOP
         INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
             SELECT SBREXT.ERR_SEQ.NEXTVAL,
@@ -215,33 +227,36 @@ BEGIN
     END LOOP;
 
     --Validate PROPERTIES_EXT
-    FOR x IN (  SELECT DISTINCT ITEM_ID,                        --Primary Keys
-                                         VER_NR
-                  FROM (SELECT ITEM_ID,
-                               VER_NR,
-                               CREAT_USR_ID,
-                               CREAT_DT,
-                               LST_UPD_DT,
-                               LST_UPD_USR_ID
-                          FROM onedata_wa.PROP
-                         WHERE item_id <> -20001
-                        UNION ALL
-                        SELECT ai.ITEM_ID,
-                               version,
-                               created_by,
-                               date_created,
-                               NVL (date_modified, date_created),
-                               modified_by
-                          FROM sbrext.properties_ext c, ONEDATA_WA.admin_item ai
-                         WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.PROP_idseq)) t
-              GROUP BY ITEM_ID,
-                       VER_NR,
-                       CREAT_USR_ID,
-                       CREAT_DT,
-                       LST_UPD_DT,
-                       LST_UPD_USR_ID
-                HAVING COUNT (*) <> 2
-              ORDER BY ITEM_ID, VER_NR)
+    FOR x
+        IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                       VER_NR
+                FROM (SELECT ITEM_ID,
+                             VER_NR,
+                             CREAT_USR_ID,
+                             CREAT_DT,
+                             LST_UPD_DT,
+                             LST_UPD_USR_ID
+                        FROM onedata_wa.PROP
+                       WHERE item_id <> -20001
+                      UNION ALL
+                      SELECT ai.ITEM_ID,
+                             version,
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
+                        FROM sbrext.properties_ext c, ONEDATA_WA.admin_item ai
+                       WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.PROP_idseq)) t
+            GROUP BY ITEM_ID,
+                     VER_NR,
+                     CREAT_USR_ID,
+                     CREAT_DT,
+                     LST_UPD_DT,
+                     LST_UPD_USR_ID
+              HAVING COUNT (*) <> 2
+            ORDER BY ITEM_ID, VER_NR)
     LOOP
         INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
             SELECT SBREXT.ERR_SEQ.NEXTVAL,
@@ -281,13 +296,15 @@ BEGIN
                              version,
                              ok.obj_key_id,
                              label_type_flag,
-                             created_by,
-                             date_created,
-                             NVL (date_modified, date_created),
-                             modified_by
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
                         FROM sbr.classification_schemes c,
-                             ONEDATA_WA.admin_item                ai,
-                             ONEDATA_WA.obj_key                   ok
+                             ONEDATA_WA.admin_item     ai,
+                             ONEDATA_WA.obj_key        ok
                        WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.CS_idseq)
                              AND TRIM (cstl_name) = ok.nci_cd
                              AND ok.obj_typ_id = 3) t
@@ -337,11 +354,14 @@ BEGIN
                       UNION ALL
                       SELECT ai.ITEM_ID,
                              version,
-                             created_by,
-                             date_created,
-                             NVL (date_modified, date_created),
-                             modified_by
-                        FROM sbrext.representations_ext c, ONEDATA_WA.admin_item ai
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
+                        FROM sbrext.representations_ext c,
+                             ONEDATA_WA.admin_item     ai
                        WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.REP_idseq)) t
             GROUP BY ITEM_ID,
                      VER_NR,
@@ -374,40 +394,46 @@ BEGIN
 
     --Validate DATA_ELEMENT_CONCEPTS
 
-    FOR x IN (SELECT DISTINCT ITEM_ID,                        --Primary Keys
-                                         VER_NR
-                  FROM (SELECT ITEM_ID,
-                               VER_NR,
-                               OBJ_CLS_QUAL,
-                               PROP_QUAL,
-                               CREAT_USR_ID,
-                               CREAT_DT,
-                               LST_UPD_DT,
-                               LST_UPD_USR_ID
-                          FROM onedata_wa.DE_CONC
-                         WHERE item_id NOT IN -20003
-                        UNION ALL
-                        SELECT ai.ITEM_ID,
-                               c.version,
-                               OBJ_CLASS_QUALIFIER,
-                               PROPERTY_QUALIFIER,
-                               c.created_by,
-                               c.date_created,
-                               NVL (c.date_modified, c.date_created),
-                               c.modified_by
-                          FROM sbr.DATA_ELEMENT_CONCEPTS c, ONEDATA_WA.admin_item ai, sbr.Administered_Components ac 
-                         WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.dec_idseq)
-                         and c.CD_IDSEQ=ac_idseq and public_id>0) t
-              GROUP BY ITEM_ID,
-                       VER_NR,
-                       OBJ_CLS_QUAL,
-                       PROP_QUAL,
-                       CREAT_USR_ID,
-                       CREAT_DT,
-                       LST_UPD_DT,
-                       LST_UPD_USR_ID
-                HAVING COUNT (*) <> 2
-              ORDER BY ITEM_ID, VER_NR)
+    FOR x
+        IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                       VER_NR
+                FROM (SELECT ITEM_ID,
+                             VER_NR,
+                             OBJ_CLS_QUAL,
+                             PROP_QUAL,
+                             CREAT_USR_ID,
+                             CREAT_DT,
+                             LST_UPD_DT,
+                             LST_UPD_USR_ID
+                        FROM onedata_wa.DE_CONC
+                       WHERE item_id NOT IN -20003
+                      UNION ALL
+                      SELECT ai.ITEM_ID,
+                             c.version,
+                             OBJ_CLASS_QUALIFIER,
+                             PROPERTY_QUALIFIER,
+                             NVL (c.created_by, 'ONEDATA'),
+                             NVL (c.date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (c.date_modified, c.date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (c.modified_by, 'ONEDATA')
+                        FROM sbr.DATA_ELEMENT_CONCEPTS  c,
+                             ONEDATA_WA.admin_item      ai,
+                             sbr.Administered_Components ac
+                       WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.dec_idseq)
+                             AND c.CD_IDSEQ = ac_idseq
+                             AND public_id > 0) t
+            GROUP BY ITEM_ID,
+                     VER_NR,
+                     OBJ_CLS_QUAL,
+                     PROP_QUAL,
+                     CREAT_USR_ID,
+                     CREAT_DT,
+                     LST_UPD_DT,
+                     LST_UPD_USR_ID
+              HAVING COUNT (*) <> 2
+            ORDER BY ITEM_ID, VER_NR)
     LOOP
         INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
             SELECT SBREXT.ERR_SEQ.NEXTVAL,
@@ -421,9 +447,12 @@ BEGIN
                    USER,
                    'DE_CONC',
                    'ONEDATA_WA'
-              FROM sbr.data_element_concepts c, ONEDATA_WA.admin_item ai, sbr.Administered_Components ac 
-                         WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.dec_idseq)
-                         and c.CD_IDSEQ=ac_idseq and public_id>0
+              FROM sbr.data_element_concepts    c,
+                   ONEDATA_WA.admin_item        ai,
+                   sbr.Administered_Components  ac
+             WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.dec_idseq)
+                   AND c.CD_IDSEQ = ac_idseq
+                   AND public_id > 0
                    AND ai.ITEM_ID = x.ITEM_ID
                    AND c.VERSION = x.VER_NR;
 
@@ -432,48 +461,51 @@ BEGIN
 
     --Validate VALUE_DOMAINS
 
-    FOR x IN (  SELECT DISTINCT ITEM_ID,                        --Primary Keys
-                                         VER_NR
-                  FROM (SELECT ITEM_ID,
-                               VER_NR,
-                               NCI_DEC_PREC,
-                               VAL_DOM_HIGH_VAL_NUM,
-                               VAL_DOM_LOW_VAL_NUM,
-                               VAL_DOM_MAX_CHAR,
-                               VAL_DOM_MIN_CHAR,
-                               CREAT_USR_ID,
-                               CREAT_DT,
-                               LST_UPD_DT,
-                               LST_UPD_USR_ID
-                          FROM onedata_wa.VALUE_DOM
-                         WHERE item_id <> -20004
-                        UNION ALL
-                        SELECT ai.ITEM_ID,
-                               version,
-                               decimal_place,
-                               high_value_num,
-                               low_value_num,
-                               max_length_num,
-                               min_length_num,
-                               created_by,
-                               date_created,
-                               NVL (date_modified, date_created),
-                               modified_by
-                          FROM sbr.VALUE_DOMAINS c, ONEDATA_WA.admin_item ai
-                         WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.vd_idseq)) t
-              GROUP BY ITEM_ID,
-                       VER_NR,
-                       NCI_DEC_PREC,
-                       VAL_DOM_HIGH_VAL_NUM,
-                       VAL_DOM_LOW_VAL_NUM,
-                       VAL_DOM_MAX_CHAR,
-                       VAL_DOM_MIN_CHAR,
-                       CREAT_USR_ID,
-                       CREAT_DT,
-                       LST_UPD_DT,
-                       LST_UPD_USR_ID
-                HAVING COUNT (*) <> 2
-              ORDER BY ITEM_ID, VER_NR)
+    FOR x
+        IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                       VER_NR
+                FROM (SELECT ITEM_ID,
+                             VER_NR,
+                             NCI_DEC_PREC,
+                             VAL_DOM_HIGH_VAL_NUM,
+                             VAL_DOM_LOW_VAL_NUM,
+                             VAL_DOM_MAX_CHAR,
+                             VAL_DOM_MIN_CHAR,
+                             CREAT_USR_ID,
+                             CREAT_DT,
+                             LST_UPD_DT,
+                             LST_UPD_USR_ID
+                        FROM onedata_wa.VALUE_DOM
+                       WHERE item_id <> -20004
+                      UNION ALL
+                      SELECT ai.ITEM_ID,
+                             version,
+                             decimal_place,
+                             high_value_num,
+                             low_value_num,
+                             max_length_num,
+                             min_length_num,
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
+                        FROM sbr.VALUE_DOMAINS c, ONEDATA_WA.admin_item ai
+                       WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.vd_idseq)) t
+            GROUP BY ITEM_ID,
+                     VER_NR,
+                     NCI_DEC_PREC,
+                     VAL_DOM_HIGH_VAL_NUM,
+                     VAL_DOM_LOW_VAL_NUM,
+                     VAL_DOM_MAX_CHAR,
+                     VAL_DOM_MIN_CHAR,
+                     CREAT_USR_ID,
+                     CREAT_DT,
+                     LST_UPD_DT,
+                     LST_UPD_USR_ID
+              HAVING COUNT (*) <> 2
+            ORDER BY ITEM_ID, VER_NR)
     LOOP
         INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
             SELECT SBREXT.ERR_SEQ.NEXTVAL,
@@ -583,10 +615,12 @@ BEGIN
                       SELECT con_id,
                              version,
                              ok.obj_key_id,
-                             created_by,
-                             date_created,
-                             NVL (date_modified, date_created),
-                             modified_by
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
                         FROM sbrext.CONCEPTS_EXT c, ONEDATA_WA.obj_key ok
                        WHERE     c.evs_source = ok.obj_key_desc(+)
                              AND ok.obj_typ_id(+) = 23) t
@@ -637,10 +671,12 @@ BEGIN
                              version,
                              description,
                              comments,
-                             created_by,
-                             date_created,
-                             NVL (date_modified, date_created),
-                             modified_by
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
                         FROM sbr.cs_items cd, ONEDATA_WA.admin_item ai
                        WHERE ai.NCI_IDSEQ = cd.CSI_IDSEQ) t
             GROUP BY ITEM_ID,
@@ -693,10 +729,12 @@ BEGIN
                              version,
                              description,
                              comments,
-                             created_by,
-                             date_created,
-                             NVL (date_modified, date_created),
-                             modified_by
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
                         FROM sbr.VALUE_MEANINGS cd, ONEDATA_WA.admin_item ai
                        WHERE ai.NCI_IDSEQ = cd.VM_IDSEQ) t
             GROUP BY ITEM_ID,
@@ -749,11 +787,14 @@ BEGIN
                              version,
                              ok.obj_key_id,
                              DECODE (qc.qtl_name,  'CRF', 70,  'TEMPLATE', 71),
-                             created_by,
-                             date_created,
-                             NVL (date_modified, date_created),
-                             modified_by
-                        FROM sbrext.quest_contents_ext qc, ONEDATA_WA.obj_key ok
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA')
+                        FROM sbrext.quest_contents_ext qc,
+                             ONEDATA_WA.obj_key       ok
                        WHERE     qc.qcdl_name = ok.nci_cd(+)
                              AND ok.obj_typ_id(+) = 22
                              AND qc.qtl_name IN ('TEMPLATE', 'CRF')) t
@@ -815,17 +856,21 @@ BEGIN
                              protocol_id,
                              LEAD_ORG,
                              PHASE,
-                             created_by,
-                             date_created,
-                             NVL (date_modified, date_created),
-                             modified_by,
-                             CHANGE_TYPE,
+                             NVL (created_by, 'ONEDATA'),
+                             NVL (date_created,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (date_modified, date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (modified_by, 'ONEDATA'),
+                                 CHANGE_TYPE,
                              CHANGE_NUMBER,
                              REVIEWED_DATE,
                              REVIEWED_BY,
                              APPROVED_DATE,
                              APPROVED_BY
-                        FROM sbrext.PROTOCOLS_EXT cd, ONEDATA_WA.admin_item ai, ONEDATA_WA.obj_key ok
+                        FROM sbrext.PROTOCOLS_EXT cd,
+                             ONEDATA_WA.admin_item ai,
+                             ONEDATA_WA.obj_key   ok
                        WHERE     ai.NCI_IDSEQ = cd.proto_IDSEQ
                              AND TRIM (TYPE) = ok.nci_cd(+)
                              AND ok.obj_typ_id(+) = 19
@@ -897,10 +942,12 @@ BEGIN
                              qc.qc_idseq,
                              vv.description_text,
                              vv.meaning_text,
-                             qc.created_by,
-                             qc.DATE_CREATED,
-                             NVL (qc.date_modified, qc.date_created),
-                             qc.modified_by
+                             NVL (qc.created_by, 'ONEDATA'),
+                             NVL (qc.DATE_CREATED,
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (NVL (qc.date_modified, qc.date_created),
+                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             NVL (qc.modified_by, 'ONEDATA')
                         FROM sbrext.QUEST_CONTENTS_EXT  qc,
                              sbrext.quest_contents_ext  qc1,
                              sbrext.valid_values_att_ext vv
