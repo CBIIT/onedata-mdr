@@ -51,8 +51,8 @@ AC.ORIGIN,AC.PREFERRED_DEFINITION, '
             || Y.ITEMID_NAME
             || ' ,
 SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
-SB.CREATED_BY, SB.DATE_CREATED,
-NVL(SB.DATE_MODIFIED, SB.DATE_CREATED), SB.MODIFIED_BY
+NVL(SB.CREATED_BY,''ONEDATA''), NVL(SB.DATE_CREATED,to_date(''8/18/2020'',''mm/dd/yyyy'')),
+NVL(NVL(SB.DATE_MODIFIED, SB.DATE_CREATED),to_date(''8/18/2020'',''mm/dd/yyyy'')), NVL(SB.MODIFIED_BY,''ONEDATA'')
 FROM '
             || Y.TAB_NAME
             || ' AC ' ||
@@ -94,8 +94,8 @@ AC.ORIGIN,AC.PREFERRED_DEFINITION, '
             || Y.ITEMID_NAME
             || ' ,
 SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
-AC.CREATED_BY, AC.DATE_CREATED,
-NVL(AC.DATE_MODIFIED, AC.DATE_CREATED), AC.MODIFIED_BY
+NVL(AC.CREATED_BY,''ONEDATA''), NVL(AC.DATE_CREATED,to_date(''8/18/2020'',''mm/dd/yyyy'')),
+NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date(''8/18/2020'',''mm/dd/yyyy'')), NVL(AC.MODIFIED_BY,''ONEDATA'')
 FROM '
             || Y.TAB_NAME
             || ' AC ' ||
@@ -144,10 +144,10 @@ END CASE;
                                name,
                                version,
                                name,
-                               created_by,
-                               date_created,
-                               NVL (date_modified, date_created),
-                               modified_by
+                               NVL(created_by,'ONEDATA'),
+                               NVL(date_created,to_date('8/18/2020','mm/dd/yyyy')),
+                               NVL(NVL (date_modified, date_created),to_date('8/18/2020','mm/dd/yyyy')),
+                               NVL(modified_by,'ONEDATA')
                           FROM SBR.CONTEXTS AC)
               GROUP BY admin_item_typ_id,
                        NCI_iDSEQ,
