@@ -282,4 +282,56 @@ and air.rel_typ_id = 64
 and aim.nci_pub_id = air.nci_pub_id and aim.nci_ver_nr = air.nci_ver_nr
 and air.cntxt_cs_item_id = cs.item_id and air.cntxt_cs_ver_nr = cs.ver_nr and cs.admin_item_typ_id = 9;
 
+						     
+						     
+alter table ADMIN_ITEM modify (LST_UPD_DT null);
+alter table ALT_DEF modify (LST_UPD_DT null);
+alter table ALT_NMS modify (LST_UPD_DT null);
+alter table CHAR_SET modify (LST_UPD_DT null);
+alter table CLSFCTN_SCHM modify (LST_UPD_DT null);
+alter table CNCPT modify (LST_UPD_DT null);
+alter table CNTCT modify (LST_UPD_DT null);
+alter table CNTXT modify (LST_UPD_DT null);
+alter table CONC_DOM modify (LST_UPD_DT null);
+alter table DATA_TYP modify (LST_UPD_DT null);
+alter table DE modify (LST_UPD_DT null);
+alter table DE_CONC modify (LST_UPD_DT null);
+alter table FMT modify (LST_UPD_DT null);
+alter table LANG modify (LST_UPD_DT null);
+alter table OBJ_CLS modify (LST_UPD_DT null);
+alter table OBJ_KEY modify (LST_UPD_DT null);
+alter table OBJ_TYP modify (LST_UPD_DT null);
+alter table ORG modify (LST_UPD_DT null);
+alter table ORG_CNTCT modify (LST_UPD_DT null);
+alter table PERM_VAL modify (LST_UPD_DT null);
+alter table PROP modify (LST_UPD_DT null);
+alter table REF modify (LST_UPD_DT null);
+alter table REF_DOC modify (LST_UPD_DT null);
+alter table REP_CLS modify (LST_UPD_DT null);
+alter table STUS_MSTR modify (LST_UPD_DT null);
+alter table UOM modify (LST_UPD_DT null);
+alter table USR_GRP modify (LST_UPD_DT null);
+alter table VAL_MEAN modify (LST_UPD_DT null);
+alter table CONC_DOM_VAL_MEAN modify (LST_UPD_DT null);
+alter table NCI_ADMIN_ITEM_REL modify (LST_UPD_DT null);
+alter table NCI_ALT_KEY_ADMIN_ITEM_REL modify (LST_UPD_DT null);
+alter table NCI_CLSFCTN_SCHM_ITEM modify (LST_UPD_DT null);
+alter table NCI_VAL_MEAN modify (LST_UPD_DT null);
+alter table NCI_PROTCL modify (LST_UPD_DT null);
+alter table NCI_ADMIN_ITEM_REL_ALT_KEY modify (LST_UPD_DT null);
+alter table NCI_INSTR modify (LST_UPD_DT null);
+alter table NCI_STG_ADMIN_ITEM modify (LST_UPD_DT null);
+alter table NCI_FORM modify (LST_UPD_DT null);
+alter table NCI_OC_RECS modify (LST_UPD_DT null);
+alter table NCI_QUEST_VALID_VALUE modify (LST_UPD_DT null);
+alter table NCI_CSI_ALT_DEFNMS modify (LST_UPD_DT null);
+alter table NCI_QUEST_VV_REP modify (LST_UPD_DT null);
+alter table NCI_FORM_TA modify (LST_UPD_DT null);
+alter table NCI_USR_CART modify (LST_UPD_DT null);
+alter table NCI_STG_AI_CNCPT modify (LST_UPD_DT null);
+alter table VALUE_DOM modify (LST_UPD_DT null);
+alter table CNCPT_ADMIN_ITEM modify (LST_UPD_DT null);
+alter table NCI_ADMIN_ITEM_EXT modify (LST_UPD_DT null);
+
+                               
 
