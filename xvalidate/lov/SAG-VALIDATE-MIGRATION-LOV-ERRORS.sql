@@ -302,3 +302,29 @@ SELECT 'SBR' schema,  UOML_NAME,
                              LST_UPD_USR_ID MODIFIED_BY
               FROM ONEDATA_WA.UOM where UOM_NM in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'UOM')
 ORDER BY UOML_NAME, schema;
+
+--DATA_TYPE
+SELECT 'SBR' schema, DTL_NAME,
+                             DESCRIPTION,
+                             COMMENTS,
+                             NVL (CREATED_BY, 'ONEDATA') CREATED_BY,
+                             NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD')) DATE_CREATED,
+                             Nvl (DATE_MODIFIED, NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD'))) DATE_MODIFIED,
+                             NVL (MODIFIED_BY, 'ONEDATA') MODIFIED_BY,
+                             SCHEME_REFERENCE,
+                             ANNOTATION
+                             --,CODEGEN_COMPATIBILITY_IND
+                        FROM SBR.DATATYPES_LOV where DTL_NAME in (SELECT Lov_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DATA_TYPE')
+              UNION ALL
+              SELECT 'WA' schema, NCI_CD DTL_NAME,
+                             DTTYPE_DESC DESCRIPTION,
+                             NCI_DTTYPE_CMNTS COMMENTS,
+                             CREAT_USR_ID CREATED_BY,
+                             CREAT_DT DATE_CREATED,
+                             LST_UPD_DT DATE_MODIFIED,
+                             LST_UPD_USR_ID MODIFIED_BY,
+                             DTTYPE_SCHM_REF SCHEME_REFERENCE,
+                             DTTYPE_ANNTTN ANNOTATION
+                             --, where is CODEGEN_COMPATIBILITY_IND
+              FROM ONEDATA_WA.DATA_TYP where NCI_CD in (SELECT Lov_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DATA_TYPE')
+ ORDER BY DTL_NAME, schema;   
