@@ -7,10 +7,10 @@ BEGIN
                              PRECISION,
                              DESCRIPTION,
                              COMMENTS,
-                             CREATED_BY,
-                             DATE_CREATED,
-                             Nvl (DATE_MODIFIED, DATE_CREATED) DATE_MODIFIED,
-                             MODIFIED_BY
+                             NVL (CREATED_BY, 'ONEDATA') CREATED_BY,
+                             NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD')) DATE_CREATED,
+                             Nvl (DATE_MODIFIED, NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD'))) DATE_MODIFIED,
+                             NVL (MODIFIED_BY, 'ONEDATA') MODIFIED_BY
                         FROM SBR.UNIT_OF_MEASURES_LOV
               UNION ALL
               SELECT UOM_NM UOML_NAME,
@@ -19,7 +19,7 @@ BEGIN
                              UOM_CMNTS COMMENTS,
                              CREAT_USR_ID CREATED_BY,
                              CREAT_DT DATE_CREATED,
-                             Nvl (LST_UPD_DT, CREAT_DT) DATE_MODIFIED,
+                             LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
               FROM ONEDATA_WA.UOM) t
       GROUP BY UOML_NAME,

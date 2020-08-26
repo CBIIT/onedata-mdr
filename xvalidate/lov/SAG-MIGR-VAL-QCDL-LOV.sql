@@ -6,10 +6,10 @@ BEGIN
     (SELECT QCDL_NAME,
                              DESCRIPTION,
                              --DISPLAY_ORDER,
-                             CREATED_BY,
-                             DATE_CREATED,
-                             Nvl (DATE_MODIFIED, DATE_CREATED) DATE_MODIFIED,
-                             MODIFIED_BY
+                             NVL (CREATED_BY, 'ONEDATA') CREATED_BY,
+                             NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD')) DATE_CREATED,
+                             Nvl (DATE_MODIFIED, NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD'))) DATE_MODIFIED,
+                             NVL (MODIFIED_BY, 'ONEDATA') MODIFIED_BY
                         FROM SBREXT.QC_DISPLAY_LOV_EXT
               UNION ALL
               SELECT OBJ_KEY_DESC QCDL_NAME,
@@ -17,7 +17,7 @@ BEGIN
                              --where is DISPLAY_ORDER,
                              CREAT_USR_ID CREATED_BY,
                              CREAT_DT DATE_CREATED,
-                             Nvl (LST_UPD_DT, CREAT_DT) DATE_MODIFIED,
+                             LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
               FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=22) t
       GROUP BY QCDL_NAME,

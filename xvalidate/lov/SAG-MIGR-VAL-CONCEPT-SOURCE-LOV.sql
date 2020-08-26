@@ -5,17 +5,17 @@ BEGIN
   OPEN c FOR SELECT CONCEPT_SOURCE FROM 
     (SELECT CONCEPT_SOURCE,
                              DESCRIPTION,
-                             CREATED_BY,
-                             DATE_CREATED,
-                             Nvl (DATE_MODIFIED, DATE_CREATED) DATE_MODIFIED,
-                             MODIFIED_BY
+                             NVL (CREATED_BY, 'ONEDATA') CREATED_BY,
+                             NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD')) DATE_CREATED,
+                             Nvl (DATE_MODIFIED, NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD'))) DATE_MODIFIED,
+                             NVL (MODIFIED_BY, 'ONEDATA') MODIFIED_BY
                         FROM SBREXT.concept_sources_lov_ext
               UNION ALL
               SELECT OBJ_KEY_DESC CONCEPT_SOURCE,
                              OBJ_KEY_DEF DESCRIPTION,
                              CREAT_USR_ID CREATED_BY,
                              CREAT_DT DATE_CREATED,
-                             Nvl (LST_UPD_DT, CREAT_DT) DATE_MODIFIED,
+                             LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
               FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=23) t
       GROUP BY CONCEPT_SOURCE,

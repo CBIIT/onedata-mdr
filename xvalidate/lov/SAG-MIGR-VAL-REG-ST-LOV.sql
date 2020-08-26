@@ -6,10 +6,11 @@ BEGIN
     (SELECT REGISTRATION_STATUS,
                              DESCRIPTION,
                              COMMENTS,
-                             CREATED_BY,
-                             DATE_CREATED,
-                             Nvl (DATE_MODIFIED, DATE_CREATED) DATE_MODIFIED,
-                             MODIFIED_BY,
+                             --DISPLAY_ORDER,
+                             NVL (CREATED_BY, 'ONEDATA') CREATED_BY,
+                             NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD')) DATE_CREATED,
+                             Nvl (DATE_MODIFIED, NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD'))) DATE_MODIFIED,
+                             NVL (MODIFIED_BY, 'ONEDATA') MODIFIED_BY,
                              DISPLAY_ORDER
                         FROM SBR.Reg_Status_Lov
               UNION ALL
@@ -18,7 +19,7 @@ BEGIN
                              NCI_CMNTS COMMENTS,
                              CREAT_USR_ID CREATED_BY,
                              CREAT_DT DATE_CREATED,
-                             Nvl (LST_UPD_DT, CREAT_DT) DATE_MODIFIED,
+                             LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY,
                              NCI_DISP_ORDR DISPLAY_ORDER
               FROM ONEDATA_WA.Stus_Mstr where STUS_TYP_ID = 1) t

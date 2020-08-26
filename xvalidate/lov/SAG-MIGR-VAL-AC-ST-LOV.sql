@@ -1,37 +1,38 @@
-CREATE OR REPLACE FUNCTION SAG_FUNC_MIGR_VAL_ORG_LOV RETURN SYS_REFCURSOR
+create or replace FUNCTION SAG_FUNC_MIGR_VAL_AC_ST_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
 BEGIN
-  OPEN c FOR SELECT NAME FROM 
-    (SELECT ORG_IDSEQ,
-                             NAME,
-                             RA_IND,
-                             MAIL_ADDRESS,
-                             CREATED_BY,
-                             DATE_CREATED,
-                             Nvl (DATE_MODIFIED, DATE_CREATED) DATE_MODIFIED,
-                             MODIFIED_BY
-                        FROM SBR.ORGANIZATIONS
+  OPEN c FOR SELECT ASL_NAME FROM 
+    (SELECT ASL_NAME,
+                             DESCRIPTION,
+                             COMMENTS,
+                             NVL (CREATED_BY, 'ONEDATA') CREATED_BY,
+                             NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD')) DATE_CREATED,
+                             Nvl (DATE_MODIFIED, NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD'))) DATE_MODIFIED,
+                             NVL (MODIFIED_BY, 'ONEDATA') MODIFIED_BY,
+                             DISPLAY_ORDER
+                        FROM SBR.AC_STATUS_LOV
               UNION ALL
-              SELECT NCI_IDSEQ ORG_IDSEQ,
-                             ORG_NM NAME,
-                             RA_IND,
-                             ORG_MAIL_ADR MAIL_ADDRESS,
+              SELECT NCI_STUS ASL_NAME,
+                             STUS_DESC DESCRIPTION,
+                             NCI_CMNTS COMMENTS,
                              CREAT_USR_ID CREATED_BY,
                              CREAT_DT DATE_CREATED,
-                             Nvl (LST_UPD_DT, CREAT_DT) DATE_MODIFIED,
-                             LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.ORG) t
-      GROUP BY ORG_IDSEQ,
-                     NAME,
-                     RA_IND,
-                     MAIL_ADDRESS,
+                             LST_UPD_DT DATE_MODIFIED,
+                             LST_UPD_USR_ID MODIFIED_BY,
+                             NCI_DISP_ORDR DISPLAY_ORDER
+              FROM ONEDATA_WA.Stus_Mstr where STUS_TYP_ID = 2) t
+      GROUP BY ASL_NAME,
+                     DESCRIPTION,
+                     COMMENTS,
+                     CREATED_BY,
                      DATE_CREATED,
                      DATE_MODIFIED,
-                     MODIFIED_BY
+                     MODIFIED_BY,
+                     DISPLAY_ORDER
       HAVING COUNT (*) <> 2
-      ORDER BY NAME;
+      ORDER BY ASL_NAME;
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_VAL_ORG_LOV to SBREXT;
+GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_VAL_AC_ST_LOV to SBREXT;
