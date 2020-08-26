@@ -25,7 +25,7 @@ BEGIN
                              DTTYPE_SCHM_REF SCHEME_REFERENCE,
                              DTTYPE_ANNTTN ANNOTATION
                              --, where is CODEGEN_COMPATIBILITY_IND
-              FROM ONEDATA_WA.DATA_TYP where NCI_CD is not NULL) t
+              FROM ONEDATA_WA.DATA_TYP where nci_dttype_typ_id = 1) t
       GROUP BY DTL_NAME,
                      DESCRIPTION,
                      COMMENTS,
