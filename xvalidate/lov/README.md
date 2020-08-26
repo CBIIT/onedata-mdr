@@ -63,6 +63,6 @@ SBREXT-MIGR-VAL-LOV-FULL.sql
 This script shall be run in SBREXT schema.
 SBREXT-SAG-MIGR-VAL-LOV.sql
 
-
-
+## SQL statements to retrieve side by side caSDR and OD data which does not pass LoVs validation
+SAG-VALIDATE-MIGRATION-LOV-ERRORS.sql
 
