@@ -21,7 +21,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation REGISTRATION_STATUS ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'REGISTRATION_STATUS';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'REGISTRATION_STATUS';
 
 --AC_STATUS
 DECLARE
@@ -44,7 +44,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation AC_STATUS ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'AC_STATUS';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'AC_STATUS';
 
 --DESIGNATION_TYPE
 DECLARE
@@ -67,7 +67,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation DESIGNATION_TYPE ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DESIGNATION_TYPE';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DESIGNATION_TYPE';
 
 --DEFINITION_TYPE
 DECLARE
@@ -90,7 +90,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation DEFINITION_TYPE ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DEFINITION_TYPE';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DEFINITION_TYPE';
 
 --ORIGIN
 DECLARE
@@ -113,7 +113,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation ORIGIN ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'ORIGIN';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'ORIGIN';
 
 --DERIVATION_TYPE
 DECLARE
@@ -136,7 +136,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation DERIVATION_TYPE ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DERIVATION_TYPE';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DERIVATION_TYPE';
 
 --concept_sources_lov_ext
 DECLARE
@@ -160,7 +160,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation CONCEPT_SOURCE ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CONCEPT_SOURCE';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CONCEPT_SOURCE';
 
 --CSI Type
 DECLARE
@@ -183,7 +183,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation CSI_TYPE ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CSI_TYPE';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CSI_TYPE';
 
 --CS Type
 DECLARE
@@ -206,7 +206,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation CS_TYPE ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CS_TYPE';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CS_TYPE';
 
 --PA
 DECLARE
@@ -229,7 +229,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation PA ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'PA';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'PA';
 
 --DOC_TYPE
 DECLARE
@@ -252,7 +252,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation DOC_TYPE ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DOC_TYPE';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DOC_TYPE';
 
 --QCDL_TYPE
 DECLARE
@@ -275,7 +275,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation QCDL_TYPE ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'QCDL_TYPE';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'QCDL_TYPE';
 
 --ORG
 DECLARE
@@ -298,7 +298,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation ORG ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'ORG';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'ORG';
 
 --FORMAT
 DECLARE
@@ -321,7 +321,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation FORMAT ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'FORMAT';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'FORMAT';
 
 --UOM
 DECLARE
@@ -344,7 +344,7 @@ BEGIN
  dbms_output.put_line('----Finished LoV Migration Validation UOM ----');
 END;
 /
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'UOM';
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'UOM';
 
 --DATA_TYPE
 DECLARE
@@ -368,7 +368,7 @@ BEGIN
 END;
 /
 
-SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DATA_TYPE';
-
+--SELECT * FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DATA_TYPE';
+select distinct Lov_Name, Lov_Value FROM SBREXT.Sag_Migr_Lov_Err order by Lov_Name;
 spool off;
 
