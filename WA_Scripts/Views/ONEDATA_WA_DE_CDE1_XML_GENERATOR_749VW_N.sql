@@ -18,7 +18,8 @@ CREATE OR REPLACE FORCE VIEW ONEDATA_WA.ONEDATA_WA_DE_CDE1_XML_GENERATOR_749VW
     VALUEDOMAIN,
     REFERENCEDOCUMENTSLIST,
     CLASSIFICATIONSLIST,
-    ALTERNATENAMELIST
+    ALTERNATENAMELIST,
+    DATAELEMENTDERIVATION
 )
 BEQUEATH DEFINER
 AS
@@ -290,7 +291,14 @@ AS
                           AND de.ver_nr = des.ver_nr
                           AND des.nm_typ_id = ok.obj_key_id(+))
                    AS cdebrowser_altname_list_t)
-               "AlternateNameList"
+               "AlternateNameList",            
+            derived_data_element_t ( 
+            ccd.CRTL_NAME,
+            ccd.DESCRIPTION,
+            ccd.METHODS,
+            ccd.RULE,
+            ccd.CONCAT_CHAR,
+           "DataElementsList")    "DataElementDerivation"
            FROM ADMIN_ITEM              ai,
            cdebrowser_de_dec_view  dec,
            admin_item              vdai,
@@ -298,10 +306,12 @@ AS
            ADMIN_ITEM              rep,        
            value_dom               vd,
            de                      de
+          ,CDEBROWSER_COMPLEX_DE_VIEW_N ccd
+
      WHERE     ai.item_id = dec.de_id
            AND ai.ver_nr = dec.de_version
            AND ai.ADMIN_STUS_NM_DN NOT IN
-                   ('RETIRED WITHDRAWN', 'RETIRED DELETED')
+           ('RETIRED WITHDRAWN', 'RETIRED DELETED')
            AND ai.item_id = de.item_id
            AND ai.ver_nr = de.ver_nr
            AND ai.admin_item_typ_id = 4
@@ -316,4 +326,7 @@ AS
            AND vdai.admin_item_typ_id = 3
            AND de.val_dom_item_id = vd.item_id
            AND de.val_dom_ver_nr = vd.ver_nr
-           AND (ai.ITEM_ID = 2181785 or rep.ITEM_ID=4550720);
+           AND ai.item_id = ccd.item_id(+)
+           AND ai.ver_nr = ccd.ver_nr(+);
+          -- AND (ai.ITEM_ID in(2465544, 2181785,2240318,2240318,2183210)
+-- or rep.ITEM_ID=4550720);
