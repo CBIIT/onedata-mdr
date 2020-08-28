@@ -8,8 +8,8 @@ BEGIN
                              COMMENTS,
                              NVL (CREATED_BY, 'ONEDATA') CREATED_BY,
                              NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD')) DATE_CREATED,
-                             --Nvl (DATE_MODIFIED, NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD'))) DATE_MODIFIED, 
-                             --NVL (MODIFIED_BY, 'ONEDATA') MODIFIED_BY, --uncomment when migration is corrected
+                             Nvl (DATE_MODIFIED, NVL (DATE_CREATED, TO_DATE('2020-08-18', 'YYYY-MM-DD'))) DATE_MODIFIED, 
+                             NVL (MODIFIED_BY, 'ONEDATA') MODIFIED_BY, --uncomment when migration is corrected
                              SCHEME_REFERENCE,
                              ANNOTATION
                              --,CODEGEN_COMPATIBILITY_IND
@@ -20,8 +20,8 @@ BEGIN
                              NCI_DTTYPE_CMNTS COMMENTS,
                              CREAT_USR_ID CREATED_BY,
                              CREAT_DT DATE_CREATED,
-                             --LST_UPD_DT DATE_MODIFIED, --uncomment when migration is corrected
-                             --LST_UPD_USR_ID MODIFIED_BY,
+                             LST_UPD_DT DATE_MODIFIED, --uncomment when migration is corrected
+                             LST_UPD_USR_ID MODIFIED_BY,
                              DTTYPE_SCHM_REF SCHEME_REFERENCE,
                              DTTYPE_ANNTTN ANNOTATION
                              --, where is CODEGEN_COMPATIBILITY_IND
