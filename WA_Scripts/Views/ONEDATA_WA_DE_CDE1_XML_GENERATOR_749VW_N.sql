@@ -1,6 +1,6 @@
 DROP VIEW ONEDATA_WA.ONEDATA_WA_DE_CDE1_XML_GENERATOR_749VW;
 
-/* Formatted on 8/26/2020 2:40:42 PM (QP5 v5.354) */
+/* Formatted on 8/31/2020 4:21:10 PM (QP5 v5.354) */
 CREATE OR REPLACE FORCE VIEW ONEDATA_WA.ONEDATA_WA_DE_CDE1_XML_GENERATOR_749VW
 (
     RAI,
@@ -14,6 +14,7 @@ CREATE OR REPLACE FORCE VIEW ONEDATA_WA.ONEDATA_WA_DE_CDE1_XML_GENERATOR_749VW
     CONTEXTVERSION,
     ORIGIN,
     REGISTRATIONSTATUS,
+    "dateModified",
     DATAELEMENTCONCEPT,
     VALUEDOMAIN,
     REFERENCEDOCUMENTSLIST,
@@ -24,28 +25,18 @@ CREATE OR REPLACE FORCE VIEW ONEDATA_WA.ONEDATA_WA_DE_CDE1_XML_GENERATOR_749VW
 BEQUEATH DEFINER
 AS
     SELECT                                                     ---de.de_idseq,
-           '2.16.840.1.113883.3.26.2'
-               "RAI",
-           ai.ITEM_ID
-               "PublicId",
-           ai.ITEM_LONG_NM
-               "LongName",
-           ai.ITEM_NM
-               "PreferredName",
-           ai.ITEM_DESC
-               "PreferredDefinition",
-           ai.VER_NR
-               "Version",
-           ai.ADMIN_STUS_NM_DN
-               "WorkflowStatus",
-           ai.CNTXT_NM_DN
-               "ContextName",
-           ai.CNTXT_VER_NR
-               "ContextVersion",
-           ai.origin
-               "Origin",
-           ai.REGSTR_STUS_NM_DN
-               "RegistrationStatus",
+           '2.16.840.1.113883.3.26.2'                     "RAI",
+           ai.ITEM_ID                                     "PublicId",
+           ai.ITEM_LONG_NM                                "LongName",
+           ai.ITEM_NM                                     "PreferredName",
+           ai.ITEM_DESC                                   "PreferredDefinition",
+           ai.VER_NR                                      "Version",
+           ai.ADMIN_STUS_NM_DN                            "WorkflowStatus",
+           ai.CNTXT_NM_DN                                 "ContextName",
+           ai.CNTXT_VER_NR                                "ContextVersion",
+           NVL (ai.origin, ai.ORIGIN_ID_DN)               "Origin",
+           ai.REGSTR_STUS_NM_DN                           "RegistrationStatus",
+           ai.LST_UPD_DT                                  "dateModified",
            cdebrowser_dec_t (
                dec.dec_id,
                dec.dec_long_name,
@@ -70,14 +61,22 @@ AS
                    dec.oc_preferred_name,
                    CAST (
                        MULTISET (
-                             SELECT con.item_long_nm      preferred_name,
-                                    con.item_nm           long_name,
-                                    con.item_id           con_id,
-                                    con.def_src           definition_source,
-                                    con.origin            origin,
-                                    cncpt.evs_src         evs_Source,
-                                    com.NCI_PRMRY_IND     primary_flag_ind,
-                                    com.nci_ord           display_order
+                             SELECT con.item_long_nm
+                                        preferred_name,
+                                    con.item_nm
+                                        long_name,
+                                    con.item_id
+                                        con_id,
+                                    con.def_src
+                                        definition_source,
+                                    NVL (con.origin, con.ORIGIN_ID_DN)
+                                        origin,
+                                    cncpt.evs_src
+                                        evs_Source,
+                                    com.NCI_PRMRY_IND
+                                        primary_flag_ind,
+                                    com.nci_ord
+                                        display_order
                                FROM cncpt_admin_item   com,
                                     Admin_item         con,
                                     ONEDATA_WA.VW_CNCPT cncpt
@@ -99,14 +98,22 @@ AS
                    dec.pt_preferred_name,
                    CAST (
                        MULTISET (
-                             SELECT con.item_long_nm      preferred_name,
-                                    con.item_nm           long_name,
-                                    con.item_id           con_id,
-                                    con.def_src           definition_source,
-                                    con.origin            origin,
-                                    cncpt.evs_src         evs_Source,
-                                    com.NCI_PRMRY_IND     primary_flag_ind,
-                                    com.nci_ord           display_order
+                             SELECT con.item_long_nm
+                                        preferred_name,
+                                    con.item_nm
+                                        long_name,
+                                    con.item_id
+                                        con_id,
+                                    con.def_src
+                                        definition_source,
+                                    NVL (con.origin, con.ORIGIN_ID_DN)
+                                        origin,
+                                    cncpt.evs_src
+                                        evs_Source,
+                                    com.NCI_PRMRY_IND
+                                        primary_flag_ind,
+                                    com.nci_ord
+                                        display_order
                                FROM cncpt_admin_item   com,
                                     Admin_item         con,
                                     ONEDATA_WA.VW_CNCPT cncpt
@@ -121,8 +128,7 @@ AS
                            AS Concepts_list_t)),
                dec.obj_class_qualifier,
                dec.property_qualifier,
-               dec.dec_origin)
-               "DataElementConcept",
+               dec.dec_origin)                            "DataElementConcept",
            -- select
            CDEBROWSER_VD_T749 (
                vdai.item_id,
@@ -151,24 +157,32 @@ AS
                vd.CHAR_SET_ID,
                vd.VAL_DOM_HIGH_VAL_NUM,
                vd.VAL_DOM_LOW_VAL_NUM,
-               vdai.origin,
-   admin_component_with_con_t (
+               NVL (vdai.origin, vdai.ORIGIN_ID_DN),
+               admin_component_with_con_t (
                    rep.item_id,
                    rep.cntxt_nm_dn,
                    rep.CNTXT_VER_NR,
                    rep.ITEM_LONG_NM,
                    rep.VER_NR,
                    rep.ITEM_NM,
-                     CAST (
+                   CAST (
                        MULTISET (
-                             SELECT con.item_long_nm      preferred_name,
-                                    con.item_nm           long_name,
-                                    con.item_id           con_id,
-                                    con.def_src           definition_source,
-                                    con.origin            origin,
-                                    cncpt.evs_src         evs_Source,
-                                    com.NCI_PRMRY_IND     primary_flag_ind,
-                                    com.nci_ord           display_order
+                             SELECT con.item_long_nm
+                                        preferred_name,
+                                    con.item_nm
+                                        long_name,
+                                    con.item_id
+                                        con_id,
+                                    con.def_src
+                                        definition_source,
+                                    NVL (con.origin, con.ORIGIN_ID_DN)
+                                        origin,
+                                    cncpt.evs_src
+                                        evs_Source,
+                                    com.NCI_PRMRY_IND
+                                        primary_flag_ind,
+                                    com.nci_ord
+                                        display_order
                                FROM cncpt_admin_item   com,
                                     Admin_item         con,
                                     ONEDATA_WA.VW_CNCPT cncpt
@@ -222,30 +236,36 @@ AS
                               AND pv.NCI_VAL_MEAN_VER_NR = vm.VER_NR
                               AND vm.ADMIN_ITEM_TYP_ID = 53)
                        AS MDSR_749_PV_VD_LIST_T),
-                         CAST (
-                       MULTISET (
-                             SELECT con.item_long_nm      preferred_name,
-                                    con.item_nm           long_name,
-                                    con.item_id           con_id,
-                                    con.def_src           definition_source,
-                                    con.origin            origin,
-                                    cncpt.evs_src         evs_Source,
-                                    com.NCI_PRMRY_IND     primary_flag_ind,
-                                    com.nci_ord           display_order
-                               FROM cncpt_admin_item   com,
-                                    Admin_item         con,
-                                    ONEDATA_WA.VW_CNCPT cncpt
-                              WHERE     vd.item_id = com.item_id(+)
-                                    AND vd.ver_nr = com.ver_nr(+)
-                                    AND com.cncpt_item_id = con.item_id(+)
-                                    AND com.cncpt_ver_nr = con.ver_nr(+)
-                                    AND con.admin_item_typ_id(+) = 49
-                                    AND com.cncpt_item_id = cncpt.item_id(+)
-                                    AND com.cncpt_ver_nr = cncpt.ver_nr(+)
-                           ORDER BY nci_ord DESC)
-                           AS Concepts_list_t) 
-                                                )
-               "ValueDomain",
+               CAST (
+                   MULTISET (
+                         SELECT con.item_long_nm
+                                    preferred_name,
+                                con.item_nm
+                                    long_name,
+                                con.item_id
+                                    con_id,
+                                con.def_src
+                                    definition_source,
+                                NVL (con.origin, con.ORIGIN_ID_DN)
+                                    origin,
+                                cncpt.evs_src
+                                    evs_Source,
+                                com.NCI_PRMRY_IND
+                                    primary_flag_ind,
+                                com.nci_ord
+                                    display_order
+                           FROM cncpt_admin_item   com,
+                                Admin_item         con,
+                                ONEDATA_WA.VW_CNCPT cncpt
+                          WHERE     vd.item_id = com.item_id(+)
+                                AND vd.ver_nr = com.ver_nr(+)
+                                AND com.cncpt_item_id = con.item_id(+)
+                                AND com.cncpt_ver_nr = con.ver_nr(+)
+                                AND con.admin_item_typ_id(+) = 49
+                                AND com.cncpt_item_id = cncpt.item_id(+)
+                                AND com.cncpt_ver_nr = cncpt.ver_nr(+)
+                       ORDER BY nci_ord DESC)
+                       AS Concepts_list_t))               "ValueDomain",
            CAST (
                MULTISET (
                    SELECT rd.ref_nm,
@@ -261,14 +281,13 @@ AS
                           --, sbr.organizations org
                           AND de.item_id = rd.item_id
                           AND de.ver_nr = rd.ver_nr)
-                   AS cdebrowser_rd_list_t)
-               "ReferenceDocumentsList",
+                   AS cdebrowser_rd_list_t)               "ReferenceDocumentsList",
            CAST (
                MULTISET (
                    SELECT admin_component_with_id_t (csv.cs_item_id,
                                                      csv.cs_cntxt_nm,
                                                      csv.cs_cntxt_ver_nr,
-                                                     csv.csi_long_nm,
+                                                     csv.cs_item_long_nm,
                                                      csv.cs_ver_nr),
                           csv.csi_item_nm,
                           csv.csitl_nm,
@@ -277,8 +296,7 @@ AS
                      FROM cdebrowser_cs_view_n csv
                     WHERE     de.item_id = csv.de_item_id
                           AND de.ver_nr = csv.de_ver_nr)
-                   AS cdebrowser_csi_list_t)
-               "ClassificationsList",
+                   AS cdebrowser_csi_list_t)              "ClassificationsList",
            CAST (
                MULTISET (
                    SELECT des.cntxt_nm_dn,
@@ -290,37 +308,34 @@ AS
                     WHERE     de.item_id = des.item_id
                           AND de.ver_nr = des.ver_nr
                           AND des.nm_typ_id = ok.obj_key_id(+))
-                   AS cdebrowser_altname_list_t)
-               "AlternateNameList",            
-            derived_data_element_t ( 
-            ccd.CRTL_NAME,
-            ccd.DESCRIPTION,
-            ccd.METHODS,
-            ccd.RULE,
-            ccd.CONCAT_CHAR,
-           "DataElementsList")    "DataElementDerivation"
-           FROM ADMIN_ITEM              ai,
-           cdebrowser_de_dec_view  dec,
-           admin_item              vdai,
-           ADMIN_ITEM              cd,
-           ADMIN_ITEM              rep,        
-           value_dom               vd,
-           de                      de
-          ,CDEBROWSER_COMPLEX_DE_VIEW_N ccd
-
+                   AS cdebrowser_altname_list_t)          "AlternateNameList",
+           derived_data_element_t (ccd.CRTL_NAME,
+                                   ccd.DESCRIPTION,
+                                   ccd.METHODS,
+                                   ccd.RULE,
+                                   ccd.CONCAT_CHAR,
+                                   "DataElementsList")    "DataElementDerivation"
+      FROM ADMIN_ITEM                    ai,
+           cdebrowser_de_dec_view        dec,
+           admin_item                    vdai,
+           ADMIN_ITEM                    cd,
+           ADMIN_ITEM                    rep,
+           value_dom                     vd,
+           de                            de,
+           CDEBROWSER_COMPLEX_DE_VIEW_N  ccd
      WHERE     ai.item_id = dec.de_id
            AND ai.ver_nr = dec.de_version
            AND ai.ADMIN_STUS_NM_DN NOT IN
-           ('RETIRED WITHDRAWN', 'RETIRED DELETED')
+                   ('RETIRED WITHDRAWN', 'RETIRED DELETED')
            AND ai.item_id = de.item_id
            AND ai.ver_nr = de.ver_nr
            AND ai.admin_item_typ_id = 4
-           AND cd.admin_item_typ_id = 1           
-           AND cd.item_id=vd.CONC_DOM_ITEM_ID
-           and cd.ver_nr=vd.CONC_DOM_VER_NR
-           AND rep.ADMIN_ITEM_TYP_ID=7
-           AND rep.item_id=vd.REP_CLS_ITEM_ID(+)
-           AND rep.ver_nr=vd.REP_CLS_VER_NR(+)     
+           AND cd.admin_item_typ_id = 1
+           AND cd.item_id = vd.CONC_DOM_ITEM_ID
+           AND cd.ver_nr = vd.CONC_DOM_VER_NR
+           AND rep.ADMIN_ITEM_TYP_ID = 7
+           AND rep.item_id = vd.REP_CLS_ITEM_ID(+)
+           AND rep.ver_nr = vd.REP_CLS_VER_NR(+)
            AND de.val_dom_item_id = vdai.item_id
            AND de.val_dom_ver_nr = vdai.ver_nr
            AND vdai.admin_item_typ_id = 3
@@ -328,5 +343,3 @@ AS
            AND de.val_dom_ver_nr = vd.ver_nr
            AND ai.item_id = ccd.item_id(+)
            AND ai.ver_nr = ccd.ver_nr(+);
-          -- AND (ai.ITEM_ID in(2465544, 2181785,2240318,2240318,2183210)
--- or rep.ITEM_ID=4550720);
