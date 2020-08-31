@@ -14,14 +14,17 @@ EXECUTE IMMEDIATE ''truncate table SBREXT.ONEDATA_MIGRATION_ERROR'';
 SAG_AI_VALIDATION;
 SAG_FK_VALIDATE;
 SAG_ITEM_VALIDATION;
+SAG_MIGR_VAL_LOV_FULL;
 END;
 '
      ,number_of_arguments  => 0
      ,enabled              => FALSE
-     ,comments             => 'Execute the following procedures 
-ONEDATA_WA.SAG_AI_VALIDATION;
-ONEDATA_WA.SAG_FK_VALIDATE;
-ONEDATA_WA.SAG_ITEM_VALIDATION;'
+     ,comments             => 'Execute the following
+EXECUTE IMMEDIATE ''truncate table SBREXT.ONEDATA_MIGRATION_ERROR'';
+SAG_AI_VALIDATION;
+SAG_FK_VALIDATE;
+SAG_ITEM_VALIDATION;
+SAG_MIGR_VAL_LOV_FULL;'
     );
 
   SYS.DBMS_SCHEDULER.ENABLE
