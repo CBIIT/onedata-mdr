@@ -467,6 +467,39 @@ INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
                      'ONEDATA_WA');
         COMMIT;
 END LOOP;  
-                                   
+    
+--Check AC_IDSEQ relationship in AC_CSI/ NCI_ALT_KEY_ADMIN_ITEM_REL  
+FOR Y IN (
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id,
+                ai3.Ver_Nr,
+                ai3.NCI_IDSEQ,
+                ai3.ITEM_LONG_NM
+  FROM SBR.AC_CSI  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = AC_IDSEQ --FK
+              WHERE NOT EXISTS
+                          (SELECT 1
+                             FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.NCI_ALT_KEY_ADMIN_ITEM_REL dec
+                                      ON dec.C_ITEM_ID = ai3.Item_Id
+                                         AND dec.C_ITEM_VER_NR = ai3.Ver_Nr
+                                         AND ai2.Nci_Idseq = dae.AC_IDSEQ)) --PK
+LOOP
+INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+             VALUES (SBREXT.ERR_SEQ.NEXTVAL,
+                     Y.NCI_iDSEQ,
+                     Y.Item_Id,
+                     Y.VER_NR,
+                     'CSI_IDSEQ',
+                     Y.ITEM_LONG_NM,
+                     'DATA MISMATCH',
+                     SYSDATE,
+                     USER,
+                     'NCI_ADMIN_ITEM_REL_ALT_KEY',
+                     'ONEDATA_WA');
+        COMMIT;
+END LOOP;  
+                               
 END;
 /
