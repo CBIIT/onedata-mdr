@@ -491,12 +491,12 @@ INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
                      Y.NCI_iDSEQ,
                      Y.Item_Id,
                      Y.VER_NR,
-                     'CSI_IDSEQ',
+                     'AC_IDSEQ',
                      Y.ITEM_LONG_NM,
                      'DATA MISMATCH',
                      SYSDATE,
                      USER,
-                     'NCI_ADMIN_ITEM_REL_ALT_KEY',
+                     'NCI_ALT_KEY_ADMIN_ITEM_REL',
                      'ONEDATA_WA');
         COMMIT;
 END LOOP;  
