@@ -3,7 +3,7 @@ spool SAG_MIGR_VAL_LOV.log
 --REGISTRATION_STATUS
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation REGISTRATION_STATUS ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'REGISTRATION_STATUS';
@@ -26,7 +26,7 @@ END;
 --AC_STATUS
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation AC_STATUS ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'AC_STATUS';
@@ -49,7 +49,7 @@ END;
 --DESIGNATION_TYPE
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation DESIGNATION_TYPE ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'DESIGNATION_TYPE';
@@ -72,7 +72,7 @@ END;
 --DEFINITION_TYPE
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation DEFINITION_TYPE ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'DEFINITION_TYPE';
@@ -95,7 +95,7 @@ END;
 --ORIGIN
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation ORIGIN ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'ORIGIN';
@@ -118,7 +118,7 @@ END;
 --DERIVATION_TYPE
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation DERIVATION_TYPE ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'DERIVATION_TYPE';
@@ -141,7 +141,7 @@ END;
 --concept_sources_lov_ext
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation CONCEPT_SOURCE ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'CONCEPT_SOURCE';
@@ -165,7 +165,7 @@ END;
 --CSI Type
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation CSI_TYPE ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'CSI_TYPE';
@@ -188,7 +188,7 @@ END;
 --CS Type
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation CS_TYPE ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'CS_TYPE';
@@ -211,7 +211,7 @@ END;
 --PA
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation PA ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'PA';
@@ -234,7 +234,7 @@ END;
 --DOC_TYPE
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation DOC_TYPE ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'DOC_TYPE';
@@ -257,7 +257,7 @@ END;
 --QCDL_TYPE
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(50);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation QCDL_TYPE ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'QCDL_TYPE';
@@ -280,7 +280,7 @@ END;
 --ORG
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(80);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation ORG ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'ORG';
@@ -291,7 +291,7 @@ BEGIN
    EXIT WHEN cur%NOTFOUND;
       dbms_output.put_line('ORG Error on Value: '||curval);
       Insert Into Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, Error_Text)
-      Values(substr(curval, 1, 50),'ORG','Migration error');
+      Values(curval,'ORG','Migration error');
       COMMIT;
  END LOOP;
  CLOSE cur;
@@ -303,7 +303,7 @@ END;
 --FORMAT
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(80);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation FORMAT ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'FORMAT';
@@ -314,7 +314,7 @@ BEGIN
    EXIT WHEN cur%NOTFOUND;
       dbms_output.put_line('FORMAT Error on Value: '||curval);
       Insert Into Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, Error_Text)
-      Values(substr(curval, 1, 50),'FORMAT','Migration error');
+      Values(curval,'FORMAT','Migration error');
       COMMIT;
  END LOOP;
  CLOSE cur;
@@ -326,7 +326,7 @@ END;
 --UOM
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(80);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('----LoV Migration Validation UOM ----');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'UOM';
@@ -337,7 +337,7 @@ BEGIN
    EXIT WHEN cur%NOTFOUND;
       dbms_output.put_line('UOM Error on Value: '||curval);
       Insert Into Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, Error_Text)
-      Values(substr(curval, 1, 50),'UOM','Migration error');
+      Values(curval,'UOM','Migration error');
       COMMIT;
  END LOOP;
  CLOSE cur;
@@ -349,7 +349,7 @@ END;
 --DATA_TYPE
 DECLARE
  cur SYS_REFCURSOR;
- curval VARCHAR2(80);
+ curval VARCHAR2(500);
 BEGIN
   dbms_output.put_line('LoV Migration Validation DATA_TYPE ');
   Delete From Sbrext.Sag_Migr_Lov_Err Where Lov_Name = 'DATA_TYPE';
@@ -360,7 +360,7 @@ BEGIN
    EXIT WHEN cur%NOTFOUND;
      dbms_output.put_line('DATA_TYPE Error on Value: '||curval);
       Insert Into Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, Error_Text)
-      Values(substr(curval, 1, 50),'DATA_TYPE','Migration error');
+      Values(curval,'DATA_TYPE','Migration error');
       COMMIT;
  END LOOP;
  CLOSE cur;

@@ -156,7 +156,7 @@ BEGIN
         FETCH cur INTO curval;
         EXIT WHEN cur%NOTFOUND;
         INSERT INTO Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, ERROR_TEXT)
-             VALUES (SUBSTR (curval, 1, 50), 'ORG', 'Migration error');
+             VALUES (curval, 'ORG', 'Migration error');
         COMMIT;
     END LOOP;
     CLOSE cur;
@@ -168,7 +168,7 @@ BEGIN
         FETCH cur INTO curval;
         EXIT WHEN cur%NOTFOUND;
         INSERT INTO Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, ERROR_TEXT)
-             VALUES (SUBSTR (curval, 1, 50), 'FORMAT', 'Migration error');
+             VALUES (curval, 'FORMAT', 'Migration error');
         COMMIT;
     END LOOP;
     CLOSE cur;
@@ -179,7 +179,7 @@ BEGIN
         FETCH cur INTO curval;
         EXIT WHEN cur%NOTFOUND;
         INSERT INTO Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, ERROR_TEXT)
-             VALUES (SUBSTR (curval, 1, 50), 'UOM', 'Migration error');
+             VALUES (curval, 'UOM', 'Migration error');
         COMMIT;
     END LOOP;
     CLOSE cur;
@@ -191,7 +191,7 @@ BEGIN
         FETCH cur INTO curval;
         EXIT WHEN cur%NOTFOUND;
         INSERT INTO Sbrext.Sag_Migr_Lov_Err (Lov_Value, Lov_Name, ERROR_TEXT)
-             VALUES (SUBSTR (curval, 1, 50), 'DATA_TYPE', 'Migration error');
+             VALUES (curval, 'DATA_TYPE', 'Migration error');
         COMMIT;
     END LOOP;
     CLOSE cur;
