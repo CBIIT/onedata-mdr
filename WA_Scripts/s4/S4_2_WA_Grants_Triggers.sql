@@ -45,12 +45,6 @@ BEGIN
 END;
 /
 
-create or replace trigger TR_DE_PREF_QUEST
-after insert or update on DE
-for each row
-begin
-  for cur in 
-end;
 create or replace trigger TR_NCI_AI_TYP_VALID_STUS_AUD_TS
   BEFORE  UPDATE
   on NCI_AI_TYP_VALID_STUS
