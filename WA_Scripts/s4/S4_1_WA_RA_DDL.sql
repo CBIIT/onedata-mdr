@@ -462,8 +462,6 @@ alter table alt_def modify (LST_UPD_DT default sysdate);
 	ITEM_ID NUMBER NOT NULL , 
 	VER_NR NUMBER(4,2) NOT NULL , 
 	LVL_NM VARCHAR2(10 BYTE) NOT NULL , 
-	ITEM_ID NUMBER NOT NULL , 
-	VER_NR NUMBER(4,2) NOT NULL , 
 	CREAT_DT DATE DEFAULT sysdate, 
 	CREAT_USR_ID VARCHAR2(50 BYTE) DEFAULT user, 
 	LST_UPD_USR_ID VARCHAR2(50 BYTE) DEFAULT user, 
@@ -471,7 +469,7 @@ alter table alt_def modify (LST_UPD_DT default sysdate);
 	LST_DEL_DT DATE DEFAULT sysdate, 
 	S2P_TRN_DT DATE DEFAULT sysdate, 
 	LST_UPD_DT DATE DEFAULT sysdate, 
-	 PRIMARY KEY (STG_AI_ID, ITEM_ID, VER_NR))
+	 PRIMARY KEY (STG_AI_ID, ITEM_ID, VER_NR));
 
 
 create or replace trigger TR_AI_EXT_TAB_INS
