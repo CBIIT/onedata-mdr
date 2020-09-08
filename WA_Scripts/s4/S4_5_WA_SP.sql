@@ -5750,7 +5750,7 @@ begin
        v_long_nm := '';
        v_def := '';
           j := 0;
-          for i in reverse 0..5 loop
+          for i in reverse 0..10 loop
       
      --  raise_application_error(-20000, 'Test'  ||ihook.getColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || 4));
           
