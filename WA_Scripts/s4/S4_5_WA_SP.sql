@@ -5858,7 +5858,7 @@ begin
         actions.extend;
         actions(actions.last) := action;
     
-      action := t_actionrowset(rows, 'Data Element Concept (No Reference)', 2,8,'insert');
+      action := t_actionrowset(rows, 'Data Element Concept', 2,8,'insert');
        actions.extend;
         actions(actions.last) := action;
   
