@@ -12,6 +12,9 @@ alter table NCI_STG_ADMIN_ITEM add (STRT_OBJ_CLS_ITEM_ID  number, STRT_OBJ_CLS_V
 
 
 alter table NCI_STG_ADMIN_ITEM add (STRT_DE_CONC_ITEM_ID  number, STRT_DE_CONC_VER_NR number(4,2));
+											     
+											     
+alter table NCI_ADMIN_ITEM_REL_ALT_KEY add (ITEM_NM  varchar2(30) null);
 
 
 drop view vw_cncpt;
