@@ -1,7 +1,7 @@
 CREATE OR REPLACE PROCEDURE SAG_MIGR_VAL_LOV_FULL
 AS
     cur      SYS_REFCURSOR;
-    curval   VARCHAR2 (50);
+    curval   VARCHAR2 (500);
 BEGIN
 
     DELETE FROM Sbrext.Sag_Migr_Lov_Err;
