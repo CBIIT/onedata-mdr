@@ -908,7 +908,7 @@ BEGIN
                    'ONEDATA_WA'
               FROM sbrext.protocols_ext cd, ONEDATA_WA.admin_item ai
              WHERE     ai.NCI_IDSEQ = cd.proto_IDSEQ
-                   AND proto_IDSEQ = x.ITEM_ID
+                   AND ITEM_ID = x.ITEM_ID
                    AND VERSION = x.VER_NR;
 
         COMMIT;
