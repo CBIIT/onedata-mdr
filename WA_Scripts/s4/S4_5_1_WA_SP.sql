@@ -184,8 +184,7 @@ end;
 
 
 END;
-/
-create or replace PROCEDURE spCreateDECSimple
+/create or replace PROCEDURE spCreateDECSimple
   (
     v_data_in IN CLOB,
     v_data_out OUT CLOB)
@@ -277,7 +276,7 @@ v_t_cncpt_id  t_cncpt_id := t_cncpt_id();
        end if;
        end loop;
               ihook.setColumnValue(rowform, 'GEN_STR',v_dec_nm ) ;
-              ihook.setColumnValue(rowform, 'ADMIN_STUS_ID',66);
+         --     ihook.setColumnValue(rowform, 'ADMIN_STUS_ID',66);
               ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'VALIDATED');
               if (   ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null and ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then
               ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'DUPLICATE DEC');
@@ -288,7 +287,14 @@ v_t_cncpt_id  t_cncpt_id := t_cncpt_id();
         rows.extend;
       rows(rows.last) := rowform;
      rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT');
-     hookOutput.forms := nci_chng_mgmt.getDECCreateForm(rowset);
+       forms                  := t_forms();
+    form1                  := t_form('AI Creation With Concepts', 2,1);
+    form1.rowset :=rowset;
+    forms.extend;    forms(forms.last) := form1;
+  
+     hookOutput.forms := forms;
+  
+     --hookOutput.forms := nci_chng_mgmt.getDECCreateForm(rowset);
      HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECCreateQuestion();
   end if;
    
@@ -304,8 +310,14 @@ v_t_cncpt_id  t_cncpt_id := t_cncpt_id();
       rows.extend;
     rows(rows.last) := rowform;
      rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT');
-     
-    hookOutput.forms := nci_chng_mgmt.getDECCreateForm(rowset);
+       forms                  := t_forms();
+    form1                  := t_form('AI Creation With Concepts', 2,1);
+    form1.rowset :=rowset;
+    forms.extend;    forms(forms.last) := form1;
+  
+     hookOutput.forms := forms;
+  
+    --hookOutput.forms := nci_chng_mgmt.getDECCreateForm(rowset);
     HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECCreateQuestion();
     else -- Validated
   -- Create OC if new
@@ -337,4 +349,4 @@ v_t_cncpt_id  t_cncpt_id := t_cncpt_id();
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
-/
+                                                                                                                                               /
