@@ -2514,7 +2514,7 @@ select admin_item_typ_id from NCI_AI_TYP_VALID_STUS where stus_id = 66);
 commit;
 
 insert into NCI_AI_TYP_VALID_STUS (STUS_ID,ADMIN_ITEM_TYP_ID)
-select 51, stus_id from vw_admin_stus where 
+select stus_id,51 from vw_admin_stus where 
 nci_stus in (
 'APPRVD FOR TRIAL USE',
 'DRAFT MOD',
