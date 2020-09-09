@@ -91,11 +91,6 @@ BEGIN
 END;
 /
 
-
-insert into cntct (cntct_nm, cntct_secu_id) values ('ONEDATA', 'ONEDATA');
-commit;
-
-
 drop trigger TRU_ALT_NMS;
 
 drop trigger TR_NCI_AI_REL_ALT_KEY;
