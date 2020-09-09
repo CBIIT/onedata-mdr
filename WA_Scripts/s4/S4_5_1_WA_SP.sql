@@ -184,7 +184,9 @@ end;
 
 
 END;
-/create or replace PROCEDURE spCreateDECSimple
+/
+                                                   
+              create or replace PROCEDURE spCreateDECSimple
   (
     v_data_in IN CLOB,
     v_data_out OUT CLOB)
