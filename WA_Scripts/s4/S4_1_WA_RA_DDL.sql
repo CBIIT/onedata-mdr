@@ -558,3 +558,20 @@ CNCPT_1_ITEM_ID_6 number null,
        LST_UPD_DT           DATE DEFAULT sysdate NULL
 );
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+
+  CREATE OR REPLACE VIEW VW_NCI_AI AS
+  select 
+	ADMIN_ITEM.ITEM_ID, 
+	ADMIN_ITEM.VER_NR, 
+        '.' || ADMIN_ITEM.ITEM_ID || '.' ITEM_ID_STR,
+	ADMIN_ITEM.CREAT_USR_ID, 
+	ADMIN_ITEM.LST_UPD_USR_ID, 
+	ADMIN_ITEM.FLD_DELETE, 
+	ADMIN_ITEM.LST_DEL_DT, 
+	ADMIN_ITEM.S2P_TRN_DT, 
+	ADMIN_ITEM.LST_UPD_DT, 
+	ADMIN_ITEM.CREAT_DT,
+        ADMIN_ITEM.ITEM_LONG_NM || 	ADMIN_ITEM.ITEM_NM || ADMIN_ITEM.ITEM_DESC  SEARCH_STR
+from ADMIN_ITEM;
+
+			       
