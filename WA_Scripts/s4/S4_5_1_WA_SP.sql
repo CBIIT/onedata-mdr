@@ -4,6 +4,7 @@ function getDECCreateForm (v_rowset in t_rowset) return t_forms;
 procedure createAIWithConcept(rowform in out t_row, idx in integer,v_item_typ_id in integer, actions in out t_actions);
 procedure createDEC (rowform in t_row, actions in out t_actions, v_id out number);
 END;
+/
 create or replace PACKAGE BODY nci_CHNG_MGMT AS
 
 v_err_str      varchar2(1000) := '';
