@@ -1,0 +1,174 @@
+/*
+Create two SQL PLus sessions connecting to ONEDATA DB as users
+ONEDATA_WA
+ONEDATA_RA 
+ONEDATA_MD
+SBR
+SBREXT
+
+Keep all sessions open. 
+Please run following the order exactly.
+
+The scripts with _WA_ token in a name run in ONEDATA_WA, 
+the scripts with _RA_ in a name run in ONEDATA_RA, 
+the scripts with _WA_RA_ in a name run in both ONEDATA_WA and then ONEDATA_RA
+the scripts with _MD in a name run in ONEDATA_MD
+the scripts with _SBREXT in a name run in SBREXT
+the scripts with _SBR in a name run in SBR
+*/
+
+/* Run in ONEDATA_WA */
+S0_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_RA */
+S0_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_WA */
+S0_2_WA_Grants.sql
+
+/* Run in ONEDATA_RA */
+S0_3_RA_Grants.sql
+
+/* Run in ONEDATA_WA */
+S0_4_WA_RA_DML.sql
+
+/* Run in ONEDATA_RA */
+S0_4_WA_RA_DML.sql
+
+/* Run in ONEDATA_WA */
+S0_5_WA_Core_Package.sql
+
+/* Run in ONEDATA_WA */
+S0_6_WA_Triggers.sql
+
+/* Run in ONEDATA_RA */
+S0_7_RA_Triggers.sql
+
+/* Run in ONEDATA_WA */
+S0_8_WA_RA_Views.sql
+
+/* Run in ONEDATA_RA */
+S0_8_WA_RA_Views.sql
+
+/* Run in ONEDATA_WA */
+S0_9_WA_SP.sql
+
+/* Run in ONEDATA_RA */
+S0_10_RA_SP.sql
+
+/* Run in ONEDATA_WA */
+S1_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_RA */
+S1_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_WA */
+S1_2_WA_Grants.sql
+
+/* Run in ONEDATA_RA */
+S1_3_RA_Grants.sql
+
+/* Run in ONEDATA_WA */
+S1_4_WA_RA_DML.sql
+
+/* Run in ONEDATA_RA */
+S1_4_WA_RA_DML.sql
+
+/* Run in ONEDATA_WA */
+S1_5_WA_SP.sql
+
+/* Run in ONEDATA_WA */
+S1_6_WA_Triggers.sql
+
+/* Run in ONEDATA_RA */
+S1_7_RA_Triggers.sql
+
+/* Run in ONEDATA_RA */
+S1_8_RA_SP.sql
+
+/* Run in SBREXT */
+S1_9_SBREXT_DDL.sql
+
+/***** s2 ************/
+/* Run in SBREXT and ignore if you see index exists error message */
+S2_1-1_SBREXT_DDL.sql
+
+/* Run in SBR */
+S2_2-1_SBR_Grants.sql
+
+/* Run in ONEDATA_WA */
+S2_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_RA */
+S2_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_WA */
+S2_2_WA_Grants_Triggers.sql
+
+/* Run in ONEDATA_RA */
+S2_3_RA_Grants.sql
+
+/* Run in ONEDATA_WA */
+S2_5_WA_SP.sql
+
+/* Run in ONEDATA_MD */
+S2_6_MD_SP.sql
+
+/* Run in ONEDATA_WA */
+S2_8_WA_Triggers.sql
+
+/***** s3 ************/
+
+/* Run in ONEDATA_WA */
+S3_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_RA */
+S3_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_WA */
+S3_2_WA_Grants_Triggers.sql
+
+/* Run in SBR */
+S3_2-1_SBR_Grants.sql
+
+/* Run in ONEDATA_RA */
+S3_3_RA_Grants_Triggers.sql
+
+/* Run in ONEDATA_WA */
+S3_5_WA_SP.sql
+
+/* Run in ONEDATA_MD */
+S3_6_MD_SP.sql
+
+/***** s4 ************/
+
+/* Run in ONEDATA_WA */
+S4_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_RA */
+S4_1_WA_RA_DDL.sql
+
+/* Run in ONEDATA_WA */
+S4_2_WA_Grants_Triggers.sql
+
+/* Run in ONEDATA_WA */
+S4_5_WA_SP.sql
+
+/* Run in ONEDATA_WA */
+S4_5_1_WA_SP.sql
+
+/* Run in ONEDATA_WA */
+S4_5_WA_SP.sql
+
+/* Run in ONEDATA_MD */
+S4_6_MD_SP.sql
+
+/* Run in ONEDATA_RA */
+S4_7_RA_SP.sql
+
+/***** W2_Scripts Migration ************/
+/* This is migration. When DDL is all ready run in ONEDATA_WA */
+S3_WA_Data_Migration.sql
+
+/* This is migration. When finished WA migration run in ONEDATA_RA */
+S3_RA_Data_Migration.sql
