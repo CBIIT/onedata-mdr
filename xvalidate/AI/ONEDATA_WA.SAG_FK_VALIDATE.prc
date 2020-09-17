@@ -500,6 +500,75 @@ INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
                      'ONEDATA_WA');
         COMMIT;
 END LOOP;  
+
+--Sprint 5 Tables 
+
+--Check PROTO_IDSEQ relationship in PROTOCOL_QC_EXT/ NCI_ADMIN_ITEM_REL
+
+FOR Y IN (SELECT /*+ PARALEL(12)*/
+           DISTINCT ai3.Item_Id,
+                    ai3.Ver_Nr,
+                    ai3.NCI_IDSEQ,
+                    ai3.ITEM_LONG_NM
+      FROM SBREXT.PROTOCOL_QC_EXT  dae
+           INNER JOIN ONEDATA_WA.admin_item ai3
+               ON     ai3.nci_idseq = proto_idseq --FK 
+               AND ai3.admin_item_typ_id = 50
+                  WHERE NOT  EXISTS
+                              (SELECT *
+                                 FROM ONEDATA_WA.admin_item  ai2
+                                      INNER JOIN ONEDATA_WA.NCI_ADMIN_ITEM_REL dec
+                                          ON   dec.P_ITEM_ID = ai3.Item_Id
+                                             AND dec.P_ITEM_VER_NR = ai3.Ver_Nr
+                                             AND ai2.Nci_Idseq = dae.proto_idseq)) --PK
+    LOOP
+    INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+                 VALUES (SBREXT.ERR_SEQ.NEXTVAL,
+                         Y.NCI_iDSEQ,
+                         Y.Item_Id,
+                         Y.VER_NR,
+                         'PROTO_IDSEQ',
+                         Y.ITEM_LONG_NM,
+                         'DATA MISMATCH',
+                         SYSDATE,
+                         USER,
+                         'NCI_ADMIN_ITEM_REL',
+                         'ONEDATA_WA');
+            COMMIT;
+END LOOP;
+
+--Check QC_IDSEQ relationship in PROTOCOL_QC_EXT/ NCI_ADMIN_ITEM_REL
+FOR Y IN (SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id,
+                ai3.Ver_Nr,
+                ai3.NCI_IDSEQ,
+                ai3.ITEM_LONG_NM
+  FROM SBREXT.PROTOCOL_QC_EXT  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = qc_idseq --FK 
+           AND ai3.admin_item_typ_id = 54
+              WHERE NOT  EXISTS
+                          (SELECT *
+                             FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.NCI_ADMIN_ITEM_REL dec
+                                      ON   dec.C_ITEM_ID = ai3.Item_Id
+                                         AND dec.C_ITEM_VER_NR = ai3.Ver_Nr
+                                         AND ai2.Nci_Idseq = dae.qc_idseq)) --PK
+LOOP
+INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+             VALUES (SBREXT.ERR_SEQ.NEXTVAL,
+                     Y.NCI_iDSEQ,
+                     Y.Item_Id,
+                     Y.VER_NR,
+                     'QC_IDSEQ',
+                     Y.ITEM_LONG_NM,
+                     'DATA MISMATCH',
+                     SYSDATE,
+                     USER,
+                     'NCI_ADMIN_ITEM_REL',
+                     'ONEDATA_WA');
+        COMMIT;
+END LOOP;
                                
 END;
 /
