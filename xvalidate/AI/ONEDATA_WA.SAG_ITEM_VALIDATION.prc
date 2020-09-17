@@ -991,5 +991,792 @@ BEGIN
 
         COMMIT;
     END LOOP;
+    
+--Sprint 5 Tables
+
+--Validate COMPLEX_DATA_ELEMENTS
+FOR x
+            IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                           VER_NR
+                    FROM (SELECT DISTINCT de.ITEM_ID,                          --Primary Keys
+                                           de.VER_NR, DERV_MTHD,
+                            DERV_RUL,
+                            de.DERV_TYP_ID,
+                            de.CONCAT_CHAR,
+                            DERV_DE_IND
+                            from de , admin_item ai, sbr.complex_data_elements  cdr
+                            WHERE de.item_id = ai.item_id
+                           AND de.ver_nr = ai.ver_nr
+                           AND cdr.p_de_idseq = ai.nci_idseq
+                          UNION ALL
+                          SELECT DISTINCT ai.ITEM_ID,                          --Primary Keys
+                                           ai.VER_NR, METHODS,
+                           RULE,
+                           o.obj_key_id,
+                           cdr.CONCAT_CHAR,
+                           1
+                      FROM sbr.complex_data_elements  cdr,
+                           obj_key                    o,
+                           admin_item                 ai
+                     WHERE     cdr.CRTL_NAME = o.nci_cd(+)
+                           AND o.obj_typ_id(+) = 21
+                           AND cdr.p_de_idseq = ai.nci_idseq) t
+                GROUP BY ITEM_ID,
+                         VER_NR
+                  HAVING COUNT (*) <> 2
+                  ORDER BY ITEM_ID, VER_NR)
+        LOOP
+            INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+                SELECT SBREXT.ERR_SEQ.NEXTVAL,
+		                   NCI_IDSEQ,
+		                   de.ITEM_ID,
+		                   de.VER_NR,
+		                   'COMPLEX_DATA_ELEMENTS',
+		                   ITEM_NM,
+		                   'DATA MISMATCH',
+		                   SYSDATE,
+		                   USER,
+		                   'DE',
+		                   'ONEDATA_WA'
+		              FROM ONEDATA_WA.DE,ONEDATA_WA.admin_item ai 
+		             WHERE ai.ITEM_ID=de.ITEM_ID and ai.VER_NR=de.VER_NR
+             AND de.ITEM_ID = x.ITEM_ID AND de.VER_NR = x.VER_NR;
+    
+            COMMIT;
+    END LOOP;
+  
+--Validate  COMPONENT_CONCEPTS_EXT for ADMIN_ITEM_TYP_ID=5
+    FOR x
+            IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                           VER_NR
+                    FROM (Select cncpt_item_id,
+                                      cncpt_ver_nr,
+                                      cai.item_id,
+                                      cai.ver_nr,
+                                      cai.nci_ord,
+                                      cai.nci_prmry_ind,
+                                      nci_cncpt_val,
+                                      cai.CREAT_USR_ID,
+                                      cai.CREAT_DT,
+                                      cai.LST_UPD_DT,
+                                      cai.LST_UPD_USR_ID
+    from cncpt_admin_item cai, admin_item ai
+    where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
+    and ADMIN_ITEM_TYP_ID=5
+    UNION ALL                                  
+    SELECT con.item_id, 
+                   con.ver_nr,
+                   oc.item_id,
+                   oc.ver_nr,
+                   cc.DISPLAY_ORDER,
+                   DECODE (cc.primary_flag_ind,  'Yes', 1,  'No', 0),
+                   concept_value,
+            nvl(cc.created_by,'ONEDATA'),
+                   nvl(cc.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+                   nvl(NVL (cc.date_modified, cc.date_created), to_date('8/18/2020','mm/dd/yyyy')),
+                   nvl(cc.modified_by,'ONEDATA')
+               FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
+                   sbrext.object_classes_ext      oce,
+                   admin_item                     con,
+                   admin_item                     oc
+             WHERE     cc.CONDR_IDSEQ = oce.CONDR_IDSEQ
+                   AND oce.oc_idseq = oc.nci_idseq
+                   AND cc.con_idseq = con.nci_idseq) t
+                GROUP BY ITEM_ID,
+                         VER_NR,
+                         CREAT_DT,
+                         CREAT_USR_ID,
+                         LST_UPD_USR_ID,
+                         LST_UPD_DT,
+                         nci_ord
+                  HAVING COUNT (*) <> 2
+                ORDER BY ITEM_ID, VER_NR)
+        LOOP
+            INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+                SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                       NCI_IDSEQ,
+                       ITEM_ID,
+                       VER_NR,
+                       'COMPONENT_CONCEPTS_EXT',
+                       ITEM_NM,
+                       'DATA MISMATCH OBJECT_CLASSES_EXT',
+                       SYSDATE,
+                       USER,
+                       'CNCPT_ADMIN_ITEM',
+                       'ONEDATA_WA'
+                  FROM ONEDATA_WA.ADMIN_ITEM
+                 WHERE ITEM_id = x.ITEM_ID AND VER_NR = x.VER_NR;
+    
+            COMMIT;
+    END LOOP;
+   
+ --Validate  COMPONENT_CONCEPTS_EXT for ADMIN_ITEM_TYP_ID=6
+    FOR x
+            IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                           VER_NR
+                    FROM (Select cncpt_item_id,
+                                      cncpt_ver_nr,
+                                      cai.item_id,
+                                      cai.ver_nr,
+                                      cai.nci_ord,
+                                      cai.nci_prmry_ind,
+                                      nci_cncpt_val,
+                                      cai.CREAT_USR_ID,
+                                      cai.CREAT_DT,
+                                      cai.LST_UPD_DT,
+                                      cai.LST_UPD_USR_ID
+    from cncpt_admin_item cai, admin_item ai
+    where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
+    and ADMIN_ITEM_TYP_ID=6 --106,987
+    UNION ALL                                  
+    SELECT con.item_id, --106,910
+                   con.ver_nr,
+                   prop.item_id,
+                   prop.ver_nr,
+                   cc.DISPLAY_ORDER,
+                   DECODE (cc.primary_flag_ind,  'Yes', 1,  'No', 0),
+                   concept_value,
+            nvl(cc.created_by,'ONEDATA'),
+                   nvl(cc.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+                   nvl(NVL (cc.date_modified, cc.date_created), to_date('8/18/2020','mm/dd/yyyy')),
+                   nvl(cc.modified_by,'ONEDATA')
+              FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
+                   sbrext.properties_ext          prope,
+                   admin_item                     con,
+                   admin_item                     prop
+             WHERE     cc.CONDR_IDSEQ = prope.CONDR_IDSEQ
+                   AND prope.prop_idseq = prop.nci_idseq
+                   AND cc.con_idseq = con.nci_idseq) t
+                GROUP BY ITEM_ID,
+                         VER_NR,
+                         CREAT_DT,
+                         CREAT_USR_ID,
+                         LST_UPD_USR_ID,
+                         LST_UPD_DT,
+                         nci_ord
+                  HAVING COUNT (*) <> 2
+                ORDER BY ITEM_ID, VER_NR)
+        LOOP
+            INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+                SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                       NCI_IDSEQ,
+                       ITEM_ID,
+                       VER_NR,
+                       'COMPONENT_CONCEPTS_EXT',
+                       ITEM_NM,
+                       'DATA MISMATCH PROPERTIES_EXT',
+                       SYSDATE,
+                       USER,
+                       'CNCPT_ADMIN_ITEM',
+                       'ONEDATA_WA'
+                  FROM ONEDATA_WA.ADMIN_ITEM
+                 WHERE ITEM_id = x.ITEM_ID AND VER_NR = x.VER_NR;
+    
+            COMMIT;
+    END LOOP;
+   
+ --Validate  COMPONENT_CONCEPTS_EXT for ADMIN_ITEM_TYP_ID=7
+    FOR x
+            IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                           VER_NR
+                    FROM (Select cncpt_item_id,
+                                      cncpt_ver_nr,
+                                      cai.item_id,
+                                      cai.ver_nr,
+                                      cai.nci_ord,
+                                      cai.nci_prmry_ind,
+                                      nci_cncpt_val,
+                                      cai.CREAT_USR_ID,
+                                      cai.CREAT_DT,
+                                      cai.LST_UPD_DT,
+                                      cai.LST_UPD_USR_ID
+    from cncpt_admin_item cai, admin_item ai
+    where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
+    and ADMIN_ITEM_TYP_ID=7 --28,142
+    UNION ALL                                  
+    SELECT con.item_id,
+                   con.ver_nr,
+                   rep.item_id,
+                   rep.ver_nr,
+                   cc.DISPLAY_ORDER,
+                   DECODE (cc.primary_flag_ind,  'Yes', 1,  'No', 0),
+                   concept_value,
+            nvl(cc.created_by,'ONEDATA'),
+                   nvl(cc.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+                   nvl(NVL (cc.date_modified, cc.date_created), to_date('8/18/2020','mm/dd/yyyy')),
+                   nvl(cc.modified_by,'ONEDATA')
+              FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
+                   sbrext.representations_ext     repe,
+                   admin_item                     con,
+                   admin_item                     rep
+             WHERE     cc.CONDR_IDSEQ = repe.CONDR_IDSEQ
+                   AND Repe.rep_idseq = rep.nci_idseq
+                   AND cc.con_idseq = con.nci_idseq) t
+                GROUP BY ITEM_ID,
+                         VER_NR,
+                         CREAT_DT,
+                         CREAT_USR_ID,
+                         LST_UPD_USR_ID,
+                         LST_UPD_DT,
+                         nci_ord
+                  HAVING COUNT (*) <> 2
+                ORDER BY ITEM_ID, VER_NR)
+        LOOP
+            INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+                SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                       NCI_IDSEQ,
+                       ITEM_ID,
+                       VER_NR,
+                       'COMPONENT_CONCEPTS_EXT',
+                       ITEM_NM,
+                       'DATA MISMATCH REPRESENTATIONS_EXT',
+                       SYSDATE,
+                       USER,
+                       'CNCPT_ADMIN_ITEM',
+                       'ONEDATA_WA'
+                  FROM ONEDATA_WA.ADMIN_ITEM
+                 WHERE ITEM_id = x.ITEM_ID AND VER_NR = x.VER_NR;
+    
+            COMMIT;
+    END LOOP;
+    
+--Validate  COMPONENT_CONCEPTS_EXT for ADMIN_ITEM_TYP_ID=53    
+    
+    FOR x
+            IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                           VER_NR
+                    FROM (Select cncpt_item_id,
+                                      cncpt_ver_nr,
+                                      cai.item_id,
+                                      cai.ver_nr,
+                                      cai.nci_ord,
+                                      cai.nci_prmry_ind,
+                                      nci_cncpt_val,
+                                      cai.CREAT_USR_ID,
+                                      cai.CREAT_DT,
+                                      cai.LST_UPD_DT,
+                                      cai.LST_UPD_USR_ID
+    from cncpt_admin_item cai, admin_item ai
+    where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
+    and ADMIN_ITEM_TYP_ID=53 --85,641
+    UNION ALL                                  
+    SELECT con.item_id,--85,641
+                   con.ver_nr,
+                   rep.item_id,
+                   rep.ver_nr,
+                   cc.DISPLAY_ORDER,
+                   DECODE (cc.primary_flag_ind,  'Yes', 1,  'No', 0),
+                   concept_value,
+            nvl(cc.created_by,'ONEDATA'),
+                   nvl(cc.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+                   nvl(NVL (cc.date_modified, cc.date_created), to_date('8/18/2020','mm/dd/yyyy')),
+                   nvl(cc.modified_by,'ONEDATA')
+              FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
+                   sbr.value_meanings             vm,
+                   admin_item                     con,
+                   admin_item                     rep
+             WHERE     cc.CONDR_IDSEQ = vm.CONDR_IDSEQ
+                   AND vm.vm_idseq = rep.nci_idseq
+                   AND cc.con_idseq = con.nci_idseq) t
+                GROUP BY ITEM_ID,
+                         VER_NR,
+                         CREAT_DT,
+                         CREAT_USR_ID,
+                         LST_UPD_USR_ID,
+                         LST_UPD_DT,
+                         nci_ord
+                  HAVING COUNT (*) <> 2
+                ORDER BY ITEM_ID, VER_NR)
+        LOOP
+            INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+                SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                       NCI_IDSEQ,
+                       ITEM_ID,
+                       VER_NR,
+                       'COMPONENT_CONCEPTS_EXT',
+                       ITEM_NM,
+                       'DATA MISMATCH VALUE_MEANINGS',
+                       SYSDATE,
+                       USER,
+                       'CNCPT_ADMIN_ITEM',
+                       'ONEDATA_WA'
+                  FROM ONEDATA_WA.ADMIN_ITEM
+                 WHERE ITEM_id = x.ITEM_ID AND VER_NR = x.VER_NR;
+    
+            COMMIT;
+    END LOOP;
+    
+ --Validate  COMPONENT_CONCEPTS_EXT for ADMIN_ITEM_TYP_ID=3   
+  FOR x
+        IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                       VER_NR
+                FROM (Select cncpt_item_id,
+                                  cncpt_ver_nr,
+                                  cai.item_id,
+                                  cai.ver_nr,
+                                  cai.nci_ord,
+                                  cai.nci_prmry_ind,
+                                  nci_cncpt_val,
+                                  cai.CREAT_USR_ID,
+                                  cai.CREAT_DT,
+                                  cai.LST_UPD_DT,
+                                  cai.LST_UPD_USR_ID
+from cncpt_admin_item cai, admin_item ai
+where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
+and ADMIN_ITEM_TYP_ID=3 --85,641
+UNION ALL                                  
+SELECT con.item_id,
+               con.ver_nr,
+               vd.item_id,
+               vd.ver_nr,
+               cc.DISPLAY_ORDER,
+               DECODE (cc.primary_flag_ind,  'Yes', 1,  'No', 0),
+               concept_value,
+        nvl(cc.created_by,'ONEDATA'),
+               nvl(cc.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+               nvl(NVL (cc.date_modified, cc.date_created), to_date('8/18/2020','mm/dd/yyyy')),
+               nvl(cc.modified_by,'ONEDATA')
+          FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
+               sbr.value_domains              vde,
+               admin_item                     con,
+               admin_item                     vd
+         WHERE     cc.CONDR_IDSEQ = vde.CONDR_IDSEQ
+               AND vde.vd_idseq = vd.nci_idseq
+               AND cc.con_idseq = con.nci_idseq) t
+            GROUP BY ITEM_ID,
+                     VER_NR,
+                     CREAT_DT,
+                     CREAT_USR_ID,
+                     LST_UPD_USR_ID,
+                     LST_UPD_DT,
+                     nci_ord
+              HAVING COUNT (*) <> 2
+            ORDER BY ITEM_ID, VER_NR)
+    LOOP
+        INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+            SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                   NCI_IDSEQ,
+                   ITEM_ID,
+                   VER_NR,
+                   'COMPONENT_CONCEPTS_EXT',
+                   ITEM_NM,
+                   'DATA MISMATCH VALUE_DOMAINS',
+                   SYSDATE,
+                   USER,
+                   'CNCPT_ADMIN_ITEM',
+                   'ONEDATA_WA'
+              FROM ONEDATA_WA.ADMIN_ITEM
+             WHERE ITEM_id = x.ITEM_ID AND VER_NR = x.VER_NR;
+
+        COMMIT;
+    END LOOP;
+    
+ --Validate  COMPONENT_CONCEPTS_EXT for ADMIN_ITEM_TYP_ID=1   
+    FOR x
+            IN (  SELECT DISTINCT ITEM_ID,                          --Primary Keys
+                                           VER_NR
+                    FROM (Select cncpt_item_id,
+                                      cncpt_ver_nr,
+                                      cai.item_id,
+                                      cai.ver_nr,
+                                      cai.nci_ord,
+                                      cai.nci_prmry_ind,
+                                      nci_cncpt_val,
+                                      cai.CREAT_USR_ID,
+                                      cai.CREAT_DT,
+                                      cai.LST_UPD_DT,
+                                      cai.LST_UPD_USR_ID
+    from cncpt_admin_item cai, admin_item ai
+    where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
+    and ADMIN_ITEM_TYP_ID=1 
+    UNION ALL                                  
+    SELECT con.item_id,
+                   con.ver_nr,
+                   cd.item_id,
+                   cd.ver_nr,
+                   cc.DISPLAY_ORDER,
+                   DECODE (cc.primary_flag_ind,  'Yes', 1,  'No', 0),
+                   concept_value,
+            nvl(cc.created_by,'ONEDATA'),
+                   nvl(cc.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+                   nvl(NVL (cc.date_modified, cc.date_created), to_date('8/18/2020','mm/dd/yyyy')),
+                   nvl(cc.modified_by,'ONEDATA')
+              FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
+                   sbr.conceptual_domains         cde,
+                   admin_item                     con,
+                   admin_item                     cd
+             WHERE     cc.CONDR_IDSEQ = cde.CONDR_IDSEQ
+                   AND cde.cd_idseq = cd.nci_idseq
+                   AND cc.con_idseq = con.nci_idseq) t
+                GROUP BY ITEM_ID,
+                         VER_NR,
+                         CREAT_DT,
+                         CREAT_USR_ID,
+                         LST_UPD_USR_ID,
+                         LST_UPD_DT,
+                         nci_ord
+                  HAVING COUNT (*) <> 2
+                ORDER BY ITEM_ID, VER_NR)
+        LOOP
+            INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+                SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                       NCI_IDSEQ,
+                       ITEM_ID,
+                       VER_NR,
+                       'COMPONENT_CONCEPTS_EXT',
+                       ITEM_NM,
+                       'DATA MISMATCH CONCEPTUAL_DOMAINS',
+                       SYSDATE,
+                       USER,
+                       'CNCPT_ADMIN_ITEM',
+                       'ONEDATA_WA'
+                  FROM ONEDATA_WA.ADMIN_ITEM
+                 WHERE ITEM_id = x.ITEM_ID AND VER_NR = x.VER_NR;
+    
+            COMMIT;
+    END LOOP;
+ 
+--Validate  PERMISSIBLE_VALUES
+    FOR x
+            IN (  SELECT DISTINCT VAL_DOM_ITEM_ID,
+                              VAL_DOM_VER_NR
+                    FROM (Select PERM_VAL_BEG_DT,
+                              PERM_VAL_END_DT,
+                              PERM_VAL_NM,
+                              PERM_VAL_DESC_TXT,
+                              VAL_DOM_ITEM_ID,
+                              VAL_DOM_VER_NR,
+                              CREAT_DT,
+                              CREAT_USR_ID,
+                              LST_UPD_DT,
+                              LST_UPD_USR_ID,
+                              NCI_VAL_MEAN_ITEM_ID,
+                              NCI_VAL_MEAN_VER_NR,
+                              NCI_IDSEQ
+    from ONEDATA_WA.PERM_VAL
+    UNION ALL                                 
+    SELECT pvs.BEGIN_DATE, 
+                   pvs.END_DATE,
+                   VALUE,
+                   SHORT_MEANING,
+                   vd.item_id,
+                   vd.ver_nr,
+                   nvl(pvs.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+                   nvl(pvs.created_by,'ONEDATA'),
+                   nvl(NVL (pvs.date_modified, pvs.date_created), to_date('8/18/2020','mm/dd/yyyy')),
+                   nvl(pvs.modified_by,'ONEDATA'),
+                   vm.item_id,
+                   vm.ver_nr,
+                   pv.pv_idseq
+              FROM sbr.PERMISSIBLE_VALUES  pv,
+                   admin_item              vm,
+                   admin_item              vd,
+                   sbr.vd_pvs              pvs
+             WHERE     pv.pv_idseq = pvs.pv_idseq
+                   AND pvs.vd_idseq = vd.nci_idseq
+                   AND pv.vm_idseq = vm.nci_idseq) t
+                GROUP BY PERM_VAL_BEG_DT,
+                              PERM_VAL_END_DT,
+                              PERM_VAL_NM,
+                              PERM_VAL_DESC_TXT,
+                              VAL_DOM_ITEM_ID,
+                              VAL_DOM_VER_NR,
+                              CREAT_DT,
+                              CREAT_USR_ID,
+                              LST_UPD_DT,
+                              LST_UPD_USR_ID,
+                              NCI_VAL_MEAN_ITEM_ID,
+                              NCI_VAL_MEAN_VER_NR,
+                              NCI_IDSEQ
+                  HAVING COUNT (*) <> 2
+                ORDER BY VAL_DOM_ITEM_ID,
+                              VAL_DOM_VER_NR)
+        LOOP
+            INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+                SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                       NCI_IDSEQ,
+                       ITEM_ID,
+                       VER_NR,
+                       'PERMISSIBLE_VALUES',
+                       ITEM_NM,
+                       'DATA MISMATCH',
+                       SYSDATE,
+                       USER,
+                       'PERM_VAL',
+                       'ONEDATA_WA'
+                  FROM ONEDATA_WA.ADMIN_ITEM
+                 WHERE ITEM_id = x.VAL_DOM_ITEM_ID AND VER_NR = x.VAL_DOM_VER_NR;
+    
+            COMMIT;
+    END LOOP;
+    
+--Validate QUEST_VV_EXT  
+FOR x
+        IN (  SELECT DISTINCT VV_PUB_ID,
+                                  VV_VER_NR
+                FROM (select DISTINCT VV_PUB_ID,
+                                  VV_VER_NR,
+                                  VAL,
+                                  EDIT_IND,
+                                  REP_SEQ,
+                                  CREAT_USR_ID,
+                                  CREAT_DT,
+                                  LST_UPD_DT,
+                                  LST_UPD_USR_ID
+from NCI_QUEST_VV_REP      
+UNION ALL                                      
+SELECT   DISTINCT vv.NCI_PUB_ID,
+               vv.NCI_VER_NR,
+               qvv.VALUE,
+               DECODE (editable_ind,  'Yes', 1,  'No', 0),
+               repeat_sequence,
+          nvl(qvv.created_by,'ONEDATA'),
+               nvl(qvv.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+             nvl(NVL (qvv.date_modified, qvv.date_created), to_date('8/18/2020','mm/dd/yyyy')),
+               nvl(qvv.modified_by,'ONEDATA')
+          FROM sbrext.QUEST_VV_EXT         qvv,
+               NCI_QUEST_VALID_VALUE       vv
+         WHERE    qvv.vv_idseq = vv.NCI_IDSEQ(+)) t
+            GROUP BY VV_PUB_ID,
+                                  VV_VER_NR,
+                                  VAL,
+                                  EDIT_IND,
+                                  REP_SEQ,
+                                  CREAT_USR_ID,
+                                  CREAT_DT,
+                                  LST_UPD_DT,
+                                  LST_UPD_USR_ID
+              HAVING COUNT (*) <> 2
+              ORDER BY VV_PUB_ID,
+                                  VV_VER_NR)
+LOOP
+        INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+            SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                   NCI_IDSEQ,
+                   NCI_PUB_ID,
+                   NCI_VER_NR,
+                   'QUEST_VV_EXT',
+                   VM_NM,
+                   'DATA MISMATCH',
+                   SYSDATE,
+                   USER,
+                   'NCI_QUEST_VV_REP',
+                   'ONEDATA_WA'
+              FROM ONEDATA_WA.NCI_QUEST_VALID_VALUE 
+             WHERE NCI_PUB_ID = x.VV_PUB_ID AND NCI_VER_NR = x.VV_VER_NR;
+        COMMIT;
+    END LOOP; 
+    
+  --Validate REFERENCE_BLOBS    
+    FOR x
+            IN (  SELECT DISTINCT FILE_NM
+                    FROM (select FILE_NM,
+                             NCI_MIME_TYPE,
+                             NCI_DOC_SIZE,
+                             NCI_CHARSET,
+                             NCI_DOC_LST_UPD_DT,
+                             BLOB_COL,
+                             CREAT_USR_ID,
+                             CREAT_DT,
+                             LST_UPD_USR_ID,
+                             LST_UPD_DT
+    FROM ref_doc
+    UNION ALL                         
+            SELECT rb.NAME,
+                   MIME_TYPE,
+                   DOC_SIZE,
+                   DAD_CHARSET,
+                   LAST_UPDATED,
+                   TO_BLOB(BLOB_CONTENT),
+                   NVL (created_by, 'ONEDATA'),
+                   NVL (date_created, TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                   NVL (modified_by, 'ONEDATA'),
+                   NVL (NVL (date_modified, date_created),
+                        TO_DATE ('8/18/2020', 'mm/dd/yyyy'))
+              FROM  sbr.REFERENCE_BLOBS rb) t
+                GROUP BY FILE_NM,
+                             NCI_MIME_TYPE,
+                             NCI_DOC_SIZE,
+                             NCI_CHARSET,
+                             NCI_DOC_LST_UPD_DT,
+                             CREAT_USR_ID,
+                             CREAT_DT,
+                             LST_UPD_USR_ID,
+                             LST_UPD_DT
+                  HAVING COUNT (*) <> 2
+                  ORDER BY FILE_NM)
+    LOOP
+            INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+                SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                       NULL,
+                       NULL,
+                       NULL,
+                       'REFERENCE_BLOBS',
+                       x.FILE_NM,
+                       'DATA MISMATCH',
+                       SYSDATE,
+                       USER,
+                       'REF_DOC',
+                       'ONEDATA_WA'
+                  FROM DUAL;
+            COMMIT;
+        END LOOP;                                  
+           
+--Validate TA_PROTO_CSI_EXT           
+FOR x
+        IN (  SELECT DISTINCT TA_ID,NCI_PUB_ID,
+                                 NCI_VER_NR
+                FROM (select TA_ID,NCI_PUB_ID,
+                                 NCI_VER_NR,
+                                 CREAT_DT,
+                                 CREAT_USR_ID,
+                                 LST_UPD_USR_ID,
+                                 LST_UPD_DT from NCI_FORM_TA_REL
+UNION ALL                                 
+        SELECT ta.ta_id,
+               ai.item_id,
+               ai.ver_nr,
+               nvl(t.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+          nvl(t.created_by,'ONEDATA'),
+               nvl(t.modified_by,'ONEDATA'),
+             nvl(NVL (t.date_modified, t.date_created), to_date('8/18/2020','mm/dd/yyyy'))
+          FROM nci_form_ta ta, sbrext.TA_PROTO_CSI_EXT t, admin_item ai
+         WHERE     ta.ta_idseq = t.ta_idseq
+               AND t.proto_idseq = ai.nci_idseq
+               AND t.proto_idseq IS NOT NULL) t
+            GROUP BY TA_ID,NCI_PUB_ID,
+                                 NCI_VER_NR,
+                                 CREAT_DT,
+                                 CREAT_USR_ID,
+                                 LST_UPD_USR_ID,
+                                 LST_UPD_DT
+              HAVING COUNT (*) <> 2
+              ORDER BY TA_ID,NCI_PUB_ID,
+                                 NCI_VER_NR)
+LOOP
+        INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+            SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                   NCI_idseq,
+                   item_id,
+                   ver_nr,
+                   'TA_PROTO_CSI_EXT',
+                   ITEM_NM,
+                   'DATA MISMATCH',
+                   SYSDATE,
+                   USER,
+                   'NCI_FORM_TA_REL',
+                   'ONEDATA_WA'
+              FROM  nci_form_ta ta, sbrext.ta_proto_csi_ext t, admin_item ai
+         WHERE     ta.ta_idseq = t.ta_idseq
+               AND t.proto_idseq = ai.nci_idseq
+               AND t.proto_idseq IS NOT NULL and ta_ID=x.ta_ID;
+        COMMIT;
+    END LOOP;        
+
+--Validate  TRIGGERED_ACTIONS_EXT   
+    FOR x
+            IN (  SELECT DISTINCT TA_IDSEQ
+                    FROM (Select 
+                                 TA_INSTR,
+                                 SRC_TYP_NM,
+                                 TRGT_TYP_NM,
+                                 TA_IDSEQ,
+                                 CREAT_DT,
+                                 CREAT_USR_ID,
+                                 LST_UPD_USR_ID,
+                                 LST_UPD_DT From NCI_FORM_TA
+    UNION ALL                             
+     SELECT      TA_INSTRUCTION,
+                   S_QTL_NAME,
+                   T_QTL_NAME,
+                   TA_IDSEQ,
+                   nvl(ta.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+              nvl(ta.created_by,'ONEDATA'),
+                   nvl(ta.modified_by,'ONEDATA'),
+                 nvl(NVL (ta.date_modified, ta.date_created), to_date('8/18/2020','mm/dd/yyyy'))
+              FROM sbrext.TRIGGERED_ACTIONS_EXT  ta) t
+                GROUP BY TA_INSTR,
+                                 SRC_TYP_NM,
+                                 TRGT_TYP_NM,
+                                 TA_IDSEQ,
+                                 CREAT_DT,
+                                 CREAT_USR_ID,
+                                 LST_UPD_USR_ID,
+                                 LST_UPD_DT
+                  HAVING COUNT (*) <> 2
+                  ORDER BY TA_IDSEQ)
+    LOOP
+            INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+                SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                       TA_IDSEQ,
+                       ac1.public_id,
+                       ac1.version,
+                       'TRIGGERED_ACTIONS_EXT',
+                       ac1.PREFERRED_NAME,
+                       'DATA MISMATCH',
+                       SYSDATE,
+                       USER,
+                       'NCI_FORM_TA',
+                       'ONEDATA_WA'
+                  from sbrext.triggered_actions_ext,sbr.administered_components ac1, sbr.administered_components ac2
+                    where ac1.ac_idseq = S_QC_IDSEQ
+                    and ac2.ac_idseq = S_QC_IDSEQ
+                    and TA_IDSEQ=x.TA_IDSEQ;
+            COMMIT;
+        END LOOP;                                  
+           
+--Validate VD_PVS           
+FOR x
+        IN (  SELECT DISTINCT VAL_DOM_ITEM_ID,VAL_DOM_VER_NR,NCI_IDSEQ
+                FROM (select DISTINCT PERM_VAL_BEG_DT, 
+                          PERM_VAL_END_DT,
+                          VAL_DOM_ITEM_ID,
+                          VAL_DOM_VER_NR,
+                          CREAT_USR_ID,                          
+                          CREAT_DT,
+                          LST_UPD_DT,
+                          LST_UPD_USR_ID,
+                          NCI_IDSEQ from  PERM_VAL 
+UNION ALL                          
+        SELECT DISTINCT pvs.BEGIN_DATE,
+               pvs.END_DATE,
+               vd.item_id,
+               vd.ver_nr,
+               nvl(pvs.created_by,'ONEDATA'),
+               nvl(pvs.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
+               nvl(NVL (pvs.date_modified, pvs.date_created), to_date('8/18/2020','mm/dd/yyyy')),
+               nvl(pvs.modified_by,'ONEDATA'),
+               pv.pv_idseq
+          FROM sbr.PERMISSIBLE_VALUES  pv,
+               admin_item              vd,
+               sbr.vd_pvs              pvs
+         WHERE     pv.pv_idseq = pvs.pv_idseq
+               AND pvs.vd_idseq = vd.nci_idseq ) t
+            GROUP BY VAL_DOM_ITEM_ID,VAL_DOM_VER_NR,PERM_VAL_BEG_DT, 
+                          PERM_VAL_END_DT,
+                          CREAT_USR_ID,                          
+                          CREAT_DT,
+                          LST_UPD_DT,
+                          LST_UPD_USR_ID,
+                          NCI_IDSEQ
+              HAVING COUNT (*) <> 2
+              ORDER BY VAL_DOM_ITEM_ID,VAL_DOM_VER_NR,NCI_IDSEQ)
+LOOP
+        INSERT INTO SBREXT.ONEDATA_MIGRATION_ERROR
+            SELECT SBREXT.ERR_SEQ.NEXTVAL,
+                   x.NCI_IDSEQ,
+                   x.VAL_DOM_ITEM_ID,
+                   x.VAL_DOM_VER_NR,
+                   'PERMISSIBLE_VALUES',
+                   NULL,
+                   'DATA MISMATCH',
+                   SYSDATE,
+                   USER,
+                   'PERM_VAL',
+                   'ONEDATA_WA'
+              from dual;
+        COMMIT;
+    END LOOP;       
+    
 END;
 /
