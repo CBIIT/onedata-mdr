@@ -1767,7 +1767,7 @@ LOOP
                    x.NCI_IDSEQ,
                    x.VAL_DOM_ITEM_ID,
                    x.VAL_DOM_VER_NR,
-                   'PERMISSIBLE_VALUES',
+                   'VD_PVS',
                    NULL,
                    'DATA MISMATCH',
                    SYSDATE,
