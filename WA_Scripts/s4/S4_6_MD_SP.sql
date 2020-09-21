@@ -1,7 +1,6 @@
 
 update od_md_objprop set prop_val = 'VIEW' where prop_id = 10001 and obj_id in (select obj_id from od_md_obj where obj_nm = 'Contexts');
 commit;
-
 create or replace procedure sp_create_user
 as
 v_cnt integer;
@@ -55,6 +54,17 @@ commit;
 insert into onedata_ra.cntct (CNTCT_ID,CNTCT_NM,CNTCT_SECU_ID) values (v_cntct_id, cur.name, cur.ua_name);
 commit;
 end loop;
+
+for cur in (select o.obj_nm, s.usr_id from od_md_objsecu s, od_md_obj o  where o.obj_id = s.obj_id and o.schm_id = s.schm_id and o.obj_typ_id = 2 and usr_id not in (select cntct_secu_id from onedata_wa.cntct)
+and o.obj_nm not in (select cntct_nm from onedata_wa.cntct) and o.obj_nm not like 'DELETED%') loop 
+select onedata_wa.od_seq_cntct.nextval into v_cntct_id from dual;
+
+insert into onedata_wa.cntct (CNTCT_ID,CNTCT_NM,CNTCT_SECU_ID) values (v_cntct_id, cur.obj_nm, cur.usr_id);
+commit;
+insert into onedata_ra.cntct (CNTCT_ID,CNTCT_NM,CNTCT_SECU_ID) values (v_cntct_id, cur.obj_nm, cur.usr_id);
+commit;
+end loop;
+
 
 select count(*) into v_cnt from onedata_wa.cntct where cntct_nm = 'ONEDATA';
 
