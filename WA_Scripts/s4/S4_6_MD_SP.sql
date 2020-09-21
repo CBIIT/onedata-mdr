@@ -56,7 +56,7 @@ commit;
 end loop;
 
 for cur in (select o.obj_nm, s.usr_id from od_md_objsecu s, od_md_obj o  where o.obj_id = s.obj_id and o.schm_id = s.schm_id and o.obj_typ_id = 2 and usr_id not in (select cntct_secu_id from onedata_wa.cntct)
-and o.obj_nm not in (select cntct_nm from onedata_wa.cntct) and o.obj_nm not like 'DELETED%') loop 
+ and o.obj_nm not like 'DELETED%') loop 
 select onedata_wa.od_seq_cntct.nextval into v_cntct_id from dual;
 
 insert into onedata_wa.cntct (CNTCT_ID,CNTCT_NM,CNTCT_SECU_ID) values (v_cntct_id, cur.obj_nm, cur.usr_id);
