@@ -1,3 +1,22 @@
+# Create the folloing objects  and jobs on ONEDATA_WA
+AI_INPUT_TAB-Init.sql
+ONEDATA_MIGRATION_ERROR.sql
+ONEDATA_WA.VALIDATE_DATA_MIGRATION
+ONEDATA_WA.VALIDATE_DATA_MIGRATION_STEPS
+
+# Compile the following procedures on ONEDATA_WA
+ONEDATA_WA.SAG_AI_VALIDATION.prc
+ONEDATA_WA.SAG_FK_VALIDATE.prc
+ONEDATA_WA.SAG_ITEM_VALIDATION.prc
+ONEDATA_WA.SAG_MIGR_VAL_LOV_FULL.prc
+
+# execute the scheduled job VALIDATE_DATA_MIGRATION on ONEDATA_WA to start the validation process.
+DBMS_SCHEDULER.RUN_JOB ('VALIDATE_DATA_MIGRATION')
+
+# Validation
+Once the job is complete, check the errors in ONEDATA_MIGRATION_ERROR.
+Based on the error, run the queries from the Migration_Validation_Results.sql file to identify the difference.
+
 # SAG_AI_VALIDATION procedure
 procedure validates the following items in ADMIN_ITEM table.
  1 - CONCEPTUAL DOMAIN
