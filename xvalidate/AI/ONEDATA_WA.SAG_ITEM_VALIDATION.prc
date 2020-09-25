@@ -1736,7 +1736,7 @@ FOR x
                           CREAT_DT,
                           LST_UPD_DT,
                           LST_UPD_USR_ID,
-                          NCI_IDSEQ from  PERM_VAL 
+                          NCI_IDSEQ,NCI_ORIGIN from  PERM_VAL 
 UNION ALL                          
         SELECT DISTINCT pvs.BEGIN_DATE,
                pvs.END_DATE,
@@ -1746,7 +1746,7 @@ UNION ALL
                nvl(pvs.date_created,to_date('8/18/2020','mm/dd/yyyy')) ,
                nvl(NVL (pvs.date_modified, pvs.date_created), to_date('8/18/2020','mm/dd/yyyy')),
                nvl(pvs.modified_by,'ONEDATA'),
-               pv.pv_idseq
+               pv.pv_idseq, pvs.ORIGIN
           FROM sbr.PERMISSIBLE_VALUES  pv,
                admin_item              vd,
                sbr.vd_pvs              pvs
