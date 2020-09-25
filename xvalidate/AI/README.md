@@ -1,4 +1,4 @@
-# Create the folloing objects  and jobs on ONEDATA_WA
+# Create the following objects and jobs on ONEDATA_WA
 AI_INPUT_TAB-Init.sql
 ONEDATA_MIGRATION_ERROR.sql
 ONEDATA_WA.VALIDATE_DATA_MIGRATION.sql
@@ -10,7 +10,7 @@ ONEDATA_WA.SAG_FK_VALIDATE.prc
 ONEDATA_WA.SAG_ITEM_VALIDATION.prc
 ONEDATA_WA.SAG_MIGR_VAL_LOV_FULL.prc
 
-# execute the scheduled job VALIDATE_DATA_MIGRATION on ONEDATA_WA to start the validation process.
+# execute the scheduled job VALIDATE_DATA_MIGRATION on ONEDATA_WA to start the validation process. This can be done though the Toad/SQL Developer or following procedure.
 DBMS_SCHEDULER.RUN_JOB ('VALIDATE_DATA_MIGRATION')
 
 # Validation
