@@ -1,1 +1,2 @@
-steps tocreateCL-CLI-Objects on ONEDATA
+steps to create CS-CSI-Objects for XML on ONEDATA
+1.exec CREATE_MDSR444_OBJECTS_G.sql
