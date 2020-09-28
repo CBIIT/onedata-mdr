@@ -1450,3 +1450,429 @@ UNION ALL
                AND pvs.vd_idseq = vd.nci_idseq
                AND (pv.pv_idseq,vd.item_id,vd.ver_nr) in (select IDSEQ,public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
         where ACTL_NAME='VD_PVS' and DESTINATION='PERMVAL') 
+        ORDER BY VAL_DOM_ITEM_ID,VAL_DOM_VER_NR;
+        
+/*Validate Foriegn Key relationship in ONEDATA_WA.SAG_FK_VALIDATE*/
+/*Rows returned are missing on ONEDATA*/
+
+--Check DATA_ELEMENT_CONCEPT Relationship in DATA_ELEMENTS/DE  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai1.Item_Id DEC_Item_Id, ai1.Ver_Nr DEC_Ver_Nr, dae.DE_IDSEQ
+  FROM sbr.data_elements  dae
+       INNER JOIN ONEDATA_WA.ADMIN_ITEM ai1
+           ON     ai1.nci_idseq = DEC_IDSEQ
+              AND ai1.Nci_Idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'DATA_ELEMENT_CONCEPT'
+                              AND DESTINATION = 'DE')
+MINUS
+SELECT de.De_Conc_Item_Id, de.De_Conc_Ver_Nr, ai2.Nci_Idseq
+  FROM ONEDATA_WA.admin_item  ai2
+       INNER JOIN ONEDATA_WA.de de
+           ON     De.Item_Id = ai2.Item_Id
+              AND De.Ver_Nr = Ai2.Ver_Nr
+              AND (de.De_Conc_Item_Id, de.De_Conc_Ver_Nr) IN
+                      (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'DATA_ELEMENT_CONCEPT'
+                              AND DESTINATION = 'DE')
+ORDER BY DEC_Item_Id, DEC_Ver_Nr;         
+
+
+--Check VALUE_DOMAIN Relationship in DATA_ELEMENTS/DE 
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id VD_Item_Id, ai3.Ver_Nr VD_Ver_Nr, dae.DE_IDSEQ
+  FROM sbr.data_elements  dae
+       INNER JOIN ONEDATA_WA.ADMIN_ITEM ai3
+           ON     ai3.nci_idseq = VD_IDSEQ
+              AND ai3.Nci_Idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'VALUE_DOMAIN'
+                              AND DESTINATION = 'DE')
+MINUS
+SELECT DISTINCT de.VAL_DOM_ITEM_ID, de.VAL_DOM_VER_NR, ai2.Nci_Idseq
+  FROM ONEDATA_WA.admin_item  ai2
+       INNER JOIN ONEDATA_WA.de de
+           ON     De.Item_Id = ai2.Item_Id
+              AND De.Ver_Nr = Ai2.Ver_Nr
+              AND (de.VAL_DOM_ITEM_ID, de.VAL_DOM_VER_NR) IN
+                      (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'VALUE_DOMAIN'
+                              AND DESTINATION = 'DE')
+ORDER BY VD_Item_Id, VD_Ver_Nr;
+
+--Check CONCEPTUAL DOMAIN relationship in DATA_ELEMENT_CONCEPTS/ DE_CONC  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id CONC_DOM_ITEM_ID,
+                ai3.Ver_Nr CONC_DOM_VER_NR,
+                dae.DEC_IDSEQ
+  FROM SBR.DATA_ELEMENT_CONCEPTS  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = CD_IDSEQ
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CONCEPTUAL DOMAIN'
+                              AND DESTINATION = 'DE_CONC')
+              MINUS
+                          SELECT dec.CONC_DOM_ITEM_ID, dec.CONC_DOM_VER_NR,ai2.Nci_Idseq
+                             FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.DE_CONC dec
+                                      ON     dec.Item_Id = ai2.Item_Id
+                                         AND dec.Ver_Nr = Ai2.Ver_Nr
+                                         AND (dec.CONC_DOM_ITEM_ID ,dec.CONC_DOM_VER_NR)
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CONCEPTUAL DOMAIN'
+                              AND DESTINATION = 'DE_CONC')
+ORDER BY CONC_DOM_ITEM_ID, CONC_DOM_VER_NR;                              
+                              
+--Check CONCEPTUAL DOMAIN relationship in VALUE_DOMAINS/ VALUE_DOM  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id CONC_DOM_ITEM_ID,
+                ai3.Ver_Nr CONC_DOM_VER_NR,
+                dae.VD_IDSEQ
+  FROM SBR.VALUE_DOMAINS  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = CD_IDSEQ --FK
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CONCEPTUAL DOMAIN'
+                              AND DESTINATION = 'VALUE_DOM')
+MINUS
+                          SELECT dec.CONC_DOM_ITEM_ID, dec.CONC_DOM_VER_NR,ai2.Nci_Idseq
+                             FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.VALUE_DOM dec
+                                      ON     dec.Item_Id = ai2.Item_Id
+                                         AND dec.Ver_Nr = Ai2.Ver_Nr
+                                         AND (dec.CONC_DOM_ITEM_ID ,dec.CONC_DOM_VER_NR) 
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CONCEPTUAL DOMAIN'
+                              AND DESTINATION = 'VALUE_DOM')  
+ORDER BY CONC_DOM_ITEM_ID, CONC_DOM_VER_NR;  
+
+
+--Check TRGT_OBJ_CLS relationship in OC_RECS_EXT/ NCI_OC_RECS  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id TRGT_OBJ_CLS_ITEM_ID,
+                ai3.Ver_Nr TRGT_OBJ_CLS_VER_NR,
+                dae.OCR_IDSEQ
+  FROM SBREXT.OC_RECS_EXT  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = T_OC_IDSEQ --FK        
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'TRGT_OBJ_CLS'
+                              AND DESTINATION = 'NCI_OC_RECS')
+MINUS
+                          SELECT dec.TRGT_OBJ_CLS_ITEM_ID,dec.TRGT_OBJ_CLS_VER_NR,ai2.Nci_Idseq
+                             FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.NCI_OC_RECS dec
+                                      ON     dec.Item_Id = ai2.Item_Id
+                                         AND dec.Ver_Nr = Ai2.Ver_Nr
+                                         AND (dec.TRGT_OBJ_CLS_ITEM_ID ,dec.TRGT_OBJ_CLS_VER_NR)
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'TRGT_OBJ_CLS'
+                              AND DESTINATION = 'NCI_OC_RECS')  
+ORDER BY TRGT_OBJ_CLS_ITEM_ID ,TRGT_OBJ_CLS_VER_NR; 
+
+
+--Check SRC_OBJ_CLS relationship in OC_RECS_EXT/ NCI_OC_RECS  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id SRC_OBJ_CLS_ITEM_ID,
+                ai3.Ver_Nr SRC_OBJ_CLS_VER_NR,
+                dae.OCR_IDSEQ
+  FROM SBREXT.OC_RECS_EXT  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = S_OC_IDSEQ --FK      
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'SRC_OBJ_CLS'
+                              AND DESTINATION = 'NCI_OC_RECS')
+MINUS
+                          SELECT dec.SRC_OBJ_CLS_ITEM_ID ,dec.SRC_OBJ_CLS_VER_NR,ai2.Nci_Idseq
+                             FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.NCI_OC_RECS dec
+                                      ON     dec.Item_Id = ai2.Item_Id
+                                         AND dec.Ver_Nr = Ai2.Ver_Nr
+                                         AND (dec.SRC_OBJ_CLS_ITEM_ID ,dec.SRC_OBJ_CLS_VER_NR)
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'SRC_OBJ_CLS'
+                              AND DESTINATION = 'NCI_OC_RECS')
+ORDER BY SRC_OBJ_CLS_ITEM_ID ,SRC_OBJ_CLS_VER_NR;    
+
+--Check P_DE relationship in COMPLEX_DE_RELATIONSHIPS/ NCI_ADMIN_ITEM_REL                                                                                                                 
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id P_ITEM_ID,
+                ai3.Ver_Nr P_ITEM_VER_NR,
+                dae.C_DE_IDSEQ
+  FROM SBR.COMPLEX_DE_RELATIONSHIPS  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = P_DE_IDSEQ --FK 736 360                  
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'P_DE'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
+MINUS
+                          SELECT dec.P_ITEM_ID , dec.P_ITEM_VER_NR, ai2.nci_idseq
+                             FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.NCI_ADMIN_ITEM_REL dec
+                                      ON ai2.item_id=dec.C_ITEM_ID
+                                         AND ai2.VER_NR	= dec.C_ITEM_VER_NR
+                                        AND (dec.P_ITEM_ID ,dec.P_ITEM_VER_NR)
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'P_DE'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
+ORDER BY P_ITEM_ID ,P_ITEM_VER_NR;    
+
+--Check C_DE relationship in COMPLEX_DE_RELATIONSHIPS/ NCI_ADMIN_ITEM_REL  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id C_ITEM_ID,
+                ai3.Ver_Nr C_ITEM_VER_NR,
+                dae.P_DE_IDSEQ
+  FROM SBR.COMPLEX_DE_RELATIONSHIPS  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = C_DE_IDSEQ --FK 736 360                  
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'C_DE'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
+MINUS
+                          SELECT dec.C_ITEM_ID , dec.C_ITEM_VER_NR, ai2.nci_idseq
+                             FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.NCI_ADMIN_ITEM_REL dec
+                                      ON ai2.item_id=dec.P_ITEM_ID
+                                         AND ai2.VER_NR	= dec.P_ITEM_VER_NR
+                                        AND (dec.C_ITEM_ID ,dec.C_ITEM_VER_NR)
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'C_DE'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
+ORDER BY C_ITEM_ID ,C_ITEM_VER_NR;  
+
+
+--Check CONTE_IDSEQ relationship in DEFINITIONS/ ALT_DEF  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id CNTXT_ITEM_ID,
+                ai3.Ver_Nr CNTXT_VER_NR,
+                dae.AC_IDSEQ
+  FROM SBR.DEFINITIONS  dae, sbr.Administered_Components  ac, ONEDATA_WA.admin_item ai3
+           WHERE     ai3.nci_idseq = dae.CONTE_IDSEQ --FK
+           AND dae.AC_IDSEQ=ac.AC_IDSEQ
+           AND ai3.admin_item_typ_id = 8
+           AND PUBLIC_ID>0            
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CONTE_IDSEQ'
+                              AND DESTINATION = 'ALT_DEF')
+MINUS
+                          SELECT dec.CNTXT_ITEM_ID,dec.CNTXT_VER_NR,ai2.nci_idseq
+                             FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.ALT_DEF dec
+                                      ON     dec.Item_Id = ai2.Item_Id
+                                         AND dec.Ver_Nr = Ai2.Ver_Nr
+                                         AND (dec.CNTXT_ITEM_ID,dec.CNTXT_VER_NR)
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CONTE_IDSEQ'
+                              AND DESTINATION = 'ALT_DEF')
+ORDER BY CNTXT_ITEM_ID ,CNTXT_VER_NR; 
+
+
+--Check CONTE_IDSEQ relationship in DESIGNATIONS/ ALT_NMS                                                                                        
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id CNTXT_ITEM_ID,
+                ai3.Ver_Nr CNTXT_VER_NR,
+                dae.AC_IDSEQ
+  FROM SBR.DESIGNATIONS  dae, sbr.Administered_Components  ac, ONEDATA_WA.admin_item ai3
+           WHERE     ai3.nci_idseq = dae.CONTE_IDSEQ --FK
+           AND dae.AC_IDSEQ=ac.AC_IDSEQ
+           AND ai3.admin_item_typ_id = 8
+           AND PUBLIC_ID>0           
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CONTE_IDSEQ'
+                              AND DESTINATION = 'ALT_NMS')
+MINUS
+                          SELECT dec.CNTXT_ITEM_ID,dec.CNTXT_VER_NR,ai2.nci_idseq
+                             FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.ALT_NMS dec
+                                      ON     dec.Item_Id = ai2.Item_Id
+                                         AND dec.Ver_Nr = Ai2.Ver_Nr
+                                         AND (dec.CNTXT_ITEM_ID,dec.CNTXT_VER_NR)
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CONTE_IDSEQ'
+                              AND DESTINATION = 'ALT_NMS')
+ORDER BY CNTXT_ITEM_ID ,CNTXT_VER_NR;   
+
+
+--Check CONTE_IDSEQ relationship in REFERENCE_DOCUMENTS/ REF  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id NCI_CNTXT_ITEM_ID,
+                ai3.Ver_Nr NCI_CNTXT_VER_NR,
+                dae.AC_IDSEQ
+  FROM SBR.REFERENCE_DOCUMENTS  dae, sbr.Administered_Components  ac, ONEDATA_WA.admin_item ai3
+           WHERE     ai3.nci_idseq = dae.CONTE_IDSEQ --FK
+           AND dae.AC_IDSEQ=ac.AC_IDSEQ
+           AND ai3.admin_item_typ_id = 8
+           AND PUBLIC_ID>0           
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CONTE_IDSEQ'
+                              AND DESTINATION = 'REF')
+MINUS
+                          SELECT dec.NCI_CNTXT_ITEM_ID,dec.NCI_CNTXT_VER_NR,ai2.nci_idseq
+                                  FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.REF dec
+                                      ON     dec.Item_Id = ai2.Item_Id
+                                         AND dec.Ver_Nr = Ai2.Ver_Nr
+                                         AND (dec.NCI_CNTXT_ITEM_ID ,dec.NCI_CNTXT_VER_NR)
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CONTE_IDSEQ'
+                              AND DESTINATION = 'REF')
+ORDER BY NCI_CNTXT_ITEM_ID ,NCI_CNTXT_VER_NR;
+
+
+--Check VM_IDSEQ relationship in CD_VMS/ CONC_DOM_VAL_MEAN  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id NCI_VAL_MEAN_ITEM_ID,
+                ai3.Ver_Nr NCI_VAL_MEAN_VER_NR,
+                dae.CD_IDSEQ
+  FROM SBR.CD_VMS  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = VM_IDSEQ          
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'VM_IDSEQ'
+                              AND DESTINATION = 'CONC_DOM_VAL_MEAN')
+MINUS
+                          SELECT dec.NCI_VAL_MEAN_ITEM_ID,dec.NCI_VAL_MEAN_VER_NR,ai2.nci_idseq
+                                  FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.CONC_DOM_VAL_MEAN dec
+                                      ON     dec.CONC_DOM_ITEM_ID = ai2.Item_Id
+                                         AND dec.CONC_DOM_VER_NR = Ai2.Ver_Nr
+                                         AND (dec.NCI_VAL_MEAN_ITEM_ID ,dec.NCI_VAL_MEAN_VER_NR)
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'VM_IDSEQ'
+                              AND DESTINATION = 'CONC_DOM_VAL_MEAN')
+ORDER BY NCI_VAL_MEAN_ITEM_ID ,NCI_VAL_MEAN_VER_NR;                               
+
+
+--Check CSI_IDSEQ relationship in CS_CSI/ NCI_ADMIN_ITEM_REL_ALT_KEY  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id C_ITEM_ID,
+                ai3.Ver_Nr C_ITEM_VER_NR,
+                dae.CS_IDSEQ
+FROM SBR.CS_CSI  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = CSI_IDSEQ --FK      
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CSI_IDSEQ'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL_ALT_KEY')
+MINUS
+                          SELECT dec.C_ITEM_ID,dec.C_ITEM_VER_NR,ai2.nci_idseq
+                                  FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.NCI_ADMIN_ITEM_REL_ALT_KEY dec
+                                      ON     dec.CNTXT_CS_ITEM_ID = ai2.Item_Id
+                                         AND dec.CNTXT_CS_VER_NR = Ai2.Ver_Nr
+                                         AND (dec.C_ITEM_ID,dec.C_ITEM_VER_NR)
+                                         IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'CSI_IDSEQ'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL_ALT_KEY')
+ORDER BY C_ITEM_ID ,C_ITEM_VER_NR;   
+
+--Check AC_IDSEQ relationship in AC_CSI/ NCI_ALT_KEY_ADMIN_ITEM_REL  
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id C_ITEM_ID,
+                ai3.Ver_Nr C_ITEM_VER_NR,
+                dae.AC_IDSEQ
+  FROM SBR.AC_CSI  dae
+       INNER JOIN ONEDATA_WA.admin_item ai3
+           ON     ai3.nci_idseq = AC_IDSEQ  
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'AC_IDSEQ'
+                              AND DESTINATION = 'NCI_ALT_KEY_ADMIN_ITEM_REL')
+MINUS
+                          SELECT dec.C_ITEM_ID,dec.C_ITEM_VER_NR,ai2.nci_idseq
+                                  FROM ONEDATA_WA.admin_item  ai2
+                                  INNER JOIN ONEDATA_WA.NCI_ALT_KEY_ADMIN_ITEM_REL dec
+                                      ON (dec.C_ITEM_ID,dec.C_ITEM_VER_NR)
+                                        IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'AC_IDSEQ'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL_ALT_KEY')
+ORDER BY C_ITEM_ID ,C_ITEM_VER_NR;  
+
+--Check PROTO_IDSEQ relationship in PROTOCOL_QC_EXT/ NCI_ADMIN_ITEM_REL
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id P_ITEM_ID,
+                ai3.Ver_Nr P_ITEM_VER_NR,
+                dae.PROTO_IDSEQ
+  FROM SBREXT.PROTOCOL_QC_EXT  dae
+           INNER JOIN ONEDATA_WA.admin_item ai3
+               ON     ai3.nci_idseq = proto_idseq --FK 
+               AND ai3.admin_item_typ_id = 50
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'PROTO_IDSEQ'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
+MINUS
+                          SELECT dec.P_ITEM_ID,dec.P_ITEM_VER_NR,ai2.nci_idseq
+                                  FROM ONEDATA_WA.admin_item  ai2
+                                      INNER JOIN ONEDATA_WA.NCI_ADMIN_ITEM_REL dec
+                                          ON   (dec.P_ITEM_ID,dec.P_ITEM_VER_NR)
+                                        IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'PROTO_IDSEQ'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
+ORDER BY P_ITEM_ID,P_ITEM_VER_NR;
+
+--Check QC_IDSEQ relationship in PROTOCOL_QC_EXT/ NCI_ADMIN_ITEM_REL
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id C_ITEM_ID,
+                ai3.Ver_Nr C_ITEM_VER_NR,
+                dae.QC_IDSEQ
+  FROM SBREXT.PROTOCOL_QC_EXT  dae
+           INNER JOIN ONEDATA_WA.admin_item ai3
+               ON     ai3.nci_idseq = QC_IDSEQ --FK 
+               AND ai3.admin_item_typ_id = 54
+           AND ai3.nci_idseq IN
+                      (SELECT idseq
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'QC_IDSEQ'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
+MINUS
+                          SELECT dec.C_ITEM_ID,dec.C_ITEM_VER_NR,ai2.nci_idseq
+                                  FROM ONEDATA_WA.admin_item  ai2
+                                      INNER JOIN ONEDATA_WA.NCI_ADMIN_ITEM_REL dec
+                                          ON   (dec.C_ITEM_ID,dec.C_ITEM_VER_NR)
+                                        IN (SELECT public_id, version
+                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE     ACTL_NAME = 'QC_IDSEQ'
+                              AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
+ORDER BY C_ITEM_ID,C_ITEM_VER_NR;                                                                                                                    
