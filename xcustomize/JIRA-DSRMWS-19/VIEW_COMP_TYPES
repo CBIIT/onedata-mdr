@@ -1,0 +1,27 @@
+DROP TYPE ONEDATA_WA.CDEBROWSER_VD_T749;
+
+CREATE OR REPLACE TYPE ONEDATA_WA.CDEBROWSER_VD_T749                                          AS OBJECT
+( "PublicId"         NUMBER,
+  "PreferredName"          VARCHAR2 (30),
+  "PreferredDefinition"    VARCHAR2 (2000),
+  "LongName"      VARCHAR2(255),
+  "Version"                NUMBER (4,2),
+  "WorkflowStatus"         VARCHAR2 (20),
+  "ContextName"         VARCHAR2 (30),
+  "ContextVersion"     NUMBER (4,2),
+  "ConceptualDomain"    admin_component_with_id_ln_t,
+  "Datatype"               VARCHAR2 (20),
+  "ValueDomainType"        VARCHAR2 (50),
+  "UnitOfMeasure"          VARCHAR2 (20),
+  "DisplayFormat"          VARCHAR2 (20),
+  "MaximumLength"          NUMBER (8),
+  "MinimumLength"          NUMBER (8),
+  "DecimalPlace"           NUMBER (2),
+  "CharacterSetName"       VARCHAR2 (20),
+  "MaximumValue"           VARCHAR2 (255),
+  "MinimumValue"           VARCHAR2 (255),
+  "Origin"    VARCHAR2(240),
+ "Representation"    admin_component_with_con_t,
+  "PermissibleValues"     MDSR_749_PV_VD_LIST_T,
+ "ValueDomainConcepts"    Concepts_list_t
+);
