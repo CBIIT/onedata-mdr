@@ -14,8 +14,7 @@ ONEDATA_WA.SAG_MIGR_VAL_LOV_FULL.prc
 DBMS_SCHEDULER.RUN_JOB ('VALIDATE_DATA_MIGRATION')  
 
 # Validation
-Once the job is complete, check the errors in ONEDATA_MIGRATION_ERROR.
-Test  
+Once the job is complete, check the errors in ONEDATA_MIGRATION_ERROR.   
 Based on the error, run the queries from the Migration_Validation_Results.sql file to identify the difference.  
 
 # SAG_AI_VALIDATION procedure
