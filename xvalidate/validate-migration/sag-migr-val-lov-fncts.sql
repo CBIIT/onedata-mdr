@@ -21,7 +21,7 @@ BEGIN
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY,
                              NCI_DISP_ORDR DISPLAY_ORDER
-              FROM ONEDATA_WA.Stus_Mstr where STUS_TYP_ID = 2) t
+              FROM Stus_Mstr where STUS_TYP_ID = 2) t
       GROUP BY ASL_NAME,
                      DESCRIPTION,
                      COMMENTS,
@@ -55,7 +55,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=23) t
+              FROM OBJ_KEY where OBJ_TYP_ID=23) t
       GROUP BY CONCEPT_SOURCE,
                      DESCRIPTION,
                      CREATED_BY,
@@ -67,7 +67,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONWEDATA_A.SAG_FUNC_MIGR_CONC_SOURC_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_CONC_SOURC_LOV to SBREXT;
 create or replace FUNCTION SAG_FUNC_MIGR_CS_TYPES_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -89,7 +89,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=3) t
+              FROM OBJ_KEY where OBJ_TYP_ID=3) t
       GROUP BY CSTL_NAME,
                      DESCRIPTION,
                      COMMENTS,
@@ -102,7 +102,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_CS_TYPES_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_CS_TYPES_LOV to SBREXT;
 create or replace FUNCTION SAG_FUNC_MIGR_CSI_TYPES_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -124,7 +124,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=20) t
+              FROM OBJ_KEY where OBJ_TYP_ID=20) t
       GROUP BY CSITL_NAME,
                      DESCRIPTION,
                      COMMENTS,
@@ -137,7 +137,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_CSI_TYPES_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_CSI_TYPES_LOV to SBREXT;
 CREATE OR REPLACE FUNCTION SAG_FUNC_MIGR_DATA_TP_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -165,7 +165,7 @@ BEGIN
                              DTTYPE_SCHM_REF SCHEME_REFERENCE,
                              DTTYPE_ANNTTN ANNOTATION
                              --, where is CODEGEN_COMPATIBILITY_IND
-              FROM ONEDATA_WA.DATA_TYP where nci_dttype_typ_id = 1) t
+              FROM DATA_TYP where nci_dttype_typ_id = 1) t
       GROUP BY DTL_NAME,
                      DESCRIPTION,
                      COMMENTS,
@@ -180,7 +180,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_DATA_TP_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_DATA_TP_LOV to SBREXT;
 CREATE OR REPLACE FUNCTION SAG_FUNC_MIGR_VAL_DEFIN_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -202,7 +202,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=15) t
+              FROM OBJ_KEY where OBJ_TYP_ID=15) t
       GROUP BY DEFL_NAME,
                      DESCRIPTION,
                      COMMENTS,
@@ -215,7 +215,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_VAL_DEFIN_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_VAL_DEFIN_LOV to SBREXT;
 CREATE OR REPLACE FUNCTION SAG_FUNC_MIGR_DERIV_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -235,7 +235,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=21) t
+              FROM OBJ_KEY where OBJ_TYP_ID=21) t
       GROUP BY CRTL_NAME,
                      DESCRIPTION,
                      CREATED_BY,
@@ -247,7 +247,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_DERIV_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_DERIV_LOV to SBREXT;
 CREATE OR REPLACE FUNCTION SAG_FUNC_MIGR_VAL_DESIG_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -269,7 +269,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=11) t
+              FROM OBJ_KEY where OBJ_TYP_ID=11) t
       GROUP BY DETL_NAME,
                      DESCRIPTION,
                      COMMENTS,
@@ -282,7 +282,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_VAL_DESIG_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_VAL_DESIG_LOV to SBREXT;
 create or replace FUNCTION SAG_FUNC_MIGR_VAL_DOC_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -304,7 +304,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=1) t
+              FROM OBJ_KEY where OBJ_TYP_ID=1) t
       GROUP BY DCTL_NAME,
                      DESCRIPTION,
                      COMMENTS,
@@ -317,7 +317,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_VAL_DOC_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_VAL_DOC_LOV to SBREXT;
 CREATE OR REPLACE FUNCTION SAG_FUNC_MIGR_FORMAT_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -339,7 +339,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.FMT) t
+              FROM FMT) t
       GROUP BY FORML_NAME,
                      DESCRIPTION,
                      COMMENTS,
@@ -352,7 +352,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_FORMAT_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_FORMAT_LOV to SBREXT;
 CREATE OR REPLACE FUNCTION SAG_FUNC_MIGR_LANG_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -372,7 +372,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              Nvl (LST_UPD_DT, CREAT_DT) DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.LANG) t
+              FROM LANG) t
       GROUP BY NAME,
                      DESCRIPTION,
                      CREATED_BY,
@@ -384,7 +384,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_LANG_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_LANG_LOV to SBREXT;
 create or replace FUNCTION SAG_FUNC_MIGR_VAL_ORG_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -408,7 +408,7 @@ BEGIN
                              norg.CREAT_DT DATE_CREATED,
                              Nvl (norg.LST_UPD_DT, norg.CREAT_DT) DATE_MODIFIED,
                              norg.LST_UPD_USR_ID MODIFIED_BY
-                        FROM ONEDATA_WA.NCI_ORG norg inner join ONEDATA_WA.NCI_ENTTY en on Norg.Entty_Id = En.Entty_Id where En.Entty_Typ_Id = 72) t
+                        FROM NCI_ORG norg inner join NCI_ENTTY en on Norg.Entty_Id = En.Entty_Id where En.Entty_Typ_Id = 72) t
       GROUP BY ORG_IDSEQ,
                      NAME,
                      RA_IND,
@@ -422,7 +422,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_VAL_ORG_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_VAL_ORG_LOV to SBREXT;
 CREATE OR REPLACE FUNCTION SAG_FUNC_MIGR_ORIGIN_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -442,7 +442,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=18) t
+              FROM OBJ_KEY where OBJ_TYP_ID=18) t
       GROUP BY SRC_NAME,
                      DESCRIPTION,
                      CREATED_BY,
@@ -454,7 +454,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_ORIGIN_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_ORIGIN_LOV to SBREXT;
 create or replace FUNCTION SAG_FUNC_MIGR_VAL_PA_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -476,7 +476,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=14) t
+              FROM OBJ_KEY where OBJ_TYP_ID=14) t
       GROUP BY PAL_NAME,
                      DESCRIPTION,
                      COMMENTS,
@@ -489,7 +489,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_VAL_PA_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_VAL_PA_LOV to SBREXT;
 create or replace FUNCTION SAG_FUNC_MIGR_VAL_QCDL_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -511,7 +511,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=22) t
+              FROM OBJ_KEY where OBJ_TYP_ID=22) t
       GROUP BY QCDL_NAME,
                      DESCRIPTION,
                      --DISPLAY_ORDER,
@@ -524,7 +524,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_VAL_QCDL_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_VAL_QCDL_LOV to SBREXT;
 CREATE OR REPLACE FUNCTION SAG_FUNC_MIGR_VAL_REG_ST_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -549,7 +549,7 @@ BEGIN
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY,
                              NCI_DISP_ORDR DISPLAY_ORDER
-              FROM ONEDATA_WA.Stus_Mstr where STUS_TYP_ID = 1) t
+              FROM Stus_Mstr where STUS_TYP_ID = 1) t
       GROUP BY REGISTRATION_STATUS,
                      DESCRIPTION,
                      COMMENTS,
@@ -563,7 +563,7 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_VAL_REG_ST_LOV to SBREXT;
+GRANT EXECUTE ON SAG_FUNC_MIGR_VAL_REG_ST_LOV to SBREXT;
 CREATE OR REPLACE FUNCTION SAG_FUNC_MIGR_UOM_LOV RETURN SYS_REFCURSOR
 AS
   c SYS_REFCURSOR;
@@ -587,7 +587,7 @@ BEGIN
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.UOM) t
+              FROM UOM) t
       GROUP BY UOML_NAME,
                      DESCRIPTION,
                      PRECISION,
@@ -601,12 +601,4 @@ BEGIN
   RETURN c;
 END;
 /
-GRANT EXECUTE ON ONEDATA_WA.SAG_FUNC_MIGR_UOM_LOV to SBREXT;
-
-
-
-
-
-
-
-
+GRANT EXECUTE ON SAG_FUNC_MIGR_UOM_LOV to SBREXT;
