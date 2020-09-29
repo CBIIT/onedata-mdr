@@ -15,6 +15,7 @@ DBMS_SCHEDULER.RUN_JOB ('VALIDATE_DATA_MIGRATION')
 
 # Validation
 Once the job is complete, check the errors in ONEDATA_MIGRATION_ERROR.
+Test
 Based on the error, run the queries from the Migration_Validation_Results.sql file to identify the difference.  
 
 # SAG_AI_VALIDATION procedure
