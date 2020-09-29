@@ -18,7 +18,7 @@ Once the job is complete, check the errors in ONEDATA_MIGRATION_ERROR.
 Based on the error, run the queries from the Migration_Validation_Results.sql file to identify the difference.  
 
 # SAG_AI_VALIDATION procedure
-procedure validates the following items in ADMIN_ITEM table.
+procedure validates the following items in ADMIN_ITEM table.  
  1 - CONCEPTUAL DOMAIN  
  2 - DATA ELEMENT CONCEPT  
  3 - VALUE DOMAIN  
