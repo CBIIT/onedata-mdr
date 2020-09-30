@@ -1,0 +1,27 @@
+Steps 1, 2, 3 shall be done once in a schema. They create DB objects.
+Step 4 shall be run each time we need a validation. This is validation itself.
+
+1. Prepare scripts in your directory
+Copy all scripts to the same SQL Plus or Toad script directory to simplify calling script files from this GIT scripts directory
+
+
+2. 
+Run in ONEDATA_WA and ignore errors if any that an object exists.
+ONEDATA_MIGRATION_ERROR.sql
+
+3. DDL
+Run in ONEDATA_WA the next scripts.
+
+sag-migr-val-lov-fncts.sql
+AI_INPUT_TAB-Init.sql
+SAG_AI_VALIDATION.prc
+SAG_FK_VALIDATE.prc
+SAG_ITEM_VALIDATION.prc
+SAG_MIGR_VAL_LOV_FULL.prc
+VALIDATE_DATA_MIGRATION_STEPS.sql
+VALIDATE_DATA_MIGRATION.sql
+
+4.
+Run validate job manually
+
+exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
