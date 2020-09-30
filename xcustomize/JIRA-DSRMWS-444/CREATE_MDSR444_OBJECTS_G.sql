@@ -200,152 +200,168 @@ GRANT EXECUTE, DEBUG ON MDSR759_XML_CS_L5_LIST_T TO PUBLIC
 /
 GRANT EXECUTE, DEBUG ON MDSR759_XML_Context_T1 TO PUBLIC
 /
-CREATE OR REPLACE FORCE VIEW MDSR444XML_5CSI_LEVEL_VIEW
+DROP VIEW ONEDATA_WA.MDSR444XML_5CSI_LEVEL_VIEW;
+
+/* Formatted on 9/28/2020 10:44:13 AM (QP5 v5.354) */
+CREATE OR REPLACE FORCE VIEW ONEDATA_WA.MDSR444XML_5CSI_LEVEL_VIEW
 (
     "PreferredName",
     "Version",
     "ClassificationList"
 )
+BEQUEATH DEFINER
 AS
     SELECT CS_CONTEXT_NAME,
            CS_CONTEXT_VERSION,
-           CAST (
-               MULTISET (  SELECT CS_ID,
-                                  PREFERRED_NAME,
-                                  LONG_NAME,
-                                  VERSION,
-								  cs_date_created,
-                                  CAST (
-                                      MULTISET (
-                                            SELECT v1.CSI_LEVEL,
-                                                   v1.CSI_NAME,
-                                                   v1.CSITL_NAME,
-                                                   v1.CSI_ID,
-                                                   v1.CSI_VERSION,
-												   v1.csi_date_created,
-                                                   v1.CSI_IDSEQ,
-                                                   '',
-                                                   NULL,
-                                                   '',
-                                                   v1.LEAF,
-                                                   CAST (
-                                                       MULTISET (
-                                                             SELECT v2.CSI_LEVEL,
-                                                                    v2.CSI_NAME,
-                                                                    v2.CSITL_NAME,
-                                                                    v2.CSI_ID,
-                                                                    v2.CSI_VERSION,
-																	v2.csi_date_created,
-                                                                    v2.CSI_IDSEQ,
-                                                                    v2.PARENT_CSI_IDSEQ,
-                                                                    v1.CSI_ID,
-                                                                    v1.CSI_VERSION,
-                                                                    v2.LEAF,
-                                                                    CAST (
-                                                                        MULTISET (
-                                                                              SELECT v3.CSI_LEVEL,
-                                                                                     v3.CSI_NAME,
-                                                                                     v3.CSITL_NAME,
-                                                                                     v3.CSI_ID,
-                                                                                     v3.CSI_VERSION,
-																					 v3.csi_date_created,
-                                                                                     v3.CSI_IDSEQ,
-                                                                                     v3.PARENT_CSI_IDSEQ,
-                                                                                     v2.CSI_ID,
-                                                                                     v2.CSI_VERSION,
-                                                                                     v3.LEAF,
-                                                                                     CAST (
-                                                                                         MULTISET (
-                                                                                               SELECT v4.CSI_LEVEL,
-                                                                                                      v4.CSI_NAME,
-                                                                                                      v4.CSITL_NAME,
-                                                                                                      v4.CSI_ID,
-                                                                                                      v4.CSI_VERSION,
-																									  v4.csi_date_created,
-                                                                                                      v4.CSI_IDSEQ,
-                                                                                                      v4.PARENT_CSI_IDSEQ,
-                                                                                                      v3.CSI_ID,
-                                                                                                      v3.CSI_VERSION,
-                                                                                                      v4.LEAF,
-                                                                                                      CAST (
-                                                                                                          MULTISET (
-                                                                                                                SELECT v5.CSI_LEVEL,
-                                                                                                                       v5.CSI_NAME,
-                                                                                                                       v5.CSITL_NAME,
-                                                                                                                       v5.CSI_ID,
-                                                                                                                       v5.CSI_VERSION,
- v5.csi_date_created,                                                                                                                      v5.CSI_IDSEQ,
-                                                                                                                       v5.PARENT_CSI_IDSEQ,
-                                                                                                                       v4.CSI_ID,
-                                                                                                                       v4.CSI_VERSION,
-                                                                                                                       v5.LEAF
-                                                                                                                  FROM REL_CLASS_SCHEME_ITEM_VW
-                                                                                                                       v5
-                                                                                                                 --   ,(select* from  REL_CLASS_SCHEME_ITEM_VW  where CSI_LEVEL=4)v4
-                                                                                                                 WHERE     v5.PARENT_CSI_IDSEQ =
-                                                                                                                           v4.CS_CSI_IDSEQ
-                                                                                                                       AND v5.CSI_LEVEL =
-                                                                                                                           5
-                                                                                                              --   group by csi.CSI_LEVEL,   csi.CSI_ID
-                                                                                                              ORDER BY v5.CSI_ID)
-                                                                                                              AS MDSR759_XML_CSI_LIST5_T)
-                                                                                                          "level5"
-                                                                                                 FROM REL_CLASS_SCHEME_ITEM_VW
-                                                                                                      V4
-                                                                                                WHERE     V4.CSI_LEVEL =
-                                                                                                          4
-                                                                                                      AND v4.PARENT_CSI_IDSEQ =
-                                                                                                          v3.CS_CSI_IDSEQ
-                                                                                             ORDER BY v4.CSI_ID)
-                                                                                             AS MDSR759_XML_CSI_LIST4_T)
-                                                                                         "level4"
-                                                                                FROM REL_CLASS_SCHEME_ITEM_VW
-                                                                                     V3
-                                                                               WHERE     CSI_LEVEL =
-                                                                                         3 --4551586
-                                                                                     AND v3.PARENT_CSI_IDSEQ =
-                                                                                         v2.CS_CSI_IDSEQ
-                                                                            ORDER BY v3.CSI_ID)
-                                                                            AS MDSR759_XML_CSI_LIST3_T)
-                                                                        "level3"
-                                                               FROM REL_CLASS_SCHEME_ITEM_VW
-                                                                    V2
-                                                              WHERE     CSI_LEVEL =
-                                                                        2
-                                                                    AND v2.PARENT_CSI_IDSEQ =
-                                                                        v1.CS_CSI_IDSEQ
-                                                           ORDER BY v2.CSI_ID)
-                                                           AS MDSR759_XML_CSI_LIST2_T)    "level2"
-                                              FROM REL_CLASS_SCHEME_ITEM_VW
-                                                   V1
-                                             WHERE     CSI_LEVEL = 1
-                                                   AND V1.CS_IDSEQ =
-                                                       cl.CS_IDSEQ
-                                          ORDER BY v1.CSI_ID)
-                                          AS MDSR759_XML_CSI_LIST1_T)    "ClassificationItemList"
-                             FROM (SELECT DISTINCT CS_IDSEQ,
-                                                   CS_ID,
-                                                   PREFERRED_NAME,
-                                                   LONG_NAME,
-                                                   PREFERRED_DEFINITION,
-                                                   VERSION,
-												   CS_DATE_CREATED,
-                                                   ASL_NAME,
-                                                   CS_CONTEXT_NAME,
-                                                   CS_CONTEXT_VERSION,
-                                                   conte_idseq
-                                     FROM REL_CLASS_SCHEME_ITEM_VW) cl
-                            WHERE cl.conte_idseq = con.CONTEXT_ID
-                         ORDER BY CS_ID) AS MDSR759_XML_CS_L5_LIST_T)    "ClassificationList"
+           CAST (MULTISET (  SELECT CS_ID,
+                                    PREFERRED_NAME,
+                                    LONG_NAME,
+                                    CS_VERSION,
+                                    cs_date_created,
+                                    CAST (
+                                        MULTISET (
+                                              SELECT v1.CSI_LEVEL,
+                                                     v1.CSI_NAME,
+                                                     v1.CSITL_NAME,
+                                                     v1.CSI_ID,
+                                                     v1.CSI_VERSION,
+                                                     v1.csi_date_created,
+                                                     A.NCI_IDSEQ,
+                                                     '',
+                                                     NULL,
+                                                     '',
+                                                     v1.LEAF,
+                                                     CAST (
+                                                         MULTISET (
+                                                               SELECT v2.CSI_LEVEL,
+                                                                      v2.CSI_NAME,
+                                                                      v2.CSITL_NAME,
+                                                                      v2.CSI_ID,
+                                                                      v2.CSI_VERSION,
+                                                                      v2.csi_date_created,
+                                                                      A.NCI_IDSEQ,
+                                                                      v2.PARENT_CSI_IDSEQ,
+                                                                      v1.CSI_ID,
+                                                                      v1.CSI_VERSION,
+                                                                      v2.LEAF,
+                                                                      CAST (
+                                                                          MULTISET (
+                                                                                SELECT v3.CSI_LEVEL,
+                                                                                       v3.CSI_NAME,
+                                                                                       v3.CSITL_NAME,
+                                                                                       v3.CSI_ID,
+                                                                                       v3.CSI_VERSION,
+                                                                                       v3.csi_date_created,
+                                                                                       A.NCI_IDSEQ,
+                                                                                       v3.PARENT_CSI_IDSEQ,
+                                                                                       v2.CSI_ID,
+                                                                                       v2.CSI_VERSION,
+                                                                                       v3.LEAF,
+                                                                                       CAST (
+                                                                                           MULTISET (
+                                                                                                 SELECT v4.CSI_LEVEL,
+                                                                                                        v4.CSI_NAME,
+                                                                                                        v4.CSITL_NAME,
+                                                                                                        v4.CSI_ID,
+                                                                                                        v4.CSI_VERSION,
+                                                                                                        v4.csi_date_created,
+                                                                                                        A.NCI_IDSEQ,
+                                                                                                        v4.PARENT_CSI_IDSEQ,
+                                                                                                        v3.CSI_ID,
+                                                                                                        v3.CSI_VERSION,
+                                                                                                        v4.LEAF,
+                                                                                                        CAST (
+                                                                                                            MULTISET (
+                                                                                                                  SELECT v5.CSI_LEVEL,
+                                                                                                                         v5.CSI_NAME,
+                                                                                                                         v5.CSITL_NAME,
+                                                                                                                         v5.CSI_ID,
+                                                                                                                         v5.CSI_VERSION,
+                                                                                                                         v5.csi_date_created,
+                                                                                                                         A.NCI_IDSEQ,
+                                                                                                                         v5.PARENT_CSI_IDSEQ,
+                                                                                                                         v4.CSI_ID,
+                                                                                                                         v4.CSI_VERSION,
+                                                                                                                         v5.LEAF
+                                                                                                                    FROM REL_CLASS_SCHEME_ITEM_VW
+                                                                                                                         v5, ADMIN_ITEM a
+                                                                                                                   --   ,(select* from  REL_CLASS_SCHEME_ITEM_VW  where CSI_LEVEL=4)v4
+                                                                                                                   WHERE a.ITEM_ID= v5.CSI_ID
+                                                                                                                   AND a.VER_NR= v5.CSI_VERSION
+                                                                                                                        AND v5.PARENT_CSI_IDSEQ =v4.CS_CSI_IDSEQ
+                                                                                                                           
+                                                                                                                         AND v5.CSI_LEVEL =
+                                                                                                                             5
+                                                                                                                --   group by csi.CSI_LEVEL,   csi.CSI_ID
+                                                                                                                ORDER BY v5.CSI_ID)
+                                                                                                                AS MDSR759_XML_CSI_LIST5_T)
+                                                                                                            "level5"
+                                                                                                   FROM REL_CLASS_SCHEME_ITEM_VW V4,
+                                                                                                               ADMIN_ITEM a
+                                                                                                                   --   ,(select* from  REL_CLASS_SCHEME_ITEM_VW  where CSI_LEVEL=4)v4
+                                                                                                                   WHERE a.ITEM_ID= v4.CSI_ID
+                                                                                                                        AND V4.CSI_LEVEL =  4
+                                                                                                        AND v4.PARENT_CSI_IDSEQ =
+                                                                                                            v3.CS_CSI_IDSEQ
+                                                                                               ORDER BY v4.CSI_ID)
+                                                                                               AS MDSR759_XML_CSI_LIST4_T)
+                                                                                           "level4"
+                                                                                  FROM REL_CLASS_SCHEME_ITEM_VW V3,
+                                                                                  ADMIN_ITEM a
+                                                                                                                   --   ,(select* from  REL_CLASS_SCHEME_ITEM_VW  where CSI_LEVEL=4)v4
+                                                                                  WHERE a.ITEM_ID= v3.CSI_ID
+                                                                                         AND CSI_LEVEL =3 --4551586
+                                                                                       AND v3.PARENT_CSI_IDSEQ =
+                                                                                           v2.CS_CSI_IDSEQ
+                                                                              ORDER BY v3.CSI_ID)
+                                                                              AS MDSR759_XML_CSI_LIST3_T)
+                                                                          "level3"
+                                                                 FROM REL_CLASS_SCHEME_ITEM_VW   V2,
+                                                                                  ADMIN_ITEM a
+                                                                WHERE a.ITEM_ID= v2.CSI_ID
+                                                                  AND    CSI_LEVEL =2
+                                                                      AND v2.PARENT_CSI_IDSEQ =
+                                                                          v1.CS_CSI_IDSEQ
+                                                             ORDER BY v2.CSI_ID)
+                                                             AS MDSR759_XML_CSI_LIST2_T)    "level2"
+                                                FROM REL_CLASS_SCHEME_ITEM_VW V1,
+                                                     ADMIN_ITEM a
+                                                WHERE  a.ITEM_ID= v1.CSI_ID   
+                                                   AND a.VER_NR= v1.CSI_VERSION                                                             
+                                                   AND v1.CS_ID=cl.CS_ID 
+                                                   AND CSI_LEVEL = 1
+                                                   AND v1.CS_VERSION=cl.CS_VERSION
+                                                         
+                                            ORDER BY v1.CSI_ID)
+                                            AS MDSR759_XML_CSI_LIST1_T)    "ClassificationItemList"
+                               FROM (SELECT DISTINCT a.NCI_IDSEQ CS_IDSEQ,
+                                                     CS_ID,
+                                                     CS_VERSION,
+                                                     PREFERRED_NAME,
+                                                     LONG_NAME,
+                                                     PREFERRED_DEFINITION,                                                     
+                                                     CS_DATE_CREATED,
+                                                     ASL_NAME,
+                                                     CS_CONTEXT_NAME,
+                                                     CS_CONTEXT_VERSION,
+                                                     CS_CONTEXT_ID
+                                       FROM REL_CLASS_SCHEME_ITEM_VW v,
+                                                     ADMIN_ITEM a
+                                               WHERE  a.ITEM_ID= v.CSI_ID
+                                               and v.CS_VERSION=a.VER_NR) cl
+                              WHERE cl.CS_CONTEXT_ID = con.CS_CONTEXT_ID
+                              and cl.CS_CONTEXT_VERSION = con.CS_CONTEXT_VERSION
+                           ORDER BY CS_ID) AS MDSR759_XML_CS_L5_LIST_T)    "ClassificationList"
       FROM (  SELECT DISTINCT
                      CS_CONTEXT_NAME,
                      CS_CONTEXT_VERSION,
-                     conte_idseq     CONTEXT_ID
+                     CS_CONTEXT_ID
                 FROM REL_CLASS_SCHEME_ITEM_VW
             ORDER BY CS_CONTEXT_NAME) con;
 
 
-GRANT SELECT ON MDSR_759XML_5CSI_LEVEL_VIEW TO PUBLIC;
+
+GRANT SELECT ON MDSR444XML_5CSI_LEVEL_VIEW TO PUBLIC;
 
 
 
@@ -360,8 +376,6 @@ CREATE TABLE MDSR_REPORTS_ERR_LOG
 GRANT SELECT ON MDSR_REPORTS_ERR_LOG TO PUBLIC
 /
 GRANT SELECT ON MDSR_REPORTS_ERR_LOG TO SBR WITH GRANT OPTION
-/
-GRANT SELECT ON MDSR_GENERATED_XML TO GUEST
 /
 CREATE TABLE MDSR_GENERATED_XML
 (
@@ -394,7 +408,7 @@ end if;
        
          l_file_name := 'CS_CSI_XML_'||P_file||'.xml';
 
-        SELECT dbms_xmlgen.getxml( 'select* from MDSR_759XML_5CSI_LEVEL_VIEW')
+        SELECT dbms_xmlgen.getxml( 'select* from MDSR444XML_5CSI_LEVEL_VIEW')
         INTO l_result
         FROM DUAL ;
         insert into MDSR_GENERATED_XML VALUES ( l_file_name ,l_result,SYSDATE,P_file);      
