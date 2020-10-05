@@ -12,14 +12,14 @@ ONEDATA_MIGRATION_ERROR.sql
 3. DDL
 Run in ONEDATA_WA the next scripts.
 
+ai_input_tab.sql
+sag_ai_validation.prc
+sag_fk_validate.prc
+sag_item_validation.prc
 sag-migr-val-lov-fncts.sql
-AI_INPUT_TAB-Init.sql
-SAG_AI_VALIDATION.prc
-SAG_FK_VALIDATE.prc
-SAG_ITEM_VALIDATION.prc
-SAG_MIGR_VAL_LOV_FULL.prc
-VALIDATE_DATA_MIGRATION_STEPS.sql
-VALIDATE_DATA_MIGRATION.sql
+sag_migr_val_lov_full.prc
+validate_data_migration_steps.sql
+validate_data_migration.sql
 
 4.
 Run validate job manually
