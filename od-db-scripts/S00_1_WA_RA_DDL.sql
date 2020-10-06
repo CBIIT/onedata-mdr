@@ -698,7 +698,7 @@ alter table alt_def modify (LST_UPD_DT default sysdate);
 	LST_DEL_DT DATE DEFAULT sysdate, 
 	S2P_TRN_DT DATE DEFAULT sysdate, 
 	LST_UPD_DT DATE DEFAULT sysdate, 
-	 PRIMARY KEY (STG_AI_ID, ITEM_ID, VER_NR))
+	 PRIMARY KEY (STG_AI_ID, ITEM_ID, VER_NR));
 
 
 create or replace trigger TR_AI_EXT_TAB_INS
@@ -980,7 +980,7 @@ commit;
 insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (17, 'NCI Item Relationships');
 commit;
 
-insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (18, 'NCI Origin');
+insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (18, 'Origin');
 commit;
 
 insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (19, 'NCI Protocol Type'); 

@@ -124,7 +124,14 @@ union
 select s.usr_id, 'I', 100, 1  from 
 od_md_objsecu s, 
 od_md_objsecurel r
-where r.obj_depn_id = s.obj_id and r.obj_secu_id = 100;
+where r.obj_depn_id = s.obj_id and r.obj_secu_id = 100
+union
+select s.usr_id, 'I', 100, 1  from 
+od_md_objsecu s, 
+od_md_objsecurel r
+where r.obj_depn_id = s.obj_id and r.obj_secu_id in (Select obj_id from od_md_obj where upper(obj_nm) = 'SUPER CURATOR ROLE');
+
+
 
 
 grant select on vw_usr_row_filter to onedata_wa;

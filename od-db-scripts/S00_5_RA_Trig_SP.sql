@@ -150,20 +150,19 @@ END;
 
 
  
+  CREATE OR REPLACE TRIGGER TR_AI_EXT_TAB_INS
+  AFTER INSERT ON ADMIN_ITEM
+  REFERENCING FOR EACH ROW
+  BEGIN
 
-
-create or replace trigger TR_AI_EXT_TAB_INS
-  AFTER INSERT
-  on ADMIN_ITEM
-  for each row
-BEGIN
-
+if (:new.admin_item_typ_id in (5,6)) then
+insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR,CNCPT_CONCAT, CNCPT_CONCAT_NM, cncpt_concat_def )
+select :new.item_id, :new.ver_nr, :new.item_long_nm, :new.item_nm, :new.item_desc from dual;
+else
 insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR)
 select :new.ITEM_ID, :new.VER_NR from dual;
-
+end if;
 END;
-
-
 /
 
  
@@ -293,7 +292,8 @@ commit;
 
 insert into NCI_ADMIN_ITEM_REL select * from onedata_wa.NCI_ADMIN_ITEM_REL;
 commit;
-
+insert into ref_Doc select * from onedata_wa.ref_doc;
+commit;
 insert into NCI_ADMIN_ITEM_EXT select * from onedata_wa.NCI_ADMIN_ITEM_EXT;
 commit;
 

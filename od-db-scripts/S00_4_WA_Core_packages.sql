@@ -7206,9 +7206,10 @@ begin
         ihook.setColumnValue(row,'VER_NR', 1);
         ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
         ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 2);
-        ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_1_LONG_NM')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'));
+--        ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_1_LONG_NM')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'));
+       ihook.setColumnValue(row,'ITEM_LONG_NM', v_id || 'v1.0');
         ihook.setColumnValue(row,'ITEM_NM',  ihook.getColumnValue(rowform, 'ITEM_1_NM')  || ' ' || ihook.getColumnValue(rowform, 'ITEM_2_NM'));
-        ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
+         ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
         ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
         ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
         ihook.setColumnValue(row,'ADMIN_STUS_ID',66);
@@ -8146,7 +8147,7 @@ insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR,  CNCPT_CONCAT, CNCPT_CONCAT_NM,
 select ai.item_id, ai.ver_nr, b.cncpt_cd, b.CNCPT_nm, b.cncpt_def
 from  admin_item ai,
 (SELECT cai.item_id, cai.ver_nr, LISTAGG(ai.item_long_nm, ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_CD ,
-LISTAGG(ai.item_nm, ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_NM ,
+LISTAGG(ai.item_nm, ' ')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_NM ,
  LISTAGG(substr(ai.item_desc,1, 750), ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_DEF 
 from cncpt_admin_item cai, admin_item ai where ai.item_id = cai.cncpt_item_id and ai.ver_nr = cai.cncpt_ver_nr
 group by cai.item_id, cai.ver_nr) b
@@ -9327,6 +9328,7 @@ if (:new.nci_idseq is null) then
 end if; 
 if (:new.admin_item_typ_id  in (4,3,2,1,54)) then -- draft new
 :new.admin_stus_id := 66;
+:new.regstr_stus_id := 9; -- not sure if rules are changed
 end if;
 if (:new.admin_item_typ_id  in (5,6,49,53,7)) then -- Released
 :new.admin_stus_id := 75;
@@ -9335,7 +9337,7 @@ if (:new.admin_item_typ_id  in (5,6)) then -- Set the default context
  :new.cntxt_item_id := 20000000024;
 :new.cntxt_ver_nr := 1;
 end if;
-:new.regstr_stus_id := null; -- not sure if rules are changed
+:new.regstr_stus_id := 9; -- not sure if rules are changed
 if (:new.ITEM_LONG_NM is null) then
 :new.ITEM_LONG_NM := :new.ITEM_ID || 'v' || :new.ver_nr;
 end if;
