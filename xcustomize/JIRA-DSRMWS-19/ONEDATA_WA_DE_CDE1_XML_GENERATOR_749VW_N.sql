@@ -1,7 +1,7 @@
-DROP VIEW ONEDATA_WA.ONEDATA_WA_DE_CDE1_XML_GENERATOR_749VW;
+DROP VIEW ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW;
 
-/* Formatted on 8/31/2020 4:21:10 PM (QP5 v5.354) */
-CREATE OR REPLACE FORCE VIEW ONEDATA_WA.ONEDATA_WA_DE_CDE1_XML_GENERATOR_749VW
+/* Formatted on 10/7/2020 6:09:07 PM (QP5 v5.354) */
+CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW
 (
     RAI,
     PUBLICID,
@@ -269,15 +269,16 @@ AS
            CAST (
                MULTISET (
                    SELECT rd.ref_nm,
-                          -- org.name,
-                          ok.OBJ_KEY_DESC,
+                          org.org_nm,
+                         --  ok.OBJ_KEY_DESC,
                           ok.obj_key_desc,
                           rd.ref_desc,
                           rd.URL,
                           TO_CHAR (rd.lang_id),
                           rd.disp_ord
-                     FROM REF rd, obj_key ok
+                     FROM REF rd, obj_key ok,NCI_ORG org
                     WHERE     rd.REF_TYP_ID = ok.obj_key_id(+)
+                             AND rd.ORG_ID=org.ENTTY_ID(+)
                           --, sbr.organizations org
                           AND de.item_id = rd.item_id
                           AND de.ver_nr = rd.ver_nr)
