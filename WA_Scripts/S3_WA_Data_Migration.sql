@@ -12,6 +12,7 @@ alter trigger TR_VAL_DOM_AUD_TS disable;
 alter trigger  NCI_TR_ENTTY_ORG disable;
 alter trigger NCI_TR_ENTTY_PRSN disable;
 alter trigger TR_DATA_TYP_AUD_TS disable;
+alter trigger TR_PERM_VAL_AUD_TS disable;
 
 truncate table NCI_CSI_ALT_DEFNMS;
 truncate table NCI_ALT_KEY_ADMIN_ITEM_REL;
