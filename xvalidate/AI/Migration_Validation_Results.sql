@@ -1,5 +1,5 @@
 /*Run below queries in ONEDATA_WA
-Identify the ACTL_NAME and DESTINATION from the SBREXT.SBREXT.ONEDATA_MIGRATION_ERROR 
+Identify the ACTL_NAME and DESTINATION from the SBREXT.ONEDATA_MIGRATION_ERROR 
 and run one of the below queries to identify the difference between ONEDATA and SBR/SBREXT row values*/
 
 /*Validation for SAG_AI_VALIDATION rejections*/
@@ -12,7 +12,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 7 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
- and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+ and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='REPRESENTATION CLASS' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBR',AC_IDSEQ , 7 ,SB.BEGIN_DATE,AC.CHANGE_NOTE,AC.END_DATE,
@@ -22,7 +22,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(SB.CREATED_BY,'ONEDATA'), NVL(SB.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(SB.DATE_MODIFIED, SB.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(SB.MODIFIED_BY,'ONEDATA')
 FROM SBR.ADMINISTERED_COMPONENTS AC , SBREXT.REPRESENTATIONS_EXT SB WHERE AC.AC_IDSEQ=SB.REP_IDSEQ AND ACTL_NAME = 'REPRESENTATION'
-and ac_idseq IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+and ac_idseq IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='REPRESENTATION CLASS' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -34,7 +34,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 56 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
- and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+ and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='OCRECS' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBR',AC_IDSEQ , 56 ,SB.BEGIN_DATE,AC.CHANGE_NOTE,AC.END_DATE,
@@ -44,7 +44,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(SB.CREATED_BY,'ONEDATA'), NVL(SB.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(SB.DATE_MODIFIED, SB.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(SB.MODIFIED_BY,'ONEDATA')
 FROM SBR.ADMINISTERED_COMPONENTS AC , SBREXT.OC_RECS_EXT SB WHERE AC.AC_IDSEQ=SB.OCR_IDSEQ AND ACTL_NAME = 'OBJECTRECS'
-and ac_idseq IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+and ac_idseq IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='OCRECS' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -56,7 +56,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 9 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
- and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+ and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CLASSIFICATION SCHEME' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBR',AC_IDSEQ , 9 ,SB.BEGIN_DATE,AC.CHANGE_NOTE,AC.END_DATE,
@@ -66,7 +66,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(SB.CREATED_BY,'ONEDATA'), NVL(SB.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(SB.DATE_MODIFIED, SB.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(SB.MODIFIED_BY,'ONEDATA')
 FROM SBR.ADMINISTERED_COMPONENTS AC , SBR.CLASSIFICATION_SCHEMES SB WHERE AC.AC_IDSEQ=SB.CS_IDSEQ AND ACTL_NAME = 'CLASSIFICATION'
-and ac_idseq IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+and ac_idseq IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CLASSIFICATION SCHEME' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -78,7 +78,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 1 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
- and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+ and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CONCEPTUAL DOMAIN' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBR',AC_IDSEQ , 1 ,SB.BEGIN_DATE,AC.CHANGE_NOTE,AC.END_DATE,
@@ -88,7 +88,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(SB.CREATED_BY,'ONEDATA'), NVL(SB.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(SB.DATE_MODIFIED, SB.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(SB.MODIFIED_BY,'ONEDATA')
 FROM SBR.ADMINISTERED_COMPONENTS AC , SBR.CONCEPTUAL_DOMAINS SB WHERE AC.AC_IDSEQ=SB.CD_IDSEQ AND ACTL_NAME = 'CONCEPTUALDOMAIN'
-and ac_idseq IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+and ac_idseq IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CONCEPTUAL DOMAIN' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -100,7 +100,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 4 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='DATA ELEMENT' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBR',DE_IDSEQ --Change
@@ -112,7 +112,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBR.DATA_ELEMENTS AC
-WHERE DE_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE DE_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='DATA ELEMENT' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -124,7 +124,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 2 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='DATA ELEMENT CONCEPT' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBR',DEC_IDSEQ --Change
@@ -136,7 +136,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBR.DATA_ELEMENT_CONCEPTS AC
-WHERE DEC_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE DEC_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='DATA ELEMENT CONCEPT' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -149,7 +149,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 3 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='VALUE DOMAIN' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBR',VD_IDSEQ --Change
@@ -161,7 +161,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBR.VALUE_DOMAINS AC
-WHERE VD_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE VD_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='VALUE DOMAIN' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -174,7 +174,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 5 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='OBJECT CLASS' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBREXT',OC_IDSEQ --Change
@@ -186,7 +186,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBREXT.OBJECT_CLASSES_EXT AC
-WHERE OC_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE OC_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='OBJECT CLASS' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -199,7 +199,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 6 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='PROPERTY' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBREXT',PROP_IDSEQ --Change
@@ -211,7 +211,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBREXT.PROPERTIES_EXT AC
-WHERE PROP_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE PROP_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='PROPERTY' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -224,7 +224,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 49 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CONCEPT' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBREXT',CON_IDSEQ --Change
@@ -236,7 +236,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBREXT.CONCEPTS_EXT AC
-WHERE CON_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE CON_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CONCEPT' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -249,7 +249,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 51 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CLASSIFICATION SCHEME ITEM' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBR',CSI_IDSEQ --Change
@@ -261,7 +261,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBR.CS_ITEMS AC
-WHERE CSI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE CSI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CLASSIFICATION SCHEME ITEM' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -274,7 +274,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 54 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='FORM' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBREXT',AC_IDSEQ --Change
@@ -286,7 +286,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBREXT.QUEST_CONTENTS_EXT	AC, SBR.ADMINISTERED_COMPONENTS SB WHERE AC_IDSEQ = QC_IDSEQ AND ACTL_NAME = 'QUEST_CONTENT' AND QTL_NAME IN ('TEMPLATE', 'CRF')
-AND AC_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+AND AC_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='FORM' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -299,7 +299,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 52 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='MODULE' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBREXT',AC_IDSEQ --Change
@@ -311,7 +311,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBREXT.QUEST_CONTENTS_EXT	AC,  SBR.ADMINISTERED_COMPONENTS SB WHERE AC_IDSEQ = QC_IDSEQ AND ACTL_NAME = 'QUEST_CONTENT' AND QTL_NAME IN ('MODULE')
-AND AC_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+AND AC_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='MODULE' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -324,7 +324,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 50 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='PROTOCOL' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBREXT',AC_IDSEQ --Change
@@ -336,7 +336,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBREXT.PROTOCOLS_EXT	AC,  SBR.ADMINISTERED_COMPONENTS  SB WHERE AC_IDSEQ = PROTO_IDSEQ AND ACTL_NAME = 'PROTOCOL'
-AND AC_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+AND AC_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='PROTOCOL' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -349,7 +349,7 @@ ELSE ORIGIN_ID_DN END ORIGIN,
 ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
  from ONEDATA_WA.ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = 53 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
-  and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='VALUE MEANING' and DESTINATION='ADMIN_ITEM')
  UNION ALL
  select 'SBR',VM_IDSEQ --Change
@@ -361,7 +361,7 @@ SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
 NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
 FROM SBR.VALUE_MEANINGS AC
-WHERE VM_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE VM_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='VALUE MEANING'  and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -380,7 +380,7 @@ SELECT 'ONEDATA' TIER, admin_item_typ_id,
                                LST_UPD_USR_ID
                           FROM ONEDATA_WA.ADMIN_ITEM    --11/8/2019 4:41:54 PM
                          WHERE ADMIN_ITEM_TYP_ID = '8'
-                        and NCI_IDSEQ IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+                        and NCI_IDSEQ IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CONTEXTS' and DESTINATION='ADMIN_ITEM')
                         UNION ALL
                         SELECT 'SBR' TIER, 8,
@@ -395,7 +395,7 @@ where ACTL_NAME='CONTEXTS' and DESTINATION='ADMIN_ITEM')
                                NVL(NVL (date_modified, date_created),to_date('8/18/2020','mm/dd/yyyy')),
                                NVL(modified_by,'ONEDATA')
                           FROM SBR.CONTEXTS AC
-                          WHERE conte_idseq IN (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+                          WHERE conte_idseq IN (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CONTEXTS' and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ;
 
@@ -412,7 +412,7 @@ SELECT 'ONEDATA' TIER,ITEM_ID,
                              LST_UPD_DT
                         FROM ONEDATA_WA.DE
                        WHERE item_id <> -20005
-                       and (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       and (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='DATAELEMENTS'  and DESTINATION='DE')
                       UNION ALL
                       SELECT 'SBR' TIER,CDE_ID,
@@ -426,7 +426,7 @@ where ACTL_NAME='DATAELEMENTS'  and DESTINATION='DE')
                                   TO_DATE ('8/18/2020', 'mm/dd/yyyy'))
                         FROM sbr.data_elements
                         WHERE (CDE_ID,
-                             VERSION) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                             VERSION) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='DATAELEMENTS' and DESTINATION='DE')
 order by ITEM_ID;
 
@@ -440,7 +440,7 @@ SELECT 'ONEDATA' TIER, ITEM_ID,
                              LST_UPD_USR_ID
                         FROM ONEDATA_WA.CNTXT
                        WHERE item_id <> -20005
-                       and (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       and (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CONTEXTS' AND DESTINATION='CNTXT')
                       UNION ALL
                       SELECT 'SBR' TIER,ai.ITEM_ID,
@@ -455,7 +455,7 @@ where ACTL_NAME='CONTEXTS' AND DESTINATION='CNTXT')
                         FROM sbr.contexts c, ONEDATA_WA.admin_item ai
                        WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.conte_idseq)
                              AND ai.admin_item_typ_id = 8
-                             and (ai.ITEM_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                             and (ai.ITEM_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CONTEXTS' AND DESTINATION='CNTXT')
 order by ITEM_ID;
 
@@ -469,7 +469,7 @@ order by ITEM_ID;
                              LST_UPD_USR_ID
                         FROM onedata_wa.CONC_DOM
                        WHERE item_id <> -20002
-                       and (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       and (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CONCEPTUAL_DOMAINS' and DESTINATION='CONC_DOM')
                       UNION ALL
                       SELECT 'SBR' TIER, ai.ITEM_ID,
@@ -483,7 +483,7 @@ where ACTL_NAME='CONCEPTUAL_DOMAINS' and DESTINATION='CONC_DOM')
                              NVL (modified_by, 'ONEDATA')
                         FROM sbr.conceptual_domains c, ONEDATA_WA.admin_item ai
                        WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.cd_idseq)
-                       and (ai.ITEM_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       and (ai.ITEM_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CONCEPTUAL_DOMAINS' and DESTINATION='CONC_DOM')
 order by ITEM_ID;
 
@@ -496,7 +496,7 @@ order by ITEM_ID;
                              LST_UPD_USR_ID
                         FROM onedata_wa.OBJ_CLS
                        WHERE item_id <> -20000
-                       and (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       and (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='OBJECT_CLASSES_EXT' and DESTINATION='OBJ_CLS')
                       UNION ALL
                       SELECT 'SBR' TIER,ai.ITEM_ID,
@@ -510,7 +510,7 @@ where ACTL_NAME='OBJECT_CLASSES_EXT' and DESTINATION='OBJ_CLS')
                         FROM sbrext.OBJECT_CLASSES_EXT c,
                              ONEDATA_WA.admin_item    ai
                        WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.oc_idseq)
-                       and (ai.ITEM_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       and (ai.ITEM_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='OBJECT_CLASSES_EXT' and DESTINATION='OBJ_CLS')
 order by ITEM_ID;
 
@@ -524,7 +524,7 @@ order by ITEM_ID;
                              LST_UPD_USR_ID
                         FROM onedata_wa.PROP
                        WHERE item_id <> -20001
-                       and (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       and (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='PROPERTIES_EXT' and DESTINATION='PROP')
                       UNION ALL
                       SELECT 'SBREXT' TIER,ai.ITEM_ID,
@@ -537,7 +537,7 @@ where ACTL_NAME='PROPERTIES_EXT' and DESTINATION='PROP')
                              NVL (modified_by, 'ONEDATA')
                         FROM sbrext.properties_ext c, ONEDATA_WA.admin_item ai
                        WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.PROP_idseq)
-                       and (ai.ITEM_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       and (ai.ITEM_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='PROPERTIES_EXT' and DESTINATION='PROP')
 order by ITEM_ID;
 
@@ -551,7 +551,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              LST_UPD_DT,
                              LST_UPD_USR_ID
                         FROM onedata_wa.CLSFCTN_SCHM
-                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='CLASSIFICATION_SCHEMES' and DESTINATION='CLSFCTN_SCHM')
                       UNION ALL
                       SELECT 'SBR' TIER, ai.ITEM_ID,
@@ -570,7 +570,7 @@ where ACTL_NAME='CLASSIFICATION_SCHEMES' and DESTINATION='CLSFCTN_SCHM')
                        WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.CS_idseq)
                              AND TRIM (cstl_name) = ok.nci_cd
                              AND ok.obj_typ_id = 3
-                             and (ai.ITEM_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                             and (ai.ITEM_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='PROPERTIES_EXT' and DESTINATION='PROP')
 order by ITEM_ID;
 
@@ -583,7 +583,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              LST_UPD_DT,
                              LST_UPD_USR_ID
                         FROM onedata_wa.REP_CLS
-                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='REPRESENTATIONS_EXT' and DESTINATION='REP_CLS')
                       UNION ALL
                       SELECT 'SBREXT' TIER,ai.ITEM_ID,
@@ -597,7 +597,7 @@ where ACTL_NAME='REPRESENTATIONS_EXT' and DESTINATION='REP_CLS')
                         FROM sbrext.representations_ext c,
                              ONEDATA_WA.admin_item     ai
                        WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.REP_idseq)
-                       and (ai.ITEM_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       and (ai.ITEM_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='REPRESENTATIONS_EXT' and DESTINATION='REP_CLS')
 order by ITEM_ID,VER_NR;
 
@@ -613,7 +613,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              LST_UPD_USR_ID
                         FROM onedata_wa.DE_CONC
                        WHERE item_id NOT IN -20003
-                       AND (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       AND (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='DATA_ELEMENT_CONCEPTS' and DESTINATION='DE_CONC')
                       UNION ALL
                       SELECT 'SBR' TIER,ai.ITEM_ID,
@@ -632,7 +632,7 @@ where ACTL_NAME='DATA_ELEMENT_CONCEPTS' and DESTINATION='DE_CONC')
                        WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.dec_idseq)
                              AND c.CD_IDSEQ = ac_idseq
                              AND public_id > 0
-                             and (ai.ITEM_ID, c.version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                             and (ai.ITEM_ID, c.version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='DATA_ELEMENT_CONCEPTS' and DESTINATION='DE_CONC')
 order by ITEM_ID,VER_NR;
 
@@ -650,7 +650,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              LST_UPD_USR_ID
                         FROM onedata_wa.VALUE_DOM
                        WHERE item_id <> -20004
-                       AND (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       AND (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='VALUE_DOMAINS' and DESTINATION='VALUE_DOM')
                       UNION ALL
                       SELECT 'SBR' TIER,ai.ITEM_ID,
@@ -668,7 +668,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              NVL (modified_by, 'ONEDATA')
                         FROM sbr.VALUE_DOMAINS c, ONEDATA_WA.admin_item ai
                        WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.vd_idseq)
-                       AND (ai.ITEM_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       AND (ai.ITEM_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='VALUE_DOMAINS' and DESTINATION='VALUE_DOM')
 order by ITEM_ID,VER_NR;
 
@@ -688,7 +688,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              DIMNSNLTY,
                              ARRAY_IND
                         FROM onedata_wa.NCI_OC_RECS
-                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='OC_RECS_EXT' and DESTINATION='NCI_OC_RECS')
                       UNION ALL
                       SELECT 'SBREXT' TIER,ocr_id,
@@ -706,7 +706,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              array_ind
                         FROM sbrext.OC_RECS_EXT c, ONEDATA_WA.admin_item ai
                        WHERE TRIM (ai.NCI_IDSEQ) = TRIM (c.t_oc_idseq)
-                       AND (OCR_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       AND (OCR_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='OC_RECS_EXT' and DESTINATION='NCI_OC_RECS')
 order by ITEM_ID,VER_NR;
 
@@ -719,7 +719,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              LST_UPD_DT,
                              LST_UPD_USR_ID
                         FROM onedata_wa.CNCPT
-                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='CONCEPTS_EXT' and DESTINATION='CNCPT')
                       UNION ALL
                       SELECT 'SBREXT' TIER,con_id,
@@ -734,7 +734,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                         FROM sbrext.CONCEPTS_EXT c, ONEDATA_WA.obj_key ok
                        WHERE     c.evs_source = ok.obj_key_desc(+)
                              AND ok.obj_typ_id(+) = 23
-                             AND (con_id,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                             AND (con_id,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='CONCEPTS_EXT' and DESTINATION='CNCPT')
 order by ITEM_ID,VER_NR;
 
@@ -749,7 +749,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              LST_UPD_DT,
                              LST_UPD_USR_ID
                         FROM onedata_wa.NCI_CLSFCTN_SCHM_ITEM
-                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='CS_ITEMS' and DESTINATION='NCI_CLSFCTN_SCHM_ITEM')
                       UNION ALL
                       SELECT 'SBR' TIER,item_id,
@@ -764,7 +764,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              NVL (modified_by, 'ONEDATA')
                         FROM sbr.CS_ITEMS cd, ONEDATA_WA.admin_item ai
                        WHERE ai.NCI_IDSEQ = cd.CSI_IDSEQ
-                       AND (ITEM_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       AND (ITEM_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='CS_ITEMS' and DESTINATION='NCI_CLSFCTN_SCHM_ITEM')
 order by ITEM_ID,VER_NR;
 
@@ -779,7 +779,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              LST_UPD_DT,
                              LST_UPD_USR_ID
                         FROM onedata_wa.NCI_VAL_MEAN
-                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='VALUE_MEANINGS' and DESTINATION='NCI_VAL_MEAN')
                       UNION ALL
                       SELECT 'SBR' TIER,item_id,
@@ -794,7 +794,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              NVL (modified_by, 'ONEDATA')
                         FROM sbr.VALUE_MEANINGS cd, ONEDATA_WA.admin_item ai
                        WHERE ai.NCI_IDSEQ = cd.VM_IDSEQ
-                       AND (ITEM_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                       AND (ITEM_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='VALUE_MEANINGS' and DESTINATION='NCI_VAL_MEAN')
 order by ITEM_ID,VER_NR;
 
@@ -808,7 +808,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              LST_UPD_DT,
                              LST_UPD_USR_ID
                         FROM onedata_wa.NCI_FORM
-                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='QUEST_CONTENTS_EXT' and DESTINATION='NCI_FORM')
                       UNION ALL
                       SELECT 'SBREXT' TIER,qc_id,
@@ -826,7 +826,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                        WHERE     qc.qcdl_name = ok.nci_cd(+)
                              AND ok.obj_typ_id(+) = 22
                              AND qc.qtl_name IN ('TEMPLATE', 'CRF')
-                             AND (qc_id,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                             AND (qc_id,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='QUEST_CONTENTS_EXT' and DESTINATION='NCI_FORM')
 order by ITEM_ID,VER_NR;  
 
@@ -849,7 +849,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              APPRVD_DT,
                              APPRVD_USR_ID
                         FROM onedata_wa.NCI_PROTCL
-                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                        WHERE (ITEM_ID,VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='PROTOCOLS_EXT' and DESTINATION='NCI_PROTCL')
                       UNION ALL
                       SELECT 'SBREXT' TIER,ai.item_id,
@@ -877,7 +877,7 @@ SELECT 'ONE_DATA' TIER,ITEM_ID,
                              AND TRIM (TYPE) = ok.nci_cd(+)
                              AND ok.obj_typ_id(+) = 19
                              AND ai.admin_item_typ_id = 50
-                             AND (ai.ITEM_ID,version) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                             AND (ai.ITEM_ID,version) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
                         where ACTL_NAME='PROTOCOLS_EXT' and DESTINATION='NCI_PROTCL')
             ORDER BY ITEM_ID, VER_NR;
 
@@ -899,7 +899,7 @@ SELECT 'ONE_DATA'     TIER,
   FROM onedata_wa.NCI_QUEST_VALID_VALUE
  WHERE (NCI_PUB_ID, Q_VER_NR) IN
            (SELECT public_id, version
-              FROM SBREXT.ONEDATA_MIGRATION_ERROR
+              FROM ONEDATA_MIGRATION_ERROR
              WHERE     ACTL_NAME = 'VALID_QUESTION_VALUES'
                    AND DESTINATION = 'NCI_QUEST_VALID_VALUE')
 UNION ALL
@@ -928,7 +928,7 @@ SELECT 'SBREXT'
        AND qc.qc_idseq = vv.qc_idseq(+)
        AND (qc.qc_id, qc1.VERSION) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'VALID_QUESTION_VALUES'
                        AND DESTINATION = 'NCI_QUEST_VALID_VALUE')
 ORDER BY NCI_PUB_ID, Q_VER_NR;
@@ -947,7 +947,7 @@ SELECT DISTINCT 'ONE_DATA' TIER,de.ITEM_ID,
        AND cdr.p_de_idseq = ai.nci_idseq
        AND (de.ITEM_ID, de.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPLEX_DATA_ELEMENTS'
                        AND DESTINATION = 'DE')
 UNION ALL
@@ -964,7 +964,7 @@ SELECT DISTINCT 'SBR' TIER,ai.ITEM_ID,                                     --Pri
        AND cdr.p_de_idseq = ai.nci_idseq
        AND (ai.ITEM_ID, ai.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPLEX_DATA_ELEMENTS'
                        AND DESTINATION = 'DE')
 ORDER BY ITEM_ID, VER_NR;
@@ -989,7 +989,7 @@ SELECT 'ONE_DATA'     TIER,
        AND ADMIN_ITEM_TYP_ID = 5
        AND (cai.ITEM_ID, cai.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH OBJECT_CLASSES_EXT')
@@ -1017,7 +1017,7 @@ SELECT 'SBREXT'
        AND cc.con_idseq = con.nci_idseq
        AND (oc.ITEM_ID, oc.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH OBJECT_CLASSES_EXT')
@@ -1040,7 +1040,7 @@ Select 'ONE_DATA'     TIER,cncpt_item_id,
     and ADMIN_ITEM_TYP_ID=6 
            AND (cai.ITEM_ID, cai.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH PROPERTIES_EXT')
@@ -1065,7 +1065,7 @@ Select 'ONE_DATA'     TIER,cncpt_item_id,
                    AND cc.con_idseq = con.nci_idseq
         AND (prop.ITEM_ID, prop.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH PROPERTIES_EXT')
@@ -1088,7 +1088,7 @@ Select 'ONE_DATA'     TIER,cncpt_item_id,
     and ADMIN_ITEM_TYP_ID=7 
     AND (cai.ITEM_ID, cai.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH REPRESENTATIONS_EXT')
@@ -1113,7 +1113,7 @@ Select 'ONE_DATA'     TIER,cncpt_item_id,
                    AND cc.con_idseq = con.nci_idseq
                    AND (rep.ITEM_ID, rep.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH REPRESENTATIONS_EXT')
@@ -1136,7 +1136,7 @@ Select 'ONE_DATA'     TIER,cncpt_item_id,
     and ADMIN_ITEM_TYP_ID=53
     AND (cai.ITEM_ID, cai.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH VALUE_MEANINGS')
@@ -1161,7 +1161,7 @@ Select 'ONE_DATA'     TIER,cncpt_item_id,
                    AND cc.con_idseq = con.nci_idseq
                    AND (rep.ITEM_ID, rep.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH VALUE_MEANINGS')
@@ -1184,7 +1184,7 @@ where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
 and ADMIN_ITEM_TYP_ID=3
 AND (cai.ITEM_ID, cai.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH VALUE_DOMAINS')
@@ -1209,7 +1209,7 @@ SELECT 'SBREXT'     TIER,con.item_id,
                AND cc.con_idseq = con.nci_idseq
                AND (vd.ITEM_ID, vd.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH VALUE_DOMAINS')
@@ -1233,7 +1233,7 @@ Select 'ONE_DATA'     TIER,cncpt_item_id,
     and ADMIN_ITEM_TYP_ID=1 
 AND (cai.ITEM_ID, cai.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH CONCEPTUAL_DOMAINS')    
@@ -1258,7 +1258,7 @@ AND (cai.ITEM_ID, cai.VER_NR) IN
                    AND cc.con_idseq = con.nci_idseq
                    AND (cd.ITEM_ID, cd.VER_NR) IN
                (SELECT public_id, version
-                  FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                  FROM ONEDATA_MIGRATION_ERROR
                  WHERE     ACTL_NAME = 'COMPONENT_CONCEPTS_EXT'
                        AND DESTINATION = 'CNCPT_ADMIN_ITEM'
                        AND ERROR_DESC = 'DATA MISMATCH CONCEPTUAL_DOMAINS')
@@ -1281,7 +1281,7 @@ Select 'ONE_DATA' TIER, PERM_VAL_BEG_DT,
                           NCI_VAL_MEAN_VER_NR,
                           NCI_IDSEQ
 from ONEDATA_WA.PERM_VAL
-where (VAL_DOM_ITEM_ID,VAL_DOM_VER_NR) in (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+where (VAL_DOM_ITEM_ID,VAL_DOM_VER_NR) in (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='PERMISSIBLE_VALUES' and DESTINATION='PERM_VAL')
 UNION ALL                                 
 SELECT 'SBR' TIER, pvs.BEGIN_DATE,
@@ -1304,7 +1304,7 @@ SELECT 'SBR' TIER, pvs.BEGIN_DATE,
          WHERE     pv.pv_idseq = pvs.pv_idseq
                AND pvs.vd_idseq = vd.nci_idseq
                AND pv.vm_idseq = vm.nci_idseq
-               and (vd.item_Id,vd.ver_nr) in (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+               and (vd.item_Id,vd.ver_nr) in (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='PERMISSIBLE_VALUES' and DESTINATION='PERM_VAL')
 order by VAL_DOM_ITEM_ID,VAL_DOM_VER_NR,NCI_IDSEQ;
 
@@ -1320,7 +1320,7 @@ select DISTINCT 'ONE_DATA' TIER,VV_PUB_ID,
                                   LST_UPD_DT,
                                   LST_UPD_USR_ID
 from NCI_QUEST_VV_REP      
-WHERE (VV_PUB_ID,VV_VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE (VV_PUB_ID,VV_VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='QUEST_VV_EXT' and DESTINATION='NCI_QUEST_VV_REP')
 UNION ALL                                      
 SELECT   DISTINCT 'SBREXT' TIER,vv.NCI_PUB_ID,
@@ -1335,7 +1335,7 @@ SELECT   DISTINCT 'SBREXT' TIER,vv.NCI_PUB_ID,
           FROM sbrext.QUEST_VV_EXT         qvv,
                NCI_QUEST_VALID_VALUE       vv
          WHERE    qvv.vv_idseq = vv.NCI_IDSEQ(+)
-         AND (vv.NCI_PUB_ID, vv.NCI_VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+         AND (vv.NCI_PUB_ID, vv.NCI_VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='QUEST_VV_EXT' and DESTINATION='NCI_QUEST_VV_REP')
 
 
@@ -1351,7 +1351,7 @@ select 'ONE_DATA' TIER,FILE_NM,
                          LST_UPD_USR_ID,
                          LST_UPD_DT
 FROM ref_doc
-WHERE FILE_NM IN (select PREFERRED_NAME from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE FILE_NM IN (select PREFERRED_NAME from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='REFERENCE_BLOBS' and DESTINATION='REF_DOC')
 UNION ALL                         
         SELECT 'SBR' TIER,rb.NAME,
@@ -1366,7 +1366,7 @@ UNION ALL
                NVL (NVL (date_modified, date_created),
                     TO_DATE ('8/18/2020', 'mm/dd/yyyy'))
           FROM  sbr.REFERENCE_BLOBS rb
-          WHERE rb.NAME IN (select PREFERRED_NAME from SBREXT.ONEDATA_MIGRATION_ERROR
+          WHERE rb.NAME IN (select PREFERRED_NAME from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='REFERENCE_BLOBS' and DESTINATION='REF_DOC')
 
 
@@ -1377,7 +1377,7 @@ select 'ONE_DATA' TIER,TA_ID,NCI_PUB_ID,
                                  CREAT_USR_ID,
                                  LST_UPD_USR_ID,
                                  LST_UPD_DT from NCI_FORM_TA_REL
-WHERE (NCI_PUB_ID, NCI_VER_NR) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+WHERE (NCI_PUB_ID, NCI_VER_NR) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='TA_PROTO_CSI_EXT' and DESTINATION='NCI_FORM_TA_REL')                                 
 UNION ALL                                 
         SELECT 'SBREXT' TIER,ta.ta_id,
@@ -1391,7 +1391,7 @@ UNION ALL
          WHERE     ta.ta_idseq = t.ta_idseq
                AND t.proto_idseq = ai.nci_idseq
                AND t.proto_idseq IS NOT NULL
-               AND (ai.item_id, ai.ver_nr) IN (select public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+               AND (ai.item_id, ai.ver_nr) IN (select public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='TA_PROTO_CSI_EXT' and DESTINATION='NCI_FORM_TA_REL')
 
 
@@ -1405,7 +1405,7 @@ Select 'ONE_DATA' TIER,
                              CREAT_USR_ID,
                              LST_UPD_USR_ID,
                              LST_UPD_DT From NCI_FORM_TA
-                             WHERE TA_IDSEQ in (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+                             WHERE TA_IDSEQ in (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='TRIGGERED_ACTIONS_EXT' and DESTINATION='NCI_FORM_TA')
 UNION ALL                             
  SELECT     'SBREXT' TIER, TA_INSTRUCTION,
@@ -1417,7 +1417,7 @@ UNION ALL
                nvl(ta.modified_by,'ONEDATA'),
              nvl(NVL (ta.date_modified, ta.date_created), to_date('8/18/2020','mm/dd/yyyy'))
           FROM sbrext.TRIGGERED_ACTIONS_EXT  ta
-          WHERE TA_IDSEQ in (select IDSEQ from SBREXT.ONEDATA_MIGRATION_ERROR
+          WHERE TA_IDSEQ in (select IDSEQ from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='TRIGGERED_ACTIONS_EXT' and DESTINATION='NCI_FORM_TA')
 
 
@@ -1431,7 +1431,7 @@ select DISTINCT 'ONE_DATA' TIER,PERM_VAL_BEG_DT,
                           LST_UPD_DT,
                           LST_UPD_USR_ID,
                           NCI_IDSEQ from  perm_val
-                          WHERE (NCI_IDSEQ,VAL_DOM_ITEM_ID,VAL_DOM_VER_NR) in (select IDSEQ,public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+                          WHERE (NCI_IDSEQ,VAL_DOM_ITEM_ID,VAL_DOM_VER_NR) in (select IDSEQ,public_id,version from ONEDATA_MIGRATION_ERROR
 where ACTL_NAME='VD_PVS' and DESTINATION='PERMVAL') 
 UNION ALL                          
         SELECT DISTINCT 'SBR' TIER,pvs.BEGIN_DATE,
@@ -1448,7 +1448,7 @@ UNION ALL
                sbr.vd_pvs              pvs
          WHERE     pv.pv_idseq = pvs.pv_idseq
                AND pvs.vd_idseq = vd.nci_idseq
-               AND (pv.pv_idseq,vd.item_id,vd.ver_nr) in (select IDSEQ,public_id,version from SBREXT.ONEDATA_MIGRATION_ERROR
+               AND (pv.pv_idseq,vd.item_id,vd.ver_nr) in (select IDSEQ,public_id,version from ONEDATA_MIGRATION_ERROR
         where ACTL_NAME='VD_PVS' and DESTINATION='PERMVAL') 
         ORDER BY VAL_DOM_ITEM_ID,VAL_DOM_VER_NR;
         
@@ -1463,7 +1463,7 @@ SELECT /*+ PARALEL(12)*/
            ON     ai1.nci_idseq = DEC_IDSEQ
               AND ai1.Nci_Idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'DATA_ELEMENT_CONCEPT'
                               AND DESTINATION = 'DE')
 MINUS
@@ -1474,7 +1474,7 @@ SELECT de.De_Conc_Item_Id, de.De_Conc_Ver_Nr, ai2.Nci_Idseq
               AND De.Ver_Nr = Ai2.Ver_Nr
               AND (de.De_Conc_Item_Id, de.De_Conc_Ver_Nr) IN
                       (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'DATA_ELEMENT_CONCEPT'
                               AND DESTINATION = 'DE')
 ORDER BY DEC_Item_Id, DEC_Ver_Nr;         
@@ -1488,7 +1488,7 @@ SELECT /*+ PARALEL(12)*/
            ON     ai3.nci_idseq = VD_IDSEQ
               AND ai3.Nci_Idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'VALUE_DOMAIN'
                               AND DESTINATION = 'DE')
 MINUS
@@ -1499,7 +1499,7 @@ SELECT DISTINCT de.VAL_DOM_ITEM_ID, de.VAL_DOM_VER_NR, ai2.Nci_Idseq
               AND De.Ver_Nr = Ai2.Ver_Nr
               AND (de.VAL_DOM_ITEM_ID, de.VAL_DOM_VER_NR) IN
                       (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'VALUE_DOMAIN'
                               AND DESTINATION = 'DE')
 ORDER BY VD_Item_Id, VD_Ver_Nr;
@@ -1514,7 +1514,7 @@ SELECT /*+ PARALEL(12)*/
            ON     ai3.nci_idseq = CD_IDSEQ
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CONCEPTUAL DOMAIN'
                               AND DESTINATION = 'DE_CONC')
               MINUS
@@ -1525,7 +1525,7 @@ SELECT /*+ PARALEL(12)*/
                                          AND dec.Ver_Nr = Ai2.Ver_Nr
                                          AND (dec.CONC_DOM_ITEM_ID ,dec.CONC_DOM_VER_NR)
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CONCEPTUAL DOMAIN'
                               AND DESTINATION = 'DE_CONC')
 ORDER BY CONC_DOM_ITEM_ID, CONC_DOM_VER_NR;                              
@@ -1540,7 +1540,7 @@ SELECT /*+ PARALEL(12)*/
            ON     ai3.nci_idseq = CD_IDSEQ --FK
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CONCEPTUAL DOMAIN'
                               AND DESTINATION = 'VALUE_DOM')
 MINUS
@@ -1551,7 +1551,7 @@ MINUS
                                          AND dec.Ver_Nr = Ai2.Ver_Nr
                                          AND (dec.CONC_DOM_ITEM_ID ,dec.CONC_DOM_VER_NR) 
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CONCEPTUAL DOMAIN'
                               AND DESTINATION = 'VALUE_DOM')  
 ORDER BY CONC_DOM_ITEM_ID, CONC_DOM_VER_NR;  
@@ -1567,7 +1567,7 @@ SELECT /*+ PARALEL(12)*/
            ON     ai3.nci_idseq = T_OC_IDSEQ --FK        
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'TRGT_OBJ_CLS'
                               AND DESTINATION = 'NCI_OC_RECS')
 MINUS
@@ -1578,7 +1578,7 @@ MINUS
                                          AND dec.Ver_Nr = Ai2.Ver_Nr
                                          AND (dec.TRGT_OBJ_CLS_ITEM_ID ,dec.TRGT_OBJ_CLS_VER_NR)
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'TRGT_OBJ_CLS'
                               AND DESTINATION = 'NCI_OC_RECS')  
 ORDER BY TRGT_OBJ_CLS_ITEM_ID ,TRGT_OBJ_CLS_VER_NR; 
@@ -1594,7 +1594,7 @@ SELECT /*+ PARALEL(12)*/
            ON     ai3.nci_idseq = S_OC_IDSEQ --FK      
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'SRC_OBJ_CLS'
                               AND DESTINATION = 'NCI_OC_RECS')
 MINUS
@@ -1605,7 +1605,7 @@ MINUS
                                          AND dec.Ver_Nr = Ai2.Ver_Nr
                                          AND (dec.SRC_OBJ_CLS_ITEM_ID ,dec.SRC_OBJ_CLS_VER_NR)
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'SRC_OBJ_CLS'
                               AND DESTINATION = 'NCI_OC_RECS')
 ORDER BY SRC_OBJ_CLS_ITEM_ID ,SRC_OBJ_CLS_VER_NR;    
@@ -1620,7 +1620,7 @@ SELECT /*+ PARALEL(12)*/
            ON     ai3.nci_idseq = P_DE_IDSEQ --FK 736 360                  
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'P_DE'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
 MINUS
@@ -1631,7 +1631,7 @@ MINUS
                                          AND ai2.VER_NR	= dec.C_ITEM_VER_NR
                                         AND (dec.P_ITEM_ID ,dec.P_ITEM_VER_NR)
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'P_DE'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
 ORDER BY P_ITEM_ID ,P_ITEM_VER_NR;    
@@ -1646,7 +1646,7 @@ SELECT /*+ PARALEL(12)*/
            ON     ai3.nci_idseq = C_DE_IDSEQ --FK 736 360                  
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'C_DE'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
 MINUS
@@ -1657,7 +1657,7 @@ MINUS
                                          AND ai2.VER_NR	= dec.P_ITEM_VER_NR
                                         AND (dec.C_ITEM_ID ,dec.C_ITEM_VER_NR)
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'C_DE'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
 ORDER BY C_ITEM_ID ,C_ITEM_VER_NR;  
@@ -1675,7 +1675,7 @@ SELECT /*+ PARALEL(12)*/
            AND PUBLIC_ID>0            
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CONTE_IDSEQ'
                               AND DESTINATION = 'ALT_DEF')
 MINUS
@@ -1686,7 +1686,7 @@ MINUS
                                          AND dec.Ver_Nr = Ai2.Ver_Nr
                                          AND (dec.CNTXT_ITEM_ID,dec.CNTXT_VER_NR)
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CONTE_IDSEQ'
                               AND DESTINATION = 'ALT_DEF')
 ORDER BY CNTXT_ITEM_ID ,CNTXT_VER_NR; 
@@ -1704,7 +1704,7 @@ SELECT /*+ PARALEL(12)*/
            AND PUBLIC_ID>0           
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CONTE_IDSEQ'
                               AND DESTINATION = 'ALT_NMS')
 MINUS
@@ -1715,7 +1715,7 @@ MINUS
                                          AND dec.Ver_Nr = Ai2.Ver_Nr
                                          AND (dec.CNTXT_ITEM_ID,dec.CNTXT_VER_NR)
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CONTE_IDSEQ'
                               AND DESTINATION = 'ALT_NMS')
 ORDER BY CNTXT_ITEM_ID ,CNTXT_VER_NR;   
@@ -1733,7 +1733,7 @@ SELECT /*+ PARALEL(12)*/
            AND PUBLIC_ID>0           
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CONTE_IDSEQ'
                               AND DESTINATION = 'REF')
 MINUS
@@ -1744,7 +1744,7 @@ MINUS
                                          AND dec.Ver_Nr = Ai2.Ver_Nr
                                          AND (dec.NCI_CNTXT_ITEM_ID ,dec.NCI_CNTXT_VER_NR)
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CONTE_IDSEQ'
                               AND DESTINATION = 'REF')
 ORDER BY NCI_CNTXT_ITEM_ID ,NCI_CNTXT_VER_NR;
@@ -1760,7 +1760,7 @@ SELECT /*+ PARALEL(12)*/
            ON     ai3.nci_idseq = VM_IDSEQ          
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'VM_IDSEQ'
                               AND DESTINATION = 'CONC_DOM_VAL_MEAN')
 MINUS
@@ -1771,7 +1771,7 @@ MINUS
                                          AND dec.CONC_DOM_VER_NR = Ai2.Ver_Nr
                                          AND (dec.NCI_VAL_MEAN_ITEM_ID ,dec.NCI_VAL_MEAN_VER_NR)
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'VM_IDSEQ'
                               AND DESTINATION = 'CONC_DOM_VAL_MEAN')
 ORDER BY NCI_VAL_MEAN_ITEM_ID ,NCI_VAL_MEAN_VER_NR;                               
@@ -1787,7 +1787,7 @@ FROM SBR.CS_CSI  dae
            ON     ai3.nci_idseq = CSI_IDSEQ --FK      
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CSI_IDSEQ'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL_ALT_KEY')
 MINUS
@@ -1798,7 +1798,7 @@ MINUS
                                          AND dec.CNTXT_CS_VER_NR = Ai2.Ver_Nr
                                          AND (dec.C_ITEM_ID,dec.C_ITEM_VER_NR)
                                          IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'CSI_IDSEQ'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL_ALT_KEY')
 ORDER BY C_ITEM_ID ,C_ITEM_VER_NR;   
@@ -1813,7 +1813,7 @@ SELECT /*+ PARALEL(12)*/
            ON     ai3.nci_idseq = AC_IDSEQ  
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'AC_IDSEQ'
                               AND DESTINATION = 'NCI_ALT_KEY_ADMIN_ITEM_REL')
 MINUS
@@ -1822,7 +1822,7 @@ MINUS
                                   INNER JOIN ONEDATA_WA.NCI_ALT_KEY_ADMIN_ITEM_REL dec
                                       ON (dec.C_ITEM_ID,dec.C_ITEM_VER_NR)
                                         IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'AC_IDSEQ'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL_ALT_KEY')
 ORDER BY C_ITEM_ID ,C_ITEM_VER_NR;  
@@ -1838,7 +1838,7 @@ SELECT /*+ PARALEL(12)*/
                AND ai3.admin_item_typ_id = 50
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'PROTO_IDSEQ'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
 MINUS
@@ -1847,7 +1847,7 @@ MINUS
                                       INNER JOIN ONEDATA_WA.NCI_ADMIN_ITEM_REL dec
                                           ON   (dec.P_ITEM_ID,dec.P_ITEM_VER_NR)
                                         IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'PROTO_IDSEQ'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
 ORDER BY P_ITEM_ID,P_ITEM_VER_NR;
@@ -1863,7 +1863,7 @@ SELECT /*+ PARALEL(12)*/
                AND ai3.admin_item_typ_id = 54
            AND ai3.nci_idseq IN
                       (SELECT idseq
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'QC_IDSEQ'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
 MINUS
@@ -1872,7 +1872,7 @@ MINUS
                                       INNER JOIN ONEDATA_WA.NCI_ADMIN_ITEM_REL dec
                                           ON   (dec.C_ITEM_ID,dec.C_ITEM_VER_NR)
                                         IN (SELECT public_id, version
-                         FROM SBREXT.ONEDATA_MIGRATION_ERROR
+                         FROM ONEDATA_MIGRATION_ERROR
                         WHERE     ACTL_NAME = 'QC_IDSEQ'
                               AND DESTINATION = 'NCI_ADMIN_ITEM_REL')
 ORDER BY C_ITEM_ID,C_ITEM_VER_NR;                                                                                                                    
