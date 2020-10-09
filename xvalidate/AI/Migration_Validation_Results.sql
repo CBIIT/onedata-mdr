@@ -1432,7 +1432,7 @@ select DISTINCT 'ONE_DATA' TIER,PERM_VAL_BEG_DT,
                           LST_UPD_USR_ID,
                           NCI_IDSEQ from  perm_val
                           WHERE (NCI_IDSEQ,VAL_DOM_ITEM_ID,VAL_DOM_VER_NR) in (select IDSEQ,public_id,version from ONEDATA_MIGRATION_ERROR
-where ACTL_NAME='VD_PVS' and DESTINATION='PERMVAL') 
+where ACTL_NAME='VD_PVS' and DESTINATION='PERM_VAL') 
 UNION ALL                          
         SELECT DISTINCT 'SBR' TIER,pvs.BEGIN_DATE,
                pvs.END_DATE,
@@ -1449,7 +1449,7 @@ UNION ALL
          WHERE     pv.pv_idseq = pvs.pv_idseq
                AND pvs.vd_idseq = vd.nci_idseq
                AND (pv.pv_idseq,vd.item_id,vd.ver_nr) in (select IDSEQ,public_id,version from ONEDATA_MIGRATION_ERROR
-        where ACTL_NAME='VD_PVS' and DESTINATION='PERMVAL') 
+        where ACTL_NAME='VD_PVS' and DESTINATION='PERM_VAL') 
         ORDER BY VAL_DOM_ITEM_ID,VAL_DOM_VER_NR;
         
 /*Validate Foriegn Key relationship in ONEDATA_WA.SAG_FK_VALIDATE*/
