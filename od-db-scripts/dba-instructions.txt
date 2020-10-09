@@ -1,0 +1,23 @@
+-- Run as ONEDATA_WA and as ONEDATA_RA
+S00_1_WA_RA_DDL.sql
+
+-- Run as ONEDATA_RA
+S00_2_RA_Grants.sql
+
+-- Run as SBR
+S00_2_SBR_Grants.sql
+
+-- Run as ONEDATA_WA
+S00_2_WA_Grants.sql
+
+-- Run as ONEDATA_MD
+S00_3_MD_SP.sql
+
+-- Run as ONEDATA_WA
+S00_4_WA_Core_packages.sql
+
+-- Run as ONEDATA_RA
+S00_5_RA_Trig_SP.sql
+
+-- Run as ONEDATA_MD
+S00_6_MD_custom_portal.sql
