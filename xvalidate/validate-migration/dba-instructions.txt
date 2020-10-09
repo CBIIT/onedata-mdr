@@ -1,5 +1,6 @@
 Steps 1, 2, 3 shall be done once in a schema. They create DB objects.
-Step 4 shall be run each time we need a validation. This is validation itself.
+
+Step 4 is on demand only and shall be run each time we need a validation immediately after a caDSR to OD migration. This is validation itself.
 
 1. Prepare scripts in your directory
 Copy all scripts to the same SQL Plus or Toad script directory to simplify calling script files from this GIT scripts directory
@@ -22,6 +23,6 @@ validate_data_migration_steps.sql
 validate_data_migration.sql
 
 4.
-Run validate job manually
+Run validate job manually on demand
 
 exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
