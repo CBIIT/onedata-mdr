@@ -4466,7 +4466,7 @@ nvl(vd.created_by,v_dflt_usr),
 
     COMMIT;
 
-/*
+
     UPDATE de
        SET PREF_QUEST_TXT = ( select name     FROM sbr.reference_documents  d,
                        obj_key                    ok,
