@@ -59,6 +59,7 @@ grant select on VER_LVL_OPTS to onedata_WA;
 grant select on OD_CNSTRNT_TYP to onedata_WA;
 grant select on SYSTEM_COLUMNS_DATA to onedata_WA;
 grant select on OBJ_CLS_REL to onedata_WA;
+grant select on NCI_CS_ITEM_REL to onedata_WA;
 grant select on CONC_DOM_VAL_MEAN to onedata_WA;
 grant select on NCI_ADMIN_ITEM_REL to onedata_WA;
 grant select on NCI_ALT_KEY_ADMIN_ITEM_REL to onedata_WA;
@@ -70,6 +71,7 @@ grant select on NCI_ADMIN_ITEM_REL_ALT_KEY to onedata_WA;
 grant select on NCI_INSTR to onedata_WA;
 grant select on NCI_STG_ADMIN_ITEM to onedata_WA;
 grant select on NCI_FORM to onedata_WA;
+grant select on NCI_TEMPLATE to onedata_WA;
 grant select on NCI_OC_RECS to onedata_WA;
 grant select on NCI_QUEST_VALID_VALUE to onedata_WA;
 grant select on NCI_CSI_ALT_DEFNMS to onedata_WA;
@@ -82,4 +84,15 @@ grant select on VALUE_DOM to onedata_WA;
 grant ALL on NCI_ADMIN_ITEM_EXT to onedata_WA;
 grant select on ADMIN_ITEM to onedata_WA;
 grant all on nci_usr_cart to onedata_wa;
+
+
+grant all on CNTCT to onedata_md;
+grant all on vw_cntxt to onedata_wa;
+grant select on nci_entty_addr to onedata_wa;
+grant select on NCI_AI_TYP_VALID_STUS to onedata_wa;
+grant select on NCI_ENTTY to onedata_wa;
+grant select on NCI_ORG to onedata_wa;
+grant select on  NCI_PRSN to onedata_wa;
+grant select on NCI_ENTTY_COMM to onedata_wa;
+grant select on NCI_ENTTY_ADDR to onedata_wa;
 
