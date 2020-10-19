@@ -12,7 +12,7 @@ alter table ALT_DEF modify (ver_nr number(4,2));
 alter table ALT_NMS modify (ver_nr number(4,2));
 alter table CNCPT_ADMIN_ITEM modify (ver_nr number(4,2));
 alter table REP_CLS modify (ver_nr number(4,2));
-alter table OBJ_CLS modify (ver_nr number(4,2));-
+alter table OBJ_CLS modify (ver_nr number(4,2));
 alter table PROP modify (ver_nr number(4,2));
 alter table CLSFCTN_SCHM modify (ver_nr number(4,2));
 alter table REF modify (ver_nr number(4,2));
@@ -481,8 +481,6 @@ create table NCI_FORM_TA
        LST_UPD_DT           DATE DEFAULT sysdate NULL
 );
 
-
-
 create table NCI_FORM_TA_REL
 (	TA_ID number not null,
 	NCI_PUB_ID number not null,
@@ -496,8 +494,6 @@ create table NCI_FORM_TA_REL
        LST_UPD_DT           DATE DEFAULT sysdate NULL,
 	primary key (TA_ID, NCI_PUB_ID, NCI_VER_NR)
 );
-
-
 
 create table test_results (
 TABLE_NAME varchar2(50) not null primary key,
