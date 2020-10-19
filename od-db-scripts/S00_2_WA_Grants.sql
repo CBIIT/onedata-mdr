@@ -89,7 +89,7 @@ grant select on NCI_STG_AI_CNCPT to onedata_ra;
 grant select on VALUE_DOM to onedata_ra;
 grant select on CNCPT_ADMIN_ITEM to onedata_ra;
 grant select on NCI_ADMIN_ITEM_EXT to onedata_ra;
-grant select on NCI_ADMIN__EXT to onedata_ra;
+grant select on NCI_ADMIN_EXT to onedata_ra;
 
 grant all on CNTCT to onedata_md;
 grant select on ADMIN_ITEM to onedata_md;
