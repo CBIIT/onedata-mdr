@@ -1,5 +1,5 @@
 set serveroutput on size 1000000
-SPOOL S1_WA_DATA_MIGRATION.log
+SPOOL S3_WA_DATA_MIGRATION.log
 --create index SBREXT.AC_CHANGE_HISTORY_IDX on SBREXT.AC_CHANGE_HISTORY_EXT (AC_IDSEQ);
 exec sp_preprocess;
 alter trigger TR_NCI_ALT_NMS_DENORM_INS disable;
