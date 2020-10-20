@@ -1,5 +1,5 @@
 set serveroutput on size 1000000
-SPOOL S1_RA_DATA_MIGRATION.log
+SPOOL S3_RA_DATA_MIGRATION.log
 --- Run in Release Area
 alter trigger TR_AI_EXT_TAB_INS disable;
 truncate table NCI_CSI_ALT_DEFNMS;
