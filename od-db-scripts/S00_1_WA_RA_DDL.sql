@@ -216,13 +216,13 @@ create table NCI_ADMIN_ITEM_REL
   DISP_ORD  integer null,
   DISP_LBL  varchar2(255) null,
   REP_NO Integer null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate,
    primary key (P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID));
 
 
@@ -242,13 +242,13 @@ create table NCI_ADMIN_ITEM_REL_ALT_KEY
   EDIT_IND  number(1) null,
   DEFLT_VAL   varchar2(2000) null,
   REQ_IND number(1) null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate,
    primary key (NCI_PUB_ID, NCI_VER_NR));
 
 
@@ -269,13 +269,13 @@ create table NCI_QUEST_VALID_VALUE
    NCI_IDSEQ char(36) null,
    MEAN_TXT   varchar2(2000) null,
    DESC_TXT  varchar2(2000) null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate,
    DISP_ORD  integer null,
    primary key (NCI_PUB_ID, NCI_VER_NR, Q_VER_NR, Q_PUB_ID));
 
@@ -286,13 +286,13 @@ create table NCI_CSI_ALT_DEFNMS
   NCI_VER_NR number(4,2) default 1 not null ,
   NMDEF_ID  number not null,
   TYP_NM  varchar2(20) not null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate,
 primary key (NCI_PUB_ID, NCI_VER_NR, NMDEF_ID)
 );
 
@@ -307,13 +307,13 @@ create table NCI_INSTR
    INSTR_LNG   varchar2(1000),
    INSTR_SHRT  varchar2(255),
    INSTR_DEF varchar2(4000) null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate,
 	 primary key (INSTR_ID));
 
 
@@ -329,13 +329,13 @@ create table NCI_ALT_KEY_ADMIN_ITEM_REL
   DISP_ORD  integer null,
   DISP_LBL  varchar2(255) null,
   NCI_IDSEQ char(36) null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate,
    primary key (NCI_PUB_ID, NCI_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID));
 
 
@@ -389,13 +389,13 @@ create table NCI_STG_ADMIN_ITEM
        VAL_DOM_FMT_ID       NUMBER NULL,
        VAL_DOM_HIGH_VAL_NUM VARCHAR2(50) NULL,
        VAL_DOM_LOW_VAL_NUM  VARCHAR2(50) NULL,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate
 );
 
 
@@ -407,13 +407,13 @@ create table NCI_STG_AI_CNCPT
   DISP_ORD  integer not null,
   CNCPT_ITEM_ID  number not null,
   CNCPT_VER_NR number(4,2) not null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL);
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate);
 
 create table NCI_OC_RECS (
 ITEM_ID number not null,
@@ -433,13 +433,13 @@ TRGT_HIGH_MULT	integer,
 DISP_ORD	integer,
 DIMNSNLTY	integer,
 ARRAY_IND	VARCHAR2(3 BYTE),
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate,
  primary key (ITEM_ID, VER_NR));
 
 
@@ -453,13 +453,13 @@ create table NCI_QUEST_VV_REP
 	VAL varchar2(255),
 	EDIT_IND number(1),
 	REP_SEQ  integer,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate
 );
 
 create table NCI_FORM_TA
@@ -472,31 +472,31 @@ create table NCI_FORM_TA
 	SRC_TYP_NM  varchar2(30),
 	TRGT_TYP_NM varchar2(30),
 	TA_IDSEQ  char(36),
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate
 );
 
 create table NCI_FORM_TA_REL
-(	TA_ID number not null,
-	NCI_PUB_ID number not null,
- 	NCI_VER_NR number(4,2) not null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+(	TA_ID number ,
+	NCI_PUB_ID number ,
+ 	NCI_VER_NR number(4,2) ,
+       CREAT_DT             DATE DEFAULT sysdate ,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user ,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user ,
+       FLD_DELETE           NUMBER(1) DEFAULT 0 ,
+       LST_DEL_DT           DATE DEFAULT sysdate ,
+       S2P_TRN_DT           DATE DEFAULT sysdate ,
+       LST_UPD_DT           DATE DEFAULT sysdate ,
 	primary key (TA_ID, NCI_PUB_ID, NCI_VER_NR)
 );
 
 create table test_results (
-TABLE_NAME varchar2(50) not null primary key,
+TABLE_NAME varchar2(50) primary key,
 RA_CNT  integer,
 WA_CNT  integer,
 caDSR_CNT  integer);
@@ -506,13 +506,13 @@ create table NCI_USR_CART
 CNTCT_SECU_ID	VARCHAR2(50 BYTE) not null,
 ITEM_ID   number not null,
 VER_NR number(4,2) not null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate,
 primary key (CNTCT_SECU_ID, ITEM_ID, VER_NR));
 
 
@@ -549,13 +549,13 @@ create table NCI_ADMIN_ITEM_EXT
   CNCPT_CONCAT_NM  varchar2(4000),
   CNCPT_CONCAT_DEF  varchar2(4000),
   PRIMARY KEY (ITEM_ID, VER_NR),
-  CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL);
+  CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate);
 
 alter table nci_admin_item_rel_alt_key modify (p_item_id null, p_item_ver_nr null);
 
@@ -775,13 +775,13 @@ CNCPT_1_ITEM_ID_6 number null,
   CNCPT_2_VER_NR_9 number(4,2)  null,
   CNCPT_2_ITEM_ID_10 number null,
   CNCPT_2_VER_NR_10 number(4,2) null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
-       LST_UPD_DT           DATE DEFAULT sysdate NULL
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
+       LST_UPD_DT           DATE DEFAULT sysdate
 );
 
 alter table ADMIN_ITEM modify (ITEM_LONG_NM varchar2(30));
@@ -818,12 +818,12 @@ drop trigger TR_AI_AUDIT_TAB_INS;
 create table NCI_AI_TYP_VALID_STUS
 ( ADMIN_ITEM_TYP_ID integer not null,
   STUS_ID  integer not null,
-      CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+      CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
        LST_UPD_DT           DATE DEFAULT sysdate NOT NULL,
 primary key (ADMIN_ITEM_TYP_ID, STUS_ID));
 
@@ -831,12 +831,12 @@ create table NCI_ENTTY
 ( ENTTY_ID number not null primary key,
   ENTTY_TYP_ID  integer not null,
   NCI_IDSEQ  char(36) not null,
-      CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+      CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
        LST_UPD_DT           DATE DEFAULT sysdate NOT NULL);
 
 create table NCI_ORG
@@ -845,12 +845,12 @@ create table NCI_ORG
  ORG_NM varchar2(80) not null,
  RA_IND  varchar2(3) null,
   MAIL_ADDR  varchar2(240) null,
-      CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+      CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
        LST_UPD_DT           DATE DEFAULT sysdate NOT NULL);
 
 create table NCI_PRSN
@@ -861,12 +861,12 @@ create table NCI_PRSN
   RNK_ORD  number(3,0) not null,
   MI varchar2(2) null,
   POS varchar2(80) null,
-       CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+       CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
        LST_UPD_DT           DATE DEFAULT sysdate NOT NULL);
 
 create table NCI_ENTTY_COMM
@@ -874,12 +874,12 @@ create table NCI_ENTTY_COMM
   COMM_TYP_ID integer not null, 
   RNK_ORD  number(3,0) not null,
   CYB_ADDR varchar2(255) not null,
-      CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+      CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
        LST_UPD_DT           DATE DEFAULT sysdate NOT NULL,
    primary key (ENTTY_ID, COMM_TYP_ID, RNK_ORD));
 
@@ -893,12 +893,12 @@ create table NCI_ENTTY_ADDR
   STATE_PROV varchar2(30) not null,
   POSTAL_CD varchar2(10) not null,
   CNTRY  varchar2(30) null,
-      CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+      CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
        LST_UPD_DT           DATE DEFAULT sysdate NOT NULL,
    primary key (ENTTY_ID, ADDR_TYP_ID, RNK_ORD));
 
@@ -914,12 +914,12 @@ CHANGED_TABLE_IDSEQ   CHAR(36)   NOT NULL  ,
 CHANGED_COLUMN        VARCHAR2(30) NOT NULL ,  
 OLD_VALUE                     VARCHAR2(4000), 
 NEW_VALUE                     VARCHAR2(4000) ,
-      CREAT_DT             DATE DEFAULT sysdate NULL,
-       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
-       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
-       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
-       LST_DEL_DT           DATE DEFAULT sysdate NULL,
-       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+      CREAT_DT             DATE DEFAULT sysdate,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user,
+       FLD_DELETE           NUMBER(1) DEFAULT 0,
+       LST_DEL_DT           DATE DEFAULT sysdate,
+       S2P_TRN_DT           DATE DEFAULT sysdate,
        LST_UPD_DT           DATE DEFAULT sysdate NOT NULL);
 
 
@@ -1585,9 +1585,7 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
 "ORIGIN","UNRSLVD_ISSUE","UNTL_DT","CLSFCTN_SCHM_VER_NR","ADMIN_ITEM_TYP_ID","CURRNT_VER_IND",
 "ADMIN_STUS_ID","REGSTR_STUS_ID","REGISTRR_CNTCT_ID","SUBMT_CNTCT_ID","STEWRD_CNTCT_ID","SUBMT_ORG_ID","STEWRD_ORG_ID","CREAT_DT","CREAT_USR_ID","LST_UPD_USR_ID",
 "FLD_DELETE","LST_DEL_DT","S2P_TRN_DT","LST_UPD_DT","LEGCY_CD","CASE_FILE_ID","REGSTR_AUTH_ID","BTCH_NR","ALT_KEY","ABAC_ATTR","NCI_IDSEQ","ADMIN_STUS_NM_DN","CNTXT_NM_DN","REGSTR_STUS_NM_DN","ORIGIN_ID","ORIGIN_ID_DN","DEF_SRC" from admin_item where ADMIN_ITEM.CURRNT_VER_IND = '1';
-				
-				
+
 alter table nci_csi_alt_defnms drop primary key;
 
 alter table nci_csi_alt_defnms add primary key (NCI_PUB_ID,NCI_VER_NR,NMDEF_ID,TYP_NM);
-
