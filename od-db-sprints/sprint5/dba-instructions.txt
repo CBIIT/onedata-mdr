@@ -1,0 +1,11 @@
+-- Run as ONEDATA_WA
+S5_1_WA_RA_DDL.sql
+
+-- Run as ONEDATA_RA
+S5_1_WA_RA_DDL.sql
+
+-- Run as ONEDATA_WA
+S5_2_WA_Grants_Triggers.sql
+
+-- Run as ONEDATA_WA
+S5_PB_NCI_11179_SPALTDEFPOST.sql
