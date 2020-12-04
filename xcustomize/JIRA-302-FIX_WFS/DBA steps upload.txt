@@ -1,0 +1,5 @@
+DBA steps: 
+1.execute file delete.sql
+2.Open the attached control file AI_STATUS.CTL.
+3.Replace  "C:\meta\DATA_UPLOAD" to the location path where you will place the attached STATUS_AI_DSR_PROD.csv file.
+4.Load data via SQL LOADER using control file  AI_STATUS.CTL
