@@ -1,6 +1,6 @@
 DROP VIEW ONEDATA_WA.VALUE_DOMAINS_VIEW;
 
-/* Formatted on 11/16/2020 1:34:05 PM (QP5 v5.354) */
+/* Formatted on 12/4/2020 7:28:50 PM (QP5 v5.354) */
 CREATE OR REPLACE FORCE VIEW ONEDATA_WA.VALUE_DOMAINS_VIEW
 (
     VD_IDSEQ,
@@ -37,7 +37,8 @@ CREATE OR REPLACE FORCE VIEW ONEDATA_WA.VALUE_DOMAINS_VIEW
     CHAR_SET_NAME,
     REP_IDSEQ,
     ORIGIN,
-    VD_ID
+    VD_ID,
+    VD_TYPE_FLAG
 )
 BEQUEATH DEFINER
 AS
@@ -66,7 +67,7 @@ AS
            VAL_DOM_MAX_CHAR                     HIGH_VALUE_NUM,
            VAL_DOM_MIN_CHAR                     LOW_VALUE_NUM,
            NCI_DEC_PREC                         DECIMAL_PLACE,
-           ai.CURRNT_VER_IND                    LATEST_VERSION_IND,
+           decode(ai.CURRNT_VER_IND,1,'YES',0,'NO') LATEST_VERSION_IND,
            ai.FLD_DELETE                        DELETED_IND,
            ai.CREAT_USR_ID                      CREATED_BY,
            ai.LST_UPD_USR_ID                    MODIFIED_BY,
@@ -77,8 +78,8 @@ AS
            rep.NCI_IDSEQ                        REP_IDSEQ,
            --QUALIFIER_NAME,
            NVL (AI.ORIGIN, AI.ORIGIN_ID_DN)     ORIGIN,
-           ai.item_id                           VD_ID
-      -- ,CONDR_IDSEQ
+           ai.item_id                           VD_ID,
+          DECODE(vd.VAL_DOM_TYP_ID,17,'E',18,'N') VD_TYPE_FLAG
 
       FROM VALUE_DOM   vd,
            admin_item  ai,
