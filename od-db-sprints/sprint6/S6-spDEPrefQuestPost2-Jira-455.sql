@@ -1,4 +1,4 @@
-create or replace PROCEDURE            spDEPrefQuestPost2 (
+CREATE OR REPLACE PROCEDURE ONEDATA_WA.spDEPrefQuestPost2 (
     row_ori   IN     t_row,
     actions   IN OUT t_actions)
 AS
@@ -36,7 +36,7 @@ BEGIN
         ihook.setColumnValue (
             row,
             'REF_NM',
-            SUBSTR (ihook.getColumnValue (row_ori, 'PREF_QUEST_TXT'), 1, 255));
+            SUBSTR (ihook.getColumnValue (row_ori, 'PREF_QUEST_TXT'), 1, 30));
         ihook.setColumnValue (
             row,
             'REF_DESC',
@@ -72,3 +72,4 @@ BEGIN
         actions (actions.LAST) := action;
         END IF;
 END;
+/
