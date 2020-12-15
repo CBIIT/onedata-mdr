@@ -4,7 +4,6 @@ OD_MD_OBJSECU_AFT_INS.trg
 -- Run as ONEDATA_WA DDL scripts
 nci_caDSR_PULL.pkb
 S6-spDEPrefQuestPost2-Jira-455.sql
-S6_AI_WF_STATUS.sql
 S6_OD_TR_ADMIN_ITEM.sql
 S6_PACKAGE_BODY_nci_11179.sql
 S6_SPAISTUPDPOST.sql
