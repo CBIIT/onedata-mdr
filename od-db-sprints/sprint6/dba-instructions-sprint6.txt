@@ -1,0 +1,24 @@
+-- Run as ONEDATA_MD DDL script
+OD_MD_OBJSECU_AFT_INS.trg
+
+-- Run as ONEDATA_WA DDL scripts
+nci_caDSR_PULL.pkb
+S6-spDEPrefQuestPost2-Jira-455.sql
+S6_AI_WF_STATUS.sql
+S6_OD_TR_ADMIN_ITEM.sql
+S6_PACKAGE_BODY_nci_11179.sql
+S6_SPAISTUPDPOST.sql
+S6_SPAIUPDPOST.sql
+
+-- Run Data Migration as ONEDATA_WA which takes 30 minutes or so
+S3_WA_Data_Migration.sql
+
+-- Run Data Migration as ONEDATA_RA
+S3_RA_Data_Migration.sql
+
+-- Run as ONEDATA_MD data synchronization procedure creating DDl script and call it
+CNTCT_USRID_SYNC_WARA.prc
+call ONEDATA_MD.CNTCT_USRID_SYNC_WARA();
+
+-- Run validate job as ONEDATA_WA
+exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
