@@ -1,30 +1,3 @@
-DROP PACKAGE ONEDATA_WA.NCI_CADSR_PULL;
-
-CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_caDSR_PULL AS
-procedure sp_create_ai_1;
-procedure sp_create_ai_2;
-procedure sp_create_ai_3;
-procedure sp_create_ai_4;
-procedure sp_create_ai_children;
-PROCEDURE            sp_create_ai_cncpt;
-PROCEDURE            sp_create_csi;
-procedure sp_create_csi_2;
-procedure sp_migrate_lov ;
-PROCEDURE            sp_create_form_ext;
-PROCEDURE            sp_create_form_question_rel;
-PROCEDURE            sp_create_form_rel;
- PROCEDURE            sp_create_form_ta;
-  PROCEDURE            sp_create_form_vv_inst;
-   procedure            sp_create_form_vv_inst_2;
-   PROCEDURE            sp_create_pv;
-    PROCEDURE            sp_create_pv_2;
-     procedure            sp_migrate_change_log;
-      procedure sp_org_contact;
-END;
-/
-
-DROP PACKAGE BODY ONEDATA_WA.NCI_CADSR_PULL;
-
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_caDSR_PULL AS
 
 
