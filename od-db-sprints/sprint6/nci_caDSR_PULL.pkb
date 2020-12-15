@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_caDSR_PULL AS
+create or replace PACKAGE BODY ONEDATA_WA.nci_caDSR_PULL AS
 
 
 v_dflt_usr  varchar2(30) := 'ONEDATA';
@@ -1002,7 +1002,7 @@ nvl(vd.created_by,v_dflt_usr),
 
 
     UPDATE de
-       SET PREF_QUEST_TXT = ( select doc_text     FROM sbr.reference_documents  d, --Changed from name to doc_text for DSRMWS-455 By AT 12/01/2020
+       SET PREF_QUEST_TXT = ( select doc_text     FROM sbr.reference_documents  d,  --Changed from name to doc_text for DSRMWS-455 By AT 12/01/2020
                        obj_key                    ok,
                        admin_item                 ai
                  WHERE             d.dctl_name = ok.nci_cd
@@ -1844,7 +1844,6 @@ BEGIN
 
     COMMIT;
 
-/*
     INSERT INTO nci_admin_item_rel_alt_key (CNTXT_CS_ITEM_ID,
                                             CNTXT_CS_VER_NR,
                                             P_ITEM_ID,
@@ -1887,51 +1886,7 @@ BEGIN
                AND cscsi.csi_idseq = ccsi.nci_idseq;
 
     COMMIT;
-*/
 
----- New
-
-    INSERT INTO nci_admin_item_rel_alt_key (CNTXT_CS_ITEM_ID,
-                                            CNTXT_CS_VER_NR,
-                                            C_ITEM_ID,
-                                            C_ITEM_VER_NR,
-                                            DISP_ORD,
-                                            DISP_LBL,
-                                            NCI_VER_NR,
-                                            REL_TYP_ID,
-                                            NCI_IDSEQ,
-                                            CREAT_USR_ID,
-                                            CREAT_DT,
-                                            LST_UPD_DT,
-                                            LST_UPD_USR_ID)
-        SELECT cs.item_id,
-               cs.ver_nr,
-               ccsi.item_id,
-               ccsi.ver_nr,
-               cscsi.DISPLAY_ORDER,
-               cscsi.label,
-               1,
-               64,
-               cscsi.CS_CSI_IDSEQ,
-      nvl(cscsi.created_by,v_dflt_usr),
-               nvl(cscsi.date_created,v_dflt_date) ,
-               nvl(NVL (cscsi.date_modified, cscsi.date_created), v_dflt_date),
-               nvl(cscsi.modified_by,v_dflt_usr)
-            FROM admin_item  cs,
-               admin_item  ccsi,
-               sbr.cs_csi  cscsi         WHERE     cscsi.cs_idseq = cs.nci_idseq
-               AND cscsi.p_cs_csi_idseq IS NOT NULL
-               AND cscsi.csi_idseq = ccsi.nci_idseq;
-
-    COMMIT;
-
- update nci_admin_item_rel_alt_key k set (P_ITEM_ID, P_ITEM_VER_NR)
- = (select nci_pub_id, 1 from nci_admin_item_rel_alt_key a, sbr.cs_csi cscsi where k.nci_idseq = cscsi.cs_csi_idseq and cscsi.p_cs_csi_idseq = a.nci_idseq
- and cscsi.p_cs_csi_idseq is not null
- )
- where rel_typ_id = 64;
- commit;
- 
 
     INSERT INTO nci_admin_item_rel_alt_key (CNTXT_CS_ITEM_ID,
                                             CNTXT_CS_VER_NR,
@@ -2345,7 +2300,8 @@ select 26, CTL_NAME, description, CTL_NAME, comments,  nvl(created_by,v_dflt_usr
                nvl(NVL (date_modified, date_created), v_dflt_date),
                nvl(modified_by,v_dflt_usr) from sbr.COMM_TYPES_LOV;
  commit;              
-               insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (54,50);
+               
+insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (54,50);
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (52,59);
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (4,65);
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (3,65);
@@ -2406,7 +2362,6 @@ insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (56,81);
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (52,81);
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (52,83);
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (52,84);
-
 commit;
 
 end;
