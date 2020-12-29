@@ -1472,6 +1472,8 @@ BEGIN
             actions(actions.last) := action;
         end if;
         hookoutput.actions    := actions;
+        hookoutput.message := 'Form created successfully. Public Id:' || v_form_id;
+
     END IF;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
