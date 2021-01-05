@@ -7,7 +7,7 @@ end if;
 if (:new.admin_item_typ_id  in (4,3,2,1,54) and :new.ver_nr = 1 and :new.admin_stus_id is null) then -- draft new
 :new.admin_stus_id := 66;
 end if;
-if (:new.admin_item_typ_id  in (4,3,2,54) and :new.ver_nr = 1 and :new.regstr_stus_id is null) then -- draft new
+if (:new.admin_item_typ_id  in (4,3,2) and :new.ver_nr = 1 and :new.regstr_stus_id is null) then -- default new reg status Application
 :new.regstr_stus_id := 9; -- not sure if rules are changed
 end if;
 if (:new.admin_item_typ_id  in (4,3,2,1,54) and :new.ver_nr > 1) then -- draft mod
