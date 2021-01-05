@@ -16,7 +16,7 @@ end if;
 if (:new.admin_item_typ_id  in (5,6,49,53,7)) then -- Released
 :new.admin_stus_id := 75;
 end if;
-if (:new.admin_item_typ_id  in (49) and :new.cntxt_item_id is null)) then -- Set the default context for concept if empty
+if (:new.admin_item_typ_id  in (49) and :new.cntxt_item_id is null) then -- Set the default context for concept if empty
  :new.cntxt_item_id := 20000000024;
  :new.cntxt_ver_nr := 1;
 end if;
