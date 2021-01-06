@@ -1269,7 +1269,7 @@ begin
             ihook.setColumnValue(row, 'CREAT_USR_ID', hookInput.userId);
             ihook.setColumnValue(row, 'LST_UPD_USR_ID', hookInput.userId);
             ihook.setColumnValue(row, 'ADMIN_STUS_ID', 65 );           
-	    ihook.setColumnValue(row, 'REGSTR_STUS_ID',9 ); –- Application			    
+	    ihook.setColumnValue(row, 'REGSTR_STUS_ID',9 ); -- Application				    
             ihook.setColumnValue(row, 'NCI_IDSEQ', '');
 
             ai_insert_action_rows.extend; ai_insert_action_rows(ai_insert_action_rows.last) := row;
