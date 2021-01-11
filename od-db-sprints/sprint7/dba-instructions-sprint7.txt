@@ -1,8 +1,5 @@
--- Run as ONEDATA_WA DDL scripts
-S7_1_WA_RA_DDL.sql
 -- Run as ONEDATA_RA DDL scripts
 S7_1_WA_RA_DDL.sql
-
 -- Run as ONEDATA_WA DDL scripts
 S7_OD_TR_ADMIN_ITEM.sql
 S7_VW_NCI_DE_AI_SEARCH.sql
