@@ -1,4 +1,4 @@
-create or replace PACKAGE nci_11179 AS
+CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_11179 AS
 function getWordCount(v_nm in varchar2) return integer;
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
 FUNCTION get_concepts(v_item_id in number, v_ver_nr in number) return varchar2;
@@ -13,7 +13,7 @@ procedure spAddConceptRel (v_data_in in clob, v_data_out out clob);
 procedure spCreateVerNCI (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure getConcatNmDef(v_item_id in number, v_ver_nr in number, v_nm out varchar2, v_long_nm out varchar2,v_def out varchar2);
 procedure spCopyModuleNCI (actions in out t_actions, v_from_module_id in number,v_from_module_ver in number,  v_from_form_id in number, v_from_form_ver number, v_to_form_id number, v_to_form_ver number);
-
+procedure spReturnSubtypeRow (v_item_id in number, v_ver_nr in number, v_type in number, row in out t_row);
 function getItemId return integer;
 procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm out varchar2, v_def out varchar2);
 function replaceChar(v_str in varchar2) return varchar2;
@@ -31,7 +31,11 @@ spCreateVerNCI - Create new version customized
 */
 END;
 /
-create or replace PACKAGE BODY            nci_11179 AS
+
+
+GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;
+
+CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_11179 AS
 
 v_err_str      varchar2(1000) := '';
 DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
@@ -596,7 +600,6 @@ ihook.setColumnValue (row, 'DISP_ORD', 1);
     ihook.setColumnValue (row, 'VM_DEF', cur1.vm_def);
     ihook.setColumnValue (row, 'VALUE', cur1.value);
     ihook.setColumnValue (row, 'MEAN_TXT', cur1.mean_txt);
-    ihook.setColumnValue (row, 'DESC_TXT', cur1.desc_txt);
     v_itemid := nci_11179.getItemId;
     ihook.setColumnValue (row, 'NCI_PUB_ID', v_itemid);
     ihook.setColumnValue (row, 'NCI_VER_NR', 1);
@@ -614,9 +617,9 @@ ihook.setColumnValue (row, 'DISP_ORD', 1);
     actions(actions.last) := action;
 
     if (v_found) then 
-    action := t_actionrowset(rowsvv, 'Question Valid Values (Hook)', 2,16,'insert');
-    actions.extend;
-    actions(actions.last) := action;
+    action := t_actionrowset(rowsvv, 'NCI_QUEST_VALID_VALUE', 1,16,'insert');
+   -- actions.extend;
+   -- actions(actions.last) := action;
   end if;
 
 end;
@@ -639,6 +642,7 @@ v_temp        number;
 v_col_val       varchar2(4000);
 
 v_meta_col_cnt      integer;
+v_disp_ord integer;
 v_meta_desc_tab      dbms_sql.desc_tab;
 
 begin
@@ -682,7 +686,7 @@ v_table_name := 'ADMIN_ITEM';
 
     ihook.setColumnValue(row, 'VER_NR',v_to_form_ver);
     ihook.setColumnValue(row, 'ITEM_ID',v_to_module_id);
-    ihook.setColumnValue(row, 'ITEM_LONG_NM',v_to_module_id);
+  --  ihook.setColumnValue(row, 'ITEM_NM',v_to_module_id);
     action_rows := t_rows();
 
     action_rows.extend; action_rows(action_rows.last) := row;
@@ -697,8 +701,11 @@ v_table_name := 'ADMIN_ITEM';
     ihook.setColumnValue(row, 'c_ITEM_ID',v_to_module_id);
     ihook.setColumnValue(row, 'c_ITEM_ver_nr',v_to_form_ver);
     ihook.setColumnValue(row, 'rel_typ_id',61);
-    -- need to change this to max display order?
-    ihook.setColumnValue(row, 'disp_ord',0);
+    
+     select nvl(max(disp_ord)+ 1,0) into v_disp_ord from nci_admin_item_rel where 
+     p_item_id = v_to_form_id and p_item_ver_nr = v_to_form_ver;
+      --   raise_application_error(-2000
+    ihook.setColumnValue(row, 'disp_ord',v_disp_ord);
 
      action_rows := t_rows();
 
@@ -962,6 +969,70 @@ begin
 end;
 
 
+
+procedure spReturnSubtypeRow (v_item_id in number, v_ver_nr in number, v_type in number, row in out t_row) as
+    action           t_actionRowset;
+    action_rows              t_rows := t_rows();
+  
+    v_table_name      varchar2(30);
+    v_sql        varchar2(4000);
+    v_cur        number;
+    v_temp        number;
+    v_col_val       varchar2(4000);
+
+    v_meta_col_cnt      integer;
+    v_meta_desc_tab      dbms_sql.desc_tab;
+begin
+    if v_type= 1 then
+        v_table_name := 'CONC_DOM';
+    elsif v_type = 2 then
+        v_table_name := 'DE_CONC';
+    elsif v_type = 3 then
+        v_table_name := 'VALUE_DOM';
+    elsif v_type = 4 then
+        v_table_name := 'DE';
+    elsif v_type = 5 then
+        v_table_name := 'OBJ_CLS';
+    elsif v_type = 6 then
+        v_table_name := 'PROP';
+    elsif v_type = 7 then
+        v_table_name := 'REP_CLS';
+    elsif v_type = 8 then
+        v_table_name := 'CNTXT';
+    elsif v_type = 9 then
+        v_table_name := 'CLSFCTN_SCHM';
+    elsif v_type = 10 then
+        v_table_name := 'DERV_RUL';
+    elsif v_type = 49 then
+        v_table_name := 'CNCPT';
+    elsif v_type = 54 then
+        v_table_name := 'NCI_FORM';
+    end if;
+
+    v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
+
+    v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where item_id=:item_id and ver_nr=:ver_nr';
+
+    v_cur := dbms_sql.open_cursor;
+    dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
+    dbms_sql.bind_variable(v_cur, ':item_id',v_item_id);
+    dbms_sql.bind_variable(v_cur, ':ver_nr', v_ver_nr);
+
+    for i in 1..v_meta_col_cnt loop
+        dbms_sql.define_column(v_cur, i, '', 4000);
+    end loop;
+
+    v_temp := dbms_sql.execute_and_fetch(v_cur);
+    dbms_sql.describe_columns(v_cur, v_meta_col_cnt, v_meta_desc_tab);
+
+
+    for i in 1..v_meta_col_cnt loop
+        dbms_sql.column_value(v_cur, i, v_col_val);
+        ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
+    end loop;
+
+    dbms_sql.close_cursor(v_cur);
+end;
 
 /*  Create sub-type row for version. Called from spCreateVer */
 
@@ -1304,7 +1375,7 @@ begin
             ihook.setColumnValue(row, 'CREAT_USR_ID', hookInput.userId);
             ihook.setColumnValue(row, 'LST_UPD_USR_ID', hookInput.userId);
             ihook.setColumnValue(row, 'ADMIN_STUS_ID', 65 );
-            ihook.setColumnValue(row, 'REGSTR_STUS_ID','' );
+            ihook.setColumnValue(row, 'REGSTR_STUS_ID',9 );
             ihook.setColumnValue(row, 'NCI_IDSEQ', '');
 
             ai_insert_action_rows.extend; ai_insert_action_rows(ai_insert_action_rows.last) := row;
@@ -1339,9 +1410,10 @@ end;
 
 END;
 /
-
-
-create or replace PACKAGE nci_form_mgmt AS
+GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;
+DROP PACKAGE ONEDATA_WA.NCI_FORM_MGMT;
+/
+CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_form_mgmt AS
 procedure spAddForm (v_data_in in clob, v_data_out out clob);
 procedure spAddModule (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spEditModule (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -1357,10 +1429,11 @@ procedure spChngQuestTextVV (v_data_in in clob, v_data_out out clob,  v_user_id 
 procedure spChngQuestDefVV (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2); 
 procedure spAddQuestionRep (rep in integer, row_ori in t_row, rows in out t_rows);
 procedure spAddQuestionRepNew (rep in integer, v_quest_id in integer, rows in out t_rows);
+procedure spFormRelatedPost (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+
 END;
 /
-
-create or replace PACKAGE BODY nci_form_mgmt AS
+CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_form_mgmt AS
 
 function isUserAuth(v_frm_item_id in number, v_frm_ver_nr in number,v_user_id in varchar2) return boolean  iS
 v_auth boolean := false;
@@ -1473,7 +1546,6 @@ BEGIN
         end if;
         hookoutput.actions    := actions;
         hookoutput.message := 'Form created successfully. Public Id:' || v_form_id;
-
     END IF;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
@@ -1589,6 +1661,49 @@ BEGIN
     hookoutput.actions    := actions;
     END IF;
   END IF;
+     
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
+
+PROCEDURE spFormRelatedPost (    v_data_in IN CLOB,    v_data_out OUT CLOB,    v_user_id in varchar2)
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+  i integer := 0;
+  v_item_id number;
+  v_ver_nr number(4,2);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ 
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ 
+ if  (hookinput.originalRowset.tablename = 'NCI_ADMIN_ITEM_REL' and ihook.getColumnValue(row_ori,'REL_TYP_ID') = 60) then   ---  protocol
+ v_item_id := ihook.getColumnValue(row_ori,'C_ITEM_ID');
+ v_ver_nr := ihook.getColumnValue(row_ori,'C_ITEM_VER_NR');
+  
+ elsif   (hookinput.originalRowset.tablename = 'NCI_ADMIN_ITEM_REL' and ihook.getColumnValue(row_ori,'REL_TYP_ID') = 61 ) then   --- Module
+ v_item_id := ihook.getColumnValue(row_ori,'P_ITEM_ID');
+ v_ver_nr := ihook.getColumnValue(row_ori,'P_ITEM_VER_NR');
+ elsif   (hookinput.originalRowset.tablename = 'NCI_ADMIN_ITEM_REL_ALT_KEY') then -- Question
+ select p_item_id, p_item_ver_nr into v_item_id, v_ver_nr from nci_admin_item_rel where rel_typ_id = 61 and 
+ c_item_id = ihook.getColumnValue(row_ori, 'P_ITEM_ID') and c_item_ver_nr = ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR');
+ elsif   (hookinput.originalRowset.tablename = 'NCI_QUEST_VV_REP') then -- Question Repetision
+ select frm_item_id, frm_ver_nr into v_item_id, v_ver_nr from vw_nci_module_de where 
+nci_pub_id = ihook.getColumnValue(row_ori, 'QUEST_PUB_ID') and nci_ver_nr = ihook.getColumnValue(row_ori, 'QUEST_VER_NR');
+ elsif   (hookinput.originalRowset.tablename = 'NCI_QUEST_VALID_VALUE') then -- Question Repetision
+ select frm_item_id, frm_ver_nr into v_item_id, v_ver_nr from vw_nci_module_de where 
+nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.getColumnValue(row_ori, 'Q_VER_NR');
+ 
+ end if;
+ if (nci_form_mgmt.isUserAuth(v_item_id, v_ver_nr, v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to edit or delete any item related to this form.');
+ end if;
      
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
@@ -1860,6 +1975,7 @@ v_found boolean;
   v_mod_ver_nr number(4,2);
   v_disp_ord integer;
   v_add integer;
+  v_rep integer;
   i integer := 0;
   v_temp number;
   column  t_column;
@@ -1873,8 +1989,8 @@ BEGIN
  rows := t_rows();
  -- Get form and module ID
  
- select r.P_ITEM_ID, r.P_ITEM_VER_NR into v_frm_id, v_frm_Ver_nr from NCI_ADMIN_ITEM_REL_ALT_KEY k, NCI_ADMIN_ITEM_REL r where k.nci_pub_id = ihook.getColumNValue(row_ori, 'Q_ITEM_ID') 
- and k.nci_ver_nr = ihook.getColumNValue(row_ori, 'Q_ITEM_VER_NR') and k.P_ITEM_ID = r.C_ITEM_ID and k.P_ITEM_VER_NR = r.C_ITEM_VER_NR and r.rel_typ_id = 61;
+ select r.P_ITEM_ID, r.P_ITEM_VER_NR into v_frm_id, v_frm_Ver_nr from NCI_ADMIN_ITEM_REL_ALT_KEY k, NCI_ADMIN_ITEM_REL r where k.nci_pub_id = ihook.getColumNValue(row_ori, 'Q_PUB_ID') 
+ and k.nci_ver_nr = ihook.getColumNValue(row_ori, 'Q_VER_NR') and k.P_ITEM_ID = r.C_ITEM_ID and k.P_ITEM_VER_NR = r.C_ITEM_VER_NR and r.rel_typ_id = 61;
  if (nci_form_mgmt.isUserAuth(v_frm_id, v_frm_ver_nr, v_user_id) = false) then
  raise_application_error(-20000,'You are not authorized to edit any question in this form.');
  end if;
@@ -1884,8 +2000,7 @@ BEGIN
    v_found := false;
    rows := t_rows();
    row := t_row();
-   
-   for cur in (Select rep_seq from nci_quest_vv_rep where QUEST_PUB_ID=ihook.getColumNValue(row_ori, 'Q_PUB_ID')  and quest_ver_nr = ihook.getColumNValue(row_ori, 'Q_VER_NR')) loop
+   for cur in (Select rep_seq  from nci_quest_vv_rep where QUEST_PUB_ID=ihook.getColumNValue(row_ori, 'Q_PUB_ID')  and quest_ver_nr = ihook.getColumNValue(row_ori, 'Q_VER_NR')) loop
    row := t_row();
    
    ihook.setColumnValue(row, 'REP_SEQ', cur.rep_seq);
@@ -2102,6 +2217,7 @@ v_found boolean;
   v_stg_ai_id number;
   v_add integer := 0;
   i integer := 0;
+  j integer;
   v_disp_ord integer;
   column  t_column;
   msg varchar2(4000);
@@ -2213,23 +2329,24 @@ BEGIN
                         if nvl(rep,0) > 0 then 
                             spAddQuestionRepNew (rep, v_id, rowsrep);
                         end if;
-                        
-                for cur1 in (select PERM_VAL_NM, PERM_VAL_DESC_TXT, item_nm, item_long_nm , item_desc from  VW_NCI_DE_PV where de_item_id = cur.item_id and de_ver_nr = cur.ver_nr) loop
+                        j := 0;
+                for cur1 in (select PERM_VAL_NM, PERM_VAL_DESC_TXT, item_nm, item_long_nm , item_desc from  VW_NCI_DE_PV where de_item_id = cur.item_id and de_ver_nr = cur.ver_nr order by PERM_VAL_NM) loop
                   row := t_row();
                 ihook.setColumnValue (row, 'Q_PUB_ID', v_id);
                 ihook.setColumnValue (row, 'Q_VER_NR', 1);
                 ihook.setColumnValue (row, 'VM_NM', cur1.item_nm);
                 ihook.setColumnValue (row, 'VM_LNM', cur1.item_long_nm);
-                ihook.setColumnValue (row, 'VM_DEF', cur1.item_nm);
+                ihook.setColumnValue (row, 'VM_DEF', cur1.item_desc);
                 ihook.setColumnValue (row, 'VALUE', cur1.perm_val_nm);
                 ihook.setColumnValue (row, 'MEAN_TXT', cur1.item_nm);
                 ihook.setColumnValue (row, 'DESC_TXT', cur1.item_desc);
                 v_itemid := nci_11179.getItemId;
                 ihook.setColumnValue (row, 'NCI_PUB_ID', v_itemid);
                 ihook.setColumnValue (row, 'NCI_VER_NR', 1);
-                
+                ihook.setColumnValue (row, 'DISP_ORD', j);
                  rowsvv.extend;
                 rowsvv(rowsvv.last) := row;
+                j := j+ 1;
                 end loop;   
                  end loop;
    end loop;
@@ -2623,7 +2740,12 @@ BEGIN
  raise_application_error(-20000,'You are not authorized to edit any question in this form.');
  end if;
  */
- 
+ select frm_item_id, frm_ver_nr into v_frm_id, v_frm_ver_nr from vw_nci_module_de where 
+nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.getColumnValue(row_ori, 'Q_VER_NR');
+ if (nci_form_mgmt.isUserAuth(v_frm_id, v_frm_ver_nr, v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to edit any valid value on this form.');
+ end if;
+
  if hookInput.invocationNumber = 0 then
    
  
@@ -2645,7 +2767,11 @@ BEGIN
     ANSWER                     := T_ANSWER(1, 1, 'Select alternate.');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Alternate Question Text', ANSWERS);
+   --  ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(2, 2, 'Set to default.');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    QUESTION               := T_QUESTION('Value Meaning Text', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
        	 showrowset := t_showablerowset (rows, 'Alternate Names', 2, 'single');
        	 hookoutput.showrowset := showrowset;
@@ -2653,10 +2779,19 @@ BEGIN
         hookoutput.message := 'No alternate names found.';
      end if;
  ELSE
-            row_sel := hookinput.selectedRowset.rowset(1);
 
+            if (hookinput.answerId = 1) then
+            row_sel := hookinput.selectedRowset.rowset(1);
             select nm_desc into v_ref from alt_nms where nm_id = ihook.getColumnValue(row_sel, 'NM_ID');
+            else   -- 2 means set default
             
+           
+           select pv.item_nm into v_ref from VW_NCI_DE_PV pv,
+        NCI_ADMIN_ITEM_REL_ALT_KEY q where pv.DE_ITEM_ID = q.C_ITEM_id and pv.DE_VER_NR = q.c_ITEM_VER_NR and q.NCI_PUB_ID = ihook.getColumnValue(row_ori,'Q_PUB_ID')
+        and q.NCI_VER_NR= ihook.getColumnValue(row_ori, 'Q_VER_NR') and pv.PERM_VAL_NM = ihook.getColumnValue(row_ori, 'VALUE');
+           -- select nm_desc into v_ref from alt_nms where nm_id = ihook.getColumnValue(row_sel, 'NM_ID');
+            
+            end if;
             ihook.setColumnValue(row_ori, 'MEAN_TXT', v_ref);
             
             rows:= t_rows();
@@ -2666,9 +2801,7 @@ BEGIN
             action             := t_actionrowset(rows, 'Question Valid Values (Hook)', 2, 0,'update');
             actions.extend;
             actions(actions.last) := action;
-     
-    
-    hookoutput.actions    := actions;
+     hookoutput.actions    := actions;
     END IF;
      
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -2717,7 +2850,11 @@ BEGIN
  raise_application_error(-20000,'You are not authorized to edit any question in this form.');
  end if;
  */
- 
+  select frm_item_id, frm_ver_nr into v_frm_id, v_frm_ver_nr from vw_nci_module_de where 
+nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.getColumnValue(row_ori, 'Q_VER_NR');
+ if (nci_form_mgmt.isUserAuth(v_frm_id, v_frm_ver_nr, v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to edit any valid value on this form.');
+ end if;
  if hookInput.invocationNumber = 0 then
    
  
@@ -2770,3 +2907,4 @@ END;
 
 end;
 /
+
