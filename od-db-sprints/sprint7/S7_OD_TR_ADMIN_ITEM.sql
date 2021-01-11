@@ -37,3 +37,4 @@ if (:new.lst_upd_dt is null) then
 :new.lst_upd_dt := sysdate;
 end if; 
 END ;
+/
