@@ -1,4 +1,4 @@
-create or replace TRIGGER ONEDATA_WA.OD_TR_ADMIN_ITEM  BEFORE INSERT  ON ONEDATA_WA.ADMIN_ITEM  for each row
+create or replace TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
 BEGIN    IF (:NEW.ITEM_ID = -1  or :NEW.ITEM_ID is null)  THEN select od_seq_ADMIN_ITEM.nextval
  into :new.ITEM_ID  from  dual ;   END IF;
 if (:new.nci_idseq is null) then 
