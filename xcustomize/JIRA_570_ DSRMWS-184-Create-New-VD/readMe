@@ -3,7 +3,9 @@ create new vd:
 Create SP ONEDATA_WA.spCreateVDNEW
 Configure a hook for this SP
 set Hook Cardinality=0 (no neded records to be choosen)
-Go to Home>>Define>>Objects>>99. Base Objects>>Administered Item
+Go to
+1.Home>>Define>>Objects>>99. Base Objects>>Administered Item
+2.Objects>>9. NCI Sub-type CO Objects>>Data Element Objects>>Administered Item (Data Element CO)
 Add a Hook Command to HooK command list.
 Make sure Command Name is uniqe and save.
 
