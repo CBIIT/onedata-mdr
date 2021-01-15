@@ -1,10 +1,4 @@
---------------------------------------------------------
---  File created - Friday-January-15-2021   
---------------------------------------------------------
---------------------------------------------------------
---  DDL for Procedure SPAISTUPDPOST
---------------------------------------------------------
-CREATE OR REPLACE EDITIONABLE PROCEDURE ONEDATA_WA.SPAISTUPDPOST (
+CREATE OR REPLACE EDITIONABLE PROCEDURE ONEDATA_WA.spAISTUpdPost (
     v_data_in    IN     CLOB,
     v_data_out      OUT CLOB)
 AS
@@ -78,7 +72,7 @@ BEGIN
                ihook.getColumnOldValue (row_ori, 'VAL_DOM_VER_NR'))
         THEN
             SELECT SUBSTR (dec.item_nm || ' ' || vd.item_nm, 1, 255),
-                   SUBSTR (dec.item_desc || '_' || vd.item_desc, 1, 4000)
+                   SUBSTR (dec.item_desc || ':' || vd.item_desc, 1, 4000)
               INTO v_item_nm, v_item_def
               FROM admin_item dec, admin_item vd
              WHERE     dec.item_id =
@@ -147,7 +141,7 @@ BEGIN
                ihook.getColumnOldValue (row_ori, 'PROP_VER_NR'))
         THEN
             SELECT SUBSTR (oc.item_nm || ' ' || prop.item_nm, 1, 255),
-                   SUBSTR (oc.item_desc || ' ' || prop.item_desc, 1, 4000)
+                   SUBSTR (oc.item_desc || ':' || prop.item_desc, 1, 4000)
               INTO v_item_nm, v_item_def
               FROM admin_item oc, admin_item prop
              WHERE     oc.item_id =
