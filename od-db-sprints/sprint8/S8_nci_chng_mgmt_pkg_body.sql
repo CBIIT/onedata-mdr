@@ -5,7 +5,7 @@
 --  DDL for Package Body NCI_CHNG_MGMT
 --------------------------------------------------------
 
-  CREATE OR REPLACE EDITIONABLE PACKAGE BODY "ONEDATA_WA"."NCI_CHNG_MGMT" AS
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY ONEDATA_WA.NCI_CHNG_MGMT AS
 
 v_err_str      varchar2(1000) := '';
 DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
@@ -107,7 +107,7 @@ begin
     form1                  := t_form('Administered Item (Data Element CO)', 2,1);
     form1.rowset :=v_rowset1;
     forms.extend;    forms(forms.last) := form1;
-    form1                  := t_form('Value Domain', 2,1);
+    form1                  := t_form('Value Domain (Create Hook)', 2,1);
 
     form1.rowset :=v_rowset2;
     forms.extend;    forms(forms.last) := form1;
@@ -161,7 +161,7 @@ begin
             rows(rows.last) := row;
             v_nm := trim(cur.item_nm) || ' ' || v_nm ;
             v_long_nm := cur.item_long_nm || ':' || v_long_nm   ;
-            v_def := substr( cur.item_desc || ' ' || v_def,1,4000);
+            v_def := substr( cur.item_desc || '_' || v_def,1,4000);
 
             j := j+ 1;
         end loop;
@@ -180,7 +180,7 @@ begin
         ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', v_item_typ_id);
         ihook.setColumnValue(row,'ADMIN_STUS_ID',66 );
         ihook.setColumnValue(row,'ITEM_LONG_NM', substr(v_long_nm,1, length(v_long_nm)-1));
-        ihook.setColumnValue(row,'ITEM_DESC', v_def);
+        ihook.setColumnValue(row,'ITEM_DESC', substr(v_def, 1, length(v_def)-1));
         ihook.setColumnValue(row,'ITEM_NM', trim(v_nm));
         ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
         ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
@@ -188,7 +188,7 @@ begin
         rows(rows.last) := row;
     -- raise_application_error(-20000, 'HEre ' || v_nm || v_long_nm || v_def);
         ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM', substr(v_long_nm,1, length(v_long_nm)-1));
-        ihook.setColumnValue(rowform,'ITEM_' || idx || '_DEF', v_def);
+        ihook.setColumnValue(rowform,'ITEM_' || idx || '_DEF', substr(v_def, 1, length(v_def)-1));
         ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', trim(v_nm));
         ihook.setColumnValue(rowform, 'ITEM_' || idx || '_ID', v_id);
          ihook.setColumnValue(rowform, 'ITEM_' || idx || '_VER_NR', 1);
@@ -828,8 +828,6 @@ BEGIN
          actions.extend; actions(actions.last) := action;
     end if;
 
-
-
     end if;
        hookoutput.actions := actions;
   end if;
@@ -838,5 +836,4 @@ BEGIN
 END;
 
 END;
-
 /
