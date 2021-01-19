@@ -72,7 +72,7 @@ BEGIN
                ihook.getColumnOldValue (row_ori, 'VAL_DOM_VER_NR'))
         THEN
             SELECT SUBSTR (dec.item_nm || ' ' || vd.item_nm, 1, 255),
-                   SUBSTR (dec.item_desc || '_' || vd.item_desc, 1, 4000)
+                   SUBSTR (dec.item_desc || ':' || vd.item_desc, 1, 4000)
               INTO v_item_nm, v_item_def
               FROM admin_item dec, admin_item vd
              WHERE     dec.item_id =
@@ -141,7 +141,7 @@ BEGIN
                ihook.getColumnOldValue (row_ori, 'PROP_VER_NR'))
         THEN
             SELECT SUBSTR (oc.item_nm || ' ' || prop.item_nm, 1, 255),
-                   SUBSTR (oc.item_desc || ' ' || prop.item_desc, 1, 4000)
+                   SUBSTR (oc.item_desc || ':' || prop.item_desc, 1, 4000)
               INTO v_item_nm, v_item_def
               FROM admin_item oc, admin_item prop
              WHERE     oc.item_id =
@@ -170,8 +170,50 @@ BEGIN
             actions (actions.LAST) := action;
         END IF;
     END IF;
-
-
+ if (hookinput.originalRowset.tablename = 'VALUE_DOM') then
+  
+          FOR cur
+            IN (SELECT ai.item_id
+                  FROM admin_item ai, VALUE_DOM vd
+                 WHERE     ai.item_id = vd.item_id
+                       AND ai.ver_nr = vd.ver_nr
+                       AND ai.ITEM_NM = ihook.getColumnValue (row_ori, 'ITEM_NM')
+                       AND ai.VER_NR = ihook.getColumnValue (row_ori, 'VER_NR')
+                       AND vd.item_id <> v_item_id
+                       AND (ai.cntxt_item_id, ai.cntxt_ver_nr) IN
+                               (SELECT ai1.cntxt_item_id, ai1.cntxt_ver_nr
+                                  FROM admin_item ai1
+                                 WHERE     item_id = v_item_id
+                                       AND ver_nr = v_ver_nr))
+        LOOP
+            raise_application_error (-20000,
+                                     'Duplicate VD found. ' || cur.item_id);
+            RETURN;
+        END LOOP;
+  
+      IF (   ihook.getColumnValue (row_ori, 'REP_CLS_ITEM_ID') <>
+               ihook.getColumnOldValue (row_ori, 'REP_CLS_ITEM_ID')
+            OR ihook.getColumnValue (row_ori, 'REP_CLS_VER_NR') <>
+               ihook.getColumnOldValue (row_ori, 'REP_CLS_VER_NR')
+          )
+        THEN
+       if ( ihook.getColumnValue(row_ori, 'REP_CLS_ITEM_ID') is not null) then
+            select substr(vd.item_nm || ' ' || rc.item_nm,1,255)  into v_item_nm from admin_item vd, admin_item rc
+            where vd.item_id = v_item_id and rc.ver_nr =  ihook.getColumnValue(row_ori, 'REP_CLS_VER_NR')
+            and rc.item_id =  ihook.getColumnValue(row_ori, 'REP_CLS_ITEM_ID') and vd.ver_nr = v_ver_nr;
+        row := t_row ();
+        ihook.setColumnValue(row,'ITEM_ID',v_item_id );  
+        ihook.setColumnValue(row,'VER_NR',v_ver_nr );  
+        ihook.setColumnValue(row,'ITEM_NM',v_item_nm );  
+        rows.extend;
+        rows(rows.last) := row;
+        action := t_actionrowset(rows, 'Administered Item', 2,0,'update');
+        actions.extend;
+        actions(actions.last) := action;
+         end if;
+        
+      end if;
+   END IF;
     IF actions.COUNT > 0
     THEN
         hookoutput.actions := actions;
