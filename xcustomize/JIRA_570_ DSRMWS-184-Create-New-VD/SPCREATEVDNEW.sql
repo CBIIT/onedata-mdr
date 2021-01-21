@@ -26,10 +26,12 @@ i integer := 0;
 
   v_item_id number;
 
- bEGIN
+ BEGIN
     hookinput                    := Ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
+ 
+     
 if hookInput.invocationNumber = 0 then
     HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getVDCreateQuestion();
     row := t_row();   
@@ -50,41 +52,56 @@ if hookInput.invocationNumber = 0 then
 
      hookOutput.forms := nci_chng_mgmt.getVDCreateForm(rowset, rowsetvd);
   ELSE
-    forms              := hookInput.forms;
-    form1              := forms(1);
-    rowai := form1.rowset.rowset(1);
-    form1              := forms(2);
-    rowvd := form1.rowset.rowset(1);
-    row := t_row();
-    rows := t_rows();
-    -- rowai has all the AI supertype attribute. RowVD is the sub-type
-    v_id := nci_11179.getItemId;
-    row := t_row();
-    ihook.setColumnValue(rowai,'ITEM_ID', v_id);
-    ihook.setColumnValue(rowai,'VER_NR', 1);
-    ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 3);
-    rows := t_rows();
-    rows.extend;
-    rows(rows.last) := rowai;
-    action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'insert');
-    actions.extend;
-    actions(actions.last) := action;
+        forms              := hookInput.forms;
+        form1              := forms(1);
+        rowai := form1.rowset.rowset(1);
+        form1              := forms(2);
+        rowvd := form1.rowset.rowset(1);
+        row := t_row();
+        rows := t_rows();
 
-    ihook.setColumnValue(rowvd,'ITEM_ID', v_id);
-    ihook.setColumnValue(rowvd,'VER_NR', 1);
+        -- rowai has all the AI supertype attribute. RowVD is the sub-type 
+        
+        if ( ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') is not null) then
+        select substr(ihook.getColumnValue(rowai, 'ITEM_NM') || ' ' || rc.item_nm,1,255)  
+        into v_item_nm from  admin_item rc
+        where  rc.ver_nr =  ihook.getColumnValue(rowvd , 'REP_CLS_VER_NR')
+        and rc.item_id =  ihook.getColumnValue(rowvd , 'REP_CLS_ITEM_ID') ;
+        else
+        v_item_nm:=ihook.getColumnValue(rowai, 'ITEM_NM');
+        end if;
+        v_id := nci_11179.getItemId;
+        row := t_row();
+          
+        ihook.setColumnValue(rowai,'ITEM_NM',v_item_nm);
+        
+        ihook.setColumnValue(rowai,'ITEM_ID', v_id);
+        ihook.setColumnValue(rowai,'VER_NR', 1);
+        ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 3);
+        rows := t_rows();
+        rows.extend;
+        rows(rows.last) := rowai;
+        action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'insert');
+        actions.extend;
+        actions(actions.last) := action;
 
-    rows := t_rows();
-    rows.extend;
-    rows(rows.last) := rowvd;
 
-    action := t_actionrowset(rows, 'Value Domain', 2,2,'insert');
-    actions.extend;
-    actions(actions.last) := action;
+        ihook.setColumnValue(rowvd,'ITEM_ID', v_id);
+        ihook.setColumnValue(rowvd,'VER_NR', 1);
 
-    hookoutput.message := 'VD Created Successfully with ID ' || v_id ;
-    hookoutput.actions := actions;
-    --   raise_application_error(-20000, 'Count ' || actions.count);
-    end if;
+        rows := t_rows();
+        rows.extend;
+        rows(rows.last) := rowvd;
+
+        action := t_actionrowset(rows, 'Value Domain', 2,2,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+
+
+        hookoutput.message := 'VD Created Successfully with ID ' || v_id ;
+        hookoutput.actions := actions;
+ --   raise_application_error(-20000, 'Count ' || actions.count);
+      end if;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;

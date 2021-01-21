@@ -190,17 +190,18 @@ BEGIN
                                      'Duplicate VD found. ' || cur.item_id);
             RETURN;
         END LOOP;
-  
+    if ( ihook.getColumnValue(row_ori, 'REP_CLS_ITEM_ID') is not null) then
       IF (   ihook.getColumnValue (row_ori, 'REP_CLS_ITEM_ID') <>
                ihook.getColumnOldValue (row_ori, 'REP_CLS_ITEM_ID')
             OR ihook.getColumnValue (row_ori, 'REP_CLS_VER_NR') <>
                ihook.getColumnOldValue (row_ori, 'REP_CLS_VER_NR')
           )
         THEN
-       if ( ihook.getColumnValue(row_ori, 'REP_CLS_ITEM_ID') is not null) then
+     
             select substr(vd.item_nm || ' ' || rc.item_nm,1,255)  into v_item_nm from admin_item vd, admin_item rc
             where vd.item_id = v_item_id and rc.ver_nr =  ihook.getColumnValue(row_ori, 'REP_CLS_VER_NR')
             and rc.item_id =  ihook.getColumnValue(row_ori, 'REP_CLS_ITEM_ID') and vd.ver_nr = v_ver_nr;
+             --  raise_application_error (-20000,     ' VD error ' || v_item_id ||','||v_item_nm );
         row := t_row ();
         ihook.setColumnValue(row,'ITEM_ID',v_item_id );  
         ihook.setColumnValue(row,'VER_NR',v_ver_nr );  
