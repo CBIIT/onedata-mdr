@@ -16,6 +16,7 @@ row_ori t_row;
 rowset            t_rowset;
 rowsetvd            t_rowset;
 v_item_nm        VARCHAR2 (255);
+v_item_desc        VARCHAR2 (4000);
 v_id number;
 v_ver_nr number(4,2);
 
@@ -63,8 +64,9 @@ if hookInput.invocationNumber = 0 then
         -- rowai has all the AI supertype attribute. RowVD is the sub-type 
         
         if ( ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') is not null) then
-        select substr(ihook.getColumnValue(rowai, 'ITEM_NM') || ' ' || rc.item_nm,1,255)  
-        into v_item_nm from  admin_item rc
+        select substr(ihook.getColumnValue(rowai, 'ITEM_NM') || ' ' || rc.item_nm,1,255)  ,
+        substr(ihook.getColumnValue(rowai, 'ITEM_DESC') || ' ' || rc.item_desc,1,4000)
+        into v_item_nm ,v_item_desc from  admin_item rc
         where  rc.ver_nr =  ihook.getColumnValue(rowvd , 'REP_CLS_VER_NR')
         and rc.item_id =  ihook.getColumnValue(rowvd , 'REP_CLS_ITEM_ID') ;
         else
@@ -74,7 +76,7 @@ if hookInput.invocationNumber = 0 then
         row := t_row();
           
         ihook.setColumnValue(rowai,'ITEM_NM',v_item_nm);
-        
+        ihook.setColumnValue(rowai,'ITEM_DESC',v_item_desc);
         ihook.setColumnValue(rowai,'ITEM_ID', v_id);
         ihook.setColumnValue(rowai,'VER_NR', 1);
         ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 3);

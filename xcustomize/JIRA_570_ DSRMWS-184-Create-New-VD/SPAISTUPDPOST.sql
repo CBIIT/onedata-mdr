@@ -24,6 +24,7 @@ AS
     column           t_column;
     v_item_nm        VARCHAR2 (255);
     v_item_def       VARCHAR2 (4000);
+    v_item_desc       VARCHAR2 (4000);
     msg              VARCHAR2 (4000);
 BEGIN
     hookinput := Ihook.gethookinput (v_data_in);
@@ -198,14 +199,18 @@ BEGIN
           )
         THEN
      
-            select substr(vd.item_nm || ' ' || rc.item_nm,1,255)  into v_item_nm from admin_item vd, admin_item rc
+            select substr(vd.item_nm || ' ' || rc.item_nm,1,255)  ,
+            substr(vd.item_desc || ' ' || rc.item_desc,1,3999) 
+            into v_item_nm ,v_item_desc
+            from admin_item vd, admin_item rc
             where vd.item_id = v_item_id and rc.ver_nr =  ihook.getColumnValue(row_ori, 'REP_CLS_VER_NR')
             and rc.item_id =  ihook.getColumnValue(row_ori, 'REP_CLS_ITEM_ID') and vd.ver_nr = v_ver_nr;
              --  raise_application_error (-20000,     ' VD error ' || v_item_id ||','||v_item_nm );
         row := t_row ();
         ihook.setColumnValue(row,'ITEM_ID',v_item_id );  
         ihook.setColumnValue(row,'VER_NR',v_ver_nr );  
-        ihook.setColumnValue(row,'ITEM_NM',v_item_nm );  
+        ihook.setColumnValue(row,'ITEM_NM',v_item_nm ); 
+        ihook.setColumnValue(row,'ITEM_DESC', v_item_desc); 
         rows.extend;
         rows(rows.last) := row;
         action := t_actionrowset(rows, 'Administered Item', 2,0,'update');
