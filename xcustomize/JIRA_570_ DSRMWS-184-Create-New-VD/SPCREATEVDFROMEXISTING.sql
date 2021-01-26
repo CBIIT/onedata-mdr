@@ -25,8 +25,9 @@ AS
     v_rep_id number;
     v_item_desc varchar2(4000);
     v_count number;
+    v_valid boolean;
 
- bEGIN
+ BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
@@ -69,6 +70,9 @@ AS
         -- rowai has all the AI supertype attribute. RowVD is the sub-type
         v_item_nm:=ihook.getColumnValue(rowai,'ITEM_NM');
         v_item_desc:=ihook.getColumnValue(rowai,'ITEM_DESC');
+        /* T_ANSWER(1, 1, 'Validate VD')-hookInput.answerId = 1 
+        when v_id := nci_11179.getItemId --hookInput.invocationNumber=1 ????*/
+    
    if ( ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') is not null and 
      (hookInput.invocationNumber=1 or   hookInput.answerId = 1 )) then     
      
@@ -87,17 +91,14 @@ AS
      where item_id=ihook.getColumnValue(rowai,'ITEM_ID')
       and ver_nr=ihook.getColumnValue(rowai,'VER_NR');
       IF v_rep_id is not null and ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') is null then
+      /*when  Rep Term is not Valid and set by application validaion to null*/
       hookoutput.message :='Original Rep Term is not Valid.'||ihook.getColumnValue(rowai,'ITEM_ID')||','||v_rep_id||' Pleas pick one from pop-up.';
-       --raise_application_error (-20000, 'BAD VD 1 found.'||ihook.getColumnValue(rowvd, 'REP_CLS_VER_NR') );
-      -- select count(*) into v_count from  vw_value_dom_33 where item_nm=v_item_nm ;
-      --IF v_count=0 then 
-      --  raise_application_error (-20000, 'Duplicate VD 2 found.' );
-      -- hookoutput.message := 'Old Rep Term :' || v_item_nm||' is invalid. Pleas pick one from pop-up.';
-     --  End IF;
-      Elsif (ihook.getColumnValue (rowvd, 'REP_CLS_ITEM_ID') is null and v_rep_id is null) or ihook.getColumnValue (rowvd, 'REP_CLS_ITEM_ID')  is not null then
+      Elsif 
+      /*when  Rep Term wa taken from 33 or original was null and Rep Term is not choosen to null*/
+      (ihook.getColumnValue (rowvd, 'REP_CLS_ITEM_ID') is null and v_rep_id is null) or ihook.getColumnValue (rowvd, 'REP_CLS_ITEM_ID')  is not null then
         hookoutput.message :='Please review VD Long name and Definition.';
        
-    END IF;
+      END IF;
     END IF;
      rows := t_rows();
      
@@ -121,9 +122,49 @@ AS
         HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getVDCreateQuestion();
      
     else --- create VD
-      v_id := nci_11179.getItemId;
-        row := t_row();
+       v_valid := true;
+         FOR cur
+            IN (SELECT ai.item_id
+                  FROM admin_item ai, VALUE_DOM vd
+                 WHERE     ai.item_id = vd.item_id
+                       AND ai.ver_nr = vd.ver_nr
+                       AND ai.ITEM_NM = ihook.getColumnValue (rowai, 'ITEM_NM')
+                       AND ai.VER_NR = 1
+                      -- AND vd.item_id <> v_id
+                       AND ai.cntxt_item_id=ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID')
+                       AND ai.cntxt_ver_nr=ihook.getColumnValue(rowai, 'CNTXT_VER_NR')   )
+        LOOP
+     
+               hookoutput.message := '******   Duplicate VD found. ******** ' || cur.item_id;
+               v_valid := false;
 
+ rows := t_rows();
+     
+        --rowai := form1.rowset.rowset(1);
+         ihook.setColumnValue(rowai, 'ITEM_NM', v_item_nm);
+         ihook.setColumnValue(rowai, 'ITEM_DESC', v_item_desc);
+       
+        rows.extend;
+        rows(rows.last) := rowai;
+        rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for form
+        rows := t_rows();
+        row := t_row();
+        -- Copy Value Domain specific attributes
+      --  nci_11179.spReturnSubtypeRow (v_item_id, v_ver_nr, 3, row );
+               rows := t_rows();
+        rows.extend;
+        rows(rows.last) := rowvd;
+        rowsetvd := t_rowset(rows, 'Value Domain', 1, 'VALUE_DOM'); -- Default values for form
+      
+        hookOutput.forms := nci_chng_mgmt.getVDCreateForm(rowset, rowsetvd);
+        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getVDCreateQuestion();
+               --  RETURN;
+        END LOOP;
+   
+ if (v_valid = true) then
+        row := t_row();
+        v_id := nci_11179.getItemId;
+      
         ihook.setColumnValue(rowai,'ITEM_ID', v_id);
         ihook.setColumnValue(rowai,'VER_NR', 1);
         ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 3);
@@ -151,6 +192,7 @@ AS
 
         hookoutput.message := 'VD Created Successfully with ID ' || v_id ;
         hookoutput.actions := actions;
+        end if;
  --   raise_application_error(-20000, 'Count ' || actions.count);
      end if;
       end if;
