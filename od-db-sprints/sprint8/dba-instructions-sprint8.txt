@@ -1,0 +1,9 @@
+--Sprint 8 DB deployment
+-- Run as ONEDATA_WA DDL script
+S8_WA_RA_DDL.sql
+-- Run as ONEDATA_RA DDL script
+S8_WA_RA_DDL.sql
+
+-- Run as ONEDATA_WA DDL scripts
+S8_nci_chng_mgmt_pkg_body.sql
+S8_spAISTUpdPost_proc
