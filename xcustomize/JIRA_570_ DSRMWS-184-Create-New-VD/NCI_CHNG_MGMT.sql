@@ -1,3 +1,21 @@
+CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_chng_mgmt AS
+function getDECCreateQuestion return t_question;
+function getVDCreateQuestion return t_question;
+function getVDEditQuestion return t_question;
+function getDECCreateForm (v_rowset in t_rowset) return t_forms;
+procedure createAIWithConcept(rowform in out t_row, idx in integer,v_item_typ_id in integer, actions in out t_actions);
+procedure createDEC (rowform in t_row, actions in out t_actions, v_id out number);
+PROCEDURE spDEPrefQuestPost (v_data_in in clob, v_data_out out clob);
+PROCEDURE spClassification ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+PROCEDURE spClassificationNMDef ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2, v_typ in varchar2);
+PROCEDURE spDesignateNew   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+function getDECreateQuestion return t_question;
+function getDECreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
+function getVDCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
+procedure createDE (rowform in t_row, actions in out t_actions, v_id out number);
+
+END;
+/
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_CHNG_MGMT AS
 
 v_err_str      varchar2(1000) := '';
@@ -42,13 +60,32 @@ begin
 
  ANSWERS                    := T_ANSWERS();
 
-    ANSWER                     := T_ANSWER(1, 1, 'Validate VD');
+    ANSWER                     := T_ANSWER(1, 1, 'Review and Validate VD');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
  ANSWER                     := T_ANSWER(2, 2, 'Create VD');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Create new VD.', ANSWERS);
+
+return question;
+end;
+
+function getVDEditQuestion return t_question is
+  question t_question;
+  answer t_answer;
+  answers t_answers;
+begin
+
+ ANSWERS                    := T_ANSWERS();
+
+    ANSWER                     := T_ANSWER(1, 1, 'Review and Validate VD');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+ ANSWER                     := T_ANSWER(2, 2, 'Save VD');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    QUESTION               := T_QUESTION('Edit VD', ANSWERS);
 
 return question;
 end;

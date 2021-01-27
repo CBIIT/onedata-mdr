@@ -1,5 +1,4 @@
-CREATE OR REPLACE PROCEDURE ONEDATA_WA.spCreateVDFromExisting
-  (
+CREATE OR REPLACE PROCEDURE ONEDATA_WA.spEditVD(
     v_data_in IN CLOB,
     v_data_out OUT CLOB)
 AS
@@ -39,7 +38,14 @@ AS
 
 
     if hookInput.invocationNumber = 0 then
-        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getVDCreateQuestion();
+    select REP_CLS_ITEM_ID into V_rep_id from value_dom 
+     where item_id=ihook.getColumnValue(rowai,'ITEM_ID')
+      and ver_nr=ihook.getColumnValue(rowai,'VER_NR');
+      IF v_rep_id is not null and ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') is null then
+      /*when  Rep Term is not Valid and set by application validaion to null*/
+      hookoutput.message :='Original Rep Term is not Valid.'||ihook.getColumnValue(rowai,'ITEM_ID')||','||v_rep_id||' Pleas pick one from pop-up.';
+      END IF;
+  HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getVDEditQuestion();
         row := row_ori;
         rows := t_rows();
         ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
@@ -72,53 +78,33 @@ AS
         v_item_desc:=ihook.getColumnValue(rowai,'ITEM_DESC');
         /* T_ANSWER(1, 1, 'Validate VD')-hookInput.answerId = 1 
         when v_id := nci_11179.getItemId --hookInput.invocationNumber=1 ????*/
-       
     
    if ( ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') is not null and 
-     (hookInput.invocationNumber=1 or   hookInput.answerId = 1 )) then    
+     (hookInput.invocationNumber=1 or   hookInput.answerId = 1 )) then     
      
-     
-       select REP_CLS_ITEM_ID into V_rep_id from value_dom 
-        where item_id=ihook.getColumnValue(rowai,'ITEM_ID')
-        and ver_nr=ihook.getColumnValue(rowai,'VER_NR'); 
-        IF ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID')<>V_rep_id then
             select substr(ihook.getColumnValue(rowai,'ITEM_NM') || ' ' || rc.item_nm,1,255) , 
             substr(ihook.getColumnValue(rowai,'ITEM_DESC') || ' ' || rc.item_desc,1,3999) 
             into v_item_nm , v_item_desc
             from  admin_item rc
             where  rc.ver_nr =  ihook.getColumnValue(rowvd, 'REP_CLS_VER_NR')
             and rc.item_id =  ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') ;
-            end IF;
      end IF;  
          
       IF HOOKINPUT.ANSWERID = 1 then --Validate
       IF ihook.getColumnValue(rowai,'ITEM_ID') is not null    then
       
-      select REP_CLS_ITEM_ID into V_rep_id from value_dom 
-      where item_id=ihook.getColumnValue(rowai,'ITEM_ID')
+    select REP_CLS_ITEM_ID into V_rep_id from value_dom 
+     where item_id=ihook.getColumnValue(rowai,'ITEM_ID')
       and ver_nr=ihook.getColumnValue(rowai,'VER_NR');
-        IF ( ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') is not null) then
-            SELECT count(*) into v_count
-              FROM admin_item ai, VALUE_DOM vd
-             WHERE ai.item_id = vd.item_id
-                   AND ai.ver_nr = vd.ver_nr
-                   AND ai.ITEM_NM = ihook.getColumnValue (rowai, 'ITEM_NM')
-                   AND ai.VER_NR = 1                      
-                   AND ai.cntxt_item_id=ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID')
-                   AND ai.cntxt_ver_nr=ihook.getColumnValue(rowai, 'CNTXT_VER_NR');  
-        END IF;
-      
-        IF ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') is not null and v_count>0 then 
-          hookoutput.message := '****** Duplicate VD found. ******';
-        Elsif v_rep_id is not null and ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') is null then
-         /*when  Rep Term is not Valid and set by application validaion to null*/
-          hookoutput.message :='Original Rep Term is not Valid.'||ihook.getColumnValue(rowai,'ITEM_ID')||','||v_rep_id||' Pleas pick one from pop-up.';
-       Elsif 
-        /*when  Rep Term wa taken from 33 or original was null and Rep Term is not choosen to null*/
-        (ihook.getColumnValue (rowvd, 'REP_CLS_ITEM_ID') is null and v_rep_id is null) or ihook.getColumnValue (rowvd, 'REP_CLS_ITEM_ID')  is not null then
-         hookoutput.message :='Please review VD Long name and Definition.';
-        
-       END IF;
+      IF v_rep_id is not null and ihook.getColumnValue(rowvd, 'REP_CLS_ITEM_ID') is null then
+      /*when  Rep Term is not Valid and set by application validaion to null*/
+      hookoutput.message :='Original Rep Term is not Valid.'||ihook.getColumnValue(rowai,'ITEM_ID')||','||v_rep_id||' Pleas pick one from pop-up.';
+      Elsif 
+      /*when  Rep Term wa taken from 33 or original was null and Rep Term is not choosen to null*/
+      (ihook.getColumnValue (rowvd, 'REP_CLS_ITEM_ID') is null and v_rep_id is null) or ihook.getColumnValue (rowvd, 'REP_CLS_ITEM_ID')  is not null then
+        hookoutput.message :='Please review VD Long name and Definition.';
+       
+      END IF;
     END IF;
      rows := t_rows();
      
@@ -139,7 +125,7 @@ AS
         rowsetvd := t_rowset(rows, 'Value Domain', 1, 'VALUE_DOM'); -- Default values for form
       
         hookOutput.forms := nci_chng_mgmt.getVDCreateForm(rowset, rowsetvd);
-        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getVDCreateQuestion();
+        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getVDEditQuestion();
      
     else --- create VD
        v_valid := true;
@@ -155,10 +141,10 @@ AS
                        AND ai.cntxt_ver_nr=ihook.getColumnValue(rowai, 'CNTXT_VER_NR')   )
         LOOP
      
-               hookoutput.message := '******   Duplicate VD found. ******' ;
+               hookoutput.message := '******   Duplicate VD found. VD ID ' || cur.item_id||' ******** ';
                v_valid := false;
 
-        rows := t_rows();
+ rows := t_rows();
      
         --rowai := form1.rowset.rowset(1);
          ihook.setColumnValue(rowai, 'ITEM_NM', v_item_nm);
@@ -177,7 +163,7 @@ AS
         rowsetvd := t_rowset(rows, 'Value Domain', 1, 'VALUE_DOM'); -- Default values for form
       
         hookOutput.forms := nci_chng_mgmt.getVDCreateForm(rowset, rowsetvd);
-        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getVDCreateQuestion();
+        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getVDEditQuestion();
                --  RETURN;
         END LOOP;
    
@@ -193,7 +179,7 @@ AS
         rows := t_rows();
         rows.extend;
         rows(rows.last) := rowai;
-        action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'insert');
+        action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'update');
         actions.extend;
         actions(actions.last) := action;
 
@@ -205,12 +191,12 @@ AS
         rows.extend;
         rows(rows.last) := rowvd;
 
-        action := t_actionrowset(rows, 'Value Domain', 2,2,'insert');
+        action := t_actionrowset(rows, 'Value Domain', 2,2,'update');
         actions.extend;
         actions(actions.last) := action;
 
 
-        hookoutput.message := 'VD Created Successfully with ID ' || v_id ;
+        hookoutput.message := 'VD Updated Successfully with ID ' || v_id ;
         hookoutput.actions := actions;
         end if;
  --   raise_application_error(-20000, 'Count ' || actions.count);
