@@ -37,8 +37,10 @@ if (:new.lst_upd_dt is null) then
 :new.lst_upd_dt := sysdate;
 end if; 
 END ;
+
 /
-				
+
+
 create or replace PACKAGE            nci_11179 AS
 function getWordCount(v_nm in varchar2) return integer;
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
@@ -8040,6 +8042,13 @@ ai.item_id = f.item_id and ai.ver_nr = f.ver_nr and ai.nci_idseq = qc.dn_crf_ids
 (select min(qc_id)  from sbrext.quest_contents_ext qc1 where qc1.qtl_name = 'FORM_INSTR' group by dn_crf_idseq));
 commit;
 
+update nci_form f set FTR_INSTR = (select qc.preferred_definition from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and 
+ai.item_id = f.item_id and ai.ver_nr = f.ver_nr and ai.nci_idseq = qc.dn_crf_idseq and qc.qc_id in 
+(select min(qc_id)  from sbrext.quest_contents_ext qc1 where qc1.qtl_name = 'FOOTER' group by dn_crf_idseq));
+commit;
+
+
+/*
 insert into NCI_INSTR
 (NCI_PUB_ID, NCI_LVL, NCI_TYP, NCI_VER_NR, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF,
 CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
@@ -8104,13 +8113,6 @@ select ai.nci_pub_id, 'VALUE',1, display_order, qc.LONG_NAME,qc.preferred_name, 
         from sbrext.quest_contents_ext qc, Nci_QUEST_VALID_VALUE ai where qc.qtl_name = 'VALUE_INSTR' and
 qc.p_val_idseq = ai.nci_idseq ;
 commit;
-
-/*
-insert into NCI_QUEST_VALID_VALUE
-(NCI_PUB_ID, Q_PUB_ID, QVV_VM_NM, QVV_VM_LNM, QVV_VALUE, QVV_CMNTS, QVV_EDIT_IND, QVV_SEQ_NBR)
-select qc.qc_id, qc1.qc_id, qc.preferred_name, qc.preferred_definition 
-from  sbrext.quest_contents_ext qc, sbrext.quest_contents_ext qc1
-where qc.qtl_name = 'VALID_VALUE' and and qc1.qtl_name = 'QUESTION' and qc1.qc_idseq = qc.p_qst_idseq;
 
 */
 
