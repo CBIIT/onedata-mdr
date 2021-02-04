@@ -1,4 +1,6 @@
-CREATE OR REPLACE EDITIONABLE PROCEDURE ONEDATA_WA.spAISTUpdPost (
+DROP PROCEDURE ONEDATA_WA.SPAISTUPDPOST;
+
+CREATE OR REPLACE PROCEDURE ONEDATA_WA.spAISTUpdPost (
     v_data_in    IN     CLOB,
     v_data_out      OUT CLOB)
 AS
@@ -14,7 +16,7 @@ AS
     rowset           t_rowset;
     v_add            INTEGER := 0;
     v_action_typ     VARCHAR2 (30);
-    v_temp           INT;
+    v_temp           VARCHAR2 (255);
     v_item_id        NUMBER;
     v_ver_nr         NUMBER (4, 2);
     v_nm_id          NUMBER;
@@ -24,6 +26,7 @@ AS
     column           t_column;
     v_item_nm        VARCHAR2 (255);
     v_item_def       VARCHAR2 (4000);
+    v_item_desc       VARCHAR2 (4000);
     msg              VARCHAR2 (4000);
 BEGIN
     hookinput := Ihook.gethookinput (v_data_in);
@@ -170,8 +173,59 @@ BEGIN
             actions (actions.LAST) := action;
         END IF;
     END IF;
-
-
+ if (hookinput.originalRowset.tablename = 'VALUE_DOM') then
+            
+          FOR cur
+            IN (SELECT ai.item_id
+                  FROM admin_item ai, VALUE_DOM vd
+                 WHERE     ai.item_id = vd.item_id
+                       AND ai.ver_nr = vd.ver_nr
+                       AND ai.ITEM_NM = ihook.getColumnValue (row_ori, 'ITEM_NM')
+                       AND ai.VER_NR = ihook.getColumnValue (row_ori, 'VER_NR')
+                       AND vd.item_id <> v_item_id
+                       AND (ai.cntxt_item_id, ai.cntxt_ver_nr) IN
+                               (SELECT ai1.cntxt_item_id, ai1.cntxt_ver_nr
+                                  FROM admin_item ai1
+                                 WHERE     item_id = v_item_id
+                                       AND ver_nr = v_ver_nr))
+        LOOP
+            raise_application_error (-20000,
+                                     'Duplicate VD found. ' || cur.item_id);
+            RETURN;
+        END LOOP;
+    if ( ihook.getColumnValue(row_ori, 'REP_CLS_ITEM_ID') is not null) then
+            
+            select item_nm into v_item_nm from admin_item where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') 
+            and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR'); 
+            select item_nm into v_temp from admin_item where item_id = ihook.getColumnValue(row_ori, 'REP_CLS_ITEM_ID') 
+            and ver_nr = ihook.getColumnValue(row_ori, 'REP_CLS_VER_NR');
+            --if ((trim(substr(v_item_nm, length(v_item_nm)-length(trim(v_temp)))) != v_temp) or
+            --length(v_item_nm) < length(v_temp))then
+            IF instr(v_item_nm,v_temp)=0 then                
+                select substr(v_item_nm || ' ' || rc.item_nm,1,255) , 
+                substr(v_item_desc || ' ' || rc.item_desc,1,3999) 
+                into v_item_nm , v_item_desc
+                from  admin_item rc
+                where  rc.ver_nr =  ihook.getColumnValue(row_ori, 'REP_CLS_VER_NR')
+                and rc.item_id =  ihook.getColumnValue(row_ori, 'REP_CLS_ITEM_ID') ;
+            end if;  
+        
+        end if;
+             --  raise_application_error (-20000,     ' VD error ' || v_item_id ||','||v_item_nm );
+        row := t_row ();
+        ihook.setColumnValue(row,'ITEM_ID',v_item_id );  
+        ihook.setColumnValue(row,'VER_NR',v_ver_nr );  
+        ihook.setColumnValue(row,'ITEM_NM',v_item_nm ); 
+        ihook.setColumnValue(row,'ITEM_DESC', v_item_desc); 
+        rows.extend;
+        rows(rows.last) := row;
+        action := t_actionrowset(rows, 'Administered Item', 2,0,'update');
+        actions.extend;
+        actions(actions.last) := action;
+   
+        
+    
+   END IF;
     IF actions.COUNT > 0
     THEN
         hookoutput.actions := actions;
