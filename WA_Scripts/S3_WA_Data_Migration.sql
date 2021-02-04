@@ -13,6 +13,10 @@ alter trigger  NCI_TR_ENTTY_ORG disable;
 alter trigger NCI_TR_ENTTY_PRSN disable;
 alter trigger TR_DATA_TYP_AUD_TS disable;
 alter trigger TR_PERM_VAL_AUD_TS disable;
+alter trigger TR_NCI_FORM_AUD_TS disable;
+alter trigger TR_NCI_ADMIN_ITEM_REL_AK_AUD_TS disable;
+alter trigger TR_NCI_ADMIN_ITEM_REL_AUD_TS disable;
+
 
 truncate table NCI_CSI_ALT_DEFNMS;
 truncate table NCI_ALT_KEY_ADMIN_ITEM_REL;
@@ -96,7 +100,8 @@ end;
 /
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_WA', 'NCI_ADMIN_ITEM_REL_ALT_KEY');
 exec nci_caDSR_Pull.sp_create_form_vv_inst;
-exec nci_caDSR_Pull.sp_create_form_vv_inst_2;
+--exec nci_caDSR_Pull.sp_create_form_vv_inst_2;
+exec nci_caDSR_Pull.sp_create_form_vv_inst_new;
 exec nci_caDSR_Pull.sp_create_form_ta;
 exec nci_caDSR_Pull.sp_create_csi_2;
 /
@@ -136,6 +141,9 @@ alter trigger  NCI_TR_ENTTY_ORG enable;
 alter trigger NCI_TR_ENTTY_PRSN enable;
 alter trigger TR_DATA_TYP_AUD_TS enable;
 alter trigger TR_PERM_VAL_AUD_TS enable;
+alter trigger TR_NCI_FORM_AUD_TS enable;
+alter trigger TR_NCI_ADMIN_ITEM_REL_AK_AUD_TS enable;
+alter trigger TR_NCI_ADMIN_ITEM_REL_AUD_TS enable;
 
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_WA', 'ADMIN_ITEM');
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_WA', 'NCI_ADMIN_ITEM_REL_ALT_KEY');
