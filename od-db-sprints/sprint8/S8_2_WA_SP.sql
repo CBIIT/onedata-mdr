@@ -1479,8 +1479,8 @@ begin
     end if;
 
     v_data_out := ihook.getHookOutput(hookOutput);
-    insert into junk_debug (id, test) values (sysdate, v_data_out);
-    commit;
+    -- insert into junk_debug (id, test) values (sysdate, v_data_out);
+    -- commit;
     
 end;
 
@@ -3165,10 +3165,10 @@ ihook.setColumnValue(rowde,'ITEM_ID', v_id);
 
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
- delete from junk_debug;
-  commit;
- insert into junk_debug values (sysdate, v_data_in);
-  commit;
+ -- delete from junk_debug;
+ -- commit;
+ -- insert into junk_debug values (sysdate, v_data_in);
+ -- commit;
 
 END;
 /
@@ -4634,8 +4634,8 @@ begin
         hookoutput.actions := actions;
             V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
-insert into junk_debug (id, test) values (sysdate, v_data_out);
-commit;
+--insert into junk_debug (id, test) values (sysdate, v_data_out);
+--commit;
 
 end;
 
