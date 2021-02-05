@@ -4663,7 +4663,7 @@ PROCEDURE            sp_create_form_rel;
     PROCEDURE            sp_create_pv_2;
      procedure            sp_migrate_change_log;
       procedure sp_org_contact;
-      procedure sp_append_quest_pv;
+  --    procedure sp_append_quest_pv;
 END;
 /
 
@@ -8479,74 +8479,6 @@ update admin_item set lst_upd_usr_id_x = lst_upd_usr_id where lst_upd_usr_id in 
  
 commit;
 
-end;
-
-
-procedure sp_append_quest_pv
-as
-v_item_id number;
-i integer;
-begin
-
---drop table temp2;
-
-/*
---create temporary table temp2 as 
-(select q_pub_id, q_ver_nr, cnt_quest, cnt_value from 
-(select q_pub_id, q_ver_nr, count(*) cnt_quest from nci_quest_valid_value group by q_pub_id, q_ver_nr) a,
-(select nci_pub_id, nci_ver_nr, count(*) cnt_value from nci_admin_item_rel_alt_key ak, VW_NCI_DE_PV pv where ak.c_item_id = pv.de_item_id 
-and ak.c_item_ver_nr = pv.de_ver_nr group by nci_pub_id, nci_ver_nr) b
-where a.q_pub_id = b.nci_pub_id and a.q_ver_nr = b.nci_ver_nr and cnt_quest < cnt_value)
-*/
-
-i := 0;
-
-/* for cur in (select q_pub_id, q_ver_nr, cnt_quest, cnt_value from 
-(select q_pub_id, q_ver_nr, count(*) cnt_quest from nci_quest_valid_value group by q_pub_id, q_ver_nr) a,
-(select nci_pub_id, nci_ver_nr, count(*) cnt_value from nci_admin_item_rel_alt_key ak, VW_NCI_DE_PV pv where ak.c_item_id = pv.de_item_id 
-and ak.c_item_ver_nr = pv.de_ver_nr group by nci_pub_id, nci_ver_nr) b
-where a.q_pub_id = b.nci_pub_id and a.q_ver_nr = b.nci_ver_nr and cnt_quest < cnt_value )  */
-
- for cur in (select q_pub_id, q_ver_nr from temp2 )
-loop
-for cur2 in (select PERM_VAL_NM from  VW_NCI_DE_PV pv, nci_admin_item_rel_alt_key a where de_item_id = a.C_item_id and de_ver_nr = a.c_item_ver_nr
-  and a.nci_pub_id = cur.q_pub_id and a.nci_ver_nr = cur.q_ver_nr and perm_val_nm not in (
-  select value PERM_VAL_NM from nci_quest_valid_value where q_pub_id = cur.q_pub_id and q_ver_nr = cur.q_ver_nr) ) loop
-  
-  for cur1 in (
-  select PERM_VAL_NM,  pv.item_nm, pv.item_long_nm , pv.item_desc from  VW_NCI_DE_PV pv, nci_admin_item_rel_alt_key a 
-  where de_item_id = a.C_item_id and de_ver_nr = a.c_item_ver_nr
-  and a.nci_pub_id = cur.q_pub_id and a.nci_ver_nr = cur.q_ver_nr and pv.perm_val_nm = cur2.perm_val_nm) loop
-                v_item_id := nci_11179.getItemId;
-                insert into /*+ APPEND */ nci_quest_valid_value (Q_PUB_ID, Q_VER_NR, VM_NM, VM_LNM, VM_DEF, VALUE, MEAN_TXT, DESC_TXT, NCI_PUB_ID, NCI_VER_NR, DISP_ORD, FLD_DELETE)
-                values (cur.q_pub_id, cur.q_ver_nr, cur1.item_nm, cur1.item_long_nm, cur1.item_desc, cur1.perm_val_nm, cur1.item_nm, cur1.item_desc, v_item_id, cur.q_ver_nr, 0,1);
-                
-    
-                /*ihook.setColumnValue (row, 'Q_PUB_ID', cur.q_pub_id);
-                ihook.setColumnValue (row, 'Q_VER_NR', cur.q_ver_nr);
-                ihook.setColumnValue (row, 'VM_NM', cur1.item_nm);
-                ihook.setColumnValue (row, 'VM_LNM', cur1.item_long_nm);
-                ihook.setColumnValue (row, 'VM_DEF', cur1.item_desc);
-                ihook.setColumnValue (row, 'VALUE', cur1.perm_val_nm);
-                ihook.setColumnValue (row, 'MEAN_TXT', cur1.item_nm);
-                ihook.setColumnValue (row, 'DESC_TXT', cur1.item_desc);
-                
-                ihook.setColumnValue (row, 'NCI_PUB_ID', v_item_id);
-                ihook.setColumnValue (row, 'NCI_VER_NR', cur.q_ver_nr);
-                ihook.setColumnValue (row, 'DISP_ORD', 0);
-                ihook.setColumnValue (row, 'FLD_DELETE', 1);
-                 rowsvv.extend;
-                rowsvv(rowsvv.last) := row;
-                j := j+ 1; */
-                
-                end loop;   
-                 end loop;
-              -- commit;
-               i := i+1;
-               if (i = 1000) then 
-               commit;
-               exit; end if;
- end loop;   
 end;
 
 END;
