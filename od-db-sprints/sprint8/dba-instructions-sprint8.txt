@@ -6,4 +6,4 @@ S8_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S8_spAISTUpdPost_proc
-S8_WA_PKG_BODY_NCI_11179_2.sql
+
