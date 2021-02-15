@@ -16,6 +16,7 @@ alter trigger TR_PERM_VAL_AUD_TS disable;
 alter trigger TR_NCI_FORM_AUD_TS disable;
 alter trigger TR_NCI_ADMIN_ITEM_REL_AK_AUD_TS disable;
 alter trigger TR_NCI_ADMIN_ITEM_REL_AUD_TS disable;
+alter index idxNCiAIRelUni disable;
 
 
 truncate table NCI_CSI_ALT_DEFNMS;
@@ -104,6 +105,7 @@ exec nci_caDSR_Pull.sp_create_form_vv_inst;
 exec nci_caDSR_Pull.sp_create_form_vv_inst_new;
 exec nci_caDSR_Pull.sp_create_form_ta;
 exec nci_caDSR_Pull.sp_create_csi_2;
+exec nci_caDSR_Pull.sp_reorder_mod;
 /
 begin
 dbms_output.put_line('sp_create_form_vv_inst-p_create_csi_2 are completed!!!!');
@@ -144,6 +146,7 @@ alter trigger TR_PERM_VAL_AUD_TS enable;
 alter trigger TR_NCI_FORM_AUD_TS enable;
 alter trigger TR_NCI_ADMIN_ITEM_REL_AK_AUD_TS enable;
 alter trigger TR_NCI_ADMIN_ITEM_REL_AUD_TS enable;
+alter index idxNCiAIRelUni enable;
 
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_WA', 'ADMIN_ITEM');
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_WA', 'NCI_ADMIN_ITEM_REL_ALT_KEY');
