@@ -6847,7 +6847,7 @@ insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, NCI_CD) 
 commit;
 
 -- Added 12/17 for form management
-insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, NCI_CD) values (81,1,'Alternate Question Text', 'Alternate Question Text for Data Element','Preferred Question Text');
+insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, NCI_CD) values (81,1,'Alternate Question Text', 'Alternate Question Text for Data Element','Alternate Question Text');
 commit;
 
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
