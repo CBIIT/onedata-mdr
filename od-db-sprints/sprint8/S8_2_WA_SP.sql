@@ -3133,7 +3133,7 @@ ihook.setColumnValue(rowde,'ITEM_ID', v_id);
     actions(actions.last) := action;
 
    if (ihook.getColumnValue(rowde, 'PREF_QUEST_TXT') like '%will be auto-generated%') then
-   ihook.setColumnValue(rowde, 'PREF_QUEST_TXT', 'Data Element ' || v_item_nm|| ' does not have Preferred Question Text.'   );
+   ihook.setColumnValue(rowde, 'PREF_QUEST_TXT', 'Data Element ' || v_item_nm|| ' does not have Preferred Question Text'   );
    end if;
    
    
@@ -5701,15 +5701,15 @@ nvl(vd.created_by,v_dflt_usr),
                ai.ver_nr,
                80,
                0,
-               'Data Element ' || item_nm|| ' does not have Preferred Question Text.',
-               substr('Data Element ' || item_nm|| ' does not have Preferred Question Text.',1,255),
+               'Data Element ' || item_nm|| ' does not have Preferred Question Text',
+               substr('Data Element ' || item_nm|| ' does not have Preferred Question Text',1,255),
                1000
           FROM admin_item               ai, de 
          WHERE     ai.item_id = de.item_id and ai.ver_nr = de.ver_nr and de.pref_quest_txt is null;
     COMMIT;
 
 UPDATE de
-       SET PREF_QUEST_TXT = ( select 'Data Element ' || item_nm|| ' does not have Preferred Question Text.'     FROM 
+       SET PREF_QUEST_TXT = ( select 'Data Element ' || item_nm|| ' does not have Preferred Question Text'     FROM 
                        admin_item                 ai
                  WHERE              de.item_id = ai.item_id
                        AND de.ver_nr = ai.ver_nr)
