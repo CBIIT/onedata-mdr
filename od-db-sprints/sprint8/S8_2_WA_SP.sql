@@ -6011,10 +6011,6 @@ BEGIN
 
     COMMIT;
 
-    -- Reference Documents
-    DELETE FROM REF;
-
-    COMMIT;
 
     INSERT INTO REF (ITEM_ID,
                      VER_NR,
