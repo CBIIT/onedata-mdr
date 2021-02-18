@@ -1306,7 +1306,7 @@ begin
             action_rows.extend; action_rows(action_rows.last) := row;
         end loop;
       if (v_found) then
-        action := t_actionRowset(action_rows, v_table_name, 22, 'insert');
+        action := t_actionRowset(action_rows, 'Protocol-Form Relationship (Form View)',2, 22, 'insert');
         actions.extend; actions(actions.last) := action;
         end if;
     end if;
