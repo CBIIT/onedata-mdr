@@ -1,0 +1,4 @@
+-- Run as ONEDATA_WA DDL scripts
+S9_1_WA_RA_DDL.sql
+-- Run as ONEDATA_RA DDL scripts
+S9_1_WA_RA_DDL.sql
