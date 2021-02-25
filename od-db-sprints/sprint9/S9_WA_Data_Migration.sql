@@ -22,13 +22,15 @@ drop index idxNCiAIRelUni;
 
 drop table cs_csi_copy;
 
-create table cs_csi_copy as
+truncate table cs_csi_copy;
+
+insert into cs_csi_copy 
 select *  from sbrext.cs_csi;
 
 
-drop table cs_items_copy;
+truncate table cs_items_copy;
 
-create table cs_items_copy as
+insert into cs_items_copy
 select *  from cs_items;
 
 exec nci_cadsr_pull.spCreateNewNode;
@@ -170,8 +172,6 @@ create unique index idxNCiAIRelUni on nci_admin_item_rel
 ( P_ITEM_ID, P_ITEM_VER_NR,decode(REL_TYP_ID, 61, 1,C_ITEM_ID), C_ITEM_VER_NR,  REL_TYP_ID, DISP_ORD);
 
 
-drop table cs_items_copy;
-drop table cs_csi_copy;
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_WA', 'ADMIN_ITEM');
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_WA', 'NCI_ADMIN_ITEM_REL_ALT_KEY');
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_WA', 'PERM_VAL');
