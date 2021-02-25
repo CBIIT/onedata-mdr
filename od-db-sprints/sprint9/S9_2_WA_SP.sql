@@ -7,6 +7,13 @@ create table nci_mdr_debug (
 ID date default sysdate primary key,
 DATA_CLOB CLOB,
 PARAM_VAL  varchar2(100));
+		    
+		    
+create table cs_csi_copy as
+select *  from sbrext.cs_csi;
+
+create table cs_items_copy as
+select *  from cs_items;
 
 CREATE TABLE TEMP_IMPORT 
    (	ITEM_ID NUMBER NOT NULL ENABLE, 
