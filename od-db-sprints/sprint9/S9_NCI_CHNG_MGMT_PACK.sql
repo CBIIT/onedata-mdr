@@ -399,10 +399,10 @@ begin
     v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
     
     -- Check if user is authorized to edit
-   if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_usr_id) = false) then
-        raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ');
-        return;
-  end if;
+--   if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_usr_id) = false) then
+--        raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ');
+--        return;
+--  end if;
 
 if hookInput.invocationNumber = 0 then
         HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion();
