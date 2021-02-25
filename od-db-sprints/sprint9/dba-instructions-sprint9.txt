@@ -1,4 +1,31 @@
 -- Run as ONEDATA_WA DDL scripts
 S9_1_WA_RA_DDL.sql
+
 -- Run as ONEDATA_RA DDL scripts
 S9_1_WA_RA_DDL.sql
+
+-- Run as ONEDATA_WA DM scripts
+S9_1_WA_RA_DDL_DM.sql
+
+-- Run as ONEDATA_RA DM scripts
+S9_1_WA_RA_DDL_DM.sql
+
+-- Run as ONEDATA_WA DDL scripts
+S9_2_WA_SP.sql
+
+-- Run as ONEDATA_WA DM scripts
+S9_NCI_CADSR_PULL_PACK.sql
+S9_NCI_CHNG_MGMT_PACK.sql
+S9_NCI_FORM_MGMT_PACK.sql
+S9_NCI_UTIL_PACK.sql
+S9_NCI_11179_PACK.sql
+S9_NCI_11179_2_PACK.sql
+S9_SPAISTUPDPOST.sql
+
+
+DATA MIGRATION
+-- Run as ONEDATA_WA DM scripts
+S9_WA_Data_Migration.sql
+
+-- Run as ONEDATA_RA DM scripts
+S9_RA_Data_Migration.sql
