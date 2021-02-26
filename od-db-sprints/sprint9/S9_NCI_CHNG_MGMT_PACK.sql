@@ -1,5 +1,3 @@
-DROP PACKAGE ONEDATA_WA.NCI_CHNG_MGMT;
-
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_chng_mgmt AS
 v_temp_rep_ver_nr varchar2(10);
 v_temp_rep_id VARCHAR2(10);
