@@ -1,5 +1,3 @@
-DROP PACKAGE ONEDATA_WA.NCI_11179_2;
-
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_11179_2 AS
 procedure spNCICompareDE (v_data_in in clob, v_data_out out clob);
 procedure spNCIShowVMDependency (v_data_in in clob, v_data_out out clob);
