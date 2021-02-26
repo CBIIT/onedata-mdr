@@ -1,5 +1,3 @@
-DROP PACKAGE ONEDATA_WA.NCI_CURRENT;
-
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_current AS
 PROCEDURE spCreatePVVM (v_data_in in clob, v_data_out out clob);
 PROCEDURE spCreateVM (v_data_in in clob, v_data_out out clob);
