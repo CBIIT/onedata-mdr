@@ -7,9 +7,6 @@ PROCEDURE spCreateVM (v_data_in in clob, v_data_out out clob);
       procedure valUsingStr (rowform in out t_row, k in integer, v_item_typ in integer) ;
 END;
 /
-
-DROP PACKAGE BODY ONEDATA_WA.NCI_CURRENT;
-
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_current AS
 
 procedure sp_quest_rep_new as
