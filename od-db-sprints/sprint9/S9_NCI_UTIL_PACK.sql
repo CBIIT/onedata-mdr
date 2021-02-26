@@ -1,12 +1,7 @@
-DROP PACKAGE ONEDATA_WA.NCI_UTIL;
-
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_util AS
 procedure debugHook ( v_param_val in varchar2, v_data_out in clob);
 END;
 /
-
-DROP PACKAGE BODY ONEDATA_WA.NCI_UTIL;
-
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_util AS
 
 procedure debugHook ( v_param_val in varchar2, v_data_out in clob)
