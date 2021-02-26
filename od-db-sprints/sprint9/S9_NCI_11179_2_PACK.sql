@@ -7,9 +7,6 @@ procedure spCheckUserAuth (v_data_in in clob, v_data_out out clob, v_user_id in 
 
 END;
 /
-
-DROP PACKAGE BODY ONEDATA_WA.NCI_11179_2;
-
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_11179_2 AS
 
 v_err_str      varchar2(1000) := '';
