@@ -1,5 +1,3 @@
-DROP PACKAGE ONEDATA_WA.NCI_CADSR_PULL;
-
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
