@@ -1,5 +1,3 @@
-DROP PACKAGE ONEDATA_WA.NCI_11179;
-
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_11179 AS
 function getWordCount(v_nm in varchar2) return integer;
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
