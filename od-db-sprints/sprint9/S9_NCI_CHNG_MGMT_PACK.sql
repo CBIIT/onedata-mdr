@@ -27,9 +27,6 @@ PROCEDURE spVDCommon ( v_init_ai in t_rowset, v_init_st in t_rowset, v_op  in va
 procedure spAddCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 END;
 /
-
-DROP PACKAGE BODY ONEDATA_WA.NCI_CHNG_MGMT;
-
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_CHNG_MGMT AS
 v_temp_rep_ver_nr varchar2(10):='0';
 v_temp_rep_id VARCHAR2(10):='0';
