@@ -1,5 +1,3 @@
-DROP PACKAGE ONEDATA_WA.NCI_FORM_MGMT;
-
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_form_mgmt AS
 procedure spAddForm (v_data_in in clob, v_data_out out clob);
 procedure spAddModule (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -19,9 +17,6 @@ PROCEDURE spQuestRemoveDE ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN
 
 END;
 /
-
-DROP PACKAGE BODY ONEDATA_WA.NCI_FORM_MGMT;
-
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_form_mgmt AS
 
 function isUserAuth(v_frm_item_id in number, v_frm_ver_nr in number,v_user_id in varchar2) return boolean  iS
