@@ -1381,7 +1381,7 @@ nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.ge
     ANSWER                     := T_ANSWER(1, 1, 'Select alternate.');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Alternate Question Text', ANSWERS);
+    QUESTION               := T_QUESTION('VM Alternate Description', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
        	 showrowset := t_showablerowset (rows, 'Alternate Definitions', 2, 'single');
        	 hookoutput.showrowset := showrowset;
