@@ -18,11 +18,17 @@ type       t_orgs is table of org_cntct.org_id%type;
 function isUserAuth(v_item_id in number, v_ver_nr in number,v_user_id in varchar2) return boolean  iS
 v_auth boolean := false;
 v_temp integer;
+v_temp1 integer;
 begin
 select count(*) into v_temp from  onedata_md.vw_usr_row_filter  v, admin_item ai 
         where ( ( v.CNTXT_ITEM_ID = ai.CNTXT_ITEM_ID and v.cntxt_VER_NR  = ai.CNTXT_VER_NR) or v.CNTXT_ITEM_ID = 100) and upper(v.USR_ID) = upper(v_user_id) and v.ACTION_TYP = 'I'
         and ai.item_id =v_item_id and ai.ver_nr = v_ver_nr;
-if (v_temp = 0) then return false; else return true; end if;
+
+-- If the item id sent are context item id and version number
+select count(*) into v_temp1 from  onedata_md.vw_usr_row_filter  v 
+        where  ( v.CNTXT_ITEM_ID = v_item_id and v.cntxt_VER_NR  = v_ver_nr) and upper(v.USR_ID) = upper(v_user_id) and v.ACTION_TYP = 'I';
+        
+if (v_temp = 0 and v_temp1 = 0) then return false; else return true; end if;
 end;
 
 
@@ -58,7 +64,7 @@ begin
         v_item_id := ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID');
         v_ver_nr := ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR');
     elsif hookinput.originalRowset.tablename = 'REF_DOC' then
-        select item_id, ver_nr into v_item_id, v_ver_nr from ref where  
+        select nci_cntxt_item_id, nci_cntxt_ver_nr into v_item_id, v_ver_nr from ref where  
         ref_id = ihook.getColumnValue(row_ori, 'NCI_REF_ID');
     elsif   (hookinput.originalRowset.tablename = 'NCI_ADMIN_ITEM_REL' and ihook.getColumnValue(row_ori,'REL_TYP_ID') = 61 ) then   --- Module
         v_item_id := ihook.getColumnValue(row_ori,'P_ITEM_ID');
