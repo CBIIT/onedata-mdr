@@ -1,0 +1,1 @@
+-- Run as ONEDATA_WA DDL scripts
