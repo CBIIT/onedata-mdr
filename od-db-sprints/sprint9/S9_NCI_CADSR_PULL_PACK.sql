@@ -1997,7 +1997,7 @@ BEGIN
     COMMIT;
     
     update NCI_CLSFCTN_SCHM_ITEM x set (p_item_id, p_item_ver_nr) = (
-    select csi.item_id, csi.ver_nr from admin_item csi, sbr.cs_csi_dm cscsi , sbr.cs_csi_dm pcscsi, admin_item ai where ai.item_id = x.item_id
+    select csi.item_id, csi.ver_nr from admin_item csi, sbr.cs_csi cscsi , sbr.cs_csi pcscsi, admin_item ai where ai.item_id = x.item_id
     and ai.ver_nr = x.ver_nr and ai.nci_idseq = cscsi.csi_idseq and cscsi.p_cs_csi_idseq = pcscsi.cs_csi_idseq and pcscsi.csi_idseq = csi.nci_idseq);
     commit;
     
