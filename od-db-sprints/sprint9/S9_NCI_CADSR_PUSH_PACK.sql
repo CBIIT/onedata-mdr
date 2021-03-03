@@ -1,5 +1,3 @@
-DROP PACKAGE ONEDATA_WA.NCI_CADSR_PUSH;
-
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_caDSR_push AS
 
 procedure pushOC (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char);
@@ -23,7 +21,6 @@ procedure pushCondr (vCondrIdseq in char, vItemId in number, vVerNr in number, v
 END;
 /
 
-DROP PACKAGE BODY ONEDATA_WA.NCI_CADSR_PUSH;
 
 CREATE OR REPLACE PACKAGE body ONEDATA_WA.nci_caDSR_push AS
 
