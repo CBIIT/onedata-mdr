@@ -20,13 +20,10 @@ alter trigger TR_NCI_QUEST_VV_AUD_TS disable;
 alter trigger TR_NCI_CSI_AUD_TS disable;
 drop index idxNCiAIRelUni;
 
-drop table cs_csi_copy;
-
 truncate table cs_csi_copy;
 
 insert into cs_csi_copy 
-select *  from sbrext.cs_csi;
-
+select *  from sbr.cs_csi;
 
 truncate table cs_items_copy;
 
