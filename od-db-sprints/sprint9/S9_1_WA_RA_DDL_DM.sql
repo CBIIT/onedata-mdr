@@ -1,4 +1,5 @@
-
+set serveroutput on size 1000000
+SPOOL S9_WA_RA_DDL_DM.log
 
 create unique index idx_Admin_item_nci_uni on admin_item (ADMIN_ITEM_TYP_ID, ITEM_LONG_NM, CNTXT_ITEM_ID, CNTXT_VER_NR, VER_NR);
 
@@ -55,20 +56,76 @@ FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi
        WHERE ADMIN_ITEM_TYP_ID = 51 and ADMIN_ITEM.ITEM_ID = CSI.ITEM_ID and ADMIN_ITEM.VER_NR = CSI.VER_NR;
 
 
-
-
-
-  CREATE OR REPLACE  VIEW VW_NCI_CSI_NODE AS
-  SELECT NODE.NCI_PUB_ID, NODE.NCI_VER_NR, CSI.ITEM_ID, CSI.VER_NR, CSI.ITEM_NM, CSI.ITEM_LONG_NM, CSI.ITEM_DESC, 
-CSI.CNTXT_NM_DN, CSI.CURRNT_VER_IND, CSI.REGSTR_STUS_NM_DN, CSI.ADMIN_STUS_NM_DN, CSI.CREAT_DT, 
-CSI.CREAT_USR_ID, CSI.LST_UPD_USR_ID, CSI.FLD_DELETE, CSI.LST_DEL_DT, CSI.S2P_TRN_DT, 
-CSI.LST_UPD_DT, cs.CNTXT_ITEM_ID, CS.CNTXT_VER_NR,
-cs.item_id cs_item_id, cs.ver_nr cs_ver_nr , cs.item_long_nm cs_long_nm, cs.item_nm cs_item_nm, cs.item_desc cs_item_desc,
-pcsi.item_id pcsi_item_id, pcsi.ver_nr pcsi_ver_nr, pcsi.item_long_nm pcsi_long_nm, pcsi.item_nm pcsi_item_nm, cs.admin_stus_nm_dn cs_admin_stus_nm_dn,CS.CLSFCTN_SCHM_TYP_ID
-FROM VW_CLSFCTN_SCHM_ITEM CSI,  VW_CLSFCTN_SCHM CS, VW_CLSFCTN_SCHM_ITEM PCSI
-       WHERE  CSI.cs_item_id = cs.item_id and CSI.cs_ITEM_Ver_nr = cs.ver_nr
-       and CSI.p_item_id = pcsi.item_id (+)
-       and CSI.p_item_ver_nr = pcsi.ver_nr (+);
+CREATE OR REPLACE FORCE VIEW ONEDATA_WA.VW_NCI_CSI_NODE
+(
+    ITEM_ID,
+    VER_NR,
+    ITEM_NM,
+    ITEM_LONG_NM,
+    ITEM_DESC,
+    CNTXT_NM_DN,
+    CURRNT_VER_IND,
+    REGSTR_STUS_NM_DN,
+    ADMIN_STUS_NM_DN,
+    CREAT_DT,
+    CREAT_USR_ID,
+    LST_UPD_USR_ID,
+    FLD_DELETE,
+    LST_DEL_DT,
+    S2P_TRN_DT,
+    LST_UPD_DT,
+    CNTXT_ITEM_ID,
+    CNTXT_VER_NR,
+    CS_ITEM_ID,
+    CS_VER_NR,
+    CS_LONG_NM,
+    CS_ITEM_NM,
+    CS_ITEM_DESC,
+    PCSI_ITEM_ID,
+    PCSI_VER_NR,
+    PCSI_LONG_NM,
+    PCSI_ITEM_NM,
+    CS_ADMIN_STUS_NM_DN,
+    CLSFCTN_SCHM_TYP_ID
+)
+BEQUEATH DEFINER
+AS
+    SELECT CSI.ITEM_ID,
+           CSI.VER_NR,
+           CSI.ITEM_NM,
+           CSI.ITEM_LONG_NM,
+           CSI.ITEM_DESC,
+           CSI.CNTXT_NM_DN,
+           CSI.CURRNT_VER_IND,
+           CSI.REGSTR_STUS_NM_DN,
+           CSI.ADMIN_STUS_NM_DN,
+           CSI.CREAT_DT,
+           CSI.CREAT_USR_ID,
+           CSI.LST_UPD_USR_ID,
+           CSI.FLD_DELETE,
+           CSI.LST_DEL_DT,
+           CSI.S2P_TRN_DT,
+           CSI.LST_UPD_DT,
+           cs.CNTXT_ITEM_ID,
+           CS.CNTXT_VER_NR,
+           cs.item_id              cs_item_id,
+           cs.ver_nr               cs_ver_nr,
+           cs.item_long_nm         cs_long_nm,
+           cs.item_nm              cs_item_nm,
+           cs.item_desc            cs_item_desc,
+           pcsi.item_id            pcsi_item_id,
+           pcsi.ver_nr             pcsi_ver_nr,
+           pcsi.item_long_nm       pcsi_long_nm,
+           pcsi.item_nm            pcsi_item_nm,
+           cs.admin_stus_nm_dn     cs_admin_stus_nm_dn,
+           CS.CLSFCTN_SCHM_TYP_ID
+      FROM VW_CLSFCTN_SCHM_ITEM  CSI,
+           VW_CLSFCTN_SCHM       CS,
+           VW_CLSFCTN_SCHM_ITEM  PCSI
+     WHERE     CSI.cs_item_id = cs.item_id
+           AND CSI.cs_ITEM_Ver_nr = cs.ver_nr
+           AND CSI.p_item_id = pcsi.item_id(+)
+           AND CSI.p_item_ver_nr = pcsi.ver_nr(+);
 
 
   CREATE OR REPLACE VIEW VW_NCI_CSI_DE AS
@@ -90,12 +147,11 @@ and csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr;
  ai.item_long_nm  csi_item_long_nm, ai.item_desc csi_item_desc, air.p_item_Id p_CS_ITEM_ID, air.P_ITEM_VER_NR p_CS_VER_NR,
 aim.CREAT_DT, aim.CREAT_USR_ID, aim.LST_UPD_USR_ID, aim.FLD_DELETE, aim.LST_DEL_DT, aim.S2P_TRN_DT, aim.LST_UPD_DT,
  ai.item_nm || ' ' || cs.ITEM_NM CSI_SEARCH_STR, cs.ITEM_NM  CS_ITEM_NM, cs.ITEM_LONG_NM CS_ITEM_LONG_NM
-from admin_item ai, VW_nci_CLSFCTN_SCHM_ITEM air, nci_admin_item_rel aim, admin_item cs 
+from admin_item ai, CLSFCTN_SCHM_ITEM air, nci_admin_item_rel aim, admin_item cs 
 where ai.item_id = air.c_item_id and ai.ver_nr = air.c_item_ver_nr 
 and air.rel_typ_id = 64
 and aim.nci_pub_id = air.nci_pub_id and aim.nci_ver_nr = air.nci_ver_nr
 and air.cntxt_cs_item_id = cs.item_id and air.cntxt_cs_ver_nr = cs.ver_nr and cs.admin_item_typ_id = 9;
-
 
 
 
@@ -118,14 +174,14 @@ STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.L
  select 'CSI' LVL, csi.P_ITEM_ID P_ITEM_ID, csi.P_ITEM_VER_NR P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ITEM_DESC, CNTXT_ITEM_ID, CNTXT_VER_NR, ITEM_LONG_NM, ITEM_NM, ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID, 
 STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT, 
  REGSTR_AUTH_ID,  NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  CREAT_USR_ID_X, LST_UPD_USR_ID_X from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi
- where ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null
+ where ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null;
 
 
 create or replace view vw_csi_tree_node as 
 select decode(admin_item_typ_id, 8, 'CONTEXT',9, 'CS', 51, 'CSI')  LVL,  ITEM_ID, VER_NR, ITEM_DESC, CNTXT_ITEM_ID, CNTXT_VER_NR, ITEM_LONG_NM, ITEM_NM, ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID, 
 STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT, 
  REGSTR_AUTH_ID,  NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  CREAT_USR_ID_X, LST_UPD_USR_ID_X from ADMIN_ITEM
- where ADMIN_ITEM_TYP_ID in ( 8,9, 51)
+ where ADMIN_ITEM_TYP_ID in ( 8,9, 51);
  
 
 create or replace view vw_csi_tree_node_rel as 
@@ -144,4 +200,4 @@ CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_
   from  NCI_CLSFCTN_SCHM_ITEM ai
  where  ai.p_item_id is not null;
 
-
+SPOOL OFF
