@@ -10,7 +10,7 @@ PARAM_VAL  varchar2(100));
 		    
 		    
 create table cs_csi_copy as
-select *  from sbrext.cs_csi;
+select *  from cs_csi;
 
 create table cs_items_copy as
 select *  from cs_items;
