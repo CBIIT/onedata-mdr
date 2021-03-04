@@ -2,7 +2,6 @@ set serveroutput on size 1000000
 SPOOL S9_WA_RA_DDL_DM.log
 
 truncate table nci_admin_item_rel; 
-truncate table DE_CONC; 
 truncate table NCI_QUEST_VV_REP; 
 
 create unique index idx_Admin_item_nci_uni on admin_item (ADMIN_ITEM_TYP_ID, ITEM_LONG_NM, CNTXT_ITEM_ID, CNTXT_VER_NR, VER_NR);
@@ -118,8 +117,8 @@ AS
            AND VALUE_DOM.UOM_ID = UOM.UOM_ID(+);
 
 
-create unique index idxDEC on DE_CONC 
-( OBJ_CLS_ITEM_ID, OBJ_CLS_VER_NR,PROP_ITEM_ID, PROP_VER_NR);
+--create unique index idxDEC on DE_CONC 
+--( OBJ_CLS_ITEM_ID, OBJ_CLS_VER_NR,PROP_ITEM_ID, PROP_VER_NR);
 
 alter table NCI_CLSFCTN_SCHM_ITEM add (P_ITEM_ID  number, P_ITEM_VER_NR number(4,2), CS_ITEM_ID NUMber, CS_ITEM_VER_NR number(4,2), CS_CSI_IDSEQ char(36));
 
