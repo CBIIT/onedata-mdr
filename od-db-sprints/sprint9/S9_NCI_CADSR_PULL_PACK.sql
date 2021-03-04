@@ -1,3 +1,5 @@
+DROP PACKAGE ONEDATA_WA.NCI_CADSR_PULL;
+
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
@@ -25,6 +27,9 @@ PROCEDURE            sp_create_form_rel;
   --    procedure sp_append_quest_pv;
 END;
 /
+
+DROP PACKAGE BODY ONEDATA_WA.NCI_CADSR_PULL;
+
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_caDSR_PULL AS
 
 
@@ -1135,10 +1140,10 @@ nvl(vd.created_by,v_dflt_usr),
                        AND de.ver_nr = ai.ver_nr);
 
     COMMIT;
-    
+
     -- Tracker 668. DM - Added 2/1/2021
 
-    
+
     INSERT INTO REF (ITEM_ID,
                      VER_NR,
                      NCI_CNTXT_ITEM_ID,
@@ -1157,20 +1162,20 @@ nvl(vd.created_by,v_dflt_usr),
                'Data Element ' || item_nm|| ' does not have Preferred Question Text',
                substr('Data Element ' || item_nm|| ' does not have Preferred Question Text',1,255),
                1000
-          FROM admin_item               ai, de 
+          FROM admin_item               ai, de
          WHERE     ai.item_id = de.item_id and ai.ver_nr = de.ver_nr and de.pref_quest_txt is null;
     COMMIT;
 
 UPDATE de
-       SET PREF_QUEST_TXT = ( select 'Data Element ' || item_nm|| ' does not have Preferred Question Text'     FROM 
+       SET PREF_QUEST_TXT = ( select 'Data Element ' || item_nm|| ' does not have Preferred Question Text'     FROM
                        admin_item                 ai
                  WHERE              de.item_id = ai.item_id
                        AND de.ver_nr = ai.ver_nr)
     where de.pref_quest_txt is null;
 
     COMMIT;
-    
-  --  insert into ref_doc 
+
+  --  insert into ref_doc
 /*
 
     INSERT INTO admin_item (item_id,
@@ -1264,6 +1269,7 @@ PROCEDURE            sp_create_ai_4
 AS
     v_cnt   INTEGER;
 BEGIN
+
     DELETE FROM nci_oc_recs;
 
     COMMIT;
@@ -1370,6 +1376,7 @@ BEGIN
                AND ocr.s_oc_idseq = soc.nci_idseq;
 
     COMMIT;
+   
 END;
 
 PROCEDURE            sp_create_ai_children
@@ -1535,7 +1542,7 @@ BEGIN
          WHERE     csi.cs_csi_idseq = att.cs_csi_idseq
                AND am.nci_idseq = att.att_idseq
                AND atl_name = 'DESIGNATION';
-               
+
     COMMIT;
 
 
@@ -1935,7 +1942,7 @@ BEGIN
 
     COMMIT;
 
-/* -- Old 
+/* -- Old
  INSERT INTO NCI_CLSFCTN_SCHM_ITEM (item_id,
                                        ver_nr,
                                        CSI_TYP_ID,
@@ -1968,7 +1975,7 @@ BEGIN
                                        CSI_TYP_ID,
                                        CSI_DESC_TXT,
                                        CSI_CMNTS,
-                                       CS_ITEM_ID, 
+                                       CS_ITEM_ID,
                                        CS_ITEM_VER_NR,
                                        CS_CSI_IDSEQ,
                                        CREAT_USR_ID,
@@ -1995,12 +2002,12 @@ BEGIN
                and cscsi.cs_idseq = cs.nci_idseq;
 
     COMMIT;
-    
+
     update NCI_CLSFCTN_SCHM_ITEM x set (p_item_id, p_item_ver_nr) = (
-    select csi.item_id, csi.ver_nr from admin_item csi, sbr.cs_csi cscsi , sbr.cs_csi pcscsi, admin_item ai where ai.item_id = x.item_id
+    select csi.item_id, csi.ver_nr from admin_item csi, cs_csi_copy cscsi , cs_csi_copy pcscsi, admin_item ai where ai.item_id = x.item_id
     and ai.ver_nr = x.ver_nr and ai.nci_idseq = cscsi.csi_idseq and cscsi.p_cs_csi_idseq = pcscsi.cs_csi_idseq and pcscsi.csi_idseq = csi.nci_idseq);
     commit;
-    
+
 
 
 
@@ -2082,7 +2089,7 @@ BEGIN
     COMMIT;
 
 
-    
+
      update nci_admin_item_rel_alt_key k set (P_NCI_PUB_ID, P_NCI_VER_NR)
  = (select nci_pub_id, NCI_VER_NR from nci_admin_item_rel_alt_key a, sbr.cs_csi cscsi where k.nci_idseq = cscsi.cs_csi_idseq and cscsi.p_cs_csi_idseq = a.nci_idseq
  and cscsi.p_cs_csi_idseq is not null
@@ -2128,7 +2135,7 @@ commit;
 end;
 
 
-procedure sp_migrate_lov 
+procedure sp_migrate_lov
 as
 v_cnt integer;
 begin
@@ -2169,7 +2176,7 @@ commit;
 
 delete from obj_key where obj_typ_id = 14;  -- Program Area
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 14, pal_name, description, pal_name, comments,               nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2180,7 +2187,7 @@ commit;
 
 delete from obj_key where obj_typ_id = 11;  -- Name/designation
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 11, detl_name, description, detl_name, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2188,7 +2195,7 @@ select 11, detl_name, description, detl_name, comments,   nvl(created_by,v_dflt_
 commit;
 
 -- DOcument type
-delete from obj_key where obj_typ_id = 1;  -- 
+delete from obj_key where obj_typ_id = 1;  --
 commit;
 
 -- Preferred Question Text ID needs to be static. Used in views.
@@ -2199,7 +2206,7 @@ commit;
 insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, NCI_CD) values (81,1,'Alternate Question Text', 'Alternate Question Text for Data Element','Alternate Question Text');
 commit;
 
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 1, DCTL_NAME, description, DCTL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2209,9 +2216,9 @@ commit;
 
 
 -- Classification Scheme Type
-delete from obj_key where obj_typ_id = 3;  -- 
+delete from obj_key where obj_typ_id = 3;  --
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 3, CSTL_NAME, description, CSTL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2219,9 +2226,9 @@ select 3, CSTL_NAME, description, CSTL_NAME, comments,   nvl(created_by,v_dflt_u
 commit;
 
 -- Classification Scheme Item Type
-delete from obj_key where obj_typ_id = 20;  -- 
+delete from obj_key where obj_typ_id = 20;  --
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 20, CSITL_NAME, description, CSITL_NAME, comments,  nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2229,18 +2236,18 @@ select 20, CSITL_NAME, description, CSITL_NAME, comments,  nvl(created_by,v_dflt
 commit;
 
 -- Protocol Type
-delete from obj_key where obj_typ_id = 19;  -- 
+delete from obj_key where obj_typ_id = 19;  --
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc,  nci_cd) 
+insert into obj_key (obj_typ_id, obj_key_desc,  nci_cd)
 select distinct 19, TYPE, TYPE from sbrext.protocols_ext where type is not null ;
 commit;
 
 
 
 -- Concept Source
-delete from obj_key where obj_typ_id = 23;  -- 
+delete from obj_key where obj_typ_id = 23;  --
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select  23, CONCEPT_SOURCE,DESCRIPTION, CONCEPT_SOURCE,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2250,9 +2257,9 @@ commit;
 
 
 -- NCI Derivation Type
-delete from obj_key where obj_typ_id = 21;  -- 
+delete from obj_key where obj_typ_id = 21;  --
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc,  nci_cd, obj_key_def,  CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc,  nci_cd, obj_key_def,  CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 21, CRTL_NAME,CRTL_NAME, DESCRIPTION ,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2304,9 +2311,9 @@ commit;
 
 
 -- Definition type
-delete from obj_key where obj_typ_id = 15;  -- 
+delete from obj_key where obj_typ_id = 15;  --
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 15, DEFL_NAME, description, DEFL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2320,9 +2327,9 @@ commit;
 
 
 -- Origin
-delete from obj_key where obj_typ_id = 18;  -- 
+delete from obj_key where obj_typ_id = 18;  --
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 18, SRC_NAME, description, SRC_NAME,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2332,9 +2339,9 @@ select 18, SRC_NAME, description, SRC_NAME,   nvl(created_by,v_dflt_usr),
 commit;
 
 -- Form Category
-delete from obj_key where obj_typ_id = 22;  -- 
+delete from obj_key where obj_typ_id = 22;  --
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID, DISP_ORD) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID, DISP_ORD)
 select 22, QCDL_NAME, description, QCDL_NAME,    nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2456,15 +2463,15 @@ delete from lang;
 commit;
 
 INSERT INTO LANG ( CNTRY_ISO_CD, LANG_ISO_CD, LANG_ID, LANG_NM,
-LANG_DESC ) VALUES ( 
-NULL, NULL, 1007, 'ICELANDIC', 'Icelandic'); 
+LANG_DESC ) VALUES (
+NULL, NULL, 1007, 'ICELANDIC', 'Icelandic');
 INSERT INTO LANG ( CNTRY_ISO_CD, LANG_ISO_CD, LANG_ID, LANG_NM,
-LANG_DESC ) VALUES ( 
-NULL, NULL, 1000, 'ENGLISH', 'English'); 
+LANG_DESC ) VALUES (
+NULL, NULL, 1000, 'ENGLISH', 'English');
 commit;
 INSERT INTO LANG ( CNTRY_ISO_CD, LANG_ISO_CD, LANG_ID, LANG_NM,
-LANG_DESC ) VALUES ( 
-NULL, NULL, 1004, 'SPANISH', 'Spanish'); 
+LANG_DESC ) VALUES (
+NULL, NULL, 1004, 'SPANISH', 'Spanish');
 commit;
 commit;
 
@@ -2472,7 +2479,7 @@ commit;
 
 delete from obj_key where obj_typ_id = 25;  -- Address Type
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 25, ATL_NAME, description, ATL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
@@ -2481,12 +2488,12 @@ commit;
 
 delete from obj_key where obj_typ_id = 26;  -- Communication Type
 commit;
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID) 
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 26, CTL_NAME, description, CTL_NAME, comments,  nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
                nvl(modified_by,v_dflt_usr) from sbr.COMM_TYPES_LOV;
- commit;              
+ commit;
                insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (54,50);
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (52,59);
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (4,65);
@@ -3229,6 +3236,7 @@ END;
 AS
     v_cnt   INTEGER;
 BEGIN
+  
     DELETE FROM NCI_QUEST_VALID_VALUE;
 
     COMMIT;
@@ -3268,13 +3276,15 @@ BEGIN
                AND qc.qc_idseq = vv.qc_idseq(+);
 
     COMMIT;
-    
+
+
     -- Added for enumerated valid values. Has to be here as Question VV is inserted here.
       update nci_admin_item_rel_alt_key q set deflt_val_id = (Select nci_pub_id from nci_quest_valid_value vv,
     (select * from  sbrext.QUEST_ATTRIBUTES_EXT where vv_idseq is not null) qa where q.nci_idseq = qa.qc_idseq and qa.vv_idseq = vv.nci_idseq and qa.vv_idseq is not null)
     where q.nci_idseq in (select qc_idseq from (select * from  sbrext.QUEST_ATTRIBUTES_EXT where vv_idseq is not null) temp1);
-    
-    commit;  
+
+    commit;
+
 
     DELETE FROM NCI_QUEST_VV_REP;
 
@@ -3300,7 +3310,7 @@ BEGIN
          WHERE     qvv.quest_idseq = q.NCI_IDSEQ
                AND qvv.vv_idseq = vv.NCI_IDSEQ(+);
 
-    COMMIT;
+    COMMIT; 
 END;
 
  procedure            sp_create_form_vv_inst_2
@@ -3319,7 +3329,7 @@ select ai.item_id, 'FORM', 'INSTRUCTION',ai.VER_NR, display_order, qc.LONG_NAME,
                nvl(qc.date_created,v_dflt_date) ,
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr)
-from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FORM_INSTR' and 
+from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FORM_INSTR' and
 qc.dn_crf_idseq = ai.nci_idseq;
 
 commit;
@@ -3333,7 +3343,7 @@ select ai.item_id, 'FORM', 'FOOTER',ai.VER_NR, display_order, qc.LONG_NAME,qc.pr
                nvl(qc.date_created,v_dflt_date) ,
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr)
-        from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and 
+        from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and
 qc.dn_crf_idseq = ai.nci_idseq;
 
 commit;
@@ -3346,7 +3356,7 @@ select ai.item_id, 'MODULE', 'INSTRUCTION',ai.VER_NR, display_order, qc.LONG_NAM
                nvl(qc.date_created,v_dflt_date) ,
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr)
-        from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'MODULE_INSTR' and 
+        from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'MODULE_INSTR' and
 qc.p_mod_idseq = ai.nci_idseq;
 
 commit;
@@ -3379,7 +3389,7 @@ commit;
 /*
 insert into NCI_QUEST_VALID_VALUE
 (NCI_PUB_ID, Q_PUB_ID, QVV_VM_NM, QVV_VM_LNM, QVV_VALUE, QVV_CMNTS, QVV_EDIT_IND, QVV_SEQ_NBR)
-select qc.qc_id, qc1.qc_id, qc.preferred_name, qc.preferred_definition 
+select qc.qc_id, qc1.qc_id, qc.preferred_name, qc.preferred_definition
 from  sbrext.quest_contents_ext qc, sbrext.quest_contents_ext qc1
 where qc.qtl_name = 'VALID_VALUE' and and qc1.qtl_name = 'QUESTION' and qc1.qc_idseq = qc.p_qst_idseq;
 
@@ -3393,13 +3403,13 @@ v_cnt integer;
 begin
 
 
-update nci_form f set HDR_INSTR = (select qc.preferred_definition from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FORM_INSTR' and 
-ai.item_id = f.item_id and ai.ver_nr = f.ver_nr and ai.nci_idseq = qc.dn_crf_idseq and qc.qc_id in 
+update nci_form f set HDR_INSTR = (select qc.preferred_definition from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FORM_INSTR' and
+ai.item_id = f.item_id and ai.ver_nr = f.ver_nr and ai.nci_idseq = qc.dn_crf_idseq and qc.qc_id in
 (select min(qc_id)  from sbrext.quest_contents_ext qc1 where qc1.qtl_name = 'FORM_INSTR' group by dn_crf_idseq));
 commit;
 
-update nci_form f set FTR_INSTR = (select qc.preferred_definition from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and 
-ai.item_id = f.item_id and ai.ver_nr = f.ver_nr and ai.nci_idseq = qc.dn_crf_idseq and qc.qc_id in 
+update nci_form f set FTR_INSTR = (select qc.preferred_definition from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and
+ai.item_id = f.item_id and ai.ver_nr = f.ver_nr and ai.nci_idseq = qc.dn_crf_idseq and qc.qc_id in
 (select min(qc_id)  from sbrext.quest_contents_ext qc1 where qc1.qtl_name = 'FOOTER' group by dn_crf_idseq));
 commit;
 
@@ -3417,7 +3427,7 @@ commit;
 
 
 
-update nci_admin_item_rel m set INSTR = (select preferred_definition from temp_import t where 
+update nci_admin_item_rel m set INSTR = (select preferred_definition from temp_import t where
 t.item_id = m.c_item_id and t.ver_nr = m.c_item_ver_nr )
 where m.rel_typ_id = 61;
 commit;
@@ -3434,7 +3444,7 @@ commit;
 delete from temp_import t1 where (qc_id) not in (select min(qc_id)from temp_import group by item_id, ver_nr);
 commit;
 
-update nci_admin_item_rel_alt_key m set INSTR = (select preferred_definition from temp_import t where 
+update nci_admin_item_rel_alt_key m set INSTR = (select preferred_definition from temp_import t where
 t.item_id = m.nci_pub_id and t.ver_nr = m.nci_ver_nr )
 where m.rel_typ_id = 63;
 commit;
@@ -3453,7 +3463,7 @@ commit;
 delete from temp_import t1 where (qc_id) not in (select min(qc_id)from temp_import group by item_id, ver_nr);
 commit;
 
-update nci_quest_valid_value m set INSTR = (select preferred_definition from temp_import t where 
+update nci_quest_valid_value m set INSTR = (select preferred_definition from temp_import t where
 t.item_id = m.nci_pub_id and t.ver_nr = m.nci_ver_nr );
 commit;
 
@@ -3629,11 +3639,11 @@ BEGIN
          WHERE     pv.pv_idseq = pvs.pv_idseq
                AND pvs.vd_idseq = vd.nci_idseq
                AND pv.vm_idseq = vm.nci_idseq
-      and ok.obj_typ_id (+)= 18 
+      and ok.obj_typ_id (+)= 18
                and pvs.origin =  ok.nci_cd (+) ;
 
     COMMIT;
-    
+
 END;
 
  procedure            sp_migrate_change_log
@@ -3658,23 +3668,23 @@ end;
 as
 v_cnt integer;
 begin
-update admin_item set (REGSTR_STUS_ID, REGSTR_STUS_NM_DN) = 
+update admin_item set (REGSTR_STUS_ID, REGSTR_STUS_NM_DN) =
 (select s.stus_id, s.NCI_STUS
-from sbr.ac_registrations ar, stus_mstr s where 
+from sbr.ac_registrations ar, stus_mstr s where
 upper(ar.REGISTRATION_STATUS) = upper(s.stus_nm) and ar.ac_idseq = admin_item.nci_idseq
 and ar.registration_status is not null);
 commit;
 
---update admin_item set REGSTR_STUS_ID = 10, REGSTR_STUS_NM_DN = 'Historical' where REGSTR_STUS_ID is null; 
+--update admin_item set REGSTR_STUS_ID = 10, REGSTR_STUS_NM_DN = 'Historical' where REGSTR_STUS_ID is null;
 --commit;
 
-update admin_item set (ORIGIN_ID, ORIGIN_ID_DN) = 
-(Select obj_key_id, obj_key_desc from obj_key ok, sbr.administered_components ac where ac.public_id = admin_item.item_id 
+update admin_item set (ORIGIN_ID, ORIGIN_ID_DN) =
+(Select obj_key_id, obj_key_desc from obj_key ok, sbr.administered_components ac where ac.public_id = admin_item.item_id
 and admin_item.ver_nr = ac.version and ac.origin = ok.obj_key_desc and ok.obj_typ_id = 18);
 commit;
 
-update admin_item set (ORIGIN) = 
-(Select origin from sbr.administered_components ac where ac.public_id = admin_item.item_id 
+update admin_item set (ORIGIN) =
+(Select origin from sbr.administered_components ac where ac.public_id = admin_item.item_id
 and admin_item.ver_nr = ac.version and origin not in (select obj_key_desc from obj_key where obj_typ_id = 18));
 commit;
 
@@ -3682,11 +3692,11 @@ insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR, USED_BY, CNCPT_CONCAT, CNCPT_CO
 select ai.item_id, ai.ver_nr, a.used_by, b.cncpt_cd, b.CNCPT_nm, b.cncpt_def
 from  admin_item ai,
 (SELECT item_id, ver_nr, LISTAGG(item_nm, ',') WITHIN GROUP (ORDER by ITEM_ID) AS USED_BY
-FROM (select distinct an.item_id,an.ver_nr, ai.item_nm from alt_nms an, admin_item ai where an.cntxt_item_id = ai.item_id ) 
+FROM (select distinct an.item_id,an.ver_nr, ai.item_nm from alt_nms an, admin_item ai where an.cntxt_item_id = ai.item_id )
 GROUP BY item_id, ver_nr) a,
 (SELECT cai.item_id, cai.ver_nr, LISTAGG(ai.item_nm, ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_CD ,
 LISTAGG(ai.item_long_nm, ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_NM ,
- LISTAGG(substr(ai.item_desc,1, 750), ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_DEF 
+ LISTAGG(substr(ai.item_desc,1, 750), ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_DEF
 from cncpt_admin_item cai, admin_item ai where ai.item_id = cai.cncpt_item_id and ai.ver_nr = cai.cncpt_ver_nr
 group by cai.item_id, cai.ver_nr) b
 where ai.item_id = b.item_id (+) and ai.ver_nr = b.ver_nr (+)
@@ -3695,8 +3705,8 @@ commit;
 
 
 update perm_val set (PRNT_CNCPT_ITEM_ID, PRNT_CNCPT_VER_NR) = (
-select 
-public_id, version from sbr.administered_components ac, sbr.vd_pvs pvs, admin_item vd where pvs.pv_idseq = perm_val.nci_idseq and ac.ac_idseq = pvs.con_idseq and 
+select
+public_id, version from sbr.administered_components ac, sbr.vd_pvs pvs, admin_item vd where pvs.pv_idseq = perm_val.nci_idseq and ac.ac_idseq = pvs.con_idseq and
 pvs.con_idseq is not null and vd.nci_idseq = pvs.vd_idseq and vd.item_id = perm_val.val_dom_item_id and vd.ver_nr = perm_val.val_dom_ver_nr)
 where nci_idseq in (select pv_idseq from sbr.vd_pvs where con_idseq is not null);
 commit;
@@ -3820,7 +3830,7 @@ commit;
 
 update admin_item set creat_usr_id_x = creat_usr_id where creat_usr_id in (select cntct_secu_id from cntct);
 update admin_item set lst_upd_usr_id_x = lst_upd_usr_id where lst_upd_usr_id in (select cntct_secu_id from cntct);
- 
+
 commit;
 
 end;
