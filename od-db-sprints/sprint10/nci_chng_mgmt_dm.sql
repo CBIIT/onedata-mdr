@@ -27,8 +27,6 @@ PROCEDURE spVDCommon ( v_init_ai in t_rowset, v_init_st in t_rowset, v_op  in va
 procedure spAddCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 END;
 /
-
-
 create or replace PACKAGE BODY            nci_CHNG_MGMT AS
 v_temp_rep_ver_nr varchar2(10):='0';
 v_temp_rep_id VARCHAR2(10):='0';
@@ -581,15 +579,13 @@ begin
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
 
-     ANSWER                     := T_ANSWER(3, 3, 'Validate using drop-down');
+     if (v_first = false) then
+    ANSWER                     := T_ANSWER(2, 2, 'Create Rep Term');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-
-    ANSWER                     := T_ANSWER(4, 4, 'Create using drop-down');
-    ANSWERS.EXTEND;
-    ANSWERS(ANSWERS.LAST) := ANSWER;
+    end if;
       if (v_first = false) then
-        ANSWER                     := T_ANSWER(2, 2, 'Create/Save');
+        ANSWER                     := T_ANSWER(3, 3, 'Create/Save');
         ANSWERS.EXTEND;
         ANSWERS(ANSWERS.LAST) := ANSWER;
     end if;
@@ -1237,7 +1233,7 @@ BEGIN
   row_ori :=  hookInput.originalRowset.rowset(1);
   v_itemid := ihook.getColumnValue(row_ori, 'ITEM_ID');
   v_VERNR := ihook.getColumnValue(row_ori, 'VER_NR');
-
+  
     rows := t_rows();
 
 
@@ -1268,7 +1264,7 @@ BEGIN
          end if;
   
   	elsif hookInput.invocationNumber = 1 then
-    
+
     select obj_key_id into v_nm_typ_id from obj_key where obj_key_desc = 'USED_BY' and obj_typ_id = 11;
     
      rows := t_rows();
@@ -1277,15 +1273,17 @@ BEGIN
      row := t_row();
      
       ihook.setColumnValue(row,'ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
-      ihook.setColumnValue(rowform,'VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
+      ihook.setColumnValue(row,'VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
       ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID'));
-      ihook.setColumnValue(rowform,'CNTXT_VER_NR', ihook.getColumnValue(row_ori,'CNTXT_VER_NR'));
-      ihook.setColumnValue(rowform,'NM_TYP_ID', ihook.getColumnValue(row_ori,'CNTXT_VER_NR'));
-      ihook.setColumnValue(rowform,'NM_ID', -1);  v_tbl_nm := 'Alternate Names';
+      ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(row_ori,'CNTXT_VER_NR'));
+        ihook.setColumnValue(row,'NM_DESC', 'TEST_USED_BY');
+   ihook.setColumnValue(row,'NM_TYP_ID', v_nm_typ_id);
+      ihook.setColumnValue(row,'NM_ID', -1);  
+      v_tbl_nm := 'Alternate Names';
         rows.extend;
         rows(rows.last) := row;
     end loop;
-        action := t_actionrowset(rows, v_tbl_nm, 1,1,'insert');
+        action := t_actionrowset(rows, v_tbl_nm, 2,1,'insert');
         actions.extend;
         actions(actions.last) := action;
      

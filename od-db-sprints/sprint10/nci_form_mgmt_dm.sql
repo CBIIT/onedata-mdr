@@ -15,10 +15,10 @@ procedure spAddQuestionRep (rep in integer, row_ori in t_row, rows in out t_rows
 procedure spAddQuestionRepNew (rep in integer, v_quest_id in integer, rows in out t_rows);
 PROCEDURE spQuestRemoveDE ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 procedure spDelModRep  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+procedure spDeleteQuestVV  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 
 END;
 /
-
 create or replace PACKAGE BODY            nci_form_mgmt AS
 
 function isUserAuth(v_frm_item_id in number, v_frm_ver_nr in number,v_user_id in varchar2) return boolean  iS
@@ -30,6 +30,70 @@ select count(*) into v_temp from  onedata_md.vw_usr_row_filter  v, admin_item ai
         and ai.item_id =v_frm_item_id and ai.ver_nr = v_frm_ver_nr;
 if (v_temp = 0) then return false; else return true; end if;
 end;
+
+procedure spDeleteQuestVV  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    rowrel t_row;
+    row_sel t_row;
+    rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+  rowform t_row;
+v_found boolean;
+  v_module_id integer;
+  v_disp_ord integer;
+  v_frm_id number;
+  v_frm_ver_nr number(4,2);
+  v_ref varchar2(255);
+  v_add integer;
+  i integer := 0;
+  column  t_column;
+  msg varchar2(4000);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ rows := t_rows();  
+ 
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ 
+ select frm_item_id, frm_ver_nr into v_frm_id, v_frm_ver_nr from vw_nci_module_de where 
+nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.getColumnValue(row_ori, 'Q_VER_NR');
+ if (nci_form_mgmt.isUserAuth(v_frm_id, v_frm_ver_nr, v_usr_id) = false) then
+ raise_application_error(-20000,'You are not authorized to edit any valid value on this form.');
+ end if;
+for i in 1..hookinput.originalrowset.rowset.count loop
+ row_ori :=  hookInput.originalRowset.rowset(i);
+ 
+
+           
+            rows.extend;
+            rows(rows.last) := row_ori;
+    end loop;
+            action             := t_actionrowset(rows, 'Question Valid Values (Hook)', 2, 0,'delete');
+            actions.extend;
+            actions(actions.last) := action;
+  
+  action             := t_actionrowset(rows, 'Question Valid Values (Hook)', 2, 1,'purge');
+            actions.extend;
+            actions(actions.last) := action;
+            
+            hookoutput.actions    := actions;
+
+     
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
 
 
 PROCEDURE spAddForm  ( v_data_in IN CLOB,    v_data_out OUT CLOB)
