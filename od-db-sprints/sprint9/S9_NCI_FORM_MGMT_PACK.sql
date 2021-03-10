@@ -1,3 +1,4 @@
+
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_form_mgmt AS
 procedure spAddForm (v_data_in in clob, v_data_out out clob);
 procedure spAddModule (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -14,10 +15,11 @@ procedure spChngQuestDefVV (v_data_in in clob, v_data_out out clob,  v_user_id i
 procedure spAddQuestionRep (rep in integer, row_ori in t_row, rows in out t_rows);
 procedure spAddQuestionRepNew (rep in integer, v_quest_id in integer, rows in out t_rows);
 PROCEDURE spQuestRemoveDE ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+procedure spDelModRep  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+procedure spDeleteQuestVV  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 
 END;
 /
-
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_form_mgmt AS
 
 function isUserAuth(v_frm_item_id in number, v_frm_ver_nr in number,v_user_id in varchar2) return boolean  iS
@@ -29,6 +31,70 @@ select count(*) into v_temp from  onedata_md.vw_usr_row_filter  v, admin_item ai
         and ai.item_id =v_frm_item_id and ai.ver_nr = v_frm_ver_nr;
 if (v_temp = 0) then return false; else return true; end if;
 end;
+
+procedure spDeleteQuestVV  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    rowrel t_row;
+    row_sel t_row;
+    rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+  rowform t_row;
+v_found boolean;
+  v_module_id integer;
+  v_disp_ord integer;
+  v_frm_id number;
+  v_frm_ver_nr number(4,2);
+  v_ref varchar2(255);
+  v_add integer;
+  i integer := 0;
+  column  t_column;
+  msg varchar2(4000);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ rows := t_rows();  
+ 
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ 
+ select frm_item_id, frm_ver_nr into v_frm_id, v_frm_ver_nr from vw_nci_module_de where 
+nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.getColumnValue(row_ori, 'Q_VER_NR');
+ if (nci_form_mgmt.isUserAuth(v_frm_id, v_frm_ver_nr, v_usr_id) = false) then
+ raise_application_error(-20000,'You are not authorized to edit any valid value on this form.');
+ end if;
+for i in 1..hookinput.originalrowset.rowset.count loop
+ row_ori :=  hookInput.originalRowset.rowset(i);
+ 
+
+           
+            rows.extend;
+            rows(rows.last) := row_ori;
+    end loop;
+            action             := t_actionrowset(rows, 'Question Valid Values (Hook)', 2, 0,'delete');
+            actions.extend;
+            actions(actions.last) := action;
+  
+  action             := t_actionrowset(rows, 'Question Valid Values (Hook)', 2, 1,'purge');
+            actions.extend;
+            actions(actions.last) := action;
+            
+            hookoutput.actions    := actions;
+
+     
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
 
 
 PROCEDURE spAddForm  ( v_data_in IN CLOB,    v_data_out OUT CLOB)
@@ -181,9 +247,17 @@ BEGIN
     QUESTION               := T_QUESTION('Add new module.', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
  
+    rows := t_rows();
+    row := t_row();
+        ihook.setColumnValue(row, 'P_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
+        ihook.setColumnValue(row, 'P_ITEM_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
+        ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(row_ori, 'ITEM_NM'));
+        rows.extend; rows(rows.last) := row;  
+        rowset := t_rowset(rows, 'Module (Hook)', 1,'NCI_ADMIN_ITEM_REL');
+        
     forms                  := t_forms();
     form1                  := t_form('Modules (Hook)', 2,1);
-    --form1.rowset :=rowset;
+    form1.rowset :=rowset;
     forms.extend;
     forms(forms.last) := form1;
     hookOutput.forms := forms;
@@ -207,7 +281,7 @@ BEGIN
             ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 52);
             ihook.setColumnValue(row, 'CNTXT_ITEM_ID', cur.CNTXT_ITEM_ID);
             ihook.setColumnValue(row, 'CNTXT_VER_NR', cur.CNTXT_VER_NR);
-            ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(rowform,'ITEM_NM'));
+            ihook.setColumnValue(row, 'ITEM_LONG_NM', v_module_id || 'v1.00');
             ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowform,'ITEM_NM'));
             ihook.setColumnValue(row, 'ITEM_DESC', ihook.getColumnValue(rowform,'ITEM_DESC'));
             ihook.setColumnValue(row, 'ADMIN_STUS_ID', cur.ADMIN_STUS_ID);
@@ -476,8 +550,136 @@ BEGIN
 
      
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+  nci_util.debugHook('GENERAL',v_data_out);
 --  insert into junk_debug values (sysdate, v_data_out);
  -- commit;
+  
+END;
+
+
+PROCEDURE spDelModRep
+  (
+    v_data_in IN CLOB,
+    v_data_out OUT CLOB,
+    v_usr_id in varchar2)
+    AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+    row_sel t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+  v_disp_ord integer;
+  v_add integer;
+  i integer := 0;
+  v_temp integer;
+  v_rep integer;
+  v_rep_sel integer;
+  column  t_column;
+  msg varchar2(4000);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ 
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ rows := t_rows();  
+ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'P_ITEM_ID'), ihook.getColumnValue(row_ori,'P_ITEM_VER_NR'), v_usr_id) = false) then
+ raise_application_error(-20000,'You are not authorized to edit module to this form.');
+ end if;
+
+  v_rep :=  nvl(ihook.getColumnValue(row_ori, 'REP_NO'),0);
+ if (v_rep = 0) then
+ raise_application_error(-20000,'This module does not have any repetitions.');
+ end if;
+ if hookInput.invocationNumber = 0 then
+    ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Select');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    QUESTION               := T_QUESTION('Delete Repetition.', ANSWERS);
+    HOOKOUTPUT.QUESTION    := QUESTION;
+
+	    for i in 1..v_rep loop
+        
+		   row := t_row();
+	   	   iHook.setcolumnvalue (ROW, 'Repetition', i);
+		   rows.extend;
+		   rows (rows.last) := row;
+		   
+	    end loop;
+
+	   	 showrowset := t_showablerowset (rows, 'Repetition', 4, 'single');
+       	 hookoutput.showrowset := showrowset;
+ 
+ 
+  ELSE 
+        row_sel := hookinput.selectedRowset.rowset(1);
+        rows := t_rows();
+        v_rep_sel := ihook.getColumnValue(row_sel, 'Repetition');
+        rows := t_rows();
+        for cur in (select r.quest_vv_rep_id from nci_admin_item_rel_alt_key ak, nci_quest_vv_rep r 
+        where ak.p_item_id = ihook.getColumnValue(row_ori,'C_ITEM_ID') and 
+        ak.p_item_ver_nr = ihook.getColumnValue(row_ori,'C_ITEM_VER_NR') and
+        r.quest_pub_id = ak.nci_pub_id and r.quest_ver_nr = ak.nci_ver_nr and r.rep_seq = v_rep_sel) loop
+        row := t_row();
+        ihook.setColumnValue(row,'QUEST_VV_REP_ID', cur.QUEST_VV_REP_ID);
+        rows.extend;            rows(rows.last) := row;
+        end loop;
+        
+        if (rows.count > 0) then
+        action             := t_actionrowset(rows, 'Question Repetition', 2, 0,'delete');
+            actions.extend;
+            actions(actions.last) := action;
+        action             := t_actionrowset(rows, 'Question Repetition', 2, 1,'purge');
+            actions.extend;
+            actions(actions.last) := action;
+         end if;   
+         rows := t_rows();
+         for i in v_rep_sel+1..v_rep loop
+            for cur in (select r.* from nci_admin_item_rel_alt_key ak, nci_quest_vv_rep r 
+            where ak.p_item_id = ihook.getColumnValue(row_ori,'C_ITEM_ID') and 
+            ak.p_item_ver_nr = ihook.getColumnValue(row_ori,'C_ITEM_VER_NR') and
+            r.quest_pub_id = ak.nci_pub_id and r.quest_ver_nr = ak.nci_ver_nr and r.rep_seq = i) loop
+                row := t_row();
+                ihook.setColumnValue(row,'QUEST_VV_REP_ID', cur.QUEST_VV_REP_ID);
+                           ihook.setColumnValue(row, 'QUEST_PUB_ID', cur.quest_pub_id);
+            ihook.setColumnValue(row, 'QUEST_VER_NR', cur.quest_ver_nr);
+            ihook.setColumnValue(row, 'REP_SEQ', i-1);
+            ihook.setColumnValue(row, 'EDIT_IND', cur.edit_ind);
+ 
+                rows.extend;            rows(rows.last) := row;
+            end loop;
+        end loop;
+        if (rows.count > 0) then
+        action             := t_actionrowset(rows, 'Question Repetition', 2, 3,'update');
+            actions.extend;
+            actions(actions.last) := action;
+         end if;   
+         rows := t_rows();
+     
+           ihook.setColumnValue(row_ori, 'REP_NO', v_rep-1);
+             
+     rows.extend;
+            rows(rows.last) := row_ori;
+            action             := t_actionrowset(rows, 'Form-Module Relationship', 2, 4,'update');
+            actions.extend;
+            actions(actions.last) := action;
+            
+    hookoutput.actions    := actions;
+    END IF;
+
+     
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
   
 END;
 
@@ -556,7 +758,7 @@ BEGIN
       v_found := true;
    end loop;
    
-   if (v_found) then
+  -- if (v_found) then
     ANSWERS                    := T_ANSWERS();
     ANSWER                     := T_ANSWER(1, 1, 'Set default');
     ANSWERS.EXTEND;
@@ -566,7 +768,7 @@ BEGIN
           	 showrowset := t_showablerowset (rows, 'Repetition', 4, 'multi');
        	 hookoutput.showrowset := showrowset;
 
-else
+--else
 
 /*rows := t_rows();
 row := t_row();
@@ -582,8 +784,8 @@ row := t_row();
             actions(actions.last) := action;
     hookoutput.actions    := actions;
   */
-   hookoutput.message := 'No repetition for this module';
- end if;
+ --  hookoutput.message := 'No repetition for this module';
+ --end if;
  ELSE
     
     
@@ -961,6 +1163,8 @@ v_found boolean;
   i integer := 0;
   column  t_column;
   msg varchar2(4000);
+  v_item_typ  integer;
+  v_mod_specified boolean;
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -978,7 +1182,7 @@ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.get
 		v_found := false;
 
 	    for cur in (select c.item_id, c.ver_nr from NCI_USR_CART c, admin_item ai where c.fld_delete= 0 and cntct_secu_id = v_user_id and ai.item_id = c.item_id and ai.ver_nr = c.ver_nr and 
-        ai.admin_item_typ_id = 54 ) loop
+        ai.admin_item_typ_id in (52, 54 ) order by admin_item_typ_id) loop
 		   row := t_row();
 	   	   iHook.setcolumnvalue (ROW, 'ITEM_ID', cur.ITEM_ID);
 		   iHook.setcolumnvalue (ROW, 'VER_NR', cur.VER_NR);
@@ -992,20 +1196,24 @@ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.get
        	 hookoutput.showrowset := showrowset;
 
        	 answers := t_answers();
-  	   	 answer := t_answer(1, 1, 'Select Form..');
+  	   	 answer := t_answer(1, 1, 'Select');
   	   	 answers.extend; answers(answers.last) := answer;
 
 	   	 question := t_question('Select option to proceed', answers);
        	 hookOutput.question := question;
      else
-               hookoutput.message := 'Please add forms to your cart.';
+               hookoutput.message := 'Please add forms or modules to your cart.';
 	   
 	   end if;
 	   
-	elsif hookInput.invocationNumber = 1 then
-		  if hookInput.answerId = 1 then -- selected form
-    row_sel := hookInput.selectedRowset.rowset(1);
-      
+	end if;
+    
+    if hookInput.invocationNumber = 1  then
+          v_mod_specified := false;
+          row_sel := hookInput.selectedRowset.rowset(1);
+          select admin_item_typ_id into v_item_typ from admin_item where  item_id = ihook.getColumnValue(row_sel,'ITEM_ID')
+          and ver_nr = ihook.getColumnValue(row_sel,'VER_NR');
+          if (v_item_typ = 54) then--- Form
             rows :=         t_rows();
 		v_found := false;
 	    for cur in (select c.item_id, c.ver_nr from VW_NCI_FORM_MODULE c where c.fld_delete= 0  and c.p_item_id = ihook.getColumnValue(row_sel,'ITEM_ID') and c.p_item_ver_nr =  ihook.getColumnValue(row_sel,'VER_NR') ) loop
@@ -1029,8 +1237,11 @@ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.get
 	   	 question := t_question('Select option to proceed', answers);
        	 hookOutput.question := question;
 	   end if;
-       end if;
-    elsif hookInput.invocationNumber = 2 then -- copy module
+    else 
+        v_mod_specified := true;
+    end if;
+    end if;
+    if (hookInput.invocationNumber = 2 or v_mod_specified = true) then -- copy module
     
 	row_sel := hookInput.selectedRowset.rowset(1);
     nci_11179.spCopyModuleNCI (actions, ihook.getColumnValue(row_sel,'ITEM_ID'),ihook.getColumnValue(row_sel,'VER_NR'), 
