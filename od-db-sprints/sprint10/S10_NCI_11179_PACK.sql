@@ -1,14 +1,14 @@
-CREATE OR REPLACE ONEDATA_WA.PACKAGE NCI_11179 AS
+CREATE OR REPLACE EDITIONABLE PACKAGE "ONEDATA_WA"."NCI_11179" AS
 function getWordCount(v_nm in varchar2) return integer;
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
 FUNCTION get_concepts(v_item_id in number, v_ver_nr in number) return varchar2;
  Function get_concept_order(v_item_id in number, v_ver_nr in number) return varchar2 ;
  function cmr_guid return varchar2;
 FUNCTION getPrimaryConceptName(v_nm in varchar2) return varchar2;
-procedure spAddToCart ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spAddToCart ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_src varchar2);
 procedure spAddToCartGuest ( v_data_in in clob, v_data_out out clob);
 procedure spRemoveFromCart (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
-procedure spNCIChangeLatestVer (v_data_in in clob, v_data_out out clob);
+procedure spNCIChangeLatestVer (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 procedure spAddConceptRel (v_data_in in clob, v_data_out out clob);
 procedure spCreateVerNCI (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure getConcatNmDef(v_item_id in number, v_ver_nr in number, v_nm out varchar2, v_long_nm out varchar2,v_def out varchar2);
@@ -18,24 +18,24 @@ function getItemId return integer;
 procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm out varchar2, v_def out varchar2);
 function replaceChar(v_str in varchar2) return varchar2;
 
-/*  This package includes generic functions as well as versioning related procedures for NCI
+/*  This package includes generic functions as well as versioning related procedures for NCI 
 
-geWordCOunt - gets the word count of a string separated by spaces. Used to parse the string the user provides in DEC creation
+geWordCOunt - gets the word count of a string separated by spaces. Used to parse the string the user provides in DEC creation 
 getWord - get the specific word in v_idx position from a string
 cmr_guid - generatest he NCI_IDSEQ
 spAddToCart , spRemoveFromCart - add selected administered Items to user cart - called from command hook
-spAddToCartGuest - Add to cart for Guest user.
-spNCIChangeLatestVer - Change latest version for a selected AI
+spAddToCartGuest - Add to cart for Guest user. 
+spNCIChangeLatestVer - Change latest version for a selected AI 
 spCreateVerNCI - Create new version customized
 
 */
 END;
 /
-CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.NCI_11179 AS
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY ONEDATA_WA.NCI_11179 AS
 
 v_err_str      varchar2(1000) := '';
 DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
-type       t_orgs is table of org_cntct.org_id%type;
+type       t_orgs is table of org_cntct.org_id%type; 
 
 /*  This package includes generic functions as well as versioning related procedures for NCI */
 /***********************************************/
@@ -99,7 +99,7 @@ as
 v_out integer;
 begin
 
-    for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
+    for cur in (select ext.* from nci_admin_item_ext ext,admin_item a 
     where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat = v_nm and a.admin_item_typ_id = v_item_typ) loop
             v_item_id := cur.item_id;
             v_item_ver_nr := cur.ver_nr;
@@ -112,7 +112,7 @@ end;
 /* Get the string in position v_idx within string v_nm */
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2 is
    v_word  varchar2(100);
-begin
+begin  
   if (v_idx = 1 and v_idx = v_max)then
     v_word := v_nm;
   elsif  (v_idx = 1 and v_idx < v_max)then
@@ -142,7 +142,7 @@ function get_concepts(v_item_id in number, v_ver_nr in number) return varchar2 i
 cursor con is
 select c.item_nm, cai.NCI_CNCPT_VAL
 from cncpt_admin_item cai, admin_item c
-where cai.item_id = v_item_id and cai.ver_nr = v_ver_nr
+where cai.item_id = v_item_id and cai.ver_nr = v_ver_nr 
 and cai.cncpt_item_id = c.item_id and cai.cncpt_ver_nr = c.ver_nr and c.admin_item_typ_id = 49
 order by  nci_ord desc;
 
@@ -177,7 +177,7 @@ function get_concept_order(v_item_id in number, v_ver_nr in number) return varch
 cursor con is
 select nci_ord
 from cncpt_admin_item cai
-where cai.item_id = v_item_id and cai.ver_nr = v_ver_nr
+where cai.item_id = v_item_id and cai.ver_nr = v_ver_nr 
 order by  nci_ord desc;
 
 v_order_sq varchar2(4000):= null;
@@ -221,7 +221,7 @@ end;
 */
 
 /* Change Latest version for select Item Id. Command hook */
-procedure spNCIChangeLatestVer (v_data_in in clob, v_data_out out clob)
+procedure spNCIChangeLatestVer (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2)
 as
 hookInput           t_hookInput;
 hookOutput           t_hookOutput := t_hookOutput();
@@ -252,6 +252,10 @@ begin
 
     if hookInput.invocationNumber = 0 then  -- First invocation - show all the versions for the select Item ID
         for cur in ( select item_id, ver_nr from admin_item where item_id = ihook.getColumnValue(row_cur,'ITEM_ID')) loop
+            if (nci_11179_2.isUserAuth(cur.item_id, cur.ver_nr, v_usr_id) = false) then
+                raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ');
+                return;
+            end if;
             row := t_row();
             ihook.setColumnValue(row, 'ITEM_ID', cur.item_id);
             ihook.setColumnValue(row, 'VER_NR', cur.ver_nr);
@@ -267,7 +271,7 @@ begin
 	   	question := t_question('Select option to proceed', answers);
        	hookOutput.question := question;  -- Ask the question
 
-	elsif hookInput.invocationNumber = 1 then  -- Second invocation - set the actions
+	elsif hookInput.invocationNumber = 1 then  -- Second invocation - set the actions 
 		  if hookInput.answerId = 1 then -- selected form
                row_sel := hookInput.selectedRowset.rowset(1);  -- Row selected to be the latest version
                 rows :=         t_rows();
@@ -292,7 +296,7 @@ begin
                     hookOutput.message := 'Successfully changed latest version.';
                 end if;
         end if;
-    end if;
+    end if;	   
     v_data_out := ihook.getHookOutput(hookOutput);
 end;
 
@@ -301,7 +305,8 @@ end;
 PROCEDURE spAddToCart (
     v_data_in IN CLOB,
     v_data_out OUT CLOB,
-    v_user_id  varchar2)
+    v_user_id  varchar2,
+    v_src varchar2)
 AS
     hookInput t_hookInput;
     hookOutput t_hookOutput := t_hookOutput();
@@ -322,12 +327,17 @@ begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
-
-    rows := t_rows();
+  
+    rows := t_rows();  
     for i in 1..hookinput.originalrowset.rowset.count loop  --- Iterate through all the selected rows
-        row_ori := hookInput.originalRowset.rowset(i);
+        row_ori := hookInput.originalRowset.rowset(i);    
+        if (v_src = 'AI') then
         v_item_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
         v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
+        elsif (v_src ='MODULE') then
+        v_item_id := ihook.getColumnValue(row_ori, 'C_ITEM_ID');
+        v_ver_nr := ihook.getColumnValue(row_ori, 'C_ITEM_VER_NR');
+        end if;        
         select count(*) into v_temp from nci_usr_cart where item_id  = v_item_id and ver_nr = v_ver_nr and cntct_secu_id = v_user_id;
         /*  If not already in cart */
         if (v_temp = 0) then
@@ -338,7 +348,7 @@ begin
             ihook.setColumnValue(row,'CNTCT_SECU_ID', v_user_id);
             ihook.setColumnValue(row,'GUEST_USR_NM', 'NONE');
             rows.extend;    rows(rows.last) := row;
-        else
+        else 
             v_already := v_already + 1;
         end if;
     end loop;
@@ -353,6 +363,7 @@ begin
     end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
+
 
 /*  Command hook for Guest Add to Cart functionality */
 PROCEDURE spAddToCartGuest
@@ -389,7 +400,7 @@ begin
     hookinput                    := Ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
-    rows := t_rows();
+    rows := t_rows();  
     if hookInput.invocationNumber = 0 then  ---First invocation of the hook - prompt for user name
             ANSWERS                    := T_ANSWERS();
             ANSWER                     := T_ANSWER(1, 1, 'Add to cart.' );
@@ -401,9 +412,9 @@ begin
             form1                  := t_form('User Cart (Hook)', 2,1);
             forms.extend;
             forms(forms.last) := form1;
-            hookOutput.forms := forms;
-	elsif hookInput.invocationNumber = 1 then  -- Second invocation - we now have the user name
-		  if hookInput.answerId = 1 then
+            hookOutput.forms := forms;	   
+	elsif hookInput.invocationNumber = 1 then  -- Second invocation - we now have the user name 
+		  if hookInput.answerId = 1 then 
             forms              := hookInput.forms;
             form1              := forms(1);
             rowform := form1.rowset.rowset(1);
@@ -435,7 +446,7 @@ begin
             else
                 hookoutput.message := v_already || ' item(s) selected already in yout cart';
             end if;
-         end if;
+         end if; 
     end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
@@ -469,7 +480,7 @@ begin
         row_ori := hookInput.originalRowset.rowset(i);
 
         /* check to make sure the user is deleting from their cart */
-        if (v_user_id <> ihook.getColumnValue(row_ori,'CNTCT_SECU_ID')) then
+        if (v_user_id <> ihook.getColumnValue(row_ori,'CNTCT_SECU_ID')) then 
             raise_application_error(-20000, 'You are not authorized to delete from another user cart');
         end if;
 
@@ -486,7 +497,7 @@ begin
     actions(actions.last) := action;
 
     hookoutput.actions := actions;
-    hookoutput.message := 'Item(s) successfully deleted from cart';
+    hookoutput.message := 'Item(s) successfully deleted from cart';    
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
@@ -521,7 +532,7 @@ BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
-    rows := t_rows();
+    rows := t_rows();  
 
    for i in 1..hookinput.originalrowset.rowset.count loop
     row_ori := hookInput.originalRowset.rowset(i);
@@ -535,7 +546,7 @@ BEGIN
     rows.extend;
     rows(rows.last) := row;
  end loop;
-  if (v_add > 0) then
+  if (v_add > 0) then 
     action := t_actionrowset(rows, 'NCI_USR_CART', 1,0,'insert');
     actions.extend;
     actions(actions.last) := action;
@@ -604,7 +615,7 @@ ihook.setColumnValue (row, 'DISP_ORD', cur.disp_ord);
     rowsvv(rowsvv.last) := row;
     v_found := true;
   --  raise_application_error(-20000, 'Inside');
-    end loop;
+    end loop;   
 --DESC_TXT
   --  raise_application_error(-20000, rows.count);
    end loop;
@@ -612,7 +623,7 @@ ihook.setColumnValue (row, 'DISP_ORD', cur.disp_ord);
     actions.extend;
     actions(actions.last) := action;
 
-    if (v_found) then
+    if (v_found) then 
     action := t_actionrowset(rowsvv, 'Question Valid Values (Hook)', 2,16,'insert');
     actions.extend;
     actions(actions.last) := action;
@@ -698,8 +709,8 @@ v_table_name := 'ADMIN_ITEM';
     ihook.setColumnValue(row, 'c_ITEM_ver_nr',v_to_form_ver);
     ihook.setColumnValue(row, 'rel_typ_id',61);
 
-if (v_disp_ord < 0) then
-     select nvl(max(disp_ord)+ 1,0) into v_disp_ord1 from nci_admin_item_rel where
+if (v_disp_ord < 0) then    
+     select nvl(max(disp_ord)+ 1,0) into v_disp_ord1 from nci_admin_item_rel where 
      p_item_id = v_to_form_id and p_item_ver_nr = v_to_form_ver;
       --   raise_application_error(-2000
     ihook.setColumnValue(row, 'disp_ord',v_disp_ord1);
@@ -748,7 +759,7 @@ begin
     v_table_name := 'ALT_NMS';
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
-    for an_cur in (select nm_id from alt_nms where
+    for an_cur in (select nm_id from alt_nms where 
     item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr) loop
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where nm_id = :nm_id';
         v_cur := dbms_sql.open_cursor;
@@ -797,7 +808,7 @@ begin
     v_table_name := 'ALT_DEF';
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
-    for ad_cur in  (select def_id from alt_def where
+    for ad_cur in  (select def_id from alt_def where 
     item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr) loop
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where def_id = :def_id';
         v_cur := dbms_sql.open_cursor;
@@ -849,7 +860,7 @@ begin
     v_table_name := 'REF';
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
-    for ref_cur in  (select ref_id from ref where
+    for ref_cur in  (select ref_id from ref where 
     item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr) loop
 
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where ref_id = :ref_id';
@@ -890,7 +901,7 @@ begin
     v_table_name := 'CNCPT_ADMIN_ITEM';
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
-    for ref_cur in  (select CNCPT_AI_ID from CNCPT_ADMIN_ITEM where
+    for ref_cur in  (select CNCPT_AI_ID from CNCPT_ADMIN_ITEM where 
     item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr) loop
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where CNCPT_AI_ID = :CNCPT_AI_ID';
         v_cur := dbms_sql.open_cursor;
@@ -929,7 +940,7 @@ begin
     v_table_name := 'NCI_ALT_KEY_ADMIN_ITEM_REL';
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
-    for ref_cur in  (select NCI_PUB_ID,NCI_VER_NR, REL_TYP_ID from NCI_ALT_KEY_ADMIN_ITEM_REL where
+    for ref_cur in  (select NCI_PUB_ID,NCI_VER_NR, REL_TYP_ID from NCI_ALT_KEY_ADMIN_ITEM_REL where 
     c_item_id = v_admin_item.item_id and c_item_ver_nr = v_admin_item.ver_nr) loop
 
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where NCI_PUB_ID = :NCI_PUB_ID and NCI_VER_NR = :NCI_VER_NR and c_item_id = :c_item_id and c_item_ver_nr = :c_item_ver_nr and rel_typ_id = :rel_typ_id';
@@ -972,7 +983,7 @@ end;
 procedure spReturnSubtypeRow (v_item_id in number, v_ver_nr in number, v_type in number, row in out t_row) as
     action           t_actionRowset;
     action_rows              t_rows := t_rows();
-
+  
     v_table_name      varchar2(30);
     v_sql        varchar2(4000);
     v_cur        number;
@@ -1112,7 +1123,7 @@ begin
         action_rows := t_rows();
         v_table_name := 'PERM_VAL';
         v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
-        for pv_cur in  (select val_id from perm_val where
+        for pv_cur in  (select val_id from perm_val where 
         val_dom_item_id = v_admin_item.item_id and val_dom_ver_nr = v_admin_item.ver_nr) loop
 
             v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where val_id = :val_id';
@@ -1147,14 +1158,14 @@ begin
         actions.extend; actions(actions.last) := action;
  end if;
 
-/*   Conceptual Domain  */
+/*   Conceptual Domain  */ 
  if v_admin_item.admin_item_typ_id = 1 then -- Conceptual Domain then add CD-VM relationship
         action_rows := t_rows();
 
         v_table_name := 'CONC_DOM_VAL_MEAN';
         v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
-        for cdvm_cur in  (select CONC_DOM_VER_NR, CONC_DOM_ITEM_ID, NCI_VAL_MEAN_ITEM_ID, NCI_VAL_MEAN_VER_NR from conc_dom_val_mean where
+        for cdvm_cur in  (select CONC_DOM_VER_NR, CONC_DOM_ITEM_ID, NCI_VAL_MEAN_ITEM_ID, NCI_VAL_MEAN_VER_NR from conc_dom_val_mean where 
         conc_dom_item_id = v_admin_item.item_id and conc_dom_ver_nr = v_admin_item.ver_nr) loop
 
             v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where CONC_DOM_VER_NR = :conc_dom_ver_nr and CONC_DOM_ITEM_ID = :conc_dom_item_id and NCI_VAL_MEAN_ITEM_ID = :nci_val_mean_item_id and NCI_VAL_MEAN_VER_NR = :nci_val_mean_ver_nr';
@@ -1192,13 +1203,13 @@ begin
 
 
     /*  DE then copy Derived Components */
-    if v_admin_item.admin_item_typ_id = 4 then
+    if v_admin_item.admin_item_typ_id = 4 then 
 
         action_rows := t_rows();
         v_table_name := 'NCI_ADMIN_ITEM_REL';
         v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
-        for de_cur in (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where
+        for de_cur in (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where 
         P_item_id = v_admin_item.item_id and p_ITEM_ver_nr = v_admin_item.ver_nr and rel_typ_id = 65) loop
 
             v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where P_ITEM_ID = :P_ITEM_ID and P_ITEM_VER_NR = :P_ITEM_VER_NR and C_ITEM_ID = :C_ITEM_ID and C_ITEM_VER_NR = :C_ITEM_VER_NR and REL_TYP_ID=65';
@@ -1235,29 +1246,29 @@ begin
     end if;
 
 /*  If Form  */
-    if v_admin_item.admin_item_typ_id = 54 then
+    if v_admin_item.admin_item_typ_id = 54 then 
     -- Add Modules
      for cur2 in (select c_item_id, c_item_ver_nr, disp_ord from nci_admin_item_rel where p_item_id = v_admin_item.item_id and p_item_ver_nr = v_admin_item.ver_nr) loop
-        nci_11179.spCopyModuleNCI(actions, cur2.c_item_id, cur2.c_item_ver_nr, v_admin_item.item_id, v_admin_item.item_id, v_admin_item.item_id, v_version, cur2.disp_ord);
-     end loop;
+        nci_11179.spCopyModuleNCI(actions, cur2.c_item_id, cur2.c_item_ver_nr, v_admin_item.item_id, v_admin_item.item_id, v_admin_item.item_id, v_version, cur2.disp_ord);   
+     end loop; 
      -- Add protocols
-
+      
         action_rows := t_rows();
         v_table_name := 'NCI_ADMIN_ITEM_REL';
         v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
         v_found := false;
 
-        for pro_cur in (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where
+        for pro_cur in (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where 
         c_item_id = v_admin_item.item_id and c_ITEM_ver_nr = v_admin_item.ver_nr ) loop
           --    raise_application_error(-20000,'Herer');
-
+         
             row := t_row();
             ihook.setColumnValue(row, 'P_ITEM_ID', pro_cur.P_ITEM_ID);
           ihook.setColumnValue(row, 'P_ITEM_VER_NR', pro_cur.P_ITEM_VER_NR);
           ihook.setColumnValue(row, 'C_ITEM_ID', pro_cur.C_ITEM_ID);
           ihook.setColumnValue(row, 'REL_TYP_ID', pro_cur.rel_typ_id);
             ihook.setColumnValue(row, 'C_ITEM_VER_NR', v_version);
-
+         
             v_found  := true;
             action_rows.extend; action_rows(action_rows.last) := row;
         end loop;
@@ -1317,14 +1328,14 @@ begin
     row_ori :=  hookInput.originalRowset.rowset(1);
 
     /* Check with user has privilege to create version for the context */
-    select count(*) into v_temp from  onedata_md.vw_usr_row_filter  v
+    select count(*) into v_temp from  onedata_md.vw_usr_row_filter  v 
         where ( ( v.CNTXT_ITEM_ID = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID') and v.cntxt_VER_NR  = ihook.getColumnValue(row_ori,'CNTXT_VER_NR')) or v.CNTXT_ITEM_ID = 100) and upper(v.USR_ID) = upper(v_user_id) and v.ACTION_TYP = 'I';
 
     if v_temp = 0 then
                    hookOutput.message := 'Not authorized to create version in the current context.';
                    v_data_out := ihook.getHookOutput(hookOutput);
                    return;
-    end if;
+    end if; 
 
     v_tab_admin_item := template_11179.getParsedAdminItemsData(hookInput.originalRowset);
 
@@ -1362,9 +1373,9 @@ begin
         form1                  := t_form('Version Creation', 2,1);
         forms.extend;
         forms(forms.last) := form1;
-        hookOutput.forms := forms;
+        hookOutput.forms := forms;	   
 	elsif hookInput.invocationNumber = 1 then  -- Version number specified...
-		  if hookInput.answerId = 1 then
+		  if hookInput.answerId = 1 then 
             forms              := hookInput.forms;
             form1              := forms(1);
             rowform := form1.rowset.rowset(1);
@@ -1437,9 +1448,9 @@ begin
     v_data_out := ihook.getHookOutput(hookOutput);
     -- insert into junk_debug (id, test) values (sysdate, v_data_out);
     -- commit;
-
+    
 end;
 
 END;
 /
-GRANT EXECUTE ON "ONEDATA_WA"."NCI_11179" TO "ONEDATA_RO";
+GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;

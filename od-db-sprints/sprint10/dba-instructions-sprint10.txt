@@ -7,4 +7,5 @@ s10_RA_DDL.sqlpts
 S9_1_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S10_NCI_11179_PACK.sql
 S10_NCI_CHNG_MGMT_PACK.sql
