@@ -382,6 +382,7 @@ PROCEDURE spDECreateFrom ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN 
         v_item_desc varchar2(4000);
         v_count  number;
         v_valid boolean;
+        v_item_type_id number;
         actions t_actions := t_actions();
         action t_actionRowset;
 begin
@@ -394,13 +395,18 @@ begin
     row_ori :=  hookInput.originalRowset.rowset(1);
     v_item_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
     v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
-    
+    v_item_type_id := ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID');
+
     -- Check if user is authorized to edit
 --   if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_usr_id) = false) then
 --        raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ');
 --        return;
 --  end if;
+-- check that a selected AI is CDE type
 
+    if (v_item_type_id <> 4) then -- 4 - CDE in table OBJ_KEY
+        raise_application_error(-20000,'!!! This functionality is only applicable for CDE !!!');
+    end if;
 if hookInput.invocationNumber = 0 then
         HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(2);
         row := row_ori;
