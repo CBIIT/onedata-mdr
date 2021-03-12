@@ -1,4 +1,4 @@
-TRIGGER TR_NCI_AI_DENORM_INS
+CREATE or REPLACE TRIGGER TR_NCI_AI_DENORM_INS
   for  insert or update   on ADMIN_ITEM
 compound trigger
 TYPE r_change_row is RECORD (
@@ -46,7 +46,11 @@ loop
 
 if(t_change(indx).REGSTR_STUS_ID is not null) then
 if ( t_change(indx).REGSTR_STUS_ID <> t_change(indx).OLD_REGSTR_STUS_ID) then
+if (t_change(indx).REGSTR_STUS_ID <> 9999) then
 select STUS_NM into s_REGSTR_STUS_NM_DN from STUS_MSTR where stus_typ_id = 1 and stus_id = t_change(indx).REGSTR_STUS_ID;
+ELSE
+s_REGSTR_STUS_NM_DN := NULL; --back to null
+END IF;
 update ADMIN_ITEM set REGSTR_STUS_NM_DN = s_REGSTR_STUS_NM_DN where ITEM_ID = t_change(indx).item_id
 and ver_nr = t_change(indx).ver_nr;
 end if;

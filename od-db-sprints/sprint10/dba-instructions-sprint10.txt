@@ -1,1 +1,10 @@
 -- Run as ONEDATA_WA DDL scripts
+S10_1_WA_RA_DDL.sql
+S10_TR_NCI_AI_DENORM_INS.sql
+
+-10 Run as ONEDATA_RA DDL scripts
+s10_RA_DDL.sqlpts
+S9_1_WA_RA_DDL.sql
+
+-- Run as ONEDATA_WA DDL scripts
+S10_NCI_CHNG_MGMT_PACK.sql
