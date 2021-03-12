@@ -888,7 +888,10 @@ BEGIN
  
  if hookInput.invocationNumber = 0 then
     ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Select alternate.');
+    ANSWER                     := T_ANSWER(1, 1, 'Alternate long name.');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    ANSWER                     := T_ANSWER(2, 2, 'Alternate short name.');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Alternate Question Text', ANSWERS);
@@ -914,8 +917,11 @@ BEGIN
 
             select ref_desc into v_ref from ref where ref_id = ihook.getColumnValue(row_sel, 'REF_ID');
             
+            if (hookinput.answerid = 1) then
             ihook.setColumnValue(row_ori, 'ITEM_LONG_NM', v_ref);
-            
+            elsif (hookinput.answerid = 2) then
+             ihook.setColumnValue(row_ori, 'ITEM_NM', substr(v_ref,1,30));
+            end if;
             rows:= t_rows();
             rows.extend;
             rows(rows.last) := row_ori;
@@ -1185,6 +1191,7 @@ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.get
 		   row := t_row();
 	   	   iHook.setcolumnvalue (ROW, 'ITEM_ID', cur.ITEM_ID);
 		   iHook.setcolumnvalue (ROW, 'VER_NR', cur.VER_NR);
+		   iHook.setcolumnvalue (ROW, 'CNTCT_SECU_ID', v_user_id);
 		   rows.extend;
 		   rows (rows.last) := row;
 		   v_found := true;
