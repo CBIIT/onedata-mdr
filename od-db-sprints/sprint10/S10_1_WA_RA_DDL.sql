@@ -237,4 +237,46 @@ and VALUE_DOM.CONC_DOM_VER_NR = CD_AI.VER_NR;
 
 alter table nci_quest_valid_value add (VAL_MEAN_ITEM_ID number, VAL_MEAN_VER_NR number(4,2));
 										       
+-- Tracker 807	      
+										       
+  CREATE OR REPLACE  VIEW VW_NCI_ALT_NMS AS
+  SELECT ALT_NMS.NM_ID, 'CDE' ALT_NMS_LVL, DE_AI.ITEM_ID  DE_ITEM_ID, 
+		DE_AI.VER_NR DE_VER_NR,
+		ALT_NMS.ITEM_ID, ALT_NMS.VER_NR, 
+		ALT_NMS.CNTXT_ITEM_ID, ALT_NMS.CNTXT_VER_NR, 
+		ALT_NMS.NM_DESC, 
+        	ALT_NMS.PREF_NM_IND, ALT_NMS.LANG_ID, AGG.CSI_ALT_NMS,
+		ALT_NMS.CREAT_DT, ALT_NMS.CREAT_USR_ID, ALT_NMS.LST_UPD_USR_ID, ALT_NMS.FLD_DELETE, ALT_NMS.LST_DEL_DT, ALT_NMS.S2P_TRN_DT, ALT_NMS.LST_UPD_DT, ALT_NMS.NM_TYP_ID
+       FROM ALT_NMS, ADMIN_ITEM DE_AI,
+       (select a.nm_id, listagg(cs.item_nm ||  '/' || ai.item_nm, chr(10)) within group (order by a.item_id) CSI_ALT_NMS
+        from alt_nms a , NCI_CSI_ALT_DEFNMS n, NCI_CLSFCTN_SCHM_ITEM x, admin_item ai , admin_item cs, de
+       where n.nmdef_id = a.nm_id and n.nci_pub_id = x.ITEM_id and x.item_id = ai.item_id and a.item_id = de.item_id and a.ver_nr = de.ver_nr
+       and x.ver_nr = ai.ver_nr and x.cs_item_id = cs.item_id and x.cs_item_ver_nr = cs.ver_nr
+       group by a.nm_id) agg
+ where DE_AI.ADMIN_ITEM_TYP_ID = 4 and
+	ALT_NMS.ITEM_ID = DE_AI.ITEM_ID and
+	ALT_NMS.VER_NR = DE_AI.VER_NR and upper(ALT_NMS.NM_DESC) <> upper(ALT_NMS.CNTXT_NM_DN) 
+	and alt_nms.nm_id = agg.nm_id (+);
+
+	
+  CREATE OR REPLACE  VIEW VW_NCI_ALT_DEF AS
+  SELECT ALT_DEF.DEF_ID, 'CDE' ALT_DEF_LVL, DE_AI.ITEM_ID  DE_ITEM_ID, 
+		DE_AI.VER_NR DE_VER_NR,
+		ALT_DEF.ITEM_ID, ALT_DEF.VER_NR, 
+		ALT_DEF.CNTXT_ITEM_ID, ALT_DEF.CNTXT_VER_NR, 
+		ALT_DEF.DEF_DESC, ALT_DEF.NCI_DEF_TYP_ID,
+        	ALT_DEF.PREF_DEF_IND, ALT_DEF.LANG_ID, AGG.CSI_ALT_DEFS,
+		ALT_DEF.CREAT_DT, ALT_DEF.CREAT_USR_ID, ALT_DEF.LST_UPD_USR_ID, ALT_DEF.FLD_DELETE, 
+        ALT_DEF.LST_DEL_DT, ALT_DEF.S2P_TRN_DT, ALT_DEF.LST_UPD_DT
+       FROM ALT_DEF, ADMIN_ITEM DE_AI,
+      (select a.def_id, listagg(cs.item_nm ||  '/' || ai.item_nm, chr(10)) within group (order by a.item_id) CSI_ALT_DEFS
+        from alt_def a , NCI_CSI_ALT_DEFNMS n,  NCI_CLSFCTN_SCHM_ITEM x, admin_item ai , admin_item cs, de
+       where n.nmdef_id = a.def_id and n.nci_pub_id = x.item_id and x.item_id = ai.item_id  and a.item_id = de.item_id and a.ver_nr = de.ver_nr
+       and x.ver_nr = ai.ver_nr and x.cs_item_id = cs.item_id and x.cs_item_ver_nr = cs.ver_nr
+       group by a.def_id) agg
+ where DE_AI.ADMIN_ITEM_TYP_ID = 4 and
+	ALT_DEF.ITEM_ID = DE_AI.ITEM_ID and
+	ALT_DEF.VER_NR = DE_AI.VER_NR and
+	ALT_DEF.DEF_ID = AGG.DEF_ID (+);		
+										       
 
