@@ -233,5 +233,8 @@ and VALUE_DOM.CONC_DOM_ITEM_ID = CD_AI.ITEM_ID
 and VALUE_DOM.CONC_DOM_VER_NR = CD_AI.VER_NR;
 
 
+-- Tracker 676 - Add VM ID to Question VV
 
+alter table nci_quest_valid_value add (VAL_MEAN_ITEM_ID number, VAL_MEAN_VER_NR number(4,2));
+										       
 
