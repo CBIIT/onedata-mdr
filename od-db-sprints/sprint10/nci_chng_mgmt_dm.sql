@@ -15,7 +15,7 @@ PROCEDURE spDECreateFrom ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN 
 PROCEDURE spClassification ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 PROCEDURE spClassificationNMDef ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2, v_typ in varchar2);
 PROCEDURE spDesignateNew   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
-function getDECreateQuestion return t_question;
+function getDECreateQuestion(v_from in number,v_first in boolean) return t_question;
 function getDECreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
 function getCSICreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
 function getVDCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
@@ -27,6 +27,7 @@ PROCEDURE spVDCommon ( v_init_ai in t_rowset, v_init_st in t_rowset, v_op  in va
 procedure spAddCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 END;
 /
+
 create or replace PACKAGE BODY            nci_CHNG_MGMT AS
 v_temp_rep_ver_nr varchar2(10):='0';
 v_temp_rep_id VARCHAR2(10):='0';
@@ -216,12 +217,13 @@ v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
   v_temp_id  number;
   v_temp_ver number(4,2);
   is_valid boolean;
+  V_valid boolean;
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
     if hookInput.invocationNumber = 0 then
-          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion();
+          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,true);
           row := t_row();
           rows := t_rows();
           ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
@@ -251,38 +253,63 @@ BEGIN
        row := t_row();
       rows := t_rows();
 
-
+      v_valid := true;
             for cur in (select ai.item_id from admin_item ai, de de
             where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
-            and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
-            and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')
-            --and de.de_conc_item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') and de.de_conc_ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
-            --and de.val_dom_item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') and de.val_dom_ver_nr =  ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR')
+           -- and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
+           -- and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')
+            and de.de_conc_item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') 
+            and de.de_conc_ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
+            and de.val_dom_item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') 
+            and de.val_dom_ver_nr =  ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR')
             and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
             and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')) 
 
- 
+
         loop
         hookoutput.message := 'Duplicate CDE found: ' || cur.item_id;
 
-                     rows.extend;
+         rows.extend;
           rows(rows.last) := rowai;
           rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
           rows := t_rows();
             rows.extend;
           rows(rows.last) := rowde;
           rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
-
+           v_valid := false;
           hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
-                HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion();
+          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,v_valid);
            V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-               return;
+            return;
             end loop;
-
-            select substr(dec.item_nm || ' ' || vd.item_nm,1,255) ,substr(dec.item_desc || ':' || vd.item_desc,  1, 4000) into v_item_nm, v_item_def from admin_item dec, admin_item vd
+            
+    select substr(dec.item_nm || ' ' || vd.item_nm,1,255) ,substr(dec.item_desc || ':' || vd.item_desc,  1, 4000) into v_item_nm, v_item_def from admin_item dec, admin_item vd
             where dec.item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') and dec.ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
             and vd.item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') and vd.ver_nr = ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR');
+   if (ihook.getColumnValue(rowde, 'PREF_QUEST_TXT')=v_dflt_txt) then
+   ihook.setColumnValue(rowde, 'PREF_QUEST_TXT', 'Data Element ' || v_item_nm|| ' does not have Preferred Question Text.'   );
+   end if;
+   if hookinput.answerid = 1 or v_valid = false then --Validate
 
+        ihook.setColumnValue(rowai, 'ITEM_NM', v_item_nm);
+        ihook.setColumnValue(rowai, 'ITEM_DESC', v_item_def);
+
+          rows.extend;
+          rows(rows.last) := rowai;
+          rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
+          rows := t_rows();
+            rows.extend;
+          rows(rows.last) := rowde;
+          rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
+           v_valid := false;
+          hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
+          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,v_valid);
+          --V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+    end if; 			
+			
+ if (hookinput.answerid = 2 and v_valid = true) then
+         
        v_id := nci_11179.getItemId;
        row := t_row();
        --row := rowai;
@@ -292,7 +319,7 @@ BEGIN
 
         --
         if ( ihook.getColumnValue(rowai,'ITEM_LONG_NM')= v_dflt_txt) then
-        ihook.setColumnValue(rowai,'ITEM_LONG_NM', v_id || 'v1.0');
+        ihook.setColumnValue(rowai,'ITEM_LONG_NM', v_id ||'v1.00');
         end if;
         if ( ihook.getColumnValue(rowai,'ITEM_NM')= v_dflt_txt) then
         ihook.setColumnValue(rowai,'ITEM_NM', v_item_nm);
@@ -312,8 +339,8 @@ BEGIN
     actions(actions.last) := action;
 
 
-ihook.setColumnValue(rowde,'ITEM_ID', v_id);
-    ihook.setColumnValue(rowde,'VER_NR', 1.0);
+    ihook.setColumnValue(rowde,'ITEM_ID', v_id);
+    ihook.setColumnValue(rowde,'VER_NR', 1.00);
 
              rows := t_rows();
     rows.extend;
@@ -332,7 +359,7 @@ ihook.setColumnValue(rowde,'ITEM_ID', v_id);
     if (ihook.getColumnValue(rowde, 'PREF_QUEST_TXT') is not null) then
         row := t_row ();
         ihook.setColumnValue(row,'ITEM_ID', v_id);
-    ihook.setColumnValue(row,'VER_NR', 1.0);
+    ihook.setColumnValue(row,'VER_NR', 1.00);
      ihook.setColumnValue(row,'REF_NM', substr(ihook.getColumnValue(rowde, 'PREF_QUEST_TXT'),1,255));
      ihook.setColumnValue(row,'REF_DESC', ihook.getColumnValue(rowde, 'PREF_QUEST_TXT'));
      ihook.setColumnValue(row,'LANG_ID', 1000);
@@ -353,7 +380,7 @@ ihook.setColumnValue(rowde,'ITEM_ID', v_id);
  --   raise_application_error(-20000, 'Count ' || actions.count);
 
     end if;
-
+ end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
 END;
@@ -380,6 +407,7 @@ PROCEDURE spDECreateFrom ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN 
         v_item_desc varchar2(4000);
         v_count  number;
         v_valid boolean;
+        v_item_type_id number;
         actions t_actions := t_actions();
         action t_actionRowset;
 begin
@@ -392,19 +420,24 @@ begin
     row_ori :=  hookInput.originalRowset.rowset(1);
     v_item_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
     v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
-    
+    v_item_type_id := ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID');
+
     -- Check if user is authorized to edit
 --   if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_usr_id) = false) then
 --        raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ');
 --        return;
 --  end if;
+-- check that a selected AI is CDE typeF
 
+    if (v_item_type_id <> 4) then -- 4 - CDE in table OBJ_KEY
+        raise_application_error(-20000,'!!! This functionality is only applicable for CDE !!!');
+    end if;
 if hookInput.invocationNumber = 0 then
-        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion();
+        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(2,true);
         row := row_ori;
         rows := t_rows();
         ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-        ihook.setColumnValue(row, 'VER_NR', 1.0);
+        ihook.setColumnValue(row, 'VER_NR', 1.00);
         ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
         ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
         ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
@@ -419,7 +452,7 @@ if hookInput.invocationNumber = 0 then
         rows(rows.last) := row;
         rowsetde := t_rowset(rows, 'Data Element', 1, 'DE'); -- Default values for form
         hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowsetai, rowsetde);
-    
+
 --      raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. 2');
 --        return;
     --spDECommon(rowsetai,rowsetst, 'insert', hookinput, hookoutput);
@@ -431,46 +464,42 @@ if hookInput.invocationNumber = 0 then
         rowde := form1.rowset.rowset(1);
         row := t_row();
         rows := t_rows();
- --raise_application_error(-20000, 'Count 2' );
-        
+        v_valid := true;
+
+
         v_item_nm:=ihook.getColumnValue(rowai,'ITEM_NM');
         v_item_desc:=ihook.getColumnValue(rowai,'ITEM_DESC');
-         
+        
+
+
   IF HOOKINPUT.ANSWERID = 1 or hookInput.invocationNumber = 1 then--Validate
         v_item_nm:=ihook.getColumnValue(rowai,'ITEM_NM');
         v_item_desc:=ihook.getColumnValue(rowai,'ITEM_DESC');
         v_valid := true;
-        
+
          select substr(dec.item_nm || ' ' || vd.item_nm,1,255) ,substr(dec.item_desc || ':' || vd.item_desc,  1, 4000) into v_item_nm, v_item_desc from admin_item dec, admin_item vd
          where dec.item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') and dec.ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
          and vd.item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') and vd.ver_nr = ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR');
 
         for cur in (select ai.item_id from admin_item ai, de de
         where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
-        and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')
-        and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
-        and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-        and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')) 
+        and de.de_conc_item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') 
+            and de.de_conc_ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
+            and de.val_dom_item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') 
+            and de.val_dom_ver_nr =  ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR')
+            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
+            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')) 
         loop
         hookoutput.message := 'Duplicate CDE found: ' || cur.item_id;
-
-        SELECT count(*) into v_count
-        FROM admin_item ai,  de de
-        where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
-        and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')
-        and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
-        and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-        and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR');
-        if v_count>0 then
-
         v_valid := false;
-        else v_valid := true;
-        end if;
-        rows := t_rows();
      
+       rows := t_rows();
+         If ihook.getColumnValue(rowai, 'ITEM_LONG_NM') is null then
+         ihook.setColumnValue(rowai, 'ITEM_LONG_NM', ihook.getColumnValue(rowai, 'ITEM_id'||'v1.00'));
+         end if ;
          ihook.setColumnValue(rowai, 'ITEM_NM', v_item_nm);
          ihook.setColumnValue(rowai, 'ITEM_DESC', v_item_desc);
-       
+
         rows.extend;
         rows(rows.last) := rowai;
         rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for form
@@ -480,21 +509,52 @@ if hookInput.invocationNumber = 0 then
         rows.extend;
         rows(rows.last) := rowde;
         rowsetde := t_rowset(rows, 'Data Element', 1, 'DE'); -- Default values for form
-      
+
         hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowsetai, rowsetde);
-        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion();
-               --  RETURN;
-      END LOOP;
-   
-      if (v_valid = true) then
+        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(2,v_valid);
+               V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+       return;
+       END LOOP;
+	   if (ihook.getColumnValue(rowde, 'PREF_QUEST_TXT') is null) then
+       ihook.setColumnValue(rowde, 'PREF_QUEST_TXT', 'Data Element ' || v_item_nm|| ' does not have Preferred Question Text.'   );
+       end if;
+       if hookinput.answerid = 1 or v_valid = false then --Validate
+
+        ihook.setColumnValue(rowai, 'ITEM_NM', v_item_nm);
+        ihook.setColumnValue(rowai, 'ITEM_DESC', v_item_desc);
+
+          rows.extend;
+          rows(rows.last) := rowai;
+          rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
+          rows := t_rows();
+            rows.extend;
+          rows(rows.last) := rowde;
+          rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
+           v_valid := false;
+          hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
+          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(2,v_valid);
+          --V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+    end if; 			
+
+end if;
+
+
+  if (hookinput.answerid = 2 and v_valid = true) then
         row := t_row();
         v_item_id := nci_11179.getItemId;
-      
+         select substr(dec.item_nm || ' ' || vd.item_nm,1,255) ,substr(dec.item_desc || ':' || vd.item_desc,  1, 4000) into v_item_nm, v_item_desc from admin_item dec, admin_item vd
+         where dec.item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') and dec.ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
+         and vd.item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') and vd.ver_nr = ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR');
+
         ihook.setColumnValue(rowai,'ITEM_ID', v_item_id);
-        ihook.setColumnValue(rowai,'VER_NR', 1);
+        ihook.setColumnValue(rowai,'VER_NR', 1.00);
         ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 4);
         ihook.setColumnValue(rowai,'ITEM_NM', v_item_nm);
         ihook.setColumnValue(rowai,'ITEM_DESC', v_item_desc);
+		if (ihook.getColumnValue(rowde, 'PREF_QUEST_TXT') is null) then
+        ihook.setColumnValue(rowde, 'PREF_QUEST_TXT', 'Data Element ' || v_item_nm|| ' does not have Preferred Question Text.'   );
+        end if;
         rows := t_rows();
         rows.extend;
         rows(rows.last) := rowai;
@@ -504,7 +564,7 @@ if hookInput.invocationNumber = 0 then
 
 
         ihook.setColumnValue(rowde,'ITEM_ID', v_item_id);
-        ihook.setColumnValue(rowde,'VER_NR', 1);
+        ihook.setColumnValue(rowde,'VER_NR', 1.00);
 
         rows := t_rows();
         rows.extend;
@@ -515,11 +575,11 @@ if hookInput.invocationNumber = 0 then
         actions(actions.last) := action;
 
 
-        hookoutput.message := 'DE Created Successfully with ID ' || v_item_id ;
+        hookoutput.message := 'DE Created Successfully with ID ' || v_item_id||'v1.00' ;
         hookoutput.actions := actions;
         end if;
  --   raise_application_error(-20000, 'Count ' || actions.count);
-    end if;
+   
   end if;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -625,18 +685,28 @@ begin
 end;
 
 
-function getDECreateQuestion return t_question is
+
+function getDECreateQuestion(v_from in number,v_first in boolean) return t_question is
   question t_question;
   answer t_answer;
   answers t_answers;
-begin
-
- ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Create CDE');
+begin 
+    ANSWERS                    := T_ANSWERS();
+    
+    ANSWER                     := T_ANSWER(1, 1, 'Review and Validate');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
+ 
+    if (v_first = false) then
+    ANSWER                     := T_ANSWER(2, 2, 'Create');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    end if;
+    If v_from=1 then
     QUESTION               := T_QUESTION('Create new CDE.', ANSWERS);
-
+    else
+    QUESTION               := T_QUESTION('Create CDE From Existing.', ANSWERS);
+    end IF;
 return question;
 end;
 
@@ -1197,97 +1267,89 @@ PROCEDURE spDesignateNew
 AS
   hookInput t_hookInput;
   hookOutput t_hookOutput := t_hookOutput();
-   actions t_actions := t_actions();
+  
+  actions t_actions := t_actions();
   action t_actionRowset;
   row t_row;
   rows  t_rows;
-    row_ori t_row;
-    row_sel t_row;
-    v_id integer;
+  row_ori t_row;
+  rowform t_row;
   action_rows       t_rows := t_rows();
   action_row		    t_row;
   rowset            t_rowset;
- question    t_question;
-answer     t_answer;
-answers     t_answers;
-showrowset	t_showablerowset;
-forms     t_forms;
-formGroup    t_form;
-form1  t_form;
-rowform t_row;
-v_itemid     ADMIN_ITEM.ITEM_ID%TYPE;
-v_vernr  ADMIN_ITEM.VER_NR%TYPE;
-v_tbl_nm  varchar2(255);
-v_found boolean;
+  
+  question    t_question;
+  answer     t_answer;
+  answers     t_answers;
+  
+  forms     t_forms;
+  form1  t_form;
+
   v_temp integer;
-  v_stg_ai_id number;
-  i integer := 0;
-  column  t_column;
-  msg varchar2(4000);
   v_nm_typ_id integer;
+  v_default_txt varchar2(30) := 'Default is Context Name.' ;
+  v_cntxt_nm  varchar2(255);
   
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
   row_ori :=  hookInput.originalRowset.rowset(1);
-  v_itemid := ihook.getColumnValue(row_ori, 'ITEM_ID');
-  v_VERNR := ihook.getColumnValue(row_ori, 'VER_NR');
-  
-    rows := t_rows();
 
-
-    if hookInput.invocationNumber = 0  then
-
-       	 answers := t_answers();
+  if hookInput.invocationNumber = 0  then
+     	 answers := t_answers();
   	   	 answer := t_answer(1, 1, 'Select');
-        answers.extend;          answers(answers.last) := answer;
+         answers.extend;          answers(answers.last) := answer;
          question := t_question('Choose Option', answers);
        	 hookOutput.question := question;
-         rows := t_rows();
-        v_found := false;         
-         for cur in (select  CNTXT_ITEM_ID, CNTXT_VER_NR from onedata_md.vw_usr_row_filter v  where 
-          upper(v.USR_ID) = upper(v_usr_id) and v.ACTION_TYP = 'I') loop
-		  row := t_row();
-          ihook.setColumnValue(row, 'ITEM_ID', cur.CNTXT_ITEM_ID);
-          ihook.setColumnValue(row, 'VER_NR', cur.CNTXT_VER_NR);
-           rows.extend;
-		   rows (rows.last) := row;
-		   v_found := true;
-	    end loop;
+         row := t_row();
 
-        if (v_found) then
-       	 showrowset := t_showablerowset (rows, 'Contexts', 2, 'multi');
-       	 hookoutput.showrowset := showrowset;
-        else
-         hookoutput.message := 'No authorized contexts found.';
-         end if;
-  
+        select obj_key_id into v_nm_typ_id from obj_key where obj_key_desc = 'USED_BY' and obj_typ_id = 11;
+      
+        ihook.setColumnValue(row, 'NM_TYP_ID', v_nm_typ_id);
+        ihook.setColumnValue(row, 'NM_DESC',v_default_txt); -- Default values
+        ihook.setColumnValue(row,'ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
+        ihook.setColumnValue(row,'VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
+        rows := t_rows(); rows.extend;    rows(rows.last) := row;
+        rowset := t_rowset(rows, 'Alternate Names', 1, 'ALT_NMS'); -- Default values for form
+        
+        forms                  := t_forms();
+        form1                  := t_form('Alternate Names', 2,1);
+        form1.rowset :=rowset;
+        forms.extend;    forms(forms.last) := form1;
+        hookoutput.forms := forms;
   	elsif hookInput.invocationNumber = 1 then
-
-    select obj_key_id into v_nm_typ_id from obj_key where obj_key_desc = 'USED_BY' and obj_typ_id = 11;
-    
-     rows := t_rows();
-     for i in 1..hookInput.selectedrowset.rowset.count loop
-     row_sel := hookInput.selectedrowset.rowset(i);
-     row := t_row();
+        forms              := hookInput.forms;
+        form1              := forms(1);
+        rowform := form1.rowset.rowset(1);  -- entered values from user
+        ihook.setColumnValue(rowform,'ITEM_ID',ihook.getColumnValue(row_ori,'ITEM_ID'));
+        ihook.setColumnValue(rowform,'VER_NR',ihook.getColumnValue(row_ori,'VER_NR'));
+        
+        rows := t_rows();
      
-      ihook.setColumnValue(row,'ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
-      ihook.setColumnValue(row,'VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
-      ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID'));
-      ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(row_ori,'CNTXT_VER_NR'));
-        ihook.setColumnValue(row,'NM_DESC', 'TEST_USED_BY');
-   ihook.setColumnValue(row,'NM_TYP_ID', v_nm_typ_id);
-      ihook.setColumnValue(row,'NM_ID', -1);  
-      v_tbl_nm := 'Alternate Names';
+        if ( ihook.getColumnValue(rowform,'NM_DESC') = v_default_txt) then -- Get context name
+            select item_nm into v_cntxt_nm from vw_cntxt where item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR');
+            ihook.setColumnValue(rowform,'NM_DESC', v_cntxt_nm);
+        end if;
+      
+      -- If row already exists
+      select count(*) into v_temp from alt_nms where 
+      cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR')
+      and item_id = ihook.getColumnValue(rowform,'ITEM_ID') and ver_nr = ihook.getColumnValue(rowform,'VER_NR')
+      and nm_typ_id =   ihook.getColumnValue(rowform,'NM_TYP_ID') and nm_desc = ihook.getColumnValue(rowform,'NM_DESC');
+      
+   --   raise_application_error(-20000, v_temp  || ' ' ||  ihook.getColumnValue(rowform,'NM_TYP_ID') || ' ' || ihook.getColumnValue(rowform,'NM_DESC') || ' ' || ihook.getColumnValue(rowform,'ITEM_ID'));
+      
+      if (v_temp = 0) then -- Row does not exist
+        ihook.setColumnValue(rowform,'NM_ID', -1);  
+        
         rows.extend;
-        rows(rows.last) := row;
-    end loop;
-        action := t_actionrowset(rows, v_tbl_nm, 2,1,'insert');
+        rows(rows.last) := rowform;
+        action := t_actionrowset(rows, 'Alternate Names', 2,1,'insert');
         actions.extend;
         actions(actions.last) := action;
-     
-       hookoutput.actions := actions;
+         hookoutput.actions := actions;
+     end if;
   end if;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -1591,7 +1653,7 @@ as
         hookoutput.message := 'VD Created/Updated Successfully. Item Id: ' || ihook.getColumnValue(rowai,'ITEM_ID')  ;
         hookoutput.actions := actions;
         end if;
-     end if;
+  end if;
 
   --  insert into junk_debug(id, test) values (sysdate, v_data_out);
 -- 
