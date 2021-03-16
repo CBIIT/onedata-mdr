@@ -7,6 +7,7 @@ procedure spCopyModule (v_data_in in clob, v_data_out out clob,  v_user_id in va
 function isUserAuth(v_frm_item_id in number, v_frm_ver_nr in number,v_user_id in varchar2) return boolean  ;
 procedure spSetModRep (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2); 
 procedure spChngQuestText (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2); 
+procedure spChngQuestShortText (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2); 
 procedure spSetDefltVal (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2); 
 procedure spAddQuestionNoDE (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
 procedure spChngQuestTextVV (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2); 
@@ -888,10 +889,7 @@ BEGIN
  
  if hookInput.invocationNumber = 0 then
     ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Alternate long name.');
-    ANSWERS.EXTEND;
-    ANSWERS(ANSWERS.LAST) := ANSWER;
-    ANSWER                     := T_ANSWER(2, 2, 'Alternate short name.');
+    ANSWER                     := T_ANSWER(1, 1, 'Select Alternate Question Text.');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Alternate Question Text', ANSWERS);
@@ -917,11 +915,102 @@ BEGIN
 
             select ref_desc into v_ref from ref where ref_id = ihook.getColumnValue(row_sel, 'REF_ID');
             
-            if (hookinput.answerid = 1) then
             ihook.setColumnValue(row_ori, 'ITEM_LONG_NM', v_ref);
-            elsif (hookinput.answerid = 2) then
-             ihook.setColumnValue(row_ori, 'ITEM_NM', substr(v_ref,1,30));
-            end if;
+            rows:= t_rows();
+            rows.extend;
+            rows(rows.last) := row_ori;
+    
+            action             := t_actionrowset(rows, 'Questions (Edit)', 2, 0,'update');
+            actions.extend;
+            actions(actions.last) := action;
+     
+    
+    hookoutput.actions    := actions;
+    END IF;
+     
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
+
+PROCEDURE spChngQuestShortText
+  (
+  
+    v_data_in IN CLOB,
+    v_data_out OUT CLOB,
+    v_user_id in varchar2)
+    AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rowrel t_row;
+  row_sel t_row;
+  rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+  rowform t_row;
+v_found boolean;
+  v_module_id integer;
+  v_disp_ord integer;
+  v_frm_id number;
+  v_frm_ver_nr number(4,2);
+  v_ref varchar2(255);
+  v_add integer;
+  i integer := 0;
+  column  t_column;
+  msg varchar2(4000);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ 
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ rows := t_rows();  
+ 
+ select frm_item_id, frm_ver_nr into v_frm_id, v_frm_Ver_nr from VW_NCI_MODULE_DE where nci_pub_id = ihook.getColumNValue(row_ori, 'NCI_PUB_ID') and nci_ver_nr = ihook.getColumNValue(row_ori, 'NCI_VER_NR');
+ if (nci_form_mgmt.isUserAuth(v_frm_id, v_frm_ver_nr, v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to edit any question in this form.');
+ end if;
+ 
+ if ( ihook.getColumNValue(row_ori, 'C_ITEM_ID') is null) then
+ raise_application_error(-20000,'No CDE attached to this question.');
+ end if;
+ if hookInput.invocationNumber = 0 then
+    ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Alternate short name.');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+     QUESTION               := T_QUESTION('Alternate Short Name for Question', ANSWERS);
+    HOOKOUTPUT.QUESTION    := QUESTION;
+ 
+	    for cur in (select nm_id from alt_nms a where a.fld_delete= 0 and item_id = ihook.getColumNValue(row_ori, 'C_ITEM_ID')  and 
+        ver_nr = ihook.getColumNValue(row_ori, 'C_ITEM_VER_NR' ) ) loop
+		   row := t_row();
+	   	   iHook.setcolumnvalue (ROW, 'NM_ID', cur.nm_id);
+		   rows.extend;
+		   rows (rows.last) := row;
+		
+ --raise_application_error(-20000,ihook.getColumNValue(row_ori, 'C_ITEM_ID'));
+   v_found := true;
+	    end loop;
+
+	  if (v_found) then 
+       	 showrowset := t_showablerowset (rows, 'Alternate Names', 2, 'single');
+       	 hookoutput.showrowset := showrowset;
+     end if;
+ ELSE
+            row_sel := hookinput.selectedRowset.rowset(1);
+
+            select nm_desc into v_ref from alt_nms where nm_id = ihook.getColumnValue(row_sel, 'NM_ID');
+            
+            ihook.setColumnValue(row_ori, 'ITEM_NM', substr(v_ref,1,30));
             rows:= t_rows();
             rows.extend;
             rows(rows.last) := row_ori;
