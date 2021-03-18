@@ -1,13 +1,11 @@
 create or replace PACKAGE            nci_chng_mgmt AS
 v_temp_rep_ver_nr varchar2(10);
 v_temp_rep_id VARCHAR2(10);
-function getDECCreateQuestion return t_question;
+
 function getCSICreateQuestion return t_question;
 function getVDCreateQuestion (v_first in boolean) return t_question;
 function getVDEditQuestion return t_question;
-function getDECCreateForm (v_rowset in t_rowset) return t_forms;
 procedure createAIWithConcept(rowform in out t_row, idx in integer,v_item_typ_id in integer, actions in out t_actions);
-procedure createDEC (rowform in t_row, actions in out t_actions, v_id out number);
 PROCEDURE spDEPrefQuestPost (v_data_in in clob, v_data_out out clob);
 PROCEDURE spCreateDE (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 PROCEDURE spDECreateFrom ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
@@ -27,7 +25,6 @@ PROCEDURE spVDCommon ( v_init_ai in t_rowset, v_init_st in t_rowset, v_op  in va
 procedure spAddCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 END;
 /
-
 create or replace PACKAGE BODY            nci_CHNG_MGMT AS
 v_temp_rep_ver_nr varchar2(10):='0';
 v_temp_rep_id VARCHAR2(10):='0';
@@ -585,32 +582,6 @@ end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
-function getDECCreateQuestion return t_question is
-  question t_question;
-  answer t_answer;
-  answers t_answers;
-begin
-
- ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Validate using String');
-    ANSWERS.EXTEND;
-    ANSWERS(ANSWERS.LAST) := ANSWER;
-  --  ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(2, 2, 'Validate using drop-down');
-    ANSWERS.EXTEND;
-    ANSWERS(ANSWERS.LAST) := ANSWER;
-    ANSWER                     := T_ANSWER(3, 3, 'Create using String');
-    ANSWERS.EXTEND;
-    ANSWERS(ANSWERS.LAST) := ANSWER;
-    ANSWER                     := T_ANSWER(4, 4, 'Create using drop-down');
-    ANSWERS.EXTEND;
-    ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Create new DEC.', ANSWERS);
-
-return question;
-end;
-
-
 function getCSICreateQuestion return t_question is
   question t_question;
   answer t_answer;
@@ -671,17 +642,6 @@ begin
     QUESTION               := T_QUESTION('Edit VD.', ANSWERS);
 
 return question;
-end;
-
-function getDECCreateForm (v_rowset in t_rowset) return t_forms is
-  forms t_forms;
-  form1 t_form;
-begin
-    forms                  := t_forms();
-    form1                  := t_form('AI Creation With Concepts', 2,1);
-    form1.rowset :=v_rowset;
-    forms.extend;    forms(forms.last) := form1;
-  return forms;
 end;
 
 
@@ -863,52 +823,6 @@ begin
 
 end;
 
-
-procedure createDEC (rowform in t_row, actions in out t_actions, v_id out  number) as
-v_nm  varchar2(255);
-v_long_nm varchar2(255);
-v_def  varchar2(4000);
-row t_row;
-rows t_rows;
- action t_actionRowset;
- --v_id number;
-begin
-   rows := t_rows();
-   row := t_row();
-     v_id := nci_11179.getItemId;
-        ihook.setColumnValue(row,'ITEM_ID', v_id);
-      --  raise_application_error (-20000, ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID')  || ihook.getColumnValue(rowform, 'ITEM_1_ID') || ihook.getColumnValue(rowform, 'ITEM_2_ID'));
-        ihook.setColumnValue(row,'VER_NR', 1);
-        ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
-        ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 2);
-   --     ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_1_LONG_NM')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'));
-        ihook.setColumnValue(row,'ITEM_LONG_NM', v_id || c_ver_suffix);
-        ihook.setColumnValue(row,'ITEM_NM',  ihook.getColumnValue(rowform, 'ITEM_1_NM')  || ' ' || ihook.getColumnValue(rowform, 'ITEM_2_NM'));
-        ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
-        ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
-        ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
-        ihook.setColumnValue(row,'ADMIN_STUS_ID',66);
-        ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',nvl(ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID'),1) );
-        ihook.setColumnValue(row,'CONC_DOM_VER_NR',nvl(ihook.getColumnValue(rowform,'CONC_DOM_VER_NR'),1) );
-        ihook.setColumnValue(row,'OBJ_CLS_ITEM_ID',nvl(ihook.getColumnValue(rowform, 'ITEM_1_ID'),1) );
-        ihook.setColumnValue(row,'OBJ_CLS_VER_NR',nvl(ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'),1) );
-        ihook.setColumnValue(row,'PROP_ITEM_ID',nvl(ihook.getColumnValue(rowform, 'ITEM_2_ID'),1));
-        ihook.setColumnValue(row,'PROP_VER_NR',nvl(ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'),1));
-        ihook.setColumnValue(row,'LST_UPD_DT',sysdate );
-        rows.extend;
-        rows(rows.last) := row;
---raise_application_error(-20000, 'Deep' || ihook.getColumnValue(row,'CNTXT_ITEM_ID') || 'ggg'|| ihook.getColumnValue(row,'ADMIN_STUS_ID') || 'GGGG' || ihook.getColumnValue(row,'ITEM_ID'));
-
-        action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,7,'insert');
-        actions.extend;
-        actions(actions.last) := action;
-
-      action := t_actionrowset(rows, 'Data Element Concept', 2,8,'insert');
-       actions.extend;
-        actions(actions.last) := action;
-
---r
-end;
 
 procedure createDE (rowform in t_row, actions in out t_actions, v_id out  number) as
 v_nm  varchar2(255);
@@ -1348,10 +1262,13 @@ BEGIN
         action := t_actionrowset(rows, 'Alternate Names', 2,1,'insert');
         actions.extend;
         actions(actions.last) := action;
-         hookoutput.actions := actions;
+       
      end if;
-  end if;
+       end if;
 
+if (actions.count > 0) then
+  hookoutput.actions := actions;
+end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
@@ -1662,4 +1579,5 @@ end;
 
 
 END;
-/
+ /
+								 
