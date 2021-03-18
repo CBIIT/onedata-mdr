@@ -11,11 +11,10 @@ CREATE OR REPLACE VIEW VW_NCI_USED_BY AS
   select distinct ITEM_ID, VER_NR , CNTXT_ITEM_ID, CNTXT_VER_NR, sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, 0 FLD_DELETE, sysdate LST_DEL_DE, sysdate S2P_TRN_DT, sysdate LST_UPD_DT
 from (
   SELECT distinct DE.ITEM_ID, DE.VER_NR, a.CNTXT_ITEM_ID, a.CNTXT_VER_NR, sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, a.FLD_DELETE, a.LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT
-       FROM DE, ALT_NMS a, obj_key ok
+       FROM DE, ALT_NMS a
        WHERE DE.ITEM_ID = a.ITEM_ID and DE.VER_NR = a.VER_NR
        and nvl(a.fld_delete,0) = 0
        and nvl(de.fld_delete,0) = 0
-       and a.nm_typ_id = ok.obj_key_id and ok.obj_typ_id =11 and ok.obj_key_desc <> 'USED_BY'
       and a.CNTXT_ITEM_ID is not null
 union
   SELECT distinct DE.ITEM_ID, DE.VER_NR, a.NCI_CNTXT_ITEM_ID, a.NCI_CNTXT_VER_NR, sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, a.FLD_DELETE, a.LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT
