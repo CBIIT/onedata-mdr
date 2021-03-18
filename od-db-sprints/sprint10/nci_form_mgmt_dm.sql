@@ -889,10 +889,10 @@ BEGIN
  
  if hookInput.invocationNumber = 0 then
     ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Select Alternate Question Text.');
+    ANSWER                     := T_ANSWER(1, 1, 'Select Question Text');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Alternate Question Text', ANSWERS);
+    QUESTION               := T_QUESTION('Question Text', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
  
 	    for cur in (select ref_id from ref r, obj_key ok where r.fld_delete= 0 and item_id = ihook.getColumNValue(row_ori, 'C_ITEM_ID')  and 
@@ -984,14 +984,15 @@ BEGIN
  end if;
  if hookInput.invocationNumber = 0 then
     ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Alternate short name.');
+    ANSWER                     := T_ANSWER(1, 1, 'Select Question Short Name');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-     QUESTION               := T_QUESTION('Alternate Short Name for Question', ANSWERS);
+     QUESTION               := T_QUESTION('Question Short Name', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
  
 	    for cur in (select nm_id from alt_nms a where a.fld_delete= 0 and item_id = ihook.getColumNValue(row_ori, 'C_ITEM_ID')  and 
-        ver_nr = ihook.getColumNValue(row_ori, 'C_ITEM_VER_NR' ) ) loop
+        ver_nr = ihook.getColumNValue(row_ori, 'C_ITEM_VER_NR' ) and nm_typ_id not in (select obj_key_id from obj_key where upper(obj_key_desc) = 'HISTORICAL_CDE_ID')
+        order by cntxt_nm_dn, nm_typ_id) loop
 		   row := t_row();
 	   	   iHook.setcolumnvalue (ROW, 'NM_ID', cur.nm_id);
 		   rows.extend;
@@ -1174,7 +1175,7 @@ BEGIN
                             spAddQuestionRepNew (rep, v_id, rowsrep);
                         end if;
                         j := 0;
-                for cur1 in (select PERM_VAL_NM, PERM_VAL_DESC_TXT, item_nm, item_long_nm , item_desc from  VW_NCI_DE_PV where de_item_id = cur.item_id and de_ver_nr = cur.ver_nr order by PERM_VAL_NM) loop
+                for cur1 in (select * from  VW_NCI_DE_PV where de_item_id = cur.item_id and de_ver_nr = cur.ver_nr order by PERM_VAL_NM) loop
                   row := t_row();
                 ihook.setColumnValue (row, 'Q_PUB_ID', v_id);
                 ihook.setColumnValue (row, 'Q_VER_NR', 1);
@@ -1184,6 +1185,8 @@ BEGIN
                 ihook.setColumnValue (row, 'VALUE', cur1.perm_val_nm);
                 ihook.setColumnValue (row, 'MEAN_TXT', cur1.item_nm);
                 ihook.setColumnValue (row, 'DESC_TXT', cur1.item_desc);
+                ihook.setColumnValue (row, 'VAL_MEAN_ITEM_ID', cur1.NCI_VAL_MEAN_ITEM_ID);
+                ihook.setColumnValue (row, 'VAL_MEAN_VER_NR', cur1.NCI_VAL_MEAN_VER_NR);  
                 v_itemid := nci_11179.getItemId;
                 ihook.setColumnValue (row, 'NCI_PUB_ID', v_itemid);
                 ihook.setColumnValue (row, 'NCI_VER_NR', 1);
@@ -1771,4 +1774,5 @@ begin
 end;
 
 end;
-/
+ /
+													      
