@@ -281,4 +281,5 @@ alter table nci_quest_valid_value add (VAL_MEAN_ITEM_ID number, VAL_MEAN_VER_NR 
 	ALT_DEF.VER_NR = DE_AI.VER_NR and
 	ALT_DEF.DEF_ID = AGG.DEF_ID (+);		
 										       
-
+-- Performance index
+create index idxPerfAltNms on ALT_NMS (ITEM_ID, VER_NR);
