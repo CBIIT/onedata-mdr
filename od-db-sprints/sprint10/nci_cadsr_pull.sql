@@ -3242,6 +3242,8 @@ BEGIN
                                        NCI_IDSEQ,
                                        DESC_TXT,
                                        MEAN_TXT,
+                                       VAL_MEAN_ITEM_ID,
+                                       VAL_MEAN_VER_NR,
                                        CREAT_USR_ID,
                                        CREAT_DT,
                                        LST_UPD_DT,
@@ -3255,17 +3257,24 @@ BEGIN
                qc.qc_idseq,
                vv.description_text,
                vv.meaning_text,
+               vm.vm_id,
+               vm.version,
           nvl(qc.created_by,v_dflt_usr),
                nvl(qc.date_created,v_dflt_date) ,
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr), qc.DISPLAY_ORDER
                        FROM sbrext.quest_contents_ext    qc,
                sbrext.quest_contents_ext    qc1,
-               sbrext.valid_values_att_ext  vv
+               sbrext.valid_values_att_ext  vv,
+               sbrext.vd_pvs  vp,
+                sbrext.permissible_Values pv,
+                sbrext.value_meanings vm 
          WHERE     qc.qtl_name = 'VALID_VALUE'
                AND qc1.qtl_name = 'QUESTION'
                AND qc1.qc_idseq = qc.p_qst_idseq
-               AND qc.qc_idseq = vv.qc_idseq(+);
+               AND qc.qc_idseq = vv.qc_idseq(+)
+                and vp.pv_idseq = pv.pv_idseq and pv.vm_idseq = vm.vm_idseq
+                and qc.vp_idseq = vp.vp_idseq;
 
     COMMIT;
     
@@ -3819,11 +3828,14 @@ DAD_CHARSET,LAST_UPDATED,BLOB_CONTENT,
 commit;
 
 update admin_item set creat_usr_id_x = creat_usr_id where creat_usr_id in (select cntct_secu_id from cntct);
+commit;
 update admin_item set lst_upd_usr_id_x = lst_upd_usr_id where lst_upd_usr_id in (select cntct_secu_id from cntct);
- 
+ commit;
+ update admin_item set regstr_stus_id = 55 where regstr_stus_id is null; -- Tracker 806
+
 commit;
 
 end;
 
 END;
-/
+                                                      /
