@@ -1,4 +1,4 @@
-CREATE OR REPLACE EDITIONABLE PACKAGE "ONEDATA_WA"."NCI_11179" AS
+CREATE OR REPLACE PACKAGE ONEDATA_WA."NCI_11179" AS
 function getWordCount(v_nm in varchar2) return integer;
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
 FUNCTION get_concepts(v_item_id in number, v_ver_nr in number) return varchar2;
@@ -14,8 +14,9 @@ procedure spCreateVerNCI (v_data_in in clob, v_data_out out clob, v_user_id varc
 procedure getConcatNmDef(v_item_id in number, v_ver_nr in number, v_nm out varchar2, v_long_nm out varchar2,v_def out varchar2);
 procedure spCopyModuleNCI (actions in out t_actions, v_from_module_id in number,v_from_module_ver in number,  v_from_form_id in number, v_from_form_ver number, v_to_form_id number, v_to_form_ver number, v_disp_ord number);
 procedure spReturnSubtypeRow (v_item_id in number, v_ver_nr in number, v_type in number, row in out t_row);
+procedure spReturnConceptRow (v_item_id in number, v_ver_nr in number, v_item_typ_id in integer, v_idx in integer, row in out t_row);
 function getItemId return integer;
-procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm out varchar2, v_def out varchar2);
+procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm in out varchar2, v_def in out varchar2);
 function replaceChar(v_str in varchar2) return varchar2;
 
 /*  This package includes generic functions as well as versioning related procedures for NCI 
@@ -31,7 +32,11 @@ spCreateVerNCI - Create new version customized
 */
 END;
 /
-CREATE OR REPLACE EDITIONABLE PACKAGE BODY ONEDATA_WA.NCI_11179 AS
+
+
+GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;
+
+CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.NCI_11179 AS
 
 v_err_str      varchar2(1000) := '';
 DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
@@ -94,7 +99,7 @@ function replaceChar(v_str in varchar2) return varchar2 IS
 
 
 /* Function returns the Item ID and associated inforamtion if the concept combination found. */
-procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm out varchar2, v_def out varchar2)
+procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm in out varchar2, v_def in out varchar2)
 as
 v_out integer;
 begin
@@ -103,7 +108,7 @@ begin
     where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat = v_nm and a.admin_item_typ_id = v_item_typ) loop
             v_item_id := cur.item_id;
             v_item_ver_nr := cur.ver_nr;
-            v_long_nm := cur.cncpt_concat_nm;
+            v_long_nm := cur.cncpt_concat;
             v_def := cur.cncpt_concat_def;
     end loop;
 end;
@@ -327,7 +332,7 @@ begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
-  
+
     rows := t_rows();  
     for i in 1..hookinput.originalrowset.rowset.count loop  --- Iterate through all the selected rows
         row_ori := hookInput.originalRowset.rowset(i);    
@@ -590,8 +595,12 @@ ihook.setColumnValue (row, 'C_ITEM_VER_NR', cur.c_item_ver_nr);
 ihook.setColumnValue (row, 'CNTXT_CS_ITEM_ID', cur.cntxt_cs_item_id);
 ihook.setColumnValue (row, 'CNTXT_CS_VER_NR', cur.cntxt_cs_ver_nr);
 ihook.setColumnValue (row, 'ITEM_LONG_NM', cur.ITEM_LONG_NM );
+ihook.setColumnValue (row, 'ITEM_NM', cur.ITEM_NM );
 ihook.setColumnValue (row, 'REL_TYP_ID', 63);
 ihook.setColumnValue (row, 'DISP_ORD', cur.disp_ord);
+ihook.setColumnValue (row, 'EDIT_IND', cur.EDIT_IND);
+ihook.setColumnValue (row, 'DEFLT_VAL_ID', cur.DEFLT_VAL_ID);
+ihook.setColumnValue (row, 'REQ_IND', cur.REQ_IND);
 
 
      rows.extend;
@@ -607,6 +616,8 @@ ihook.setColumnValue (row, 'DISP_ORD', cur.disp_ord);
     ihook.setColumnValue (row, 'VM_DEF', cur1.vm_def);
     ihook.setColumnValue (row, 'VALUE', cur1.value);
     ihook.setColumnValue (row, 'MEAN_TXT', cur1.mean_txt);
+     ihook.setColumnValue (row, 'VAL_MEAN_ITEM_ID', cur1.VAL_MEAN_ITEM_ID);
+     ihook.setColumnValue (row, 'VAL_MEAN_VER_NR', cur1.VAL_MEAN_VER_NR);
     v_itemid := nci_11179.getItemId;
     ihook.setColumnValue (row, 'NCI_PUB_ID', v_itemid);
     ihook.setColumnValue (row, 'NCI_VER_NR', 1);
@@ -693,7 +704,7 @@ v_table_name := 'ADMIN_ITEM';
 
     ihook.setColumnValue(row, 'VER_NR',v_to_form_ver);
     ihook.setColumnValue(row, 'ITEM_ID',v_to_module_id);
-  --  ihook.setColumnValue(row, 'ITEM_NM',v_to_module_id);
+    ihook.setColumnValue(row, 'ITEM_LONG_NM',v_to_module_id || 'v' || v_to_form_ver);
     action_rows := t_rows();
 
     action_rows.extend; action_rows(action_rows.last) := row;
@@ -703,24 +714,24 @@ v_table_name := 'ADMIN_ITEM';
 
     row := t_row();
 
-    ihook.setColumnValue(row, 'P_item_VER_NR',v_to_form_ver);
-    ihook.setColumnValue(row, 'p_ITEM_ID',v_to_form_id);
-    ihook.setColumnValue(row, 'c_ITEM_ID',v_to_module_id);
-    ihook.setColumnValue(row, 'c_ITEM_ver_nr',v_to_form_ver);
-    ihook.setColumnValue(row, 'rel_typ_id',61);
+    ihook.setColumnValue(row, 'P_ITEM_VER_NR',v_to_form_ver);
+    ihook.setColumnValue(row, 'P_ITEM_ID',v_to_form_id);
+    ihook.setColumnValue(row, 'C_ITEM_ID',v_to_module_id);
+    ihook.setColumnValue(row, 'C_ITEM_VER_NR',v_to_form_ver);
+    ihook.setColumnValue(row, 'REL_TYP_ID',61);
 
 if (v_disp_ord < 0) then    
      select nvl(max(disp_ord)+ 1,0) into v_disp_ord1 from nci_admin_item_rel where 
      p_item_id = v_to_form_id and p_item_ver_nr = v_to_form_ver;
       --   raise_application_error(-2000
-    ihook.setColumnValue(row, 'disp_ord',v_disp_ord1);
+    ihook.setColumnValue(row, 'DISP_ORD',v_disp_ord1);
 else
-    ihook.setColumnValue(row, 'disp_ord',v_disp_ord);
+    ihook.setColumnValue(row, 'DISP_ORD',v_disp_ord);
 end if;
      action_rows := t_rows();
 
     action_rows.extend; action_rows(action_rows.last) := row;
-    action := t_actionRowset(action_rows, 'Form-Module Relationship', 2, 12, 'insert');
+    action := t_actionRowset(action_rows, 'Generic AI Relationship', 2, 12, 'insert');
     actions.extend; actions(actions.last) := action;
 
 --raise_application_error(-20000,'HErer');
@@ -979,11 +990,25 @@ begin
 end;
 
 
+procedure spReturnConceptRow (v_item_id in number, v_ver_nr in number, v_item_typ_id in integer, v_idx in integer, row in out t_row) as
+    i   integer;
+ 
+begin
+    i := 1;
+     for cur in (select cai.cncpt_item_id item_id, cai.cncpt_ver_nr ver_nr from  cncpt_admin_item cai where 
+      cai.item_id = v_item_id and cai.ver_nr = v_ver_nr order by nci_ord desc ) loop
+                                ihook.setColumnValue(row, 'CNCPT_' || v_idx  ||'_ITEM_ID_' || i,cur.item_id);
+                                ihook.setColumnValue(row, 'CNCPT_' || v_idx || '_VER_NR_' || i, cur.ver_nr);
+                                i := i+1;
+                        end loop; 
+end;
+
+
 
 procedure spReturnSubtypeRow (v_item_id in number, v_ver_nr in number, v_type in number, row in out t_row) as
     action           t_actionRowset;
     action_rows              t_rows := t_rows();
-  
+
     v_table_name      varchar2(30);
     v_sql        varchar2(4000);
     v_cur        number;
@@ -1040,7 +1065,9 @@ begin
         dbms_sql.column_value(v_cur, i, v_col_val);
         ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
     end loop;
-
+    ihook.setColumnValue(row,'ITEM_ID', v_item_id);
+    ihook.setColumnValue(row,'VER_NR', v_ver_nr);
+ 
     dbms_sql.close_cursor(v_cur);
 end;
 
@@ -1252,7 +1279,7 @@ begin
         nci_11179.spCopyModuleNCI(actions, cur2.c_item_id, cur2.c_item_ver_nr, v_admin_item.item_id, v_admin_item.item_id, v_admin_item.item_id, v_version, cur2.disp_ord);   
      end loop; 
      -- Add protocols
-      
+
         action_rows := t_rows();
         v_table_name := 'NCI_ADMIN_ITEM_REL';
         v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
@@ -1261,14 +1288,14 @@ begin
         for pro_cur in (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where 
         c_item_id = v_admin_item.item_id and c_ITEM_ver_nr = v_admin_item.ver_nr ) loop
           --    raise_application_error(-20000,'Herer');
-         
+
             row := t_row();
             ihook.setColumnValue(row, 'P_ITEM_ID', pro_cur.P_ITEM_ID);
           ihook.setColumnValue(row, 'P_ITEM_VER_NR', pro_cur.P_ITEM_VER_NR);
           ihook.setColumnValue(row, 'C_ITEM_ID', pro_cur.C_ITEM_ID);
           ihook.setColumnValue(row, 'REL_TYP_ID', pro_cur.rel_typ_id);
             ihook.setColumnValue(row, 'C_ITEM_VER_NR', v_version);
-         
+
             v_found  := true;
             action_rows.extend; action_rows(action_rows.last) := row;
         end loop;
@@ -1448,9 +1475,11 @@ begin
     v_data_out := ihook.getHookOutput(hookOutput);
     -- insert into junk_debug (id, test) values (sysdate, v_data_out);
     -- commit;
-    
+
 end;
 
 END;
 /
+
+
 GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;
