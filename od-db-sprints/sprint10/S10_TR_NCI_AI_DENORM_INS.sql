@@ -1,4 +1,4 @@
-CREATE or REPLACE TRIGGER TR_NCI_AI_DENORM_INS
+CREATE OR REPLACE TRIGGER TR_NCI_AI_DENORM_INS
   for  insert or update   on ADMIN_ITEM
 compound trigger
 TYPE r_change_row is RECORD (
@@ -84,3 +84,5 @@ end loop;
 END AFTER STATEMENT;
 
 END;
+/
+
