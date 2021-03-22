@@ -4,8 +4,21 @@ S10_TR_NCI_AI_DENORM_INS.sql
 
 -10 Run as ONEDATA_RA DDL scripts
 s10_RA_DDL.sqlpts
-S9_1_WA_RA_DDL.sql
+S10_1_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S10_NCI_11179_PACK.sql
+S10_NCI_11179_2_PACK.sql
 S10_NCI_CHNG_MGMT_PACK.sql
+S10_NCI_FORM_MGMT_PACK.sql
+S10_NCI_CADSR_PULL_PACK.sql
+S10_NCI_POST_HOOK_PACK.sql
+S10_NCI_DEC_MGMT_PACK.sql
+
+
+DATA MIGRATION
+-- Run as ONEDATA_WA DM scripts
+S10_WA_Data_Migration.sql
+
+-- Run as ONEDATA_RA DM scripts
+S9_RA_Data_Migration.sql
