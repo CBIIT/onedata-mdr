@@ -18,6 +18,7 @@ alter trigger TR_NCI_ADMIN_ITEM_REL_AK_AUD_TS disable;
 alter trigger TR_NCI_ADMIN_ITEM_REL_AUD_TS disable;
 alter trigger TR_NCI_QUEST_VV_AUD_TS disable;
 alter trigger TR_NCI_CSI_AUD_TS disable;
+alter trigger TR_NCI_QUEST_VV_REP_AUD_TS disable;
 drop index idxNCiAIRelUni;
 drop index idx_Admin_item_nci_uni;
 
@@ -172,6 +173,7 @@ alter trigger TR_NCI_ADMIN_ITEM_REL_AK_AUD_TS enable;
 alter trigger TR_NCI_ADMIN_ITEM_REL_AUD_TS enable;
 alter trigger TR_NCI_QUEST_VV_AUD_TS enable;
 alter trigger TR_NCI_CSI_AUD_TS enable;
+alter trigger TR_NCI_QUEST_VV_REP_AUD_TS enable;
 
 create unique index idxNCiAIRelUni on nci_admin_item_rel 
 ( P_ITEM_ID, P_ITEM_VER_NR,decode(REL_TYP_ID, 61, 1,C_ITEM_ID), C_ITEM_VER_NR,  REL_TYP_ID, DISP_ORD);
