@@ -21,6 +21,7 @@ alter trigger TR_NCI_CSI_AUD_TS disable;
 alter trigger TR_NCI_QUEST_VV_REP_AUD_TS disable;
 
 drop index idxNCiAIRelUni;
+drop index idx_Admin_item_nci_uni;
 
 truncate table cs_csi_copy;
 
@@ -176,6 +177,9 @@ alter trigger TR_NCI_QUEST_VV_REP_AUD_TS enable;
 
 create unique index idxNCiAIRelUni on nci_admin_item_rel 
 ( P_ITEM_ID, P_ITEM_VER_NR,decode(REL_TYP_ID, 61, 1,C_ITEM_ID), C_ITEM_VER_NR,  REL_TYP_ID, DISP_ORD);
+
+
+create unique index idx_Admin_item_nci_uni on admin_item (ADMIN_ITEM_TYP_ID, ITEM_LONG_NM, CNTXT_ITEM_ID, CNTXT_VER_NR, VER_NR);
 
 
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_WA', 'ADMIN_ITEM');
