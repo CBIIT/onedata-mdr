@@ -10,7 +10,7 @@ select :new.ITEM_ID, :new.VER_NR from dual;
 end if;
 END;
 
-                                   
+/                                   
  create or replace TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
 BEGIN    IF (:NEW.ITEM_ID = -1  or :NEW.ITEM_ID is null)  THEN select od_seq_ADMIN_ITEM.nextval
  into :new.ITEM_ID  from  dual ;   END IF;
