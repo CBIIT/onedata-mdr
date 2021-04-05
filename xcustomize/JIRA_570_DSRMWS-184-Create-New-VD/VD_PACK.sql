@@ -30,7 +30,7 @@ begin
     form1                  := t_form('Administered Item (Data Element CO)', 2,1);
     form1.rowset :=v_rowset1;
     forms.extend;    forms(forms.last) := form1;
-    forms                  := t_forms();
+    --forms                  := t_forms();
     form1                  := t_form('Rep Term (Hook Creation)', 2,1);
     form1.rowset :=v_rowset2;
     forms.extend;    forms(forms.last) := form1;
@@ -189,7 +189,7 @@ AS
     end if;
 
       --ihook.setColumnValue(rowform, 'GEN_STR',v_dec_nm ) ;
-       ihook.setColumnValue(rowvd, 'GEN_STR',ihook.getColumnValue(rowform,'ITEM_1_NM')  ) ;
+       ihook.setColumnValue(rowvd, 'GEN_STR',ihook.getColumnValue(rowvd,'ITEM_1_NM')  ) ;
        ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'VALIDATED');  
        
        if (   ihook.getColumnValue(rowvd, 'ITEM_1_ID') is not null ) then
@@ -243,11 +243,11 @@ AS
                     
                      --- Update name, definition, context
             row := row_ori;
-                ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowform,'GEN_STR'));
-                ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(rowform,'ITEM_1_ID') || 'v' ||ihook.getColumnValue(rowform,'ITEM_1_VER_NR'));
-                ihook.setColumnValue(row, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
-                ihook.setColumnValue(row, 'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
-                ihook.setColumnValue(row, 'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF'),1,4000));
+                ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowai,'GEN_STR'));
+                ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(rowai,'ITEM_1_ID') || 'v' ||ihook.getColumnValue(rowai,'ITEM_1_VER_NR'));
+                ihook.setColumnValue(row, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowai,'CNTXT_ITEM_ID'));
+                ihook.setColumnValue(row, 'CNTXT_VER_NR', ihook.getColumnValue(rowai,'CNTXT_VER_NR'));
+                ihook.setColumnValue(row, 'ITEM_DESC',substr(ihook.getColumnValue(rowai, 'ITEM_1_DEF'),1,4000));
                 rows := t_rows();    rows.extend;    rows(rows.last) := row;
                 action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,10,'update');
                 actions.extend;
@@ -256,8 +256,8 @@ AS
            -- Get the Sub-type row. Update REP CD.
 
             nci_11179.spReturnSubtypeRow (v_item_id, v_ver_nr, 2, row );
-            ihook.setColumnValue(row, 'REP_CLS_ITEM_ID', ihook.getColumnValue(rowform,'ITEM_1_ID'));
-            ihook.setColumnValue(row, 'REP_CLS_VER_NR', ihook.getColumnValue(rowform,'ITEM_1_VER_NR'));
+            ihook.setColumnValue(row, 'REP_CLS_ITEM_ID', ihook.getColumnValue(rowvd,'ITEM_1_ID'));
+            ihook.setColumnValue(row, 'REP_CLS_VER_NR', ihook.getColumnValue(rowvd,'ITEM_1_VER_NR'));
             
 
              rows := t_rows();    rows.extend;    rows(rows.last) := row;
@@ -285,7 +285,7 @@ AS
   
 end if;
    
- --V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+--V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
  
 
 END;  
