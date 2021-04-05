@@ -5,9 +5,6 @@ create table nci_dload_hdr
 dload_typ_id integer not null,
 dload_fmt_id integer not null,
 dload_hdr_nm varchar2(255),
-dload_form_nm  varchar2(255),
-dload_prot_nm  varchar2(255),
-dload_ind_1  number(1) default 0,
 dload_status varchar2(30) default 'CREATED',
  CREAT_DT             DATE DEFAULT sysdate NULL,
        CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
@@ -28,7 +25,7 @@ create table nci_dload_als
 ( hdr_id number,
 als_form_nm  varchar2(255),
 als_prot_nm  varchar2(255),
-PV_VM_IND  number(1) default 0,
+PV_VM_IND  number,
  CREAT_DT             DATE DEFAULT sysdate NULL,
        CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
        LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
@@ -78,34 +75,6 @@ add (DTTYPE_ID NUMBER,
 	PV_9	varchar2(255),
 	PV_10	varchar2(255));
 
-
--- WA only
-
-CREATE OR REPLACE TRIGGER TR_AI_EXT_TAB_INS
-  AFTER INSERT
-  on ADMIN_ITEM
-  for each row
-BEGIN
-
-if (:new.admin_item_typ_id not in (5,6,7, 53)) then
-insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR)
-select :new.ITEM_ID, :new.VER_NR from dual;
-end if;
-END;
-
-
-create sequence
-
- CREATE SEQUENCE OD_SEQ_DLOAD_HDR
-          INCREMENT BY 1
-          START WITH 1000
-         ;
-         
-    CREATE OR REPLACE TRIGGER OD_TR_DLOAD_HDR  BEFORE INSERT  on  NCI_DLOAD_HDR for each row
-         BEGIN    IF (:NEW.HDR_ID<= 0  or :NEW.HDR_ID is null)  THEN 
-         select od_seq_DLOAD_HDR.nextval
-    into :new.HDR_ID  from  dual ;   END IF; END ;
-/
 
 
 --
