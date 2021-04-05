@@ -6,12 +6,10 @@ CREATE OR REPLACE PACKAGE ONEDATA_WA.VD_PACK AS
   procedure createVD(rowform in t_row, actions in out t_actions, v_id out  number);
   procedure spVDCommon ( v_init_ai in t_rowset,v_init_vd in t_rowset,v_from in number,  v_op  in varchar2,  hookInput in t_hookInput, hookOutput in out t_hookOutput);
   PROCEDURE spVDCreateNew (v_data_in in clob, v_data_out out clob);
-  procedure valUsingStr (rowform in out t_row, k in integer, v_item_typ in integer) ;
-  procedure createValAIWithConcept(rowform in out t_row, idx in integer,v_item_typ_id in integer, v_mode in varchar2,v_cncpt_src in varchar2,  actions in out t_actions);
+    procedure createValAIWithConcept(rowform in out t_row, idx in integer,v_item_typ_id in integer, v_mode in varchar2,v_cncpt_src in varchar2,  actions in out t_actions);
 --  PROCEDURE spVDCreateFrom (v_data_in in clob, v_data_out out clob);
 --  PROCEDURE spVDEdit (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
-  procedure CncptCombExistsNew (rowform in out t_row, v_item_nm in varchar2, v_item_typ in integer, v_idx in number, v_item_id out number, v_item_ver_nr out number);
-
+  
 END;
 /
 
@@ -529,7 +527,7 @@ if (v_cncpt_src ='DROP-DOWN') then
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM', v_long_nm);
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', v_nm);
         
-            CncptCombExistsNew (rowform , substr(v_long_nm_suf,2), v_item_typ_id, idx , v_item_id, v_ver_nr);
+            nci_DEC_MGMT.CncptCombExistsNew (rowform , substr(v_long_nm_suf,2), v_item_typ_id, idx , v_item_id, v_ver_nr);
 
        
 if (v_mode = 'C') AND V_ITEM_ID  is null then --- Create
@@ -628,82 +626,5 @@ if (v_mode = 'C') AND V_ITEM_ID  is null then --- Create
 end if;
 
 end;
-
-procedure CncptCombExistsNew (rowform in out t_row, v_item_nm in varchar2, v_item_typ in integer, v_idx in number, v_item_id out number, v_item_ver_nr out number)
-as
-v_out integer;
-v_long_nm  varchar2(30);
-v_nm varchar2(255);
-v_def varchar2(4000);
-
-begin
-
-    for cur in (select ext.* from nci_admin_item_ext ext,admin_item a 
-    where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat = v_item_nm and a.admin_item_typ_id = v_item_typ) loop
-                 ihook.setColumnValue(rowform, 'ITEM_' || v_idx  ||'_ID',cur.item_id);
-                 v_item_id := cur.item_id;
-                 v_item_ver_nr := cur.ver_nr;
-                ihook.setColumnValue(rowform, 'ITEM_' || v_idx || '_VER_NR', cur.ver_nr);
-                ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_LONG_NM', cur.cncpt_concat);
-                ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_DEF',  cur.CNCPT_CONCAT_DEF);
-                ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_NM', cur.CNCPT_CONCAT_NM);
-          
-    end loop;
-    
-    
-              
-end;
-
-
-
-procedure valUsingStr (rowform in out t_row, k in integer, v_item_typ in integer) as
-i integer;
-v_str varchar2(255);
-cnt integer;
-v_nm varchar2(255);
-v_cncpt_nm varchar2(255);
-v_def varchar2(255);
-v_dec_nm varchar2(255);
-v_item_id number;
-v_ver_nr number;
-v_long_nm varchar2(255);
-begin
-
-           for i in  1..10 loop
-                        ihook.setColumnValue(rowform, 'CNCPT_1_ITEM_ID_' || i,'');
-                        ihook.setColumnValue(rowform, 'CNCPT_1_VER_NR_' || i, '');
-                end loop;
-            if (ihook.getColumnValue(rowform, 'CNCPT_CONCAT_STR_' || k) is not null) then
-                v_str := trim(ihook.getColumnValue(rowform, 'CNCPT_CONCAT_STR_'|| k));
-                cnt := nci_11179.getwordcount(v_str);
-                v_nm := '';
-                for i in  1..cnt loop
-                        v_cncpt_nm := nci_11179.getWord(v_str, i, cnt);
-                        ihook.setColumnValue(rowform, 'CNCPT_' || k  ||'_ITEM_ID_' || i,'');
-                        ihook.setColumnValue(rowform, 'CNCPT_' || k || '_VER_NR_' || i, '');
-                        for cur in(select item_id, item_nm , item_long_nm from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
-                                ihook.setColumnValue(rowform, 'CNCPT_' || k  ||'_ITEM_ID_' || i,cur.item_id);
-                                ihook.setColumnValue(rowform, 'CNCPT_' || k || '_VER_NR_' || i, 1);
-                                v_dec_nm := trim(v_dec_nm || ' ' || cur.item_nm) ;
-                                v_nm := trim(v_nm || ':' || cur.item_long_nm);
-                        end loop;
-                end loop;
-                for i in  cnt+1..10 loop
-                        ihook.setColumnValue(rowform, 'CNCPT_' || k  ||'_ITEM_ID_' || i,'');
-                        ihook.setColumnValue(rowform, 'CNCPT_' || k || '_VER_NR_' || i, '');
-                end loop;
-     
-                nci_11179.CncptCombExists(substr(v_nm,2),v_item_typ,v_item_id, v_ver_nr,v_long_nm, v_def);
-                ihook.setColumnValue(rowform, 'ITEM_' || k  ||'_ID',v_item_id);
-                ihook.setColumnValue(rowform, 'ITEM_' || k || '_VER_NR', v_ver_nr);
-                ihook.setColumnValue(rowform,'ITEM_' || k || '_LONG_NM', trim(substr(v_nm,2)));
-                ihook.setColumnValue(rowform,'ITEM_' || k || '_DEF', v_def);
-                ihook.setColumnValue(rowform,'ITEM_' || k || '_NM', v_long_nm);
-            end if;
-            
-            end;
-
-
-
 END;
 /
