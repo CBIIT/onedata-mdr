@@ -79,7 +79,7 @@ add (DTTYPE_ID NUMBER,
 
 --
 
-Inserts
+--Inserts
 
 
 insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (31, 'Download Format');
@@ -88,8 +88,14 @@ commit;
 insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (32, 'Download Component Type');
 commit;
 
+			 
+insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (33, 'ALS PV-VM type');
+commit;
 insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (90,31,'ALS', 'ALS', '', 'ALS');
 insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (91,31,'Other', 'Other', '', 'Other');
 insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (92,32,'Form', 'Form', '', 'Form');
 insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (93,32,'CDE', 'CDE', '', 'CDE');
+insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (94,33,'PV', 'PV', '', 'PV');
+insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (95,33,'PVM', 'PVM', '', 'PVM');
+			 
 commit;
