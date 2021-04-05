@@ -62,3 +62,32 @@ commit;
 delete from onedata_ra.nci_usr_cart where CNTCT_SECU_ID = 'GUEST';
 commit;
 end;
+
+/
+
+
+-- WA only
+
+CREATE OR REPLACE TRIGGER TR_AI_EXT_TAB_INS
+  AFTER INSERT
+  on ADMIN_ITEM
+  for each row
+BEGIN
+
+if (:new.admin_item_typ_id not in (5,6,7, 53)) then
+insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR)
+select :new.ITEM_ID, :new.VER_NR from dual;
+end if;
+END;
+/
+
+ CREATE SEQUENCE OD_SEQ_DLOAD_HDR
+          INCREMENT BY 1
+          START WITH 1000
+         ;
+         
+    CREATE OR REPLACE TRIGGER OD_TR_DLOAD_HDR  BEFORE INSERT  on  NCI_DLOAD_HDR for each row
+         BEGIN    IF (:NEW.HDR_ID<= 0  or :NEW.HDR_ID is null)  THEN 
+         select od_seq_DLOAD_HDR.nextval
+    into :new.HDR_ID  from  dual ;   END IF; END ;
+/
