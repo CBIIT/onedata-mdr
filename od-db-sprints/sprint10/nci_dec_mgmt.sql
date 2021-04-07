@@ -1,4 +1,4 @@
-create or replace PACKAGE nci_DEC_MGMT AS
+create or replace PACKAGE            nci_DEC_MGMT AS
 
 procedure valUsingStr (rowform in out t_row, k in integer, v_item_typ in integer) ;
 
@@ -32,13 +32,13 @@ function getDECCreateForm (v_rowset in t_rowset) return t_forms;
 
 END;
 /
-create or replace PACKAGE BODY nci_DEC_MGMT AS
+create or replace PACKAGE BODY            nci_DEC_MGMT AS
 
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
 c_ver_suffix varchar2(5) := 'v1.00';
 v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
-    
+
 
 -- Utility procedure to parse the Concept string and update the drop-downs.
 -- k is the index 1 - OC, 2 - Prop; For all other item types always 1.
@@ -56,14 +56,14 @@ v_long_nm varchar2(255);
 begin
 
     -- Set all the concept drop-down to null
-    
+
            for i in  1..10 loop
                         ihook.setColumnValue(rowform, 'CNCPT_' || k  ||'_ITEM_ID_' || i,'');
                         ihook.setColumnValue(rowform, 'CNCPT_' || k || '_VER_NR_' || i, '');
             end loop;
-    
+
     --  Only parse if string is not null
-    
+
             if (ihook.getColumnValue(rowform, 'CNCPT_CONCAT_STR_' || k) is not null) then
                 v_str := trim(ihook.getColumnValue(rowform, 'CNCPT_CONCAT_STR_'|| k));
                 cnt := nci_11179.getwordcount(v_str);
@@ -80,7 +80,7 @@ begin
                 end loop;
 
   -- Check if concept combination esits. If it sodes, set the ITEM_k_ID and ITEM_k_VER_NR.
-  
+
                 nci_11179.CncptCombExists(substr(v_nm,2),v_item_typ,v_item_id, v_ver_nr,v_long_nm, v_def);
                 ihook.setColumnValue(rowform, 'ITEM_' || k  ||'_ID',v_item_id);
                 ihook.setColumnValue(rowform, 'ITEM_' || k || '_VER_NR', v_ver_nr);
@@ -88,7 +88,7 @@ begin
                 ihook.setColumnValue(rowform,'ITEM_' || k || '_DEF', v_def);
                 ihook.setColumnValue(rowform,'ITEM_' || k || '_NM', v_long_nm);
             end if;
-            
+
             end;
 
 -- Create from existing. Only the start point is different. Else - everything the same as New.
@@ -124,13 +124,13 @@ begin
     v_item_type_id := ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID');
 
     -- check that a selected AI is DEC type
-    if (v_item_type_id <> 2) then 
+    if (v_item_type_id <> 2) then
         raise_application_error(-20000,'!!! This functionality is only applicable for DEC !!!');
     end if;
 
 
     row := row_ori;
- 
+
     select obj_cls_item_id, obj_cls_ver_nr, prop_item_id, prop_ver_nr, conc_dom_item_id, conc_dom_ver_nr into v_oc_item_id, v_oc_ver_nr, v_prop_item_id, v_prop_ver_nr ,
     v_conc_dom_item_id, v_conc_dom_ver_nr
     from de_conc where item_id = v_item_id and ver_nr = v_ver_nr;
@@ -138,19 +138,20 @@ begin
      -- Copy subtype specific attributes into concept drop-down
     nci_11179.spReturnConceptRow (v_oc_item_id, v_oc_ver_nr, 5, 1, row );
     nci_11179.spReturnConceptRow (v_prop_item_id, v_prop_ver_nr, 6, 2, row );
-    
+
     --  Set the conceptual domain and default for dummy internal ID.
     ihook.setColumnValue(row, 'STG_AI_ID', 1);
     ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', v_conc_dom_item_id);
     ihook.setColumnValue(row, 'CONC_DOM_VER_NR', v_conc_dom_ver_nr);
-   
-    
+
+
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
     rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT');
-     
+
     spDECCommon(rowset, 'insert', hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+    nci_util.debugHook('GENERAL',v_data_out);
 
 end;
 
@@ -173,15 +174,15 @@ begin
 
 
     -- Default for new row. Dummy Identifier has to be set else error.
-    row := t_row();   
+    row := t_row();
     ihook.setColumnValue(row, 'STG_AI_ID', 1);
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
     rowsetai := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT'); -- Default values for form
- 
+
     spDECCommon(rowsetai, 'insert', hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-
+     nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 -- Edit an existing DEC
@@ -203,7 +204,7 @@ as
     v_prop_ver_nr number(4,2);
       v_conc_dom_item_id number;
     v_conc_dom_ver_nr number(4,2);
-  
+
     rowset  t_rowset;
 
 begin
@@ -226,14 +227,14 @@ begin
     end if;
 
     -- check that a selected AI is DEC type
-    if (v_item_type_id <> 2) then 
+    if (v_item_type_id <> 2) then
         raise_application_error(-20000,'!!! This functionality is only applicable for DEC !!!');
     end if;
 
     row := row_ori;
- 
+
     --  Only AI row is submitted with the hook. We need to get the sub-type details and populate the OC/Prop concepts
-    
+
     select obj_cls_item_id, obj_cls_ver_nr, prop_item_id, prop_ver_nr, conc_dom_item_id, conc_dom_ver_nr into v_oc_item_id, v_oc_ver_nr, v_prop_item_id, v_prop_ver_nr ,
     v_conc_dom_item_id, v_conc_dom_ver_nr
     from de_conc where item_id = v_item_id and ver_nr = v_ver_nr;
@@ -241,18 +242,18 @@ begin
      -- Copy OC and Prop concepts
     nci_11179.spReturnConceptRow (v_oc_item_id, v_oc_ver_nr, 5, 1, row );
     nci_11179.spReturnConceptRow (v_prop_item_id, v_prop_ver_nr, 6, 2, row );
-    
+
     -- Internal dummy is is set to 1. Existing CD is populated.
     ihook.setColumnValue(row, 'STG_AI_ID', 1);
     ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', v_conc_dom_item_id);
     ihook.setColumnValue(row, 'CONC_DOM_VER_NR', v_conc_dom_ver_nr);
-   
-    
+
+
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
     rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT');
-     
+
     spDECCommon(rowset, 'update', hookinput, hookoutput);
-    
+
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
 --nci_util.debugHook('GENERAL', v_data_out);
@@ -261,7 +262,7 @@ end;
 
 
 -- Common routine for DEC - Create or Update
--- v_init is the initial rowset to populate. 
+-- v_init is the initial rowset to populate.
 -- v_op is insert or update
 PROCEDURE       spDECCommon ( v_init in t_rowset,  v_op  in varchar2,  hookInput in t_hookInput, hookOutput in out t_hookOutput)
 AS
@@ -290,7 +291,7 @@ AS
  v_item_id number;
  v_ver_nr number(4,2);
   cnt integer;
-  
+
     actions t_actions := t_actions();
   action t_actionRowset;
   v_msg varchar2(1000);
@@ -310,17 +311,17 @@ begin
     if hookInput.invocationNumber = 0 then
         --  Get question. Either create or edit
           HOOKOUTPUT.QUESTION    := getDECQuestion(v_op);
-        
+
         -- Send initial rowset to create the form.
           hookOutput.forms :=getDECCreateForm(v_init);
-   
+
     else
         forms              := hookInput.forms;
         form1              := forms(1);
         rowform := form1.rowset.rowset(1);
         row := t_row();        rows := t_rows();
         is_valid := true;
-     
+
         if HOOKINPUT.ANSWERID = 1 or Hookinput.answerid = 3 then  -- Validate using string
             for k in  1..2  loop
                     for i in  1..10 loop
@@ -332,13 +333,13 @@ begin
                 createValAIWithConcept(rowform , k,4+k,'V','STRING',actions);
             end loop;
             end if;
-    
+
         if HOOKINPUT.ANSWERID = 2 or Hookinput.answerid = 4 then  -- Validate using drop-down
             for k in  1..2  loop
                createValAIWithConcept(rowform , k,4+k,'V','DROP-DOWN',actions);
             end loop;
         end if;
-    
+
     -- Show generated name
        ihook.setColumnValue(rowform, 'GEN_STR',ihook.getColumnValue(rowform,'ITEM_1_NM') ||  ' ' || ihook.getColumnValue(rowform,'ITEM_2_NM') ) ;
        ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'VALIDATED');
@@ -346,7 +347,7 @@ begin
        if (   ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null and ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then
               for cur in (select de_conc.* from de_conc, admin_item ai where obj_cls_item_id =  ihook.getColumnValue(rowform, 'ITEM_1_ID') and obj_cls_ver_nr =  ihook.getColumnValue(rowform, 'ITEM_1_VER_NR') and
                prop_item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID') and prop_ver_nr =  ihook.getColumnValue(rowform, 'ITEM_2_VER_NR') and
-              de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr 
+              de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr
               --and ai.cntxt_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID')
              -- and ai.cntxt_ver_nr = ihook.getColumnValue(rowform, 'CNTXT_VER_NR')
              ) loop
@@ -358,9 +359,9 @@ begin
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'OC or PROP missing.');
                   is_valid := false;
         end if;
-     
+
          rows := t_rows();
-         
+
          -- If any of the test fails or if the user has triggered validation, then go back to the screen.
         if (is_valid=false or hookinput.answerid = 1 or hookinput.answerid = 2) then
                 rows.extend;
@@ -369,18 +370,19 @@ begin
                 hookOutput.forms := getDECCreateForm(rowset);
                 HOOKOUTPUT.QUESTION    := getDECQuestion(v_op);
         end if;
-    
-    -- If all the tests have passed and the user has asked for create, then create DEC and optionally OC and Prop. 
-    
+
+    -- If all the tests have passed and the user has asked for create, then create DEC and optionally OC and Prop.
+
     IF HOOKINPUT.ANSWERID in ( 3,4)  and is_valid = true THEN  -- Create
         createValAIWithConcept(rowform , 1,5,'C','DROP-DOWN',actions); -- OC
         createValAIWithConcept(rowform , 2,6,'C','DROP-DOWN',actions); -- Property
-    
+
     --If Create DEC
-    if (upper(v_op) = 'INSERT') then 
+   if (upper(v_op) = 'INSERT') then
         createDEC(rowform, actions, v_item_id);
         hookoutput.message := 'DEC Created Successfully with ID ' || v_item_id ;
-    else
+
+  else
     -- Update DEC. Get the selected row, update name, definition, context.
         row := t_row();
         row_ori :=  hookInput.originalRowset.rowset(1);
@@ -391,7 +393,7 @@ begin
         --- Update name, definition, context
             row := row_ori;
             ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowform,'GEN_STR'));
-            ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(rowform,'ITEM_1_ID') || 'v' ||ihook.getColumnValue(rowform,'ITEM_1_VER_NR') || 
+            ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(rowform,'ITEM_1_ID') || 'v' ||ihook.getColumnValue(rowform,'ITEM_1_VER_NR') ||
              ihook.getColumnValue(rowform,'ITEM_2_ID') || 'v' ||ihook.getColumnValue(rowform,'ITEM_2_VER_NR'));
             ihook.setColumnValue(row, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
             ihook.setColumnValue(row, 'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
@@ -402,7 +404,7 @@ begin
         actions(actions.last) := action;
            row := t_row();
            -- Get the Sub-type row. Update OC, Prop, CD.
-           
+
             nci_11179.spReturnSubtypeRow (v_item_id, v_ver_nr, 2, row );
             ihook.setColumnValue(row, 'OBJ_CLS_ITEM_ID', ihook.getColumnValue(rowform,'ITEM_1_ID'));
             ihook.setColumnValue(row, 'OBJ_CLS_VER_NR', ihook.getColumnValue(rowform,'ITEM_1_VER_NR'));
@@ -410,20 +412,23 @@ begin
             ihook.setColumnValue(row, 'PROP_VER_NR', ihook.getColumnValue(rowform,'ITEM_2_VER_NR'));
             ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID'));
             ihook.setColumnValue(row, 'CONC_DOM_VER_NR', ihook.getColumnValue(rowform,'CONC_DOM_VER_NR'));
-         
+
              rows := t_rows();    rows.extend;    rows(rows.last) := row;
              action := t_actionrowset(rows, 'Data Element Concept', 2,11,'update');
         actions.extend;
         actions(actions.last) := action;
-        
+
     end if;
     if (actions.count > 0) then
         hookoutput.actions := actions;
+         --   raise_application_error(-20000,'Inside 1' || v_item_id);
+
     end if;
     end if;
-  
+     -- raise_application_error(-20000,'Inside');
+
 end if;
-   
+
 END;
 
 
@@ -467,7 +472,7 @@ if (v_cncpt_src ='STRING') then
                                 ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,cur.item_id);
                                 ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, 1);
                                -- v_dec_nm := trim(v_dec_nm || ' ' || cur.item_nm) ;
-                                v_long_nm_suf := trim(v_long_nm_suf || '_' || cur.item_long_nm);
+                                v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                                 v_nm := trim(v_nm || ' ' || cur.item_nm);
                         end loop;
                 end loop;
@@ -476,7 +481,7 @@ if (v_cncpt_src ='STRING') then
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, '');
                 end loop;
             end if;
-      
+
 end if;
 
 -- If drop-downs to be used to check existing or new
@@ -489,14 +494,14 @@ if (v_cncpt_src ='DROP-DOWN') then
                         if (v_temp_id is not null) then
                         for cur in(select item_id, item_nm , item_long_nm from admin_item where admin_item_typ_id = 49 and item_id = v_temp_id and ver_nr = v_temp_ver) loop
                           --       v_dec_nm := trim(v_dec_nm || ' ' || cur.item_nm) ;
-                              v_long_nm_suf := trim(v_long_nm_suf || '_' || cur.item_long_nm);
+                              v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                                 v_nm := trim(v_nm || ' ' || cur.item_nm);
                          end loop;
                         end if;
                 end loop;
-          
+
   end if;
-        
+
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM', v_long_nm);
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', v_nm);
 
@@ -542,10 +547,10 @@ if (v_cncpt_src ='DROP-DOWN') then
         actions.extend;
         actions(actions.last) := action;
 
-        rows := t_rows();        row := t_row();
+        rows := t_rows();        row := rowform;
         v_long_nm := substr(v_long_nm,1, length(v_long_nm)-1);
         v_nm := substr(trim(v_nm),1, c_nm_len);
-     
+
         -- if lenght of short name is greater than 30, then use IDv1.00
         if (length(v_long_nm) > 30) then
             v_long_nm := v_id || c_ver_suffix;
@@ -556,7 +561,8 @@ if (v_cncpt_src ='DROP-DOWN') then
         ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
         ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', v_item_typ_id);
         ihook.setColumnValue(row,'ADMIN_STUS_ID',66 );
-        ihook.setColumnValue(row,'ITEM_LONG_NM', v_long_nm);
+        ihook.setColumnValue(row,'REGSTR_STUS_ID',9 );
+     ihook.setColumnValue(row,'ITEM_LONG_NM', v_long_nm);
         ihook.setColumnValue(row,'ITEM_DESC', substr(v_def, 1, length(v_def)-1));
         ihook.setColumnValue(row,'ITEM_NM', v_nm);
         ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
@@ -564,7 +570,8 @@ if (v_cncpt_src ='DROP-DOWN') then
         ihook.setColumnValue(row,'CNCPT_CONCAT', substr(v_long_nm_suf,2));
         ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', substr(v_def, 1, length(v_def)-1));
         ihook.setColumnValue(row,'CNCPT_CONCAT_NM', v_nm);
-     
+          ihook.setColumnValue(row,'LST_UPD_DT',sysdate );
+
         rows.extend;
         rows(rows.last) := row;
     -- raise_application_error(-20000, 'HEre ' || v_nm || v_long_nm || v_def);
@@ -578,15 +585,22 @@ if (v_cncpt_src ='DROP-DOWN') then
         actions.extend;
         actions(actions.last) := action;
 
+-- Temporaru fox fpr tracker 838 until I find the real fix. 
 
-        action := t_actionrowset(rows, 'NCI AI Extension (Hook)', 2,3,'insert');
-        actions.extend;
-        actions(actions.last) := action;
-        
+    insert into nci_admin_item_ext (ITEM_ID, VER_NR, CNCPT_CONCAT, CNCPT_CONCAT_NM, CNCPT_CONCAT_DEF)
+    values (v_id, 1, substr(v_long_nm_suf,2),v_nm, substr(v_def, 1, length(v_def)-1));
+    commit;
+    
+      --  action := t_actionrowset(rows, 'NCI AI Extension (Hook)', 2,3,'insert');
+      --  actions.extend;
+       -- actions(actions.last) := action;
+
        case v_item_typ_id
        when 5 then v_obj_nm := 'Object Class';
        when 6 then v_obj_nm := 'Property';
-       
+       when 53 then v_obj_nm := 'Value Meaning';
+       when 7 then v_obj_nm := 'Representation Class';
+
         end case;
         action := t_actionrowset(rows, v_obj_nm, 2,2,'insert');
         actions.extend;
@@ -604,7 +618,7 @@ v_def varchar2(4000);
 
 begin
 
-    for cur in (select ext.* from nci_admin_item_ext ext,admin_item a 
+    for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
     where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat = v_item_nm and a.admin_item_typ_id = v_item_typ) loop
                  ihook.setColumnValue(rowform, 'ITEM_' || v_idx  ||'_ID',cur.item_id);
                  v_item_id := cur.item_id;
@@ -613,11 +627,11 @@ begin
                 ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_LONG_NM', cur.cncpt_concat);
                 ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_DEF',  cur.CNCPT_CONCAT_DEF);
                 ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_NM', cur.CNCPT_CONCAT_NM);
-          
+
     end loop;
-    
-    
-              
+  --raise_application_error(-20000, v_item_nm || '  ' || v_item_id);
+
+
 end;
 
 
@@ -677,7 +691,7 @@ begin
 return question;
 end;
 
--- Old procedure to be deleted.
+
 
 procedure createDEC (rowform in t_row, actions in out t_actions, v_id out  number) as
 v_nm  varchar2(255);
@@ -703,7 +717,8 @@ begin
         ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
         ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
         ihook.setColumnValue(row,'ADMIN_STUS_ID',66);
-        ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',nvl(ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID'),1) );
+         ihook.setColumnValue(row,'REGSTR_STUS_ID',9);
+       ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',nvl(ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID'),1) );
         ihook.setColumnValue(row,'CONC_DOM_VER_NR',nvl(ihook.getColumnValue(rowform,'CONC_DOM_VER_NR'),1) );
         ihook.setColumnValue(row,'OBJ_CLS_ITEM_ID',nvl(ihook.getColumnValue(rowform, 'ITEM_1_ID'),1) );
         ihook.setColumnValue(row,'OBJ_CLS_VER_NR',nvl(ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'),1) );
@@ -741,4 +756,5 @@ end;
 
 
 END;
-/
+                                                   /
+                                                   
