@@ -174,5 +174,12 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT e
        WHERE ADMIN_ITEM_TYP_ID = 6 and ADMIN_ITEM.ITEM_ID = e.ITEM_ID (+) and ADMIN_ITEM.VER_NR = e.VER_NR (+);
 
 
+-- Tracker 631
+alter table NCI_PROTCL Add (LEAD_ORG_ID number);
 
+--Tracker 667
+			 
+alter table DATA_TYP ADD (NCI_DFLT_LEGCY_ID number);
+			 
+			 
 			 
