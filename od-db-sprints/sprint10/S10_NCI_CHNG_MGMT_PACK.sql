@@ -174,48 +174,46 @@ ihook.setColumnValue(rowcsi,'ITEM_ID', v_id);
 END;
 
 
-PROCEDURE   spCreateDE (v_data_in IN CLOB,    v_data_out OUT CLOB, v_usr_id  IN varchar2) 
+PROCEDURE spCreateDE (v_data_in IN CLOB,    v_data_out OUT CLOB, v_usr_id  IN varchar2) 
 AS
-  hookInput t_hookInput;
-  hookOutput t_hookOutput := t_hookOutput();
-  showRowset t_showableRowset;
-  rowai t_row;
-  rowde t_row;
-  forms t_forms;
-  form1 t_form;
-
-v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
-
-  row t_row;
-  rows  t_rows;
-  row_ori t_row;
-  rowset            t_rowset;
-  rowsetde            t_rowset;
-  v_prop_long_nm varchar2(255);
-  v_prop_def  varchar2(2000);
-  v_dec_item_id number;
- v_str  varchar2(255);
- v_nm  varchar2(255);
- v_id number;
- v_ver_nr number(4,2);
-  cnt integer;
-
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    showRowset t_showableRowset;
+    rowai t_row;
+    rowde t_row;
+    forms t_forms;
+    form1 t_form;
+    c_ver_suffix varchar2(5) := 'v1.00';
+    v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
+    row t_row;
+    rows  t_rows;
+    row_ori t_row;
+    rowset            t_rowset;
+    rowsetde            t_rowset;
+    v_prop_long_nm varchar2(255);
+    v_prop_def  varchar2(2000);
+    v_dec_item_id number;
+    v_str  varchar2(255);
+    v_nm  varchar2(255);
+    v_id number;
+    v_ver_nr number(4,2);
+    cnt integer;
     actions t_actions := t_actions();
-  action t_actionRowset;
-  v_msg varchar2(1000);
-  i integer := 0;
-  v_err  integer;
-  column  t_column;
-  v_item_nm varchar2(255);
-  v_cncpt_nm varchar2(255);
-  v_long_nm varchar2(255);
-  v_item_def varchar2(4000);
-  v_oc_id number;
-  v_prop_id number;
-  v_temp_id  number;
-  v_temp_ver number(4,2);
-  is_valid boolean;
-  V_valid boolean;
+    action t_actionRowset;
+    v_msg varchar2(1000);
+    i integer := 0;
+    v_err  integer;
+    column  t_column;
+    v_item_nm varchar2(255);
+    v_cncpt_nm varchar2(255);
+    v_long_nm varchar2(255);
+    v_item_def varchar2(4000);
+    v_oc_id number;
+    v_prop_id number;
+    v_temp_id  number;
+    v_temp_ver number(4,2);
+    is_valid boolean;
+    V_valid boolean;
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -240,7 +238,7 @@ BEGIN
           ihook.setColumnValue(row, 'PREF_QUEST_TXT', v_dflt_txt);
           rows.extend;
           rows(rows.last) := row;
-       rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
+          rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
           hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
   ELSE
       forms              := hookInput.forms;
@@ -277,9 +275,10 @@ BEGIN
            v_valid := false;
           hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
           HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,v_valid);
-           V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-            return;
-            end loop;
+          V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+          return;
+		  exit;
+         end loop;
             
     select substr(dec.item_nm || ' ' || vd.item_nm,1,255) ,substr(dec.item_desc || ':' || vd.item_desc,  1, 4000) into v_item_nm, v_item_def from admin_item dec, admin_item vd
             where dec.item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') and dec.ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
@@ -420,12 +419,6 @@ begin
     v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
     v_item_type_id := ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID');
 
-    -- Check if user is authorized to edit
---   if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_usr_id) = false) then
---        raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ');
---        return;
---  end if;
--- check that a selected AI is CDE typeF
 
     if (v_item_type_id <> 4) then -- 4 - CDE in table OBJ_KEY
         raise_application_error(-20000,'!!! This functionality is only applicable for CDE !!!');
@@ -467,7 +460,36 @@ if hookInput.invocationNumber = 0 then
 
         v_item_nm:=ihook.getColumnValue(rowai,'ITEM_NM');
         v_item_desc:=ihook.getColumnValue(rowai,'ITEM_DESC');
-        
+              v_valid := true;
+            for cur in (select ai.item_id from admin_item ai, de de
+            where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
+           -- and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
+           -- and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')
+            and de.de_conc_item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') 
+            and de.de_conc_ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
+            and de.val_dom_item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') 
+            and de.val_dom_ver_nr =  ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR')
+            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
+            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')) 
+
+
+        loop
+        hookoutput.message := 'Duplicate CDE found: ' || cur.item_id;
+
+         rows.extend;
+          rows(rows.last) := rowai;
+          rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
+          rows := t_rows();
+            rows.extend;
+          rows(rows.last) := rowde;
+          rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
+           v_valid := false;
+          hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
+          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,v_valid);
+           V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+            return;
+			exit;
+         end loop;
 
 
   IF HOOKINPUT.ANSWERID = 1 or hookInput.invocationNumber = 1 then--Validate
@@ -509,7 +531,7 @@ if hookInput.invocationNumber = 0 then
         rowsetde := t_rowset(rows, 'Data Element', 1, 'DE'); -- Default values for form
 
         hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowsetai, rowsetde);
-        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(2,v_valid);
+        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,v_valid);
                V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
        return;
        END LOOP;
@@ -530,7 +552,7 @@ if hookInput.invocationNumber = 0 then
           rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
            v_valid := false;
           hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
-          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(2,v_valid);
+          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,v_valid);
           --V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
     end if; 			
