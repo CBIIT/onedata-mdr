@@ -143,7 +143,7 @@ union
       );
 
 
-drop view vw_rep_cls;
+drop materialized view vw_rep_cls;
 
 
 CREATE or REPLACE VIEW VW_REP_CLS AS
