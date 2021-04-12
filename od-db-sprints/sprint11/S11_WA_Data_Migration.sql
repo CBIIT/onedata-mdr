@@ -85,6 +85,7 @@ dbms_output.put_line('tables truncated!!!');
 end;
 /
 exec nci_caDSR_Pull.sp_migrate_lov;
+exec nci_caDSR_Pull.sp_org_contact;
 exec nci_caDSR_Pull.sp_create_ai_1;
 exec nci_caDSR_Pull.sp_create_ai_2;
 exec nci_caDSR_Pull.sp_create_ai_3;
@@ -130,7 +131,7 @@ end;
 /
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_WA', 'ADMIN_ITEM');
 exec nci_caDSR_Pull.sp_create_ai_children;
-exec nci_caDSR_Pull.sp_org_contact;
+exec nci_caDSR_Pull.sp_post_upd;
 /
 begin
 dbms_output.put_line('sp_create_ai_children-sp_org_contact are completed!!!!');
