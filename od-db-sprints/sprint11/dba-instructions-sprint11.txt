@@ -5,3 +5,8 @@ S11_3_WA_SP.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S11_1_WA_RA_DDL.sql
+
+
+Data Migration
+ONEDATA_WA:  S11_WA_Data_Migration.sql
+ONEDATA_RA: S9_RA_Data_Migration.sql
