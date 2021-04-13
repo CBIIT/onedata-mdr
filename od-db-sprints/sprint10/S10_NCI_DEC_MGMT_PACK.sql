@@ -585,15 +585,17 @@ if (v_cncpt_src ='DROP-DOWN') then
         actions.extend;
         actions(actions.last) := action;
 
--- Temporaru fox fpr tracker 838 until I find the real fix. 
+-- Temporary fix fpr tracker 838 until I find the real fix. 
+-- Removing the temporary fix as server restart seems to have fixed the issue.
+                                                                 
 
-    insert into nci_admin_item_ext (ITEM_ID, VER_NR, CNCPT_CONCAT, CNCPT_CONCAT_NM, CNCPT_CONCAT_DEF)
-    values (v_id, 1, substr(v_long_nm_suf,2),v_nm, substr(v_def, 1, length(v_def)-1));
-    commit;
+ --   insert into nci_admin_item_ext (ITEM_ID, VER_NR, CNCPT_CONCAT, CNCPT_CONCAT_NM, CNCPT_CONCAT_DEF)
+  --  values (v_id, 1, substr(v_long_nm_suf,2),v_nm, substr(v_def, 1, length(v_def)-1));
+  --  commit;
     
-      --  action := t_actionrowset(rows, 'NCI AI Extension (Hook)', 2,3,'insert');
-      --  actions.extend;
-       -- actions(actions.last) := action;
+        action := t_actionrowset(rows, 'NCI AI Extension (Hook)', 2,3,'insert');
+        actions.extend;
+        actions(actions.last) := action;
 
        case v_item_typ_id
        when 5 then v_obj_nm := 'Object Class';
