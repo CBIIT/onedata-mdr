@@ -1,1 +1,1 @@
-drop trigger TR_AI_EXT_TAB_INS;
+drop trigger ONEDATA_RA.TR_AI_EXT_TAB_INS;
