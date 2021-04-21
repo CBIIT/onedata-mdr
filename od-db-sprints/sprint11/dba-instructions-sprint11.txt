@@ -14,6 +14,7 @@ S11_WA_NCI_PV_VM.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S11_1_WA_RA_DDL.sql
+S11_RA_DDL.sql
 
 
 Data Migration
