@@ -149,6 +149,10 @@ FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi
        FORM_VER_NR   number(4,2),
        MOD_NM varchar2(255),
        PREF_QUEST_TXT varchar2(255),
+    	BTCH_USR_NM  varchar2(100) not null,
+        BTCH_NM  varchar2(100) not null,
+        BTCH_SEQ_NBR  integer not null,
+    	VAL_DOM_NM  varchar2(255) null,
 	 PRIMARY KEY (STG_AI_ID));
 		      
 		      create or replace view VW_CNCPT 
