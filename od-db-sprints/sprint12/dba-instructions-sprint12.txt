@@ -1,5 +1,6 @@
 -- Run as ONEDATA_WA DDL scripts
 S12_1_WA_RA_DDL.sql
+S12_WA_TR_AI_WFS.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S12_1_WA_RA_DDL.sql
@@ -7,10 +8,10 @@ S12_1_WA_RA_DDL.sql
 -- DATA MIGRATION
 
 -- Run as ONEDATA_WA DM scripts
-S12_WA_Data_Migration.sql
+--S12_WA_Data_Migration.sql
 
 -- Run as ONEDATA_RA DM scripts
-S9_RA_Data_Migration.sql
+--S12_RA_Data_Migration.sql
 
 -- Check that materialized views have valid statuses.
 
