@@ -166,3 +166,7 @@ nvl(decode(ADMIN_ITEM.DEF_SRC, 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No Def Sour
        FROM ADMIN_ITEM, CNCPT, OBJ_KEY
        WHERE ADMIN_ITEM_TYP_ID = 49 and ADMIN_ITEM.ITEM_ID = CNCPT.ITEM_ID and ADMIN_ITEM.VER_NR = CNCPT.VER_NR
 	and cncpt.EVS_SRC_ID = OBJ_KEY.OBJ_KEY_ID (+) and admin_item.admin_stus_nm_dn = 'RELEASED';
+
+		      
+		      alter table nci_dload_als modify (PV_VM_IND number default null);
+		      
