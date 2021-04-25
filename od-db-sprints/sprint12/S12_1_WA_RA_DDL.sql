@@ -146,6 +146,8 @@ FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi
        DE_CONC_VER_NR number(4,2),
        VAL_DOM_ITEM_ID number,
        VAL_DOM_VER_NR number(4,2),
+      VAL_DOM_ITEM_ID_FND number,
+       VAL_DOM_VER_NR_FND number(4,2),
        FORM_ITEM_ID  number,
        FORM_VER_NR   number(4,2),
        MOD_NM varchar2(255),
