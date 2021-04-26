@@ -217,4 +217,6 @@ nvl(decode(ADMIN_ITEM.DEF_SRC, 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No Def Sour
 		      
 		      
 alter table nci_dload_als modify (PV_VM_IND number default null);
+
+ALTER TABLE ADMIN_ITEM MODIFY EFF_DT DATE DEFAULT SYSDATE;
 		      
