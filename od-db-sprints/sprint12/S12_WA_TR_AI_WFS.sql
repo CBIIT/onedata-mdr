@@ -10,6 +10,6 @@ CREATE OR REPLACE TRIGGER ONEDATA_WA.TR_AI_WFS
   ))
 BEGIN
 RAISE_APPLICATION_ERROR( -20001, 
-'!!!! The item is not saved. "RETIRED" Workflow Status requires "Effective End Date" value to be set !!!!');
+'!!!! The item is not saved. "RETIRED" Workflow Status requires "End Date" value to be set !!!!');
 END TR_AI_WFS;
 /
