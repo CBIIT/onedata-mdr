@@ -1,7 +1,6 @@
 set serveroutput on size 1000000
 SPOOL S12_RA_DATA_MIGRATION.log
 --- Run in Release Area
-alter trigger TR_AI_EXT_TAB_INS disable;
 truncate table ONEDATA_RA.NCI_CSI_ALT_DEFNMS;
 truncate table ONEDATA_RA.NCI_ALT_KEY_ADMIN_ITEM_REL;
 truncate table ONEDATA_RA.NCI_FORM_TA_REL;
@@ -57,7 +56,6 @@ begin
 dbms_output.put_line('ONEDATA_RA sp_insert_all is completed');
 end;
 /
-alter trigger TR_AI_EXT_TAB_INS enable;
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_RA', 'ADMIN_ITEM');
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_RA', 'NCI_ADMIN_ITEM_REL_ALT_KEY');
 EXEC DBMS_STATS.GATHER_TABLE_STATS ('ONEDATA_RA', 'PERM_VAL');
