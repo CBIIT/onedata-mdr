@@ -1,9 +1,14 @@
 -- Run as ONEDATA_WA DDL scripts
 S12_1_WA_RA_DDL.sql
+S12_2_WA_DDL.sql
 S12_WA_TR_AI_WFS.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S12_1_WA_RA_DDL.sql
+
+-- Run as ONEDATA_WA
+S12_WA_NCI_CADSR_PULL.sql
+S12_WA_NCI_CHNG_MGMT.sql
 
 -- DATA MIGRATION
 
