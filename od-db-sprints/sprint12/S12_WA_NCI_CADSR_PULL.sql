@@ -1,3 +1,5 @@
+DROP PACKAGE ONEDATA_WA.NCI_CADSR_PULL;
+
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
@@ -26,6 +28,8 @@ PROCEDURE            sp_create_form_rel;
   --    procedure sp_append_quest_pv;
 END;
 /
+
+DROP PACKAGE BODY ONEDATA_WA.NCI_CADSR_PULL;
 
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_caDSR_PULL AS
 
@@ -2127,6 +2131,7 @@ procedure sp_migrate_lov
 as
 v_cnt integer;
 begin
+/*
 delete from stus_mstr;
 commit;
 
@@ -2160,6 +2165,7 @@ v_cnt := v_cnt + 1;
 end loop;
 commit;
 
+*/
 
 
 delete from obj_key where obj_typ_id = 14;  -- Program Area
@@ -2597,7 +2603,7 @@ select 26, CTL_NAME, description, CTL_NAME, comments,  nvl(created_by,v_dflt_usr
 --insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (52,83);
 --insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (52,84);
 insert into NCI_AI_TYP_VALID_STUS (STUS_ID,ADMIN_ITEM_TYP_ID,CREAT_DT,CREAT_USR_ID,LST_UPD_DT,LST_UPD_USR_ID)
-select stus_id, obj_key_id, 
+select stus_id, obj_key_id,
               nvl(e.date_created,v_dflt_date) ,
   nvl(e.created_by,v_dflt_usr),
                 nvl(NVL (e.date_modified, e.date_created), v_dflt_date),
@@ -2636,17 +2642,20 @@ from sbrext.ASL_ACTL_EXT e, stus_mstr s
 where e.ASL_NAME = s.nci_stus and s.stus_typ_id = 2 and e.ACTL_NAME = 'QUEST_CONTENT';
 commit;
 
+/*
 -- Adding DRAFT-new for all Admin_item_types
 
 insert into NCI_AI_TYP_VALID_STUS (STUS_ID,ADMIN_ITEM_TYP_ID)
-select 66, obj_key_id from 
-(select obj_key_id from vw_obj_key_4 
+select 66, obj_key_id from
+(select obj_key_id from vw_obj_key_4
 minus
 select admin_item_typ_id from NCI_AI_TYP_VALID_STUS where stus_id = 66);
 commit;
 
+*/
+
 insert into NCI_AI_TYP_VALID_STUS (STUS_ID,ADMIN_ITEM_TYP_ID)
-select stus_id,51 from vw_admin_stus where 
+select stus_id,51 from vw_admin_stus where
 nci_stus in (
 'APPRVD FOR TRIAL USE',
 'DRAFT MOD',
@@ -2888,7 +2897,7 @@ INSERT /*+ APPEND */
     COMMIT;
 
 
-    
+
   INSERT INTO nci_protcl (item_id,
                             ver_nr,
                             PROTCL_TYP_ID,
@@ -2929,7 +2938,7 @@ nvl(cd.created_by,v_dflt_usr),
                AND ok.obj_typ_id(+) = 19
                AND ai.admin_item_typ_id = 50
                and cd.LEAD_ORG =org.ORG_NM(+);
-               
+
     COMMIT;
 END;
 
