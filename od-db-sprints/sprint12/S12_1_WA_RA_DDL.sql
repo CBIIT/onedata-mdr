@@ -250,3 +250,7 @@ AND ADMIN_ITEM.VER_NR=VALUE_DOM.VER_NR and
 VALUE_DOM.REP_CLS_ITEM_ID = RC.ITEM_ID (+) and 
 VALUE_DOM.REP_CLS_VER_NR = RC.VER_NR (+);
 
+
+		     alter table NCI_STG_AI_CNCPT_CREAT add (BTCH_USR_NM  varchar2(100) not null,
+        BTCH_NM  varchar2(100) not null);
+		      
