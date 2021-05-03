@@ -2,6 +2,7 @@
 S12_1_WA_RA_DDL.sql
 S12_2_WA_DDL.sql
 S12_WA_TR_AI_WFS.sql
+S12_OD_TR_ADMIN_ITEM.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S12_1_WA_RA_DDL.sql
