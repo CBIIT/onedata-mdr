@@ -2191,42 +2191,77 @@ end;
 procedure sp_migrate_lov
 as
 v_cnt integer;
+v_status_name stus_mstr.STUS_NM%TYPE;
+v_status_type_id number;
+v_status_max_id number;
+v_found varchar2(5);
 begin
-/*
+/* we do not clean up this table, but populate it incrementally to preserve IDs
 delete from stus_mstr;
 commit;
-
-v_cnt := 1;
+*/
+v_cnt := 0; -- status ID to use
 
 for cur in (select registration_status,description,
                     comments,created_by, date_created,
                     nvl(date_modified, date_created) date_modified, modified_by,
-                    display_order from sbr.reg_status_lov order by display_order) loop
-insert into stus_mstr (STUS_ID, NCI_STUS,STUS_NM, STUS_DESC,
-                        NCI_CMNTS,CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID,
-                        NCI_DISP_ORDR,STUS_TYP_ID )
-values (v_cnt, cur.registration_status, cur.registration_status, cur.description, cur.comments, nvl(cur.created_by, v_dflt_usr), nvl(cur.date_created,v_dflt_date),
-nvl(nvl(cur.date_modified,cur.date_created), v_dflt_date), nvl(cur.modified_by, v_dflt_usr), cur.display_order, 1);
-v_cnt := v_cnt + 1;
+                    display_order from sbr.reg_status_lov 
+                    order by display_order) loop
 
+v_cnt = get_stus_mstr_id(cur.registration_status, 1); -- we need to preserve ID
+
+v_found := is_stus_mstr_exist(cur.registration_status, 1);
+
+if (v_found = 'FALSE') then --if not exist INSERT
+insert into stus_mstr (STUS_ID, NCI_STUS, STUS_NM, STUS_DESC,
+                       NCI_CMNTS, CREAT_USR_ID, CREAT_DT, LST_UPD_DT, LST_UPD_USR_ID,
+                       NCI_DISP_ORDR, STUS_TYP_ID )
+values (v_cnt, cur.registration_status, cur.registration_status, cur.description, 
+cur.comments, nvl(cur.created_by, v_dflt_usr), nvl(cur.date_created,v_dflt_date), nvl(nvl(cur.date_modified,cur.date_created), v_dflt_date), nvl(cur.modified_by, v_dflt_usr), 
+cur.display_order, 1);
+else --update
+update stus_mstr set NCI_STUS = cur.registration_status, STUS_NM = cur.registration_status, STUS_DESC=cur.description,
+NCI_CMNTS = cur.comments, CREAT_USR_ID = nvl(cur.created_by, v_dflt_usr), CREAT_DT = nvl(cur.date_created,v_dflt_date), 
+LST_UPD_DT = nvl(nvl(cur.date_modified,cur.date_created), v_dflt_date), LST_UPD_USR_ID = nvl(cur.modified_by, v_dflt_usr), 
+NCI_DISP_ORDR = cur.display_order where STUS_ID = v_cnt;
+end if;
 end loop;
-
-v_cnt := 50;
+commit;
 
 for cur in (select asl_name,description,
                     comments,created_by, date_created,
                     nvl(date_modified, date_created) date_modified, modified_by,
-                    display_order from sbr.ac_status_lov order by asl_name) loop
-insert into stus_mstr (STUS_ID, NCI_STUS,STUS_NM, STUS_DESC,
-                        NCI_CMNTS,CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID,
-                        NCI_DISP_ORDR,STUS_TYP_ID )
-values (v_cnt, cur.asl_name, cur.asl_name, cur.description, cur.comments, nvl(cur.created_by, v_dflt_usr), nvl(cur.date_created,v_dflt_date),
-nvl(nvl(cur.date_modified,cur.date_created), v_dflt_date), nvl(cur.modified_by, v_dflt_usr), cur.display_order, 2);
+                    display_order from sbr.ac_status_lov 
+                    order by asl_name) loop
+
+v_cnt = get_stus_mstr_id(cur.asl_name, 2); -- we need to preserve ID
+
+v_found := is_stus_mstr_exist(cur.asl_name, 2);
+
+if (v_found = 'FALSE') then --if not exist INSERT
+insert into stus_mstr (STUS_ID, NCI_STUS, STUS_NM, STUS_DESC,
+                       NCI_CMNTS, CREAT_USR_ID, CREAT_DT, LST_UPD_DT, LST_UPD_USR_ID,
+                       NCI_DISP_ORDR, STUS_TYP_ID )
+values (v_cnt, cur.asl_name, cur.asl_name, cur.description, 
+cur.comments, nvl(cur.created_by, v_dflt_usr), nvl(cur.date_created,v_dflt_date), nvl(nvl(cur.date_modified,cur.date_created), v_dflt_date), nvl(cur.modified_by, v_dflt_usr), 
+cur.display_order, 2);
 v_cnt := v_cnt + 1;
+else --update
+update stus_mstr set NCI_STUS = cur.asl_name, STUS_NM = cur.asl_name, STUS_DESC = cur.description,
+NCI_CMNTS = cur.comments, CREAT_USR_ID = nvl(cur.created_by, v_dflt_usr), CREAT_DT = nvl(cur.date_created,v_dflt_date), 
+LST_UPD_DT = nvl(nvl(cur.date_modified,cur.date_created), LST_UPD_USR_ID = nvl(cur.modified_by, v_dflt_usr),
+NCI_DISP_ORDR = cur.display_order where STUS_ID = v_cnt;
+end if;
 end loop;
 commit;
 
-*/
+--clean up caDSR-deleted WFS
+delete from stus_mstr sm where STUS_TYP_ID =  2 and not exists (select * from sbr.ac_status_lov lv where sm.STUS_NM = lv.asl_name);
+commit;
+
+--clean up caDSR-deleted reg statuses
+delete from stus_mstr sm where STUS_TYP_ID =  1 and not exists (select * from sbr.reg_status_lov lv where sm.STUS_NM = lv.registration_status);
+commit;
 
 
 delete from obj_key where obj_typ_id = 14;  -- Program Area
