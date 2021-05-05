@@ -2096,14 +2096,12 @@ END;
 
 procedure sp_load_status
 as
-
 v_cnt integer;
-v_status_name stus_mstr.STUS_NM%TYPE;
-v_status_type_id number;
---v_status_max_id number;
 v_found varchar2(5);
 begin
-/Insert into ONEDATA_WA.STUS_MSTR (STUS_ID,STUS_NM,STUS_DESC,STUS_TYP_ID,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT,STUS_MSK,STUS_ACRO,NCI_STUS,NCI_CMNTS,NCI_DISP_ORDR) values (9,'Application','The AC is part of a computer program or application and may not have all the metadata generally required by the registry.',1,to_date('26-MAY-04','DD-MON-RR'),'SBR','CHENR',0,to_date('19-APR-21','DD-MON-RR'),to_date('19-APR-21','DD-MON-RR'),to_date('02-DEC-16','DD-MON-RR'),'000000',null,'Application',null,55);
+delete from ONEDATA_WA.STUS_MSTR ;
+commit;
+Insert into ONEDATA_WA.STUS_MSTR (STUS_ID,STUS_NM,STUS_DESC,STUS_TYP_ID,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT,STUS_MSK,STUS_ACRO,NCI_STUS,NCI_CMNTS,NCI_DISP_ORDR) values (9,'Application','The AC is part of a computer program or application and may not have all the metadata generally required by the registry.',1,to_date('26-MAY-04','DD-MON-RR'),'SBR','CHENR',0,to_date('19-APR-21','DD-MON-RR'),to_date('19-APR-21','DD-MON-RR'),to_date('02-DEC-16','DD-MON-RR'),'000000',null,'Application',null,55);
 Insert into ONEDATA_WA.STUS_MSTR (STUS_ID,STUS_NM,STUS_DESC,STUS_TYP_ID,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT,STUS_MSK,STUS_ACRO,NCI_STUS,NCI_CMNTS,NCI_DISP_ORDR) values (10,'Historical','Historical',1,to_date('02-DEC-16','DD-MON-RR'),'CHENR','CHENR',0,to_date('19-APR-21','DD-MON-RR'),to_date('19-APR-21','DD-MON-RR'),to_date('02-DEC-16','DD-MON-RR'),'000000',null,'Historical',null,58);
 Insert into ONEDATA_WA.STUS_MSTR (STUS_ID,STUS_NM,STUS_DESC,STUS_TYP_ID,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT,STUS_MSK,STUS_ACRO,NCI_STUS,NCI_CMNTS,NCI_DISP_ORDR) values (11,'Retired','The AC should no longer be used.',1,to_date('26-MAY-04','DD-MON-RR'),'SBR','SBR',0,to_date('19-APR-21','DD-MON-RR'),to_date('19-APR-21','DD-MON-RR'),to_date('29-MAR-05','DD-MON-RR'),'000000',null,'Retired',null,60);
 Insert into ONEDATA_WA.STUS_MSTR (STUS_ID,STUS_NM,STUS_DESC,STUS_TYP_ID,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT,STUS_MSK,STUS_ACRO,NCI_STUS,NCI_CMNTS,NCI_DISP_ORDR) values (50,'APPRVD FOR TRIAL USE','Fully specified administered component, CRFs CDE-compliant',2,to_date('19-FEB-02','DD-MON-RR'),'SBR','DWARZEL',0,to_date('19-APR-21','DD-MON-RR'),to_date('19-APR-21','DD-MON-RR'),to_date('02-APR-15','DD-MON-RR'),'000000',null,'APPRVD FOR TRIAL USE','Status assigned to Draft New Data Elements included on CDE-compliant forms, as well as their associated Administered Components.  Promotion to this status occurs when the Administered Component has been fully specified and CRFs with which the Data Element is associated are deemed CDE-compliant.',20);
@@ -2158,10 +2156,6 @@ commit;
 
 /* we do not clean up this table, but populate it incrementally to preserve IDs
 */
-delete from stus_mstr;
-commit;
-sp_load_status;
-
 
 v_cnt := 0; -- status ID to use
 
@@ -2260,10 +2254,7 @@ end;
 procedure sp_migrate_lov
 as
 v_cnt integer;
-v_status_name stus_mstr.STUS_NM%TYPE;
-v_status_type_id number;
-v_status_max_id number;
-v_found varchar2(5);
+
 begin
 
 sp_load_status;
