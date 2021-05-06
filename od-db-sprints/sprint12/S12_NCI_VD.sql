@@ -379,12 +379,12 @@ AS
             ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
             and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR') 
             and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')) loop
+            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')
+            and ai.item_id <>  nvl(ihook.getColumnValue(rowai, 'ITEM_ID'),0)) loop
                 is_valid := false;
                 ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'Duplicate VD found based on context/short name: ' || cur.item_id || chr(13));
 
             end loop;
-
 
 
          rows := t_rows();
@@ -946,4 +946,4 @@ end if;
 end;
 
 END;
-/
+								      /
