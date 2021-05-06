@@ -30,7 +30,7 @@ function is_stus_mstr_exist (STATUS_NAME VARCHAR2, STATUS_TYPE_ID number) return
 END;
 /
 
-CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_caDSR_PULL AS
+create or replace PACKAGE BODY            nci_caDSR_PULL AS
 
 
 v_dflt_usr  varchar2(30) := 'ONEDATA';
@@ -390,7 +390,7 @@ end loop;
                ac.change_note,
                --conte_idseq,
                cntxt.item_id,
-               cntxt_ver_nr,
+               cntxt.ver_nr,
                cntxt.item_nm,
                ac.end_date,
                DECODE (UPPER (ac.latest_version_ind),  'YES', 1,  'NO', 0),
@@ -4082,4 +4082,4 @@ END;
 RETURN v_found;
 END;
 END;
-/
+						      /
