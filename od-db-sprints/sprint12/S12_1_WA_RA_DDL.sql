@@ -1,6 +1,9 @@
 alter table NCI_STG_AI_CNCPT_CREAT
 add (ITEM_LONG_NM  varchar2(30) null,  ITEM_NM varchar2(255) null);
 
+update obj_key set fld_delete = 1 where obj_key_id = 10;
+commit;
+
 drop materialized view  VW_CLSFCTN_SCHM;
 
 
