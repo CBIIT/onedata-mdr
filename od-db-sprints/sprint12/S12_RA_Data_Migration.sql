@@ -45,7 +45,7 @@ truncate table ONEDATA_RA.NCI_ENTTY;
 truncate table ONEDATA_RA.obj_key;
 truncate table ONEDATA_RA.obj_typ;
 truncate table ONEDATA_RA.NCI_USR_CART;
-truncate table STUS_MSTR;
+truncate table ONEDATA_RA.STUS_MSTR;
 /
 begin
 dbms_output.put_line('ONEDATA_RA tables truncated');
