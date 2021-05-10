@@ -8,7 +8,7 @@
 S13_WA_Data_Migration.sql
 
 -- Run as ONEDATA_RA DM scripts
-S9_RA_Data_Migration.sql
+S12_RA_Data_Migration.sql
 
 -- Check that materialized views have valid statuses.
 
