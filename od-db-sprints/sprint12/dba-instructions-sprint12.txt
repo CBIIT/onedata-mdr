@@ -18,7 +18,7 @@ S12_WA_NCI_CHNG_MGMT.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S12_1_WA_RA_DDL.sql
-
+S12_2_RA_DDL.sql
 -- DATA MIGRATION
 
 -- Run as ONEDATA_WA DM scripts
