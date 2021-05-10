@@ -13,21 +13,19 @@ S12_NCI_PV_VM.sql
 S12_NCI_FORM_MGMT.sql
 S12_NCI_IMPORT.sql
 S12_NCI_POST_HOOK.sql
+S12_WA_NCI_CADSR_PULL.sql
+S12_WA_NCI_CHNG_MGMT.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S12_1_WA_RA_DDL.sql
 
--- Run as ONEDATA_WA
-S12_WA_NCI_CADSR_PULL.sql
-S12_WA_NCI_CHNG_MGMT.sql
-
 -- DATA MIGRATION
 
 -- Run as ONEDATA_WA DM scripts
---S12_WA_Data_Migration.sql
+S12_WA_Data_Migration.sql
 
 -- Run as ONEDATA_RA DM scripts
---S12_RA_Data_Migration.sql
+S12_RA_Data_Migration.sql
 
 -- Check that materialized views have valid statuses.
 
