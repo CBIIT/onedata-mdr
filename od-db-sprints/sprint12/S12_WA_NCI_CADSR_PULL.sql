@@ -1303,9 +1303,11 @@ end loop;
 
     COMMIT;
     
-update admin_Item set fld_delete = 1 where admin_item_typ_id = 8 and nci_idseq not in (Select conte_idseq from sbr.contexts);  
+update admin_Item set fld_delete = 1 where admin_item_typ_id = 8 and nci_idseq not in (Select conte_idseq from sbr.contexts);
 commit;
-update cntxt set fld_delete = 1 where (item_id,ver_nr) not in (Select item_id,ver_nr from admin_Item where fld_delete = 1 and admin_item_typ_id = 8 );
+update cntxt set fld_delete = 1 where (item_id,ver_nr)  in (Select item_id,ver_nr from admin_Item where fld_delete = 1 and admin_item_typ_id = 8 );
+commit;
+update cntxt set fld_delete = 0 where (item_id,ver_nr)  in (Select item_id,ver_nr from admin_Item where fld_delete = 0 and admin_item_typ_id = 8 );
 commit;
 
     -- Conceptual Domain Creation
