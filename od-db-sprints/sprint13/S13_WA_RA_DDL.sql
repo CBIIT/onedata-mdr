@@ -6,5 +6,5 @@ alter table NCI_STG_AI_CNCPT_CREAT add (CTL_VAL_STUS varchar2(100));
                                                               
  drop view vw_perm_values;
                                                               
-alter NCI_DLOAD_HDR add (EMAIL_ADDR  varchar2(255));
+alter table NCI_DLOAD_HDR add (EMAIL_ADDR  varchar2(255));
                                               
