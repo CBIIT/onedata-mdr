@@ -1,3 +1,16 @@
+create or replace function get_origin_id_nci_thesaurus return number is
+v_ORIGIN_NCI_THESAURUS_ID number;
+BEGIN
+BEGIN
+select obj_key_id into v_ORIGIN_NCI_THESAURUS_ID from obj_key where obj_typ_id = 18 and obj_key_desc='NCI Thesaurus';
+EXCEPTION 
+	WHEN NO_DATA_FOUND THEN
+	v_ORIGIN_NCI_THESAURUS_ID := null;
+END;
+RETURN v_ORIGIN_NCI_THESAURUS_ID;
+END;
+/
+
 create or replace TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
 BEGIN    IF (:NEW.ITEM_ID = -1  or :NEW.ITEM_ID is null)  THEN select od_seq_ADMIN_ITEM.nextval
  into :new.ITEM_ID  from  dual ;   END IF;
@@ -26,7 +39,7 @@ if (:new.admin_item_typ_id  in (49) and :new.cntxt_item_id is null) then -- Set 
  :new.cntxt_ver_nr := 1;
 end if;
 if (:new.admin_item_typ_id  in (49) and :new.ORIGIN_ID is null) then -- Set the default origin for concept if empty
- :new.ORIGIN_ID := 69942; --NCI Thesaurus DSRMWS-748
+ :new.ORIGIN_ID := get_origin_id_nci_thesaurus; --NCI Thesaurus DSRMWS-748
 end if;
 if (:new.admin_item_typ_id  in (5,6)) then -- Set the default context
  :new.cntxt_item_id := 20000000024;
