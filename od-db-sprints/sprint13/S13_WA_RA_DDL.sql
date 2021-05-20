@@ -196,8 +196,8 @@ and VALUE_DOM.CONC_DOM_ITEM_ID = CD_AI.ITEM_ID
 and VALUE_DOM.CONC_DOM_VER_NR = CD_AI.VER_NR;
 
 
-
-  CREATE OR REPLACE  VIEW VW_NCI_USED_BY AS
+-- Tracker 845
+ CREATE OR REPLACE  VIEW VW_NCI_USED_BY AS
   select distinct ITEM_ID, VER_NR , CNTXT_ITEM_ID, CNTXT_VER_NR, sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, 0 FLD_DELETE, sysdate LST_DEL_DE, sysdate S2P_TRN_DT, sysdate LST_UPD_DT
 from (
   SELECT distinct DE.ITEM_ID, DE.VER_NR, a.CNTXT_ITEM_ID, a.CNTXT_VER_NR, sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, a.FLD_DELETE, a.LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT
@@ -232,6 +232,12 @@ union
        and rel.C_ITEM_ID = quest.P_ITEM_ID
        and rel.C_ITEM_VER_NR = quest.P_ITEM_VER_NR
        and ai.admin_stus_id = 75 -- only for released forms.
+union
+  SELECT distinct quest.C_ITEM_ID, quest.C_ITEM_VER_NR, cs.CNTXT_ITEM_ID, cs.CNTXT_VER_NR, sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, quest.FLD_DELETE, quest.LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT
+       FROM NCI_ADMIN_ITEM_REL quest, ADMIN_ITEM cs, NCI_CLSFCTN_SCHM_ITEM csi
+       WHERE cs.ITEM_ID = csi.cs_ITEM_ID and cs.VER_NR = csi.CS_ITEM_VER_NR
+       and nvl(cs.fld_delete,0) = 0
+       and nvl(csi.fld_delete,0) = 0
+       and csi.ITEM_ID = quest.P_ITEM_ID
+       and cs.VER_NR = quest.P_ITEM_VER_NR
       );
-
-
