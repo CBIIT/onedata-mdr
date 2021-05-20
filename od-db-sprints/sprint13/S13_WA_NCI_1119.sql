@@ -1,5 +1,3 @@
-DROP PACKAGE ONEDATA_WA.NCI_11179;
-
 CREATE OR REPLACE PACKAGE ONEDATA_WA."NCI_11179" AS
 function getWordCount(v_nm in varchar2) return integer;
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
@@ -40,10 +38,7 @@ spCreateVerNCI - Create new version customized
 END;
 /
 
-
 GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;
-
-DROP PACKAGE BODY ONEDATA_WA.NCI_11179;
 
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.NCI_11179 AS
 
@@ -280,7 +275,7 @@ begin
         hookOutput.showRowset := showRowset;  -- Show rowset
 
         answers := t_answers();
-  	   	answer := t_answer(1, 1, 'Select new latest version');
+  	   	answer := t_answer(1, 1, 'Select Latest Version');
   	   	answers.extend; answers(answers.last) := answer;
 	   	question := t_question('Set new Version', answers);
        	hookOutput.question := question;  -- Ask the question
@@ -1524,7 +1519,7 @@ begin
         ANSWER                     := T_ANSWER(1, 1, 'Create Version' );
         ANSWERS.EXTEND;
         ANSWERS(ANSWERS.LAST) := ANSWER;
-        QUESTION               := T_QUESTION('change to Specify new Version, current version is' || trim(to_char(ihook.getColumnValue(row_ori,'VER_NR' ), '9999.99')) , ANSWERS);
+        QUESTION               := T_QUESTION('Specify new Version, current version is: ' || trim(to_char(ihook.getColumnValue(row_ori,'VER_NR' ), '9999.99')) , ANSWERS);
         HOOKOUTPUT.QUESTION    := QUESTION;
         forms                  := t_forms();
         form1                  := t_form('Version Creation', 2,1);
