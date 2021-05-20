@@ -241,3 +241,78 @@ union
        and csi.ITEM_ID = quest.P_ITEM_ID
        and cs.VER_NR = quest.P_ITEM_VER_NR
       );
+      
+
+create table nci_ds_hdr
+( hdr_id number,
+entty_nm varchar2(255),
+entty_nm_usr varchar2(255),
+BTCH_SEQ_NBR number,
+USR_CMNTS  varchar2(4000),
+ CREAT_DT             DATE DEFAULT sysdate NULL,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
+       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
+       LST_DEL_DT           DATE DEFAULT sysdate NULL,
+       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+       CREATED_DT           DATE DEFAULT sysdate null,
+       CREATED_BY           varchar2(50) null,
+       LST_TRIGGER_DT       DATE DEFAULT sysdate null,
+primary key (hdr_id));
+
+
+create table nci_ds_dtl
+(hdr_id number ,
+ perm_val_nm varchar2(255),
+ CREAT_DT             DATE DEFAULT sysdate NULL,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
+       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
+       LST_DEL_DT           DATE DEFAULT sysdate NULL,
+       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+primary key (hdr_id, perm_val_nm));
+
+
+
+create table nci_ds_rslt
+(hdr_id number not null ,
+ item_id number not null,
+ ver_nr number(4,2) not null,
+ RULE_ID integer,
+ SCORE integer,
+ RULE_DESC varchar2(255),
+USR_CMNTS  varchar2(4000),
+ NUM_PV_IN_SRC integer,
+ NUM_PV_IN_CDE integer,
+ NUM_PV_MTCH integer,
+ NM_MTCH_PRCNT  integer,
+ NUM_PV_MTCH_FUZZY integer,
+ CREAT_DT             DATE DEFAULT sysdate NULL,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
+       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
+       LST_DEL_DT           DATE DEFAULT sysdate NULL,
+       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+primary key (hdr_id, item_id, ver_nr));
+
+
+create table nci_ds_rslt_dtl
+(HDR_ID number,
+ ITEM_ID number,
+ VER_NR number(4,2),
+ PERM_VAL_NM varchar2(255),
+ RULE_ID integer,
+ SCORE integer,
+ RULE_DESC varchar2(255),
+ CREAT_DT             DATE DEFAULT sysdate NULL,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
+       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
+       LST_DEL_DT           DATE DEFAULT sysdate NULL,
+       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+primary key (HDR_ID, ITEM_ID, VER_NR, PERM_VAL_NM, RULE_ID));
+
