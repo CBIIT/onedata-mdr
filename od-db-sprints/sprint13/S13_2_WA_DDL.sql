@@ -67,3 +67,14 @@ if (:new.lst_upd_dt is null) then
 end if; 
 END ;
 /
+
+CREATE SEQUENCE OD_SEQ_DS_HDR
+          INCREMENT BY 1
+          START WITH 1000
+         ;
+         
+    CREATE OR REPLACE TRIGGER OD_TR_DS_HDR  BEFORE INSERT  on  NCI_DS_HDR for each row
+         BEGIN    IF (:NEW.HDR_ID<= 0  or :NEW.HDR_ID is null)  THEN 
+         select od_seq_DS_HDR.nextval
+    into :new.HDR_ID  from  dual ;   END IF; END ;
+/
