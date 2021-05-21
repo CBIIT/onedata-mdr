@@ -322,7 +322,10 @@ BEGIN
         ihook.setColumnValue(rowai,'ITEM_NM', v_item_nm);
    
         ihook.setColumnValue(rowai,'ITEM_DESC',v_item_def);
-     
+   
+        if hookinput.answerid = 1 and v_valid = false then --Validate
+            hookoutput.message := 'Validation Successful';
+        end if;    
 
           rows.extend;
           rows(rows.last) := rowai;
@@ -445,6 +448,7 @@ select count(*) into v_unq_id from admin_item ai, de de
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
 END;
+
 
 PROCEDURE spDEValCreateImport (rowform in out t_row, v_op in varchar2, actions in out t_actions, v_val_ind in out boolean)
 AS
@@ -883,7 +887,6 @@ select count(*) into v_unq_id from admin_item ai, de de
 END;
 
 
-
 function getCSICreateQuestion return t_question is
   question t_question;
   answer t_answer;
@@ -947,7 +950,7 @@ begin
     If v_from=1 then
     QUESTION               := T_QUESTION('Create new CDE.', ANSWERS);
     else
-    QUESTION               := T_QUESTION('Create CDE From Existing.', ANSWERS);
+    QUESTION               := T_QUESTION('Create CDE from Existing.', ANSWERS);
     end IF;
 return question;
 end;
