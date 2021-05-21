@@ -1,4 +1,4 @@
-create or replace PACKAGE            nci_DEC_MGMT AS
+CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_DEC_MGMT AS
 
 procedure valUsingStr (rowform in out t_row, k in integer, v_item_typ in integer) ;
 
@@ -37,7 +37,9 @@ function getDECCreateForm (v_rowset in t_rowset) return t_forms;
 
 END;
 /
-create or replace PACKAGE BODY            nci_DEC_MGMT AS
+
+
+CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_DEC_MGMT AS
 
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
@@ -276,47 +278,48 @@ end;
 -- v_op is insert or update
 PROCEDURE       spDECCommon ( v_init in t_rowset,  v_op  in varchar2, v_src in integer, hookInput in t_hookInput, hookOutput in out t_hookOutput)
 AS
-  rowform t_row;
-  forms t_forms;
-  form1 t_form;
+rowform t_row;
+forms t_forms;
+form1 t_form;
 
-  row t_row;
-  rows  t_rows;
-  row_ori t_row;
-  rowset            t_rowset;
-  v_oc_item_id number;
-  v_oc_ver_nr number;
-  v_oc_long_nm varchar2(255);
-  v_oc_nm varchar2(255);
-  v_prop_nm varchar2(255);
-  v_oc_def  varchar2(2000);
+row t_row;
+rows  t_rows;
+row_ori t_row;
+rowset            t_rowset;
+v_oc_item_id number;
+v_oc_ver_nr number;
+v_oc_long_nm varchar2(255);
+v_oc_nm varchar2(255);
+v_prop_nm varchar2(255);
+v_oc_def  varchar2(2000);
+v_prop_item_id number;
+v_prop_ver_nr number;
+v_prop_long_nm varchar2(255);
+v_prop_def  varchar2(2000);
+v_dec_item_id number;
+v_str  varchar2(255);
+v_nm  varchar2(255);
+v_item_id number;
+v_ver_nr number(4,2);
+cnt integer;
 
-  v_prop_item_id number;
-  v_prop_ver_nr number;
-  v_prop_long_nm varchar2(255);
-  v_prop_def  varchar2(2000);
-  v_dec_item_id number;
- v_str  varchar2(255);
- v_nm  varchar2(255);
- v_item_id number;
- v_ver_nr number(4,2);
-  cnt integer;
-
-    actions t_actions := t_actions();
-  action t_actionRowset;
-  v_msg varchar2(1000);
-  i integer := 0;
-  v_err  integer;
-  column  t_column;
-  v_dec_nm varchar2(255);
-  v_cncpt_nm varchar2(255);
-  v_long_nm varchar2(255);
-  v_def varchar2(4000);
-  v_oc_id number;
-  v_prop_id number;
-  v_temp_id  number;
-  v_temp_ver number(4,2);
-  is_valid boolean;
+actions t_actions := t_actions();
+action t_actionRowset;
+v_msg varchar2(1000);
+i integer := 0;
+v_err  integer;
+column  t_column;
+v_dec_nm varchar2(255);
+v_cncpt_nm varchar2(255);
+v_long_nm varchar2(255);
+v_def varchar2(4000);
+v_oc_id number;
+v_prop_id number;
+v_temp_id  number;
+v_temp_ver number(4,2);
+v_unq_id number;
+v_unq_ver number(4,2);
+is_valid boolean;
 begin
     if hookInput.invocationNumber = 0 then
         --  Get question. Either create or edit
@@ -374,6 +377,17 @@ begin
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'OC or PROP missing.');
                   is_valid := false;
         end if;
+        
+         for cur in (select ai.* from  admin_item ai where 
+             trim(ai.ITEM_LONG_NM)=trim(ihook.getColumnValue(rowform,'ITEM_LONG_NM'))
+            and  ai.ver_nr =  NVL(ihook.getColumnValue(rowform, 'VER_NR'),1)            
+            and ai.cntxt_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') 
+            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowform, 'CNTXT_VER_NR'))
+            loop
+             ihook.setColumnValue(rowform, 'CTL_VAL_MSG','Unique constraint violated. The DEC '||nci_chng_mgmt.get_AI_id(cur.item_id ,cur.ver_nr )||' with the same Short Name and Context is found.');
+         -- hookoutput.message := 'Unique constraint violated. The DEC '||nci_chng_mgmt.get_AI_id(v_unq_id,v_unq_ver)||' with the same Short Name and Context is found.';
+           is_valid := false;
+           end loop;
 
          rows := t_rows();
 
