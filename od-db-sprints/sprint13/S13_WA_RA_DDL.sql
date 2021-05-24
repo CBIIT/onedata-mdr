@@ -7,7 +7,8 @@ alter table NCI_STG_AI_CNCPT_CREAT add (CTL_VAL_STUS varchar2(100));
  drop view vw_perm_values;
                                                               
 alter table NCI_DLOAD_HDR add (EMAIL_ADDR  varchar2(255));
-                                              
+ alter table NCI_DLOAD_HDR add (CMNT_TXT  varchar2(4000));
+                                             
   CREATE OR REPLACE  VIEW VW_CNCPT AS
   SELECT ADMIN_ITEM.ITEM_ID, ADMIN_ITEM.VER_NR, ADMIN_ITEM.ITEM_NM,  ADMIN_ITEM.ITEM_LONG_NM, ADMIN_ITEM.ITEM_DESC, ADMIN_ITEM.CREATION_DT, 
 ADMIN_ITEM.EFF_DT, ADMIN_ITEM.ORIGIN,  ADMIN_ITEM.UNTL_DT,  ADMIN_ITEM.CURRNT_VER_IND, ADMIN_ITEM.REGSTR_STUS_NM_DN, ADMIN_ITEM.ADMIN_STUS_NM_DN, 
