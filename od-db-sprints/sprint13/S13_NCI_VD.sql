@@ -406,7 +406,7 @@ AS
                     if (ihook.getColumnValue(rowvd, 'CNCPT_1_ITEM_ID_' || i) <> nvl(ihook.getColumnValue(rowvdold, 'CNCPT_1_ITEM_ID_' || i),0) ) then
                        for cur in (select item_nm, item_desc from admin_item  where item_id = ihook.getColumnValue(rowvd, 'CNCPT_1_ITEM_ID_' || i) and ver_nr = ihook.getColumnValue(rowvd, 'CNCPT_1_VER_NR_' || i)) loop
                         v_nm := v_nm || ' ' || cur.item_nm;
-                        v_def := v_def || ' ' || cur.item_desc;
+                        v_def := v_def || '_' || cur.item_desc;
                         
                        end loop;
                     end if;
@@ -573,7 +573,7 @@ from value_dom where item_id = v_item_id and ver_nr = v_ver_nr;
    
 --
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-      nci_util.debugHook('GENERAL',v_data_out);
+ --     nci_util.debugHook('GENERAL',v_data_out);
 end;
 --
 
@@ -647,7 +647,7 @@ from value_dom where item_id = v_item_id and ver_nr = v_ver_nr;
    
 --
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
- nci_util.debugHook('GENERAL',v_data_out);
+ --nci_util.debugHook('GENERAL',v_data_out);
 
 end;
 
@@ -688,7 +688,7 @@ begin
     spVDCommon(rowsetai,rowsetst,1, 'insert', hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-     nci_util.debugHook('GENERAL',v_data_out);
+   --  nci_util.debugHook('GENERAL',v_data_out);
 end;
 --
 --PROCEDURE spVDEdit ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
