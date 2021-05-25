@@ -247,83 +247,46 @@ BEGIN
       rows := t_rows();
 
       v_valid := true;
- -- for cur in (
-            
-            select count(*) into v_temp_id from admin_item ai, de de
-            where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
-           -- and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
-           -- and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')
-            and de.de_conc_item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') 
-            and de.de_conc_ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
-            and de.val_dom_item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') 
-            and de.val_dom_ver_nr =  ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR')
-            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR');--) 
-            
-            select count(*) into v_unq_id from admin_item ai, de de
-            where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
-            and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
-            and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')            
-            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR');
-
-
-        --loop
-        IF v_temp_id>0 or v_unq_id>0 then
-        IF v_temp_id>0 then
-        
-         select max(ai.item_id),max(ai.ver_nr) into v_temp_id,v_temp_ver from admin_item ai, de de
-            where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
-           
-            and de.de_conc_item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') 
-            and de.de_conc_ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
-            and de.val_dom_item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') 
-            and de.val_dom_ver_nr =  ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR')
-            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR');
-        --hookoutput.message := 'Duplicate CDE found: ' || v_temp_id;
-        
-        hookoutput.message := 'Duplicate CDE found: ' ||get_AI_id(v_temp_id,v_temp_ver);
-        END IF;
-        IF v_unq_id>0 then
-            select max(ai.item_id)  into v_unq_id from admin_item ai, de de
-            where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
-            and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
-            and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')            
-            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR');
-           hookoutput.message := 'Unique constraint violated. The CDE '||get_AI_id(v_unq_id,ihook.getColumnValue(rowai, 'VER_NR'))||' with the same Short Name and Context is found.';
       
-         -- hookoutput.message := 'Unique constraint violated. The CDE '||v_unq_id||'v'||ihook.getColumnValue(rowai, 'VER_NR')||' with the same Short Name and Context is found.';
-     END IF;
-         rows.extend;
-          rows(rows.last) := rowai;
-          rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
-          rows := t_rows();
-            rows.extend;
-          rows(rows.last) := rowde;
-          rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
-           v_valid := false;
-          hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
-          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,v_valid);
-          V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-          return;
-		 -- exit;
-         --end loop;
-          end if;  
-            
+      for cur in (select ai.item_id from  admin_item ai, de de
+            where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
+            and de.de_conc_item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') 
+            and de.de_conc_ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
+            and de.val_dom_item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') 
+            and de.val_dom_ver_nr =  ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR')
+            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
+            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')) loop 
+                v_valid := false;
+                hookoutput.message := 'Duplicate CDE found: ' ||cur.item_id;
+        end loop;
+        
+        for cur in (select ai.item_id from admin_item ai, de de
+            where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
+            and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
+            and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')            
+            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
+            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')) loop
+                v_valid := false;
+                hookoutput.message := 'Unique constraint on Item Short Name viaolated ' ||cur.item_id;            
+        end loop;
+
+-- Derivation rule/Derivation Type
+    if (v_valid = true and ( (ihook.getColumnValue (rowde, 'DERV_TYP_ID') is not null and ihook.getColumnValue (rowde, 'DERV_RUL') is null) or 
+        (ihook.getColumnValue (rowde, 'DERV_TYP_ID') is null and ihook.getColumnValue (rowde, 'DERV_RUL') is not null))) then
+                v_valid := false;
+                hookoutput.message := 'Derivation Type or Derivation Rule is missing. ';            
+        end if;       
+
     select substr(dec.item_nm || ' ' || vd.item_nm,1,255) ,substr(dec.item_desc || ':' || vd.item_desc,  1, 4000) into v_item_nm, v_item_def from admin_item dec, admin_item vd
             where dec.item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') and dec.ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
             and vd.item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') and vd.ver_nr = ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR');
 
    if hookinput.answerid = 1 or v_valid = false then --Validate
 
-   
         ihook.setColumnValue(rowai,'ITEM_NM', v_item_nm);
    
         ihook.setColumnValue(rowai,'ITEM_DESC',v_item_def);
-   
-        if hookinput.answerid = 1 and v_valid = false then --Validate
+        if hookinput.answerid = 1 and v_valid = true then --Validate
             hookoutput.message := 'Validation Successful';
         end if;    
 
@@ -341,12 +304,10 @@ BEGIN
 
     end if; 			
 			
- if (hookinput.answerid = 2 and v_valid = true) then
+    if (hookinput.answerid = 2 and v_valid = true) then
          
        v_id := nci_11179.getItemId;
        row := t_row();
-       --row := rowai;
-
         ihook.setColumnValue(rowai,'ITEM_ID', v_id);
         ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 4);
 
@@ -366,34 +327,6 @@ BEGIN
         if (ihook.getColumnValue(rowde, 'PREF_QUEST_TXT') = v_dflt_txt) then
         ihook.setColumnValue(rowde, 'PREF_QUEST_TXT', 'Data Element ' || v_item_nm|| ' does not have Preferred Question Text.'   );
         end if;
-select count(*) into v_unq_id from admin_item ai, de de
-            where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
-            and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
-            and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')            
-            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR');
-  IF v_unq_id>0 then
-            select max(ai.item_id)  into v_unq_id from admin_item ai, de de
-            where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
-            and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
-            and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')            
-            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR');
-           hookoutput.message := 'Unique constraint violated. The CDE '||get_AI_id(v_unq_id,ihook.getColumnValue(rowai, 'VER_NR'))||' with the same Short Name and Context is found.';
-         rows.extend;
-         
-          rows(rows.last) := rowai;
-          rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
-          rows := t_rows();
-            rows.extend;
-          rows(rows.last) := rowde;
-          rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
-           v_valid := false;
-          hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
-          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,v_valid);
-          V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-          return;   
-          END IF;
 
     rows := t_rows();
     rows.extend;
