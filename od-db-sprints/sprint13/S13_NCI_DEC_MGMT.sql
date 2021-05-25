@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_DEC_MGMT AS
+create or replace PACKAGE            nci_DEC_MGMT AS
 
 procedure valUsingStr (rowform in out t_row, k in integer, v_item_typ in integer) ;
 
@@ -37,9 +37,7 @@ function getDECCreateForm (v_rowset in t_rowset) return t_forms;
 
 END;
 /
-
-
-CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_DEC_MGMT AS
+create or replace PACKAGE BODY            nci_DEC_MGMT AS
 
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
@@ -658,13 +656,14 @@ if (v_cncpt_src ='STRING') then
                         v_cncpt_nm := nci_11179.getWord(v_str, i, cnt);
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, '');
-                        for cur in(select item_id, item_nm , item_long_nm from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
+                        for cur in(select item_id, item_nm , item_long_nm, item_desc from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
                                 ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,cur.item_id);
                                 ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, 1);
                                -- v_dec_nm := trim(v_dec_nm || ' ' || cur.item_nm) ;
                                 v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                                 v_nm := trim(v_nm || ' ' || cur.item_nm);
-                        end loop;
+                                           v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
+             end loop;
                 end loop;
                 for i in  cnt+1..10 loop
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
@@ -682,10 +681,12 @@ if (v_cncpt_src ='DROP-DOWN') then
                         v_temp_id := ihook.getColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i);
                         v_temp_ver := ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i);
                         if (v_temp_id is not null) then
-                        for cur in(select item_id, item_nm , item_long_nm from admin_item where admin_item_typ_id = 49 and item_id = v_temp_id and ver_nr = v_temp_ver) loop
+                        for cur in(select item_id, item_nm , item_long_nm , item_desc from admin_item where admin_item_typ_id = 49 and item_id = v_temp_id and ver_nr = v_temp_ver) loop
                           --       v_dec_nm := trim(v_dec_nm || ' ' || cur.item_nm) ;
                               v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                                 v_nm := trim(v_nm || ' ' || cur.item_nm);
+                                v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
+      
                          end loop;
                         end if;
                 end loop;
@@ -694,6 +695,7 @@ if (v_cncpt_src ='DROP-DOWN') then
 
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM', v_long_nm);
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', v_nm);
+             ihook.setColumnValue(rowform,'ITEM_' || idx || '_DEF', v_def);
 
 -- Check if combo exists. If it does, then v_item_id will be set.
 
