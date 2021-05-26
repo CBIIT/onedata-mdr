@@ -833,10 +833,10 @@ function getDECEditQuestion return t_question is
 begin
 --- If Edit DEC
     ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(2, 2, 'Validate Using Drop-down');
+    ANSWER                     := T_ANSWER(2, 2, 'Validate Using Drop-Down');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    ANSWER                     := T_ANSWER(4, 4, 'Update Using Drop-down');
+    ANSWER                     := T_ANSWER(4, 4, 'Update Using Drop-Down');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Edit DEC.', ANSWERS);
@@ -865,9 +865,9 @@ begin
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     if (v_src = 1) then -- Create new
-    QUESTION               := T_QUESTION('Create new DEC.', ANSWERS);
+    QUESTION               := T_QUESTION('Create New DEC', ANSWERS);
     else
-    QUESTION               := T_QUESTION('Create DEC from Existing.', ANSWERS);
+    QUESTION               := T_QUESTION('Create DEC from Existing', ANSWERS);
     end if;
 
 return question;

@@ -881,7 +881,7 @@ begin
     ANSWERS(ANSWERS.LAST) := ANSWER;
     end if;
     If v_from=1 then
-    QUESTION               := T_QUESTION('Create new CDE.', ANSWERS);
+    QUESTION               := T_QUESTION('Create New CDE', ANSWERS);
     else
     QUESTION               := T_QUESTION('Create CDE from Existing.', ANSWERS);
     end IF;

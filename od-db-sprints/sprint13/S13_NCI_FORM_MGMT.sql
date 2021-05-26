@@ -259,10 +259,10 @@ BEGIN
     -- First invocation - show the Add Form
     if hookInput.invocationNumber = 0 then
         ANSWERS                    := T_ANSWERS();
-        ANSWER                     := T_ANSWER(1, 1, 'Create Form.');
+        ANSWER                     := T_ANSWER(1, 1, 'Create Form');
         ANSWERS.EXTEND;
         ANSWERS(ANSWERS.LAST) := ANSWER;
-        QUESTION               := T_QUESTION('Add new form/template.', ANSWERS);
+        QUESTION               := T_QUESTION('Create New Form', ANSWERS);
         HOOKOUTPUT.QUESTION    := QUESTION;
 
         forms                  := t_forms();
@@ -373,10 +373,10 @@ BEGIN
 
  if hookInput.invocationNumber = 0 then
     ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Create Module.');
+    ANSWER                     := T_ANSWER(1, 1, 'Create Module');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Add new module.', ANSWERS);
+    QUESTION               := T_QUESTION('Add New Module', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
 
     rows := t_rows();
@@ -1320,7 +1320,7 @@ BEGIN
   	   	 answer := t_answer(1, 1, 'Select CDE to add..');
   	   	 answers.extend; answers(answers.last) := answer;
 
-	   	 question := t_question('Select option to proceed', answers);
+	   	 question := t_question('Select Module to Copy', answers);
        	 hookOutput.question := question;
       else
         hookoutput.message := 'Please add Data Elements to your cart.';

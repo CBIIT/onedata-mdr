@@ -729,19 +729,19 @@ begin
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
   --  ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(2, 2, 'Validate using drop-down');
+    ANSWER                     := T_ANSWER(2, 2, 'Validate Using Drop-Down');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    ANSWER                     := T_ANSWER(3, 3, 'Create using String');
+    ANSWER                     := T_ANSWER(3, 3, 'Create from String');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    ANSWER                     := T_ANSWER(4, 4, 'Create using drop-down');
+    ANSWER                     := T_ANSWER(4, 4, 'Create from Drop-Down');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-      ANSWER                     := T_ANSWER(5, 5, 'Create using specified');
+      ANSWER                     := T_ANSWER(5, 5, 'Create from Specified');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Create VM and/or PV.', ANSWERS);
+    QUESTION               := T_QUESTION('Create VM and/or PV', ANSWERS);
 
 return question;
 end;
@@ -758,7 +758,7 @@ begin
     ANSWER                     := T_ANSWER(1, 1, 'Create');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-  QUESTION               := T_QUESTION('Create PV and/or VM.', ANSWERS);
+  QUESTION               := T_QUESTION('Create Multiple PV with/without VM from Single Concept', ANSWERS);
 
 return question;
 end;
@@ -770,7 +770,7 @@ function getVMEditQuestion (v_src_tbl_nm in varchar2) return t_question is
 begin
 --- If Edit DEC
  ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(2, 2, 'Validate using drop-down');
+    ANSWER                     := T_ANSWER(2, 2, 'Validate Using Drop-Down');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     ANSWER                     := T_ANSWER(4, 4, 'Update');

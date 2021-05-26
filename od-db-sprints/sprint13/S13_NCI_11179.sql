@@ -1540,7 +1540,7 @@ begin
         ANSWER                     := T_ANSWER(1, 1, 'Create Version' );
         ANSWERS.EXTEND;
         ANSWERS(ANSWERS.LAST) := ANSWER;
-        QUESTION               := T_QUESTION('Specify new Version, current version is: ' || trim(to_char(ihook.getColumnValue(row_ori,'VER_NR' ), '9999.99')) , ANSWERS);
+        QUESTION               := T_QUESTION('Specify new Version, Current Version is: ' || trim(to_char(ihook.getColumnValue(row_ori,'VER_NR' ), '9999.99')) , ANSWERS);
         HOOKOUTPUT.QUESTION    := QUESTION;
         forms                  := t_forms();
         form1                  := t_form('Version Creation', 2,1);
