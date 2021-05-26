@@ -1,5 +1,6 @@
 -- Run as ONEDATA_WA DDL scripts
 S13_WA_RA_DDL.sql
+S13_1_WA_DDL.sql
 S13_2_WA_DDL.sql
 S13_NCI_11179.sql
 S13_NCI_11179_2.sql
