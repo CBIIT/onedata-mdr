@@ -1,5 +1,3 @@
-DROP PACKAGE ONEDATA_WA.NCI_CADSR_PULL;
-
 CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
@@ -31,8 +29,6 @@ function is_stus_mstr_exist (STATUS_NAME VARCHAR2, STATUS_TYPE_ID number) return
   --    procedure sp_append_quest_pv;
 END;
 /
-
-DROP PACKAGE BODY ONEDATA_WA.NCI_CADSR_PULL;
 
 CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_caDSR_PULL AS
 
