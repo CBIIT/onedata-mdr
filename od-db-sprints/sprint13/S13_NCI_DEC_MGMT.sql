@@ -153,9 +153,7 @@ begin
     ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', v_conc_dom_item_id);
     ihook.setColumnValue(row, 'CONC_DOM_VER_NR', v_conc_dom_ver_nr);
     ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
-    ihook.setColumnValue(row,'ADMIN_STUS_ID',66);
-    ihook.setColumnValue(row,'REGSTR_STUS_ID',9);
-
+   
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
     rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT');
 
