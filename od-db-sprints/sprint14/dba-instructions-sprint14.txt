@@ -3,7 +3,7 @@ S14_1_WA_RA_DDL.sql
 S14_NCI_11179.sql
 S14_NCI_DEC_MGMT.sql
 S14_NCI_VD.sql
-
+S14_NCI_PV_VM.sql
 -- Run as ONEDATA_RA DDL scripts
 S14_1_WA_RA_DDL.sql
 -- DATA MIGRATION
