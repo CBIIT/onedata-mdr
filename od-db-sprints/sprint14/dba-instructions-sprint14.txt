@@ -1,7 +1,10 @@
 -- Run as ONEDATA_WA DDL scripts
+S14_1_WA_RA_DDL.sql
+S14_NCI_11179.sql
 S14_NCI_DEC_MGMT.sql
--- Run as ONEDATA_RA DDL scripts
 
+-- Run as ONEDATA_RA DDL scripts
+S14_1_WA_RA_DDL.sql
 -- DATA MIGRATION
 
 -- Run as ONEDATA_WA DM scripts
