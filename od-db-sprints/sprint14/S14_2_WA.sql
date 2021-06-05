@@ -39,4 +39,36 @@ if (:new.lst_upd_dt is null) then
 :new.lst_upd_dt := sysdate;
 end if; 
 END ;
+/
+CREATE OR REPLACE TRIGGER TR_NCI_ALT_NMS
+  BEFORE INSERT  on ALT_NMS
+  for each row
+BEGIN
+ :new.NCI_IDSEQ := nci_11179.cmr_guid();
+END;
+/
 
+create or replace TRIGGER TR_NCI_ALT_DEF
+  BEFORE INSERT 
+  on ALT_DEF
+  for each row
+BEGIN
+ :new.NCI_IDSEQ := nci_11179.cmr_guid();
+END;
+/
+CREATE OR REPLACE TRIGGER OD_TR_ALT_KEY  BEFORE INSERT  on NCI_ADMIN_ITEM_REL_ALT_KEY
+  for each row
+         BEGIN    IF (:NEW.NCI_PUB_ID<= 0  or :NEW.NCI_PUB_ID is null)  THEN 
+         select od_seq_ADMIN_ITEM.nextval
+    into :new.NCI_PUB_ID  from  dual ;   
+ :new.nci_idseq := nci_11179.cmr_guid();
+END IF; END ;
+/
+CREATE OR REPLACE TRIGGER OD_TR_QUEST_VV BEFORE INSERT  ON NCI_QUEST_VALID_VALUE
+  for each row
+BEGIN    IF (:NEW.NCI_PUB_ID<= 0  or :NEW.NCI_PUB_ID is null)  THEN
+         select od_seq_ADMIN_ITEM.nextval
+    into :new.NCI_PUB_ID  from  dual ;   END IF;
+ :new.nci_idseq := nci_11179.cmr_guid();
+ END ;
+/
