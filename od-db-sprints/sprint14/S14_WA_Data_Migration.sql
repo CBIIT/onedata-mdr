@@ -22,8 +22,10 @@ alter trigger TR_NCI_QUEST_VV_REP_AUD_TS disable;
 alter trigger TR_AI_WFS disable;
 alter trigger TR_STUS_MSTR_AUD_TS disable;
 alter trigger TR_CNTXT_AUD_TS disable;
-TR_NCI_ALT_NMS
-
+alter trigger TR_NCI_ALT_NMS disable;
+alter trigger TR_NCI_ALT_DEF disable;
+alter trigger OD_TR_ALT_KEY disable;
+alter trigger OD_TR_QUEST_VV disable;
 
 drop index idxNCiAIRelUni;
 drop index idx_Admin_item_nci_uni;
@@ -229,6 +231,10 @@ alter trigger TR_NCI_QUEST_VV_REP_AUD_TS enable;
 alter trigger TR_AI_WFS enable;
 alter trigger TR_STUS_MSTR_AUD_TS enable;
 alter trigger TR_CNTXT_AUD_TS enable;
+alter trigger TR_NCI_ALT_NMS enable;
+alter trigger TR_NCI_ALT_DEF enable;
+alter trigger OD_TR_ALT_KEY enable;
+alter trigger OD_TR_QUEST_VV enable;
 create unique index idxNCiAIRelUni on nci_admin_item_rel 
 ( P_ITEM_ID, P_ITEM_VER_NR,decode(REL_TYP_ID, 61, 1,C_ITEM_ID), C_ITEM_VER_NR,  REL_TYP_ID, DISP_ORD);
 
