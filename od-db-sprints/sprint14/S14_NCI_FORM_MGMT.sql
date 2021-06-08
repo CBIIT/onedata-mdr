@@ -732,7 +732,7 @@ BEGIN
  end if;
  if hookInput.invocationNumber = 0 then
     ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Select');
+    ANSWER                     := T_ANSWER(1, 1, 'Select Repetition');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Delete Repetition', ANSWERS);
@@ -1350,7 +1350,7 @@ BEGIN
                         ihook.setColumnValue (row, 'CNTXT_CS_ITEM_ID', cur.cntxt_item_id);
                         ihook.setColumnValue (row, 'CNTXT_CS_VER_NR', cur.cntxt_ver_nr);
                         ihook.setColumnValue (row, 'ITEM_LONG_NM', cur.QUEST_TEXT );
-                         ihook.setColumnValue (row, 'ITEM_NM', cur.ITEM_NM );
+                         ihook.setColumnValue (row, 'ITEM_NM', cur.ITEM_LONG_NM );
 
                         ihook.setColumnValue (row, 'REL_TYP_ID', 63);
                         ihook.setColumnValue (row, 'DISP_ORD', v_disp_ord);
@@ -1533,7 +1533,7 @@ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.get
 
 	row_sel := hookInput.selectedRowset.rowset(1);
     nci_11179.spCopyModuleNCI (actions, ihook.getColumnValue(row_sel,'ITEM_ID'),ihook.getColumnValue(row_sel,'VER_NR'),
-    ihook.getColumnValue(row_sel,'P_ITEM_ID'), ihook.getColumnValue(row_sel,'P_ITEM_VER_NR'), ihook.getColumnValue(row_ori,'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), -1);
+    ihook.getColumnValue(row_sel,'P_ITEM_ID'), ihook.getColumnValue(row_sel,'P_ITEM_VER_NR'), ihook.getColumnValue(row_ori,'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), -1,'C');
 
 
     hookoutput.actions := actions;
@@ -1771,14 +1771,14 @@ nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.ge
 
 	  if (v_found) then
       ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Select Alternate');
+    ANSWER                     := T_ANSWER(1, 1, 'Select Alternate Name');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
    --  ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(2, 2, 'Set to Default');
+    ANSWER                     := T_ANSWER(2, 2, 'Set to Default VM Name');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Value Meaning Text', ANSWERS);
+    QUESTION               := T_QUESTION('Change Value Meaning Text', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
        	 showrowset := t_showablerowset (rows, 'Alternate Names', 2, 'single');
        	 hookoutput.showrowset := showrowset;
@@ -1880,13 +1880,13 @@ nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.ge
 
 	  if (v_found) then
       ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Select Alternate');
+    ANSWER                     := T_ANSWER(1, 1, 'Select Alternate Description');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-     ANSWER                     := T_ANSWER(2, 2, 'Set to Default');
+     ANSWER                     := T_ANSWER(2, 2, 'Set to Default VM Description');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('VM Alternate Description', ANSWERS);
+    QUESTION               := T_QUESTION('Change VM Alternate Description', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
        	 showrowset := t_showablerowset (rows, 'Alternate Definitions', 2, 'single');
        	 hookoutput.showrowset := showrowset;
