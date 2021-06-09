@@ -217,3 +217,15 @@ union
 	PV.NCI_VAL_MEAN_ITEM_ID = vm.ITEM_ID and
 	PV.NCI_VAL_MEAN_VER_NR = vm.VER_NR;
 	
+  CREATE OR REPLACE  VIEW VW_NCI_MODULE_QUEST  AS
+  select  
+air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr,
+ air.c_item_id de_item_id, air.c_item_ver_nr de_ver_nr, air.disp_ord,
+ air.nci_pub_id,air.nci_ver_nr, 
+de.CNTXT_NM_DN,
+air.CREAT_DT, air.CREAT_USR_ID, air.LST_UPD_USR_ID, air.FLD_DELETE, air.LST_DEL_DT, air.S2P_TRN_DT, air.LST_UPD_DT, air.item_long_nm QUEST_LONG_TXT, air.item_nm QUEST_TXT
+from  nci_admin_item_rel_alt_key air,
+ admin_item de
+where  air.rel_typ_id = 63
+and air.c_item_id = de.item_id
+and air.c_item_ver_nr = de.ver_nr;
