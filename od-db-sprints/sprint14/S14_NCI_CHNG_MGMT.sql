@@ -1,4 +1,28 @@
-CREATE OR REPLACE PACKAGE BODY nci_CHNG_MGMT AS
+create or replace PACKAGE            nci_chng_mgmt AS
+v_temp_rep_ver_nr varchar2(10);
+v_temp_rep_id VARCHAR2(10);
+
+function getCSICreateQuestion return t_question;
+procedure createAIWithConcept(rowform in out t_row, idx in integer,v_item_typ_id in integer, actions in out t_actions);
+PROCEDURE spDEPrefQuestPost (v_data_in in clob, v_data_out out clob);
+PROCEDURE spCreateDE (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2, v_src in varchar2);
+PROCEDURE spDEValCreateImport (rowform in out t_row, v_op in varchar2, actions in out t_actions, v_val_ind in out boolean);
+PROCEDURE spDECreateFrom ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+--PROCEDURE spDECommon ( v_init_ai in t_rowset, v_init_st in t_rowset, v_op  in varchar2,  v_ori_rep_cls in number, hookInput in t_hookInput, hookOutput in out t_hookOutput);
+PROCEDURE spClassification ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+PROCEDURE spClassificationNMDef ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2, v_typ in varchar2);
+PROCEDURE spDesignateNew   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+PROCEDURE spClassifyUnclassify   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+function getDECreateQuestion(v_from in number,v_first in boolean) return t_question;
+function getDECreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
+function getCSICreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
+procedure createDE (rowform in t_row, actions in out t_actions, v_id out number);
+procedure spAddCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+
+function get_AI_id(P_ID NUMBER,P_VER in number) RETURN VARCHAR2;
+END;
+/
+create or replace PACKAGE BODY nci_CHNG_MGMT AS
 v_temp_rep_ver_nr varchar2(10):='0';
 v_temp_rep_id VARCHAR2(10):='0';
 v_err_str      varchar2(1000) := '';
@@ -146,7 +170,7 @@ ihook.setColumnValue(rowcsi,'ITEM_ID', v_id);
 END;
 
 
-PROCEDURE spCreateDE (v_data_in IN CLOB,    v_data_out OUT CLOB, v_usr_id  IN varchar2) 
+PROCEDURE spCreateDE (v_data_in IN CLOB,    v_data_out OUT CLOB, v_usr_id  IN varchar2, v_src in varchar2) 
 AS
     hookInput t_hookInput;
     hookOutput t_hookOutput := t_hookOutput();
@@ -161,7 +185,11 @@ AS
     rows  t_rows;
     row_ori t_row;
     rowset            t_rowset;
+    rowsetai            t_rowset;
     rowsetde            t_rowset;
+         v_item_id  number;
+         v_item_type_id  number;
+   
     v_prop_long_nm varchar2(255);
     v_prop_def  varchar2(2000);
     v_dec_item_id number;
@@ -192,6 +220,7 @@ BEGIN
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
     if hookInput.invocationNumber = 0 then
+    if (v_src = 'C') then -- create new
           HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,true);
           row := t_row();
           rows := t_rows();
@@ -213,6 +242,39 @@ BEGIN
           rows(rows.last) := row;
           rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
           hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
+    end if;
+    if (v_src = 'E') then -- create from Existing
+    
+    row_ori :=  hookInput.originalRowset.rowset(1);
+    v_item_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
+    v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
+    v_item_type_id := ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID');
+
+
+    if (v_item_type_id <> 4) then -- 4 - CDE in table OBJ_KEY
+        raise_application_error(-20000,'!!! This functionality is only applicable for CDE !!!');
+    end if;
+
+        HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(2,true);
+        row := row_ori;
+        rows := t_rows();
+        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
+        ihook.setColumnValue(row, 'VER_NR', 1.00);
+        ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
+        ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
+        ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
+        rows.extend;
+        rows(rows.last) := row;
+        rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for form
+        rows := t_rows();
+        row := t_row();
+        -- Copy DE specific attributes
+        nci_11179.spReturnSubtypeRow (v_item_id, v_ver_nr, 4, row );
+        rows.extend;
+        rows(rows.last) := row;
+        rowsetde := t_rowset(rows, 'Data Element', 1, 'DE'); -- Default values for form
+        hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowsetai, rowsetde);
+  end if;
   ELSE
       forms              := hookInput.forms;
       form1              := forms(1);
@@ -1383,6 +1445,7 @@ BEGIN
    
    select obj_key_id into v_nm_typ_id from obj_key where obj_key_desc = 'USED_BY' and obj_typ_id = 11;
 
+
   if hookInput.invocationNumber = 0  then
      	 answers := t_answers();
   	   	 answer := t_answer(1, 1, 'Select');
@@ -1412,51 +1475,56 @@ BEGIN
         for i in 1..hookinput.originalrowset.rowset.count loop
 
             row_ori :=  hookInput.originalRowset.rowset(i);
-            row := rowform;
+            if (ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') = 4 and ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID') in (65,75,76)) then   
+                row := rowform;
 
-        ihook.setColumnValue(row,'ITEM_ID',ihook.getColumnValue(row_ori,'ITEM_ID'));
-        ihook.setColumnValue(row,'VER_NR',ihook.getColumnValue(row_ori,'VER_NR'));
+                ihook.setColumnValue(row,'ITEM_ID',ihook.getColumnValue(row_ori,'ITEM_ID'));
+                ihook.setColumnValue(row,'VER_NR',ihook.getColumnValue(row_ori,'VER_NR'));
 
 
-        if ( ihook.getColumnValue(rowform,'NM_DESC') != v_default_txt) then -- Get context name
+            if ( ihook.getColumnValue(rowform,'NM_DESC') != v_default_txt) then -- Get context name
               select count(*) into v_temp from alt_nms where
-            cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR')
-            and item_id = ihook.getColumnValue(rowform,'ITEM_ID') and ver_nr = ihook.getColumnValue(rowform,'VER_NR')
+                cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR')
+                and item_id = ihook.getColumnValue(rowform,'ITEM_ID') and ver_nr = ihook.getColumnValue(rowform,'VER_NR')
                 and nm_typ_id =   ihook.getColumnValue(rowform,'NM_TYP_ID') and nm_desc = ihook.getColumnValue(rowform,'NM_DESC');
 
                   if (v_temp = 0) then -- Row does not exist
                         rows.extend;
                         rows(rows.last) := row;
                  end if;
-        end if;
+            end if;
 
       -- Default used by row
 
-      select item_nm into v_cntxt_nm from vw_cntxt where item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR');
-            ihook.setColumnValue(row,'NM_DESC', v_cntxt_nm);
-            ihook.setColumnValue(row,'NM_TYP_ID', v_nm_typ_id);
+            select item_nm into v_cntxt_nm from vw_cntxt where item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR');
+                ihook.setColumnValue(row,'NM_DESC', v_cntxt_nm);
+                ihook.setColumnValue(row,'NM_TYP_ID', v_nm_typ_id);
 
  
           -- If row already exists
-          select count(*) into v_temp from alt_nms where
-          cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR')
-          and item_id = ihook.getColumnValue(rowform,'ITEM_ID') and ver_nr = ihook.getColumnValue(rowform,'VER_NR')
-          and nm_typ_id =   v_nm_typ_id and nm_desc = ihook.getColumnValue(rowform,'NM_DESC');
+                select count(*) into v_temp from alt_nms where
+                cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR')
+                and item_id = ihook.getColumnValue(rowform,'ITEM_ID') and ver_nr = ihook.getColumnValue(rowform,'VER_NR')
+                and nm_typ_id =   v_nm_typ_id and nm_desc = ihook.getColumnValue(rowform,'NM_DESC');
 
-          if (v_temp = 0) then -- Row does not exist
-            rows.extend;
-            rows(rows.last) := row;
-          end if;
+                if (v_temp = 0) then -- Row does not exist
+                    rows.extend;
+                    rows(rows.last) := row;
+                end if;
+        end if;
     end loop;
 
-                        action := t_actionrowset(rows, 'Alternate Names', 2,1,'insert');
+               if (rows.count > 0) then
+                    action := t_actionrowset(rows, 'Alternate Names', 2,1,'insert');
                         actions.extend;
                         actions(actions.last) := action;
-
+                    hookoutput.message := 'Only CDE with Release/Released Non-Compliant and Draft-Mod have been designated.';
+                end if;
        end if;
 
 if (actions.count > 0) then
   hookoutput.actions := actions;
+ 
 end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
@@ -1594,3 +1662,4 @@ RETURN V_DN;
 END;
 END;
 /
+
