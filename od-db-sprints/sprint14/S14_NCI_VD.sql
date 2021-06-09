@@ -455,8 +455,8 @@ AS
         if (v_from = 2) then --- create from existing and enumerated copy Perm Val
              rows := t_rows();
                row_ori := hookinput. originalrowset.rowset(1);
-
-            nci_11179.CopyPermVal (rows, ihook.getColumnValue(row_ori,'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), v_item_id, v_ver_nr);
+        
+            nci_11179.CopyPermVal (actions, ihook.getColumnValue(row_ori,'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), v_item_id, v_ver_nr);
             if (rows.count>0) then 
                 action := t_actionRowset(rows, 'Permissible Values (Edit AI)', 2, 'insert');
                 actions.extend; actions(actions.last) := action;
