@@ -219,14 +219,17 @@ union
 	
   
   CREATE OR REPLACE  VIEW VW_NCI_MODULE_QUEST  AS
-  select  
+  select  rel.p_item_id frm_item_id, rel.p_item_ver_nr frm_ver_nr,
 air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr,
  air.c_item_id de_item_id, air.c_item_ver_nr de_ver_nr, air.disp_ord,
  air.nci_pub_id,air.nci_ver_nr, 
 de.CNTXT_NM_DN,
 air.CREAT_DT, air.CREAT_USR_ID, air.LST_UPD_USR_ID, air.FLD_DELETE, air.LST_DEL_DT, air.S2P_TRN_DT, air.LST_UPD_DT, air.item_long_nm QUEST_LONG_TXT, air.item_nm QUEST_TXT, 63 REL_TYP_ID
-from  nci_admin_item_rel_alt_key air,
+from  nci_admin_item_rel_alt_key air,nci_admin_item_rel rel,
  admin_item de
 where  air.rel_typ_id = 63
 and air.c_item_id = de.item_id
-and air.c_item_ver_nr = de.ver_nr;
+and air.c_item_ver_nr = de.ver_nr
+and air.p_item_id = rel.c_item_id
+and air.p_item_ver_nr = rel.c_item_ver_nr
+and rel.rel_typ_id in (61,62);
