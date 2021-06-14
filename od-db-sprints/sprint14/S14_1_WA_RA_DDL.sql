@@ -539,3 +539,11 @@ ai.ITEM_NM, ai.ITEM_LONG_NM, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_NM_DN
 from NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai
 where ak.C_ITEM_ID  = ai.ITEM_ID and ak.C_ITEM_VER_NR  = ai.VER_NR and ai.ADMIN_ITEM_TYP_ID = 4;
 
+
+insert into obj_typ (obj_typ_id, obj_typ_Desc) values (34, 'CSI Tree Node Type for Display');
+commit;
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (34, 'Context', 98, 'CNTXT-DISPLAY');
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (34, 'Classification Scheme', 99, 'CS-DISPLAY');
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (34, 'CSI', 100, 'CSI-DISPLAY');
+commit;
+
