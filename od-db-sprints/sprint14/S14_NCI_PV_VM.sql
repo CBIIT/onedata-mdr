@@ -1,4 +1,36 @@
-CREATE OR REPLACE PACKAGE BODY nci_PV_VM AS
+create or replace PACKAGE            nci_PV_VM AS
+
+PROCEDURE spPVVMCreateNew (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
+PROCEDURE spPVVMCreateNewBulk (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
+PROCEDURE spVMEdit (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
+PROCEDURE spVMCreateEdit (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
+
+procedure spPVVMCommon ( v_init in t_rowset,  v_op  in varchar2, hookInput in t_hookInput, hookOutput in out t_hookOutput);
+procedure spPVVMImport ( row_ori in out t_row,actions in out t_actions);
+procedure createPVVMBulk ( rowform in t_row,  hookInput in t_hookInput, hookOutput in out t_hookOutput);
+
+procedure setDefaultParamPVVM (row_ori in t_row, row in out t_row);
+procedure chkPVVMActionValid ( row_ori in t_row, v_usr_id in varchar2);
+
+
+function getPVVMQuestion return t_question;
+function getVMEditQuestion (v_src_tbl_nm in varchar2) return t_question;
+function getVMCreateEditQuestion (v_src_tbl_nm in varchar2) return t_question;
+function getPVVMQuestionBulk return t_question;
+function getPVVMCreateFormBulk (v_rowset in t_rowset) return t_forms;
+
+
+function getPVVMCreateForm (v_rowset in t_rowset) return t_forms;
+function getVMEditForm (v_rowset in t_rowset) return t_forms;
+function getVMCreateEditForm (v_rowset in t_rowset) return t_forms;
+procedure VMEditCore ( v_init in t_rowset,  hookInput in t_hookInput, hookOutput in out t_hookOutput); 
+procedure VMCreateEditCore ( v_init in t_rowset,  hookInput in t_hookInput, hookOutput in out t_hookOutput); 
+
+procedure createVMConcept (rowform in out t_row, v_cncpt_src in varchar2, v_mode in varchar2,  actions in out t_actions);
+
+END;
+/
+create or replace PACKAGE BODY nci_PV_VM AS
 
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
@@ -11,8 +43,9 @@ procedure setDefaultParamPVVM ( row_ori in t_row, row in out t_row)
 as
 begin
     ihook.setColumnValue(row, 'STG_AI_ID', 1);
-    ihook.setColumnValue(row, 'ITEM_2_NM', ihook.getColumnValue(row_ori, 'ITEM_NM')); --Using not used attribute ITEM_2_NM to show selected VD.
-   -- Set default Conc Dom 
+    ihook.setColumnValue(row, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID')); --Using not used attribute ITEM_2_NM to show selected VD.
+   ihook.setColumnValue(row, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR')); --Using not used attribute ITEM_2_NM to show selected VD.
+   --- Set default Conc Dom 
     for cur in (select * from value_dom where item_id =ihook.getColumnValue(row_ori,'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'VER_NR') )loop
            ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', cur.CONC_DOM_ITEM_ID);
          ihook.setColumnValue(row, 'CONC_DOM_VER_NR', cur.CONC_DOM_VER_NR);
@@ -125,7 +158,7 @@ begin
 end;
 
 
--- Edit an existing DEC
+--Inplace edit of VM
 
 PROCEDURE spVMEdit ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
 as
@@ -136,6 +169,7 @@ as
     rows t_rows;
     v_item_nm varchar2(255);
     v_item_def varchar2(4000);
+    v_item_long_nm varchar2(255);
     v_item_id  number;
     v_ver_nr  number(4,2);
     v_item_type_id number;
@@ -161,10 +195,11 @@ begin
         v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
         v_item_nm := ihook.getColumnValue(row_ori, 'ITEM_NM');
         v_item_def := ihook.getColumnValue(row_ori, 'ITEM_DESC');
+        v_item_long_nm := ihook.getColumnValue(row_ori, 'ITEM_LONG_NM');
     else
         v_item_id := ihook.getColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID');
         v_ver_nr := ihook.getColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR');
-        select item_nm, item_desc into v_item_nm, v_item_def from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
+        select item_nm, item_desc, item_long_nm into v_item_nm, v_item_def, v_item_long_nm from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
     end if ;
     -- Check if user is authorized to edit
     if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_usr_id) = false) then
@@ -185,17 +220,92 @@ begin
 
     -- Internal dummy is is set to 1. 
     ihook.setColumnValue(row, 'STG_AI_ID', 1);
-    ihook.setColumnValue(row, 'ITEM_2_ID', v_item_id);  --- Used in update later
-    ihook.setColumnValue(row, 'ITEM_2_VER_NR', v_ver_nr);   --- Used in update later
+    ihook.setColumnValue(row, 'ITEM_1_ID', v_item_id);  --- Used in update later
+    ihook.setColumnValue(row, 'ITEM_1_VER_NR', v_ver_nr);   --- Used in update later
 
   --  raise_application_error(-20000, ihook.getColumnValue(row, 'CNCPT_1_ITEM_ID_1'));
-        ihook.setColumnValue(row, 'ITEM_2_NM',  v_item_nm);
-        ihook.setColumnValue(row, 'ITEM_2_DEF',  v_item_def);
+        ihook.setColumnValue(row, 'ITEM_1_NM',  v_item_nm);
+        ihook.setColumnValue(row, 'ITEM_1_DEF',  v_item_def);
+        ihook.setColumnValue(row, 'ITEM_1_LONG_NM',  v_item_long_nm);
 
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
     rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
 
-    nci_pv_vm.spVMCommon(rowset, hookinput, hookoutput);
+    nci_pv_vm.VMEditCore(rowset, hookinput, hookoutput);
+
+    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+nci_util.debugHook('GENERAL', v_data_out);
+
+end;
+
+
+
+-- Change PV Association May result in creation of new VM
+
+PROCEDURE spVMCreateEdit ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
+as
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    row_ori  t_row;
+    row  t_row;
+    rows t_rows;
+    v_item_nm varchar2(255);
+    v_item_def varchar2(4000);
+    v_item_long_nm varchar2(255);
+    v_item_id  number;
+    v_ver_nr  number(4,2);
+    v_item_type_id number;
+   rowset  t_rowset;
+    v_tbl_nm varchar2(100);
+begin
+    -- Standard header
+    hookInput                    := Ihook.gethookinput (v_data_in);
+    hookOutput.invocationnumber  := hookInput.invocationnumber;
+    hookOutput.originalrowset    := hookInput.originalrowset;
+
+    -- Get the selected row
+    row_ori :=  hookInput.originalRowset.rowset(1);
+    v_item_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
+    v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
+    v_item_type_id := ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID');
+        v_item_id := ihook.getColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID');
+        v_ver_nr := ihook.getColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR');
+        select item_nm, item_desc, item_long_nm into v_item_nm, v_item_def, v_item_long_nm from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
+   --     select conc_dom_item_id, conc_dom_Ver_nr into v_cd_item_id, v_cd_ver_nr from nci_val_mean where 
+    -- Check if user is authorized to edit
+    if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_usr_id) = false) then
+        raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ');
+        return;
+    end if;
+
+  
+    row := row_ori;
+
+
+     -- Copy VM concepts
+    nci_11179.spReturnConceptRow (v_item_id, v_ver_nr, 53, 1, row );
+
+    -- Internal dummy is is set to 1. 
+    ihook.setColumnValue(row, 'STG_AI_ID', 1);
+  --  ihook.setColumnValue(row, 'ITEM_2_ID', v_item_id);  --- Used in update later
+  --  ihook.setColumnValue(row, 'ITEM_2_VER_NR', v_ver_nr);   --- Used in update later
+    ihook.setColumnValue(row, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));  
+    ihook.setColumnValue(row, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));   
+    ihook.setColumnValue(row, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'PERM_VAL_NM'));  
+    
+
+        ihook.setColumnValue(row, 'ITEM_1_NM',  v_item_nm);
+        ihook.setColumnValue(row, 'ITEM_1_DEF',  v_item_def);
+        ihook.setColumnValue(row, 'ITEM_1_LONG_NM',  v_item_long_nm);
+        ihook.setColumnValue(row, 'ITEM_1_ID',  v_item_id);
+        ihook.setColumnValue(row, 'ITEM_1_VER_NR',  v_ver_nr);
+        
+
+    rows := t_rows();    rows.extend;    rows(rows.last) := row;
+    rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
+
+    nci_pv_vm.VMCreateEditCore(rowset, hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
@@ -228,6 +338,7 @@ AS
   v_pv  varchar2(255);
   v_vd_item_id number;
   v_vd_ver_nr number(4,2);
+  v_cncpt_str  varchar2(255);
   v_vm_rows t_rows;
   v_vm_cd_rows t_rows;
   v_pv_rows  t_rows;
@@ -244,14 +355,26 @@ begin
       for i in 1..10 loop  -- Max of 10 pairs
         v_cncpt_id := ihook.getColumnValue(rowform,'CNCPT_1_ITEM_ID_' || i );
         v_cncpt_ver_nr := ihook.getColumnValue(rowform,'CNCPT_1_VER_NR_' || i );
+        v_cncpt_str := ihook.getColumnValue(rowform,'STR_' || i );
             --v_pv :=  trim(nvl(ihook.getColumnValue(rowform,'PV_' || i), v_cncpt_nm));
          -- If all values specified
-        if (v_cncpt_id is not null and v_cncpt_ver_nr is not null) then
+        if (v_cncpt_id is not null or v_cncpt_str is not null) then
             -- check if VM already exists
+            -- IF concept ID specified
+            if (v_cncpt_id is not null) then
                 select item_nm, item_long_nm, item_desc into v_cncpt_nm, v_cncpt_long_nm, v_cncpt_def 
                 from admin_item where item_id = v_cncpt_id and ver_nr = v_cncpt_ver_nr;
-                  v_pv :=  trim(nvl(ihook.getColumnValue(rowform,'PV_' || i), v_cncpt_nm));
-
+            end if;
+            -- if concept string specified
+            if (v_cncpt_str is not null) then
+                 v_cncpt_long_nm := v_cncpt_str;
+                 v_cncpt_nm := v_cncpt_str;
+                 v_cncpt_def := v_cncpt_str;
+            end if;
+        -- if PV is null, use VM name.
+        
+            v_pv :=  trim(nvl(ihook.getColumnValue(rowform,'PV_' || i), v_cncpt_nm));
+        
                 v_item_id := null;
                 v_ver_nr := 1;
                 -- Check if VM exists
@@ -260,7 +383,8 @@ begin
                   v_item_id := cur.item_id;
                   v_ver_nr :=cur.ver_nr;
                 end loop;
-
+   --  raise_application_error(-20000, v_cncpt_long_nm || ' ' || v_item_id);
+      
                 if (v_item_id is null) then -- create new VM
                     v_ver_nr := 1;
 
@@ -279,8 +403,8 @@ begin
                         ihook.setColumnValue(row,'ITEM_LONG_NM', v_cncpt_long_nm);
                         ihook.setColumnValue(row,'ITEM_DESC', v_cncpt_def);
                         ihook.setColumnValue(row,'ITEM_NM', v_cncpt_nm);
-                        ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
-                        ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
+                        ihook.setColumnValue(row,'CNTXT_ITEM_ID',20000000024); -- NCIP
+                        ihook.setColumnValue(row,'CNTXT_VER_NR', 1);
                         ihook.setColumnValue(row,'CNCPT_CONCAT', v_cncpt_long_nm);
                         ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', v_cncpt_def);
                         ihook.setColumnValue(row,'CNCPT_CONCAT_NM', v_cncpt_nm);
@@ -337,9 +461,11 @@ begin
                 actions.extend;
                 actions(actions.last) := action;
 
+        if (v_cncpt_id is not null) then
                 action := t_actionrowset(v_vm_rows, 'Items under Concept', 2,6,'insert');
                 actions.extend;
                 actions(actions.last) := action;
+            end if;
          end if;
 
           if (v_vm_cd_rows.count > 0) then
@@ -357,7 +483,7 @@ begin
 
     if (actions.count > 0) then
         hookoutput.actions := actions;
-        hookoutput.message := v_vm_rows.count || ' Value Meanings created. ' || v_pv_rows.count || ' permissible values created. ';
+        hookoutput.message := v_pv_rows.count || ' permissible values created. ';
     end if;
 
 END;
@@ -429,21 +555,23 @@ begin
          --   end loop;
         end if;
 
-    if (hookinput.answerid < 5) then
-    -- Show generated name
        ihook.setColumnValue(rowform, 'GEN_STR',ihook.getColumnValue(rowform,'ITEM_1_NM') ) ;
        ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'VALIDATED');
 
-        if (   ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is null) then
+        if (   ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is null and hookinput.answerId < 5) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'Concept missing');
                   is_valid := false;
         end if;
-    else
-        if (   ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM') is null) then
+        if (   ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM') is null and hookinput.answerid = 5) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'No specified VM name');
                   is_valid := false;
         end if;
-    end if;
+        
+        if (   ihook.getColumnValue(rowform, 'ITEM_1_ID') is null and hookinput.answerid = 6) then
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'No VM Specified');
+                  is_valid := false;
+        end if;
+        
          rows := t_rows();
 
          -- If any of the test fails or if the user has triggered validation, then go back to the screen.
@@ -467,15 +595,24 @@ begin
       -- Create PV
 
       v_item_id := ihook.getColumnValue(rowform,'ITEM_1_ID');
+      v_ver_nr := ihook.getColumnValue(rowform,'ITEM_1_VER_NR');
+      v_pv := ihook.getColumnValue(rowform,'PERM_VAL_NM');
+      
       if (hookinput.answerid = 5) then -- use specified value
         v_pv :=  nvl(ihook.getColumnValue(rowform,'PERM_VAL_NM'),ihook.getColumnValue(rowform,'ITEM_2_LONG_NM') );
-      else
+      end if;
+      if (hookinput.answerid in (3,4)) then -- use specified value
         v_pv :=  nvl(ihook.getColumnValue(rowform,'PERM_VAL_NM'),ihook.getColumnValue(rowform,'ITEM_1_NM') );
       end if;
+     
+      if (hookinput.answerid =6 and v_pv is null) then -- use specified value
+      select item_nm into v_pv from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;  
+      end if;
+      
       hookoutput.message := 'Value Meaning ID: ' || v_item_id;
 
         select count(*) into v_temp from CONC_DOM_VAL_MEAN where CONC_DOM_ITEM_ID = ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') and 
-        CONC_DOM_VER_NR = ihook.getColumnValue(rowform, 'CONC_DOM_VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = ihook.getColumnValue(rowform, 'ITEM_1_VER_NR');
+        CONC_DOM_VER_NR = ihook.getColumnValue(rowform, 'CONC_DOM_VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = v_ver_nr;
 
         if (v_temp = 0) then
         rows := t_rows();
@@ -494,7 +631,7 @@ begin
       end if;
       if (v_pv is not null) then
         select count(*) into v_temp from PERM_VAL where VAL_DOM_ITEM_ID = ihook.getColumnValue(row_ori, 'ITEM_ID') and 
-        VAL_DOM_VER_NR = ihook.getColumnValue(row_ori, 'VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = ihook.getColumnValue(rowform, 'ITEM_1_VER_NR')
+        VAL_DOM_VER_NR = ihook.getColumnValue(row_ori, 'VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = v_ver_nr
         and upper(PERM_VAL_NM) = upper(v_pv);
 
         if (v_temp = 0) then
@@ -614,8 +751,169 @@ begin
 
 END;
 
+-- Only called from VM Edit  Inplace Edit
+PROCEDURE       VMEditCore ( v_init in t_rowset,  hookInput in t_hookInput, hookOutput in out t_hookOutput)
+AS
+  rowform t_row;
+  forms t_forms;
+  form1 t_form;
+    v_temp_id number;
+    v_temp_ver number(4,2);
+    idx integer;
+  row t_row;
+  rows  t_rows;
+  row_ori t_row;
+  rowset            t_rowset;
+ v_str  varchar2(255);
+ v_nm  varchar2(255);
+ v_item_id number;
+ v_ver_nr number(4,2);
+  cnt integer;
+j integer;
+k integer;
+    actions t_actions := t_actions();
+  action t_actionRowset;
+  v_msg varchar2(1000);
+  v_def varchar2(4000);
+  v_temp integer;
+  is_valid boolean;
+  v_item_typ_glb integer;
+  v_pv  varchar2(255);
+  v_long_nm_suf varchar2(255);
+  v_long_nm  varchar2(255);
+  v_id number;
+  v_cncpt_id number;
+  v_cncpt_ver_nr number(4,2);
+begin
+    v_item_typ_glb := 53;
+    row_ori :=  hookInput.originalRowset.rowset(1);
+
+   if hookInput.invocationNumber = 0 then
+        --  Get question. Either create or edit
+          HOOKOUTPUT.QUESTION    := getVMEditQuestion(hookinput.originalrowset.tablename);
+
+          hookOutput.forms :=getVMEditForm(v_init);
+
+    else
+        forms              := hookInput.forms;
+        form1              := forms(1);
+        rowform := form1.rowset.rowset(1);
+        row := t_row();        rows := t_rows();
+        is_valid := true;
+        k := 1;
+        idx := 1;
+        j :=0;
+
+        if (HOOKINPUT.ANSWERID = 1 and ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is not null) then  -- Validate using drop-down
+             --- Only update definition and long name. No name change
+                idx := 1;
+                   for i in 1..10 loop
+                        v_temp_id := ihook.getColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i);
+                        v_temp_ver := ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i);
+                        if (v_temp_id is not null) then
+                        for cur in(select item_id, item_nm , item_long_nm , item_desc from admin_item where admin_item_typ_id = 49 and item_id = v_temp_id and ver_nr = v_temp_ver) loop
+                                v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
+                                v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
+                        end loop;
+                        end if;
+                end loop;
+                ihook.setColumnValue(rowform, 'ITEM_1_DEF', substr(v_def,2));
+               ihook.setColumnValue(rowform, 'ITEM_1_LONG_NM', substr(v_long_nm_suf,2));
+               rows := t_rows();  rows.extend;  rows(rows.last) := rowform;      
+               rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
+                HOOKOUTPUT.QUESTION    := getVMEditQuestion(hookinput.originalrowset.tablename);
+
+          hookOutput.forms :=getVMEditForm(rowset);
+          return;
+
+        end if;
+
+        if (HOOKINPUT.ANSWERID = 2 and is_Valid = true) then
+          v_item_id := ihook.getColumnValue(rowform, 'ITEM_1_ID');
+          v_ver_nr :=ihook.getColumnValue(rowform, 'ITEM_1_VER_NR');
+          
+        -- Delete purge existing relationship
+            rows := t_rows();
+            for cur in (select * from cncpt_admin_item where item_id = v_item_id and ver_nr = v_ver_nr) loop
+                row := t_row();
+                ihook.setColumnValue(row,'CNCPT_AI_ID', cur.CNCPT_AI_ID);
+                rows.extend; rows(rows.last) := row;
+      
+            end loop;
+            if (rows.count > 0) then
+            action := t_actionrowset(rows, 'Items under Concept', 2,1,'delete');
+            actions.extend;
+            actions(actions.last) := action;
+            action := t_actionrowset(rows, 'Items under Concept', 2,2,'purge');
+            actions.extend;
+            actions(actions.last) := action;
+            end if;
+                
+        if (ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is not null) then  --- If drop-down specified, manually entered text is overwritten.
+            rows := t_rows();
+            
+            for i in reverse 0..10 loop
+                    v_cncpt_id := ihook.getColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i);
+                    v_cncpt_ver_nr :=  ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i);
+                    if( v_cncpt_id is not null) then
+                        for cur in (select item_nm, item_long_nm, item_desc from admin_item where item_id = v_cncpt_id and ver_nr = v_cncpt_ver_nr) loop
+                                row := t_row();
+                                ihook.setColumnValue(row,'ITEM_ID', v_item_id);
+                                ihook.setColumnValue(row,'VER_NR', v_ver_nr);
+                                ihook.setColumnValue(row,'CNCPT_ITEM_ID',v_cncpt_id);
+                                ihook.setColumnValue(row,'CNCPT_VER_NR', v_cncpt_ver_nr);
+                                ihook.setColumnValue(row,'NCI_ORD', j);
+                                ihook.setColumnValue(row,'CNCPT_AI_ID', -1);
+
+                         --       v_temp := v_temp || i || ':' ||  v_cncpt_id;
+                                if j = 0 then
+                                    ihook.setColumnValue(row,'NCI_PRMRY_IND', 1);
+                                else ihook.setColumnValue(row,'NCI_PRMRY_IND', 0);
+                                end if;
+                                rows.extend;
+                                rows(rows.last) := row;
+                                j := j+ 1;
+                        end loop;
+                    end if;
+            end loop;
+            action := t_actionrowset(rows, 'Items under Concept', 2,6,'insert');
+            actions.extend;
+            actions(actions.last) := action;
+        end if;
+        end if;
+        rows := t_rows();
+        row := t_row();
+        
+       nci_11179.spReturnAIRow (v_item_id, v_ver_nr, row);
+       nci_11179.spReturnAIExtRow (v_item_id, v_ver_nr,  row);
+       ihook.setColumnValue(row,'ITEM_NM', ihook.getColumnValue(rowform, 'ITEM_1_NM'));
+       ihook.setColumnValue(row,'ITEM_DESC', ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
+       ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
+       ihook.setColumnValue(row,'CNCPT_CONCAT', ihook.getColumnValue(rowform, 'ITEM_1_LONG_NM'));
+       ihook.setColumnValue(row,'CNCPT_CONCAT_NM', ihook.getColumnValue(rowform, 'ITEM_1_NM'));
+       rows.extend;
+       rows(rows.last) := row;
+      
+        action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,7,'update');
+        actions.extend;
+        actions(actions.last) := action;
+
+
+        action := t_actionrowset(rows, 'NCI AI Extension (Hook)', 2,8,'update');
+        actions.extend;
+        actions(actions.last) := action;
+    if (actions.count > 0) then
+        hookoutput.actions := actions;
+    end if;
+
+
+end if;
+
+END;
+
+
 -- Only called from VM Edit
-PROCEDURE       spVMCommon ( v_init in t_rowset,  hookInput in t_hookInput, hookOutput in out t_hookOutput)
+PROCEDURE       VMCreateEditCore ( v_init in t_rowset,  hookInput in t_hookInput, hookOutput in out t_hookOutput)
 AS
   rowform t_row;
   forms t_forms;
@@ -649,9 +947,9 @@ begin
 
    if hookInput.invocationNumber = 0 then
         --  Get question. Either create or edit
-          HOOKOUTPUT.QUESTION    := getVMEditQuestion(hookinput.originalrowset.tablename);
+          HOOKOUTPUT.QUESTION    := getVMCreateEditQuestion(hookinput.originalrowset.tablename);
 
-          hookOutput.forms :=getVMEditForm(v_init);
+          hookOutput.forms :=getVMCreateEditForm(v_init);
 
     else
         forms              := hookInput.forms;
@@ -662,20 +960,22 @@ begin
         k := 1;
 
 
-        if (HOOKINPUT.ANSWERID = 2 and ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is not null) then  -- Validate using drop-down
+        if (HOOKINPUT.ANSWERID = 1 and ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is not null) then  -- Validate using drop-down
                nci_dec_mgmt.createValAIWithConcept(rowform , k,v_item_typ_glb ,'V','DROP-DOWN',actions);
                rows := t_rows();  rows.extend;  rows(rows.last) := rowform;      
-               rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
-                HOOKOUTPUT.QUESTION    := getVMEditQuestion(hookinput.originalrowset.tablename);
+               rowset := t_rowset(rows, 'VM Create Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
+                HOOKOUTPUT.QUESTION    := getVMCreateEditQuestion(hookinput.originalrowset.tablename);
 
-          hookOutput.forms :=getVMEditForm(rowset);
+          hookOutput.forms :=getVMCreateEditForm(rowset);
           return;
 
         end if;
 
-        if (HOOKINPUT.ANSWERID = 4 and is_Valid = true) then
+        if (HOOKINPUT.ANSWERID = 2) then
+         if (ihook.getColumnValue(rowform,'ITEM_1_ID') is null) then
               nci_pv_vm.createVMConcept(rowform ,'DROP-DOWN', 'C', actions);
          --   end loop;
+         end if;
         end if;
 
 
@@ -687,7 +987,6 @@ begin
 end if;
 
 END;
-
 
 
 function getPVVMQuestion return t_question
@@ -711,7 +1010,10 @@ begin
     ANSWER                     := T_ANSWER(4, 4, 'Create Using Drop-Down');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-      ANSWER                     := T_ANSWER(5, 5, 'Create Using Specified');
+      ANSWER                     := T_ANSWER(5, 5, 'Create Using Specified Name');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+          ANSWER                     := T_ANSWER(6, 6, 'Create Using Existing VM');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Create VM and/or PV', ANSWERS);
@@ -743,18 +1045,32 @@ function getVMEditQuestion (v_src_tbl_nm in varchar2) return t_question is
 begin
 --- If Edit DEC
  ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(2, 2, 'Validate Using Drop-Down');
+    ANSWER                     := T_ANSWER(1, 1, 'Validate Using Drop-Down');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    ANSWER                     := T_ANSWER(4, 4, 'Update');
+    ANSWER                     := T_ANSWER(2, 2, 'Update');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-   -- if (v_src_tbl_nm like '%Per%') then
-   --     ANSWER                     := T_ANSWER(3, 3, 'Replace with found VM.');
-    --    ANSWERS.EXTEND;
-    --    ANSWERS(ANSWERS.LAST) := ANSWER;
-    --end if;
     QUESTION               := T_QUESTION('Edit VM', ANSWERS);
+
+return question;
+end;
+
+
+function getVMCreateEditQuestion (v_src_tbl_nm in varchar2) return t_question is
+  question t_question;
+  answer t_answer;
+  answers t_answers;
+begin
+--- If Edit DEC
+ ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Validate Using Drop-Down');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    ANSWER                     := T_ANSWER(2, 2, 'Associate');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    QUESTION               := T_QUESTION('Change PV Association', ANSWERS);
 
 return question;
 end;
@@ -777,6 +1093,17 @@ function getVMEditForm (v_rowset in t_rowset) return t_forms is
 begin
     forms                  := t_forms();
     form1                  := t_form('VM Edit (Hook)', 2,1);
+    form1.rowset :=v_rowset;
+    forms.extend;    forms(forms.last) := form1;
+  return forms;
+end;
+
+function getVMCreateEditForm (v_rowset in t_rowset) return t_forms is
+  forms t_forms;
+  form1 t_form;
+begin
+    forms                  := t_forms();
+    form1                  := t_form('VM Create Edit (Hook)', 2,1);
     form1.rowset :=v_rowset;
     forms.extend;    forms(forms.last) := form1;
   return forms;
