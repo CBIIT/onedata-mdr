@@ -1,4 +1,22 @@
-CREATE OR REPLACE PACKAGE BODY nci_vd AS
+create or replace PACKAGE            nci_vd AS
+  function getVDCreateForm (v_rowset1 in t_rowset,v_rowset2 in t_rowset) return t_forms;
+  function getVDcreateQuestion(v_first in Boolean,V_from in number) return t_question;
+  procedure createVD(rowai in t_row, rowvd in t_row, actions in out t_actions, v_id out  number);
+  procedure spVDCommon ( v_init_ai in t_rowset,v_init_vd in t_rowset,v_from in number,  v_op  in varchar2,  hookInput in t_hookInput, hookOutput in out t_hookOutput);
+  PROCEDURE spVDCreateNew (v_data_in in clob, v_data_out out clob);
+    procedure createValAIWithConcept(rowform in out t_row,   idx in integer,v_item_typ_id in integer, v_mode in varchar2,v_cncpt_src in varchar2,  actions in out t_actions);
+  PROCEDURE spVDCreateFrom (v_data_in in clob, v_data_out out clob);
+ PROCEDURE spVDEdit (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
+---  PROCEDURE spVDEdit (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
+ PROCEDURE spCreateRTSA (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
+ PROCEDURE spCreateVMSA (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
+
+procedure spVDValCreateImport ( rowform in out t_row , v_op  in varchar2, actions in out t_actions,  v_val_ind in out boolean);
+  procedure createVDImport(rowform in out t_row, actions in out t_actions);
+
+END;
+/
+create or replace PACKAGE BODY            nci_vd AS
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
 c_ver_suffix varchar2(5) := 'v1.00';
@@ -353,7 +371,7 @@ AS
 
         if (   ihook.getColumnValue(rowai, 'ADMIN_STUS_ID') = 75 and  ihook.getColumnValue(rowvd, 'VAL_DOM_TYP_ID') =  17
         and v_op = 'insert' and v_from <> 2) then -- Status cannot be released if VD is enumerated
-                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'Workflow status cannot be Released for an Enumerated Value Domain.');
+                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'An Enumerated VD WFS cannot be Released if there are no permissible values.');
                   is_valid := false;
         end if;
 
@@ -398,7 +416,13 @@ AS
                 ihook.setColumnValue (rowai, 'ITEM_NM', v_nm);
                 ihook.setColumnValue (rowai, 'ITEM_DESC', v_def);
             end if; 
+
                 ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 3);
+                if (v_from = 2) then -- create from existing then update name and definition
+                    ihook.setColumnValue(rowai,'ITEM_NM', ihook.getColumnValue(rowvd,'ITEM_1_NM' ));
+                    ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowvd,'ITEM_1_DEF'));
+                
+                end if;
                 rows(rows.last) := rowai;
                 rowsetai := t_rowset(rows, 'Administered Item (Hook Creation)', 1, 'ADMIN_ITEM'); 
                 rows := t_rows();       
@@ -451,17 +475,14 @@ AS
              action := t_actionrowset(rows, 'Value Domain', 2,11,'update');
         actions.extend;
         actions(actions.last) := action;
+        end if;
 
-        if (v_from = 2) then --- create from existing and enumerated copy Perm Val
+        if (v_from = 2 and v_op = 'insert') then --- create from existing and enumerated copy Perm Val
              rows := t_rows();
                row_ori := hookinput. originalrowset.rowset(1);
         
-            nci_11179.CopyPermVal (actions, ihook.getColumnValue(row_ori,'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), v_item_id, v_ver_nr);
-            if (rows.count>0) then 
-                action := t_actionRowset(rows, 'Permissible Values (Edit AI)', 2, 'insert');
-                actions.extend; actions(actions.last) := action;
-            end if;
-        end if;
+            nci_11179.CopyPermVal (actions, ihook.getColumnValue(row_ori,'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), v_item_id, 1);
+
         end if;
 
 
@@ -557,7 +578,7 @@ from value_dom where item_id = v_item_id and ver_nr = v_ver_nr;
 
 --
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
- --     nci_util.debugHook('GENERAL',v_data_out);
+     nci_util.debugHook('GENERAL',v_data_out);
 end;
 --
 
@@ -637,6 +658,87 @@ end;
 
 --
 PROCEDURE spVDCreateNew ( v_data_in IN CLOB, v_data_out OUT CLOB)
+as
+  hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    row_ori  t_row;
+    row  t_row;
+    rows t_rows;
+    v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
+    rowsetai  t_rowset;
+    rowsetst  t_rowset;
+begin
+    -- Standard header
+    hookinput                    := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber  := hookinput.invocationnumber;
+    hookoutput.originalrowset    := hookinput.originalrowset;
+
+
+    -- Default for new row. Dummy Identifier has to be set else error.
+    row := t_row();
+    ihook.setColumnValue(row, 'STG_AI_ID', 1);
+        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
+          ihook.setColumnValue(row, 'VER_NR', 1.0);
+          ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
+          ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
+          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 3);
+          ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
+          ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
+          ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
+
+    rows := t_rows(); rows.extend;    rows(rows.last) := row;
+    rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for AI form
+    rowsetst := t_rowset(rows, 'Value Domain', 1, 'VALUE_DOM'); -- Default values for VD form
+
+    spVDCommon(rowsetai,rowsetst,1, 'insert', hookinput, hookoutput);
+
+    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+   --  nci_util.debugHook('GENERAL',v_data_out);
+end;
+
+
+
+PROCEDURE spCreateVMSA ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id in varchar2)
+as
+  hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    row_ori  t_row;
+    row  t_row;
+    rows t_rows;
+    v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
+    rowsetai  t_rowset;
+    rowsetst  t_rowset;
+begin
+    -- Standard header
+    hookinput                    := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber  := hookinput.invocationnumber;
+    hookoutput.originalrowset    := hookinput.originalrowset;
+
+
+    -- Default for new row. Dummy Identifier has to be set else error.
+    row := t_row();
+    ihook.setColumnValue(row, 'STG_AI_ID', 1);
+        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
+          ihook.setColumnValue(row, 'VER_NR', 1.0);
+          ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
+          ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
+          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 3);
+          ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
+          ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
+          ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
+
+    rows := t_rows(); rows.extend;    rows(rows.last) := row;
+    rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for AI form
+    rowsetst := t_rowset(rows, 'Value Domain', 1, 'VALUE_DOM'); -- Default values for VD form
+
+    spVDCommon(rowsetai,rowsetst,1, 'insert', hookinput, hookoutput);
+
+    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+   --  nci_util.debugHook('GENERAL',v_data_out);
+end;
+
+
+PROCEDURE spCreateRTSA ( v_data_in IN CLOB, v_data_out OUT CLOB,  v_usr_id in varchar2)
 as
   hookInput t_hookInput;
     hookOutput t_hookOutput := t_hookOutput();
@@ -779,17 +881,20 @@ if (v_cncpt_src ='STRING') then
                 cnt := nci_11179.getwordcount(v_str);
                 v_nm := '';
                 v_long_nm := '';
+                v_def := '';
                 for i in  1..cnt loop
                         j := i+1;
                         v_cncpt_nm := nci_11179.getWord(v_str, i, cnt);
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || j,'');
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || j, '');
-                        for cur in(select item_id, item_nm , item_long_nm from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
+                        for cur in(select item_id, item_nm , item_long_nm, item_desc from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
                                 ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || j,cur.item_id);
                                 ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || j, 1);
                                -- v_dec_nm := trim(v_dec_nm || ' ' || cur.item_nm) ;
                                 v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                                 v_nm := trim(v_nm || ' ' || cur.item_nm);
+                              v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
+      
                         end loop;
                 end loop;
                 for i in  cnt+2..10 loop
@@ -805,14 +910,16 @@ end if;
 if (v_cncpt_src ='DROP-DOWN') then
         v_nm := '';
         v_long_nm_suf :='';
+        v_def := '';
                 for i in 2..10 loop
                         v_temp_id := ihook.getColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i);
                         v_temp_ver := ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i);
                         if (v_temp_id is not null) then
-                        for cur in(select item_id, item_nm , item_long_nm from admin_item where admin_item_typ_id = 49 and item_id = v_temp_id and ver_nr = v_temp_ver) loop
+                        for cur in(select item_id, item_nm , item_long_nm, item_desc from admin_item where admin_item_typ_id = 49 and item_id = v_temp_id and ver_nr = v_temp_ver) loop
                           --       v_dec_nm := trim(v_dec_nm || ' ' || cur.item_nm) ;
                               v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                                 v_nm := trim(v_nm || ' ' || cur.item_nm);
+                            v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
                          end loop;
                         end if;
                 end loop;
@@ -831,6 +938,7 @@ if (v_cncpt_src ='DROP-DOWN') then
      --  raise_application_error(-20000, v_long_nm_suf || '  Long name: ' || v_nm);
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM', v_long_nm_suf);
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', v_nm);
+               ihook.setColumnValue(rowform,'ITEM_' || idx || '_DEF', substr(v_def,2));
 
             nci_DEC_MGMT.CncptCombExistsNew (rowform , v_long_nm_suf, v_item_typ_id, idx , v_item_id, v_ver_nr);
       --      raise_application_error(-20000, 'HErer ' || v_item_id);
