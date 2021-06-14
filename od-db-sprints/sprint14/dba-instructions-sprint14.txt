@@ -1,5 +1,6 @@
 -- Run as ONEDATA_MD DDL scripts
 S14_MD_TR_OD_MD_OBJSECU_AFT_INS.sql
+exec sp_create_user
 
 -- Run as ONEDATA_WA DDL scripts
 S14_1_WA_RA_DDL.sql
