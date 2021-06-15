@@ -1,0 +1,18 @@
+-- Run as ONEDATA_MD DDL scripts
+
+
+-- Run as ONEDATA_WA DDL scripts
+S15_MIGR_VAL_LOV_FUNC_AC_ST.sql
+S15-MIGR-VAL-LOV_FUNC_REG-ST.sql
+
+-- Run as ONEDATA_RA DDL scripts
+
+-- DATA MIGRATION
+
+-- Run as ONEDATA_WA DM scripts
+
+-- Run as ONEDATA_RA DM scripts
+
+
+-- Run validate job as ONEDATA_WA
+exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
