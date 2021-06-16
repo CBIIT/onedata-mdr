@@ -44,7 +44,7 @@ as
   rowcsi t_row;
   forms t_forms;
   form1 t_form;
-v_dflt_txt    varchar2(100) := 'Enter text or will be auto-generated.';
+v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
 
   row t_row;
   rows  t_rows;
@@ -72,7 +72,7 @@ v_dflt_txt    varchar2(100) := 'Enter text or will be auto-generated.';
   hookoutput.originalrowset    := hookinput.originalrowset;
      row_ori := hookInput.originalRowset.rowset(1);
 
-   if (ihook.getColumnValue(row_ori,'LVL') = 'CONTEXT') then
+   if (ihook.getColumnValue(row_ori,'LVL') = 98) then
    raise_application_error(-20000, 'Cannot create CSI under Context. Please choose CS or CSI.');
    return;
    end if;
@@ -84,8 +84,11 @@ v_dflt_txt    varchar2(100) := 'Enter text or will be auto-generated.';
           ihook.setColumnValue(row, 'VER_NR', 1.0);
           ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
           ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 4);
-          ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
+          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 51);
+           ihook.setColumnValue(row, 'CNTXT_ITEM_ID', ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID'));
+          ihook.setColumnValue(row, 'CNTXT_VER_NR', ihook.getColumnValue(row_ori, 'CNTXT_VER_NR'));
+          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 51);
+         ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
                    rows.extend;
           rows(rows.last) := row;
           rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
@@ -140,13 +143,13 @@ v_dflt_txt    varchar2(100) := 'Enter text or will be auto-generated.';
 
 ihook.setColumnValue(rowcsi,'ITEM_ID', v_id);
     ihook.setColumnValue(rowcsi,'VER_NR', 1.0);
-    if (ihook.getColumnValue(row_ori,'LVL') = 'CSI') then
+    if (ihook.getColumnValue(row_ori,'LVL') = 100) then
         ihook.setColumnValue(rowcsi,'P_ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
         ihook.setColumnValue(rowcsi,'P_ITEM_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
         ihook.setColumnValue(rowcsi,'CS_ITEM_ID', ihook.getColumnValue(row_ori,'P_ITEM_ID'));
         ihook.setColumnValue(rowcsi,'CS_ITEM_VER_NR', ihook.getColumnValue(row_ori,'P_ITEM_VER_NR'));
     end if;
-    if (ihook.getColumnValue(row_ori,'LVL') = 'CLASSIFICATION SCHEME') then
+    if (ihook.getColumnValue(row_ori,'LVL') =99) then
        ihook.setColumnValue(rowcsi,'CS_ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
         ihook.setColumnValue(rowcsi,'CS_ITEM_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
     end if;
@@ -303,7 +306,8 @@ BEGIN
             and ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
             and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')            
             and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')) loop
+            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')
+            and admin_item_typ_id = 4) loop
                 v_valid := false;
                 hookoutput.message := 'Unique constraint on Item Short Name viaolated ' ||cur.item_id;            
         end loop;
@@ -1662,4 +1666,3 @@ RETURN V_DN;
 END;
 END;
 /
-
