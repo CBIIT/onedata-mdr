@@ -324,6 +324,13 @@ AS
         rows := t_rows();
         is_valid := true;
 
+        if (v_op ='update') then
+            row_ori :=  hookInput.originalRowset.rowset(1);
+
+                    v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
+                    v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+
+        end if;
     IF HOOKINPUT.ANSWERID = 1 or Hookinput.answerid = 3 THEN  -- Validate using string
 
                 for i in  2..10 loop
@@ -351,30 +358,40 @@ AS
         end if;
 
 
-  /*     if (   ihook.getColumnValue(rowvd, 'ITEM_1_ID') is not null ) then
-              for cur in (select VALUE_DOM.* from VALUE_DOM, admin_item ai where REP_CLS_ITEM_ID =  ihook.getColumnValue(rowvd, 'ITEM_1_ID') 
-              and REP_CLS_VER_NR =  ihook.getColumnValue(rowvd, 'ITEM_1_VER_NR') and
-                 VALUE_DOM.item_id = ai.item_id and VALUE_DOM.ver_nr = ai.ver_nr 
-                 and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID')
-              and ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR'))
-               loop
-                    ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'DUPLICATE VD');
-                    is_valid := false;
-              end loop;
-
-        end if; 
-    */ 
+  
         if (   ihook.getColumnValue(rowvd, 'CNCPT_1_ITEM_ID_1') is null ) then
                   ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'Rep Term missing.');
                   is_valid := false;
         end if;
 
+-- Create new
         if (   ihook.getColumnValue(rowai, 'ADMIN_STUS_ID') = 75 and  ihook.getColumnValue(rowvd, 'VAL_DOM_TYP_ID') =  17
         and v_op = 'insert' and v_from <> 2) then -- Status cannot be released if VD is enumerated
                   ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'An Enumerated VD WFS cannot be Released if there are no permissible values.');
                   is_valid := false;
         end if;
-
+-- Edit
+       if (   ihook.getColumnValue(rowai, 'ADMIN_STUS_ID') = 75 and  ihook.getColumnValue(rowvd, 'VAL_DOM_TYP_ID') =  17
+        and v_op = 'update' ) then -- Status cannot be released if VD is enumerated
+            select count(*) into v_temp from perm_val where val_dom_item_id = v_item_id and val_dom_Ver_nr = v_ver_nr and nvl(fld_delete,0) = 0;
+            if v_temp = 0 then
+                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'An Enumerated VD WFS cannot be Released if there are no permissible values.');
+                  is_valid := false;
+                end if;
+        end if;
+        
+-- Create from Existing    
+         if (   ihook.getColumnValue(rowai, 'ADMIN_STUS_ID') = 75 and  ihook.getColumnValue(rowvd, 'VAL_DOM_TYP_ID') =  17
+        and v_op = 'insert' and v_from = 2) then -- Status cannot be released if VD is enumerated
+         row_ori :=  hookInput.originalRowset.rowset(1);
+            select count(*) into v_temp from perm_val where val_dom_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') 
+            and val_dom_Ver_nr = ihook.getColumnValue(row_ori,'VER_NR') and nvl(fld_delete,0) = 0;
+            if v_temp = 0 then
+                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'An Enumerated VD WFS cannot be Released if there are no permissible values.');
+                  is_valid := false;
+                end if;
+     
+        end if;
 --raise_application_error(-20000, ihook.getColumnValue(rowai,'ITEM_LONG_NM'));
 -- Short name uniqueness
 --raise_application_error(-20000, ihook.getColumnValue(rowai,'ITEM_LONG_NM'));
@@ -384,7 +401,8 @@ AS
         --    and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR') 
             and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
             and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')
-            and ai.item_id <>  nvl(ihook.getColumnValue(rowai, 'ITEM_ID'),0)) 
+            and ai.item_id <>  nvl(ihook.getColumnValue(rowai, 'ITEM_ID'),0)
+            and ai.admin_item_typ_id = 3) 
             loop
                 is_valid := false;
                 ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'Duplicate VD found based on context/short name: ' || cur.item_id || chr(13));
@@ -429,7 +447,8 @@ AS
                 rows.extend;
                 rows(rows.last) := rowvd;
                 rowset := t_rowset(rows, 'Rep Term (Hook Creation)', 1, 'NCI_STG_AI_CNCPT_CREAT');
-                hookOutput.forms := getVDCreateForm(rowsetai,rowset);             
+                hookoutput.message := ihook.getColumnValue(rowvd, 'CTL_VAL_MSG');
+                      hookOutput.forms := getVDCreateForm(rowsetai,rowset);             
                 HOOKOUTPUT.QUESTION    := getVDCreateQuestion(false,v_from);
         end if;
 
@@ -637,6 +656,8 @@ from value_dom where item_id = v_item_id and ver_nr = v_ver_nr;
     nci_11179.spReturnRTConceptRow (v_rc_item_id, v_rc_ver_nr, 7, 1, rowvd );
 --   
 --    
+
+    
     ihook.setColumnValue(rowvd, 'STG_AI_ID', 1);
 
      rows := t_rows();    rows.extend;    rows(rows.last) := rowai;
@@ -714,6 +735,8 @@ begin
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
 
+    raise_application_error(-20000,'Work in progress');
+    return;
 
     -- Default for new row. Dummy Identifier has to be set else error.
     row := t_row();
@@ -755,6 +778,8 @@ begin
     hookoutput.originalrowset    := hookinput.originalrowset;
 
 
+    raise_application_error(-20000,'Work in progress');
+    return;
     -- Default for new row. Dummy Identifier has to be set else error.
     row := t_row();
     ihook.setColumnValue(row, 'STG_AI_ID', 1);
@@ -926,11 +951,13 @@ if (v_cncpt_src ='DROP-DOWN') then
 
   end if;
         --- Primary Concept
-             for cur in (select item_id, item_nm , item_long_nm from admin_item where admin_item_typ_id = 49 and item_id = ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_ITEM_ID_1')
+             for cur in (select item_id, item_nm , item_long_nm, item_desc from admin_item where admin_item_typ_id = 49 and item_id = ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_ITEM_ID_1')
              and ver_nr  = ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_1')) loop
                           --       v_dec_nm := trim(v_dec_nm || ' ' || cur.item_nm) ;
                               v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                                 v_nm := trim(v_nm || ' ' || cur.item_nm);
+                               v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
+           
                                 --raise_application_error(-20000, 'In HEre' || cur.item_long_nm);
              end loop;
             v_long_nm_suf := substr(v_long_nm_suf,2);
