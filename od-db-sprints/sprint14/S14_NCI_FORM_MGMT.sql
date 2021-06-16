@@ -1,4 +1,28 @@
-CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_form_mgmt AS
+create or replace PACKAGE            nci_form_mgmt AS
+procedure spAddForm (v_data_in in clob, v_data_out out clob);
+procedure spAddModule (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spEditModule (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spAddQuestion (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+procedure spCopyModule (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+function isUserAuth(v_frm_item_id in number, v_frm_ver_nr in number,v_user_id in varchar2) return boolean  ;
+procedure spSetModRep (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+procedure spChngQuestText (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+procedure spChngQuestShortText (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+procedure spSetDefltVal (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+procedure spAddQuestionNoDE (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+procedure spChngQuestTextVV (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+procedure spChngQuestDefVV (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+procedure spAddQuestionRep (rep in integer, row_ori in t_row, rows in out t_rows);
+procedure spAddQuestionRepNew (rep in integer, v_quest_id in integer, rows in out t_rows);
+PROCEDURE spQuestRemoveDE ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+procedure spDelModRep  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+procedure spDeleteQuestVV  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+procedure spAddQuestVV  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+procedure spDelDefltVal (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+procedure spReorderModule (v_data_in in clob, v_data_out out clob,  v_user_id in varchar2);
+END;
+/
+create or replace PACKAGE BODY            nci_form_mgmt AS
 c_ver_suffix varchar2(5) := 'v1.00';
 
 function isUserAuth(v_frm_item_id in number, v_frm_ver_nr in number,v_user_id in varchar2) return boolean  iS
@@ -202,6 +226,129 @@ for i in 1..hookinput.originalrowset.rowset.count loop
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
+
+
+
+procedure spReorderModule  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    rowrel t_row;
+    row_sel t_row;
+    rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  j integer;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+ forms t_forms;
+    form1 t_form;
+    v_cur_disp_ord number;
+    v_new_disp_ord number;
+    v_max_disp_ord number;
+     rowform t_row;
+     v_sql  varchar2(4000);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ rows := t_rows();
+
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ v_cur_disp_ord := ihook.getColumnValue(row_ori, 'DISP_ORD');
+ 
+   if hookInput.invocationNumber = 0 then  -- If first invocation, prompt for version number
+
+        ANSWERS                    := T_ANSWERS();
+        ANSWER                     := T_ANSWER(1, 1, 'Change Position To:' );
+        ANSWERS.EXTEND;
+        ANSWERS(ANSWERS.LAST) := ANSWER;
+        QUESTION               := T_QUESTION('Current position is: ' || v_cur_disp_ord , ANSWERS);
+        HOOKOUTPUT.QUESTION    := QUESTION;
+        forms                  := t_forms();
+        form1                  := t_form('Display Order Change', 2,1);
+        forms.extend;
+        forms(forms.last) := form1;
+        hookOutput.forms := forms;
+	elsif hookInput.invocationNumber = 1 then  -- Position specified...
+            forms              := hookInput.forms;
+            form1              := forms(1);
+            rowform := form1.rowset.rowset(1);
+            v_new_disp_ord := ihook.getColumnValue(rowform,'ITEM_ID');
+            
+            select least(max(disp_ord), count(disp_ord))  into v_max_disp_ord from nci_admin_item_rel where rel_typ_id = 61 and p_item_id = ihook.getColumnValue(row_ori, 'P_ITEM_ID')
+            and p_item_ver_nr = ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR') and nvl(fld_Delete,0) = 0;
+ 
+            if (v_new_disp_ord < 0) then
+                raise_application_error(-20000, 'Invalid Display Order.');
+                return;
+            end if;
+            
+            if (v_new_disp_ord > v_max_disp_ord) then 
+                v_new_disp_ord := v_max_disp_ord;
+            end if;
+            
+ --  if current position is greater than new position
+ 
+  rows := t_rows();
+
+    if (v_cur_disp_ord > v_new_disp_ord) then
+            j := v_new_disp_ord;
+            for i in v_new_disp_ord..v_cur_disp_ord-1 loop
+                row := t_row();
+                v_sql := 'select * from NCI_ADMIN_ITEM_REL where nvl(fld_delete,0) = 0 and p_item_id = ' ||  ihook.getColumnValue(row_ori, 'P_ITEM_ID') || ' and p_item_ver_nr = ' ||  ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR') || ' and disp_ord = ' || i ;
+                nci_11179.ReturnRow(v_sql, 'NCI_ADMIN_ITEM_REL', row);
+                if (ihook.getColumnValue(row, 'P_ITEM_ID') is not null) then
+                    j := j+1;
+                    ihook.setColumnValue(row, 'DISP_ORD', j);
+                    rows.extend;
+                    rows(rows.last) := row;
+                end if;      
+ end loop;
+ end if;
+ -- if current position is less than new position
+
+        if (v_cur_disp_ord < v_new_disp_ord) then
+            j := v_cur_disp_ord + 1;
+            for i in v_cur_disp_ord+1..v_new_disp_ord loop
+                row := t_row();
+                v_sql := 'select * from NCI_ADMIN_ITEM_REL where nvl(fld_delete,0) = 0 and p_item_id = ' ||  ihook.getColumnValue(row_ori, 'P_ITEM_ID') || ' and p_item_ver_nr = ' ||  ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR') || ' and disp_ord = ' || i ;
+                nci_11179.ReturnRow(v_sql, 'NCI_ADMIN_ITEM_REL', row);
+                if (ihook.getColumnValue(row, 'P_ITEM_ID') is not null) then
+                     ihook.setColumnValue(row, 'DISP_ORD', j-1);
+                       j := j+1;
+                 
+                    rows.extend;
+                    rows(rows.last) := row;
+                end if;       
+            end loop;
+    end if;
+  
+    
+row := t_row();
+v_sql := 'select * from NCI_ADMIN_ITEM_REL where nvl(fld_delete,0) = 0 and p_item_id = ' ||  ihook.getColumnValue(row_ori, 'P_ITEM_ID') || ' and p_item_ver_nr = ' ||  ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR') || ' and disp_ord = ' || v_cur_disp_ord ;
+nci_11179.ReturnRow(v_sql, 'NCI_ADMIN_ITEM_REL', row);
+
+ ihook.setColumnValue(row, 'DISP_ORD', v_new_disp_ord);
+  rows.extend;
+            rows(rows.last) := row;
+
+ action := t_actionRowset(rows, 'Generic AI Relationship', 2, 1000, 'update');
+    actions.extend; actions(actions.last) := action;
+  hookoutput.actions:= actions;
+    end if;
+     v_data_out := ihook.getHookOutput(hookOutput);
+    nci_util.debugHook('FORM',v_data_out);
+
+END;
+
+
 
 
 PROCEDURE spAddForm  ( v_data_in IN CLOB,    v_data_out OUT CLOB)
@@ -945,7 +1092,7 @@ row := t_row();
     rows0.extend;
             rows0(rows0.last) := row;
      -- raise_application_error(-20000,  ihook.getColumnValue(row_ori,'ITEM_ID'));
-            action             := t_actionrowset(rows0, 'Question (Base Object)', 2, 2,'update');
+            action             := t_actionrowset(rows0, 'Questions (Base Object)', 2, 2,'update');
             actions.extend;
             actions(actions.last) := action;
         end if;
@@ -1020,7 +1167,7 @@ BEGIN
          if (upper(hookinput.originalrowset.tablename) like '%REP%') then
             action             := t_actionrowset(rows, 'Question Repetition', 2, 0,'update');
          else
-            action             := t_actionrowset(rows, 'Question (Base Object)', 2, 0,'update');       
+            action             := t_actionrowset(rows, 'Questions (Base Object)', 2, 0,'update');       
          end if;
          actions.extend;
          actions(actions.last) := action;
@@ -1391,7 +1538,7 @@ BEGIN
 --DESC_TXT
    -- raise_application_error(-20000, v_add);
         if (rows.count > 0) then
-                        action := t_actionrowset(rows, 'Question (Base Object)', 2,0,'insert');
+                        action := t_actionrowset(rows, 'Questions (Base Object)', 2,0,'insert');
                         actions.extend;
                         actions(actions.last) := action;
         end if;
@@ -1681,7 +1828,7 @@ BEGIN
 --DESC_TXT
    -- raise_application_error(-20000, v_add);
         if (v_add > 0) then
-                        action := t_actionrowset(rows, 'Question (Base Object)', 2,0,'insert');
+                        action := t_actionrowset(rows, 'Questions (Base Object)', 2,0,'insert');
                         actions.extend;
                         actions(actions.last) := action;
         end if;
@@ -1958,7 +2105,7 @@ begin
    ihook.setColumnValue(row_ori,'C_ITEM_VER_NR','');
 
     rows := t_rows();    rows.extend;    rows(rows.last) := row_ori;
-    action := t_actionrowset(rows, 'Question (Base Object)', 2,2,'update');
+    action := t_actionrowset(rows, 'Questions (Base Object)', 2,2,'update');
         actions.extend;
         actions(actions.last) := action;
 
