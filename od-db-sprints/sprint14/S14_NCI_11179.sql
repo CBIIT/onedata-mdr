@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE NCI_11179 AS
+create or replace PACKAGE            "NCI_11179" AS
 function getWordCount(v_nm in varchar2) return integer;
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
 FUNCTION get_concepts(v_item_id in number, v_ver_nr in number) return varchar2;
@@ -23,7 +23,7 @@ function getItemId return integer;
 procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm in out varchar2, v_def in out varchar2);
 function replaceChar(v_str in varchar2) return varchar2;
 procedure CopyPermVal (actions in out t_actions, v_from_id in number, v_from_ver_nr in number, v_to_id in number, v_to_ver_nr in number);
-
+procedure ReturnRow (v_sql varchar2,  v_table_name in varchar2, row in out t_row);
 /*  This package includes generic functions as well as versioning related procedures for NCI
 
 geWordCOunt - gets the word count of a string separated by spaces. Used to parse the string the user provides in DEC creation
@@ -37,8 +37,7 @@ spCreateVerNCI - Create new version customized
 */
 END;
 /
-
-CREATE OR REPLACE PACKAGE BODY NCI_11179 AS
+create or replace PACKAGE BODY NCI_11179 AS
 
 v_err_str      varchar2(1000) := '';
 DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
@@ -72,6 +71,47 @@ i := getWordCount(v_nm);
 v_temp := getWord(v_nm, i+1,i+1);
 return v_temp;
 end;
+
+
+
+procedure ReturnRow (v_sql varchar2,  v_table_name in varchar2, row in out t_row) as
+    action           t_actionRowset;
+    action_rows              t_rows := t_rows();
+
+   -- v_sql        varchar2(4000);
+    v_cur        number;
+    v_temp        number;
+    v_col_val       varchar2(4000);
+
+    v_meta_col_cnt      integer;
+    v_meta_desc_tab      dbms_sql.desc_tab;
+begin
+
+
+    v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
+
+  --  v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where rel_typ_id = 61 and p_item_id=:p_item_id and p_item_ver_nr=:p_item_ver_nr and disp_ord=:disp_ord';
+
+    v_cur := dbms_sql.open_cursor;
+    dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
+  
+
+    for i in 1..v_meta_col_cnt loop
+        dbms_sql.define_column(v_cur, i, '', 4000);
+    end loop;
+
+    v_temp := dbms_sql.execute_and_fetch(v_cur);
+    dbms_sql.describe_columns(v_cur, v_meta_col_cnt, v_meta_desc_tab);
+
+
+    for i in 1..v_meta_col_cnt loop
+        dbms_sql.column_value(v_cur, i, v_col_val);
+        ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
+    end loop;
+    
+    dbms_sql.close_cursor(v_cur);
+end;
+
 
 /*  Generate Public ID for Asminiteres Item */
 function getItemId return integer is
@@ -1457,7 +1497,7 @@ begin
         v_found := false;
 
         for pro_cur in (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where
-        c_item_id = v_admin_item.item_id and c_ITEM_ver_nr = v_admin_item.ver_nr and nvl(fld_delete,0) = 0) loop
+        c_item_id = v_admin_item.item_id and c_ITEM_ver_nr = v_admin_item.ver_nr and rel_typ_id = 60 and nvl(fld_delete,0) = 0) loop
           --    raise_application_error(-20000,'Herer');
 
             row := t_row();
@@ -1653,6 +1693,3 @@ end;
 
 END;
 /
-
-
-GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;
