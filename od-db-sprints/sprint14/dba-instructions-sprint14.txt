@@ -5,20 +5,24 @@ exec sp_create_user
 -- Run as ONEDATA_WA DDL scripts
 S14_1_WA_RA_DDL.sql
 S14_NCI_11179.sql
+S14_NCI_11179_2.sql
 S14_NCI_CHNG_MGMT.sql
 S14_NCI_DEC_MGMT.sql
 S14_NCI_VD.sql
 S14_NCI_PV_VM.sql
 S14_NCI_FORM_MGMT.sql
+S14_NCI_POST_HOOK.sql
+S14_NCI_CADSR_PULL.sql
+
 -- Run as ONEDATA_RA DDL scripts
 S14_1_WA_RA_DDL.sql
 -- DATA MIGRATION
 
 -- Run as ONEDATA_WA DM scripts
--- S13_WA_Data_Migration.sql
+S14_WA_Data_Migration.sql
 
 -- Run as ONEDATA_RA DM scripts
--- S12_RA_Data_Migration.sql
+S12_RA_Data_Migration.sql
 
 -- Check that materialized views have valid statuses.
 
