@@ -256,6 +256,8 @@ as
     v_item_id  number;
     v_ver_nr  number(4,2);
     v_item_type_id number;
+    v_cd_item_id number;
+    v_cd_ver_nr number(4,2);
    rowset  t_rowset;
     v_tbl_nm varchar2(100);
 begin
@@ -272,7 +274,6 @@ begin
         v_item_id := ihook.getColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID');
         v_ver_nr := ihook.getColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR');
         select item_nm, item_desc, item_long_nm into v_item_nm, v_item_def, v_item_long_nm from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
-   --     select conc_dom_item_id, conc_dom_Ver_nr into v_cd_item_id, v_cd_ver_nr from nci_val_mean where 
     -- Check if user is authorized to edit
     if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_usr_id) = false) then
         raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ');
@@ -293,8 +294,13 @@ begin
     ihook.setColumnValue(row, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));  
     ihook.setColumnValue(row, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));   
     ihook.setColumnValue(row, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'PERM_VAL_NM'));  
-    
 
+    select conc_dom_item_id, conc_dom_Ver_nr into v_cd_item_id, v_cd_ver_nr from value_dom where item_id = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID')
+    and ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR');
+    
+    ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', v_cd_item_id);  
+    ihook.setColumnValue(row, 'CONC_DOM_VER_NR', v_cd_ver_nr);   
+    
         ihook.setColumnValue(row, 'ITEM_1_NM',  v_item_nm);
         ihook.setColumnValue(row, 'ITEM_1_DEF',  v_item_def);
         ihook.setColumnValue(row, 'ITEM_1_LONG_NM',  v_item_long_nm);
@@ -804,8 +810,9 @@ begin
         idx := 1;
         j :=0;
 
-        if (HOOKINPUT.ANSWERID = 1 and ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is not null) then  -- Validate using drop-down
+        if (HOOKINPUT.ANSWERID = 1 ) then  -- Validate using drop-down
              --- Only update definition and long name. No name change
+                if  (ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is not null) then
                 idx := 1;
                    for i in 1..10 loop
                         v_temp_id := ihook.getColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i);
@@ -821,12 +828,20 @@ begin
                ihook.setColumnValue(rowform, 'ITEM_1_LONG_NM', substr(v_long_nm_suf,2));
                rows := t_rows();  rows.extend;  rows(rows.last) := rowform;      
                rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
+               else
+                  is_Valid := false;
+                  hookoutput.message := 'You need to specify atleast one concept.';
+               rows := t_rows();  rows.extend;  rows(rows.last) := rowform;      
+               rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
+                end if;
+        end if;
+
+        if (is_valid = false or HOOKINPUT.ANSWERID = 1) then
                 HOOKOUTPUT.QUESTION    := getVMEditQuestion(hookinput.originalrowset.tablename);
 
           hookOutput.forms :=getVMEditForm(rowset);
           return;
-
-        end if;
+    end if;
 
         if (HOOKINPUT.ANSWERID = 2 and is_Valid = true) then
           v_item_id := ihook.getColumnValue(rowform, 'ITEM_1_ID');
@@ -880,12 +895,12 @@ begin
             actions.extend;
             actions(actions.last) := action;
         end if;
-        end if;
         rows := t_rows();
         row := t_row();
         
        nci_11179.spReturnAIRow (v_item_id, v_ver_nr, row);
        nci_11179.spReturnAIExtRow (v_item_id, v_ver_nr,  row);
+   
        ihook.setColumnValue(row,'ITEM_NM', ihook.getColumnValue(rowform, 'ITEM_1_NM'));
        ihook.setColumnValue(row,'ITEM_DESC', ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
        ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
@@ -902,6 +917,8 @@ begin
         action := t_actionrowset(rows, 'NCI AI Extension (Hook)', 2,8,'update');
         actions.extend;
         actions(actions.last) := action;
+        end if;
+        
     if (actions.count > 0) then
         hookoutput.actions := actions;
     end if;
@@ -971,13 +988,45 @@ begin
 
         end if;
 
+      if (HOOKINPUT.ANSWERID = 3 and ihook.getColumnValue(rowform, 'ITEM_2_ID') is null) then  -- Associate using specified but no value specified
+               rows := t_rows();  rows.extend;  rows(rows.last) := rowform;      
+               rowset := t_rowset(rows, 'VM Create Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
+                hookoutput.message := 'No Value Meaning spectified';
+                HOOKOUTPUT.QUESTION    := getVMCreateEditQuestion(hookinput.originalrowset.tablename);
+
+          hookOutput.forms :=getVMCreateEditForm(rowset);
+          return;
+
+        end if;
+
+    rows := t_rows();
         if (HOOKINPUT.ANSWERID = 2) then
          if (ihook.getColumnValue(rowform,'ITEM_1_ID') is null) then
-              nci_pv_vm.createVMConcept(rowform ,'DROP-DOWN', 'C', actions);
+             nci_dec_mgmt.createValAIWithConcept(rowform , 1,v_item_typ_glb ,'C','DROP-DOWN',actions);
+                ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID', ihook.getColumnValue(rowform, 'ITEM_1_ID'));
+              ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'));
+                   rows.extend;
+            rows(rows.last) := row_ori;
+          action := t_actionrowset(rows, 'Permissible Values (Edit AI)', 2,19,'update');
+           actions.extend;
+           actions(actions.last) := action;
+
          --   end loop;
          end if;
         end if;
 
+        if (HOOKINPUT.ANSWERID = 3) then -- Associate using specified
+                ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID', ihook.getColumnValue(rowform, 'ITEM_2_ID'));
+              ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'));
+                   rows.extend;
+            rows(rows.last) := row_ori;
+          action := t_actionrowset(rows, 'Permissible Values (Edit AI)', 2,19,'update');
+           actions.extend;
+           actions(actions.last) := action;
+
+         --   end loop;
+         end if;
+    
 
     if (actions.count > 0) then
         hookoutput.actions := actions;
@@ -1010,7 +1059,7 @@ begin
     ANSWER                     := T_ANSWER(4, 4, 'Create Using Drop-Down');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-      ANSWER                     := T_ANSWER(5, 5, 'Create Using Specified Name');
+      ANSWER                     := T_ANSWER(5, 5, 'Create Using Specified');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
           ANSWER                     := T_ANSWER(6, 6, 'Create Using Existing VM');
@@ -1067,7 +1116,10 @@ begin
     ANSWER                     := T_ANSWER(1, 1, 'Validate Using Drop-Down');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    ANSWER                     := T_ANSWER(2, 2, 'Associate');
+    ANSWER                     := T_ANSWER(2, 2, 'Associate Using Drop-Down');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    ANSWER                     := T_ANSWER(3, 3, 'Associate Using Specified');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Change PV Association', ANSWERS);
