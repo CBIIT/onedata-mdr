@@ -1,4 +1,4 @@
-create or replace PACKAGE            nci_11179_2 AS
+CREATE OR REPLACE PACKAGE nci_11179_2 AS
 procedure spNCICompareDE (v_data_in in clob, v_data_out out clob);
 procedure spNCIShowVMDependency (v_data_in in clob, v_data_out out clob);
 procedure spNCIShowVMDependencyDE (v_data_in in clob, v_data_out out clob);
@@ -7,11 +7,13 @@ procedure spCheckUserAuth (v_data_in in clob, v_data_out out clob, v_user_id in 
 procedure setStdAttr(row in out t_row);
 procedure setItemLongNm(row in out t_row, v_id in number);
 END;
+
 /
-create or replace PACKAGE BODY            nci_11179_2 AS
+
+
+CREATE OR REPLACE PACKAGE BODY nci_11179_2 AS
 
 c_ver_suffix varchar2(5) := 'v1.00';
-
 
 
 procedure setItemLongNm(row in out t_row, v_id in number) as
