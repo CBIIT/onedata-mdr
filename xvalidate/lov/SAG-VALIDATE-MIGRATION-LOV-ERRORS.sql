@@ -8,7 +8,7 @@ SELECT 'SBR' schema, ORG_IDSEQ,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM SBR.ORGANIZATIONS where NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'ORG')
+                        FROM SBR.ORGANIZATIONS where NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'ORG')
               UNION ALL
               SELECT 'WA' schema, en.NCI_IDSEQ ORG_IDSEQ,
                              norg.ORG_NM NAME,
@@ -19,7 +19,7 @@ SELECT 'SBR' schema, ORG_IDSEQ,
                              en.LST_UPD_DT DATE_MODIFIED,
                              en.LST_UPD_USR_ID MODIFIED_BY
                         FROM ONEDATA_WA.NCI_ORG norg inner join ONEDATA_WA.NCI_ENTTY en on Norg.Entty_Id = En.Entty_Id where En.Entty_Typ_Id = 72
-                        and norg.ORG_NM in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'ORG')
+                        and norg.ORG_NM in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'ORG')
 ORDER BY NAME, schema;
 
 --CS_TYPE
@@ -31,7 +31,7 @@ SELECT 'SBR' schema, CSTL_NAME,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM sbr.CS_TYPES_LOV where CSTL_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CS_TYPE')
+                        FROM sbr.CS_TYPES_LOV where CSTL_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'CS_TYPE')
               UNION ALL
               SELECT 'WA' schema, OBJ_KEY_DESC CSTL_NAME,
                              OBJ_KEY_DEF DESCRIPTION,
@@ -40,7 +40,7 @@ SELECT 'SBR' schema, CSTL_NAME,
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=3 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CS_TYPE')
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=3 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'CS_TYPE')
 ORDER BY CSTL_NAME, schema;
 
 -- CSI_TYPE 
@@ -51,7 +51,7 @@ SELECT 'SBR' schema, CSITL_NAME,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM sbr.CSI_TYPES_LOV where CSITL_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CSI_TYPE')
+                        FROM sbr.CSI_TYPES_LOV where CSITL_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'CSI_TYPE')
               UNION ALL
               SELECT 'WA' schema, OBJ_KEY_DESC CSITL_NAME,
                              OBJ_KEY_DEF DESCRIPTION,
@@ -60,7 +60,7 @@ SELECT 'SBR' schema, CSITL_NAME,
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=20 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CSI_TYPE')
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=20 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'CSI_TYPE')
 ORDER BY CSITL_NAME, schema;
 
 --CONCEPT_SOURCE
@@ -70,7 +70,7 @@ SELECT 'SBR' schema, CONCEPT_SOURCE,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM SBREXT.concept_sources_lov_ext where CONCEPT_SOURCE in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CONCEPT_SOURCE')
+                        FROM concept_sources_lov_ext where CONCEPT_SOURCE in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'CONCEPT_SOURCE')
               UNION ALL
               SELECT 'WA' schema, OBJ_KEY_DESC CONCEPT_SOURCE,
                              OBJ_KEY_DEF DESCRIPTION,
@@ -78,7 +78,7 @@ SELECT 'SBR' schema, CONCEPT_SOURCE,
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=23 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'CONCEPT_SOURCE')
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=23 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'CONCEPT_SOURCE')
 ORDER BY CONCEPT_SOURCE, schema;
 
 --AC_STATUS
@@ -90,7 +90,7 @@ SELECT 'SBR' schema, ASL_NAME,
                              DATE_MODIFIED,
                              MODIFIED_BY,
                              DISPLAY_ORDER
-                        FROM SBR.AC_STATUS_LOV where ASL_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'AC_STATUS')
+                        FROM SBR.AC_STATUS_LOV where ASL_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'AC_STATUS')
               UNION ALL
               SELECT 'WA' schema, NCI_STUS ASL_NAME,
                              STUS_DESC DESCRIPTION,
@@ -100,7 +100,7 @@ SELECT 'SBR' schema, ASL_NAME,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY,
                              NCI_DISP_ORDR DISPLAY_ORDER
-              FROM ONEDATA_WA.Stus_Mstr where STUS_TYP_ID = 2 and NCI_STUS in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'AC_STATUS')
+              FROM ONEDATA_WA.Stus_Mstr where STUS_TYP_ID = 2 and NCI_STUS in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'AC_STATUS')
 ORDER BY ASL_NAME, schema;
 
 --DEFINITION_TYPE
@@ -111,7 +111,7 @@ SELECT 'SBR' schema, DEFL_NAME,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM SBREXT.definition_types_lov_ext where DEFL_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DEFINITION_TYPE')
+                        FROM definition_types_lov_ext where DEFL_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'DEFINITION_TYPE')
               UNION ALL
               SELECT 'WA' schema, OBJ_KEY_DESC DEFL_NAME,
                              OBJ_KEY_DEF DESCRIPTION,
@@ -120,7 +120,7 @@ SELECT 'SBR' schema, DEFL_NAME,
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=15 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DEFINITION_TYPE')
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=15 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'DEFINITION_TYPE')
 ORDER BY DEFL_NAME, schema;
 
 --DERIVATION_TYPE
@@ -130,7 +130,7 @@ SELECT 'SBR' schema, CRTL_NAME,
                              DATE_CREATED,
                              Nvl (DATE_MODIFIED, DATE_CREATED) DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM SBR.complex_rep_type_lov where CRTL_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DERIVATION_TYPE')
+                        FROM SBR.complex_rep_type_lov where CRTL_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'DERIVATION_TYPE')
               UNION ALL
               SELECT 'WA' schema, OBJ_KEY_DESC CRTL_NAME,
                              OBJ_KEY_DEF DESCRIPTION,
@@ -138,7 +138,7 @@ SELECT 'SBR' schema, CRTL_NAME,
                              CREAT_DT DATE_CREATED,
                              Nvl (LST_UPD_DT, CREAT_DT) DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=18 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DERIVATION_TYPE')
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=18 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'DERIVATION_TYPE')
 ORDER BY CRTL_NAME, schema;
 
 --DESIGNATION_TYPE
@@ -149,7 +149,7 @@ SELECT 'SBR' schema, DETL_NAME,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM SBR.designation_types_lov where DETL_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DESIGNATION_TYPE')
+                        FROM SBR.designation_types_lov where DETL_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'DESIGNATION_TYPE')
               UNION ALL
               SELECT 'WA' schema, OBJ_KEY_DESC DETL_NAME,
                              OBJ_KEY_DEF DESCRIPTION,
@@ -158,7 +158,7 @@ SELECT 'SBR' schema, DETL_NAME,
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=11 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DESIGNATION_TYPE')
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=11 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'DESIGNATION_TYPE')
 ORDER BY DETL_NAME, schema;
 
 --DOC_TYPE
@@ -169,7 +169,7 @@ SELECT 'SBR' schema, DCTL_NAME,
                              DATE_CREATED,
                              Nvl (DATE_MODIFIED, DATE_CREATED) DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM sbr.DOCUMENT_TYPES_LOV where DCTL_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DOC_TYPE')
+                        FROM sbr.DOCUMENT_TYPES_LOV where DCTL_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'DOC_TYPE')
               UNION ALL
               SELECT 'WA' schema, OBJ_KEY_DESC DCTL_NAME,
                              OBJ_KEY_DEF DESCRIPTION,
@@ -178,7 +178,7 @@ SELECT 'SBR' schema, DCTL_NAME,
                              CREAT_DT DATE_CREATED,
                              Nvl (LST_UPD_DT, CREAT_DT) DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=1 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DOC_TYPE')
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=1 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'DOC_TYPE')
 ORDER BY DCTL_NAME, schema;
 
 --FORMATS
@@ -189,7 +189,7 @@ SELECT 'SBR' schema, FORML_NAME,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM SBR.FORMATS_LOV where FORML_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'FORMATS')
+                        FROM SBR.FORMATS_LOV where FORML_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'FORMATS')
               UNION ALL
               SELECT 'WA' schema, FMT_NM FORML_NAME,
                              FMT_DESC DESCRIPTION,
@@ -198,7 +198,7 @@ SELECT 'SBR' schema, FORML_NAME,
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY 
-              FROM ONEDATA_WA.FMT where FMT_NM in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'FORMATS')
+              FROM ONEDATA_WA.FMT where FMT_NM in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'FORMATS')
 ORDER BY FORML_NAME, schema;
 
 --ORIGIN
@@ -208,7 +208,7 @@ SELECT 'SBR' schema, SRC_NAME,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM SBREXT.sources_ext where SRC_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'ORIGIN')
+                        FROM sources_ext where SRC_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'ORIGIN')
               UNION ALL
               SELECT 'WA' schema, OBJ_KEY_DESC SRC_NAME,
                              OBJ_KEY_DEF DESCRIPTION,
@@ -216,7 +216,7 @@ SELECT 'SBR' schema, SRC_NAME,
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=18 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'ORIGIN')
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=18 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'ORIGIN')
 ORDER BY SRC_NAME, schema;
 
 --PA
@@ -227,7 +227,7 @@ SELECT 'SBR' schema, PAL_NAME,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM sbr.PROGRAM_AREAS_LOV where PAL_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'PA')
+                        FROM sbr.PROGRAM_AREAS_LOV where PAL_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'PA')
               UNION ALL
               SELECT 'WA' schema, OBJ_KEY_DESC PAL_NAME,
                              OBJ_KEY_DEF DESCRIPTION,
@@ -236,7 +236,7 @@ SELECT 'SBR' schema, PAL_NAME,
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=14 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'PA')
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=14 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'PA')
 ORDER BY PAL_NAME, schema;
 
 --QCDL_TYPE
@@ -247,7 +247,7 @@ SELECT 'SBR' schema, QCDL_NAME,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM SBREXT.QC_DISPLAY_LOV_EXT where QCDL_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'QCDL_TYPE')
+                        FROM QC_DISPLAY_LOV_EXT where QCDL_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'QCDL_TYPE')
               UNION ALL
               SELECT 'WA' schema, OBJ_KEY_DESC QCDL_NAME,
                              OBJ_KEY_DEF DESCRIPTION,
@@ -256,7 +256,7 @@ SELECT 'SBR' schema, QCDL_NAME,
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=22 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'QCDL_TYPE')
+              FROM ONEDATA_WA.OBJ_KEY where OBJ_TYP_ID=22 and OBJ_KEY_DESC in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'QCDL_TYPE')
 ORDER BY QCDL_NAME, schema;
 
 --REGISTRATION_STATUS
@@ -268,7 +268,7 @@ SELECT 'SBR' schema, REGISTRATION_STATUS,
                              DATE_MODIFIED,
                              MODIFIED_BY,
                              DISPLAY_ORDER
-                        FROM SBR.Reg_Status_Lov where REGISTRATION_STATUS in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'REGISTRATION_STATUS')
+                        FROM SBR.Reg_Status_Lov where REGISTRATION_STATUS in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'REGISTRATION_STATUS')
               UNION ALL
               SELECT 'WA' schema, NCI_STUS REGISTRATION_STATUS,
                              STUS_DESC DESCRIPTION,
@@ -278,7 +278,7 @@ SELECT 'SBR' schema, REGISTRATION_STATUS,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY,
                              NCI_DISP_ORDR DISPLAY_ORDER
-              FROM ONEDATA_WA.Stus_Mstr where STUS_TYP_ID = 1 and NCI_STUS in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'REGISTRATION_STATUS')
+              FROM ONEDATA_WA.Stus_Mstr where STUS_TYP_ID = 1 and NCI_STUS in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'REGISTRATION_STATUS')
 ORDER BY REGISTRATION_STATUS, schema;
 
 --UOM
@@ -290,7 +290,7 @@ SELECT 'SBR' schema,  UOML_NAME,
                              DATE_CREATED,
                              DATE_MODIFIED,
                              MODIFIED_BY
-                        FROM SBR.UNIT_OF_MEASURES_LOV where UOML_NAME in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'UOM')
+                        FROM SBR.UNIT_OF_MEASURES_LOV where UOML_NAME in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'UOM')
               UNION ALL
               SELECT 'WA' schema, UOM_NM UOML_NAME,
                              to_char(UOM_PREC) PRECISION,
@@ -300,7 +300,7 @@ SELECT 'SBR' schema,  UOML_NAME,
                              CREAT_DT DATE_CREATED,
                              LST_UPD_DT DATE_MODIFIED,
                              LST_UPD_USR_ID MODIFIED_BY
-              FROM ONEDATA_WA.UOM where UOM_NM in (SELECT LOV_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'UOM')
+              FROM ONEDATA_WA.UOM where UOM_NM in (SELECT LOV_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'UOM')
 ORDER BY UOML_NAME, schema;
 
 --DATA_TYPE
@@ -314,7 +314,7 @@ SELECT 'SBR' schema, DTL_NAME,
                              SCHEME_REFERENCE,
                              ANNOTATION
                              --,CODEGEN_COMPATIBILITY_IND
-                        FROM SBR.DATATYPES_LOV where DTL_NAME in (SELECT Lov_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DATA_TYPE')
+                        FROM SBR.DATATYPES_LOV where DTL_NAME in (SELECT Lov_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'DATA_TYPE')
               UNION ALL
               SELECT 'WA' schema, NCI_CD DTL_NAME,
                              DTTYPE_DESC DESCRIPTION,
@@ -326,5 +326,5 @@ SELECT 'SBR' schema, DTL_NAME,
                              DTTYPE_SCHM_REF SCHEME_REFERENCE,
                              DTTYPE_ANNTTN ANNOTATION
                              --, where is CODEGEN_COMPATIBILITY_IND
-              FROM ONEDATA_WA.DATA_TYP where NCI_CD in (SELECT Lov_VALUE FROM SBREXT.Sag_Migr_Lov_Err WHERE Lov_Name = 'DATA_TYPE')
+              FROM ONEDATA_WA.DATA_TYP where NCI_CD in (SELECT Lov_VALUE FROM Sag_Migr_Lov_Err WHERE Lov_Name = 'DATA_TYPE')
  ORDER BY DTL_NAME, schema;   

@@ -4,6 +4,7 @@ exec sp_create_user
 
 -- Run as ONEDATA_WA DDL scripts
 S14_1_WA_RA_DDL.sql
+S14_2_WA.sql
 S14_NCI_11179.sql
 S14_NCI_11179_2.sql
 S14_NCI_CHNG_MGMT.sql
