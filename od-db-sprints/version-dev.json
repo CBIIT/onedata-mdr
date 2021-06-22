@@ -1,6 +1,6 @@
 {
-  "version":"wmonedata-1.0.0-sprint15-01",
-  "tag":"",
-  "tier":"DEV",
+  "Version":"wmonedata-1.0.0",
+  "Tag":"wmonedata-1.0.0-sprint15-01",
+  "Tier":"DEV",
   "release_date":"June 2021"
 }
