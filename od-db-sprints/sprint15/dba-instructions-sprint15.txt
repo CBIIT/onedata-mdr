@@ -4,6 +4,7 @@
 -- Run as ONEDATA_WA DDL scripts
 S15_MIGR_VAL_LOV_FUNC_AC_ST.sql
 S15-MIGR-VAL-LOV_FUNC_REG-ST.sql
+S15_NCI_CADSR_PULL.sql
 
 -- Run as ONEDATA_RA DDL scripts
 
