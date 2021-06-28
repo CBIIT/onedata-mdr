@@ -154,3 +154,34 @@ END ;
            AND VALUE_DOM.CONC_DOM_ITEM_ID = CD_AI.ITEM_ID
            AND VALUE_DOM.CONC_DOM_VER_NR = CD_AI.VER_NR;
 
+CREATE OR REPLACE FORCE VIEW VW_REGIST_AUTH
+(
+    ORG_ID,
+    NCI_IDSEQ,
+    ORG_NM,
+    RA_IND,
+    ORG_MAIL_ADR,
+    CREAT_DT,
+    CREAT_USR_ID,
+    LST_UPD_USR_ID,
+    FLD_DELETE,
+    LST_DEL_DT,
+    S2P_TRN_DT,
+    LST_UPD_DT
+)
+BEQUEATH DEFINER
+AS
+    SELECT ENTTY_ID      ORG_ID,
+           RAI           NCI_IDSEQ,
+           ORG_NM,
+           RA_IND,
+           MAIL_ADDR     ORG_MAIL_ADR,
+           CREAT_DT,
+           CREAT_USR_ID,
+           LST_UPD_USR_ID,
+           FLD_DELETE,
+           LST_DEL_DT,
+           S2P_TRN_DT,
+           LST_UPD_DT
+      FROM NCI_ORG
+     WHERE RA_IND = 'Yes';
