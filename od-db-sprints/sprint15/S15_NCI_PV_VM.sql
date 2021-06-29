@@ -1,4 +1,5 @@
-create or replace PACKAGE            nci_PV_VM AS
+
+CREATE OR REPLACE PACKAGE nci_PV_VM AS
 
 PROCEDURE spPVVMCreateNew (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 PROCEDURE spPVVMCreateNewBulk (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
@@ -30,7 +31,9 @@ procedure createVMConcept (rowform in out t_row, v_cncpt_src in varchar2, v_mode
 
 END;
 /
-create or replace PACKAGE BODY            nci_PV_VM AS
+
+
+CREATE OR REPLACE PACKAGE BODY nci_PV_VM AS
 
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
