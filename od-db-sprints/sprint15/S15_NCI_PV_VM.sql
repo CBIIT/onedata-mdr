@@ -30,7 +30,7 @@ procedure createVMConcept (rowform in out t_row, v_cncpt_src in varchar2, v_mode
 
 END;
 /
-create or replace PACKAGE BODY nci_PV_VM AS
+create or replace PACKAGE BODY            nci_PV_VM AS
 
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
@@ -47,8 +47,7 @@ begin
    ihook.setColumnValue(row, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR')); --Using not used attribute ITEM_2_NM to show selected VD.
      ihook.setColumnValue(row, 'ITEM_2_ID', ihook.getColumnValue(row_ori, 'ITEM_ID')); --Using not used attribute ITEM_2_NM to show selected VD.
    ihook.setColumnValue(row, 'ITEM_2_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR')); --Using not used attribute ITEM_2_NM to show selected VD.
-  
-   --- Set default Conc Dom 
+  --- Set default Conc Dom 
     for cur in (select * from value_dom where item_id =ihook.getColumnValue(row_ori,'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'VER_NR') )loop
            ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', cur.CONC_DOM_ITEM_ID);
          ihook.setColumnValue(row, 'CONC_DOM_VER_NR', cur.CONC_DOM_VER_NR);
@@ -193,17 +192,18 @@ begin
 
   --  raise_application_error(-20000, v_tbl_nm);
 
-    if (v_tbl_nm = 'Administered Item') then
+    if (v_tbl_nm <> 'Administered Item') then  -- being called from PV
+       v_item_id := ihook.getColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID');
+        v_ver_nr := ihook.getColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR');
+        nci_11179.spReturnAIRow(v_item_id, v_ver_nr, row_ori);
+        
+    end if;
         v_item_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
         v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
         v_item_nm := ihook.getColumnValue(row_ori, 'ITEM_NM');
         v_item_def := ihook.getColumnValue(row_ori, 'ITEM_DESC');
         v_item_long_nm := ihook.getColumnValue(row_ori, 'ITEM_LONG_NM');
-    else
-        v_item_id := ihook.getColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID');
-        v_ver_nr := ihook.getColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR');
-        select item_nm, item_desc, item_long_nm into v_item_nm, v_item_def, v_item_long_nm from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
-    end if ;
+  
     -- Check if user is authorized to edit
     if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_usr_id) = false) then
         raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ');
@@ -230,6 +230,7 @@ begin
         ihook.setColumnValue(row, 'ITEM_1_NM',  v_item_nm);
         ihook.setColumnValue(row, 'ITEM_1_DEF',  v_item_def);
         ihook.setColumnValue(row, 'ITEM_1_LONG_NM',  v_item_long_nm);
+     
 
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
     rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
@@ -585,6 +586,12 @@ begin
 
          -- If any of the test fails or if the user has triggered validation, then go back to the screen.
         if (is_valid=false or hookinput.answerid = 1 or hookinput.answerid = 2) then
+              
+              -- Read-only drop-downs do not migrate
+                ihook.setColumnValue(rowform, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID')); --Using not used attribute ITEM_2_NM to show selected VD.
+                ihook.setColumnValue(rowform, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR')); --Using not used attribute ITEM_2_NM to show selected VD.
+                ihook.setColumnValue(rowform, 'ITEM_2_ID', ihook.getColumnValue(row_ori, 'ITEM_ID')); --Using not used attribute ITEM_2_NM to show selected VD.
+                ihook.setColumnValue(rowform, 'ITEM_2_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR')); --Using not used attribute ITEM_2_NM to show selected VD.
                 rows.extend;
                 rows(rows.last) := rowform;
                 rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT');
@@ -618,8 +625,12 @@ begin
       select item_nm into v_pv from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;  
       end if;
       
-      hookoutput.message := 'Value Meaning ID: ' || v_item_id;
-
+      -- Show resue if string specified.
+      if (hookinput.answerid = 5) then
+        hookoutput.message := ihook.getColumnValue(rowform,'CTL_VAL_MSG');
+    else
+      hookoutput.message := 'VM Created: ' || v_item_id;
+    end if;
         select count(*) into v_temp from CONC_DOM_VAL_MEAN where CONC_DOM_ITEM_ID = ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') and 
         CONC_DOM_VER_NR = ihook.getColumnValue(rowform, 'CONC_DOM_VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = v_ver_nr;
 
@@ -906,6 +917,9 @@ begin
    
        ihook.setColumnValue(row,'ITEM_NM', ihook.getColumnValue(rowform, 'ITEM_1_NM'));
        ihook.setColumnValue(row,'ITEM_DESC', ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
+        ihook.setColumnValue(row,'ADMIN_STUS_ID', ihook.getColumnValue(rowform, 'ADMIN_STUS_ID'));
+        ihook.setColumnValue(row,'REGSTR_STUS_ID', ihook.getColumnValue(rowform, 'REGSTR_STUS_ID'));
+    
        ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
        ihook.setColumnValue(row,'CNCPT_CONCAT', ihook.getColumnValue(rowform, 'ITEM_1_LONG_NM'));
        ihook.setColumnValue(row,'CNCPT_CONCAT_NM', ihook.getColumnValue(rowform, 'ITEM_1_NM'));
@@ -982,6 +996,9 @@ begin
 
         if (HOOKINPUT.ANSWERID = 1 and ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is not null) then  -- Validate using drop-down
                nci_dec_mgmt.createValAIWithConcept(rowform , k,v_item_typ_glb ,'V','DROP-DOWN',actions);
+                  ihook.setColumnValue(rowform, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));  
+    ihook.setColumnValue(rowform, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));   
+  
                rows := t_rows();  rows.extend;  rows(rows.last) := rowform;      
                rowset := t_rowset(rows, 'VM Create Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
                 HOOKOUTPUT.QUESTION    := getVMCreateEditQuestion(hookinput.originalrowset.tablename);
@@ -1006,6 +1023,7 @@ begin
         if (HOOKINPUT.ANSWERID = 2) then
          if (ihook.getColumnValue(rowform,'ITEM_1_ID') is null) then
              nci_dec_mgmt.createValAIWithConcept(rowform , 1,v_item_typ_glb ,'C','DROP-DOWN',actions);
+            end if;
                 ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID', ihook.getColumnValue(rowform, 'ITEM_1_ID'));
               ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'));
                    rows.extend;
@@ -1015,7 +1033,7 @@ begin
            actions(actions.last) := action;
 
          --   end loop;
-         end if;
+ 
         end if;
 
         if (HOOKINPUT.ANSWERID = 3) then -- Associate using specified
@@ -1136,7 +1154,7 @@ function getPVVMCreateForm (v_rowset in t_rowset) return t_forms is
   form1 t_form;
 begin
     forms                  := t_forms();
-    form1                  := t_form('PV VM Creation (Hook)', 2,1);
+    form1                  := t_form('PV/VM Creation', 2,1);
     form1.rowset :=v_rowset;
     forms.extend;    forms(forms.last) := form1;
   return forms;
@@ -1170,7 +1188,7 @@ function getPVVMCreateFormBulk (v_rowset in t_rowset) return t_forms is
   form1 t_form;
 begin
     forms                  := t_forms();
-    form1                  := t_form('PV VM Creation Single (Hook)', 2,1);
+    form1                  := t_form('PV/VM Creation', 2,1);
     form1.rowset :=v_rowset;
     forms.extend;    forms(forms.last) := form1;
   return forms;
