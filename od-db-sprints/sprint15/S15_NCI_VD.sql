@@ -140,12 +140,17 @@ v_dtype_id integer;
 row t_row;
 rows t_rows;
 v_obj_nm varchar2(100);
+v_cncpt_id number;
+v_cncpt_ver_nr number(4,2);
+j integer;
+idx integer;
  action t_actionRowset;
  --v_id number;
 begin
    rows := t_rows();
    row := rowai;
      v_id := nci_11179.getItemId;
+     idx := 1;
         ihook.setColumnValue(row,'ITEM_ID', v_id);
       if (ihook.getColumnValue(rowai, 'ITEM_LONG_NM') = v_dflt_txt) then
          ihook.setColumnValue(row,'ITEM_LONG_NM', v_id || c_ver_suffix);
@@ -154,6 +159,9 @@ begin
 
 
      ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', v_item_typ_id);
+       ihook.setColumnValue(row,'CNCPT_CONCAT', ihook.getColumnValue(rowcncpt, 'ITEM_1_LONG_NM'));
+        ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', ihook.getColumnValue(rowai, 'ITEM_DESC'));
+        ihook.setColumnValue(row,'CNCPT_CONCAT_NM', ihook.getColumnValue(rowai, 'ITEM_NM'));
 
         rows.extend;
         rows(rows.last) := row;
@@ -161,7 +169,9 @@ begin
         action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,7,'insert');
         actions.extend;
         actions(actions.last) := action;
-        
+         action := t_actionrowset(rows, 'NCI AI Extension (Hook)', 2,3,'insert');
+        actions.extend;
+        actions(actions.last) := action;
         if v_item_typ_id = 7 then
             v_obj_nm := 'Representation Class';
         else
@@ -172,13 +182,66 @@ begin
        actions(actions.last) := action;
 --Rep Term (Hook Creation)
         rows := t_rows();
-        row := rowcncpt;
-      
-        rows.extend;
-        rows(rows.last) := row;
-       action := t_actionrowset(rows, 'Value Domain', 2,8,'insert');        
-       actions.extend;
-       actions(actions.last) := action;
+        if (v_item_typ_id = 53) then
+        j := 0;
+        for i in reverse 0..10 loop
+            v_cncpt_id := ihook.getColumnValue(rowcncpt, 'CNCPT_' || idx  ||'_ITEM_ID_' || i);
+             v_cncpt_ver_nr :=  ihook.getColumnValue(rowcncpt, 'CNCPT_' || idx || '_VER_NR_' || i);
+            if( v_cncpt_id is not null) then
+                        row := t_row();
+                        ihook.setColumnValue(row,'ITEM_ID', v_id);
+                        ihook.setColumnValue(row,'VER_NR', 1);
+                        ihook.setColumnValue(row,'CNCPT_ITEM_ID',v_cncpt_id);
+                        ihook.setColumnValue(row,'CNCPT_VER_NR', v_cncpt_ver_nr);
+                        ihook.setColumnValue(row,'NCI_ORD', j);
+                        if j = 0 then
+                            ihook.setColumnValue(row,'NCI_PRMRY_IND', 1);
+                        else ihook.setColumnValue(row,'NCI_PRMRY_IND', 0);
+                        end if;
+                        rows.extend;
+                        rows(rows.last) := row;
+                        j := j+ 1;
+            end if;
+        end loop;
+        end if;
+           if (v_item_typ_id = 7) then
+             j := 1;
+    
+          for i in reverse 2..10 loop
+
+          v_cncpt_id := ihook.getColumnValue(rowcncpt, 'CNCPT_' || idx  ||'_ITEM_ID_' || i);
+             v_cncpt_ver_nr :=  ihook.getColumnValue(rowcncpt, 'CNCPT_' || idx || '_VER_NR_' || i);
+          if( v_cncpt_id is not null) then
+    --   raise_application_error(-20000, 'Test'  || i || v_cncpt_id);
+            row := t_row();
+            ihook.setColumnValue(row,'ITEM_ID', v_id);
+            ihook.setColumnValue(row,'VER_NR', 1);
+            ihook.setColumnValue(row,'CNCPT_ITEM_ID',v_cncpt_id);
+            ihook.setColumnValue(row,'CNCPT_VER_NR', v_cncpt_ver_nr);
+            ihook.setColumnValue(row,'NCI_ORD', j);
+            rows.extend;
+            rows(rows.last) := row;
+            j := j+ 1;
+        end if;
+        end loop;
+
+
+          v_cncpt_id := ihook.getColumnValue(rowcncpt, 'CNCPT_' || idx  ||'_ITEM_ID_1' );
+             v_cncpt_ver_nr :=  ihook.getColumnValue(rowcncpt, 'CNCPT_' || idx || '_VER_NR_1' );
+            row := t_row();
+            ihook.setColumnValue(row,'ITEM_ID', v_id);
+            ihook.setColumnValue(row,'VER_NR', 1);
+            ihook.setColumnValue(row,'CNCPT_ITEM_ID',v_cncpt_id);
+            ihook.setColumnValue(row,'CNCPT_VER_NR', v_cncpt_ver_nr);
+            ihook.setColumnValue(row,'NCI_ORD', 0);
+            ihook.setColumnValue(row,'NCI_PRMRY_IND', 1);
+            rows.extend;
+            rows(rows.last) := row;
+
+        end if;
+     action := t_actionrowset(rows, 'Items under Concept', 2,50,'insert');
+        actions.extend;
+        actions(actions.last) := action;
 
 
 end;
