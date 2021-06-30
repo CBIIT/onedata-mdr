@@ -2,6 +2,7 @@ create or replace PACKAGE            nci_vd AS
   function getVDCreateForm (v_rowset1 in t_rowset,v_rowset2 in t_rowset) return t_forms;
   function getVDcreateQuestion(v_first in Boolean,V_from in number) return t_question;
   procedure createVD(rowai in t_row, rowvd in t_row, actions in out t_actions, v_id out  number);
+  procedure createSA(rowai in t_row, rowcncpt in t_row, v_item_typ_id in integer, actions in out t_actions, v_id out  number);
   procedure spVDCommon ( v_init_ai in t_rowset,v_init_vd in t_rowset,v_from in number,  v_op  in varchar2,  hookInput in t_hookInput, hookOutput in out t_hookOutput);
   PROCEDURE spVDCreateNew (v_data_in in clob, v_data_out out clob);
     procedure createValAIWithConcept(rowform in out t_row,   idx in integer,v_item_typ_id in integer, v_mode in varchar2,v_cncpt_src in varchar2,  actions in out t_actions);
@@ -10,9 +11,9 @@ create or replace PACKAGE            nci_vd AS
 ---  PROCEDURE spVDEdit (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
  PROCEDURE spCreateRTSA (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
  PROCEDURE spCreateVMSA (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
- procedure SACommon ( v_init_ai in t_rowset,v_init_st in t_rowset,  v_item_typ_id in integer, hookInput in t_hookInput, hookOutput in out t_hookOutput);
+ procedure SACommon ( v_init_ai in t_rowset,  v_item_typ_id in integer, hookInput in t_hookInput, hookOutput in out t_hookOutput);
   function getSACreateQuestion(v_first in Boolean,v_item_typ_id in integer) return t_question;
-  function getSACreateForm (v_rowset1 in t_rowset,v_rowset2 in t_rowset, v_rowset3 in t_rowset,v_item_typ_id in integer) return t_forms;
+  function getSACreateForm (v_rowset1 in t_rowset,v_rowset2 in t_rowset,v_item_typ_id in integer) return t_forms;
   
 procedure spVDValCreateImport ( rowform in out t_row , v_op  in varchar2, actions in out t_actions,  v_val_ind in out boolean);
   procedure createVDImport(rowform in out t_row, actions in out t_actions);
@@ -130,6 +131,57 @@ begin
 
 end;
 
+
+procedure createSA (rowai in t_row, rowcncpt in t_row, v_item_typ_id in integer, actions in out t_actions, v_id out  number) as
+v_nm  varchar2(255);
+v_long_nm varchar2(255);
+v_def  varchar2(4000);
+v_dtype_id integer;
+row t_row;
+rows t_rows;
+v_obj_nm varchar2(100);
+ action t_actionRowset;
+ --v_id number;
+begin
+   rows := t_rows();
+   row := rowai;
+     v_id := nci_11179.getItemId;
+        ihook.setColumnValue(row,'ITEM_ID', v_id);
+      if (ihook.getColumnValue(rowai, 'ITEM_LONG_NM') = v_dflt_txt) then
+         ihook.setColumnValue(row,'ITEM_LONG_NM', v_id || c_ver_suffix);
+      end if;
+
+
+
+     ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', v_item_typ_id);
+
+        rows.extend;
+        rows(rows.last) := row;
+
+        action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,7,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+        
+        if v_item_typ_id = 7 then
+            v_obj_nm := 'Representation Class';
+        else
+          v_obj_nm := 'Value Meaning';
+        end if;
+         action := t_actionrowset(rows, v_obj_nm, 2,8,'insert');        
+       actions.extend;
+       actions(actions.last) := action;
+--Rep Term (Hook Creation)
+        rows := t_rows();
+        row := rowcncpt;
+      
+        rows.extend;
+        rows(rows.last) := row;
+       action := t_actionrowset(rows, 'Value Domain', 2,8,'insert');        
+       actions.extend;
+       actions(actions.last) := action;
+
+
+end;
 
 procedure spVDValCreateImport ( rowform in out t_row , v_op  in varchar2, actions in out t_actions,  v_val_ind in out boolean)
 AS
@@ -511,13 +563,14 @@ end if;
 END;  
 --
 
- procedure SACommon ( v_init_ai in t_rowset,v_init_st in t_rowset,  v_item_typ_id in integer, hookInput in t_hookInput, hookOutput in out t_hookOutput)
+ procedure SACommon ( v_init_ai in t_rowset, v_item_typ_id in integer, hookInput in t_hookInput, hookOutput in out t_hookOutput)
  AS
 
   showRowset t_showableRowset;
     rowform t_row;
     rowai t_row;
-    rowvd t_row;
+    rowst t_row;
+    rowcncpt t_row;
     forms t_forms;
     form1 t_form;   
     row t_row;
@@ -541,29 +594,29 @@ END;
     v_substr  varchar2(100);
     v_temp_id number;
     v_temp_ver number(4,2);
-    rowsetvd t_rowset;
-    rowsetai t_rowset;
-    rowsetrp t_rowset;
-    rowvdold t_row;
+     rowsetai t_rowset;
+    rowsetcncpt t_rowset;
     rowset            t_rowset;
      v_rep_nm varchar2(255);
     v_cncpt_nm varchar2(255);
     v_long_nm varchar2(255);
     v_def varchar2(4000);
     is_valid boolean;
-    v_dtype_id integer;
     v_err_str varchar2(4000);
-    v_from integer;
-
+  
  BEGIN
 
 
     if hookInput.invocationNumber = 0 then
         --  Get question. Either create or edit  
-        hookOutput.question    := getVDCreateQuestion(true,v_from);
+        hookOutput.question    := getSACreateQuestion(true,v_item_typ_id);
+  row := t_row();
+    ihook.setColumnValue(row, 'STG_AI_ID', 1);
+    rows := t_rows(); rows.extend;    rows(rows.last) := row;
+    rowsetcncpt := t_rowset(rows, 'Rep Term (Stand Alone)', 1, 'NCI_STG_AI_CNCPT_CREAT'); -- Default values for cncpt form
 
         -- Send initial rowset to create the form.
-        hookOutput.forms := getVDCreateForm(v_init_ai,v_init_st);
+        hookOutput.forms := getSACreateForm(v_init_ai, rowsetcncpt, v_item_typ_id);
 
   ELSE
  --          raise_application_error(-20000, 'Here 1');
@@ -571,7 +624,7 @@ END;
         form1              := forms(1);
         rowai := form1.rowset.rowset(1);
         form1              := forms(2);
-        rowvd := form1.rowset.rowset(1);
+        rowcncpt := form1.rowset.rowset(1);
         row := t_row();
         rows := t_rows();
         is_valid := true;
@@ -580,40 +633,33 @@ END;
     IF HOOKINPUT.ANSWERID = 1 or Hookinput.answerid = 3 THEN  -- Validate using string
 
                 for i in  2..10 loop
-                        ihook.setColumnValue(rowvd, 'CNCPT_1_ITEM_ID_' || i,'');
-                        ihook.setColumnValue(rowvd, 'CNCPT_1_VER_NR_' || i, '');
+                        ihook.setColumnValue(rowcncpt, 'CNCPT_1_ITEM_ID_' || i,'');
+                        ihook.setColumnValue(rowcncpt, 'CNCPT_1_VER_NR_' || i, '');
                 end loop;
            --     raise_application_error(-20000, 'Here');   
-
-               createValAIWithConcept(rowvd ,  1,7,'V','STRING',actions);
-
+        --    if (v_item_typ_id = 7) then
+               createValAIWithConcept(rowcncpt ,  1,v_item_typ_id,'V','STRING',actions);
+         --   else
+           --     nci_dec_mgmt.createValAIWithConcept(rowcncpt ,  1,v_item_typ_id,'V','STRING',actions);
+          --  end if;
     end if;
 
     IF HOOKINPUT.ANSWERID = 2 or Hookinput.answerid = 4 THEN  -- Validate using drop-down       
-               createValAIWithConcept(rowvd , 1,7,'V','DROP-DOWN',actions);          
+               createValAIWithConcept(rowcncpt , 1,v_item_typ_id,'V','DROP-DOWN',actions);          
     end if;
 
       --ihook.setColumnValue(rowform, 'GEN_STR',v_dec_nm ) ;
-       ihook.setColumnValue(rowvd, 'GEN_STR',ihook.getColumnValue(rowvd,'ITEM_1_NM')  ) ;
-       ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'VALIDATED');  
-
-      if (ihook.getColumnValue(rowvd, 'DTTYPE_ID') is null and  ihook.getColumnValue(rowvd,'NCI_STD_DTTYPE_ID') is not null) then --- Tracker 667
-            select NCI_DFLT_LEGCY_ID into v_dtype_id from data_typ where DTTYPE_ID = ihook.getColumnValue(rowvd,'NCI_STD_DTTYPE_ID');
-            ihook.setColumnValue(rowvd, 'DTTYPE_ID', v_dtype_id);
-        --    raise_application_error(-20000, v_dtype_id);
-        end if;
-
+       ihook.setColumnValue(rowcncpt, 'GEN_STR',ihook.getColumnValue(rowcncpt,'ITEM_1_NM')  ) ;
+       ihook.setColumnValue(rowcncpt, 'CTL_VAL_MSG', 'VALIDATED');  
 
   
-        if (   ihook.getColumnValue(rowvd, 'CNCPT_1_ITEM_ID_1') is null ) then
-                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'Rep Term missing.');
+        if (   ihook.getColumnValue(rowcncpt, 'CNCPT_1_ITEM_ID_1') is null ) then
+                  ihook.setColumnValue(rowcncpt, 'CTL_VAL_MSG', 'At least one concept has to be specified.');
                   is_valid := false;
         end if;
 
--- Create new
-        if (   ihook.getColumnValue(rowai, 'ADMIN_STUS_ID') = 75 and  ihook.getColumnValue(rowvd, 'VAL_DOM_TYP_ID') =  17
-        and v_from <> 2) then -- Status cannot be released if VD is enumerated
-                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'An Enumerated VD WFS cannot be Released if there are no permissible values.');
+   if (   ihook.getColumnValue(rowcncpt, 'ITEM_1_ID') is  not null ) then
+                  ihook.setColumnValue(rowcncpt, 'CTL_VAL_MSG', 'Duplicate found based on concepts');
                   is_valid := false;
         end if;
 
@@ -621,50 +667,39 @@ END;
 -- Short name uniqueness
 --raise_application_error(-20000, ihook.getColumnValue(rowai,'ITEM_LONG_NM'));
    v_err_str := '';
-    nci_11179_2.stdAIValidation(rowai, 3,is_valid, v_err_str );
+    nci_11179_2.stdAIValidation(rowai, v_item_typ_id,is_valid, v_err_str );
         if (v_err_str is not null) then
-        ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', v_err_Str);
+        ihook.setColumnValue(rowcncpt, 'CTL_VAL_MSG', v_err_Str);
         end if;
          rows := t_rows();
              -- If any of the test fails or if the user has triggered validation, then go back to the screen.
         if is_valid=false or hookinput.answerid in (1, 2) then
                 rows := t_rows();      
                 rows.extend;        
-
-          
-                ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 3);
-                if (v_from = 2) then -- create from existing then update name and definition
-                    ihook.setColumnValue(rowai,'ITEM_NM', ihook.getColumnValue(rowvd,'ITEM_1_NM' ));
-                    ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowvd,'ITEM_1_DEF'));
-                
-                end if;
+        ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', v_item_typ_id);
+        ihook.setColumnValue(rowai,'ITEM_NM', ihook.getColumnValue(rowcncpt,'ITEM_1_NM'));
+              ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowcncpt,'ITEM_1_DEF'));
+      
                 rows(rows.last) := rowai;
                 rowsetai := t_rowset(rows, 'Administered Item (Hook Creation)', 1, 'ADMIN_ITEM'); 
                 rows := t_rows();       
                 rows.extend;
-                rows(rows.last) := rowvd;
+                rows(rows.last) := rowcncpt;
                 rowset := t_rowset(rows, 'Rep Term (Hook Creation)', 1, 'NCI_STG_AI_CNCPT_CREAT');
-                hookoutput.message := ihook.getColumnValue(rowvd, 'CTL_VAL_MSG');
-                      hookOutput.forms := getVDCreateForm(rowsetai,rowset);             
-                HOOKOUTPUT.QUESTION    := getVDCreateQuestion(false,v_from);
+                hookoutput.message := ihook.getColumnValue(rowcncpt, 'CTL_VAL_MSG');
+                      hookOutput.forms := getSACreateForm(rowsetai,rowset,v_item_typ_id);             
+                HOOKOUTPUT.QUESTION    := getSACreateQuestion(false,v_item_typ_id);
         end if;
 
 
      -- If all the tests have passed and the user has asked for create, then create VD and Repp.     
     -- raise_application_error(-20000, 'Here2');    
     IF HOOKINPUT.ANSWERID in ( 3,4)  and is_valid = true THEN  -- Create
-        ihook.setColumnValue(rowvd, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowai,'CNTXT_ITEM_ID'));
-        ihook.setColumnValue(rowvd, 'CNTXT_VER_NR', ihook.getColumnValue(rowai,'CNTXT_VER_NR'));
-
-        createValAIWithConcept(rowvd , 1,7,'C','DROP-DOWN',actions); -- Rep
-
-                createVD(rowai, rowvd, actions, v_item_id);
-                hookoutput.message := 'VD Created Successfully with ID ' || v_item_id ;
-
        
+                createSA(rowai, rowcncpt, v_item_typ_id, actions, v_item_id);
+                hookoutput.message := 'Item Created Successfully with ID ' || v_item_id ;
 
-
-        hookoutput.actions := actions;
+         hookoutput.actions := actions;
 
     end if;
 
@@ -698,7 +733,7 @@ begin
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     end IF;
-   if (v_item_typ_id =9) then
+   if (v_item_typ_id =7) then
     QUESTION               := T_QUESTION('Create New Rep Term', ANSWERS);
     else
        QUESTION               := T_QUESTION('Create New Value Meaning', ANSWERS);
@@ -706,7 +741,7 @@ end if;
 return question;
 end;
 
-  function getSACreateForm (v_rowset1 in t_rowset,v_rowset2 in t_rowset, v_rowset3 in t_rowset,v_item_typ_id in integer) return t_forms is
+  function getSACreateForm (v_rowset1 in t_rowset,v_rowset2 in t_rowset,v_item_typ_id in integer) return t_forms is
    forms t_forms;
   form1 t_form;
 begin
@@ -715,7 +750,11 @@ begin
     form1.rowset :=v_rowset1;
     forms.extend;    forms(forms.last) := form1;
 
-    form1                  := t_form('Rep Term (Hook Creation)', 2,1);
+if (v_item_typ_id = 7) then -- Rep term
+    form1                  := t_form('Rep Term (Stand Alone)', 2,1);
+else
+   form1                  := t_form('VM (Stand Alone)', 2,1);
+end if;
     form1.rowset :=v_rowset2;
     forms.extend;    forms(forms.last) := form1;
 
@@ -881,7 +920,6 @@ as
     row_ori  t_row;
     row  t_row;
     rows t_rows;
-    v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
     rowsetai  t_rowset;
     rowsetst  t_rowset;
 begin
@@ -922,38 +960,37 @@ as
     row_ori  t_row;
     row  t_row;
     rows t_rows;
-    v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
     rowsetai  t_rowset;
     rowsetst  t_rowset;
+    v_item_typ_id integer;
 begin
     -- Standard header
     hookinput                    := Ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
 
-    raise_application_error(-20000,'Work in progress');
-    return;
-
+      v_item_typ_id := 53;
+      row := t_row();
     -- Default for new row. Dummy Identifier has to be set else error.
-    row := t_row();
-    ihook.setColumnValue(row, 'STG_AI_ID', 1);
-        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
+       ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
           ihook.setColumnValue(row, 'VER_NR', 1.0);
           ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
           ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 3);
+          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', v_item_typ_id);
           ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
-
+  
     rows := t_rows(); rows.extend;    rows(rows.last) := row;
-    rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for AI form
-    rowsetst := t_rowset(rows, 'Value Domain', 1, 'VALUE_DOM'); -- Default values for VD form
 
-    spVDCommon(rowsetai,rowsetst,1, 'insert', hookinput, hookoutput);
+    
+    rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for AI form
+   
+    SACommon(rowsetai,v_item_typ_id, hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-   --  nci_util.debugHook('GENERAL',v_data_out);
+
+  --  nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 
@@ -964,35 +1001,33 @@ as
     row_ori  t_row;
     row  t_row;
     rows t_rows;
-    v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
     rowsetai  t_rowset;
     rowsetst  t_rowset;
+    v_item_typ_id integer;
 begin
     -- Standard header
     hookinput                    := Ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
 
-
-    raise_application_error(-20000,'Work in progress');
-    return;
-    -- Default for new row. Dummy Identifier has to be set else error.
     row := t_row();
-    ihook.setColumnValue(row, 'STG_AI_ID', 1);
-        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
+    v_item_typ_id := 7;
+    -- Default for new row. Dummy Identifier has to be set else error.
+       ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
           ihook.setColumnValue(row, 'VER_NR', 1.0);
           ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
           ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 3);
+          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', v_item_typ_id);
           ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
-
+  
     rows := t_rows(); rows.extend;    rows(rows.last) := row;
-    rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for AI form
-    rowsetst := t_rowset(rows, 'Value Domain', 1, 'VALUE_DOM'); -- Default values for VD form
 
-    spVDCommon(rowsetai,rowsetst,1, 'insert', hookinput, hookoutput);
+    
+    rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for AI form
+   
+    SACommon(rowsetai,v_item_typ_id, hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
    --  nci_util.debugHook('GENERAL',v_data_out);
