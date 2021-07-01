@@ -1,19 +1,30 @@
--- Run as ONEDATA_MD DDL scripts
-
-
 -- Run as ONEDATA_WA DDL scripts
+S15_1_WA_RA_DDL.sql
+S15_3_WA_DDL.SQL
 S15_MIGR_VAL_LOV_FUNC_AC_ST.sql
 S15-MIGR-VAL-LOV_FUNC_REG-ST.sql
+S15_NCI_11179.sql
+S15_NCI_11179_2.sql
+S15_NCI_CHNG_MGMT.sql
+S15_NCI_POST_HOOK.sql
+S15_NCI_DEC_MGMT.sql
+S15_NCI_PV_VM.sql
+S15_NCI_VD.sql
+S15_NCI_FORM_MGMT.sql
 S15_NCI_CADSR_PULL.sql
 
 -- Run as ONEDATA_RA DDL scripts
+S15_1_WA_RA_DDL.sql
+S15_2_RA_DDL.sql
 
 -- DATA MIGRATION
 
 -- Run as ONEDATA_WA DM scripts
+S15_WA_Data_Migration.sql
 
 -- Run as ONEDATA_RA DM scripts
-
+S12_RA_Data_Migration.sql
 
 -- Run validate job as ONEDATA_WA
 exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
+
