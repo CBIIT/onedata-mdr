@@ -1087,7 +1087,7 @@ begin
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
     for ref_cur in  (select P_ITEM_ID,P_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where
-    c_item_id = v_admin_item.item_id and c_item_ver_nr = v_admin_item.ver_nr and rel_typ_id = 65) loop
+    c_item_id = v_admin_item.item_id and c_item_ver_nr = v_admin_item.ver_nr and rel_typ_id = 65 and nvl(fld_Delete,0) = 0) loop
 
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where P_ITEM_ID = :P_ITEM_ID and P_ITEM_VER_NR = :P_ITEM_VER_NR and c_item_id = :c_item_id and c_item_ver_nr = :c_item_ver_nr and rel_typ_id = :rel_typ_id';
         v_cur := dbms_sql.open_cursor;
@@ -1477,7 +1477,7 @@ begin
         v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
         for de_cur in (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where
-        P_item_id = v_admin_item.item_id and p_ITEM_ver_nr = v_admin_item.ver_nr and rel_typ_id = 66) loop
+        P_item_id = v_admin_item.item_id and p_ITEM_ver_nr = v_admin_item.ver_nr and rel_typ_id = 66 and nvl(fld_Delete,0) = 0) loop
 
             v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where P_ITEM_ID = :P_ITEM_ID and P_ITEM_VER_NR = :P_ITEM_VER_NR and C_ITEM_ID = :C_ITEM_ID and C_ITEM_VER_NR = :C_ITEM_VER_NR and REL_TYP_ID=66';
 
