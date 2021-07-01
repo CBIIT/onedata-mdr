@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE nci_PV_VM AS
+create or replace PACKAGE            nci_PV_VM AS
 
 PROCEDURE spPVVMCreateNew (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 PROCEDURE spPVVMCreateNewBulk (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
@@ -30,7 +30,7 @@ procedure createVMConcept (rowform in out t_row, v_cncpt_src in varchar2, v_mode
 
 END;
 /
-CREATE OR REPLACE PACKAGE BODY nci_PV_VM AS
+create or replace PACKAGE BODY            nci_PV_VM AS
 
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
@@ -1154,7 +1154,7 @@ function getPVVMCreateForm (v_rowset in t_rowset) return t_forms is
   form1 t_form;
 begin
     forms                  := t_forms();
-    form1                  := t_form('PV/VM Creation', 2,1);
+    form1                  := t_form('PV VM Creation (Hook)', 2,1);
     form1.rowset :=v_rowset;
     forms.extend;    forms(forms.last) := form1;
   return forms;
@@ -1188,7 +1188,7 @@ function getPVVMCreateFormBulk (v_rowset in t_rowset) return t_forms is
   form1 t_form;
 begin
     forms                  := t_forms();
-    form1                  := t_form('PV/VM Creation', 2,1);
+    form1                  := t_form('PV VM Creation Single (Hook)', 2,1);
     form1.rowset :=v_rowset;
     forms.extend;    forms(forms.last) := form1;
   return forms;
