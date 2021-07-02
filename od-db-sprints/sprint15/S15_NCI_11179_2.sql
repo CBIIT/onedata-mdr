@@ -12,6 +12,7 @@ END;
 create or replace PACKAGE BODY            nci_11179_2 AS
 
 c_ver_suffix varchar2(5) := 'v1.00';
+v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
 
 
 
@@ -45,7 +46,8 @@ for cur in (select ai.item_id item_id from admin_item ai
             and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
             and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')
             and ai.item_id <>  nvl(ihook.getColumnValue(rowai, 'ITEM_ID'),0)
-            and ai.admin_item_typ_id = v_item_typ_id) 
+            and ai.admin_item_typ_id = v_item_typ_id
+            and ihook.getColumnValue(rowai,'ITEM_LONG_NM') <> v_dflt_txt) 
             loop
                 v_valid := false;
                 v_err_str := 'Duplicate found based on context/short name: ' || cur.item_id || chr(13);
