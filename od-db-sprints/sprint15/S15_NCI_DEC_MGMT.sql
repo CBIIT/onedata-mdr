@@ -15,7 +15,7 @@ PROCEDURE spDECEdit (v_data_in in clob, v_data_out out clob, v_usr_id  IN varcha
 
 -- Common procedure called by new, create from existing or edit
 
-procedure spDECCommon ( v_init in t_rowset,  v_op  in varchar2, v_src in integer, hookInput in t_hookInput, hookOutput in out t_hookOutput);
+procedure spDECCommon ( v_init in t_rowset, v_init_cncpt in t_rowset, v_op  in varchar2, v_src in integer, hookInput in t_hookInput, hookOutput in out t_hookOutput);
 
 --Used in Import  v_op - 'V'  validate, 'C' create
 procedure spDECValCreateImport ( rowform in out t_row,  v_op  in varchar2, actions in out t_actions, v_val_ind in out boolean);
@@ -27,12 +27,12 @@ function getDECEditQuestion return t_question;
 function getDECQuestion (v_op in varchar2, v_src in integer) return t_question;
 
 
-procedure createDEC (rowform in t_row, actions in out t_actions, v_id out number);
+procedure createDEC (rowai in t_row, rowform in t_row, actions in out t_actions, v_id out number);
 
 procedure createDECImport (rowform in out t_row, actions in out t_actions);
 
 -- Get the form for DEC Create
-function getDECCreateForm (v_rowset in t_rowset) return t_forms;
+function getDECCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
 
 
 END;
@@ -118,8 +118,8 @@ PROCEDURE spDECCreateFrom ( v_data_in IN CLOB, v_data_out OUT CLOB) as
     v_prop_ver_nr number(4,2);
     v_conc_dom_item_id number;
     v_conc_dom_ver_nr number(4,2);
-    rowset  t_rowset;
-    rowsetst  t_rowset;
+    rowsetai  t_rowset;
+    rowsetcncpt  t_rowset;
 begin
     -- Standard header
     hookinput                    := Ihook.gethookinput (v_data_in);
@@ -139,7 +139,13 @@ begin
 
 
     row := row_ori;
-
+    ihook.setColumnValue(row, 'ITEM_ID', -1);
+    
+    rows := t_rows();    rows.extend;    rows(rows.last) := row;
+     rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for AI form
+    
+     row := t_row();
+        
     select obj_cls_item_id, obj_cls_ver_nr, prop_item_id, prop_ver_nr, conc_dom_item_id, conc_dom_ver_nr into v_oc_item_id, v_oc_ver_nr, v_prop_item_id, v_prop_ver_nr ,
     v_conc_dom_item_id, v_conc_dom_ver_nr
     from de_conc where item_id = v_item_id and ver_nr = v_ver_nr;
@@ -152,15 +158,11 @@ begin
     ihook.setColumnValue(row, 'STG_AI_ID', 1);
     ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', v_conc_dom_item_id);
     ihook.setColumnValue(row, 'CONC_DOM_VER_NR', v_conc_dom_ver_nr);
-    ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
-     ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(row_ori, 'ITEM_NM'));
-  ihook.setColumnValue(row,'ADMIN_STUS_ID',66);
-    ihook.setColumnValue(row,'REGSTR_STUS_ID',9);
-   
+         
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
-  rowset := t_rowset(rows, 'DEC Create Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
-
-    spDECCommon(rowset, 'insert',2, hookinput, hookoutput);
+    rowsetcncpt := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT'); -- Default values for form
+    
+    spDECCommon(rowsetai,rowsetcncpt ,'insert',2, hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
   --  nci_util.debugHook('GENERAL',v_data_out);
@@ -177,6 +179,7 @@ as
     row  t_row;
     rows t_rows;
      rowsetai  t_rowset;
+     rowsetcncpt t_rowset;
 begin
     -- Standard header
     hookinput                    := Ihook.gethookinput (v_data_in);
@@ -186,18 +189,28 @@ begin
 
     -- Default for new row. Dummy Identifier has to be set else error.
     row := t_row();
-    ihook.setColumnValue(row, 'STG_AI_ID', 1);
-    ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
-    ihook.setColumnValue(row,'ADMIN_STUS_ID',66);
-    ihook.setColumnValue(row,'REGSTR_STUS_ID',9);
-        
-    rows := t_rows();    rows.extend;    rows(rows.last) := row;
-    rowsetai := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT'); -- Default values for form
+          row := t_row();
+        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
+          ihook.setColumnValue(row, 'VER_NR', 1.0);
+          ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
+          ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
+          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 2);
+          ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
+          ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
+          ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
 
-    spDECCommon(rowsetai, 'insert',1, hookinput, hookoutput);
+    rows := t_rows(); rows.extend;    rows(rows.last) := row;
+    rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for AI form
+     row := t_row();
+        ihook.setColumnValue(row, 'STG_AI_ID', 1);
+         
+    rows := t_rows();    rows.extend;    rows(rows.last) := row;
+    rowsetcncpt := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT'); -- Default values for form
+
+    spDECCommon(rowsetai,rowsetcncpt, 'insert',1, hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-  --   nci_util.debugHook('GENERAL',v_data_out);
+    nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 -- Edit an existing DEC
@@ -220,7 +233,9 @@ as
       v_conc_dom_item_id number;
     v_conc_dom_ver_nr number(4,2);
 
-    rowset  t_rowset;
+    rowsetai  t_rowset;
+    rowsetcncpt  t_rowset;
+    
 
 begin
     -- Standard header
@@ -248,8 +263,12 @@ begin
 
     row := row_ori;
 
+    rows := t_rows();    rows.extend;    rows(rows.last) := row;
+     rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for AI form
+    
     --  Only AI row is submitted with the hook. We need to get the sub-type details and populate the OC/Prop concepts
-
+    row := t_row();
+    
     select obj_cls_item_id, obj_cls_ver_nr, prop_item_id, prop_ver_nr, conc_dom_item_id, conc_dom_ver_nr into v_oc_item_id, v_oc_ver_nr, v_prop_item_id, v_prop_ver_nr ,
     v_conc_dom_item_id, v_conc_dom_ver_nr
     from de_conc where item_id = v_item_id and ver_nr = v_ver_nr;
@@ -262,17 +281,16 @@ begin
     ihook.setColumnValue(row, 'STG_AI_ID', 1);
     ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', v_conc_dom_item_id);
     ihook.setColumnValue(row, 'CONC_DOM_VER_NR', v_conc_dom_ver_nr);
-    ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(row_ori, 'ITEM_NM'));
- 
+    
 
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
-    rowset := t_rowset(rows, 'DEC Create Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
+    rowsetcncpt := t_rowset(rows, 'DEC Create Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
 
-    spDECCommon(rowset, 'update',3, hookinput, hookoutput);
+    spDECCommon(rowsetai,rowsetcncpt,  'update',3, hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
---nci_util.debugHook('GENERAL', v_data_out);
+nci_util.debugHook('GENERAL', v_data_out);
 
 end;
 
@@ -280,7 +298,7 @@ end;
 -- Common routine for DEC - Create or Update
 -- v_init is the initial rowset to populate.
 -- v_op is insert or update
-PROCEDURE       spDECCommon ( v_init in t_rowset,  v_op  in varchar2, v_src in integer, hookInput in t_hookInput, hookOutput in out t_hookOutput)
+PROCEDURE       spDECCommon ( v_init in t_rowset,  v_init_cncpt in t_rowset, v_op  in varchar2, v_src in integer, hookInput in t_hookInput, hookOutput in out t_hookOutput)
 AS
 rowform t_row;
 forms t_forms;
@@ -289,6 +307,7 @@ form1 t_form;
 row t_row;
 rows  t_rows;
 row_ori t_row;
+rowai t_row;
 rowset            t_rowset;
 v_oc_item_id number;
 v_oc_ver_nr number;
@@ -314,6 +333,8 @@ v_temp_id  number;
 v_temp_ver number(4,2);
 v_oc_str varchar2(4000);
 v_prop_str varchar2(4000);
+rowsetcncpt t_rowset;
+v_err_str  varchar2(4000);
 
 is_valid boolean;
 begin
@@ -321,12 +342,20 @@ begin
         --  Get question. Either create or edit
           HOOKOUTPUT.QUESTION    := getDECQuestion(v_op, v_src);
 
-        -- Send initial rowset to create the form.
-          hookOutput.forms :=getDECCreateForm(v_init);
+   row := t_row();
+  
+    -- Send initial rowset to create the form.
+          hookOutput.forms :=getDECCreateForm(v_init, v_init_cncpt);
     else
         forms              := hookInput.forms;
         form1              := forms(1);
+        rowai := form1.rowset.rowset(1);
+        form1              := forms(2);
         rowform := form1.rowset.rowset(1);
+        -- Copy context from AI row to be used in OC and Prop creation
+        ihook.setColumnValue(rowform, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID'));
+         ihook.setColumnValue(rowform, 'CNTXT_VER_NR', ihook.getColumnValue(rowai, 'CNTXT_VER_MR'));
+       
         row := t_row();        rows := t_rows();
         is_valid := true;
 
@@ -370,7 +399,7 @@ begin
             for prop_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_prop_str and ai.admin_item_typ_id = 6) loop
                for cur in (select de_conc.* from de_conc, admin_item ai where obj_cls_item_id =  oc_cur.item_id and obj_cls_ver_nr =  oc_cur.ver_nr and
                prop_item_id = prop_cur.item_id and prop_ver_nr =  prop_cur.ver_nr and
-               cntxt_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform, 'CNTXT_VER_NR') and 
+               cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR') and 
               de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr and de_conc.item_id <> v_item_id
              ) loop
                     ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'DUPLICATE DEC found:' || cur.item_id || 'v' || cur.ver_nr);
@@ -385,26 +414,32 @@ begin
                   is_valid := false;
         end if;
         
-        -- Short name uniqueness
-         for cur in (select ai.* from  admin_item ai where 
-             trim(ai.ITEM_LONG_NM)=trim(ihook.getColumnValue(rowform,'ITEM_LONG_NM'))
-          and  ai.item_id  <> v_item_id            
-            and ai.cntxt_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') 
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowform, 'CNTXT_VER_NR')
-            and ai.admin_item_typ_id = 2) loop
-             ihook.setColumnValue(rowform, 'CTL_VAL_MSG','Unique constraint violated. The DEC '||nci_chng_mgmt.get_AI_id(cur.item_id ,cur.ver_nr )||' with the same Short Name and Context is found.');
-                is_valid := false;
-           end loop;
-
-         rows := t_rows();
-
+          v_err_str := '';
+         nci_11179_2.stdAIValidation(rowai, 2,is_valid, v_err_str );
+        if (v_err_str is not null) then
+        ihook.setColumnValue(rowform, 'CTL_VAL_MSG', v_err_Str);
+        end if;
+        
+         
          -- If any of the test fails or if the user has triggered validation, then go back to the screen.
         if (is_valid=false or hookinput.answerid = 1 or hookinput.answerid = 2) then
+                
+                hookoutput.message := ihook.getColumnValue(rowform, 'CTL_VAL_MSG');
+                ihook.setColumnValue(rowai, 'ITEM_NM', ihook.getColumnValue(rowform, 'GEN_STR'));
+       --         ihook.setColumnValue(rowform, 'CNTXT_VER_NR', ihook.getColumnValue(rowai, 'CNTXT_VER_MR'));
+                ihook.setColumnValue(rowai, 'ADMIN_ITEM_TYP_ID', 2);
+     
+                rows := t_rows();
+                rows.extend;
+                rows(rows.last) := rowai;
+                rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
+               
+               
+                rows := t_rows();
                 rows.extend;
                 rows(rows.last) := rowform;
-                hookoutput.message := ihook.getColumnValue(rowform, 'CTL_VAL_MSG');
-                rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT');
-                hookOutput.forms := getDECCreateForm(rowset);
+                rowsetcncpt := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT');
+                hookOutput.forms := getDECCreateForm(rowset, rowsetcncpt);
                 HOOKOUTPUT.QUESTION    := getDECQuestion(v_op, v_src);
         end if;
 
@@ -416,7 +451,7 @@ begin
 
     --If Create DEC
     if (upper(v_op) = 'INSERT') then
-        createDEC(rowform, actions, v_item_id);
+        createDEC(rowai, rowform, actions, v_item_id);
         hookoutput.message := 'DEC Created Successfully with ID ' || v_item_id ;
     else
     -- Update DEC. Get the selected row, update name, definition, context.
@@ -427,15 +462,16 @@ begin
         v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
 
         --- Update name, definition, context
-            row := row_ori;
-            ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowform,'GEN_STR'));
-            ihook.setColumnValue(row, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
-            ihook.setColumnValue(row, 'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
-            ihook.setColumnValue(row, 'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
-              ihook.setColumnValue(row, 'ADMIN_STUS_ID', ihook.getColumnValue(rowform,'ADMIN_STUS_ID'));
-            ihook.setColumnValue(row, 'REGSTR_STUS_ID', ihook.getColumnValue(rowform,'REGSTR_STUS_ID'));
+            row := rowai;
+          --  ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowform,'GEN_STR'));
+          --  ihook.setColumnValue(row, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
+           -- ihook.setColumnValue(row, 'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
+               ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 2);
+     ihook.setColumnValue(row, 'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
+            --  ihook.setColumnValue(row, 'ADMIN_STUS_ID', ihook.getColumnValue(rowform,'ADMIN_STUS_ID'));
+           -- ihook.setColumnValue(row, 'REGSTR_STUS_ID', ihook.getColumnValue(rowform,'REGSTR_STUS_ID'));
       --      raise_application_error(-20000,  ihook.getColumnValue(rowform,'ITEM_LONG_NM'));
-            ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(rowform,'ITEM_LONG_NM'));
+          --  ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(rowform,'ITEM_LONG_NM'));
            rows := t_rows();    rows.extend;    rows(rows.last) := row;
              action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,10,'update');
             actions.extend;
@@ -898,7 +934,7 @@ end;
 
 
 
-procedure createDEC (rowform in t_row, actions in out t_actions, v_id out  number) as
+procedure createDEC (rowai in t_row, rowform in t_row, actions in out t_actions, v_id out  number) as
 v_nm  varchar2(255);
 v_long_nm varchar2(255);
 v_def  varchar2(4000);
@@ -908,25 +944,21 @@ rows t_rows;
  --v_id number;
 begin
    rows := t_rows();
-   row := t_row();
+   row := rowai;
      v_id := nci_11179.getItemId;
         ihook.setColumnValue(row,'ITEM_ID', v_id);
         ihook.setColumnValue(row,'VER_NR', 1);
         ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
         ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 2);
      
-       if (    trim(ihook.getColumnValue(rowform, 'ITEM_LONG_NM')) = v_dflt_txt) then
+       if (    trim(ihook.getColumnValue(rowai, 'ITEM_LONG_NM')) = v_dflt_txt) then
             ihook.setColumnValue(row,'ITEM_LONG_NM', v_id || c_ver_suffix);
         else
-            ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_LONG_NM'));    
+            ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowai, 'ITEM_LONG_NM'));    
         end if;
      
-        ihook.setColumnValue(row,'ITEM_NM',  ihook.getColumnValue(rowform, 'ITEM_1_NM')  || ' ' || ihook.getColumnValue(rowform, 'ITEM_2_NM'));
+       -- ihook.setColumnValue(row,'ITEM_NM',  ihook.getColumnValue(rowform, 'ITEM_1_NM')  || ' ' || ihook.getColumnValue(rowform, 'ITEM_2_NM'));
         ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
-        ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
-        ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
-        ihook.setColumnValue(row,'ADMIN_STUS_ID',ihook.getColumnValue(rowform,'ADMIN_STUS_ID'));
-         ihook.setColumnValue(row,'REGSTR_STUS_ID',ihook.getColumnValue(rowform,'REGSTR_STUS_ID'));
          
        ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',nvl(ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID'),1) );
         ihook.setColumnValue(row,'CONC_DOM_VER_NR',nvl(ihook.getColumnValue(rowform,'CONC_DOM_VER_NR'),1) );
@@ -946,7 +978,7 @@ begin
        actions.extend;
         actions(actions.last) := action;
 
---r
+
 end;
 
 
@@ -1002,13 +1034,17 @@ begin
 --r
 end;
 -- Create form for DEC.
-function getDECCreateForm (v_rowset in t_rowset) return t_forms is
+function getDECCreateForm (v_rowset1 in t_rowset,v_rowset2 in t_rowset) return t_forms is
   forms t_forms;
   form1 t_form;
 begin
     forms                  := t_forms();
+    forms                  := t_forms();
+    form1                  := t_form('Administered Item (DEC Create)', 2,1);
+    form1.rowset :=v_rowset1;
+    forms.extend;    forms(forms.last) := form1;
     form1                  := t_form('DEC Create Edit (Hook)', 2,1);
-    form1.rowset :=v_rowset;
+    form1.rowset :=v_rowset2;
     forms.extend;    forms(forms.last) := form1;
   return forms;
 end;
