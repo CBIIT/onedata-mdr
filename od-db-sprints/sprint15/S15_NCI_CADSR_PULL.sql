@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE nci_caDSR_PULL AS
+create or replace PACKAGE            nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
 procedure sp_create_ai_3;
@@ -30,15 +30,15 @@ procedure SP_SOURCE_TYPE;
   --    procedure sp_append_quest_pv;
 END;
 /
-
-CREATE OR REPLACE PACKAGE BODY nci_caDSR_PULL AS
+create or replace PACKAGE BODY            nci_caDSR_PULL AS
 
 
 v_dflt_usr  varchar2(30) := 'ONEDATA';
 
 v_err_str      varchar2(1000) := '';
 DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
-v_dflt_date date := to_date('8/18/2020','mm/dd/yyyy');
+--v_dflt_date date := to_date('8/18/2020','mm/dd/yyyy');
+v_dflt_date date := sysdate;
 
 
 
@@ -59,7 +59,7 @@ select c_item_id, c_item_ver_nr, rep_no from nci_admin_item_rel r where rel_typ_
 commit;
 
 insert into /* APPEND */ nci_quest_vv_rep (quest_pub_id, quest_ver_nr, rep_seq)
-select nci_pub_id, nci_ver_nr, i from nci_admin_item_rel_alt_key ak where (p_item_id, p_item_ver_nr) in (select item_id, ver_nr from temp_import where rep_no = 1)
+select nci_pub_id, nci_ver_nr, 1 from nci_admin_item_rel_alt_key ak where (p_item_id, p_item_ver_nr) in (select item_id, ver_nr from temp_import where rep_no = 1)
 minus
 select quest_pub_id, quest_ver_nr, rep_seq from nci_quest_vv_rep ak where rep_seq = 1;
 commit;
