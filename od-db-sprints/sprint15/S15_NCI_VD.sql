@@ -372,7 +372,7 @@ begin
         action := t_actionrowset(rows, 'Value Domain', 2,8,'insert');        
        actions.extend;
        actions(actions.last) := action;
-   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'VD Created Successfully with ID ' || v_id||c_ver_suffix || chr(13)) ;
+   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'VD Created Successfully with ID ' || v_id || chr(13)) ;
 
 
 end;
@@ -760,8 +760,11 @@ END;
     IF HOOKINPUT.ANSWERID in ( 3,4)  and is_valid = true THEN  -- Create
        
                 createSA(rowai, rowcncpt, v_item_typ_id, actions, v_item_id);
-                hookoutput.message := 'Item Created Successfully with ID ' || v_item_id ;
-
+                if (v_item_typ_id = 7) then
+                hookoutput.message := 'Rep Term Created Successfully with ID ' || v_item_id ;
+                else
+                hookoutput.message := 'Value Meaning Created Successfully with ID ' || v_item_id ;
+                end if;
          hookoutput.actions := actions;
 
     end if;
