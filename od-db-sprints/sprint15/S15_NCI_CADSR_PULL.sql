@@ -4676,7 +4676,8 @@ BEGIN
     COMMIT;
 
     -- Changed as per tracker 863
-
+    --added CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, LST_UPD_DT
+	
     INSERT INTO NCI_QUEST_VV_REP (QUEST_PUB_ID,
                                   QUEST_VER_NR,
                                   VV_PUB_ID,
@@ -4684,7 +4685,11 @@ BEGIN
                                   VAL,
                                   EDIT_IND,
                                   REP_SEQ,
-                                  DEFLT_VAL_ID)
+                                  DEFLT_VAL_ID,
+								  CREAT_DT,
+                                  CREAT_USR_ID,
+                                  LST_UPD_USR_ID,
+                                  LST_UPD_DT)
         SELECT distinct q.NCI_PUB_ID,
                q.NCI_VER_NR,
                vv.NCI_PUB_ID,
@@ -4692,12 +4697,19 @@ BEGIN
                qvv.VALUE,
                DECODE (editable_ind,  'Yes', 1,  'No', 0),
                repeat_sequence,
-               vv.nci_pub_id
+               vv.nci_pub_id,
+			   vv.CREAT_DT,
+               vv.CREAT_USR_ID,
+               vv.LST_UPD_USR_ID,
+               vv.LST_UPD_DT
           FROM sbrext.quest_vv_ext         qvv,
                NCI_ADMIN_ITEM_REL_ALT_KEY  q,
                NCI_QUEST_VALID_VALUE       vv
          WHERE     qvv.quest_idseq = q.NCI_IDSEQ
                AND qvv.vv_idseq = vv.NCI_IDSEQ(+);
+			   
+			   
+			   
 
     COMMIT;
 END;
