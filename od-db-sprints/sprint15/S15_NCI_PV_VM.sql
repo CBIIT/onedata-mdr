@@ -550,7 +550,10 @@ begin
         row := t_row();        rows := t_rows();
         is_valid := true;
         k := 1;
-
+      -- Context is always going to be NCIP
+        ihook.setColumnValue(rowform,'CNTXT_ITEM_ID',20000000024); -- NCIP
+        ihook.setColumnValue(rowform,'CNTXT_VER_NR', 1);
+                  
         if HOOKINPUT.ANSWERID = 1 or Hookinput.answerid = 3 then  -- Validate using string
                      for i in  1..10 loop
                             ihook.setColumnValue(rowform, 'CNCPT_' || k  ||'_ITEM_ID_' || i,'');
@@ -916,7 +919,10 @@ begin
        nci_11179.spReturnAIExtRow (v_item_id, v_ver_nr,  row);
    
        ihook.setColumnValue(row,'ITEM_NM', ihook.getColumnValue(rowform, 'ITEM_1_NM'));
-       ihook.setColumnValue(row,'ITEM_DESC', ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
+       -- Setting the Vm short name to id + version as per tracker 882
+        ihook.setColumnValue(row,'ITEM_LONG_NM', v_item_id ||  'v' || trim(to_char(v_ver_nr, '9999.99')));
+        
+      ihook.setColumnValue(row,'ITEM_DESC', ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
         ihook.setColumnValue(row,'ADMIN_STUS_ID', ihook.getColumnValue(rowform, 'ADMIN_STUS_ID'));
         ihook.setColumnValue(row,'REGSTR_STUS_ID', ihook.getColumnValue(rowform, 'REGSTR_STUS_ID'));
     
