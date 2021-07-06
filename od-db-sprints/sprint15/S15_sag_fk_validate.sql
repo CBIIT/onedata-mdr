@@ -433,42 +433,73 @@ INSERT INTO ONEDATA_MIGRATION_ERROR
         COMMIT;
 END LOOP;  
 
---Check CSI_IDSEQ relationship in CS_CSI/ NCI_ADMIN_ITEM_REL_ALT_KEY  
+--Check CSI_IDSEQ relationship in CS_CSI/ NCI_CLSFCTN_SCHM_ITEM  
 FOR Y IN (
 SELECT /*+ PARALEL(12)*/
        DISTINCT ai3.Item_Id,
                 ai3.Ver_Nr,
                 ai3.NCI_IDSEQ,
                 ai3.ITEM_LONG_NM
-  FROM SBR.CS_CSI  dae
+  FROM SBR.CS_CSI   dae
        INNER JOIN admin_item ai3
            ON     ai3.nci_idseq = CSI_IDSEQ --FK
               WHERE NOT EXISTS
                           (SELECT 1
                              FROM admin_item  ai2
-                                  INNER JOIN NCI_ADMIN_ITEM_REL_ALT_KEY dec
-                                      ON     dec.CNTXT_CS_ITEM_ID = ai2.Item_Id
-                                         AND dec.CNTXT_CS_VER_NR = Ai2.Ver_Nr
-                                         AND dec.C_ITEM_ID = ai3.Item_Id
-                                         AND dec.C_ITEM_VER_NR = ai3.Ver_Nr
-                                         AND ai2.Nci_Idseq = dae.CS_IDSEQ)) --PK
+                                  INNER JOIN NCI_CLSFCTN_SCHM_ITEM dec
+                                      ON    dec.CS_ITEM_ID = ai2.Item_Id
+                                         AND dec.CS_ITEM_VER_NR = ai2.Ver_Nr
+                                         AND dae.CS_CSI_IDSEQ = dec.CS_CSI_IDSEQ)) --PK
 LOOP
 INSERT INTO ONEDATA_MIGRATION_ERROR
              VALUES (ERR_SEQ.NEXTVAL,
                      Y.NCI_iDSEQ,
                      Y.Item_Id,
                      Y.VER_NR,
-                     'CSI_IDSEQ',
+                     'CS_CSI_FOR_CSI',
                      Y.ITEM_LONG_NM,
-                     'DATA MISMATCH',
+                     'DATA MISMATCH CS/CSI for CSI',
                      SYSDATE,
                      USER,
-                     'NCI_ADMIN_ITEM_REL_ALT_KEY',
+                     'NCI_CLSFCTN_SCHM_ITEM',
+                     '');
+        COMMIT;
+END LOOP; 
+
+--Check AC_IDSEQ relationship in AC_CSI/ NCI_CLSFCTN_SCHM_ITEM  
+FOR Y IN (
+SELECT /*+ PARALEL(12)*/
+       DISTINCT ai3.Item_Id,
+                ai3.Ver_Nr,
+                ai3.NCI_IDSEQ,
+                ai3.ITEM_LONG_NM
+  FROM SBR.CS_CSI   dae
+       INNER JOIN admin_item ai3
+           ON     ai3.nci_idseq = CS_IDSEQ --FK
+              WHERE  not EXISTS
+                          (SELECT *
+                             FROM admin_item  ai2
+                                  INNER JOIN NCI_CLSFCTN_SCHM_ITEM dec
+                                      ON    dec.CS_ITEM_ID = ai2.Item_Id
+                                         AND dec.CS_ITEM_VER_NR = ai2.Ver_Nr
+                                         AND dae.CS_CSI_IDSEQ = dec.CS_CSI_IDSEQ)) --PK
+LOOP
+INSERT INTO ONEDATA_MIGRATION_ERROR
+             VALUES (ERR_SEQ.NEXTVAL,
+                     Y.NCI_iDSEQ,
+                     Y.Item_Id,
+                     Y.VER_NR,
+                     'CS_CSI_FOR_CS',
+                     Y.ITEM_LONG_NM,
+                     'DATA MISMATCH CS/CSI for CS',
+                     SYSDATE,
+                     USER,
+                     'NCI_CLSFCTN_SCHM_ITEM',
                      '');
         COMMIT;
 END LOOP;  
     
---Check AC_IDSEQ relationship in AC_CSI/ NCI_ALT_KEY_ADMIN_ITEM_REL  
+--Check AC_IDSEQ relationship in AC_CSI/ NCI_ADMIN_ITEM_REL (REL_TYP_ID/obj_key_id 65 AC>>CSI)  
 FOR Y IN (
 SELECT /*+ PARALEL(12)*/
        DISTINCT ai3.Item_Id,
@@ -481,7 +512,7 @@ SELECT /*+ PARALEL(12)*/
               WHERE NOT EXISTS
                           (SELECT 1
                              FROM admin_item  ai2
-                                  INNER JOIN NCI_ALT_KEY_ADMIN_ITEM_REL dec
+                                  INNER JOIN NCI_ADMIN_ITEM_REL dec
                                       ON dec.C_ITEM_ID = ai3.Item_Id
                                          AND dec.C_ITEM_VER_NR = ai3.Ver_Nr
                                          AND ai2.Nci_Idseq = dae.AC_IDSEQ)) --PK
@@ -493,10 +524,10 @@ INSERT INTO ONEDATA_MIGRATION_ERROR
                      Y.VER_NR,
                      'AC_IDSEQ',
                      Y.ITEM_LONG_NM,
-                     'DATA MISMATCH',
+                     'DATA MISMATCH AC_CSI',
                      SYSDATE,
                      USER,
-                     'NCI_ALT_KEY_ADMIN_ITEM_REL',
+                     'NCI_ADMIN_ITEM_REL',
                      '');
         COMMIT;
 END LOOP;  
