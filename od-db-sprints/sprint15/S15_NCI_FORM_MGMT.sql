@@ -812,7 +812,7 @@ BEGIN
             actions(actions.last) := action;
         end if;
         hookoutput.actions    := actions;
-        hookoutput.message := 'Form created successfully. Public Id:' || v_form_id;
+        hookoutput.message := 'Form created successfully with Id ' || v_form_id;
     END IF;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
@@ -935,6 +935,8 @@ BEGIN
             actions(actions.last) := action;
     end loop;
     hookoutput.actions    := actions;
+    hookoutput.message := 'Module created successfully with Id ' || v_module_id;
+   
     END IF;
   END IF;
 
