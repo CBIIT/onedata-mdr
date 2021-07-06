@@ -4698,10 +4698,10 @@ BEGIN
                DECODE (editable_ind,  'Yes', 1,  'No', 0),
                repeat_sequence,
                vv.nci_pub_id,
-			   vv.CREAT_DT,
-               vv.CREAT_USR_ID,
-               vv.LST_UPD_USR_ID,
-               vv.LST_UPD_DT
+			   nvl(qvv.created_by,v_dflt_usr),
+               nvl(qvv.date_created,v_dflt_date) ,
+               nvl(NVL (qvv.date_modified, date_created), v_dflt_date),
+               nvl(qvv.modified_by,v_dflt_usr)
           FROM sbrext.quest_vv_ext         qvv,
                NCI_ADMIN_ITEM_REL_ALT_KEY  q,
                NCI_QUEST_VALID_VALUE       vv
