@@ -119,7 +119,7 @@ v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
 
         --
         if ( ihook.getColumnValue(rowai,'ITEM_LONG_NM')= v_dflt_txt) then
-        ihook.setColumnValue(rowai,'ITEM_LONG_NM', v_id || 'v1.0');
+        ihook.setColumnValue(rowai,'ITEM_LONG_NM', v_id || 'v1.00');
         end if;
 
        /* ihook.setColumnValue(row,'CNTXT_ITEM_ID',ihook.getColumnValue(rowai,'CNTXT_ITEM_ID'));
@@ -164,7 +164,7 @@ ihook.setColumnValue(rowcsi,'ITEM_ID', v_id);
     action := t_actionrowset(rows, 'CSI', 2,2,'insert');
     actions.extend;
     actions(actions.last) := action;
-     hookoutput.message := 'CSI Created Successfully with ID ' || v_id||c_ver_suffix ;
+     hookoutput.message := 'CSI Created Successfully with ID ' || v_id ;
         hookoutput.actions := actions;
  --   raise_application_error(-20000, 'Count ' || actions.count);
 
@@ -268,8 +268,8 @@ BEGIN
         ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
         ihook.setColumnValue(row, 'VER_NR', 1.00);
         ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
-        ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-        ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
+             ihook.setColumnValue(row, 'ITEM_ID', -1);
+   ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
         rows.extend;
         rows(rows.last) := row;
         rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for form
@@ -302,21 +302,15 @@ BEGIN
             and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
             and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')) loop 
                 v_valid := false;
-                hookoutput.message := 'Duplicate CDE found: ' ||cur.item_id;
+                 hookoutput.message := 'Duplicate CDE found based on DEC/VD/Context: ' ||cur.item_id;
         end loop;
 
-     /*   for cur in (select ai.item_id from admin_item ai
-            where ai.ITEM_LONG_NM=ihook.getColumnValue(rowai,'ITEM_LONG_NM')
-            and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID') 
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')
-            and admin_item_typ_id = 4) loop
-                v_valid := false;
-                hookoutput.message := 'Unique constraint on Item Short Name viaolated ' ||cur.item_id;            
-        end loop;*/
-        
+     
+      if (v_valid = true) then
           nci_11179_2.stdAIValidation(rowai, 4,v_valid, v_err_str);
         if (v_valid = false) then
         hookoutput.message := v_err_str;
+        end if;
         end if;
 
 -- Derivation rule/Derivation Type
@@ -335,6 +329,8 @@ BEGIN
         ihook.setColumnValue(rowai,'ITEM_NM', v_item_nm);
 
         ihook.setColumnValue(rowai,'ITEM_DESC',v_item_def);
+        ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID',4);
+        
         if hookinput.answerid = 1 and v_valid = true then --Validate
             hookoutput.message := 'Validation Successful';
         end if;    
@@ -348,7 +344,12 @@ BEGIN
           rowsetde := t_rowset(rows, 'Data Element', 1, 'DE');
            v_valid := false;
           hookOutput.forms := nci_chng_mgmt.getDECreateForm(rowset, rowsetde);
+          if (v_src = 'E') then
+          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(2,v_valid);
+          else
           HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,v_valid);
+          end if;
+          
           --V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
     end if; 			
@@ -421,7 +422,7 @@ BEGIN
     actions.extend;
     actions(actions.last) := action;
     end if;
-        hookoutput.message := 'CDE Created Successfully with ID ' || v_id||c_ver_suffix ;
+        hookoutput.message := 'CDE Created Successfully with ID ' || v_id ;
         hookoutput.actions := actions;
  --   raise_application_error(-20000, 'Count ' || actions.count);
 
@@ -545,7 +546,7 @@ BEGIN
             action := t_actionrowset(rows, 'Classification Scheme', 2,2,'insert');
             actions.extend;
             actions(actions.last) := action;
-            hookoutput.message := 'CS Created Successfully with ID ' || v_id||c_ver_suffix ;
+            hookoutput.message := 'CS Created Successfully with ID ' || v_id ;
                 hookoutput.actions := actions;
         end if;
  end if;
@@ -696,7 +697,7 @@ BEGIN
     action := t_actionrowset(rows, 'References (for hook insert)', 2,12,'insert');
     actions.extend;
     actions(actions.last) := action;
-    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'CDE Created Successfully with ID ' || v_id||c_ver_suffix || chr(13)) ;
+    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'CDE Created Successfully with ID ' || v_id ||  chr(13)) ;
 
 
  end if;
@@ -756,8 +757,7 @@ if hookInput.invocationNumber = 0 then
         ihook.setColumnValue(row, 'VER_NR', 1.00);
         ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
         ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-        ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-        rows.extend;
+         rows.extend;
         rows(rows.last) := row;
         rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for form
         rows := t_rows();
@@ -979,7 +979,7 @@ select count(*) into v_unq_id from admin_item ai, de de
         actions(actions.last) := action;
 
 
-        hookoutput.message := 'DE Created Successfully with ID ' || v_item_id||'v1.00' ;
+        hookoutput.message := 'CDE Created Successfully with ID ' || v_item_id ;
         hookoutput.actions := actions;
         end if;
  --   raise_application_error(-20000, 'Count ' || actions.count);
@@ -997,10 +997,10 @@ function getCSICreateQuestion return t_question is
 begin
 
  ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Create CSI Node');
+    ANSWER                     := T_ANSWER(1, 1, 'Create CSI');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Create new CSI.', ANSWERS);
+    QUESTION               := T_QUESTION('Create New CSI', ANSWERS);
 
 return question;
 end;
@@ -1016,7 +1016,7 @@ begin
     ANSWER                     := T_ANSWER(1, 1, 'Create CS');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Create New Classification Scheme.', ANSWERS);
+    QUESTION               := T_QUESTION('Create New Classification Scheme', ANSWERS);
 
 return question;
 end;
