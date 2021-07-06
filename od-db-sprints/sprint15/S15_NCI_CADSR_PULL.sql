@@ -4686,8 +4686,8 @@ BEGIN
                                   EDIT_IND,
                                   REP_SEQ,
                                   DEFLT_VAL_ID,
-								  CREAT_DT,
-                                  CREAT_USR_ID,
+								  CREAT_USR_ID,
+								  CREAT_DT,                                  
                                   LST_UPD_USR_ID,
                                   LST_UPD_DT)
         SELECT distinct q.NCI_PUB_ID,
@@ -4700,8 +4700,9 @@ BEGIN
                vv.nci_pub_id,
 			   nvl(qvv.created_by,v_dflt_usr),
                nvl(qvv.date_created,v_dflt_date) ,
-               nvl(NVL (qvv.date_modified, date_created), v_dflt_date),
-               nvl(qvv.modified_by,v_dflt_usr)
+			   nvl(qvv.modified_by,v_dflt_usr),
+               nvl(NVL (qvv.date_modified, date_created), v_dflt_date)
+               
           FROM sbrext.quest_vv_ext         qvv,
                NCI_ADMIN_ITEM_REL_ALT_KEY  q,
                NCI_QUEST_VALID_VALUE       vv
