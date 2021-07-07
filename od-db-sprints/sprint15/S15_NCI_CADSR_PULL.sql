@@ -4685,11 +4685,12 @@ BEGIN
                                   VAL,
                                   EDIT_IND,
                                   REP_SEQ,
-                                  DEFLT_VAL_ID,
+                                  DEFLT_VAL_ID
+								  /*,
 								  CREAT_USR_ID,
 								  CREAT_DT,                                  
                                   LST_UPD_USR_ID,
-                                  LST_UPD_DT)
+                                  LST_UPD_DT*/)
         SELECT distinct q.NCI_PUB_ID,
                q.NCI_VER_NR,
                vv.NCI_PUB_ID,
@@ -4697,11 +4698,12 @@ BEGIN
                qvv.VALUE,
                DECODE (editable_ind,  'Yes', 1,  'No', 0),
                repeat_sequence,
-               vv.nci_pub_id,
+               vv.nci_pub_id
+			/*   ,
 			   nvl(qvv.created_by,v_dflt_usr),
                nvl(qvv.date_created,v_dflt_date) ,
 			   nvl(qvv.modified_by,v_dflt_usr),
-               nvl(NVL (qvv.date_modified, date_created), v_dflt_date)
+               nvl(NVL (qvv.date_modified, date_created), v_dflt_date)*/
                
           FROM sbrext.quest_vv_ext         qvv,
                NCI_ADMIN_ITEM_REL_ALT_KEY  q,
@@ -4713,6 +4715,13 @@ BEGIN
 			   
 
     COMMIT;
+	
+	
+	update NCI_QUEST_VV_REP set CREAT_USR_ID= nvl(qvv.created_by,v_dflt_usr),
+								  CREAT_DT= nvl(qvv.date_created,v_dflt_date),                                  
+                                  LST_UPD_USR_ID= nvl(qvv.modified_by,v_dflt_usr),
+                                  LST_UPD_DT= nvl(NVL (qvv.date_modified, date_created), v_dflt_date)
+								  where
 END;
 
  procedure            sp_create_form_vv_inst_2
