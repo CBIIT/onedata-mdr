@@ -2,11 +2,14 @@
 
 
 -- Run as ONEDATA_WA DDL scripts
+S16_1_WA_RA_DDL.sql
+S16_2_WA_DDL.sql
+S16_3_WA_RA_MISC.sql
 
 
 -- Run as ONEDATA_RA DDL scripts
-
-
+S16_1_WA_RA_DDL.sql
+S16_3_WA_RA_MISC.sql
 
 -- DATA MIGRATION
 
