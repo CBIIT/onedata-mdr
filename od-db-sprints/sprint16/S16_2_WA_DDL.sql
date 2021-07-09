@@ -6,3 +6,20 @@ BEGIN
     update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
 END;
 /
+
+CREATE OR REPLACE TRIGGER TR_NCI_DLOAD_HDR_TS
+  BEFORE  UPDATE
+  on NCI_DLOAD_HDR
+  for each row
+BEGIN
+  :new.LST_UPD_DT := SYSDATE;
+END;
+/
+CREATE OR REPLACE TRIGGER TR_NCI_DLOAD_DTL_TS
+  BEFORE  UPDATE
+  on NCI_DLOAD_DTL
+  for each row
+BEGIN
+  :new.LST_UPD_DT := SYSDATE;
+END;
+/
