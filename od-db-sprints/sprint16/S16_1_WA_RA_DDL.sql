@@ -37,3 +37,5 @@
            AND ADMIN_ITEM.VER_NR = REF.VER_NR(+);
 
 
+alter table nci_dload_hdr add (	LST_GEN_DT date);
+
