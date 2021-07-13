@@ -68,8 +68,8 @@ alter table nci_dload_hdr add (	LST_GEN_DT date);
 	DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID and
 	DE.DE_CONC_VER_NR = DE_CONC.VER_NR
 	union
-         SELECT '3. Representation Term' ALT_NMS_LVL, DE.ITEM_ID  DITEM_ID,
-		DE.VER_NR DVER_NR,
+         SELECT '3. Representation Term' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
 		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
 		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
@@ -126,7 +126,23 @@ alter table nci_dload_hdr add (	LST_GEN_DT date);
        FROM CNCPT_ADMIN_ITEM a, DE_CONC DEC where 
 	a.ITEM_ID = DEC.PROP_ITEM_ID and
 	a.VER_NR = DEC.PROP_VER_NR;
-
-
-
-
+  union 
+  SELECT  'Component Concept' ALT_NMS_LVL, a.ITEM_ID, a.VER_NR,
+	a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR, 
+		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID, 
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT, 
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL
+       FROM CNCPT_ADMIN_ITEM a
+   union
+      SELECT 'Representation Term' ALT_NMS_LVL, VD.ITEM_ID  ITEM_ID,
+		DE.VER_NR DVER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL
+       FROM CNCPT_ADMIN_ITEM a, VALUE_DOM VD where
+	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
+	a.VER_NR = VD.REP_CLS_VER_NR ;
+	
