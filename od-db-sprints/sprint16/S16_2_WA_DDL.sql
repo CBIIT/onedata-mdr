@@ -102,3 +102,45 @@ if (:new.rel_typ_id = 65) then
     end if;
 END;
 /
+
+
+
+create or replace TRIGGER TR_DE_POST
+  AFTER  UPDATE
+  on DE
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+
+
+create or replace TRIGGER TR_VD_POST
+  AFTER  UPDATE
+  on VALUE_DOM
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+
+
+create or replace TRIGGER TR_DEC_POST
+  AFTER  UPDATE
+  on DE_CONC
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+
+
+create or replace TRIGGER TR_PERM_VAL_POST
+  AFTER INSERT OR UPDATE
+  on PERM_VAL
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.val_dom_item_id and VER_NR = :new.val_dom_VER_NR;
+END;
+/
+
