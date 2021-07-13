@@ -852,7 +852,7 @@ begin
                rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
                else
                   is_Valid := false;
-                  hookoutput.message := 'You need to specify atleast one concept.';
+                  hookoutput.message := 'You need to specify at least one concept.';
                rows := t_rows();  rows.extend;  rows(rows.last) := rowform;
                rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
                 end if;
