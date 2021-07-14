@@ -134,6 +134,17 @@ BEGIN
 END;
 /
 
+CREATE OR REPLACE TRIGGER OD_TR_DLOAD_HDR  BEFORE INSERT  on  NCI_DLOAD_HDR for each row
+BEGIN    IF (:NEW.HDR_ID<= 0  or :NEW.HDR_ID is null)  THEN 
+         select od_seq_DLOAD_HDR.nextval
+    into :new.HDR_ID  from  dual ;   END IF;
+    :new.CREATED_BY := :new.CREAT_USR_ID;
+    :new.CREATED_DT := :new.CREAT_DT; 
+    END ;
+    /
+    
+    
+
 
 create or replace TRIGGER TR_PERM_VAL_POST
   AFTER INSERT OR UPDATE
