@@ -34,6 +34,7 @@ procedure createDECImport (rowform in out t_row, actions in out t_actions);
 -- Get the form for DEC Create
 function getDECCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
 
+procedure spBulkUpdateDEC ( v_data_in IN CLOB,    v_data_out OUT CLOB,    v_usr_id  IN varchar2);
 
 END;
 /
@@ -46,6 +47,104 @@ c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
 c_ver_suffix varchar2(5) := 'v1.00';
 v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
+
+
+
+PROCEDURE spBulkUpdateDEC
+  (
+    v_data_in IN CLOB,
+    v_data_out OUT CLOB,
+    v_usr_id  IN varchar2)
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+
+  actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+  row_ori t_row;
+  rowform t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+
+  question    t_question;
+  answer     t_answer;
+  answers     t_answers;
+
+  forms     t_forms;
+  form1  t_form;
+    v_item_id number;
+    v_ver_nr number(4,2);
+  v_temp integer;
+  v_nm_typ_id integer;
+
+  v_cnt integer;
+    v_found boolean;
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+
+
+  if hookInput.invocationNumber = 0  then
+     	 answers := t_answers();
+  	   	 answer := t_answer(1, 1, 'Bulk Update');
+         answers.extend;          answers(answers.last) := answer;
+         question := t_question('Choose Option', answers);
+       	 hookOutput.question := question;
+         row := t_row();
+
+/*
+        ihook.setColumnValue(row, 'NM_TYP_ID', v_nm_typ_id);
+        ihook.setColumnValue(row, 'NM_DESC',v_default_txt); -- Default values
+        ihook.setColumnValue(row, 'LANG_ID',1000); -- Default values
+        rows := t_rows(); rows.extend;    rows(rows.last) := row;
+        rowset := t_rowset(rows, 'Alternate Names', 1, 'ALT_NMS'); -- Default values for form
+*/
+        forms                  := t_forms();
+        form1                  := t_form('Data Element Concept (Bulk Update Hook)', 2,1);
+      --  form1.rowset :=rowset;
+        forms.extend;    forms(forms.last) := form1;
+        hookoutput.forms := forms;
+  	elsif hookInput.invocationNumber = 1 then
+        forms              := hookInput.forms;
+        form1              := forms(1);
+        rowform := form1.rowset.rowset(1);  -- entered values from user
+        rows := t_rows();
+        for i in 1..hookinput.originalrowset.rowset.count loop
+               v_found := false;
+               row_ori :=  hookInput.originalRowset.rowset(i);
+               v_item_id :=ihook.getColumnValue(row_ori, 'ITEM_ID');
+               v_ver_nr :=ihook.getColumnValue(row_ori, 'VER_NR');
+               
+               row := row_ori;
+               ihook.setColumnValue(row, 'ADMIN_STUS_ID', nvl(ihook.getColumnValue(rowform, 'ADMIN_STUS_ID'), ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID')));
+               ihook.setColumnValue(row, 'REGSTR_STUS_ID', nvl(ihook.getColumnValue(rowform, 'REGSTR_STUS_ID'), ihook.getColumnValue(row_ori, 'REGSTR_STUS_ID')));
+               ihook.setColumnValue(row, 'CNTXT_ITEM_ID', nvl(ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID'), ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')));
+               ihook.setColumnValue(row, 'CNTXT_VER_NR', nvl(ihook.getColumnValue(rowform, 'CNTXT_VER_NR'), ihook.getColumnValue(row_ori, 'CNTXT_VER_NR')));
+            
+               rows.extend;
+               rows(rows.last) := row_ori;
+        end loop;
+      
+
+               if (rows.count > 0) then
+                    action := t_actionrowset(rows, 'Administered Items (No Sequence)', 2,1,'update');
+                        actions.extend;
+                        actions(actions.last) := action;
+                end if;
+       end if;
+
+if (actions.count > 0) then
+  hookoutput.actions := actions;
+
+end if;
+       
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
 
 
 -- Utility procedure to parse the Concept string and update the drop-downs.
@@ -140,7 +239,11 @@ begin
 
     row := row_ori;
     ihook.setColumnValue(row, 'ITEM_ID', -1);
-
+      nci_11179_2.setStdAttr(row);
+                 ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 2);
+   --       ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
+    --      ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
+          ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
      rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for AI form
 
@@ -190,10 +293,7 @@ begin
     -- Default for new row. Dummy Identifier has to be set else error.
     row := t_row();
           row := t_row();
-        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-          ihook.setColumnValue(row, 'VER_NR', 1.0);
-          ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
-          ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
+          nci_11179_2.setStdAttr(row);
           ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 2);
           ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
@@ -786,7 +886,7 @@ if (v_cncpt_src ='DROP-DOWN') then
         end loop;
 
         -- Insert into CNCPT_ADMIN_ITEM
-       action := t_actionrowset(rows, 'Items under Concept', 2,6,'insert');
+       action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,6,'insert');
         actions.extend;
         actions(actions.last) := action;
 
