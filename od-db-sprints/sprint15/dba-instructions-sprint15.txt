@@ -1,3 +1,6 @@
+-- Run as ONEDATA_RA DDL scripts
+S15_2_RA_DDL.sql
+
 -- Run as ONEDATA_WA DDL scripts
 S15_1_WA_RA_DDL.sql
 S15_3_WA_DDL.SQL
@@ -16,7 +19,6 @@ S15_NCI_CADSR_PULL.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S15_1_WA_RA_DDL.sql
-S15_2_RA_DDL.sql
 
 -- DATA MIGRATION
 
