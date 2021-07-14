@@ -100,6 +100,9 @@ BEGIN
 if (:new.rel_typ_id = 65) then
     update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.c_item_id and VER_NR = :new.c_item_VER_NR;
     end if;
+    if (:new.rel_typ_id = 66) then
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.p_item_id and VER_NR = :new.p_item_VER_NR;
+    end if;
 END;
 /
 
@@ -115,6 +118,74 @@ END;
 /
 
 
+
+
+create or replace TRIGGER TR_CLSFCTN_SCHM_POST
+  AFTER  UPDATE
+  on CLSFCTN_SCHM
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+create or replace TRIGGER TR_CNCPT_POST
+  AFTER  UPDATE
+  on CNCPT
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+create or replace TRIGGER TR_CONC_DOM_POST
+  AFTER  UPDATE
+  on CONC_DOM
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+create or replace TRIGGER TR_NCI_CSI_POST
+  AFTER  UPDATE
+  on NCI_CLSFCTN_SCHM_ITEM
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+create or replace TRIGGER TR_NCI_FORM_POST
+  AFTER  UPDATE
+  on NCI_FORM
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+
+create or replace TRIGGER TR_NCI_PROTCL_POST
+  AFTER  UPDATE
+  on NCI_PROTCL
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+create or replace TRIGGER TR_NCI_VAL_MEAN_POST
+  AFTER  UPDATE
+  on NCI_VAL_MEAN
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+
+	
+
+  	
+    	
+      
+      
+      
+  
 create or replace TRIGGER TR_VD_POST
   AFTER  UPDATE
   on VALUE_DOM
