@@ -8,14 +8,93 @@ procedure setStdAttr(row in out t_row);
 procedure setItemLongNm(row in out t_row, v_id in number);
 procedure stdAIValidation(rowai in t_row,  v_item_typ_id in number, v_valid in out boolean, v_err_str out varchar2);
 function getStdShortName (v_item_id in number, v_ver_nr in number) return varchar2;
+function getStdDataType (v_data_typ_id in number) return number;
+procedure copyDDEComponents (v_src_item_id in number, v_src_ver_nr in number, v_tgt_item_id in number, v_tgt_ver_nr in number, actions in out t_actions);
+
 END;
 /
 create or replace PACKAGE BODY            nci_11179_2 AS
 
 c_ver_suffix varchar2(5) := 'v1.00';
 v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
+DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
 
 
+
+procedure copyDDEComponents (v_src_item_id in number, v_src_ver_nr in number, v_tgt_item_id in number, v_tgt_ver_nr in number, actions in out t_actions) as
+    action           t_actionRowset;
+    action_rows              t_rows := t_rows();
+
+    v_sql        varchar2(4000);
+    v_cur        number;
+    v_temp        number;
+    v_col_val       varchar2(4000);
+
+    v_meta_col_cnt      integer;
+    v_meta_desc_tab      dbms_sql.desc_tab;
+    v_table_name varchar2(100);
+    row t_row;
+    
+begin
+
+     v_table_name := 'NCI_ADMIN_ITEM_REL';
+    action_rows := t_rows();
+    
+    v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
+      for de_cur in (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where
+        P_item_id = v_src_item_id and p_ITEM_ver_nr = v_src_ver_nr and rel_typ_id = 66 and nvl(fld_Delete,0) = 0) loop
+
+            v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where P_ITEM_ID = :P_ITEM_ID and P_ITEM_VER_NR = :P_ITEM_VER_NR and C_ITEM_ID = :C_ITEM_ID and C_ITEM_VER_NR = :C_ITEM_VER_NR and REL_TYP_ID=66';
+
+            v_cur := dbms_sql.open_cursor;
+            dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
+            dbms_sql.bind_variable(v_cur, ':P_ITEM_ID', de_cur.P_ITEM_ID);
+            dbms_sql.bind_variable(v_cur, ':P_ITEM_VER_NR', de_cur.P_ITEM_VER_NR);
+            dbms_sql.bind_variable(v_cur, ':C_ITEM_ID', de_cur.C_ITEM_ID);
+            dbms_sql.bind_variable(v_cur, ':C_ITEM_VER_NR', de_cur.C_ITEM_VER_NR);
+
+            for i in 1..v_meta_col_cnt loop
+                dbms_sql.define_column(v_cur, i, '', 4000);
+            end loop;
+
+            v_temp := dbms_sql.execute_and_fetch(v_cur);
+            dbms_sql.describe_columns(v_cur, v_meta_col_cnt, v_meta_desc_tab);
+
+            row := t_row();
+
+            for i in 1..v_meta_col_cnt loop
+                dbms_sql.column_value(v_cur, i, v_col_val);
+                ihook.setColumnValue(row, v_meta_desc_tab(i).col_name, v_col_val);
+            end loop;
+
+            dbms_sql.close_cursor(v_cur);
+         ihook.setColumnValue(row, 'P_ITEM_ID', v_tgt_item_id);
+   
+            ihook.setColumnValue(row, 'P_ITEM_VER_NR', v_tgt_ver_nr);
+            action_rows.extend; action_rows(action_rows.last) := row;
+        end loop;
+
+        if (action_rows.count> 0) then
+        action := t_actionRowset(action_rows, 'Derived CDE Component (Data Element CO)',2, 12, 'insert');
+        actions.extend; actions(actions.last) := action;
+        end if;
+    
+
+
+end;
+
+
+
+function getStdDataType (v_data_typ_id in number) return number
+is
+v_temp number;
+begin
+
+select nvl(dttype_id,0) into v_temp from data_typ where nci_dttype_typ_id = 2 and 
+upper(dttype_nm) in ( select upper(nci_dttype_map) from data_typ where nci_dttype_typ_id = 1 and dttype_id = v_data_typ_id);
+
+return v_temp;
+end;
 
 procedure setItemLongNm(row in out t_row, v_id in number) as
 begin
@@ -39,8 +118,7 @@ and ihook.getColumnValue(rowai, 'UNTL_DT') is null) loop
     v_err_str := 'Cannot retire an Administered Item without expiration date.';
     return;
 end loop;
-for cur in (select * from vw_admin_stus where stus_id = nvl(ihook.getColumnValue(rowai, 'ADMIN_STUS_ID'),-1) and upper(stus_nm) like '%RETIRED%'
-and ihook.getColumnValue(rowai, 'UNTL_DT') is not null and ihook.getColumnValue(rowai, 'UNTL_DT') < nvl(ihook.getColumnValue(rowai, 'EFF_DT'), sysdate) ) loop
+for cur in (select * from vw_admin_stus where ihook.getColumnValue(rowai, 'UNTL_DT') is not null and ihook.getColumnValue(rowai, 'UNTL_DT') < nvl(ihook.getColumnValue(rowai, 'EFF_DT'), sysdate) ) loop
     v_valid := false;
     v_err_str := 'Expiration date has to be greater than Effective date or current date.';
     return;
@@ -70,6 +148,11 @@ begin
                ihook.setColumnValue(row,'REGSTR_STUS_ID',9 );
        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
        ihook.setColumnValue(row, 'VER_NR', 1);
+     ihook.setColumnValue(row, 'EFF_DT', to_char(sysdate, DEFAULT_TS_FORMAT));
+ihook.setColumnValue(row, 'UNTL_DT', '');
+    -- ihook.setColumnValue(row, 'ADMIN_NOTES', '2001/1/1');
+
+
 
 end;
 
@@ -384,11 +467,12 @@ begin
 
         row := t_row();
         if (v_tab_val_mean_cd(i) = v_tab_val_mean_nm(i)) then
-            ihook.setColumnValue(row, 'Concept Code', 'No Concepts');
+         --   ihook.setColumnValue(row, 'Concept Code', 'No Concepts');
+          ihook.setColumnValue(row, 'VM Concept Codes', '');
         else
-        ihook.setColumnValue(row, 'Concept Code', v_tab_val_mean_cd(i));
+        ihook.setColumnValue(row, 'VM Concept Codes', v_tab_val_mean_cd(i));
         end if;
-        ihook.setColumnValue(row, 'Concept Name', nci_11179.replaceChar(v_tab_val_mean_nm(i)));
+        ihook.setColumnValue(row, 'VM Name', nci_11179.replaceChar(v_tab_val_mean_nm(i)));
 
         for j in 1 .. hookInput.originalRowset.Rowset.count loop
            row_cur := hookInput.originalRowset.Rowset(j);
