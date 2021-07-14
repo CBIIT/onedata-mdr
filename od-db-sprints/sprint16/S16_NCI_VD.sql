@@ -118,10 +118,12 @@ begin
         ihook.setColumnValue(row,'VER_NR', 1);
         ihook.setColumnValue(row,'REP_CLS_ITEM_ID',  ihook.getColumnValue(rowvd,'ITEM_1_ID'));
         ihook.setColumnValue(row,'REP_CLS_VER_NR',  ihook.getColumnValue(rowvd,'ITEM_1_VER_NR'));
-         if (ihook.getColumnValue(row, 'DTTYPE_ID') is null and  ihook.getColumnValue(row,'NCI_STD_DTTYPE_ID') is not null) then --- Tracker 667
-            select NCI_DFLT_LEGCY_ID into v_dtype_id from data_typ where DTTYPE_ID = ihook.getColumnValue(row,'NCI_STD_DTTYPE_ID');
-            ihook.setColumnValue(row, 'DTTYPE_ID', v_dtype_id);
-        end if;
+        ihook.setColumnValue(row, 'NCI_STD_DTTYPE_ID', nci_11179_2.getStdDataType(ihook.getColumnValue(row, 'DTTYPE_ID')));
+   
+--         if (ihook.getColumnValue(row, 'DTTYPE_ID') is null and  ihook.getColumnValue(row,'NCI_STD_DTTYPE_ID') is not null) then --- Tracker 667
+--            select NCI_DFLT_LEGCY_ID into v_dtype_id from data_typ where DTTYPE_ID = ihook.getColumnValue(row,'NCI_STD_DTTYPE_ID');
+--            ihook.setColumnValue(row, 'DTTYPE_ID', v_dtype_id);
+--        end if;
         rows.extend;
         rows(rows.last) := row;
        action := t_actionrowset(rows, 'Value Domain', 2,8,'insert');
@@ -239,7 +241,7 @@ begin
             rows(rows.last) := row;
 
         end if;
-     action := t_actionrowset(rows, 'Items under Concept', 2,50,'insert');
+     action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,50,'insert');
         actions.extend;
         actions(actions.last) := action;
 
@@ -888,9 +890,8 @@ from value_dom where item_id = v_item_id and ver_nr = v_ver_nr;
     ihook.setColumnValue(rowai, 'ITEM_LONG_NM', v_dflt_txt);
     ihook.setColumnValue(rowai, 'ITEM_ID', -1);
     ihook.setColumnValue(rowvd, 'STG_AI_ID', 1);
-      ihook.setColumnValue(rowai, 'ADMIN_STUS_ID', 66);
-          ihook.setColumnValue(rowai, 'REGSTR_STUS_ID', 9);
-
+    nci_11179_2.setStdAttr(rowai);
+          
      rows := t_rows();    rows.extend;    rows(rows.last) := rowai;
      rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
 --
@@ -1004,10 +1005,7 @@ begin
     -- Default for new row. Dummy Identifier has to be set else error.
     row := t_row();
     ihook.setColumnValue(row, 'STG_AI_ID', 1);
-        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-          ihook.setColumnValue(row, 'VER_NR', 1.0);
-          ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
-          ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
+       nci_11179_2.setStdAttr(row);
           ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 3);
           ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
@@ -1044,11 +1042,8 @@ begin
       v_item_typ_id := 53;
       row := t_row();
     -- Default for new row. Dummy Identifier has to be set else error.
-       ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-          ihook.setColumnValue(row, 'VER_NR', 1.0);
-          ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
-          ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', v_item_typ_id);
+      nci_11179_2.setStdAttr(row);
+              ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', v_item_typ_id);
           ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
@@ -1085,11 +1080,8 @@ begin
     row := t_row();
     v_item_typ_id := 7;
     -- Default for new row. Dummy Identifier has to be set else error.
-       ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-          ihook.setColumnValue(row, 'VER_NR', 1.0);
-          ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
-          ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', v_item_typ_id);
+       nci_11179_2.setStdAttr(row);
+             ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', v_item_typ_id);
           ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
@@ -1328,7 +1320,7 @@ if (v_mode = 'C') AND V_ITEM_ID  is null then --- Create
         end loop;
 
 
-       action := t_actionrowset(rows, 'Items under Concept', 2,6,'insert');
+       action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,6,'insert');
         actions.extend;
         actions(actions.last) := action;
 
