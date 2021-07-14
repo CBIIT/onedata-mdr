@@ -472,7 +472,7 @@ begin
                 actions(actions.last) := action;
 
         if (v_cncpt_id is not null) then
-                action := t_actionrowset(v_vm_rows, 'Items under Concept', 2,6,'insert');
+                action := t_actionrowset(v_vm_rows, 'Items under Concept (Hook)t', 2,6,'insert');
                 actions.extend;
                 actions(actions.last) := action;
             end if;
@@ -632,7 +632,7 @@ begin
       if (hookinput.answerid = 5) then
         hookoutput.message := ihook.getColumnValue(rowform,'CTL_VAL_MSG');
     else
-      hookoutput.message := 'VM Created: ' || v_item_id;
+      hookoutput.message := 'PV/VM Created Successfully with VM ID: ' || v_item_id;
     end if;
         select count(*) into v_temp from CONC_DOM_VAL_MEAN where CONC_DOM_ITEM_ID = ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') and
         CONC_DOM_VER_NR = ihook.getColumnValue(rowform, 'CONC_DOM_VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = v_ver_nr;
@@ -859,6 +859,9 @@ begin
         end if;
 
         if (is_valid = false or HOOKINPUT.ANSWERID = 1) then
+        if (is_valid = true) then 
+                          hookoutput.message := 'VALIDATED';
+        end if;
                 HOOKOUTPUT.QUESTION    := getVMEditQuestion(hookinput.originalrowset.tablename);
 
           hookOutput.forms :=getVMEditForm(rowset);
@@ -878,10 +881,10 @@ begin
 
             end loop;
             if (rows.count > 0) then
-            action := t_actionrowset(rows, 'Items under Concept', 2,1,'delete');
+            action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,1,'delete');
             actions.extend;
             actions(actions.last) := action;
-            action := t_actionrowset(rows, 'Items under Concept', 2,2,'purge');
+            action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,2,'purge');
             actions.extend;
             actions(actions.last) := action;
             end if;
@@ -913,7 +916,7 @@ begin
                         end loop;
                     end if;
             end loop;
-            action := t_actionrowset(rows, 'Items under Concept', 2,6,'insert');
+            action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,6,'insert');
             actions.extend;
             actions(actions.last) := action;
         end if;
@@ -1287,11 +1290,11 @@ ITEM_2_ID holds Item ID of VM and ITEM_2_VER_NR holds Version number
         end loop;
 
         if rows.count > 0 then
-            action := t_actionrowset(rows, 'Items under Concept', 2,1,'delete');
+            action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,1,'delete');
             actions.extend;
             actions(actions.last) := action;
 
-            action := t_actionrowset(rows, 'Items under Concept', 2,2,'purge');
+            action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,2,'purge');
             actions.extend;
             actions(actions.last) := action;
         end if;
@@ -1323,7 +1326,7 @@ ITEM_2_ID holds Item ID of VM and ITEM_2_VER_NR holds Version number
                         end loop;
                     end if;
             end loop;
-            action := t_actionrowset(rows, 'Items under Concept', 2,6,'insert');
+            action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,6,'insert');
             actions.extend;
             actions(actions.last) := action;
         end if;
