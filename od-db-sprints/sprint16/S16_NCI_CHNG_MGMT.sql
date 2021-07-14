@@ -231,11 +231,8 @@ BEGIN
           HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(1,true);
           row := t_row();
           rows := t_rows();
-          ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-          ihook.setColumnValue(row, 'VER_NR', 1.0);
-          ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
-          ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 4);
+       nci_11179_2.setStdAttr(row);
+             ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 4);
           ihook.setColumnValue(row, 'ITEM_NM', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_DESC', v_dflt_txt);
           ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
@@ -265,12 +262,9 @@ BEGIN
         HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(2,true);
         row := row_ori;
         rows := t_rows();
-        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-        ihook.setColumnValue(row, 'VER_NR', 1.00);
-        ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
+       nci_11179_2.setStdAttr(row);
              ihook.setColumnValue(row, 'ITEM_ID', -1);
-   ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-        rows.extend;
+         rows.extend;
         rows(rows.last) := row;
         rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for form
         rows := t_rows();
@@ -421,6 +415,16 @@ BEGIN
     action := t_actionrowset(rows, 'References (for hook insert)', 2,3,'insert');
     actions.extend;
     actions(actions.last) := action;
+    end if;
+    
+    -- Add derivation components if Createe from Existing
+    -- if Derivation Type is set and there are components in the original DDE
+    if (ihook.getColumnValue(row_ori, 'DERV_TYP_ID') is not null and ihook.getColumnValue(rowde, 'DERV_TYP_ID') is not null and v_src = 'E') then
+        rows := t_rows();
+        row_ori :=  hookInput.originalRowset.rowset(1);
+        v_item_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
+        v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
+        nci_11179_2.copyDDEComponents(v_item_id, v_ver_nr, v_id, 1, actions);
     end if;
         hookoutput.message := 'CDE Created Successfully with ID ' || v_id ;
         hookoutput.actions := actions;
@@ -753,11 +757,8 @@ if hookInput.invocationNumber = 0 then
         HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getDECreateQuestion(2,true);
         row := row_ori;
         rows := t_rows();
-        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-        ihook.setColumnValue(row, 'VER_NR', 1.00);
-        ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
-        ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-         rows.extend;
+      nci_11179_2.setStdAttr(row);
+             rows.extend;
         rows(rows.last) := row;
         rowsetai := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM'); -- Default values for form
         rows := t_rows();
@@ -1078,7 +1079,7 @@ function getDECreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t
   form1 t_form;
 begin
     forms                  := t_forms();
-    form1                  := t_form('Administered Item (Data Element CO)', 2,1);
+    form1                  := t_form('Administered Item (Hook Creation)', 2,1);
     form1.rowset :=v_rowset1;
     forms.extend;    forms(forms.last) := form1;
     form1                  := t_form('Data Element(hook creation)', 2,1);
@@ -1094,7 +1095,7 @@ function getCSICreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return 
   form1 t_form;
 begin
     forms                  := t_forms();
-    form1                  := t_form('Administered Item (Data Element CO)', 2,1);
+    form1                  := t_form('Administered Item (Hook Creation)', 2,1);
     form1.rowset :=v_rowset1;
     forms.extend;    forms(forms.last) := form1;
     form1                  := t_form('CSI (Hook Creation)', 2,1);
@@ -1601,7 +1602,7 @@ AS
   v_default_txt varchar2(30) := 'Default is Context Name.' ;
   v_cntxt_nm  varchar2(255);
   v_cnt integer;
-
+    v_found boolean;
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -1637,7 +1638,7 @@ BEGIN
         rows := t_rows();
             ihook.setColumnValue(rowform,'NM_ID', -1);
         for i in 1..hookinput.originalrowset.rowset.count loop
-
+             v_found := false;
             row_ori :=  hookInput.originalRowset.rowset(i);
             if (ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') = 4 and ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID') in (65,75,76)) then
                 row := rowform;
@@ -1645,7 +1646,7 @@ BEGIN
                 ihook.setColumnValue(row,'ITEM_ID',ihook.getColumnValue(row_ori,'ITEM_ID'));
                 ihook.setColumnValue(row,'VER_NR',ihook.getColumnValue(row_ori,'VER_NR'));
 
-
+               
             if ( ihook.getColumnValue(rowform,'NM_DESC') != v_default_txt) then -- Get context name
               select count(*) into v_temp from alt_nms where
                 cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR')
@@ -1655,6 +1656,7 @@ BEGIN
                   if (v_temp = 0) then -- Row does not exist
                         rows.extend;
                         rows(rows.last) := row;
+                        v_found := true;
                 end if;
             end if;
 
@@ -1674,8 +1676,12 @@ BEGIN
                 if (v_temp = 0) then -- Row does not exist
                     rows.extend;
                     rows(rows.last) := row;
-                    v_cnt := v_cnt + 1;
-   end if;
+                    v_found := true;
+            
+                end if;
+        end if;
+        if (v_found) then
+                v_cnt := v_cnt + 1;
         end if;
     end loop;
 
