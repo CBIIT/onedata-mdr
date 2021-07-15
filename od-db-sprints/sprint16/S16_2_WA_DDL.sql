@@ -116,6 +116,15 @@ END;
 
 
 
+create or replace TRIGGER TR_NCI_OC_RECS_POST
+  AFTER  UPDATE
+  on NCI_OC_RECS
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+END;
+/
+
 create or replace TRIGGER TR_CLSFCTN_SCHM_POST
   AFTER  UPDATE
   on CLSFCTN_SCHM
