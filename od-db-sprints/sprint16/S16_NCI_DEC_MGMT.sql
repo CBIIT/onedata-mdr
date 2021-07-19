@@ -63,6 +63,7 @@ AS
   action t_actionRowset;
   row t_row;
   rows  t_rows;
+  rowscd t_rows;
   row_ori t_row;
   rowform t_row;
   action_rows       t_rows := t_rows();
@@ -95,17 +96,16 @@ BEGIN
          question := t_question('Choose Option', answers);
        	 hookOutput.question := question;
          row := t_row();
+        rows := t_rows();
 
-/*
-        ihook.setColumnValue(row, 'NM_TYP_ID', v_nm_typ_id);
-        ihook.setColumnValue(row, 'NM_DESC',v_default_txt); -- Default values
-        ihook.setColumnValue(row, 'LANG_ID',1000); -- Default values
-        rows := t_rows(); rows.extend;    rows(rows.last) := row;
-        rowset := t_rowset(rows, 'Alternate Names', 1, 'ALT_NMS'); -- Default values for form
-*/
+        ihook.setColumnValue(row, 'ITEM_ID', -1);
+        ihook.setColumnValue(row, 'VER_NR',-1); -- Default values
+     rows.extend;               rows(rows.last) := row;
+        rowset := t_rowset(rows, 'Data Element Concept (Bulk Update Hook)', 1, 'DE_CONC'); -- Default values for form
+
         forms                  := t_forms();
         form1                  := t_form('Data Element Concept (Bulk Update Hook)', 2,1);
-      --  form1.rowset :=rowset;
+        form1.rowset :=rowset;
         forms.extend;    forms(forms.last) := form1;
         hookoutput.forms := forms;
   	elsif hookInput.invocationNumber = 1 then
@@ -113,36 +113,54 @@ BEGIN
         form1              := forms(1);
         rowform := form1.rowset.rowset(1);  -- entered values from user
         rows := t_rows();
+        rowscd := t_rows();
         for i in 1..hookinput.originalrowset.rowset.count loop
-               v_found := false;
-               row_ori :=  hookInput.originalRowset.rowset(i);
-               v_item_id :=ihook.getColumnValue(row_ori, 'ITEM_ID');
-               v_ver_nr :=ihook.getColumnValue(row_ori, 'VER_NR');
-               
-               row := row_ori;
-               ihook.setColumnValue(row, 'ADMIN_STUS_ID', nvl(ihook.getColumnValue(rowform, 'ADMIN_STUS_ID'), ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID')));
-               ihook.setColumnValue(row, 'REGSTR_STUS_ID', nvl(ihook.getColumnValue(rowform, 'REGSTR_STUS_ID'), ihook.getColumnValue(row_ori, 'REGSTR_STUS_ID')));
-               ihook.setColumnValue(row, 'CNTXT_ITEM_ID', nvl(ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID'), ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')));
-               ihook.setColumnValue(row, 'CNTXT_VER_NR', nvl(ihook.getColumnValue(rowform, 'CNTXT_VER_NR'), ihook.getColumnValue(row_ori, 'CNTXT_VER_NR')));
-            
-               rows.extend;
-               rows(rows.last) := row_ori;
+                row_ori :=  hookInput.originalRowset.rowset(i);
+                if (ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') = 2) then
+                    v_item_id :=ihook.getColumnValue(row_ori, 'ITEM_ID');
+                    v_ver_nr :=ihook.getColumnValue(row_ori, 'VER_NR');
+                    if (ihook.getColumnValue(rowform, 'ADMIN_STUS_ID') is not null or ihook.getColumnValue(rowform, 'REGSTR_STUS_ID') is not null) then
+                        row := row_ori;
+                        ihook.setColumnValue(row, 'ADMIN_STUS_ID', nvl(ihook.getColumnValue(rowform, 'ADMIN_STUS_ID'), ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID')));
+                        ihook.setColumnValue(row, 'REGSTR_STUS_ID', nvl(ihook.getColumnValue(rowform, 'REGSTR_STUS_ID'), ihook.getColumnValue(row_ori, 'REGSTR_STUS_ID')));  
+                        ihook.setColumnValue(row, 'CNTXT_ITEM_ID', nvl(ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID'), ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')));  
+                       ihook.setColumnValue(row, 'CNTXT_VER_NR', nvl(ihook.getColumnValue(rowform, 'CNTXT_VER_NR'), ihook.getColumnValue(row_ori, 'CNTXT_VER_NR')));  
+                   rows.extend;               rows(rows.last) := row;
+                    end if;
+                    if (ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') is not null ) then
+                        row := t_row();
+                        nci_11179.spReturnSubTypeRow(v_item_id, v_ver_nr,2, row); 
+                        ihook.setColumnValue(row, 'CONC_DOM_ITEM_ID', ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID'));
+                        ihook.setColumnValue(row, 'CONC_DOM_VER_NR', ihook.getColumnValue(rowform, 'CONC_DOM_VER_NR'));
+                            rowscd.extend;               rowscd(rowscd.last) := row;            
+                    end if;
+                end if;  
         end loop;
-      
 
                if (rows.count > 0) then
-                    action := t_actionrowset(rows, 'Administered Items (No Sequence)', 2,1,'update');
+                    action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'update');
                         actions.extend;
                         actions(actions.last) := action;
                 end if;
-       end if;
+                 if (rowscd.count > 0) then
+                    action := t_actionrowset(rowscd, 'Data Element Concept', 2,1,'update');
+                        actions.extend;
+                        actions(actions.last) := action;
+                end if;
+    end if;
+        
+        
 
 if (actions.count > 0) then
   hookoutput.actions := actions;
+       hookoutput.message := 'Data Element Concepts updated: ' || greatest(rowscd.count, rows.count);
+
+else
+       hookoutput.message := 'Only Data Element Concept will be updated.';
 
 end if;
-       
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+-- nci_util.debugHook('GENERAL',v_data_out);
 END;
 
 
