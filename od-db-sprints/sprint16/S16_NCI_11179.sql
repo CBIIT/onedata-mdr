@@ -953,7 +953,7 @@ begin
         ihook.setColumnValue(row, 'NCI_IDSEQ', '');
         action_rows.extend; action_rows(action_rows.last) := row;
 
-        for csi_cur in (select nci_pub_id, nci_ver_nr, typ_nm from NCI_CSI_ALT_DEFNMS where nmdef_id = ad_cur.def_id) loop
+        for csi_cur in (select nci_pub_id, nci_ver_nr, typ_nm from NCI_CSI_ALT_DEFNMS where nmdef_id = ad_cur.def_id and nvl(fld_delete,0) = 0) loop
             row:= t_row();
             ihook.setColumnValue(row, 'NMDEF_ID',v_temp);
             ihook.setColumnValue(row, 'NCI_PUB_ID', csi_cur.NCI_PUB_ID);
