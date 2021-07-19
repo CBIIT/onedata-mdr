@@ -1100,7 +1100,7 @@ begin
           ANSWER                     := T_ANSWER(6, 6, 'Create Using Existing VM');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Create VM and/or PV', ANSWERS);
+    QUESTION               := T_QUESTION('Create PV/VM', ANSWERS);
 
 return question;
 end;
