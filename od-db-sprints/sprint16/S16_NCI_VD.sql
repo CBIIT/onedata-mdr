@@ -746,9 +746,10 @@ END;
                 rows := t_rows();
                 rows.extend;
         ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', v_item_typ_id);
+        if (ihook.getColumnValue(rowcncpt,'ITEM_1_NM') is not null) then
         ihook.setColumnValue(rowai,'ITEM_NM', ihook.getColumnValue(rowcncpt,'ITEM_1_NM'));
               ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowcncpt,'ITEM_1_DEF'));
-
+        end if;
                 rows(rows.last) := rowai;
                 rowsetai := t_rowset(rows, 'Administered Item (Hook Creation)', 1, 'ADMIN_ITEM');
                 rows := t_rows();
@@ -1203,7 +1204,11 @@ if (v_cncpt_src ='STRING') then
                 v_long_nm := '';
                 v_def := '';
                 for i in  1..cnt loop
+                if (v_item_typ_id = 7) then
                         j := i+1;
+                else
+                        j :=i;
+                end if;
                         v_cncpt_nm := nci_11179.getWord(v_str, i, cnt);
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || j,'');
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || j, '');
@@ -1217,10 +1222,19 @@ if (v_cncpt_src ='STRING') then
 
                         end loop;
                 end loop;
+                   if (v_item_typ_id = 7) then
                 for i in  cnt+2..10 loop
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, '');
                 end loop;
+                end if;
+                   if (v_item_typ_id = 53) then
+                for i in  cnt+1..10 loop
+                        ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
+                        ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, '');
+                end loop;
+                end if;
+                
     --            ihook.setColumnValue(rowform, 'ITEM_' || idx || '_NM', v_nm);
   --
             end if;
