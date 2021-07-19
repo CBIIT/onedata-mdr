@@ -185,7 +185,7 @@ hookInput        t_hookInput;
 
 for cur in (select * from vw_admin_stus where stus_id = nvl(ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID'),-1) and upper(stus_nm) like '%RETIRED%'
 and ihook.getColumnValue(row_ori, 'UNTL_DT') is not null and ihook.getColumnValue(row_ori, 'UNTL_DT') < nvl(ihook.getColumnValue(row_ori, 'EFF_DT'), sysdate) ) loop
- raise_application_error(-20000, 'Expiration date has to be greater than Effective date or current date.');
+ raise_application_error(-20000, 'Expiration date has to be the same or greater than Effective date.');
     return;
 end loop;
 
@@ -271,7 +271,8 @@ BEGIN
     end loop;
 
  if (ihook.getColumnValue(row_ori, 'UNTL_DT') is not null and ihook.getColumnValue(row_ori, 'UNTL_DT') < nvl(ihook.getColumnValue(row_ori, 'EFF_DT'), sysdate) ) then
- raise_application_error(-20000, 'Expiration date has to be greater than Effective date or current date.');
+ raise_application_error(-20000, 'Expiration date has to be the same or greater than Effective date.');
+
     return;
 end if;
 
@@ -557,7 +558,7 @@ BEGIN
  
  
  if (ihook.getColumnValue(row_ori, 'UNTL_DT') is not null and ihook.getColumnValue(row_ori, 'UNTL_DT') < nvl(ihook.getColumnValue(row_ori, 'EFF_DT'), sysdate) ) then
- raise_application_error(-20000, 'Expiration date has to be greater than Effective date or current date.');
+ raise_application_error(-20000, 'Expiration date has to be the same or greater than Effective date.');
     return;
 end if;
 
