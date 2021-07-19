@@ -75,7 +75,7 @@ begin
         end loop;
 
         if (action_rows.count> 0) then
-        action := t_actionRowset(action_rows, 'Derived CDE Component (Data Element CO)',2, 12, 'insert');
+        action := t_actionRowset(action_rows, 'Derived CDE Component (Data Element CO)',2, 14, 'insert');
         actions.extend; actions(actions.last) := action;
         end if;
     
@@ -120,7 +120,7 @@ and ihook.getColumnValue(rowai, 'UNTL_DT') is null) loop
 end loop;
 for cur in (select * from vw_admin_stus where ihook.getColumnValue(rowai, 'UNTL_DT') is not null and ihook.getColumnValue(rowai, 'UNTL_DT') < nvl(ihook.getColumnValue(rowai, 'EFF_DT'), sysdate) ) loop
     v_valid := false;
-    v_err_str := 'Expiration date has to be greater than Effective date or current date.';
+    v_err_str := 'Expiration date has to be the same or greater than Effective date.';
     return;
 end loop;
 
@@ -472,7 +472,7 @@ begin
         else
         ihook.setColumnValue(row, 'VM Concept Codes', v_tab_val_mean_cd(i));
         end if;
-        ihook.setColumnValue(row, 'VM Name', nci_11179.replaceChar(v_tab_val_mean_nm(i)));
+        ihook.setColumnValue(row, 'VM Concept Names', nci_11179.replaceChar(v_tab_val_mean_nm(i)));
 
         for j in 1 .. hookInput.originalRowset.Rowset.count loop
            row_cur := hookInput.originalRowset.Rowset(j);
