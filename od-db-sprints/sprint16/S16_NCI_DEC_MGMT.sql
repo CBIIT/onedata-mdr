@@ -119,7 +119,8 @@ BEGIN
                 if (ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') = 2) then
                     v_item_id :=ihook.getColumnValue(row_ori, 'ITEM_ID');
                     v_ver_nr :=ihook.getColumnValue(row_ori, 'VER_NR');
-                    if (ihook.getColumnValue(rowform, 'ADMIN_STUS_ID') is not null or ihook.getColumnValue(rowform, 'REGSTR_STUS_ID') is not null) then
+                      if (ihook.getColumnValue(rowform, 'ADMIN_STUS_ID') is not null or ihook.getColumnValue(rowform, 'REGSTR_STUS_ID') is not null or
+                   ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') is not null ) then
                         row := row_ori;
                         ihook.setColumnValue(row, 'ADMIN_STUS_ID', nvl(ihook.getColumnValue(rowform, 'ADMIN_STUS_ID'), ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID')));
                         ihook.setColumnValue(row, 'REGSTR_STUS_ID', nvl(ihook.getColumnValue(rowform, 'REGSTR_STUS_ID'), ihook.getColumnValue(row_ori, 'REGSTR_STUS_ID')));  
