@@ -419,18 +419,18 @@ BEGIN
     
     -- Add derivation components if Createe from Existing
     -- if Derivation Type is set and there are components in the original DDE
-    if (ihook.getColumnValue(row_ori, 'DERV_TYP_ID') is not null and ihook.getColumnValue(rowde, 'DERV_TYP_ID') is not null and v_src = 'E') then
-        rows := t_rows();
+    if (v_src = 'E') then
         row_ori :=  hookInput.originalRowset.rowset(1);
         v_item_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
         v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
-        nci_11179_2.copyDDEComponents(v_item_id, v_ver_nr, v_id, 1, actions);
+       
+        if (ihook.getColumnValue(rowde, 'DERV_TYP_ID') is not null ) then
+          nci_11179_2.copyDDEComponents(v_item_id, v_ver_nr, v_id, 1, actions);
+        end if;
     end if;
-        hookoutput.message := 'CDE Created Successfully with ID ' || v_id ;
+          hookoutput.message := 'CDE Created Successfully with ID ' || v_id ;
         hookoutput.actions := actions;
- --   raise_application_error(-20000, 'Count ' || actions.count);
-
-    end if;
+ end if;
  end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
@@ -1111,7 +1111,7 @@ function getCSCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t
   form1 t_form;
 begin
     forms                  := t_forms();
-    form1                  := t_form('Administered Item (Data Element CO)', 2,1);
+    form1                  := t_form('Administered Item (Hook Creation)', 2,1);
     form1.rowset :=v_rowset1;
     forms.extend;    forms(forms.last) := form1;
     form1                  := t_form('Classification Scheme (Create Hook)', 2,1);
@@ -1690,14 +1690,15 @@ BEGIN
                         actions.extend;
                         actions(actions.last) := action;
                 end if;
+                         hookoutput.message := 'Only CDE with Release/Released Non-Compliant and Draft-Mod have been designated. Total Designated: ' || v_cnt;
+  
        end if;
 
 if (actions.count > 0) then
   hookoutput.actions := actions;
 
 end if;
-                  hookoutput.message := 'Only CDE with Release/Released Non-Compliant and Draft-Mod have been designated. Total Designated: ' || v_cnt;
-  
+         
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
