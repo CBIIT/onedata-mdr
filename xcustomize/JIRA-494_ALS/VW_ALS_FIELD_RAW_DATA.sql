@@ -1,6 +1,3 @@
-DROP VIEW ONEDATA_WA.VW_ALS_FIELD_RAW_DATA;
-
-/* Formatted on 6/14/2021 11:20:46 AM (QP5 v5.354) */
 CREATE OR REPLACE FORCE VIEW ONEDATA_WA.VW_ALS_FIELD_RAW_DATA
 (
     PROTOCOL,
@@ -59,15 +56,7 @@ AS
                     NULL           VD_Version,
                     NULL           UOM_ID
       FROM ADMIN_ITEM  FR,
-           --           (  SELECT C_ITEM_ID,
-           --                     C_ITEM_VER_NR,
-           --                     LISTAGG (P_ITEM_ID || 'v' || P_ITEM_VER_NR,
-           --                              ':'
-           --                              ON OVERFLOW TRUNCATE)
-           --                     WITHIN GROUP (ORDER BY DISP_ORD)    PROTO_ID
-           --                FROM NCI_ADMIN_ITEM_REL
-           --            GROUP BY C_ITEM_ID, C_ITEM_VER_NR)
-            (  SELECT C_ITEM_ID,
+                      (  SELECT C_ITEM_ID,
                       C_ITEM_VER_NR,
                       LISTAGG (p.ITEM_LONG_NM, ':' ON OVERFLOW TRUNCATE)
                           WITHIN GROUP (ORDER BY DISP_ORD)    PROTO_ID
@@ -91,7 +80,7 @@ AS
            QUESTION.DISP_ORD                               QUEST_DISP_ORD,
            QUESTION.ITEM_LONG_NM                           QUEST_Long_Name,
            QUESTION.ITEM_NM                                QUEST_SHORT_Name,
-           QUESTION.INSTR                                   QUEST_INST,
+           QUESTION.INSTR                                  QUEST_INST,
            DE.ITEM_ID                                      DE_PUB_ID,
            DE.VER_NR                                       DE_VERSION,
            DE.ITEM_LONG_NM                                 CDE_Sort_Name,
@@ -102,8 +91,8 @@ AS
            DECODE (VAL_DOM_TYP_ID,  17, 'E',  18, 'N')     VAL_DOM_TYP_ID,
            VALUE_DOM.VAL_DOM_HIGH_VAL_NUM                  VD_Max_Length,
            FMT.FMT_NM                                      VD_Display_Format,
-           dt.NCI_CD VD_DATA_TYPE_NCI,
-           dt.NCI_DTTYPE_MAP VD_DATA_TYPE_MAP,
+           dt.NCI_CD                                       VD_DATA_TYPE_NCI,
+           dt.NCI_DTTYPE_MAP                               VD_DATA_TYPE_MAP,
            VD.ITEM_id                                      VD_ID,
            VD.VER_NR                                       VD_Version,
            VALUE_DOM.UOM_ID
@@ -116,15 +105,8 @@ AS
            ADMIN_ITEM                  VD,
            VALUE_DOM,
            FMT,
-           DATA_TYP DT,
-           --           (  SELECT C_ITEM_ID,
-           --                     C_ITEM_VER_NR,
-           --                     LISTAGG (P_ITEM_ID || 'v' || P_ITEM_VER_NR,
-           --                              ':'
-           --                              ON OVERFLOW TRUNCATE)
-           --                     WITHIN GROUP (ORDER BY DISP_ORD)    PROTO_ID
-           --                FROM NCI_ADMIN_ITEM_REL
-           --            GROUP BY C_ITEM_ID, C_ITEM_VER_NR) REL,
+           DATA_TYP                    DT,
+          
             (  SELECT C_ITEM_ID,
                       C_ITEM_VER_NR,
                       LISTAGG (p.ITEM_LONG_NM, ':' ON OVERFLOW TRUNCATE)
@@ -163,5 +145,6 @@ AS
            AND VD.VER_NR = VALUE_DOM.VER_NR
            AND FORM.ITEM_ID = FR.ITEM_ID
            AND FORM.VER_NR = FR.VER_NR
-           AND PROTO_ID IS NOT NULL
+         
     ORDER BY 3, 4, 5;
+    
