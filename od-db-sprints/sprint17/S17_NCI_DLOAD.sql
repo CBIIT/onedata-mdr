@@ -92,7 +92,7 @@ begin
        rows := t_rows();
     rows.extend;
     rows(rows.last) := rowhdr;
-    action := t_actionrowset(rows, 'Download Header', 2,1,'insert');
+    action := t_actionrowset(rows, 'Download Header (Hook)', 2,1,'insert');
     actions.extend;
     actions(actions.last) := action;
       rows := t_rows();
