@@ -2,6 +2,7 @@ create or replace PACKAGE            nci_11179_2 AS
 procedure spNCICompareDE (v_data_in in clob, v_data_out out clob);
 procedure spNCIShowVMDependency (v_data_in in clob, v_data_out out clob);
 procedure spNCIShowVMDependencyDE (v_data_in in clob, v_data_out out clob);
+procedure spNCIShowVMDependencyComb (v_data_in in clob, v_data_out out clob);
 function isUserAuth(v_item_id in number, v_ver_nr in number,v_user_id in varchar2) return boolean;
 procedure spCheckUserAuth (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure setStdAttr(row in out t_row);
@@ -11,7 +12,7 @@ function getStdShortName (v_item_id in number, v_ver_nr in number) return varcha
 function getStdDataType (v_data_typ_id in number) return number;
 procedure copyDDEComponents (v_src_item_id in number, v_src_ver_nr in number, v_tgt_item_id in number, v_tgt_ver_nr in number, actions in out t_actions);
 function getCollectionId return integer;
-
+procedure spBulkUpdateContext (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 END;
 /
 create or replace PACKAGE BODY            nci_11179_2 AS
@@ -90,6 +91,88 @@ begin
 
 end;
 
+
+procedure spBulkUpdateContext (v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+as
+ hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+    row_sel t_row;
+    v_id integer;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+forms     t_forms;
+v_itemid     integer;
+v_found boolean;
+  v_temp integer;
+  v_stg_ai_id number;
+  i integer := 0;
+  column  t_column;
+  msg varchar2(4000);
+  v_item_typ  integer;
+
+  form1 t_form;
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+  row_ori :=  hookInput.originalRowset.rowset(1);
+
+
+    if hookInput.invocationNumber = 0 then
+
+    forms                  := t_forms();
+    form1                  := t_form('Context Bulk Change (Hook)', 2,1);
+    forms.extend;    forms(forms.last) := form1;
+  hookoutput.forms := forms;
+       	 answers := t_answers();
+  	   	 answer := t_answer(1, 1, 'Select Context');
+  	   	 answers.extend; answers(answers.last) := answer;
+
+	   	 question := t_question('Select Context to Move To', answers);
+       	 hookOutput.question := question;
+ 
+	end if;
+
+    if hookInput.invocationNumber = 1  then
+    
+            rows :=         t_rows();
+	    for cur in (select * from vw_obj_key_4 where nvl(fld_delete,0) = 0) loop
+		   row := t_row();
+	   	   iHook.setcolumnvalue (ROW, 'OBJ_KEY_ID', cur.OBJ_KEY_ID);
+		   rows.extend;
+		   rows (rows.last) := row;
+		   
+	    end loop;
+
+       	 showrowset := t_showablerowset (rows, 'Administered Item Type', 2, 'multi');
+       	 hookoutput.showrowset := showrowset;
+
+       	 answers := t_answers();
+  	   	 answer := t_answer(1, 1, 'Select Item Types to Update');
+  	   	 answers.extend; answers(answers.last) := answer;
+
+	   	 question := t_question('Select Types', answers);
+       	 hookOutput.question := question;
+	   end if;
+   
+  
+    if (hookInput.invocationNumber = 2 ) then -- copy module
+    rows := t_rows();
+    end if;
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+ -- nci_util.debugHook('GENERAL',v_data_out);
+
+END;
 
 
 function getStdDataType (v_data_typ_id in number) return number
@@ -501,5 +584,191 @@ begin
 
     v_data_out := ihook.getHookOutput(hookOutput);
 end;
+
+
+/*  Show PV comparison from ADministereds Item */
+
+procedure spNCIShowVMDependencyComb (v_data_in in clob, v_data_out out clob)
+as
+
+    hookInput           t_hookInput;
+    hookOutput           t_hookOutput := t_hookOutput();
+    showRowset     t_showableRowset;
+
+    rows      t_rows;
+    row          t_row;
+    row_cur t_row;
+    row_ori  t_row;
+
+    v_admin_item                admin_item%rowtype;
+    v_tab_admin_item            tab_admin_item_pk;
+
+    v_found      boolean;
+
+    type t_val_mean_cd is table of nci_admin_item_ext.cncpt_concat%type;
+    type t_val_mean_nm is table of nci_admin_item_ext.cncpt_concat_nm%type;
+
+    v_tab_val_mean_cd  t_val_mean_cd := t_val_mean_cd();
+    v_tab_val_mean_nm  t_val_mean_nm := t_val_mean_nm();
+
+    v_tab_val_dom    tab_admin_item_pk := tab_admin_item_pk();
+
+    type      t_admin_item_nm is table of admin_item.item_nm%type;
+    v_tab_admin_item_nm   t_admin_item_nm := t_admin_item_nm();
+    k integer;
+    v_val_mean_desc    val_mean.val_mean_desc%type;
+    v_perm_val_nm    perm_val.perm_val_nm%type;
+    v_item_id		 number;
+    v_ver_nr		 number;
+    vd_id_nm    varchar2(300);
+    v_item_typ_id integer;
+begin
+
+    hookInput := ihook.getHookInput(v_data_in);
+    hookOutput.invocationNumber := hookInput.invocationNumber;
+    hookOutput.originalRowset := hookInput.originalRowset;
+
+ row_ori := hookInput.originalRowset.rowset (1);
+-- saving all unique val_mean_ids from submitted admin items into v_tab_val_mean_id
+
+    if (ihook.getColumnValue(row_ori,'ADMIN_ITEM_TYP_ID') not in (3, 4)) then
+        raise_application_error(-20000,'!!!! This functionality is only applicable for CDE and VD !!!!');
+    return;
+    end if;
+    v_item_typ_id := ihook.getColumnValue(row_ori,'ADMIN_ITEM_TYP_ID');
+    
+    if (v_item_typ_id = 4) then -- Data Element
+    for i in 1 .. hookInput.originalRowset.Rowset.count loop
+        row_cur := hookInput.originalRowset.Rowset(i);
+        if (ihook.getColumnValue(row_cur, 'ADMIN_ITEM_TYP_ID') = v_item_typ_id) then
+        for rec in (  select nci_val_mean_item_id, nci_val_mean_ver_nr, cncpt_concat, cncpt_concat_nm from perm_val pv, nci_admin_item_ext ext, de
+        where pv.val_dom_item_id=de.val_dom_item_id and de.item_id = ihook.getColumnValue(row_cur,'ITEM_ID')
+        and pv.val_dom_ver_nr=de.val_dom_ver_nr and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR') and pv.fld_delete=0 and
+        pv.nci_val_mean_item_id = ext.item_id and pv.nci_val_mean_ver_nr = ext.ver_nr) loop
+
+            v_found := false;
+            for j in 1..v_tab_val_mean_cd.count loop
+                    v_found := v_found or v_tab_val_mean_cd(j)=rec.cncpt_concat;
+            end loop;
+            if not v_found then
+                v_tab_val_mean_cd.extend();
+                v_tab_val_mean_nm.extend();
+                v_tab_val_mean_cd(v_tab_val_mean_cd.count) := rec.cncpt_concat;
+                v_tab_val_mean_nm(v_tab_val_mean_nm.count) := rec.cncpt_concat_nm;
+            end if;
+        end loop;
+    
+        v_tab_admin_item_nm.extend();
+        select ai.item_id || '-' || ai.item_nm into  vd_id_nm from admin_item ai, de where ai.item_id = de.val_dom_item_id and ai.ver_nr = de.val_dom_ver_nr and de.item_id =ihook.getColumnValue(row_cur,'ITEM_ID')
+        and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR');
+
+        v_tab_admin_item_nm(v_tab_admin_item_nm.count) := 'CDE:' || ihook.getColumnValue(row_cur,'ITEM_ID') || '-' || ihook.getColumnValue(row_cur,'ITEM_NM') || chr(13) || 'VD:' ||  vd_id_nm ;
+     end if;
+    end loop;
+  end if;
+  if (v_item_typ_id = 3) then --Value Domain
+  
+    for i in 1 .. hookInput.originalRowset.Rowset.count loop
+        row_cur := hookInput.originalRowset.Rowset(i);
+     if (ihook.getColumnValue(row_cur, 'ADMIN_ITEM_TYP_ID') = v_item_typ_id) then
+   
+        for rec in (  select nci_val_mean_item_id, nci_val_mean_ver_nr, cncpt_concat, cncpt_concat_nm from perm_val pv, nci_admin_item_ext ext
+        where val_dom_item_id=ihook.getColumnValue(row_cur,'ITEM_ID')
+        and val_dom_ver_nr=ihook.getColumnValue(row_cur,'VER_NR') and pv.fld_delete=0 and
+        pv.nci_val_mean_item_id = ext.item_id and pv.nci_val_mean_ver_nr = ext.ver_nr) loop
+            v_found := false;
+            for j in 1..v_tab_val_mean_cd.count loop
+                    v_found := v_found or v_tab_val_mean_cd(j)=rec.cncpt_concat;
+            end loop;
+
+            if not v_found then
+                v_tab_val_mean_cd.extend();
+                v_tab_val_mean_nm.extend();
+                v_tab_val_mean_cd(v_tab_val_mean_cd.count) := rec.cncpt_concat;
+                v_tab_val_mean_nm(v_tab_val_mean_nm.count) := rec.cncpt_concat_nm;
+            end if;
+        end loop;
+      v_tab_admin_item_nm.extend();
+     
+      v_tab_admin_item_nm(v_tab_admin_item_nm.count) := 'VD:' || ihook.getColumnValue(row_cur,'ITEM_ID') || '-' || ihook.getColumnValue(row_cur,'ITEM_NM');
+    end if;
+    end loop;
+   end if; 
+    
+    -- populating val means/perm vals
+   
+    if (v_item_typ_id = 4) then
+   
+    rows := t_rows();
+    for i in 1 .. v_tab_val_mean_cd.count loop
+
+        row := t_row();
+        if (v_tab_val_mean_cd(i) = v_tab_val_mean_nm(i)) then
+         --   ihook.setColumnValue(row, 'Concept Code', 'No Concepts');
+          ihook.setColumnValue(row, 'VM Concept Codes', '');
+        else
+        ihook.setColumnValue(row, 'VM Concept Codes', v_tab_val_mean_cd(i));
+        end if;
+        ihook.setColumnValue(row, 'VM Concept Names', nci_11179.replaceChar(v_tab_val_mean_nm(i)));
+    k := 1;
+        for j in 1 .. hookInput.originalRowset.Rowset.count loop
+           row_cur := hookInput.originalRowset.Rowset(j);
+        if (ihook.getColumnValue(row_cur, 'ADMIN_ITEM_TYP_ID') = v_item_typ_id) then
+            
+            v_perm_val_nm := '';
+            for rec in   (select perm_val_nm   from perm_val a, nci_admin_item_Ext ext, de
+            where nci_val_mean_item_id=ext.item_id  and nci_val_mean_ver_nr = ext.ver_nr and ext.cncpt_concat = v_tab_val_mean_cd(i)
+            and a.val_dom_item_id=de.val_dom_item_id and de.item_id = ihook.getColumnValue(row_cur,'ITEM_ID')
+            and a.val_dom_ver_nr=de.val_dom_ver_nr and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR') and a.fld_delete=0) loop
+                v_perm_val_nm := rec.perm_val_nm;
+            end loop;
+            ihook.setColumnValue(row, v_tab_admin_item_nm(k), nci_11179.replaceChar(v_perm_val_nm));
+            k := k + 1;
+            end if;
+        end loop;
+        rows.extend; rows(rows.last) := row;
+    end loop;
+    end if;
+    
+    if (v_item_typ_id = 3) then
+   
+    rows := t_rows();
+    for i in 1 .. v_tab_val_mean_cd.count loop
+
+        row := t_row();
+        if (v_tab_val_mean_cd(i) = v_tab_val_mean_nm(i)) then
+         --   ihook.setColumnValue(row, 'Concept Code', 'No Concepts');
+          ihook.setColumnValue(row, 'VM Concept Codes', '');
+        else
+        ihook.setColumnValue(row, 'VM Concept Codes', v_tab_val_mean_cd(i));
+        end if;
+        ihook.setColumnValue(row, 'VM Concept Names', nci_11179.replaceChar(v_tab_val_mean_nm(i)));
+        k := 1;
+        for j in 1 .. hookInput.originalRowset.Rowset.count loop
+           row_cur := hookInput.originalRowset.Rowset(j);
+        if (ihook.getColumnValue(row_cur, 'ADMIN_ITEM_TYP_ID') = v_item_typ_id) then
+
+            v_perm_val_nm := '';
+            for rec in   (select perm_val_nm   from perm_val a, nci_admin_item_Ext ext
+            where nci_val_mean_item_id=ext.item_id  and nci_val_mean_ver_nr = ext.ver_nr and ext.cncpt_concat = v_tab_val_mean_cd(i)
+            and a.val_dom_item_id=ihook.getColumnValue(row_cur,'ITEM_ID')
+            and a.val_dom_ver_nr= ihook.getColumnValue(row_cur,'VER_NR') and a.fld_delete=0) loop
+                v_perm_val_nm := rec.perm_val_nm;
+            end loop;
+            ihook.setColumnValue(row, v_tab_admin_item_nm(k), nci_11179.replaceChar(v_perm_val_nm));
+            k := k+1;
+            end if;
+        end loop;
+        rows.extend; rows(rows.last) := row;
+     
+    end loop;
+    end if;
+    
+    showRowset := t_showableRowset(rows, 'Permissible Value Comparison',4, 'unselectable');
+    hookOutput.showRowset := showRowset;
+
+    v_data_out := ihook.getHookOutput(hookOutput);
+end;
+
 end;
 /
