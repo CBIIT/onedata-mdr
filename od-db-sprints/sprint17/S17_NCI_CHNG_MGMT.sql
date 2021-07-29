@@ -15,6 +15,7 @@ PROCEDURE spClassification ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  I
 PROCEDURE spClassificationNMDef ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2, v_typ in varchar2);
 PROCEDURE spDesignateNew   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 PROCEDURE spClassifyUnclassify   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+PROCEDURE spShowClassificationNmDef   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 function getDECreateQuestion(v_from in number,v_first in boolean) return t_question;
 function getDECreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
 function getCSICreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
@@ -37,6 +38,61 @@ c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
 c_ver_suffix varchar2(5) := 'v1.00';
 
+
+
+PROCEDURE spShowClassificationNmDef   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
+as
+
+    hookInput           t_hookInput;
+    hookOutput           t_hookOutput := t_hookOutput();
+    showRowset     t_showableRowset;
+
+    rows      t_rows;
+    row          t_row;
+    row_ori t_row;
+
+    v_tbl_nm  varchar2(100);
+    v_item_id		 number;
+    v_ver_nr		 number;
+begin
+
+    hookInput := ihook.getHookInput(v_data_in);
+    hookOutput.invocationNumber := hookInput.invocationNumber;
+    hookOutput.originalRowset := hookInput.originalRowset;
+    
+    row_ori := hookInput.originalRowset.Rowset(1);
+    v_item_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
+    v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
+    v_tbl_nm := hookinput.originalRowset.tablename ;
+    
+    rows := t_rows();
+
+    if (upper(v_tbl_nm) like '%NAME%') then
+    for cur in (select * from alt_nms where item_id = v_item_id and ver_nr = v_ver_nr) loop
+        row := t_row();
+        ihook.setColumnValue(row,'NM_ID', cur.NM_ID);
+        ihook.setColumnValue(row,'ITEM_ID', v_item_id);
+        ihook.setColumnValue(row,'VER_NR', v_ver_nr);
+        rows.extend; rows(rows.last) := row;
+    end loop;
+    showRowset := t_showableRowset(rows, 'NCI Alternate Names',2, 'unselectable');
+    end if;
+    if (upper(v_tbl_nm) like '%DEF%') then
+    for cur in (select * from alt_def where item_id = v_item_id and ver_nr = v_ver_nr) loop
+        row := t_row();
+        ihook.setColumnValue(row,'DEF_ID', cur.DEF_ID);
+        ihook.setColumnValue(row,'ITEM_ID', v_item_id);
+        ihook.setColumnValue(row,'VER_NR', v_ver_nr);
+        rows.extend; rows(rows.last) := row;
+    end loop;
+    showRowset := t_showableRowset(rows, 'NCI Alternate Definitions',2, 'unselectable');
+    end if;
+    
+    hookOutput.showRowset := showRowset;
+
+    hookOutput.message := 'Classification Details';
+    v_data_out := ihook.getHookOutput(hookOutput);
+end;
 
 procedure spAddCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
 as
@@ -1691,7 +1747,7 @@ BEGIN
                             actions.extend;
                             actions(actions.last) := action;
                     end if;
-                             hookoutput.message := 'Only CDE with Release/Released Non-Compliant and Draft-Mod have been designated. Total Designated: ' || v_cnt;
+                             hookoutput.message := 'Only CDEs with Release/Released Non-Compliant and Draft-Mod have been designated. Total Designated: ' || v_cnt;
 
        end if;
        end if;
