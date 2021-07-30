@@ -42,3 +42,13 @@ STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.L
  where ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null;
 
 alter table nci_dload_hdr modify (lst_trigger_dt date default null);
+
+
+create or replace view vw_stg_bulk_cntxt_upd as
+select cntxt_item_id, cntxt_ver_nr, cntxt_item_id to_cntxt_item_id, cntxt_ver_nr to_cntxt_ver_nr,
+currnt_ver_ind IND_ALL_TYPES, currnt_ver_ind IND_TYP_1, currnt_ver_ind IND_TYP_2, 
+currnt_ver_ind IND_TYP_3, currnt_ver_ind IND_TYP_4, currnt_ver_ind IND_TYP_5, currnt_ver_ind IND_TYP_6, currnt_ver_ind IND_TYP_7, currnt_ver_ind IND_TYP_8,
+currnt_ver_ind IND_TYP_9, currnt_ver_ind IND_TYP_49, currnt_ver_ind IND_TYP_53, currnt_ver_ind IND_TYP_51, currnt_ver_ind IND_TYP_52,
+currnt_ver_ind IND_ALT_NMS, currnt_ver_ind IND_ALT_DEF, currnt_ver_ind IND_REF_DOC,
+ CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT
+ from admin_item where admin_item_typ_id = 8;
