@@ -1,3 +1,6 @@
+DROP VIEW ONEDATA_WA.VW_ALS_FIELD_RAW_DATA;
+
+/* Formatted on 7/30/2021 11:21:14 AM (QP5 v5.354) */
 CREATE OR REPLACE FORCE VIEW ONEDATA_WA.VW_ALS_FIELD_RAW_DATA
 (
     PROTOCOL,
@@ -56,7 +59,15 @@ AS
                     NULL           VD_Version,
                     NULL           UOM_ID
       FROM ADMIN_ITEM  FR,
-                      (  SELECT C_ITEM_ID,
+           --           (  SELECT C_ITEM_ID,
+           --                     C_ITEM_VER_NR,
+           --                     LISTAGG (P_ITEM_ID || 'v' || P_ITEM_VER_NR,
+           --                              ':'
+           --                              ON OVERFLOW TRUNCATE)
+           --                     WITHIN GROUP (ORDER BY DISP_ORD)    PROTO_ID
+           --                FROM NCI_ADMIN_ITEM_REL
+           --            GROUP BY C_ITEM_ID, C_ITEM_VER_NR)
+            (  SELECT C_ITEM_ID,
                       C_ITEM_VER_NR,
                       LISTAGG (p.ITEM_LONG_NM, ':' ON OVERFLOW TRUNCATE)
                           WITHIN GROUP (ORDER BY DISP_ORD)    PROTO_ID
@@ -106,7 +117,14 @@ AS
            VALUE_DOM,
            FMT,
            DATA_TYP                    DT,
-          
+           --           (  SELECT C_ITEM_ID,
+           --                     C_ITEM_VER_NR,
+           --                     LISTAGG (P_ITEM_ID || 'v' || P_ITEM_VER_NR,
+           --                              ':'
+           --                              ON OVERFLOW TRUNCATE)
+           --                     WITHIN GROUP (ORDER BY DISP_ORD)    PROTO_ID
+           --                FROM NCI_ADMIN_ITEM_REL
+           --            GROUP BY C_ITEM_ID, C_ITEM_VER_NR) REL,
             (  SELECT C_ITEM_ID,
                       C_ITEM_VER_NR,
                       LISTAGG (p.ITEM_LONG_NM, ':' ON OVERFLOW TRUNCATE)
@@ -145,6 +163,6 @@ AS
            AND VD.VER_NR = VALUE_DOM.VER_NR
            AND FORM.ITEM_ID = FR.ITEM_ID
            AND FORM.VER_NR = FR.VER_NR
-         
-    ORDER BY 3, 4, 5;
-    
+    -- AND PROTO_ID IS NOT NULL
+  AND FORM.ITEM_ID = 3284264
+    ORDER BY 3, 5, 7;
