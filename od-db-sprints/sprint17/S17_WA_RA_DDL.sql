@@ -48,7 +48,7 @@ create or replace view vw_stg_bulk_cntxt_upd as
 select item_id cntxt_item_id, ver_nr cntxt_ver_nr, item_id to_cntxt_item_id, ver_nr to_cntxt_ver_nr,
 derv_de_ind IND_ALL_TYPES, derv_de_ind  IND_TYP_1, derv_de_ind  IND_TYP_2, 
 derv_de_ind  IND_TYP_3, derv_de_ind  IND_TYP_4, derv_de_ind  IND_TYP_5, derv_de_ind  IND_TYP_6, derv_de_ind  IND_TYP_7, 
-derv_de_ind  IND_TYP_9, derv_de_ind  IND_TYP_49, derv_de_ind  IND_TYP_53,derv_de_ind  IND_TYP_51, derv_de_ind  IND_TYP_52,
+derv_de_ind  IND_TYP_9, derv_de_ind  IND_TYP_49, derv_de_ind  IND_TYP_50,derv_de_ind  IND_TYP_51, derv_de_ind  IND_TYP_52,derv_de_ind  IND_TYP_54,
 derv_de_ind  IND_ALT_NMS, derv_de_ind  IND_ALT_DEF, derv_de_ind  IND_REF_DOC,
  CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT
  from de;
