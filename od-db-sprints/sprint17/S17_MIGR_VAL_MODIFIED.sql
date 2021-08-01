@@ -1,3 +1,26 @@
+create or replace function get_ai_modified_date_idseq(IDSEQ CHAR, admin_item_typ_id number) return date is
+v_idseq CHAR(36);
+v_admin_item_typ_id number;
+v_modified_date date;
+
+BEGIN
+v_idseq := IDSEQ;
+v_admin_item_typ_id := admin_item_typ_id;
+
+BEGIN
+select lst_upd_dt into v_modified_date from admin_item
+where nci_idseq = v_idseq and admin_item_typ_id = v_admin_item_typ_id;
+EXCEPTION 
+  WHEN OTHERS THEN
+  v_modified_date := sysdate;
+END;
+
+RETURN v_modified_date;
+END;
+/
+GRANT EXECUTE ON get_ai_modified_date_idseq to SBREXT;
+GRANT EXECUTE ON get_ai_modified_date_idseq to ONEDATA_RO;
+
 create or replace PROCEDURE SAG_AI_VALIDATION
 AS
     --DECLARE
@@ -24,7 +47,7 @@ BEGIN
               FROM AI_INPUT_TAB)
     LOOP
         ITEM_CODE:=Y.ITEM_TYPE_CODE;
-
+        
         CASE
         WHEN ITEM_CODE=1 OR ITEM_CODE=7 OR ITEM_CODE=9 OR ITEM_CODE=56 THEN
         vSQL :=
@@ -51,8 +74,14 @@ AC.ORIGIN,SB.PREFERRED_DEFINITION, ' --Not to pick from SBR.ADMINISTERED_COMPONE
             || Y.ITEMID_NAME
             || ' ,
 SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
-NVL(SB.CREATED_BY,''ONEDATA''), NVL(SB.DATE_CREATED,to_date(''8/18/2020'',''mm/dd/yyyy'')),
-NVL(NVL(SB.DATE_MODIFIED, SB.DATE_CREATED),to_date(''8/18/2020'',''mm/dd/yyyy'')), NVL(SB.MODIFIED_BY,''ONEDATA'')
+NVL(SB.CREATED_BY,''ONEDATA''), 
+NVL(SB.DATE_CREATED,to_date(''8/18/2020'',''mm/dd/yyyy'')),
+NVL(SB.DATE_MODIFIED, get_ai_modified_date_idseq('
+  || Y.IDSEQ_NAME  
+  || ', '
+  || Y.ITEM_TYPE_CODE
+  || ')), 
+NVL(SB.MODIFIED_BY,''ONEDATA'')
 FROM '
             || Y.TAB_NAME
             || ' AC ' ||
@@ -95,7 +124,12 @@ AC.ORIGIN,AC.PREFERRED_DEFINITION, '
             || ' ,
 SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
 NVL(AC.CREATED_BY,''ONEDATA''), NVL(AC.DATE_CREATED,to_date(''8/18/2020'',''mm/dd/yyyy'')),
-NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date(''8/18/2020'',''mm/dd/yyyy'')), NVL(AC.MODIFIED_BY,''ONEDATA'')
+NVL(AC.DATE_MODIFIED, get_ai_modified_date_idseq('
+  || Y.IDSEQ_NAME
+  || ', '
+  || Y.ITEM_TYPE_CODE
+  || ')), 
+NVL(AC.MODIFIED_BY,''ONEDATA'')
 FROM '
             || Y.TAB_NAME
             || ' AC ' ||
@@ -112,7 +146,7 @@ ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
             END LOOP;
             END;';
 END CASE;            
-        --DBMS_OUTPUT.PUT_LINE(vSQL);
+        DBMS_OUTPUT.PUT_LINE(vSQL);
         EXECUTE IMMEDIATE vSQL;
     END LOOP;
 
@@ -146,7 +180,7 @@ END CASE;
                                name,
                                NVL(created_by,'ONEDATA'),
                                NVL(date_created,to_date('8/18/2020','mm/dd/yyyy')),
-                               NVL(NVL (date_modified, date_created),to_date('8/18/2020','mm/dd/yyyy')),
+                               NVL(date_modified, get_ai_modified_date_idseq(conte_idseq, 8)),
                                NVL(modified_by,'ONEDATA')
                           FROM SBR.CONTEXTS AC)
               GROUP BY admin_item_typ_id,
