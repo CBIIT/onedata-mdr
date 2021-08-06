@@ -26,19 +26,20 @@ alter trigger TR_NCI_ALT_NMS disable;
 alter trigger TR_NCI_ALT_DEF disable;
 alter trigger OD_TR_ALT_KEY disable;
 alter trigger OD_TR_QUEST_VV disable;
-ALTER TABLE ADMIN_ITEM DISABLE ALL TRIGGERS;
-ALTER TABLE DE DISABLE ALL TRIGGERS;
-ALTER TABLE DE_CONC DISABLE ALL TRIGGERS;
-ALTER TABLE VALUE_DOM DISABLE ALL TRIGGERS;
-ALTER TABLE ALT_NMS DISABLE ALL TRIGGERS;
-ALTER TABLE ALT_DEF ALL TRIGGERS;
-ALTER TABLE REF DISABLE ALL TRIGGERS;
-ALTER TABLE REF_DOC DISABLE ALL TRIGGERS;
-ALTER TABLE NCI_FORM DISABLE ALL TRIGGERS;
-ALTER TABLE CONC_DOM DISABLE ALL TRIGGERS;
-ALTER TABLE NCI_ADMIN_ITEM_REL DISABLE ALL TRIGGERS;
-ALTER TABLE CNTXT DISABLE ALL TRIGGERS;
-ALTER TABLE NCI_ADMIN_ITEM_REL_ALT_KEY ALL TRIGGERS;
+-- Added
+alter trigger TR_ALT_DEF_POST disable;
+alter trigger TR_ALT_NMS_POST disable;
+alter trigger TR_CLSFCTN_SCHM_POST disable;
+alter trigger TR_CNCPT_POST disable;
+alter trigger TR_CONC_DOM_POST disable;
+alter trigger TR_DE_POST disable;
+alter trigger TR_DEC_POST disable;
+alter trigger TR_CSI_DE_POST disable;
+alter trigger TR_NCI_CSI_POST disable;
+alter trigger TR_NCI_FORM_POST disable;
+alter trigger TR_NCI_PROTCL_POST disable;
+alter trigger TR_REF_POST disable;
+alter trigger TR_VD_POST disable;
 
 --drop index idxNCiAIRelUni;
 drop index idx_Admin_item_nci_uni;
@@ -248,7 +249,20 @@ alter trigger TR_NCI_ALT_NMS enable;
 alter trigger TR_NCI_ALT_DEF enable;
 alter trigger OD_TR_ALT_KEY enable;
 alter trigger OD_TR_QUEST_VV enable;
--
+-- Added
+alter trigger TR_ALT_DEF_POST enable;
+alter trigger TR_ALT_NMS_POST enable;
+alter trigger TR_CLSFCTN_SCHM_POST enable;
+alter trigger TR_CNCPT_POST enable;
+alter trigger TR_CONC_DOM_POST enable;
+alter trigger TR_DE_POST enable;
+alter trigger TR_DEC_POST enable;
+alter trigger TR_CSI_DE_POST enable;
+alter trigger TR_NCI_CSI_POST enable;
+alter trigger TR_NCI_FORM_POST enable;
+alter trigger TR_NCI_PROTCL_POST enable;
+alter trigger TR_REF_POST enable;
+alter trigger TR_VD_POST enable;
 ---create unique index idxNCiAIRelUni on nci_admin_item_rel 
 --( P_ITEM_ID, P_ITEM_VER_NR,decode(REL_TYP_ID, 61, 1,C_ITEM_ID), C_ITEM_VER_NR,  REL_TYP_ID, DISP_ORD);
 
