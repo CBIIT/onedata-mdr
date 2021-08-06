@@ -76,3 +76,34 @@ FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
    start with p_item_id is null
    CONNECT BY PRIOR csi.item_id = csi.p_item_id;
 --
+
+
+
+  CREATE OR REPLACE  VIEW VW_CSI_ONLY_NODE_DE_REL AS
+  SELECT ak.CREAT_DT,
+           ak.CREAT_USR_ID,
+           ak.LST_UPD_USR_ID,
+           ak.LST_UPD_DT,
+           ak.S2P_TRN_DT,
+           ak.LST_DEL_DT,
+           ak.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           ak.P_ITEM_ID,
+           ak.P_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           ak.CREAT_USR_ID       CREAT_USR_ID_X,
+           ak.LST_UPD_USR_ID     LST_UPD_USR_ID_X
+      FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR
+           AND ai.ADMIN_ITEM_TYP_ID = 4;
