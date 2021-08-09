@@ -68,7 +68,7 @@ commit;
 
 
 for cur in (select * from temp_import) loop
-for i in 1..cur.rep_no  loop
+for i in 1..cur.rep_no - 1 loop
 --for i in 1..1  loop
 insert into /* APPEND */ nci_quest_vv_rep (quest_pub_id, quest_ver_nr, rep_seq)
 select nci_pub_id, nci_ver_nr, i from nci_admin_item_rel_alt_key ak where p_item_id = cur.item_id and p_item_ver_nr= cur.ver_nr
@@ -3131,7 +3131,10 @@ BEGIN
     commit;
 
 
-
+-- CSI with no CS - set Workflow status to Retired Withdrawn. Denise - 8/4/2021
+ update ADMIN_ITEM set ADMIN_STUS_ID = 81, ADMIN_STUS_NM_DN = 'RETIRED WITHDRAWN', UNTL_DT = LST_UPD_DT where admin_item_typ_id = 51 and (item_id, ver_nr) in 
+ (select item_id, ver_nr from NCI_CLSFCTN_SCHM_ITEM where cs_item_id is null);
+ commit;
 
 /*  commented if new code works.
  --last version 12/10/2020
