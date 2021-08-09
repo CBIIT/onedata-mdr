@@ -2,7 +2,7 @@ create or replace PACKAGE            nci_chng_mgmt AS
 v_temp_rep_ver_nr varchar2(10);
 v_temp_rep_id VARCHAR2(10);
 
-function getCSICreateQuestion return t_question;
+function getCSICreateQuestion(v_from in number) return t_question;
 function getCSCreateQuestion return t_question;
 procedure createAIWithConcept(rowform in out t_row, idx in integer,v_item_typ_id in integer, actions in out t_actions);
 PROCEDURE spDEPrefQuestPost (v_data_in in clob, v_data_out out clob);
@@ -22,6 +22,8 @@ function getCSICreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return 
 function getCSCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
 procedure createDE (rowform in t_row, actions in out t_actions, v_id out number);
 procedure spAddCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+procedure spEditCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+procedure spDeleteCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 
 function get_AI_id(P_ID NUMBER,P_VER in number) RETURN VARCHAR2;
 END;
@@ -110,21 +112,13 @@ v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
   row_ori t_row;
   rowset            t_rowset;
   rowsetde            t_rowset;
- v_nm  varchar2(255);
  v_id number;
  v_ver_nr number(4,2);
   cnt integer;
 
     actions t_actions := t_actions();
   action t_actionRowset;
-  v_msg varchar2(1000);
   i integer := 0;
-  v_err  integer;
-  column  t_column;
-  v_item_nm varchar2(255);
-  v_temp_id  number;
-  v_temp_ver number(4,2);
-  is_valid boolean;
  bEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -136,101 +130,252 @@ v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
    return;
    end if;
     if hookInput.invocationNumber = 0 then
-          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getCSICreateQuestion();
+          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getCSICreateQuestion(1);
           row := t_row();
-          rows := t_rows();
+          
           ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
           ihook.setColumnValue(row, 'VER_NR', 1.0);
-          ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
+          ihook.setColumnValue(row, 'ADMIN_STUS_ID', 75);
           ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
           ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 51);
-           ihook.setColumnValue(row, 'CNTXT_ITEM_ID', ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID'));
-          ihook.setColumnValue(row, 'CNTXT_VER_NR', ihook.getColumnValue(row_ori, 'CNTXT_VER_NR'));
-          ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 51);
-         ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
-                   rows.extend;
-          rows(rows.last) := row;
+          ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
+         
+          rows := t_rows(); rows.extend;          rows(rows.last) := row;
           rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
-          rows := t_rows();
           row := t_row();
-                 rows.extend;
-          rows(rows.last) := row;
-       rowsetde := t_rowset(rows, 'CSI', 1, 'NCI_CLSFCTN_SCHM_ITEM');
+           if (ihook.getColumnValue(row_ori,'LVL') = 100) then
+                ihook.setColumnValue(row,'P_ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
+                ihook.setColumnValue(row,'P_ITEM_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
+                for cur1 in (select * from nci_clsfctn_schm_item where item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'VER_NR')) loop
+                ihook.setColumnValue(row,'CS_ITEM_ID', cur1.cs_item_id);
+                ihook.setColumnValue(row,'CS_ITEM_VER_NR', cur1.cs_item_ver_nr);
+                end loop;
+            end if;
+            if (ihook.getColumnValue(row_ori,'LVL') =99) then
+                ihook.setColumnValue(row,'CS_ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
+                ihook.setColumnValue(row,'CS_ITEM_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
+            end if;
+            ihook.setColumnValue(row,'ITEM_ID', -1);
+            ihook.setColumnValue(row,'VER_NR', 1);
+        
+                 rows := t_rows(); rows.extend;          rows(rows.last) := row;
+                 rowsetde := t_rowset(rows, 'CSI', 1, 'NCI_CLSFCTN_SCHM_ITEM');
           hookOutput.forms := nci_chng_mgmt.getCSICreateForm(rowset, rowsetde);
   ELSE
-      forms              := hookInput.forms;
-      form1              := forms(1);
-      rowai := form1.rowset.rowset(1);
-      form1              := forms(2);
-      rowcsi := form1.rowset.rowset(1);
-       row := t_row();
-      rows := t_rows();
+            forms              := hookInput.forms;
+            form1              := forms(1);
+            rowai := form1.rowset.rowset(1);
+            form1              := forms(2);
+            rowcsi := form1.rowset.rowset(1);
+      
+            v_id := nci_11179.getItemId;
+      
+            ihook.setColumnValue(rowai,'ITEM_ID', v_id);
+            ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 51);
+            ihook.setColumnValue(rowai,'ITEM_LONG_NM', v_id || 'v1.00');
+          
+            ihook.setColumnValue(rowcsi,'ITEM_ID', v_id);
+            ihook.setColumnValue(rowcsi,'VER_NR', 1.0);
+            if (ihook.getColumnValue(rowcsi,'P_ITEM_ID') is not null) then
+    -- use CS from Parent
+                for cur1 in (select * from vw_clsfctn_schm_item where item_id = ihook.getColumnValue(rowcsi,'P_ITEM_ID') and ver_nr = ihook.getColumnValue(rowcsi,'P_ITEM_VER_NR')) loop
+                    ihook.setColumnValue(rowcsi,'CS_ITEM_ID', cur1.cs_item_id);
+                    ihook.setColumnValue(rowcsi,'CS_ITEM_VER_NR', cur1.cs_item_VER_NR);
+                end loop;
+            end if;
+            -- Context is context of CS
+            for cur1 in (select * from admin_item where item_id = ihook.getColumnValue(rowcsi,'CS_ITEM_ID') and ver_nr = ihook.getColumnValue(rowcsi,'CS_ITEM_VER_NR')) loop
+                ihook.setColumnValue(rowai, 'CNTXT_ITEM_ID', cur1.CNTXT_ITEM_ID);
+                ihook.setColumnValue(rowai, 'CNTXT_VER_NR', cur1.CNTXT_VER_NR);
+            end loop;
 
-       v_id := nci_11179.getItemId;
-       row := t_row();
-       --row := rowai;
+            rows := t_rows();    rows.extend;    rows(rows.last) := rowai;
+            action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'insert');
+            actions.extend;    actions(actions.last) := action;
 
-        ihook.setColumnValue(rowai,'ITEM_ID', v_id);
-        ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 51);
-
-        --
-        if ( ihook.getColumnValue(rowai,'ITEM_LONG_NM')= v_dflt_txt) then
-        ihook.setColumnValue(rowai,'ITEM_LONG_NM', v_id || 'v1.00');
-        end if;
-
-       /* ihook.setColumnValue(row,'CNTXT_ITEM_ID',ihook.getColumnValue(rowai,'CNTXT_ITEM_ID'));
-        ihook.setColumnValue(row,'CNTXT_VER_NR',ihook.getColumnValue(rowai,'CNTXT_VER_NR'));
-       ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-       ihook.setColumnValue(row, 'VER_NR', 1);
-       ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
-       ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-        ihook.setColumnValue(row,'DE_CONC_ITEM_ID',ihook.getColumnValue(rowde,'DE_CONC_ITEM_ID'));
-        ihook.setColumnValue(row,'VAL_DOM_ITEM_ID',ihook.getColumnValue(rowde,'VAL_DOM_ITEM_ID'));
-        ihook.setColumnValue(row,'DE_CONC_VER_NR',ihook.getColumnValue(rowde,'DE_CONC_VER_NR'));
-        ihook.setColumnValue(row,'VAL_DOM_VER_NR',ihook.getColumnValue(rowde,'VAL_DOM_VER_NR'));
-        ihook.setColumnValue(row,'PREF_QUEST_TXT',ihook.getColumnValue(rowai,'PREF_QUEST_TXT'));
-           ihook.setColumnValue(row,'LST_UPD_DT',sysdate );
-      */
-
-            rows := t_rows();
-    rows.extend;
-    rows(rows.last) := rowai;
-   action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'insert');
-    actions.extend;
-    actions(actions.last) := action;
-
-
-ihook.setColumnValue(rowcsi,'ITEM_ID', v_id);
-    ihook.setColumnValue(rowcsi,'VER_NR', 1.0);
-    if (ihook.getColumnValue(row_ori,'LVL') = 100) then
-        ihook.setColumnValue(rowcsi,'P_ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
-        ihook.setColumnValue(rowcsi,'P_ITEM_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
-        ihook.setColumnValue(rowcsi,'CS_ITEM_ID', ihook.getColumnValue(row_ori,'P_ITEM_ID'));
-        ihook.setColumnValue(rowcsi,'CS_ITEM_VER_NR', ihook.getColumnValue(row_ori,'P_ITEM_VER_NR'));
+            rows := t_rows();    rows.extend;    rows(rows.last) := rowcsi;
+            action := t_actionrowset(rows, 'CSI', 2,2,'insert');
+            actions.extend;    actions(actions.last) := action;
+     
+            hookoutput.message := 'CSI Created Successfully with ID ' || v_id ;
+            hookoutput.actions := actions;
+ 
     end if;
-    if (ihook.getColumnValue(row_ori,'LVL') =99) then
-       ihook.setColumnValue(rowcsi,'CS_ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
-        ihook.setColumnValue(rowcsi,'CS_ITEM_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
-    end if;
-
-             rows := t_rows();
-    rows.extend;
-    rows(rows.last) := rowcsi;
-
-    action := t_actionrowset(rows, 'CSI', 2,2,'insert');
-    actions.extend;
-    actions(actions.last) := action;
-     hookoutput.message := 'CSI Created Successfully with ID ' || v_id ;
-        hookoutput.actions := actions;
- --   raise_application_error(-20000, 'Count ' || actions.count);
-
-    end if;
-
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
 END;
 
+
+procedure spEditCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
+as
+ hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+  showRowset t_showableRowset;
+  rowai t_row;
+  rowcsi t_row;
+  forms t_forms;
+  form1 t_form;
+v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
+
+  row t_row;
+  rows  t_rows;
+  row_ori t_row;
+  rowset            t_rowset;
+  rowsetde            t_rowset;
+ v_item_id number;
+ v_ver_nr number(4,2);
+  cnt integer;
+
+    actions t_actions := t_actions();
+  action t_actionRowset;
+  i integer := 0;
+ bEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+     row_ori := hookInput.originalRowset.rowset(1);
+      v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
+          v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+    
+   if (ihook.getColumnValue(row_ori,'LVL') <> 100) then
+   raise_application_error(-20000, 'Please select a CSI to edit.');
+   return;
+   end if;
+    if hookInput.invocationNumber = 0 then
+          HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getCSICreateQuestion(2);
+          v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
+          v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+          row := t_row();
+          nci_11179.spReturnAIRow(v_item_id, v_ver_nr, row);
+         
+          rows := t_rows(); rows.extend;          rows(rows.last) := row;
+          rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
+          row := t_row();
+          nci_11179.spReturnSubtypeRow(v_item_id, v_ver_nr,51, row);
+         
+                 rows := t_rows(); rows.extend;          rows(rows.last) := row;
+                 rowsetde := t_rowset(rows, 'CSI', 1, 'NCI_CLSFCTN_SCHM_ITEM');
+          hookOutput.forms := nci_chng_mgmt.getCSICreateForm(rowset, rowsetde);
+  ELSE
+            forms              := hookInput.forms;
+            form1              := forms(1);
+            rowai := form1.rowset.rowset(1);
+            form1              := forms(2);
+            rowcsi := form1.rowset.rowset(1);
+      
+            ihook.setColumnValue(rowai,'ITEM_ID', v_item_id);
+             ihook.setColumnValue(rowai,'VER_NR', v_ver_nr);
+           ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 51);
+            ihook.setColumnValue(rowai,'ITEM_LONG_NM', v_item_id || 'v1.00');
+          
+            ihook.setColumnValue(rowcsi,'ITEM_ID', v_item_id);
+            ihook.setColumnValue(rowcsi,'VER_NR', v_ver_nr);
+            if (ihook.getColumnValue(rowcsi,'P_ITEM_ID') is not null) then
+             if (nci_11179_2.isCSParentCSIValid(rowcsi) = false) then
+                HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getCSICreateQuestion(2);
+                rows := t_rows(); rows.extend;          rows(rows.last) := rowai;
+                rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
+        
+                 rows := t_rows(); rows.extend;          rows(rows.last) := rowcsi;
+                 rowsetde := t_rowset(rows, 'CSI', 1, 'NCI_CLSFCTN_SCHM_ITEM');
+          hookOutput.forms := nci_chng_mgmt.getCSICreateForm(rowset, rowsetde);
+         hookoutput.message := 'Parent CSI should belong to the same Classification Scheme as specified.';
+             end if;
+          /*      for cur1 in (select * from vw_clsfctn_schm_item where item_id = ihook.getColumnValue(rowcsi,'P_ITEM_ID') and ver_nr = ihook.getColumnValue(rowcsi,'P_ITEM_VER_NR')) loop
+                    ihook.setColumnValue(rowcsi,'CS_ITEM_ID', cur1.cs_item_id);
+                    ihook.setColumnValue(rowcsi,'CS_ITEM_VER_NR', cur1.cs_item_VER_NR);
+                end loop; */
+            end if;
+            -- Context is context of CS
+             if (nci_11179_2.isCSParentCSIValid(rowcsi) = true) then
+            for cur1 in (select * from admin_item where item_id = ihook.getColumnValue(rowcsi,'CS_ITEM_ID') and ver_nr = ihook.getColumnValue(rowcsi,'CS_ITEM_VER_NR')) loop
+                ihook.setColumnValue(rowai, 'CNTXT_ITEM_ID', cur1.CNTXT_ITEM_ID);
+                ihook.setColumnValue(rowai, 'CNTXT_VER_NR', cur1.CNTXT_VER_NR);
+            end loop;
+
+            rows := t_rows();    rows.extend;    rows(rows.last) := rowai;
+            action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'update');
+            actions.extend;    actions(actions.last) := action;
+
+            rows := t_rows();    rows.extend;    rows(rows.last) := rowcsi;
+            action := t_actionrowset(rows, 'CSI', 2,2,'update');
+            actions.extend;    actions(actions.last) := action;
+     
+            hookoutput.message := 'CSI updated Successfully with ID ' || v_item_id ;
+            hookoutput.actions := actions;
+            end if;
+    end if;
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+  nci_util.debugHook('GENERAL', v_data_out);
+END;
+
+
+procedure spDeleteCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
+as
+ hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+  showRowset t_showableRowset;
+  rowai t_row;
+  rowcsi t_row;
+  forms t_forms;
+  form1 t_form;
+  row t_row;
+  rows  t_rows;
+  row_ori t_row;
+  rowset            t_rowset;
+  rowsetde            t_rowset;
+ v_item_id number;
+ v_ver_nr number(4,2);
+  cnt integer;
+
+    actions t_actions := t_actions();
+  action t_actionRowset;
+  i integer := 0;
+ BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+     row_ori := hookInput.originalRowset.rowset(1);
+
+   if (ihook.getColumnValue(row_ori,'LVL') <> 100) then
+   raise_application_error(-20000, 'Please select a CSI to delete.');
+   return;
+   end if;
+     v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
+          v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+    
+   for cur in (select * from nci_clsfctn_schm_item where p_item_id= v_item_id and p_item_ver_nr = v_ver_nr and nvl(fld_delete,0) = 0) loop
+    raise_application_error(-20000, 'Select CSI has children nodes. Please move children before deleting.');
+    end loop;
+    
+   for cur in (select * from NCI_CSI_ALT_DEFNMS where  NCI_PUB_ID =v_item_id and NCI_VER_NR = v_ver_nr and nvl(fld_delete,0) = 0) loop
+        raise_application_error(-20000, 'CSI linked to Alternate Names or Definition classifications. Please delete before CSI can be deleted.');
+    end loop;
+    
+    
+   for cur in (select * from NCI_ADMIN_ITEM_REL where  P_ITEM_ID= v_item_id and P_ITEM_VER_NR = v_ver_nr and rel_typ_id = 65 and nvl(fld_delete,0) = 0) loop
+        raise_application_error(-20000, 'Classifications found for this CSI. Please delete classification before CSI can be deleted.');
+    end loop;
+
+   row := t_row();
+          nci_11179.spReturnAIRow(v_item_id, v_ver_nr, row);
+            ihook.setColumnValue(row,'ADMIN_STUS_ID', 78);
+              ihook.setColumnValue(row,'UNTL_DT', to_char(sysdate, DEFAULT_TS_FORMAT) );
+          
+            rows := t_rows();    rows.extend;    rows(rows.last) := row;
+            action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'update');
+            actions.extend;    actions(actions.last) := action;
+
+     
+            hookoutput.message := 'CSI deleted Successfully with ID ' || v_item_id ;
+            hookoutput.actions := actions;
+ 
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+END;
 
 PROCEDURE spCreateDE (v_data_in IN CLOB,    v_data_out OUT CLOB, v_usr_id  IN varchar2, v_src in varchar2)
 AS
@@ -1047,18 +1192,24 @@ select count(*) into v_unq_id from admin_item ai, de de
 END;
 
 
-function getCSICreateQuestion return t_question is
+function getCSICreateQuestion(v_from in number) return t_question is
   question t_question;
   answer t_answer;
   answers t_answers;
 begin
 
  ANSWERS                    := T_ANSWERS();
+ if (v_from = 1) then -- create
     ANSWER                     := T_ANSWER(1, 1, 'Create CSI');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Create New CSI', ANSWERS);
-
+else
+    ANSWER                     := T_ANSWER(1, 1, 'Update CSI');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    QUESTION               := T_QUESTION('Edit CSI', ANSWERS);
+end if;
 return question;
 end;
 
@@ -1151,7 +1302,7 @@ function getCSICreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return 
   form1 t_form;
 begin
     forms                  := t_forms();
-    form1                  := t_form('Administered Item (Hook Creation)', 2,1);
+    form1                  := t_form('Administered Item (No Short Name)', 2,1);
     form1.rowset :=v_rowset1;
     forms.extend;    forms(forms.last) := form1;
     form1                  := t_form('CSI (Hook Creation)', 2,1);
