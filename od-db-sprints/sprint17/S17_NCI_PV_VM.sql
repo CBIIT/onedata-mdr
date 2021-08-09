@@ -7,7 +7,7 @@ PROCEDURE spVMEdit (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar
 PROCEDURE spVMCreateEdit (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 
 procedure spPVVMCommon ( v_init in t_rowset,  v_op  in varchar2, hookInput in t_hookInput, hookOutput in out t_hookOutput);
-procedure spPVVMCommon2 ( v_init in t_rowset,  v_op  in varchar2, hookInput in t_hookInput, hookOutput in out t_hookOutput);
+procedure spPVVMCommon2 ( v_init_rows in t_rows,  v_op  in varchar2, hookInput in t_hookInput, hookOutput in out t_hookOutput);
 procedure spPVVMImport ( row_ori in out t_row,actions in out t_actions);
 procedure createPVVMBulk ( rowform in t_row,  hookInput in t_hookInput, hookOutput in out t_hookOutput);
 
@@ -23,7 +23,7 @@ function getPVVMCreateFormBulk (v_rowset in t_rowset) return t_forms;
 
 
 function getPVVMCreateForm (v_rowset in t_rowset) return t_forms;
-function getPVVMCreateForm2 (v_rowset in t_rowset) return t_forms;
+function getPVVMCreateForm2 (v_init_rows in t_rows) return t_forms;
 function getVMEditForm (v_rowset in t_rowset) return t_forms;
 function getVMCreateEditForm (v_rowset in t_rowset) return t_forms;
 procedure VMEditCore ( v_init in t_rowset,  hookInput in t_hookInput, hookOutput in out t_hookOutput);
@@ -130,6 +130,7 @@ as
     rows t_rows;
     v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
     rowsetai  t_rowset;
+    i integer;
 begin
     -- Standard header
     hookinput                    := Ihook.gethookinput (v_data_in);
@@ -140,16 +141,23 @@ begin
 
     chkPVVMActionValid ( row_ori, v_usr_id );
     -- Default for new row. Dummy Identifier has to be set else error.
-    row := t_row();
-    setDefaultParamPVVM (row_ori, row);
+   -- row := t_row();
+    --setDefaultParamPVVM (row_ori, row);
+rows := t_rows();
+ for i in 1..5 loop
+   row := t_row();
+   ihook.setColumnValue(row, 'STG_AI_ID', i);
+        rows.extend;    rows(rows.last) := row;
+    end loop;
+    
+  --  rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT'); -- Default values for form
+   -- rows := t_rows();    rows.extend;    rows(rows.last) := row;
+   -- rowsetai := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT'); -- Default values for form
 
-    rows := t_rows();    rows.extend;    rows(rows.last) := row;
-    rowsetai := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT'); -- Default values for form
-
-    spPVVMCommon2(rowsetai, 'insert', hookinput, hookoutput);
+    spPVVMCommon2(rows, 'insert', hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-     nci_util.debugHook('GENERAL',v_data_out);
+   --  nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 
@@ -724,7 +732,7 @@ begin
 
 END;
 
-PROCEDURE       spPVVMCommon2 ( v_init in t_rowset,  v_op  in varchar2,  hookInput in t_hookInput, hookOutput in out t_hookOutput)
+PROCEDURE       spPVVMCommon2 ( v_init_rows in t_rows,  v_op  in varchar2,  hookInput in t_hookInput, hookOutput in out t_hookOutput)
 AS
   rowform t_row;
   forms t_forms;
@@ -732,13 +740,14 @@ AS
 
   row t_row;
   rows  t_rows;
+  rowforms t_rows;
   row_ori t_row;
   rowset            t_rowset;
  v_str  varchar2(255);
  v_nm  varchar2(255);
  v_item_id number;
  v_ver_nr number(4,2);
-  cnt integer;
+  v_cnt integer;
 k integer;
     actions t_actions := t_actions();
   action t_actionRowset;
@@ -754,6 +763,7 @@ k integer;
   is_valid boolean;
   v_item_typ_glb integer;
   v_pv  varchar2(255);
+  rep_idx integer;
 begin
     v_item_typ_glb := 53;
     row_ori :=  hookInput.originalRowset.rowset(1);
@@ -763,21 +773,27 @@ begin
           HOOKOUTPUT.QUESTION    := getPVVMQuestion;
 
         -- Send initial rowset to create the form.
-          hookOutput.forms :=getPVVMCreateForm2(v_init);
+          hookOutput.forms :=getPVVMCreateForm2(v_init_rows);
 
     else
         forms              := hookInput.forms;
-        form1              := forms(1);
-        rowform := form1.rowset.rowset(1);
-        row := t_row();        rows := t_rows();
+     
         is_valid := true;
         k := 1;
-      -- Context is always going to be NCIP
-        ihook.setColumnValue(rowform,'CNTXT_ITEM_ID',20000000024); -- NCIP
-        ihook.setColumnValue(rowform,'CNTXT_VER_NR', 1);
+        rowforms := t_rows();
+        for rep_idx in 1..5 loop
+            form1              := forms(rep_idx);
+            rowform := form1.rowset.rowset(1);
+           setDefaultParamPVVM (row_ori, rowform);
+        -- Rowforms holds all the data
+        
+        -- Context is always going to be NCIP
+      
+            ihook.setColumnValue(rowform,'CNTXT_ITEM_ID',20000000024); -- NCIP
+            ihook.setColumnValue(rowform,'CNTXT_VER_NR', 1);
 
-        if HOOKINPUT.ANSWERID = 1 or Hookinput.answerid = 3 then  -- Validate using string
-                     for i in  1..10 loop
+            if HOOKINPUT.ANSWERID = 1 or Hookinput.answerid = 3 then  -- Validate using string
+                     for i in  1..5 loop
                             ihook.setColumnValue(rowform, 'CNCPT_' || k  ||'_ITEM_ID_' || i,'');
                             ihook.setColumnValue(rowform, 'CNCPT_' || k || '_VER_NR_' || i, '');
                     end loop;
@@ -806,103 +822,100 @@ begin
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'No VM Specified');
                   is_valid := false;
         end if;
-
-         rows := t_rows();
-
+        rowforms.extend;
+                rowforms(rowforms.last) := rowform;
+        
+   end loop;
+     
+      
          -- If any of the test fails or if the user has triggered validation, then go back to the screen.
-        if (is_valid=false or hookinput.answerid = 1 or hookinput.answerid = 2) then
+        if ( hookinput.answerid = 1 or hookinput.answerid = 2) then
 
-              -- Read-only drop-downs do not migrate
-                ihook.setColumnValue(rowform, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID')); --Using not used attribute ITEM_2_NM to show selected VD.
-                ihook.setColumnValue(rowform, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR')); --Using not used attribute ITEM_2_NM to show selected VD.
-                ihook.setColumnValue(rowform, 'ITEM_2_ID', ihook.getColumnValue(row_ori, 'ITEM_ID')); --Using not used attribute ITEM_2_NM to show selected VD.
-                ihook.setColumnValue(rowform, 'ITEM_2_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR')); --Using not used attribute ITEM_2_NM to show selected VD.
-                rows.extend;
-                rows(rows.last) := rowform;
-                rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT');
-                hookOutput.forms := getPVVMCreateForm(rowset);
+                hookOutput.forms := getPVVMCreateForm2(rowforms);
                 HOOKOUTPUT.QUESTION    := getPVVMQuestion;
                 return;
         end if;
 
     -- If all the tests have passed and the user has asked for create, then create DEC and optionally OC and Prop.
 
-    IF HOOKINPUT.ANSWERID in ( 3,4)  and is_valid = true THEN  -- Create
-        nci_dec_mgmt.createValAIWithConcept(rowform , 1,v_item_typ_glb ,'C','DROP-DOWN',actions); -- Vm
-    elsif (hookinput.answerid = 5 and is_Valid = true) then
-        nci_dec_mgmt.createAIWithoutConcept(rowform , 1, 53, ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'),nvl(ihook.getColumnValue(rowform, 'ITEM_2_DEF'), ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM')),
-        actions);
-    end if;
-      -- Create PV
+    v_cnt := 0;
+      if (hookinput.answerid > 2) then
+            for rep_idx in 1..5 loop
+      
+                rowform :=rowforms(rep_idx);
+                if (ihook.getColumnValue(rowform, 'CTL_VAL_MSG') = 'VALIDATED') then
+                    v_cnt := v_cnt + 1;
+                    IF HOOKINPUT.ANSWERID in ( 3,4)   THEN  -- Create
+                        nci_dec_mgmt.createValAIWithConcept(rowform , 1,v_item_typ_glb ,'C','DROP-DOWN',actions); -- Vm
+                    end if;
+                    if (hookinput.answerid = 5 ) then
+                        nci_dec_mgmt.createAIWithoutConcept(rowform , 1, 53, ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'),nvl(ihook.getColumnValue(rowform, 'ITEM_2_DEF'), ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM')),
+                        actions);
+                    end if;
+      
+                    -- Create PV
+                
+                      v_item_id := ihook.getColumnValue(rowform,'ITEM_1_ID');
+                      v_ver_nr := ihook.getColumnValue(rowform,'ITEM_1_VER_NR');
+                      v_pv := ihook.getColumnValue(rowform,'PERM_VAL_NM');
+                
+                      if (hookinput.answerid = 5) then -- use specified value
+                        v_pv :=  nvl(ihook.getColumnValue(rowform,'PERM_VAL_NM'),ihook.getColumnValue(rowform,'ITEM_2_LONG_NM') );
+                      end if;
+                      if (hookinput.answerid in (3,4)) then -- use specified value
+                        v_pv :=  nvl(ihook.getColumnValue(rowform,'PERM_VAL_NM'),ihook.getColumnValue(rowform,'ITEM_1_NM') );
+                      end if;
 
-      v_item_id := ihook.getColumnValue(rowform,'ITEM_1_ID');
-      v_ver_nr := ihook.getColumnValue(rowform,'ITEM_1_VER_NR');
-      v_pv := ihook.getColumnValue(rowform,'PERM_VAL_NM');
+                        if (hookinput.answerid =6 and v_pv is null) then -- use specified value
+                            select item_nm into v_pv from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
+                        end if;
 
-      if (hookinput.answerid = 5) then -- use specified value
-        v_pv :=  nvl(ihook.getColumnValue(rowform,'PERM_VAL_NM'),ihook.getColumnValue(rowform,'ITEM_2_LONG_NM') );
-      end if;
-      if (hookinput.answerid in (3,4)) then -- use specified value
-        v_pv :=  nvl(ihook.getColumnValue(rowform,'PERM_VAL_NM'),ihook.getColumnValue(rowform,'ITEM_1_NM') );
-      end if;
+                    select count(*) into v_temp from CONC_DOM_VAL_MEAN where CONC_DOM_ITEM_ID = ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') and
+                    CONC_DOM_VER_NR = ihook.getColumnValue(rowform, 'CONC_DOM_VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = v_ver_nr;
 
-      if (hookinput.answerid =6 and v_pv is null) then -- use specified value
-      select item_nm into v_pv from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
-      end if;
+                    if (v_temp = 0) then
+                        rows := t_rows();
+                        row := t_row();
+                        ihook.setColumnValue(row,'CONC_DOM_ITEM_ID', ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID'));
+                        ihook.setColumnValue(row,'CONC_DOM_VER_NR', ihook.getColumnValue(rowform, 'CONC_DOM_VER_NR'));
+                        ihook.setColumnValue(row,'NCI_VAL_MEAN_ITEM_ID',  v_item_id);
+                        ihook.setColumnValue(row,'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'));
 
-      -- Show resue if string specified.
-      if (hookinput.answerid = 5) then
-        hookoutput.message := ihook.getColumnValue(rowform,'CTL_VAL_MSG');
-    else
-      hookoutput.message := 'PV/VM Created Successfully with VM ID: ' || v_item_id;
-    end if;
-        select count(*) into v_temp from CONC_DOM_VAL_MEAN where CONC_DOM_ITEM_ID = ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') and
-        CONC_DOM_VER_NR = ihook.getColumnValue(rowform, 'CONC_DOM_VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = v_ver_nr;
-
-        if (v_temp = 0) then
-        rows := t_rows();
-        row := t_row();
-        ihook.setColumnValue(row,'CONC_DOM_ITEM_ID', ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID'));
-        ihook.setColumnValue(row,'CONC_DOM_VER_NR', ihook.getColumnValue(rowform, 'CONC_DOM_VER_NR'));
-        ihook.setColumnValue(row,'NCI_VAL_MEAN_ITEM_ID',  v_item_id);
-        ihook.setColumnValue(row,'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'));
-
-            rows.extend;
-            rows(rows.last) := row;
-          action := t_actionrowset(rows, 'Value Meanings', 2,10,'insert');
-           actions.extend;
-           actions(actions.last) := action;
-
-      end if;
-      if (v_pv is not null) then
-        select count(*) into v_temp from PERM_VAL where VAL_DOM_ITEM_ID = ihook.getColumnValue(row_ori, 'ITEM_ID') and
-        VAL_DOM_VER_NR = ihook.getColumnValue(row_ori, 'VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = v_ver_nr
-        and upper(PERM_VAL_NM) = upper(v_pv);
-
-        if (v_temp = 0) then
-        rows := t_rows();
-        row := t_row();
-        ihook.setColumnValue(row,'PERM_VAL_NM', v_pv);
-        ihook.setColumnValue(row,'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
-        ihook.setColumnValue(row,'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
-        ihook.setColumnValue(row,'NCI_VAL_MEAN_ITEM_ID',  v_item_id);
-        ihook.setColumnValue(row,'NCI_VAL_MEAN_VER_NR', 1);
-
-        ihook.setColumnValue(row,'VAL_ID',-1);
-            rows.extend;
-            rows(rows.last) := row;
-          action := t_actionrowset(rows, 'Permissible Values (Edit AI)', 2,19,'insert');
-           actions.extend;
-           actions(actions.last) := action;
-
+                        rows.extend;
+                        rows(rows.last) := row;
+                        action := t_actionrowset(rows, 'Value Meanings', 2,10,'insert');
+                        actions.extend;
+                        actions(actions.last) := action;
+                    end if;
+     
+                    if (v_pv is not null) then
+                        select count(*) into v_temp from PERM_VAL where VAL_DOM_ITEM_ID = ihook.getColumnValue(row_ori, 'ITEM_ID') and
+                        VAL_DOM_VER_NR = ihook.getColumnValue(row_ori, 'VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = v_ver_nr
+                        and upper(PERM_VAL_NM) = upper(v_pv);
+                
+                        if (v_temp = 0) then
+                            rows := t_rows();
+                            row := t_row();
+                            ihook.setColumnValue(row,'PERM_VAL_NM', v_pv);
+                            ihook.setColumnValue(row,'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
+                            ihook.setColumnValue(row,'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
+                            ihook.setColumnValue(row,'NCI_VAL_MEAN_ITEM_ID',  v_item_id);
+                            ihook.setColumnValue(row,'NCI_VAL_MEAN_VER_NR', 1);
+                    
+                            ihook.setColumnValue(row,'VAL_ID',-1);
+                            rows.extend;     rows(rows.last) := row;
+                              action := t_actionrowset(rows, 'Permissible Values (Edit AI)', 2,19,'insert');
+                               actions.extend;
+                               actions(actions.last) := action;
+                        end if;
+                    end if;
+            end if;
+        end loop;
         end if;
-
-      end if;
-     end if;
-
-
+end if;
     if (actions.count > 0) then
         hookoutput.actions := actions;
+        hookoutput.message := v_cnt || ' VM/PV created.';
          --   raise_application_error(-20000,'Inside 1' || v_item_id);
 
     end if;
@@ -1378,7 +1391,7 @@ begin
     ANSWER                     := T_ANSWER(1, 1, 'Validate Using Drop-Down');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    ANSWER                     := T_ANSWER(2, 2, 'Update');
+    ANSWER                     := T_ANSWER(2, 2, 'Update VM');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     if (v_dup = true) then
@@ -1428,14 +1441,25 @@ end;
 
 
 -- Create form for Multi-concept VM
-function getPVVMCreateForm2 (v_rowset in t_rowset) return t_forms is
+function getPVVMCreateForm2 (v_init_rows in t_rows) return t_forms is
   forms t_forms;
   form1 t_form;
+  i integer;
+  row t_row;
+  rows t_rows;
+  rowset t_rowset;
 begin
     forms                  := t_forms();
-    form1                  := t_form('PV VM Creation 5 (Hook)', 2,5);
-    form1.rowset :=v_rowset;
-    forms.extend;    forms(forms.last) := form1;
+   -- raise_application_error(-20000, 'Error' || v_init_rows.count);
+    for i in 1..5 loop
+      row := v_init_rows(i);
+    rows := t_rows();    rows.extend;    rows(rows.last) := row;
+    rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT'); -- Default values for form
+
+    form1                  := t_form('PV VM Creation 5 (Hook)', 2,1);
+    form1.rowset :=rowset;
+    forms.extend;  forms(forms.last) := form1;
+    end loop;
   return forms;
 end;
 function getVMEditForm (v_rowset in t_rowset) return t_forms is
