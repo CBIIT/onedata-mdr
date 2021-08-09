@@ -314,7 +314,7 @@ end loop;
         end if;
             /*  If item not already in cart */
             if (rowscart.count  > 0) then
-                action := t_actionrowset(rows, 'User Cart', 2,0,'insert');
+                action := t_actionrowset(rowscart, 'User Cart', 2,0,'insert');
                 actions.extend;
                 actions(actions.last) := action;
             end if;
