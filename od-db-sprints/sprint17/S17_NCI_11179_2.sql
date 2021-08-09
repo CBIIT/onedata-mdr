@@ -13,6 +13,9 @@ function getStdDataType (v_data_typ_id in number) return number;
 procedure copyDDEComponents (v_src_item_id in number, v_src_ver_nr in number, v_tgt_item_id in number, v_tgt_ver_nr in number, actions in out t_actions);
 function getCollectionId return integer;
 procedure spBulkUpdateContext (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spBulkUpdateCSI (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+function isCSParentCSIValid(row in t_row) return boolean;
+procedure spAddAIToCartID (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 END;
 /
 create or replace PACKAGE BODY            nci_11179_2 AS
@@ -29,6 +32,20 @@ select od_seq_DLOAD_HDR.nextval into v_out from dual;
 return v_out;
 end;
 
+function isCSParentCSIValid(row in t_row) return boolean is
+v_item_id  number;
+v_ver_nr number(4,2);
+begin
+ v_item_id := ihook.getColumnValue(row, 'ITEM_ID');
+        v_ver_nr := ihook.getColumnValue(row, 'VER_NR');
+
+
+for cur in (select * from vw_clsfctn_schm_item where cs_item_id <>  ihook.getColumnValue(row, 'CS_ITEM_ID') and item_id = nvl(ihook.getColumnValue(row, 'P_ITEM_ID'), -1)) loop
+    return false;
+end loop;
+
+return true;
+end;
 procedure copyDDEComponents (v_src_item_id in number, v_src_ver_nr in number, v_tgt_item_id in number, v_tgt_ver_nr in number, actions in out t_actions) as
     action           t_actionRowset;
     action_rows              t_rows := t_rows();
@@ -92,6 +109,89 @@ begin
 end;
 
 
+procedure spAddAIToCartID (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    row_sel t_row;
+    rows  t_rows;
+    rowscart  t_rows;
+    row_ori t_row;
+    v_item_id  number;
+    v_ver_nr number(4,2);
+    v_temp integer;
+    v_add integer :=0;
+    v_already integer :=0;
+    i integer := 0;
+    v_item_typ_id integer;
+    v_found boolean;
+    v_str varchar2(4000);
+    cnt integer;
+ forms t_forms;
+  form1 t_form;
+
+begin
+    hookinput := ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber  := hookinput.invocationnumber;
+    hookoutput.originalrowset    := hookinput.originalrowset;
+
+
+    if (hookinput.invocationnumber = 0) then   -- First invocation
+         forms                  := t_forms();
+        form1                  := t_form('Add Item to Collection (Hook)', 2,1);
+        forms.extend;    forms(forms.last) := form1;
+        hookoutput.forms := forms;
+       	 hookOutput.question := nci_dload.getAddComponentCreateQuestion;
+	end if;
+
+    if hookInput.invocationNumber = 1  then  -- Seconf invocation
+    
+        forms              := hookInput.forms;
+        form1              := forms(1);
+        row_sel := form1.rowset.rowset(1);
+        v_str := trim(ihook.getColumnValue(row_sel, 'VM_DESC_TXT'));
+             cnt := nci_11179.getwordcount(v_str);
+
+          rowscart := t_rows();
+   
+         for i in  1..cnt loop
+                        v_item_id := nci_11179.getWord(v_str, i, cnt);
+        for cur in (select * from admin_item where item_id = v_item_id and currnt_ver_ind = 1 and admin_item_typ_id in (4,51,54) and (item_id, ver_nr) not in
+        (select item_id, ver_nr from nci_usr_cart  where cntct_secu_id = v_usr_id)) loop
+    
+        row := t_row();
+            ihook.setColumnValue(row, 'ITEM_ID', cur.item_id);
+            ihook.setColumnValue(row, 'VER_NR', cur.ver_nr);
+            ihook.setColumnValue(row,'CNTCT_SECU_ID', v_usr_id);
+            ihook.setColumnValue(row,'GUEST_USR_NM', 'NONE');
+                	rowscart.extend;
+                    rowscart (rowscart.last) := row;
+        
+
+ end loop;
+end loop;
+        -- If Item needs to be added.
+     
+            /*  If item not already in cart */
+            if (rowscart.count  > 0) then
+                action := t_actionrowset(rowscart, 'User Cart', 2,0,'insert');
+                actions.extend;
+                actions(actions.last) := action;
+            end if;
+
+        if (actions.count > 0) then
+            hookoutput.actions := actions;
+        end if;
+             hookoutput.message := 'Number of items added to cart: ' || rowscart.count;
+   end if;
+V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
+
 procedure spBulkUpdateContext (v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
 as
  hookInput t_hookInput;
@@ -101,7 +201,7 @@ as
   row t_row;
   rows  t_rows;
     row_ori t_row;
-    row_sel t_row;
+    rowform t_row;
     v_id integer;
   action_rows       t_rows := t_rows();
   action_row		    t_row;
@@ -125,8 +225,7 @@ BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
-  row_ori :=  hookInput.originalRowset.rowset(1);
-
+  
 
     if hookInput.invocationNumber = 0 then
 
@@ -135,7 +234,7 @@ BEGIN
     forms.extend;    forms(forms.last) := form1;
   hookoutput.forms := forms;
        	 answers := t_answers();
-  	   	 answer := t_answer(1, 1, 'Select Context');
+  	   	 answer := t_answer(1, 1, 'Reassign');
   	   	 answers.extend; answers(answers.last) := answer;
 
 	   	 question := t_question('Select Context to Move To', answers);
@@ -144,36 +243,122 @@ BEGIN
 	end if;
 
     if hookInput.invocationNumber = 1  then
-    
             rows :=         t_rows();
-	    for cur in (select * from vw_obj_key_4 where nvl(fld_delete,0) = 0) loop
-		   row := t_row();
-	   	   iHook.setcolumnvalue (ROW, 'OBJ_KEY_ID', cur.OBJ_KEY_ID);
-		   rows.extend;
-		   rows (rows.last) := row;
-		   
-	    end loop;
-
-       	 showrowset := t_showablerowset (rows, 'Administered Item Type', 2, 'multi');
-       	 hookoutput.showrowset := showrowset;
-
-       	 answers := t_answers();
-  	   	 answer := t_answer(1, 1, 'Select Item Types to Update');
-  	   	 answers.extend; answers(answers.last) := answer;
-
-	   	 question := t_question('Select Types', answers);
-       	 hookOutput.question := question;
-	   end if;
-   
-  
-    if (hookInput.invocationNumber = 2 ) then -- copy module
-    rows := t_rows();
+             forms              := hookInput.forms;
+           form1              := forms(1);
+      rowform := form1.rowset.rowset(1);
+	    
+        if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1) then
+            update admin_item set cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
+            where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR');
+            commit;
+        else
+        for i in 1..60 loop
+        if (nvl(ihook.getColumnValue(rowform,'IND_TYP_' || i),0) = 1) then
+        update admin_item set cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
+            where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') and admin_item_typ_id = i;
+        end if;
+        end loop;
+        end if;
+        
+        if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1 or nvl(ihook.getColumnValue(rowform,'IND_ALT_NMS'),0) = 1 ) then
+              update alt_nms set cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
+            where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') ;
+ 
+        end if;
+            if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1 or nvl(ihook.getColumnValue(rowform,'IND_ALT_DEF'),0) = 1 ) then
+              update alt_def set cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
+            where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') ;
+ 
+        end if;
+              if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1 or nvl(ihook.getColumnValue(rowform,'IND_REF_DOC'),0) = 1 ) then
+              update ref set nci_cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), nci_cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
+            where nci_cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and nci_cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') ;
+ 
+        end if;
+        
+      
+ 
+        hookoutput.message := 'Context reassigned.';
     end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
  -- nci_util.debugHook('GENERAL',v_data_out);
 
 END;
 
+
+procedure spBulkUpdateCSI (v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+as
+ hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+    rowform t_row;
+    v_id integer;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+forms     t_forms;
+v_itemid     integer;
+v_found boolean;
+  v_temp integer;
+  v_stg_ai_id number;
+  i integer := 0;
+  column  t_column;
+  msg varchar2(4000);
+  v_item_typ  integer;
+
+  form1 t_form;
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+  
+
+    if hookInput.invocationNumber = 0 then
+
+    forms                  := t_forms();
+    form1                  := t_form('CSI Bulk Change (Hook)', 2,1);
+    forms.extend;    forms(forms.last) := form1;
+  hookoutput.forms := forms;
+       	 answers := t_answers();
+  	   	 answer := t_answer(1, 1, 'Reassign');
+  	   	 answers.extend; answers(answers.last) := answer;
+
+	   	 question := t_question('Select CSI to Move To', answers);
+       	 hookOutput.question := question;
+ 
+	end if;
+
+    if hookInput.invocationNumber = 1  then
+            rows :=         t_rows();
+             forms              := hookInput.forms;
+             form1              := forms(1);
+             rowform := form1.rowset.rowset(1);
+	   
+       
+       update nci_admin_item_rel set p_item_id = ihook.getColumnValue(rowform, 'TO_CNTXT_ITEM_ID'), p_item_ver_nr =  ihook.getColumnValue(rowform, 'TO_CNTXT_VER_NR') where rel_typ_id = 65 and 
+       p_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and p_item_ver_nr =  ihook.getColumnValue(rowform, 'CNTXT_VER_NR');
+       commit;
+       
+       update NCI_CSI_ALT_DEFNMS set NCI_PUB_ID = ihook.getColumnValue(rowform, 'TO_CNTXT_ITEM_ID'), NCI_VER_NR =  ihook.getColumnValue(rowform, 'TO_CNTXT_VER_NR') where 
+       NCI_PUB_ID = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and NCI_VER_NR =  ihook.getColumnValue(rowform, 'CNTXT_VER_NR');
+       commit;
+       
+     
+        hookoutput.message := 'CSI reassigned.';
+    end if;
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+ -- nci_util.debugHook('GENERAL',v_data_out);
+
+END;
 
 function getStdDataType (v_data_typ_id in number) return number
 is
@@ -216,7 +401,7 @@ end loop;
 
 for cur in (select ai.item_id item_id from admin_item ai
             where
-            upper(trim(ai.ITEM_LONG_NM))=upper(trim(ihook.getColumnValue(rowai,'ITEM_LONG_NM')))
+            trim(ai.ITEM_LONG_NM)=trim(ihook.getColumnValue(rowai,'ITEM_LONG_NM'))
         --    and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')
             and ai.cntxt_item_id = ihook.getColumnValue(rowai, 'CNTXT_ITEM_ID')
             and  ai.cntxt_ver_nr = ihook.getColumnValue(rowai, 'CNTXT_VER_NR')
