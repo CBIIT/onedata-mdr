@@ -9,6 +9,8 @@ procedure spQuestRestore ( v_data_in in clob, v_data_out out clob, v_user_id var
 procedure spQuestVVRestore ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_mode in varchar2);
 procedure spAIIns ( v_data_in in clob, v_data_out out clob);
 procedure spPVUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spCSIUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+
 
 END;
 /
@@ -171,6 +173,27 @@ end loop;
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
+
+
+procedure spCSIUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2)
+as
+hookInput        t_hookInput;
+    hookOutput       t_hookOutput := t_hookOutput ();
+    row_ori          t_row;
+    v_item_id number;
+    v_ver_nr number(4,2);
+  BEGIN
+    hookinput := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber := hookinput.invocationnumber;
+    hookoutput.originalrowset := hookinput.originalrowset;
+
+    row_ori := hookInput.originalRowset.rowset (1);
+  if (nci_11179_2.isCSParentCSIValid(row_ori) = false) then
+      raise_application_error(-20000, 'Parent CSI should belong to the same Classification Scheme as specified.');
+  end if;
+  
+ V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+end;
 
 
 -- Can only add Components if Derivation Rule is set
