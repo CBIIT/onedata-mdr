@@ -121,3 +121,11 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
 
 insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (67,17,'Module-Module Relationship ', 'Module-Module Relationship', '', 'MMR');
 commit;
+
+  CREATE OR REPLACE  VIEW VW_NCI_FORM_MODULE AS
+  select air.p_item_id, air.p_item_ver_nr, ai.item_id, ai.ver_nr, ai.item_nm, ai.item_long_nm, ai.item_desc,
+'MODULE' admin_item_typ_nm,air.INSTR,
+ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT, air.disp_ord, air.rep_no,
+ai.regstr_stus_id, ai.admin_stus_id, ai.cntxt_item_id, ai.cntxt_ver_nr
+from admin_item ai, nci_admin_item_rel air where ai.item_id = air.c_item_id and ai.ver_nr = air.c_item_ver_nr and air.rel_typ_id in (61,62);
+
