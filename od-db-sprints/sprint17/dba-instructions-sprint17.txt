@@ -20,9 +20,10 @@ S17_WA_RA_DDL.sql
 -- DATA MIGRATION
 
 -- Run as ONEDATA_WA DM scripts
+S17_WA_Data_Migration.sql
 
 -- Run as ONEDATA_RA DM scripts
-
+S12_RA_Data_Migration.sql
 
 -- Run validate job as ONEDATA_WA
 exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
