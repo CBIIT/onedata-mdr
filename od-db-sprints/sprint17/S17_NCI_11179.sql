@@ -406,7 +406,7 @@ begin
         hookoutput.actions := actions;
         hookoutput.message := v_add || ' item(s) added successfully to cart. ' || v_already || ' item(s) selected already in your cart';
     else
-        hookoutput.message := v_already || ' item(s) selected already in yout cart';
+        hookoutput.message := v_already || ' item(s) selected already in your cart';
     end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
@@ -489,9 +489,9 @@ begin
                 actions.extend;
                 actions(actions.last) := action;
                 hookoutput.actions := actions;
-                hookoutput.message := v_add || ' item(s) added successfully to cart. ' || v_already || ' item(s) selected already in yout cart';
+                hookoutput.message := v_add || ' item(s) added successfully to cart. ' || v_already || ' item(s) selected already in your cart';
             else
-                hookoutput.message := v_already || ' item(s) selected already in yout cart';
+                hookoutput.message := v_already || ' item(s) selected already in your cart';
             end if;
          end if;
     end if;
@@ -598,9 +598,9 @@ BEGIN
     actions.extend;
     actions(actions.last) := action;
     hookoutput.actions := actions;
-    hookoutput.message := v_add || ' item(s) added successfully to cart. ' || v_already || ' item(s) selected already in yout cart';
+    hookoutput.message := v_add || ' item(s) added successfully to cart. ' || v_already || ' item(s) selected already in your cart';
     else
-    hookoutput.message := v_already || ' item(s) selected already in yout cart';
+    hookoutput.message := v_already || ' item(s) selected already in your cart';
     end if;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
