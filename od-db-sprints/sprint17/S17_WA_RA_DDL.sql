@@ -158,3 +158,5 @@ from admin_item ai, nci_admin_item_rel air where ai.item_id = air.c_item_id and 
            AND ak.C_ITEM_VER_NR = ai.VER_NR
            AND ai.ADMIN_ITEM_TYP_ID = 54;
 
+alter table NCI_DLOAD_HDR add (FILE_FMT_ID integer);
+
