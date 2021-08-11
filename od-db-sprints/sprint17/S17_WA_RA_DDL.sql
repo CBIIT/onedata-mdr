@@ -1,5 +1,15 @@
 
-  CREATE OR REPLACE  VIEW VW_NCI_MODULE_DE AS
+  
+insert into obj_typ (obj_typ_id, obj_typ_Desc) values (35, 'Download File Format');
+commit;
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (35, 'Excel', 110, 'Excel');
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (35, 'XML', 111, 'XML');
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (35, 'JSON', 112, 'JSON');
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (31, 'Form', 101, 'Form');
+
+commit;
+
+CREATE OR REPLACE  VIEW VW_NCI_MODULE_DE AS
   select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr, 
 air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr,
  air.c_item_id de_item_id, air.c_item_ver_nr de_ver_nr, air.disp_ord,
