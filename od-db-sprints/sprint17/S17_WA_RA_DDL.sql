@@ -129,3 +129,32 @@ ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, a
 ai.regstr_stus_id, ai.admin_stus_id, ai.cntxt_item_id, ai.cntxt_ver_nr, ai.item_long_nm 
 from admin_item ai, nci_admin_item_rel air where ai.item_id = air.c_item_id and ai.ver_nr = air.c_item_ver_nr and air.rel_typ_id in (61,62);
 
+ CREATE OR REPLACE VIEW VW_CSI_FORM_REL AS
+  SELECT ak.CREAT_DT,
+           ak.CREAT_USR_ID,
+           ak.LST_UPD_USR_ID,
+           ak.LST_UPD_DT,
+           ak.S2P_TRN_DT,
+           ak.LST_DEL_DT,
+           ak.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           ak.P_ITEM_ID,
+           ak.P_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           ak.CREAT_USR_ID       CREAT_USR_ID_X,
+           ak.LST_UPD_USR_ID     LST_UPD_USR_ID_X
+      FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR
+           AND ai.ADMIN_ITEM_TYP_ID = 54;
+
