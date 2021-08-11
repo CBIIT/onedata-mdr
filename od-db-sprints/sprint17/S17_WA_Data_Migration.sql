@@ -2,6 +2,10 @@ set serveroutput on size 1000000
 SPOOL S16_WA_DATA_MIGRATION.log
 --create index SBREXT.AC_CHANGE_HISTORY_IDX on SBREXT.AC_CHANGE_HISTORY_EXT (AC_IDSEQ);
 exec sp_preprocess;
+alter trigger TRG_NCI_QVV_POST disable;
+alter trigger TRG_NCI_QS_MOD_POST disable;
+alter trigger TRG_NCI_MOD_PROT_POST disable;
+alter trigger TRG_NCI_FORM_POST disable;
 alter trigger TR_NCI_ALT_NMS_DENORM_INS disable;
 alter trigger TR_NCI_AI_DENORM_INS disable;
 alter trigger TR_AI_AUD_TS disable;
@@ -263,6 +267,10 @@ alter trigger TR_NCI_FORM_POST enable;
 alter trigger TR_NCI_PROTCL_POST enable;
 alter trigger TR_REF_POST enable;
 alter trigger TR_VD_POST enable;
+alter trigger TRG_NCI_QVV_POST enable;
+alter trigger TRG_NCI_QS_MOD_POST enable;
+alter trigger TRG_NCI_MOD_PROT_POST enable;
+alter trigger TRG_NCI_FORM_POST enable;
 ---create unique index idxNCiAIRelUni on nci_admin_item_rel 
 --( P_ITEM_ID, P_ITEM_VER_NR,decode(REL_TYP_ID, 61, 1,C_ITEM_ID), C_ITEM_VER_NR,  REL_TYP_ID, DISP_ORD);
 
