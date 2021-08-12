@@ -5,7 +5,7 @@ commit;
 insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (35, 'Excel', 110, 'Excel');
 insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (35, 'XML', 111, 'XML');
 insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (35, 'JSON', 112, 'JSON');
-insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (31, 'Form', 101, 'Form');
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'caDSR I', 101, 'caDSR I backward compatible formats', 'caDSR I');
 
 commit;
 
