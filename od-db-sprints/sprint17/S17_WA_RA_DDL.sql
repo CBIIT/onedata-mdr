@@ -5,9 +5,13 @@ commit;
 insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (35, 'Excel', 110, 'Excel');
 insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (35, 'XML', 111, 'XML');
 insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, NCI_CD) values (35, 'JSON', 112, 'JSON');
-insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'caDSR I', 101, 'caDSR I backward compatible formats', 'caDSR I');
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy Form Builder XMLI', 101, 'Legacy Form Builder XML', 'Legacy Form Builder XML');
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy Form Builder Excel', 102, 'Legacy Form Builder Excel', 'Legacy Form Builder Excel');
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy CDE Excel', 103, 'Legacy CDE Excel', 'Legacy CDE Excel');
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy CDE XML', 104, 'Legacy CDE XML', 'Legacy CDE XML');
 
 commit;
+
 
 CREATE OR REPLACE  VIEW VW_NCI_MODULE_DE AS
   select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr, 
