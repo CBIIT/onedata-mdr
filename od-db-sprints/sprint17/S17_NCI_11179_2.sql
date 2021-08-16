@@ -138,7 +138,7 @@ begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
-
+--raise_application_error(-20000, v_usr_id);
 
     if (hookinput.invocationnumber = 0) then   -- First invocation
          forms                  := t_forms();
@@ -166,7 +166,9 @@ begin
         row := t_row();
             ihook.setColumnValue(row, 'ITEM_ID', cur.item_id);
             ihook.setColumnValue(row, 'VER_NR', cur.ver_nr);
-            ihook.setColumnValue(row,'CNTCT_SECU_ID', v_usr_id);
+           ihook.setColumnValue(row,'CNTCT_SECU_ID', v_usr_id);
+            --   ihook.setColumnValue(row,'CNTCT_SECU_ID', 'DWARZEL');
+   
             ihook.setColumnValue(row,'GUEST_USR_NM', 'NONE');
                 	rowscart.extend;
                     rowscart (rowscart.last) := row;
@@ -227,6 +229,10 @@ BEGIN
   hookoutput.originalrowset    := hookinput.originalrowset;
   
 
+  if(hookinput.originalrowset.rowset.count > 0) then
+  raise_application_error(-20000, 'Bulk change applies to to all items in the caDSR and not the selected/filtered items. Please deselect items and re-select the command.');
+  end if;
+  
     if hookInput.invocationNumber = 0 then
 
     forms                  := t_forms();
@@ -237,7 +243,7 @@ BEGIN
   	   	 answer := t_answer(1, 1, 'Reassign');
   	   	 answers.extend; answers(answers.last) := answer;
 
-	   	 question := t_question('Select Context to Move To', answers);
+	   	 question := t_question('Reassign Item Context', answers);
        	 hookOutput.question := question;
  
 	end if;
@@ -321,6 +327,9 @@ BEGIN
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
   
+  if(hookinput.originalrowset.rowset.count > 0) then
+  raise_application_error(-20000, 'Bulk change applies to to all items in the caDSR and not the selected/filtered items. Please deselect items and re-select the command.');
+  end if;
 
     if hookInput.invocationNumber = 0 then
 
@@ -332,7 +341,7 @@ BEGIN
   	   	 answer := t_answer(1, 1, 'Reassign');
   	   	 answers.extend; answers(answers.last) := answer;
 
-	   	 question := t_question('Select CSI to Move To', answers);
+	   	 question := t_question('Reassign Item CSI.', answers);
        	 hookOutput.question := question;
  
 	end if;
