@@ -248,7 +248,8 @@ AS
     cnt integer;
  forms t_forms;
   form1 t_form;
-
+  v_cnt_valid_fmt integer;
+  v_cnt_valid_type integer;
 begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -274,6 +275,9 @@ begin
        rows := t_rows();
        row := t_row();
 
+        v_cnt_valid_fmt := 0;
+        v_cnt_valid_type := 0;
+        
         forms              := hookInput.forms;
         form1              := forms(1);
         row_sel := form1.rowset.rowset(1);
@@ -286,8 +290,10 @@ begin
         ihook.setColumnValue(row, 'HDR_ID', ihook.getColumnValue(row_ori,'HDR_ID'));
 
          for i in  1..cnt loop
+          IF (VALIDATE_CONVERSION(nci_11179.getWord(v_str, i, cnt) AS NUMBER) = 1) THEN
                         v_item_id := nci_11179.getWord(v_str, i, cnt);
-
+                    v_cnt_valid_fmt := v_cnt_valid_fmt + 1;
+        
         -- Only add if item is of the right type and not currently in collection.
         for cur in (select * from admin_item where item_id = v_item_id and currnt_ver_ind = 1 and admin_item_typ_id = v_item_typ_id and (item_id, ver_nr) not in
         (select item_id, ver_nr from nci_dload_dtl where hdr_id = ihook.getColumnValue(row_ori,'HDR_ID'))) loop
@@ -295,6 +301,7 @@ begin
             ihook.setColumnValue(row, 'VER_NR', cur.ver_nr);
             ihook.setColumnValue(row,'CNTCT_SECU_ID', v_usr_id);
             ihook.setColumnValue(row,'GUEST_USR_NM', 'NONE');
+            v_cnt_valid_type := v_cnt_valid_type + 1;
           	rows.extend;
             rows (rows.last) := row;
             -- Add to user cart as well as per curator.
@@ -305,6 +312,7 @@ begin
               end if;
 
  end loop;
+ end if;
 end loop;
         -- If Item needs to be added.
         if (rows.count > 0) then
@@ -322,7 +330,10 @@ end loop;
         if (actions.count > 0) then
             hookoutput.actions := actions;
         end if;
-             hookoutput.message := 'Number of items added to collection: ' || rows.count;
+        v_cnt_valid_fmt := cnt-v_cnt_valid_fmt;
+        v_cnt_valid_type := cnt - v_cnt_valid_fmt -  v_cnt_valid_type;
+        
+             hookoutput.message := 'Total Items: ' || cnt || ';     Items added: ' || nvl(rows.count,0) || ';    Items with invalid format: ' || v_cnt_valid_fmt || ';    Items with wrong type: ' || v_cnt_valid_type ;
    end if;
 V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
