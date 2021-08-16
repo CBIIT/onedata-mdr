@@ -9,6 +9,7 @@ procedure spAddToCart ( v_data_in in clob, v_data_out out clob, v_user_id varcha
 procedure spAddToCartGuest ( v_data_in in clob, v_data_out out clob);
 procedure spRemoveFromCart (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure spNCIChangeLatestVer (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
+procedure spCreateCommonChildrenNCI (actions in out t_actions, v_from_item_id in number, v_from_ver_nr in number, v_to_item_id in number, v_to_ver_nr in number);
 procedure spAddConceptRel (v_data_in in clob, v_data_out out clob);
 procedure spCreateVerNCI (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure getConcatNmDef(v_item_id in number, v_ver_nr in number, v_nm out varchar2, v_long_nm out varchar2,v_def out varchar2);
@@ -374,7 +375,8 @@ begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
-
+   -- raise_application_error(-20000,v_user_id);
+    
     rows := t_rows();
     for i in 1..hookinput.originalrowset.rowset.count loop  --- Iterate through all the selected rows
         row_ori := hookInput.originalRowset.rowset(i);
@@ -392,7 +394,9 @@ begin
             v_add := v_add + 1;
             ihook.setColumnValue(row,'ITEM_ID', v_item_id);
             ihook.setColumnValue(row,'VER_NR', v_ver_nr);
-            ihook.setColumnValue(row,'CNTCT_SECU_ID', v_user_id);
+      --      ihook.setColumnValue(row,'CNTCT_SECU_ID', v_user_id);
+             ihook.setColumnValue(row,'CNTCT_SECU_ID', v_user_id);
+     
             ihook.setColumnValue(row,'GUEST_USR_NM', 'NONE');
             rows.extend;    rows(rows.last) := row;
         else
@@ -400,15 +404,20 @@ begin
         end if;
     end loop;
     if (v_add > 0) then   -- IF there are items to add to cart
-        action := t_actionrowset(rows, 'User Cart', 2,0,'insert');
-        actions.extend;
+        action := t_actionrowset(rows, 'User Cart', 2,1,'insert');
+    --     action := t_actionrowset(rows, 'NCI_USR_CART', 1,1,'insert');
+     actions.extend;
         actions(actions.last) := action;
         hookoutput.actions := actions;
         hookoutput.message := v_add || ' item(s) added successfully to cart. ' || v_already || ' item(s) selected already in your cart';
     else
         hookoutput.message := v_already || ' item(s) selected already in your cart';
     end if;
+--raise_application_error(-20000,hookoutput.message);
+
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+       nci_util.debugHook('GENERAL',v_data_out);
+  
 END;
 
 
@@ -852,7 +861,7 @@ end;
 
 
 /*  Common children copy when creating a version */
-procedure spCreateCommonChildrenNCI (actions in out t_actions, v_admin_item admin_item%rowtype, v_version number) as
+procedure spCreateCommonChildrenNCI (actions in out t_actions, v_from_item_id in number, v_from_ver_nr in number, v_to_item_id in number, v_to_ver_nr in number) as
     action           t_actionRowset;
     action_rows              t_rows := t_rows();
     action_rows_csi              t_rows := t_rows();
@@ -878,7 +887,7 @@ begin
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
     for an_cur in (select nm_id from alt_nms where
-    item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr and nvl(fld_delete,0) = 0) loop
+    item_id = v_from_item_id and ver_nr = v_from_ver_nr and nvl(fld_delete,0) = 0) loop
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where nm_id = :nm_id';
         v_cur := dbms_sql.open_cursor;
         dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
@@ -900,7 +909,8 @@ begin
 
         select od_seq_ALT_NMS.nextval into v_temp from dual;
         ihook.setColumnValue(row, 'nm_ID',v_temp);
-        ihook.setColumnValue(row, 'VER_NR', v_version);
+        ihook.setColumnValue(row, 'ITEM_ID', v_to_item_id);
+        ihook.setColumnValue(row, 'VER_NR', v_to_ver_nr);
         ihook.setColumnValue(row, 'NCI_IDSEQ', '');
 
         action_rows.extend; action_rows(action_rows.last) := row;
@@ -927,7 +937,7 @@ begin
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
     for ad_cur in  (select def_id from alt_def where
-    item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr and nvl(fld_delete,0) = 0) loop
+    item_id = v_from_item_id and ver_nr = v_from_ver_nr and nvl(fld_delete,0) = 0) loop
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where def_id = :def_id';
         v_cur := dbms_sql.open_cursor;
         dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
@@ -949,7 +959,8 @@ begin
         dbms_sql.close_cursor(v_cur);
         select od_seq_ALT_DEF.nextval into v_temp from dual;
         ihook.setColumnValue(row, 'DEF_ID', v_temp);
-        ihook.setColumnValue(row, 'VER_NR', v_version);
+        ihook.setColumnValue(row, 'ITEM_ID', v_to_item_id);
+        ihook.setColumnValue(row, 'VER_NR', v_to_ver_nr);
         ihook.setColumnValue(row, 'NCI_IDSEQ', '');
         action_rows.extend; action_rows(action_rows.last) := row;
 
@@ -979,7 +990,7 @@ begin
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
     for ref_cur in  (select ref_id from ref where
-    item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr and nvl(fld_delete,0) = 0) loop
+    item_id = v_from_item_id and ver_nr = v_from_ver_nr and nvl(fld_delete,0) = 0) loop
 
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where ref_id = :ref_id';
         v_cur := dbms_sql.open_cursor;
@@ -1005,7 +1016,8 @@ begin
         select od_seq_REF.nextval into v_temp from dual;
         ihook.setColumnValue(row, 'ref_ID', v_temp);
         ihook.setColumnValue(row, 'NCI_IDSEQ', '');
-        ihook.setColumnValue(row, 'VER_NR', v_version);
+        ihook.setColumnValue(row, 'ITEM_ID', v_to_item_id);
+        ihook.setColumnValue(row, 'VER_NR', v_to_ver_nr);
         action_rows.extend; action_rows(action_rows.last) := row;
 
         -- Blobs are not supported in iHooks. Copying blobs as direct sql. No other option
@@ -1048,7 +1060,7 @@ begin
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
     for ref_cur in  (select CNCPT_AI_ID from CNCPT_ADMIN_ITEM where
-    item_id = v_admin_item.item_id and ver_nr = v_admin_item.ver_nr) loop
+    item_id = v_from_item_id and ver_nr = v_from_ver_nr) loop
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where CNCPT_AI_ID = :CNCPT_AI_ID';
         v_cur := dbms_sql.open_cursor;
         dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
@@ -1070,7 +1082,8 @@ begin
         dbms_sql.close_cursor(v_cur);
 
         ihook.setColumnValue(row, 'CNCPT_AI_ID', -1);
-        ihook.setColumnValue(row, 'VER_NR', v_version);
+        ihook.setColumnValue(row, 'ITEM_ID', v_to_item_id);
+        ihook.setColumnValue(row, 'VER_NR', v_to_ver_nr);
         action_rows.extend; action_rows(action_rows.last) := row;
     end loop;
 
@@ -1087,15 +1100,15 @@ begin
     v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
 
     for ref_cur in  (select P_ITEM_ID,P_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where
-    c_item_id = v_admin_item.item_id and c_item_ver_nr = v_admin_item.ver_nr and rel_typ_id = 65 and nvl(fld_Delete,0) = 0) loop
+    c_item_id = v_from_item_id and c_item_ver_nr = v_from_ver_nr and rel_typ_id = 65 and nvl(fld_Delete,0) = 0) loop
 
         v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where P_ITEM_ID = :P_ITEM_ID and P_ITEM_VER_NR = :P_ITEM_VER_NR and c_item_id = :c_item_id and c_item_ver_nr = :c_item_ver_nr and rel_typ_id = :rel_typ_id';
         v_cur := dbms_sql.open_cursor;
         dbms_sql.parse(v_cur, v_sql, dbms_sql.native);
         dbms_sql.bind_variable(v_cur, ':P_ITEM_ID', ref_cur.P_ITEM_ID);
         dbms_sql.bind_variable(v_cur, ':P_ITEM_VER_NR', ref_cur.P_ITEM_VER_NR);
-        dbms_sql.bind_variable(v_cur, ':c_item_id', v_admin_item.item_id);
-        dbms_sql.bind_variable(v_cur, ':c_item_ver_nr', v_admin_item.ver_nr);
+        dbms_sql.bind_variable(v_cur, ':c_item_id', v_from_item_id);
+        dbms_sql.bind_variable(v_cur, ':c_item_ver_nr', v_from_ver_nr);
         dbms_sql.bind_variable(v_cur, ':rel_typ_id', ref_cur.rel_typ_id);
 
         for i in 1..v_meta_col_cnt loop
@@ -1114,7 +1127,8 @@ begin
 
         dbms_sql.close_cursor(v_cur);
 
-       ihook.setColumnValue(row, 'C_ITEM_VER_NR', v_version);
+       ihook.setColumnValue(row, 'C_ITEM_ID', v_to_item_id);
+       ihook.setColumnValue(row, 'C_ITEM_VER_NR', v_to_ver_nr);
         ihook.setColumnValue(row, 'NCI_IDSEQ', '');
         action_rows.extend; action_rows(action_rows.last) := row;
     end loop;
@@ -1701,7 +1715,7 @@ begin
             spCreateSubtypeVerNCI(actions, v_admin_item, v_version);
 
             /* Copy all common children */
-            spCreateCommonChildrenNCI(actions, v_admin_item, v_version);
+            spCreateCommonChildrenNCI(actions, v_admin_item.item_id,v_admin_item.ver_nr, v_admin_item.item_id, v_version);
 
             action := t_actionRowset(ai_insert_action_rows, 'Administered Item (No Sequence)',2, 0, 'insert');
             actions.extend; actions(actions.last) := action;
