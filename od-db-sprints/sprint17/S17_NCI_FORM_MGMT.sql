@@ -1,5 +1,6 @@
 create or replace PACKAGE            nci_form_mgmt AS
 procedure spAddForm (v_data_in in clob, v_data_out out clob);
+procedure spAddFormFromExisting (v_data_in in clob, v_data_out out clob);
 procedure spAddModule (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spAddSAModule (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spEditModule (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -32,6 +33,8 @@ END;
 /
 create or replace PACKAGE BODY            nci_form_mgmt AS
 c_ver_suffix varchar2(5) := 'v1.00';
+v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
+
 
 function isUserAuth(v_frm_item_id in number, v_frm_ver_nr in number,v_user_id in varchar2) return boolean  iS
 v_auth boolean := false;
@@ -818,6 +821,125 @@ BEGIN
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
+
+PROCEDURE spAddFormFromExisting  ( v_data_in IN CLOB,    v_data_out OUT CLOB)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    rowrel t_row;
+    rows  t_rows;
+    row_ori t_row;
+    action_rows       t_rows := t_rows();
+    action_row		    t_row;
+    rowset            t_rowset;
+    question    t_question;
+    answer     t_answer;
+    answers     t_answers;
+    showrowset	t_showablerowset;
+    forms t_forms;
+    form1 t_form;
+    rowform t_row;
+    v_from_item_id number;
+    v_from_Ver_nr number(4,2);
+    v_found boolean;
+    v_form_id integer;
+    i integer := 0;
+BEGIN
+    hookinput                    := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber  := hookinput.invocationnumber;
+    hookoutput.originalrowset    := hookinput.originalrowset;
+     row_ori :=  hookInput.originalRowset.rowset(1);
+     v_from_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
+        v_from_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+   
+    -- First invocation - show the Add Form
+    if hookInput.invocationNumber = 0 then
+        ANSWERS                    := T_ANSWERS();
+        ANSWER                     := T_ANSWER(1, 1, 'Create Form');
+        ANSWERS.EXTEND;
+        ANSWERS(ANSWERS.LAST) := ANSWER;
+        QUESTION               := T_QUESTION('Create New Form', ANSWERS);
+        HOOKOUTPUT.QUESTION    := QUESTION;
+
+        forms                  := t_forms();
+        form1                  := t_form('Forms (Hook From Existing)', 2,1);  -- Forms (Hook) is a custom object for this purpose.
+        action_row := row_ori;
+        nci_11179.spReturnSubtypeRow (v_from_item_id, v_from_ver_nr, 54, action_row);
+         ihook.setColumnValue(action_row, 'ADMIN_STUS_ID', 66);
+         ihook.setColumnValue(action_row, 'REGSTR_STUS_ID', 9);
+    
+        ihook.setColumnValue(action_row, 'FORM_TYP_ID', 70);
+        action_rows.extend; action_rows(action_rows.last) := action_row;
+        rowset := t_rowset(action_rows, 'Form (Hook)', 1,'NCI_FORM');
+
+        form1.rowset :=rowset;
+        forms.extend;
+        forms(forms.last) := form1;
+        hookOutput.forms := forms;
+  ELSE -- Second invocation
+        forms              := hookInput.forms;
+        form1              := forms(1);
+        rowform := form1.rowset.rowset(1);
+
+        v_form_id :=  nci_11179.getItemId;
+        row := t_row();
+        row := rowform;
+
+        ihook.setColumnValue(row, 'ITEM_ID', v_form_id);
+        ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
+        ihook.setColumnValue(row, 'VER_NR', 1);
+        ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 54);
+        ihook.setColumnValue(row, 'ITEM_LONG_NM', v_form_id || c_ver_suffix);
+        ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
+         ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
+    
+        rows:= t_rows();
+        rows.extend;
+        rows(rows.last) := row;
+
+        -- Insert super-type
+        action             := t_actionrowset(rows, 'Administered Item (No Sequence)', 2, 0,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+        -- Insert sub-type
+        action             := t_actionrowset(rows, 'Form AI', 2, 1,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+
+        -- Insert form-protocol relationship if protocol specified
+        if (ihook.getColumnValue(rowform,'P_ITEM_ID') > 0) then
+            rows:= t_rows();
+            rowrel := t_row();
+            ihook.setColumnValue(rowrel, 'P_ITEM_ID', ihook.getColumnValue(rowform,'P_ITEM_ID'));
+            ihook.setColumnValue(rowrel, 'P_ITEM_VER_NR', ihook.getColumnValue(rowform,'P_ITEM_VER_NR'));
+            ihook.setColumnValue(rowrel, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
+            ihook.setColumnValue(rowrel, 'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
+            ihook.setColumnValue(rowrel, 'C_ITEM_ID', v_form_id);
+            ihook.setColumnValue(rowrel, 'C_ITEM_VER_NR', 1);
+            ihook.setColumnValue(rowrel, 'REL_TYP_ID', 60);
+
+            rows.extend;
+            rows(rows.last) := rowrel;
+            action             := t_actionrowset(rows, 'Generic AI Relationship', 2, 2,'insert');
+            actions.extend;
+            actions(actions.last) := action;
+        end if;
+         nci_11179.spCreateCommonChildrenNCI(actions, v_from_item_id,v_from_ver_nr, v_form_id, 1);
+        --Copy all modules
+        for cur2 in (select c_item_id, c_item_ver_nr, disp_ord from nci_admin_item_rel where p_item_id = v_from_item_id and p_item_ver_nr = v_from_ver_nr
+     and nvl(fld_delete,0) = 0) loop
+     nci_11179.spCopyModuleNCI (actions, cur2.c_item_id,cur2.c_item_ver_nr,    v_from_item_id, v_from_ver_nr,v_form_id, 1, cur2.disp_ord,'V');
+    end loop;
+      
+        hookoutput.actions    := actions;
+        hookoutput.message := 'Form Created Successfully with ID ' || v_form_id;
+    END IF;
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
 PROCEDURE spAddModule  (    v_data_in IN CLOB,    v_data_out OUT CLOB,    v_user_id in varchar2)
 AS
   hookInput t_hookInput;
@@ -868,7 +990,16 @@ BEGIN
     row := t_row();
         ihook.setColumnValue(row, 'P_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
         ihook.setColumnValue(row, 'P_ITEM_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
-        ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(row_ori, 'ITEM_NM'));
+        ihook.setColumnValue(row, 'FORM_NM', ihook.getColumnValue(row_ori, 'ITEM_NM'));
+        -- get default context from Form
+        for cur in (select cntxt_item_id, cntxt_ver_nr from admin_item where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')) loop
+           ihook.setColumnValue(row, 'CNTXT_ITEM_ID', cur.CNTXT_ITEM_ID);
+            ihook.setColumnValue(row, 'CNTXT_VER_NR', cur.CNTXT_VER_NR);  
+        end loop;
+        ihook.setColumnValue(row, 'ADMIN_STUS_ID', 65);
+        ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
+         ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
+   
         rows.extend; rows(rows.last) := row;
         rowset := t_rowset(rows, 'Module (Hook)', 1,'NCI_ADMIN_ITEM_REL');
 
@@ -886,24 +1017,22 @@ BEGIN
         rowform := form1.rowset.rowset(1);
 
         v_module_id :=  nci_11179.getItemId;
-        row := t_row();
+        row := rowform;
 
 
    -- raise_application_error(-20000, ihook.getColumnValue(rowform,'INSTR'));
 
-        for cur in (select cntxt_item_id, cntxt_ver_nr, admin_stus_id from admin_item where item_id =ihook.getColumnValue(row_ori,'ITEM_ID') and ver_nr =  ihook.getColumnValue(row_ori,'VER_NR')) loop
-            ihook.setColumnValue(row, 'ITEM_ID', v_module_id);
+             ihook.setColumnValue(row, 'ITEM_ID', v_module_id);
             ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
             ihook.setColumnValue(row, 'VER_NR',ihook.getColumnValue(row_ori,'VER_NR') );
             ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 52);
-            ihook.setColumnValue(row, 'CNTXT_ITEM_ID', cur.CNTXT_ITEM_ID);
-            ihook.setColumnValue(row, 'CNTXT_VER_NR', cur.CNTXT_VER_NR);
-            ihook.setColumnValue(row, 'ITEM_LONG_NM', v_module_id ||  c_ver_suffix);
-            ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowform,'ITEM_NM'));
-            ihook.setColumnValue(row, 'ITEM_DESC', ihook.getColumnValue(rowform,'ITEM_DESC'));
-            ihook.setColumnValue(row, 'ADMIN_STUS_ID', cur.ADMIN_STUS_ID);
-          ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-
+            if ( ihook.getColumnValue(rowform,'ITEM_LONG_NM')= v_dflt_txt) then
+                   ihook.setColumnValue(row, 'ITEM_LONG_NM', v_module_id ||  c_ver_suffix);
+            else
+                        ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(rowform,'ITEM_LONG_NM'));
+ 
+            end if;
+       
             rows:= t_rows();
             rows.extend;
             rows(rows.last) := row;
@@ -921,8 +1050,8 @@ BEGIN
             ihook.setColumnValue(rowrel, 'P_ITEM_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
             ihook.setColumnValue(rowrel, 'C_ITEM_ID', v_module_id);
             ihook.setColumnValue(rowrel, 'C_ITEM_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
-            ihook.setColumnValue(rowrel, 'CNTXT_ITEM_ID', cur.CNTXT_ITEM_ID);
-            ihook.setColumnValue(rowrel, 'CNTXT_VER_NR', cur.CNTXT_VER_NR);
+            ihook.setColumnValue(rowrel, 'CNTXT_ITEM_ID',ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
+            ihook.setColumnValue(rowrel, 'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
             ihook.setColumnValue(rowrel, 'DISP_ORD', v_disp_ord);
             ihook.setColumnValue(rowrel, 'REL_TYP_ID', 61);
             ihook.setColumnValue(rowrel, 'REP_NO', ihook.getColumnValue(rowform,'REP_NO'));
@@ -934,7 +1063,6 @@ BEGIN
             action             := t_actionrowset(rows, 'Generic AI Relationship', 2, 2,'insert');
             actions.extend;
             actions(actions.last) := action;
-    end loop;
     hookoutput.actions    := actions;
     hookoutput.message := 'Module Created Successfully with ID ' || v_module_id;
 
@@ -967,7 +1095,7 @@ showrowset	t_showablerowset;
   rowform t_row;
 v_found boolean;
   v_module_id integer;
-  v_disp_ord integer;
+ 
   v_add integer;
   i integer := 0;
   column  t_column;
@@ -976,13 +1104,7 @@ BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
-
- row_ori :=  hookInput.originalRowset.rowset(1);
- rows := t_rows();
- if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), v_user_id) = false) then
- raise_application_error(-20000,'You are not authorized to add a module to this form.');
- end if;
-
+  
  if hookInput.invocationNumber = 0 then
     ANSWERS                    := T_ANSWERS();
     ANSWER                     := T_ANSWER(1, 1, 'Create Module');
@@ -994,8 +1116,11 @@ BEGIN
     rows := t_rows();
     row := t_row();
         ihook.setColumnValue(row, 'P_ITEM_ID',-1);
-        ihook.setColumnValue(row, 'P_ITEM_VER_NR', -1);
-        ihook.setColumnValue(row, 'ITEM_LONG_NM', -1);
+        ihook.setColumnValue(row, 'P_ITEM_VER_NR', 1);
+        ihook.setColumnValue(row, 'FORM_NM', 'Not Applicable');
+        ihook.setColumnValue(row, 'ITEM_LONG_NM', v_dflt_txt);
+        ihook.setColumnValue(row, 'ADMIN_STUS_ID', 65);
+        ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
         rows.extend; rows(rows.last) := row;
         rowset := t_rowset(rows, 'Module (Hook)', 1,'NCI_ADMIN_ITEM_REL');
 
@@ -1013,24 +1138,22 @@ BEGIN
         rowform := form1.rowset.rowset(1);
 
         v_module_id :=  nci_11179.getItemId;
-        row := t_row();
+        row := rowform;
 
 
    -- raise_application_error(-20000, ihook.getColumnValue(rowform,'INSTR'));
 
-        for cur in (select cntxt_item_id, cntxt_ver_nr, admin_stus_id from admin_item where item_id =ihook.getColumnValue(row_ori,'ITEM_ID') and ver_nr =  ihook.getColumnValue(row_ori,'VER_NR')) loop
-            ihook.setColumnValue(row, 'ITEM_ID', v_module_id);
+           ihook.setColumnValue(row, 'ITEM_ID', v_module_id);
             ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
-            ihook.setColumnValue(row, 'VER_NR',ihook.getColumnValue(row_ori,'VER_NR') );
+            ihook.setColumnValue(row, 'VER_NR',1 );
             ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 52);
-            ihook.setColumnValue(row, 'CNTXT_ITEM_ID', cur.CNTXT_ITEM_ID);
-            ihook.setColumnValue(row, 'CNTXT_VER_NR', cur.CNTXT_VER_NR);
-            ihook.setColumnValue(row, 'ITEM_LONG_NM', v_module_id ||  c_ver_suffix);
-            ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowform,'ITEM_NM'));
-            ihook.setColumnValue(row, 'ITEM_DESC', ihook.getColumnValue(rowform,'ITEM_DESC'));
-            ihook.setColumnValue(row, 'ADMIN_STUS_ID', cur.ADMIN_STUS_ID);
-          ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-
+            if ( ihook.getColumnValue(rowform,'ITEM_LONG_NM')= v_dflt_txt) then
+                   ihook.setColumnValue(row, 'ITEM_LONG_NM', v_module_id ||  c_ver_suffix);
+            else
+                        ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(rowform,'ITEM_LONG_NM'));
+ 
+            end if;
+          
             rows:= t_rows();
             rows.extend;
             rows(rows.last) := row;
@@ -1046,8 +1169,8 @@ BEGIN
             ihook.setColumnValue(rowrel, 'P_ITEM_VER_NR', 1);
             ihook.setColumnValue(rowrel, 'C_ITEM_ID', v_module_id);
             ihook.setColumnValue(rowrel, 'C_ITEM_VER_NR', 1);
-            ihook.setColumnValue(rowrel, 'CNTXT_ITEM_ID', cur.CNTXT_ITEM_ID);
-            ihook.setColumnValue(rowrel, 'CNTXT_VER_NR', cur.CNTXT_VER_NR);
+            ihook.setColumnValue(rowrel, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID'));
+            ihook.setColumnValue(rowrel, 'CNTXT_VER_NR',  ihook.getColumnValue(rowform, 'CNTXT_VER_NR'));
             ihook.setColumnValue(rowrel, 'DISP_ORD', 0);
             ihook.setColumnValue(rowrel, 'REL_TYP_ID', 67);
             ihook.setColumnValue(rowrel, 'REP_NO', 0);
@@ -1059,7 +1182,6 @@ BEGIN
             action             := t_actionrowset(rows, 'Generic AI Relationship', 2, 2,'insert');
             actions.extend;
             actions(actions.last) := action;
-    end loop;
     hookoutput.actions    := actions;
     hookoutput.message := 'Module Created Successfully with ID ' || v_module_id;
 
@@ -1067,6 +1189,7 @@ BEGIN
   END IF;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+    nci_util.debugHook('GENERAL',v_data_out);
 END;
 
 PROCEDURE spEditModule  (    v_data_in IN CLOB,    v_data_out OUT CLOB,    v_user_id in varchar2)
@@ -1109,22 +1232,27 @@ BEGIN
 
  if hookInput.invocationNumber = 0 then
     ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Save Module Name');
+    ANSWER                     := T_ANSWER(1, 1, 'Update');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Edit Module Name', ANSWERS);
+    QUESTION               := T_QUESTION('Edit Module', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
     rows := t_rows();
-    row := t_row();
-    for cur in (select item_nm, item_desc from admin_item where item_id = ihook.getColumnValue(row_ori, 'C_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'C_ITEM_VER_NR')) loop
-        ihook.setColumnValue(row, 'ITEM_NM', cur.item_nm);
-        ihook.setColumnValue(row, 'ITEM_DESC', cur.item_desc);
-    end loop;
+    row := row_ori;
+    
+    nci_11179.spReturnAIRow( ihook.getColumnValue(row_ori, 'C_ITEM_ID'),ihook.getColumnValue(row_ori, 'C_ITEM_VER_NR'), row);
+  --   Form name
+    for cur in (select item_nm from admin_item where item_id = ihook.getColumnValue(row_ori, 'P_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR')) loop
+  --  and  ihook.getColumnValue(row_ori, 'P_ITEM_ID') <>  ihook.getColumnValue(row_ori, 'C_ITEM_ID')) loop
+     ihook.setColumnValue(row, 'FORM_NM', cur.item_nm);
+     end loop;
        rows.extend; rows(rows.last) := row;
-        rowset := t_rowset(rows, 'Edit Module (Hook)', 1,'ADMIN_ITEM');
+        rowset := t_rowset(rows, 'Modules (Hook)', 1,'ADMIN_ITEM');
 
+--
+     
     forms                  := t_forms();
-    form1                  := t_form('Edit Module (Hook)', 2,1);
+    form1                  := t_form('Modules (Hook)', 2,1);
     form1.rowset :=rowset;
     forms.extend;
     forms(forms.last) := form1;
@@ -1137,13 +1265,15 @@ BEGIN
         rowform := form1.rowset.rowset(1);
 
        row := t_row();
-
-
-            ihook.setColumnValue(row, 'ITEM_ID', ihook.getColumnValue(row_ori,'C_ITEM_ID'));
-            ihook.setColumnValue(row, 'VER_NR', ihook.getColumnValue(row_ori,'C_ITEM_VER_NR'));
-            ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowform,'ITEM_NM'));
-            ihook.setColumnValue(row, 'ITEM_DESC', ihook.getColumnValue(rowform,'ITEM_DESC'));
-
+       -- Get original row
+       nci_11179.spReturnAIRow( ihook.getColumnValue(row_ori, 'C_ITEM_ID'),ihook.getColumnValue(row_ori, 'C_ITEM_VER_NR'), row);
+                        ihook.setColumnValue(row, 'ITEM_LONG_NM', ihook.getColumnValue(rowform,'ITEM_LONG_NM'));
+                        ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowform,'ITEM_NM'));
+                        ihook.setColumnValue(row, 'ADMIN_STUS_ID', ihook.getColumnValue(rowform,'ADMIN_STUS_ID'));
+                        ihook.setColumnValue(row, 'REGSTR_STUS_ID', ihook.getColumnValue(rowform,'REGSTR_STUS_ID'));
+            ihook.setColumnValue(row, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
+            ihook.setColumnValue(row, 'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
+       
             rows:= t_rows();
             rows.extend;
             rows(rows.last) := row;
@@ -1151,7 +1281,23 @@ BEGIN
             action             := t_actionrowset(rows, 'Administered Item (No Sequence)', 2, 0,'update');
             actions.extend;
             actions(actions.last) := action;
-      hookoutput.actions    := actions;
+
+            rows:= t_rows();
+          
+          row := row_ori;
+            ihook.setColumnValue(row, 'INSTR', ihook.getColumnValue(rowform,'INSTR'));
+
+            rows.extend;
+            rows(rows.last) := row;
+     -- raise_application_error(-20000,  ihook.getColumnValue(row_ori,'ITEM_ID'));
+            action             := t_actionrowset(rows, 'Generic AI Relationship', 2, 2,'update');
+            actions.extend;
+            actions(actions.last) := action;
+    hookoutput.actions    := actions;
+    hookoutput.message := 'Module updated Successfully.';
+
+
+
     END IF;
   END IF;
 
@@ -1496,11 +1642,14 @@ BEGIN
  rows := t_rows();
  -- Get form and module ID
 
+
  select r.P_ITEM_ID, r.P_ITEM_VER_NR into v_frm_id, v_frm_Ver_nr from NCI_ADMIN_ITEM_REL_ALT_KEY k, NCI_ADMIN_ITEM_REL r where k.nci_pub_id = ihook.getColumNValue(row_ori, 'Q_PUB_ID')
  and k.nci_ver_nr = ihook.getColumNValue(row_ori, 'Q_VER_NR') and k.P_ITEM_ID = r.C_ITEM_ID and k.P_ITEM_VER_NR = r.C_ITEM_VER_NR and r.rel_typ_id = 61;
+ 
  if (nci_form_mgmt.isUserAuth(v_frm_id, v_frm_ver_nr, v_user_id) = false) then
  raise_application_error(-20000,'You are not authorized to edit any question in this form.');
  end if;
+
 
  if hookInput.invocationNumber = 0 then
 
