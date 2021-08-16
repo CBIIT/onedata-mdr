@@ -44,6 +44,10 @@ alter trigger TR_NCI_FORM_POST disable;
 alter trigger TR_NCI_PROTCL_POST disable;
 alter trigger TR_REF_POST disable;
 alter trigger TR_VD_POST disable;
+alter trigger TR_PERM_VAL_POST disable;
+alter trigger TR_NCI_OC_RECS_POST disable;
+alter trigger TR_NCI_VAL_MEAN_POST disable;
+
 
 --drop index idxNCiAIRelUni;
 drop index idx_Admin_item_nci_uni;
@@ -271,6 +275,9 @@ alter trigger TRG_NCI_QVV_POST enable;
 alter trigger TRG_NCI_QS_MOD_POST enable;
 alter trigger TRG_NCI_MOD_PROT_POST enable;
 alter trigger TRG_NCI_FORM_POST enable;
+alter trigger TR_PERM_VAL_POST enable;
+alter trigger TR_NCI_OC_RECS_POST enable;
+alter trigger TR_NCI_VAL_MEAN_POST enable;
 ---create unique index idxNCiAIRelUni on nci_admin_item_rel 
 --( P_ITEM_ID, P_ITEM_VER_NR,decode(REL_TYP_ID, 61, 1,C_ITEM_ID), C_ITEM_VER_NR,  REL_TYP_ID, DISP_ORD);
 
