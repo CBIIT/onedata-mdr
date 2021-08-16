@@ -68,7 +68,7 @@ commit;
 
 
 for cur in (select * from temp_import) loop
-for i in 1..cur.rep_no - 1 loop
+for i in 1..cur.rep_no  loop
 --for i in 1..1  loop
 insert into /* APPEND */ nci_quest_vv_rep (quest_pub_id, quest_ver_nr, rep_seq)
 select nci_pub_id, nci_ver_nr, i from nci_admin_item_rel_alt_key ak where p_item_id = cur.item_id and p_item_ver_nr= cur.ver_nr
