@@ -538,7 +538,7 @@ begin
 
     if (actions.count > 0) then
         hookoutput.actions := actions;
-        hookoutput.message := v_pv_rows.count || ' permissible values created. ';
+        hookoutput.message := v_pv_rows.count || ' PV/VM created. ';
     end if;
 
 END;
@@ -822,6 +822,8 @@ begin
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'No VM Specified');
                   is_valid := false;
         end if;
+        ihook.setColumnValue(rowform, 'STG_AI_ID', rep_idx);
+    
         rowforms.extend;
                 rowforms(rowforms.last) := rowform;
         
@@ -915,7 +917,7 @@ begin
 end if;
     if (actions.count > 0) then
         hookoutput.actions := actions;
-        hookoutput.message := v_cnt || ' VM/PV created.';
+        hookoutput.message := v_cnt || ' PV/VM created.';
          --   raise_application_error(-20000,'Inside 1' || v_item_id);
 
     end if;
