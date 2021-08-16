@@ -14,6 +14,7 @@ PROCEDURE spDECreateFrom ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN 
 PROCEDURE spClassification ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 PROCEDURE spClassificationNMDef ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2, v_typ in varchar2);
 PROCEDURE spDesignateNew   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+PROCEDURE spUndesignate   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 PROCEDURE spClassifyUnclassify   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 PROCEDURE spShowClassificationNmDef   ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 function getDECreateQuestion(v_from in number,v_first in boolean) return t_question;
@@ -346,7 +347,8 @@ as
      v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
           v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
     
-   for cur in (select * from nci_clsfctn_schm_item where p_item_id= v_item_id and p_item_ver_nr = v_ver_nr and nvl(fld_delete,0) = 0) loop
+   for cur in (select ai.* from admin_item ai, nci_clsfctn_schm_item csi where p_item_id= v_item_id and p_item_ver_nr = v_ver_nr and nvl(ai.fld_delete,0) = 0
+   and csi.item_id = ai.item_id and csi.ver_nr = ai.ver_nr and upper(ai.admin_stus_nm_dn) not like '%DELETED%') loop
     raise_application_error(-20000, 'Select CSI has children nodes. Please move children before deleting.');
     end loop;
     
@@ -561,7 +563,9 @@ BEGIN
             and vd.item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') and vd.ver_nr = ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR');
 
         if ( ihook.getColumnValue(rowai,'ITEM_LONG_NM')= v_dflt_txt) then
-        ihook.setColumnValue(rowai,'ITEM_LONG_NM', v_id ||'v1.00');
+        ihook.setColumnValue(rowai,'ITEM_LONG_NM', ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') || 'v' 
+        || trim(to_char(ihook.getColumnValue(rowde, 'DE_CONC_VER_NR'), '9999.99')) || ':' || ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') || 'v' || 
+        trim(to_char(ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR'), '9999.99')));
         end if;
         if ( ihook.getColumnValue(rowai,'ITEM_NM')= v_dflt_txt) then
         ihook.setColumnValue(rowai,'ITEM_NM', v_item_nm);
@@ -1822,8 +1826,8 @@ BEGIN
      	 answers := t_answers();
   	   	 answer := t_answer(1, 1, 'Designate');
          answers.extend;          answers(answers.last) := answer;
-         answer := t_answer(2, 2, 'Undesignate');
-         answers.extend;          answers(answers.last) := answer;
+  --       answer := t_answer(2, 2, 'Undesignate');
+   --      answers.extend;          answers(answers.last) := answer;
       question := t_question('Choose Option', answers);
        	 hookOutput.question := question;
          row := t_row();
@@ -1922,7 +1926,7 @@ BEGIN
                     action := t_actionrowset(rows, 'Alternate Names', 2,1,'delete');
                     actions.extend;
                     actions(actions.last) := action;
-                    action := t_actionrowset(rows, 'Alternate Names', 2,1,'purge');
+                    action := t_actionrowset(rows, 'Alternate Names', 2,2,'purge');
                     actions.extend;
                     actions(actions.last) := action;
            hookoutput.message := 'Only CDEs have been undesignated. Total Undesignated: ' || rows.count;
@@ -1935,8 +1939,107 @@ if (actions.count > 0) then
 end if;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+  nci_util.debugHook('GENERAL', v_data_out);
 END;
 
+PROCEDURE spUndesignate
+  (
+    v_data_in IN CLOB,
+    v_data_out OUT CLOB,
+    v_usr_id  IN varchar2)
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+
+  actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+  row_ori t_row;
+  rowform t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+
+  question    t_question;
+  answer     t_answer;
+  answers     t_answers;
+
+  forms     t_forms;
+  form1  t_form;
+
+  v_temp integer;
+  v_nm_typ_id integer;
+  v_default_txt varchar2(30) := 'Default is Context Name.' ;
+  v_cntxt_nm  varchar2(255);
+  v_cnt integer;
+    v_found boolean;
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+
+   select obj_key_id into v_nm_typ_id from obj_key where obj_key_desc = 'USED_BY' and obj_typ_id = 11;
+    v_cnt := 0; -- number of designations
+
+  if hookInput.invocationNumber = 0  then
+     	 answers := t_answers();
+  	      answer := t_answer(2, 2, 'Undesignate');
+         answers.extend;          answers(answers.last) := answer;
+      question := t_question('Choose Option', answers);
+       	 hookOutput.question := question;
+         row := t_row();
+
+
+   
+
+        forms                  := t_forms();
+        form1                  := t_form('Designate Context Form', 2,1);
+        form1.rowset :=rowset;
+        forms.extend;    forms(forms.last) := form1;
+        hookoutput.forms := forms;
+  	elsif hookInput.invocationNumber = 1 then
+        forms              := hookInput.forms;
+        form1              := forms(1);
+        rowform := form1.rowset.rowset(1);  -- entered values from user
+        rows := t_rows();
+        if (hookinput.answerId = 2) then -- undesignate
+       rows := t_rows();
+       for i in 1..hookinput.originalrowset.rowset.count loop
+                    row_ori :=  hookInput.originalRowset.rowset(i);
+                    if (ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') = 4 ) then
+                         for cur in (select * from alt_nms where item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'VER_NR')
+                        and NM_TYP_ID = v_nm_typ_id and CNTXT_ITEM_ID = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID')
+                        and CNTXT_VER_NR = ihook.getColumnValue(rowform,'CNTXT_VER_NR') ) loop
+                            row := t_row();
+                            ihook.setColumnValue(row, 'NM_ID', cur.NM_ID);
+     rows.extend;
+                            rows(rows.last) := row;
+                        end loop;
+                    end if;
+        end loop;
+        if (rows.count > 0) then
+        
+                    action := t_actionrowset(rows, 'Alternate Names', 2,1,'delete');
+                    actions.extend;
+                    actions(actions.last) := action;
+                    action := t_actionrowset(rows, 'Alternate Names', 2,2,'purge');
+                    actions.extend;
+                    actions(actions.last) := action;
+           hookoutput.message := 'Only CDEs have been undesignated. Total Undesignated: ' || rows.count;
+        else
+        hookoutput.message := 'No CDEs have been undesignated.';
+        end if;
+    end if;
+    
+if (actions.count > 0) then
+  hookoutput.actions := actions;
+
+end if;
+end if;
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+ -- nci_util.debugHook('GENERAL', v_data_out);
+END;
 
 -- Classify/Unclassify for Super Curators
 PROCEDURE spClassifyUnclassify
