@@ -40,11 +40,11 @@ if (:new.lst_upd_dt is null) then
 :new.lst_upd_dt := sysdate;
 end if;
 END ;
-
+/
 
 CREATE or REPLACE TRIGGER TR_AI_AUD_TS
   BEFORE UPDATE ON ADMIN_ITEM
-  REFERENCING FOR EACH ROW
+   FOR EACH ROW
 BEGIN
   :new.LST_UPD_DT := SYSDATE;
   :new.LST_UPD_USR_ID_X := :new.LST_UPD_USR_ID;
@@ -68,3 +68,4 @@ if (:new.LST_UPD_USR_ID_X is null) then
 end if;
 
 END TR_AI_AUD_TS;
+/
