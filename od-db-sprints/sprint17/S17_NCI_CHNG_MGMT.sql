@@ -562,7 +562,7 @@ BEGIN
             where dec.item_id = ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') and dec.ver_nr =  ihook.getColumnValue(rowde, 'DE_CONC_VER_NR')
             and vd.item_id =  ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') and vd.ver_nr = ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR');
 
-        if ( ihook.getColumnValue(rowai,'ITEM_LONG_NM')= v_dflt_txt) then
+        if ( ihook.getColumnValue(rowai,'ITEM_LONG_NM')= v_dflt_txt or ihook.getColumnValue(rowai,'ITEM_LONG_NM') is null) then
         ihook.setColumnValue(rowai,'ITEM_LONG_NM', ihook.getColumnValue(rowde, 'DE_CONC_ITEM_ID') || 'v' 
         || trim(to_char(ihook.getColumnValue(rowde, 'DE_CONC_VER_NR'), '9999.99')) || ':' || ihook.getColumnValue(rowde, 'VAL_DOM_ITEM_ID') || 'v' || 
         trim(to_char(ihook.getColumnValue(rowde, 'VAL_DOM_VER_NR'), '9999.99')));
