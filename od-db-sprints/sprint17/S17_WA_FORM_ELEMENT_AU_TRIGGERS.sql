@@ -46,11 +46,3 @@ end IF;
 END;
 /
 
---from updating its ADMIN_ITEM
-CREATE OR REPLACE TRIGGER TRG_NCI_FORM_POST
-  AFTER INSERT or UPDATE OR DELETE
-  on NCI_FORM
-  for each row
-BEGIN
-    update ADMIN_ITEM set LST_UPD_DT = :new.LST_UPD_DT, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
-END;
