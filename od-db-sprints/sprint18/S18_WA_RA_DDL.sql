@@ -18,4 +18,4 @@ and frm.admin_item_typ_id in ( 54,55)
 and air.c_item_id = de.item_id
 and air.c_item_ver_nr = de.ver_nr;
 
-alter table CNCPT add (PRMRY_CNCPT_IND  number(1));
+alter table CNCPT add (PRMRY_CNCPT_IND  number(1) default 0);
