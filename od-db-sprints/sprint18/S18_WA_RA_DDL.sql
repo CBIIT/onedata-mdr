@@ -3,7 +3,7 @@
   select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr,
 air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr,
  air.c_item_id de_item_id, air.c_item_ver_nr de_ver_nr, air.disp_ord quest_disp_ord,frm_mod.disp_ord mod_disp_ord,
-aim.item_nm MOD_ITEM_NM,
+aim.item_nm MOD_ITEM_NM, air.instr,
  aim.item_long_nm  mod_item_long_nm, aim.item_desc mod_item_desc,
 'QUESTION' admin_item_typ_nm, air.nci_pub_id,air.nci_ver_nr,
 de.CNTXT_NM_DN, de.item_nm DE_ITEM_NM, de.cntxt_item_id DE_CNTXT_ITEM_ID, de.cntxt_VER_NR DE_CNTXT_VER_NR,
