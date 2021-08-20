@@ -1,0 +1,28 @@
+-- Run as ONEDATA_MD DDL scripts
+
+
+-- Run as ONEDATA_WA DDL scripts
+S18_WA_RA_DDL.sql
+S18_WA_DDL.sql
+S18_sp_postprocess.sql
+S18_NCI_DEC_MGMT.sql
+S18_NCI_VD.sql
+S18_NCI_CADSR_PULL.sql
+S18_NCI_CADSR_PUSH_CORE.sql
+S18_NCI_CADSR_PUSH.sql
+S18_PUSH_Migration.sql
+S18_NCI_CADSR_PUSH_FORM.sql
+
+-- Run as ONEDATA_RA DDL scripts
+S18_WA_RA_DDL.sql
+
+-- DATA MIGRATION
+
+-- Run as ONEDATA_WA DM scripts
+S18_WA_Data_migration.sql
+
+-- Run as ONEDATA_RA DM scripts
+S12_RA_Data_Migration.sql
+
+-- Run validate job as ONEDATA_WA
+exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
