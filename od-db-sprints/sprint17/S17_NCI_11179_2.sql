@@ -149,7 +149,7 @@ begin
 	end if;
 
     if hookInput.invocationNumber = 1  then  -- Seconf invocation
-    
+
         forms              := hookInput.forms;
         form1              := forms(1);
         row_sel := form1.rowset.rowset(1);
@@ -157,27 +157,27 @@ begin
              cnt := nci_11179.getwordcount(v_str);
 
           rowscart := t_rows();
-   
+
          for i in  1..cnt loop
                         v_item_id := nci_11179.getWord(v_str, i, cnt);
         for cur in (select * from admin_item where item_id = v_item_id and currnt_ver_ind = 1 and admin_item_typ_id in (4,51,54) and (item_id, ver_nr) not in
         (select item_id, ver_nr from nci_usr_cart  where cntct_secu_id = v_usr_id)) loop
-    
+
         row := t_row();
             ihook.setColumnValue(row, 'ITEM_ID', cur.item_id);
             ihook.setColumnValue(row, 'VER_NR', cur.ver_nr);
            ihook.setColumnValue(row,'CNTCT_SECU_ID', v_usr_id);
             --   ihook.setColumnValue(row,'CNTCT_SECU_ID', 'DWARZEL');
-   
+
             ihook.setColumnValue(row,'GUEST_USR_NM', 'NONE');
                 	rowscart.extend;
                     rowscart (rowscart.last) := row;
-        
+
 
  end loop;
 end loop;
         -- If Item needs to be added.
-     
+
             /*  If item not already in cart */
             if (rowscart.count  > 0) then
                 action := t_actionrowset(rowscart, 'User Cart', 2,0,'insert');
@@ -227,12 +227,12 @@ BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
-  
+
 
   if(hookinput.originalrowset.rowset.count > 0) then
   raise_application_error(-20000, 'Bulk change applies to to all items in the caDSR and not the selected/filtered items. Please deselect items and re-select the command.');
   end if;
-  
+
     if hookInput.invocationNumber = 0 then
 
     forms                  := t_forms();
@@ -245,7 +245,7 @@ BEGIN
 
 	   	 question := t_question('Reassign Item Context', answers);
        	 hookOutput.question := question;
- 
+
 	end if;
 
     if hookInput.invocationNumber = 1  then
@@ -253,7 +253,7 @@ BEGIN
              forms              := hookInput.forms;
            form1              := forms(1);
       rowform := form1.rowset.rowset(1);
-	    
+
         if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1) then
             update admin_item set cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
             where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR');
@@ -266,25 +266,25 @@ BEGIN
         end if;
         end loop;
         end if;
-        
+
         if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1 or nvl(ihook.getColumnValue(rowform,'IND_ALT_NMS'),0) = 1 ) then
               update alt_nms set cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
             where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') ;
- 
+
         end if;
             if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1 or nvl(ihook.getColumnValue(rowform,'IND_ALT_DEF'),0) = 1 ) then
               update alt_def set cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
             where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') ;
- 
+
         end if;
               if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1 or nvl(ihook.getColumnValue(rowform,'IND_REF_DOC'),0) = 1 ) then
               update ref set nci_cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), nci_cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
             where nci_cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and nci_cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') ;
- 
+
         end if;
-        
-      
- 
+
+
+
         hookoutput.message := 'Context reassigned.';
     end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -326,7 +326,7 @@ BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
-  
+
   if(hookinput.originalrowset.rowset.count > 0) then
   raise_application_error(-20000, 'Bulk change applies to to all items in the caDSR and not the selected/filtered items. Please deselect items and re-select the command.');
   end if;
@@ -343,7 +343,7 @@ BEGIN
 
 	   	 question := t_question('Reassign Item CSI.', answers);
        	 hookOutput.question := question;
- 
+
 	end if;
 
     if hookInput.invocationNumber = 1  then
@@ -351,17 +351,17 @@ BEGIN
              forms              := hookInput.forms;
              form1              := forms(1);
              rowform := form1.rowset.rowset(1);
-	   
-       
-       update nci_admin_item_rel set p_item_id = ihook.getColumnValue(rowform, 'TO_CNTXT_ITEM_ID'), p_item_ver_nr =  ihook.getColumnValue(rowform, 'TO_CNTXT_VER_NR') where rel_typ_id = 65 and 
+
+
+       update nci_admin_item_rel set p_item_id = ihook.getColumnValue(rowform, 'TO_CNTXT_ITEM_ID'), p_item_ver_nr =  ihook.getColumnValue(rowform, 'TO_CNTXT_VER_NR') where rel_typ_id = 65 and
        p_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and p_item_ver_nr =  ihook.getColumnValue(rowform, 'CNTXT_VER_NR');
        commit;
-       
-       update NCI_CSI_ALT_DEFNMS set NCI_PUB_ID = ihook.getColumnValue(rowform, 'TO_CNTXT_ITEM_ID'), NCI_VER_NR =  ihook.getColumnValue(rowform, 'TO_CNTXT_VER_NR') where 
+
+       update NCI_CSI_ALT_DEFNMS set NCI_PUB_ID = ihook.getColumnValue(rowform, 'TO_CNTXT_ITEM_ID'), NCI_VER_NR =  ihook.getColumnValue(rowform, 'TO_CNTXT_VER_NR') where
        NCI_PUB_ID = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and NCI_VER_NR =  ihook.getColumnValue(rowform, 'CNTXT_VER_NR');
        commit;
-       
-     
+
+
         hookoutput.message := 'CSI reassigned.';
     end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -814,6 +814,7 @@ as
     v_perm_val_nm    perm_val.perm_val_nm%type;
     v_item_id		 number;
     v_ver_nr		 number;
+    v_cart boolean;
     vd_id_nm    varchar2(300);
     v_item_typ_id integer;
 begin
@@ -821,20 +822,26 @@ begin
     hookInput := ihook.getHookInput(v_data_in);
     hookOutput.invocationNumber := hookInput.invocationNumber;
     hookOutput.originalRowset := hookInput.originalRowset;
-
+v_cart := false;
  row_ori := hookInput.originalRowset.rowset (1);
 -- saving all unique val_mean_ids from submitted admin items into v_tab_val_mean_id
 
-    if (ihook.getColumnValue(row_ori,'ADMIN_ITEM_TYP_ID') not in (3, 4)) then
+if (upper(hookinput.originalrowset.tablename) like '%CART%') then
+    v_item_typ_id := 4;
+    v_cart := true;
+else
+    v_item_typ_id := ihook.getColumnValue(row_ori,'ADMIN_ITEM_TYP_ID');
+end if;
+
+    if (v_item_typ_id not in (3, 4)) then
         raise_application_error(-20000,'!!!! This functionality is only applicable for CDE and VD !!!!');
     return;
     end if;
-    v_item_typ_id := ihook.getColumnValue(row_ori,'ADMIN_ITEM_TYP_ID');
-    
+
     if (v_item_typ_id = 4) then -- Data Element
     for i in 1 .. hookInput.originalRowset.Rowset.count loop
         row_cur := hookInput.originalRowset.Rowset(i);
-        if (ihook.getColumnValue(row_cur, 'ADMIN_ITEM_TYP_ID') = v_item_typ_id) then
+        if (ihook.getColumnValue(row_cur, 'ADMIN_ITEM_TYP_ID') = v_item_typ_id or v_cart) then
         for rec in (  select nci_val_mean_item_id, nci_val_mean_ver_nr, cncpt_concat, cncpt_concat_nm from perm_val pv, nci_admin_item_ext ext, de
         where pv.val_dom_item_id=de.val_dom_item_id and de.item_id = ihook.getColumnValue(row_cur,'ITEM_ID')
         and pv.val_dom_ver_nr=de.val_dom_ver_nr and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR') and pv.fld_delete=0 and
@@ -851,7 +858,7 @@ begin
                 v_tab_val_mean_nm(v_tab_val_mean_nm.count) := rec.cncpt_concat_nm;
             end if;
         end loop;
-    
+
         v_tab_admin_item_nm.extend();
         select ai.item_id || '-' || ai.item_nm into  vd_id_nm from admin_item ai, de where ai.item_id = de.val_dom_item_id and ai.ver_nr = de.val_dom_ver_nr and de.item_id =ihook.getColumnValue(row_cur,'ITEM_ID')
         and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR');
@@ -861,11 +868,11 @@ begin
     end loop;
   end if;
   if (v_item_typ_id = 3) then --Value Domain
-  
+
     for i in 1 .. hookInput.originalRowset.Rowset.count loop
         row_cur := hookInput.originalRowset.Rowset(i);
      if (ihook.getColumnValue(row_cur, 'ADMIN_ITEM_TYP_ID') = v_item_typ_id) then
-   
+
         for rec in (  select nci_val_mean_item_id, nci_val_mean_ver_nr, cncpt_concat, cncpt_concat_nm from perm_val pv, nci_admin_item_ext ext
         where val_dom_item_id=ihook.getColumnValue(row_cur,'ITEM_ID')
         and val_dom_ver_nr=ihook.getColumnValue(row_cur,'VER_NR') and pv.fld_delete=0 and
@@ -883,16 +890,16 @@ begin
             end if;
         end loop;
       v_tab_admin_item_nm.extend();
-     
+
       v_tab_admin_item_nm(v_tab_admin_item_nm.count) := 'VD:' || ihook.getColumnValue(row_cur,'ITEM_ID') || '-' || ihook.getColumnValue(row_cur,'ITEM_NM');
     end if;
     end loop;
-   end if; 
-    
+   end if;
+
     -- populating val means/perm vals
-   
+
     if (v_item_typ_id = 4) then
-   
+
     rows := t_rows();
     for i in 1 .. v_tab_val_mean_cd.count loop
 
@@ -907,8 +914,8 @@ begin
     k := 1;
         for j in 1 .. hookInput.originalRowset.Rowset.count loop
            row_cur := hookInput.originalRowset.Rowset(j);
-        if (ihook.getColumnValue(row_cur, 'ADMIN_ITEM_TYP_ID') = v_item_typ_id) then
-            
+        if (ihook.getColumnValue(row_cur, 'ADMIN_ITEM_TYP_ID') = v_item_typ_id or v_cart) then
+
             v_perm_val_nm := '';
             for rec in   (select perm_val_nm   from perm_val a, nci_admin_item_Ext ext, de
             where nci_val_mean_item_id=ext.item_id  and nci_val_mean_ver_nr = ext.ver_nr and ext.cncpt_concat = v_tab_val_mean_cd(i)
@@ -923,9 +930,9 @@ begin
         rows.extend; rows(rows.last) := row;
     end loop;
     end if;
-    
+
     if (v_item_typ_id = 3) then
-   
+
     rows := t_rows();
     for i in 1 .. v_tab_val_mean_cd.count loop
 
@@ -954,10 +961,10 @@ begin
             end if;
         end loop;
         rows.extend; rows(rows.last) := row;
-     
+
     end loop;
     end if;
-    
+
     showRowset := t_showableRowset(rows, 'Permissible Value Comparison',4, 'unselectable');
     hookOutput.showRowset := showRowset;
 
