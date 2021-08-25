@@ -1,0 +1,17 @@
+-- Run as ONEDATA_MD DDL scripts
+
+
+-- Run as ONEDATA_WA DDL scripts
+
+-- Run as ONEDATA_RA DDL scripts
+
+-- DATA MIGRATION
+
+-- Run as ONEDATA_WA DM scripts
+S19_WA_Data_migration.sql
+
+-- Run as ONEDATA_RA DM scripts
+S12_RA_Data_Migration.sql
+
+-- Run validate job as ONEDATA_WA
+exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
