@@ -217,3 +217,6 @@ FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
            AND ADMIN_ITEM.CNTXT_ITEM_ID = CNTXT.ITEM_ID
            AND ADMIN_ITEM.CNTXT_VER_NR = CNTXT.VER_NR;
 
+
+create or replace view vw_cncpt_admin_item as select a.*, decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT from
+cncpt_admin_item a
