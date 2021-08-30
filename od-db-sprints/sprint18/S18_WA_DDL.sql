@@ -30,3 +30,17 @@ BEGIN
 END;
 /
   
+create or replace TRIGGER TR_NCI_PERM_VAL
+  BEFORE INSERT  on PERM_VAL
+  for each row
+BEGIN
+   if (:new.NCI_IDSEQ is null) then
+ :new.NCI_IDSEQ := nci_11179.cmr_guid();
+ /*for cur in (select nci_idseq from perm_val where perm_val_nm = :new.perm_val_nm and nci_val_mean_item_id = :new.nci_val_mean_item_id and
+             nci_val_mean_ver_nr = :new.nci_val_mean_ver_nr) loop
+      :new.NCI_IDSEQ := cur.nci_idseq;
+  end loop;
+   */          
+end if;
+END;
+/
