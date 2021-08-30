@@ -218,5 +218,127 @@ FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
            AND ADMIN_ITEM.CNTXT_VER_NR = CNTXT.VER_NR;
 
 
-create or replace view vw_cncpt_admin_item as select a.*, decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT from
-cncpt_admin_item a
+  CREATE OR REPLACE  VIEW VW_NCI_AI_CNCPT AS
+  SELECT  '5. Object Class' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT
+       FROM CNCPT_ADMIN_ITEM a, DE, DE_CONC where
+	a.ITEM_ID = DE_CONC.OBJ_CLS_ITEM_ID and
+	a.VER_NR = DE_CONC.OBJ_CLS_VER_NR and
+	DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID and
+	DE.DE_CONC_VER_NR = DE_CONC.VER_NR
+	union
+         SELECT '4. Property' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND,  NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT
+       FROM CNCPT_ADMIN_ITEM a, DE, DE_CONC where
+	a.ITEM_ID = DE_CONC.PROP_ITEM_ID and
+	a.VER_NR = DE_CONC.PROP_VER_NR and
+	DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID and
+	DE.DE_CONC_VER_NR = DE_CONC.VER_NR
+	union
+         SELECT '3. Representation Term' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT
+       FROM CNCPT_ADMIN_ITEM a, DE, VALUE_DOM VD where
+	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
+	a.VER_NR = VD.REP_CLS_VER_NR and
+	DE.VAL_DOM_ITEM_ID = VD.ITEM_ID and
+	DE.VAL_DOM_VER_NR = VD.VER_NR
+	union
+         SELECT '1. Value Meaning' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT
+       FROM CNCPT_ADMIN_ITEM a, DE, PERM_VAL PV where
+	a.ITEM_ID = PV.NCI_VAL_MEAN_ITEM_ID and
+	a.VER_NR = PV.NCI_VAL_MEAN_VER_NR and
+	DE.VAL_DOM_ITEM_ID = PV.VAL_DOM_ITEM_ID and
+	DE.VAL_DOM_VER_NR = PV.VAL_DOM_VER_NR
+	union
+         SELECT '2. Value Domain' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT
+       FROM CNCPT_ADMIN_ITEM a, DE where
+	DE.VAL_DOM_ITEM_ID = a.ITEM_ID and
+	DE.VAL_DOM_VER_NR = a.VER_NR
+  union
+    SELECT  '2. Object Class' ALT_NMS_LVL, DEC.ITEM_ID  ITEM_ID,
+		DEC.VER_NR VER_NR,
+	a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT
+       FROM CNCPT_ADMIN_ITEM a, DE_CONC DEC where
+	a.ITEM_ID = DEC.OBJ_CLS_ITEM_ID and
+	a.VER_NR = DEC.OBJ_CLS_VER_NR
+	union
+         SELECT '1. Property' ALT_NMS_LVL, DEC.ITEM_ID  ITEM_ID,
+		DEC.VER_NR VER_NR,
+	a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+			a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT
+       FROM CNCPT_ADMIN_ITEM a, DE_CONC DEC where
+	a.ITEM_ID = DEC.PROP_ITEM_ID and
+	a.VER_NR = DEC.PROP_VER_NR
+  union
+  SELECT  'Component Concept' ALT_NMS_LVL, a.ITEM_ID, a.VER_NR,
+	a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT
+       FROM CNCPT_ADMIN_ITEM a
+   union
+      SELECT 'Representation Term' ALT_NMS_LVL, VD.ITEM_ID  ITEM_ID,
+	VD.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT
+       FROM CNCPT_ADMIN_ITEM a, VALUE_DOM VD where
+	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
+	a.VER_NR = VD.REP_CLS_VER_NR ;
+
+update obj_key set disp_ord = 1 where obj_key_id in (8, 49);
+
+update obj_key set disp_ord = 2 where obj_key_id in (1,5,6,7,9, 50, 53, 51, 56);
+
+
+update obj_key set disp_ord = 3 where obj_key_id in (2,3);
+
+
+update obj_key set disp_ord = 4 where obj_key_id in (4);
+commit;
