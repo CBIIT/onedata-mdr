@@ -342,3 +342,5 @@ update obj_key set disp_ord = 3 where obj_key_id in (2,3);
 
 update obj_key set disp_ord = 4 where obj_key_id in (4);
 commit;
+
+alter table nci_admin_item_rel modify (REP_NO  default 0);
