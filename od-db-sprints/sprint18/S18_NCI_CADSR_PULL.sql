@@ -1,4 +1,4 @@
-create or replace PACKAGE nci_caDSR_PULL AS
+CREATE OR REPLACE PACKAGE nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
 procedure sp_create_ai_3;
@@ -30,7 +30,9 @@ procedure SP_SOURCE_TYPE;
   --    procedure sp_append_quest_pv;
 END;
 /
-create or replace PACKAGE BODY nci_caDSR_PULL AS
+
+
+CREATE OR REPLACE PACKAGE BODY nci_caDSR_PULL AS
 
 
 v_dflt_usr  varchar2(30) := 'ONEDATA';
@@ -152,7 +154,7 @@ BEGIN
 --               nvl(date_created,v_dflt_date) date_created,
 --   nvl(NVL (date_modified, date_created), v_dflt_date) date_modified,
 --            nvl(modified_by,v_dflt_usr) modified_by
---          FROM sbr.contexts order by name) loop
+--          FROM sbr_m.contexts order by name) loop
 --    INSERT INTO admin_item (item_id, admin_item_typ_id,
 --                            NCI_iDSEQ,
 --                            ITEM_DESC,
@@ -195,7 +197,7 @@ BEGIN
 --               nvl(c.date_created,v_dflt_date) ,
 --               nvl(NVL (date_modified, date_created), v_dflt_date),
 --               nvl(c.modified_by,v_dflt_usr)
---          FROM sbr.contexts c, admin_item ai, obj_key ok
+--          FROM sbr_m.contexts c, admin_item ai, obj_key ok
 --         WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.conte_idseq)
 --               AND TRIM (c.pal_name) = TRIM (ok.NCI_CD)
 --               AND ok.obj_typ_id = 14
@@ -1251,7 +1253,7 @@ for cur in ( SELECT TRIM (conte_idseq) conte_idseq,
                nvl(date_created,v_dflt_date) date_created,
    nvl(NVL (date_modified, date_created), v_dflt_date) date_modified,
             nvl(modified_by,v_dflt_usr) modified_by
-          FROM sbr.contexts c
+          FROM sbr_m.contexts c
           where  NOT EXISTS (select * from admin_item a where c.conte_idseq =a.nci_IDSEQ and a.ADMIN_ITEM_TYP_ID=8)order by name)
     loop
     INSERT INTO admin_item (item_id, admin_item_typ_id,
@@ -1298,7 +1300,7 @@ end loop;
                nvl(c.date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
                nvl(c.modified_by,v_dflt_usr)
-          FROM sbr.contexts c, admin_item ai, obj_key ok
+          FROM sbr_m.contexts c, admin_item ai, obj_key ok
          WHERE     TRIM (ai.NCI_IDSEQ) = TRIM (c.conte_idseq)
                AND TRIM (c.pal_name) = TRIM (ok.NCI_CD)
                AND ok.obj_typ_id = 14
@@ -1306,10 +1308,10 @@ end loop;
 
     COMMIT;
 
-update admin_Item set fld_delete = 1 where admin_item_typ_id = 8 and nci_idseq not in (Select conte_idseq from sbr.contexts);
+update admin_Item set fld_delete = 1 where admin_item_typ_id = 8 and nci_idseq not in (Select conte_idseq from sbr_m.contexts);
 commit;
 MERGE INTO admin_item a
-USING sbr.contexts c
+USING sbr_m.contexts c
 ON (c.conte_idseq =a.nci_IDSEQ
  AND a.admin_item_typ_id = 8)
   WHEN MATCHED THEN
@@ -1391,7 +1393,7 @@ update SET
                nvl(ac.date_created,v_dflt_date) ,
                nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr)
-          FROM sbr.conceptual_domains  ac,
+          FROM sbr_m.conceptual_domains  ac,
                admin_item                   cntxt,
                stus_mstr                    s
          WHERE     ac.conte_idseq = cntxt.nci_idseq
@@ -1414,7 +1416,7 @@ update SET
                nvl(cd.date_created,v_dflt_date) ,
                   nvl(NVL (cd.date_modified, cd.date_created), v_dflt_date),
                nvl(cd.modified_by,v_dflt_usr)
-          FROM sbr.conceptual_domains cd, admin_item ai
+          FROM sbr_m.conceptual_domains cd, admin_item ai
          WHERE ai.NCI_IDSEQ = cd.CD_IDSEQ;
 
     COMMIT;
@@ -1481,7 +1483,7 @@ update SET
                     nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr),
                ac.definition_source
-          FROM admin_item cntxt, stus_mstr s, sbrext.object_classes_ext ac
+          FROM admin_item cntxt, stus_mstr s, sbrext_m.object_classes_ext ac
          WHERE     ac.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND cntxt.admin_item_typ_id = 8;
@@ -1537,7 +1539,7 @@ update SET
                    nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr),
                ac.definition_source
-          FROM admin_item cntxt, stus_mstr s, sbrext.properties_ext ac
+          FROM admin_item cntxt, stus_mstr s, sbrext_m.properties_ext ac
          WHERE     ac.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND cntxt.admin_item_typ_id = 8;
@@ -1557,7 +1559,7 @@ update SET
                nvl(cd.date_created,v_dflt_date) ,
                               nvl(NVL (cd.date_modified, cd.date_created), v_dflt_date),
                nvl(cd.modified_by,v_dflt_usr)
-          FROM sbrext.object_classes_ext cd, admin_item ai
+          FROM sbrext_m.object_classes_ext cd, admin_item ai
          WHERE ai.NCI_IDSEQ = cd.OC_IDSEQ;
 
     COMMIT;
@@ -1575,7 +1577,7 @@ update SET
                nvl(cd.date_created,v_dflt_date) ,
                  nvl(NVL (cd.date_modified, cd.date_created), v_dflt_date),
                nvl(cd.modified_by,v_dflt_usr)
-          FROM sbrext.properties_ext cd, admin_item ai
+          FROM sbrext_m.properties_ext cd, admin_item ai
          WHERE ai.NCI_IDSEQ = cd.PROP_IDSEQ;
 
     COMMIT;
@@ -1641,7 +1643,7 @@ update SET
                nvl(ac.date_created,v_dflt_date) ,
   nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr)
-          FROM sbr.classification_schemes  ac,
+          FROM sbr_m.classification_schemes  ac,
                admin_item                   cntxt,
                stus_mstr                    s
          WHERE     ac.conte_idseq = cntxt.nci_idseq
@@ -1699,7 +1701,7 @@ update SET
                nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr),
                ac.definition_source
-          FROM sbrext.representations_ext  ac,
+          FROM sbrext_m.representations_ext  ac,
                admin_item                   cntxt,
                stus_mstr                    s
          WHERE     ac.conte_idseq = cntxt.nci_idseq
@@ -1724,7 +1726,7 @@ update SET
                nvl(cd.date_created,v_dflt_date) ,
                nvl(NVL (cd.date_modified, cd.date_created), v_dflt_date),
                nvl(cd.modified_by,v_dflt_usr)
-          FROM sbr.classification_schemes cd, admin_item ai, obj_key ok
+          FROM sbr_m.classification_schemes cd, admin_item ai, obj_key ok
          WHERE     ai.NCI_IDSEQ = cd.CS_IDSEQ
                AND TRIM (cstl_name) = ok.nci_cd
                AND ok.obj_typ_id = 3;
@@ -1745,7 +1747,7 @@ update SET
                nvl(cd.date_created,v_dflt_date) ,
                nvl(NVL (cd.date_modified, cd.date_created), v_dflt_date),
                nvl(cd.modified_by,v_dflt_usr)
-          FROM sbrext.representations_ext cd, admin_item ai
+          FROM sbrext_m.representations_ext cd, admin_item ai
          WHERE ai.NCI_IDSEQ = cd.REP_IDSEQ;
 
     COMMIT;
@@ -1820,7 +1822,7 @@ BEGIN
                nvl(ac.date_created,v_dflt_date) ,
                nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr)
-                 FROM sbr.data_element_concepts ac, admin_item cntxt, stus_mstr s
+                 FROM sbr_m.data_element_concepts ac, admin_item cntxt, stus_mstr s
          WHERE     ac.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND cntxt.admin_item_typ_id = 8;
@@ -1874,7 +1876,7 @@ BEGIN
                nvl(ac.date_created,v_dflt_date) ,
                nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr)
-          FROM sbr.value_domains ac, admin_item cntxt, stus_mstr s
+          FROM sbr_m.value_domains ac, admin_item cntxt, stus_mstr s
          WHERE     ac.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND cntxt.admin_item_typ_id = 8;
@@ -1929,7 +1931,7 @@ BEGIN
                nvl(ac.date_created,v_dflt_date) ,
                nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr)
-          FROM sbr.data_elements ac, admin_item cntxt, stus_mstr s
+          FROM sbr_m.data_elements ac, admin_item cntxt, stus_mstr s
          WHERE     ac.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND cntxt.admin_item_typ_id = 8;
@@ -1986,7 +1988,7 @@ BEGIN
                nvl(dec.date_created,v_dflt_date) ,
                nvl(NVL (dec.date_modified, dec.date_created), v_dflt_date),
                nvl(dec.modified_by,v_dflt_usr)
-                 FROM sbr.data_element_concepts  dec,
+                 FROM sbr_m.data_element_concepts  dec,
                admin_item                 ai,
                admin_item                 oc,
                admin_item                 prop,
@@ -2033,7 +2035,7 @@ BEGIN
                nvl(dec.date_created,v_dflt_date) ,
                nvl(NVL (dec.date_modified, dec.date_created), v_dflt_date),
                nvl(dec.modified_by,v_dflt_usr)
-          FROM sbr.data_element_concepts  dec,
+          FROM sbr_m.data_element_concepts  dec,
                admin_item                 ai,
                admin_item                 oc,
                admin_item                 cd
@@ -2075,7 +2077,7 @@ BEGIN
                nvl(dec.date_created,v_dflt_date) ,
                nvl(NVL (dec.date_modified, dec.date_created), v_dflt_date),
                nvl(dec.modified_by,v_dflt_usr)
-          FROM sbr.data_element_concepts  dec,
+          FROM sbr_m.data_element_concepts  dec,
                admin_item                 ai,
                admin_item                 prop,
                admin_item                 cd
@@ -2117,7 +2119,7 @@ BEGIN
                nvl(dec.date_created,v_dflt_date) ,
                nvl(NVL (dec.date_modified, dec.date_created), v_dflt_date),
                nvl(dec.modified_by,v_dflt_usr)
-          FROM sbr.data_element_concepts dec, admin_item ai, admin_item cd
+          FROM sbr_m.data_element_concepts dec, admin_item ai, admin_item cd
          WHERE     ai.NCI_IDSEQ = dec.dec_IDSEQ
                AND cd.admin_item_typ_id = 1
                AND dec.cd_idseq = cd.NCI_IDSEQ
@@ -2165,7 +2167,7 @@ nvl(vd.created_by,v_dflt_usr),
                nvl(NVL (vd.date_modified, vd.date_created), v_dflt_date),
                nvl(vd.modified_by,v_dflt_usr),
                        DECODE (VD_TYPE_FLAG,  'E', 17,  'N', 18)
-          FROM sbr.value_domains  vd,
+          FROM sbr_m.value_domains  vd,
                admin_item         ai,
                admin_item         cd,
                admin_item         rc,
@@ -2217,7 +2219,7 @@ nvl(vd.created_by,v_dflt_usr),
                nvl(de.date_created,v_dflt_date) ,
                nvl(NVL (de.date_modified, de.date_created), v_dflt_date),
                nvl(de.modified_by,v_dflt_usr)
-            FROM sbr.data_elements  de,
+            FROM sbr_m.data_elements  de,
                admin_item         ai,
                admin_item         dec,
                admin_item         vd
@@ -2240,7 +2242,7 @@ nvl(vd.created_by,v_dflt_usr),
                        o.obj_key_id,
                        cdr.CONCAT_CHAR,
                        1
-                  FROM sbr.complex_data_elements  cdr,
+                  FROM sbr_m.complex_data_elements  cdr,
                        obj_key                    o,
                        admin_item                 ai
                  WHERE     cdr.CRTL_NAME = o.nci_cd(+)
@@ -2253,7 +2255,7 @@ nvl(vd.created_by,v_dflt_usr),
 
 
     UPDATE de
-       SET PREF_QUEST_TXT = ( select doc_text     FROM sbr.reference_documents  d, --Changed from name to doc_text for DSRMWS-455 By AT 12/01/2020
+       SET PREF_QUEST_TXT = ( select doc_text     FROM sbr_m.reference_documents  d, --Changed from name to doc_text for DSRMWS-455 By AT 12/01/2020
                        obj_key                    ok,
                        admin_item                 ai
                  WHERE             d.dctl_name = ok.nci_cd
@@ -2382,7 +2384,7 @@ UPDATE de
           --, qc.DATE_CREATED,qc.CREATED_BY,qc.MODIFIED_BY,DATE_MODIFIED
           FROM admin_item                    prnt,
                admin_item                    child,
-               sbr.complex_de_relationships  cdr
+               sbr_m.complex_de_relationships  cdr
          WHERE     prnt.nci_idseq = cdr.p_de_idseq
                AND child.nci_idseq = cdr.c_de_idseq;
 
@@ -2449,7 +2451,7 @@ BEGIN
                nvl(ac.date_created,v_dflt_date) ,
                nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr)
-          FROM sbrext.oc_recs_ext ac, admin_item cntxt, stus_mstr s
+          FROM sbrext_m.oc_recs_ext ac, admin_item cntxt, stus_mstr s
          WHERE     ac.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND --ac.end_date is not null and
@@ -2492,7 +2494,7 @@ BEGIN
                display_order,
                dimensionality,
                array_ind
-          FROM sbrext.oc_recs_ext ocr, admin_item soc, admin_item toc
+          FROM sbrext_m.oc_recs_ext ocr, admin_item soc, admin_item toc
          WHERE     soc.admin_item_typ_id = 5
                AND toc.admin_item_typ_id = 5
                AND ocr.t_oc_idseq = toc.nci_idseq
@@ -2538,7 +2540,7 @@ BEGIN
                nvl(modified_by,v_dflt_usr),
                def.defin_idseq
           FROM admin_item       ai,
-               sbr.definitions  def,
+               sbr_m.definitions  def,
                admin_item       cntxt,
                obj_key          ok
          WHERE     ai.nci_idseq = def.ac_idseq
@@ -2582,7 +2584,7 @@ BEGIN
                cntxt.ITEM_NM,
                def.desig_idseq
           FROM admin_item        ai,
-               sbr.designations  def,
+               sbr_m.designations  def,
                admin_item        cntxt,
                obj_key           ok
          WHERE     ai.nci_idseq = def.ac_idseq
@@ -2628,7 +2630,7 @@ BEGIN
                nvl(modified_by,v_dflt_usr),
                rd_idseq
           FROM admin_item               ai,
-               sbr.reference_documents  def,
+               sbr_m.reference_documents  def,
                admin_item               cntxt,
                obj_key                  ok
          WHERE     ai.nci_idseq = def.ac_idseq
@@ -2659,7 +2661,7 @@ BEGIN
           --att.created_by, att.date_created,
           --att.date_modified, att.modified_by
           FROM nci_CLSFCTN_SCHM_ITEM  csi,
-               sbrext.AC_ATT_CSCSI_EXT     att,
+               sbrext_m.AC_ATT_CSCSI_EXT     att,
                alt_nms                     am
          WHERE     csi.cs_csi_idseq = att.cs_csi_idseq
                AND am.nci_idseq = att.att_idseq
@@ -2681,7 +2683,7 @@ BEGIN
           --att.created_by, att.date_created,
           --att.date_modified, att.modified_by
           FROM nci_CLSFCTN_SCHM_ITEM  csi,
-               sbrext.AC_ATT_CSCSI_EXT     att,
+               sbrext_m.AC_ATT_CSCSI_EXT     att,
                alt_def                     am
          WHERE    csi.cs_csi_idseq = att.cs_csi_idseq
                AND am.nci_idseq = att.att_idseq
@@ -2758,7 +2760,7 @@ BEGIN
                nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr),
              ac.DEFINITION_SOURCE
-          FROM sbrext.concepts_ext ac, admin_item cntxt, stus_mstr s
+          FROM sbrext_m.concepts_ext ac, admin_item cntxt, stus_mstr s
          WHERE     ac.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND cntxt.admin_item_typ_id = 8;
@@ -2780,7 +2782,7 @@ BEGIN
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
                nvl(modified_by,v_dflt_usr)
-          FROM sbrext.concepts_ext c, obj_key ok
+          FROM sbrext_m.concepts_ext c, obj_key ok
          WHERE c.evs_source = ok.obj_key_desc(+) AND ok.obj_typ_id(+) = 23;
 
     COMMIT;
@@ -2846,8 +2848,8 @@ BEGIN
                nvl(cc.date_created,v_dflt_date) ,
                nvl(NVL (cc.date_modified, cc.date_created), v_dflt_date),
                nvl(cc.modified_by,v_dflt_usr)
-           FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
-               sbrext.object_classes_ext      oce,
+           FROM sbrext_m.COMPONENT_CONCEPTS_EXT  cc,
+               sbrext_m.object_classes_ext      oce,
                admin_item                     con,
                admin_item                     oc
          WHERE     cc.CONDR_IDSEQ = oce.CONDR_IDSEQ
@@ -2882,8 +2884,8 @@ BEGIN
                nvl(cc.date_created,v_dflt_date) ,
                nvl(NVL (cc.date_modified, cc.date_created), v_dflt_date),
                nvl(cc.modified_by,v_dflt_usr)
-          FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
-               sbrext.properties_ext          prope,
+          FROM sbrext_m.COMPONENT_CONCEPTS_EXT  cc,
+               sbrext_m.properties_ext          prope,
                admin_item                     con,
                admin_item                     prop
          WHERE     cc.CONDR_IDSEQ = prope.CONDR_IDSEQ
@@ -2917,8 +2919,8 @@ BEGIN
                nvl(cc.date_created,v_dflt_date) ,
                nvl(NVL (cc.date_modified, cc.date_created), v_dflt_date),
                nvl(cc.modified_by,v_dflt_usr)
-          FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
-               sbrext.representations_ext     repe,
+          FROM sbrext_m.COMPONENT_CONCEPTS_EXT  cc,
+               sbrext_m.representations_ext     repe,
                admin_item                     con,
                admin_item                     rep
          WHERE     cc.CONDR_IDSEQ = repe.CONDR_IDSEQ
@@ -2952,8 +2954,8 @@ BEGIN
                nvl(cc.date_created,v_dflt_date) ,
                nvl(NVL (cc.date_modified, cc.date_created), v_dflt_date),
                nvl(cc.modified_by,v_dflt_usr)
-          FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
-               sbr.value_meanings             vm,
+          FROM sbrext_m.COMPONENT_CONCEPTS_EXT  cc,
+               sbr_m.value_meanings             vm,
                admin_item                     con,
                admin_item                     rep
          WHERE     cc.CONDR_IDSEQ = vm.CONDR_IDSEQ
@@ -2987,8 +2989,8 @@ BEGIN
                nvl(cc.date_created,v_dflt_date) ,
                nvl(NVL (cc.date_modified, cc.date_created), v_dflt_date),
                nvl(cc.modified_by,v_dflt_usr)
-          FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
-               sbr.value_domains              vde,
+          FROM sbrext_m.COMPONENT_CONCEPTS_EXT  cc,
+               sbr_m.value_domains              vde,
                admin_item                     con,
                admin_item                     vd
          WHERE     cc.CONDR_IDSEQ = vde.CONDR_IDSEQ
@@ -3022,8 +3024,8 @@ BEGIN
                nvl(cc.date_created,v_dflt_date) ,
                nvl(NVL (cc.date_modified, cc.date_created), v_dflt_date),
                nvl(cc.modified_by,v_dflt_usr)
-          FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
-               sbr.conceptual_domains         cde,
+          FROM sbrext_m.COMPONENT_CONCEPTS_EXT  cc,
+               sbr_m.conceptual_domains         cde,
                admin_item                     con,
                admin_item                     cd
          WHERE     cc.CONDR_IDSEQ = cde.CONDR_IDSEQ
@@ -3119,7 +3121,7 @@ BEGIN
                nvl(cd.date_created, v_dflt_date) ,
                nvl(NVL (cd.date_modified, cd.date_created), v_dflt_date),
                nvl(cd.modified_by,v_dflt_usr)
-          FROM sbr.cs_items cd, admin_item ai, obj_key ok
+          FROM sbr_m.cs_items cd, admin_item ai, obj_key ok
          WHERE     ai.NCI_IDSEQ = cd.CSI_IDSEQ
                AND TRIM (csitl_name) = ok.nci_cd
                AND ok.obj_typ_id = 20;
@@ -3200,7 +3202,7 @@ BEGIN
                nvl(cscsi.date_created,v_dflt_date) ,
                nvl(NVL (cscsi.date_modified, cscsi.date_created), v_dflt_date),
                nvl(cscsi.modified_by,v_dflt_usr)
-          FROM admin_item cs, admin_item ccsi, sbr.cs_csi cscsi
+          FROM admin_item cs, admin_item ccsi, sbr_m.cs_csi cscsi
          WHERE     cscsi.cs_idseq = cs.nci_idseq
                AND cscsi.p_cs_csi_idseq IS NULL
                AND cscsi.csi_idseq = ccsi.nci_idseq;
@@ -3239,8 +3241,8 @@ BEGIN
             FROM admin_item  cs,
                admin_item  pcsi,
                admin_item  ccsi,
-               sbr.cs_csi  cscsi,
-               sbr.cs_csi  pcscsi
+               sbr_m.cs_csi  cscsi,
+               sbr_m.cs_csi  pcscsi
          WHERE     cscsi.cs_idseq = cs.nci_idseq
                AND cscsi.p_cs_csi_idseq IS NOT NULL
                AND pcscsi.cs_csi_idseq = cscsi.p_cs_csi_idseq
@@ -3252,7 +3254,7 @@ BEGIN
 
 
      update nci_admin_item_rel_alt_key k set (P_NCI_PUB_ID, P_NCI_VER_NR)
- = (select nci_pub_id, NCI_VER_NR from nci_admin_item_rel_alt_key a, sbr.cs_csi cscsi where k.nci_idseq = cscsi.cs_csi_idseq and cscsi.p_cs_csi_idseq = a.nci_idseq
+ = (select nci_pub_id, NCI_VER_NR from nci_admin_item_rel_alt_key a, sbr_m.cs_csi cscsi where k.nci_idseq = cscsi.cs_csi_idseq and cscsi.p_cs_csi_idseq = a.nci_idseq
  and cscsi.p_cs_csi_idseq is not null
  )
  where rel_typ_id = 64;
@@ -3315,9 +3317,9 @@ Insert into ONEDATA_WA.STUS_MSTR (STUS_ID,STUS_NM,STUS_DESC,STUS_TYP_ID,CREAT_DT
 Insert into ONEDATA_WA.STUS_MSTR (STUS_ID,STUS_NM,STUS_DESC,STUS_TYP_ID,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT,STUS_MSK,STUS_ACRO,NCI_STUS,NCI_CMNTS,NCI_DISP_ORDR) values (84,'UNDER DEVELOPMENT','Status to be replaced with Context-selected status',2,to_date('13-FEB-02','DD-MON-RR'),'SBRCONV','JASUR',0,to_date('19-APR-21','DD-MON-RR'),to_date('19-APR-21','DD-MON-RR'),to_date('30-OCT-03','DD-MON-RR'),'000000',null,'UNDER DEVELOPMENT','Status not to be used; transfer elements as directed by context.',null);
 commit;
 
-update stus_mstr set fld_delete = 1 where stus_typ_id = 1 and nci_stus not in (Select registration_status from sbr.reg_status_lov);
+update stus_mstr set fld_delete = 1 where stus_typ_id = 1 and nci_stus not in (Select registration_status from sbr_m.reg_status_lov);
 commit;
-update stus_mstr set fld_delete = 1 where stus_typ_id = 2 and nci_stus not in (Select asl_name from sbr.ac_status_lov);
+update stus_mstr set fld_delete = 1 where stus_typ_id = 2 and nci_stus not in (Select asl_name from sbr_m.ac_status_lov);
 commit;
 
 /* we do not clean up this table, but populate it incrementally to preserve IDs
@@ -3328,7 +3330,7 @@ v_cnt := 0; -- status ID to use
 for cur in (select registration_status,description,
                     comments,created_by, date_created,
                     nvl(date_modified, date_created) date_modified, modified_by,
-                    display_order from sbr.reg_status_lov
+                    display_order from sbr_m.reg_status_lov
                     order by display_order) loop
 
 v_cnt := get_stus_mstr_id(cur.registration_status, 1); -- we need to preserve ID
@@ -3354,7 +3356,7 @@ commit;
 for cur in (select asl_name,description,
                     comments,created_by, date_created,
                     nvl(date_modified, date_created) date_modified, modified_by,
-                    display_order from sbr.ac_status_lov
+                    display_order from sbr_m.ac_status_lov
                     order by asl_name) loop
 
 v_cnt := get_stus_mstr_id(cur.asl_name, 2); -- we need to preserve ID
@@ -3396,7 +3398,7 @@ select ak.nci_pub_id, ak.nci_ver_nr, ai.item_id, ai.ver_nr, 65,
                nvl(accsi.date_created,v_dflt_date) ,
                nvl(NVL (accsi.date_modified, accsi.date_created), v_dflt_date),
                nvl(accsi.modified_by,v_dflt_usr)
- from  sbr.ac_csi accsi, nci_admin_item_rel_alt_key ak, admin_item ai
+ from  sbr_m.ac_csi accsi, nci_admin_item_rel_alt_key ak, admin_item ai
 where accsi.ac_idseq = ai.nci_idseq and
  accsi.cs_csi_idseq = ak.nci_idseq and ak.rel_typ_id = 64;
 commit;
@@ -3409,7 +3411,7 @@ select csi.item_id, csi.ver_nr, de.item_id, de.ver_nr, 65,
                nvl(accsi.date_created,v_dflt_date) ,
                nvl(NVL (accsi.date_modified, accsi.date_created), v_dflt_date),
                nvl(accsi.modified_by,v_dflt_usr)
- from  sbr.ac_csi accsi, nci_clsfctn_schm_item csi,  admin_item de
+ from  sbr_m.ac_csi accsi, nci_clsfctn_schm_item csi,  admin_item de
 where accsi.ac_idseq = de.nci_idseq and
   accsi.cs_csi_idseq = csi.cs_csi_idseq;
 commit;
@@ -3442,7 +3444,7 @@ select 14, pal_name, description, pal_name, comments,               nvl(created_
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
                nvl(modified_by,v_dflt_usr)
- from sbr.PROGRAM_AREAS_LOV;
+ from sbr_m.PROGRAM_AREAS_LOV;
 commit;
 
 
@@ -3452,7 +3454,7 @@ insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts
 select 11, detl_name, description, detl_name, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbr.DESIGNATION_TYPES_LOV;
+               nvl(modified_by,v_dflt_usr) from sbr_m.DESIGNATION_TYPES_LOV;
 commit;
 
 -- DOcument type
@@ -3471,7 +3473,7 @@ insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts
 select 1, DCTL_NAME, description, DCTL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbr.document_TYPES_LOV where DCTL_NAME not like 'Preferred Question Text'
+               nvl(modified_by,v_dflt_usr) from sbr_m.document_TYPES_LOV where DCTL_NAME not like 'Preferred Question Text'
                and DCTL_NAME not like 'Alternate Question Text';
 commit;
 
@@ -3483,7 +3485,7 @@ insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts
 select 3, CSTL_NAME, description, CSTL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbr.CS_TYPES_LOV;
+               nvl(modified_by,v_dflt_usr) from sbr_m.CS_TYPES_LOV;
 commit;
 
 -- Classification Scheme Item Type
@@ -3493,14 +3495,14 @@ insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts
 select 20, CSITL_NAME, description, CSITL_NAME, comments,  nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbr.CSI_TYPES_LOV;
+               nvl(modified_by,v_dflt_usr) from sbr_m.CSI_TYPES_LOV;
 commit;
 
 -- Protocol Type
 delete from obj_key where obj_typ_id = 19;  --
 commit;
 insert into obj_key (obj_typ_id, obj_key_desc,  nci_cd)
-select distinct 19, TYPE, TYPE from sbrext.protocols_ext where type is not null ;
+select distinct 19, TYPE, TYPE from sbrext_m.protocols_ext where type is not null ;
 commit;
 
 
@@ -3512,7 +3514,7 @@ commit;
 --select  23, CONCEPT_SOURCE,DESCRIPTION, CONCEPT_SOURCE,   nvl(created_by,v_dflt_usr),
 --               nvl(date_created,v_dflt_date) ,
 --               nvl(NVL (date_modified, date_created), v_dflt_date),
---               nvl(modified_by,v_dflt_usr) from sbrext.concept_sources_lov_ext ;
+--               nvl(modified_by,v_dflt_usr) from sbrext_m.concept_sources_lov_ext ;
 --commit;
 /*Insirt static typeID*/
 SP_SOURCE_TYPE;
@@ -3526,7 +3528,7 @@ nvl(created_by,v_dflt_usr) created_by,
 nvl(date_created,v_dflt_date) date_created,
 nvl(NVL (date_modified, date_created), v_dflt_date) date_modified,
 nvl(modified_by,v_dflt_usr) modified_by
-from sbrext.concept_sources_lov_ext c
+from sbrext_m.concept_sources_lov_ext c
 where  NOT EXISTS (select*from obj_key where trim(NCI_CD)=trim(c.CONCEPT_SOURCE) and obj_typ_id=23)
 )
 loop
@@ -3561,7 +3563,7 @@ insert into obj_key (obj_typ_id, obj_key_desc,  nci_cd, obj_key_def,  CREAT_USR_
 select 21, CRTL_NAME,CRTL_NAME, DESCRIPTION ,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbr.complex_rep_type_lov ;
+               nvl(modified_by,v_dflt_usr) from sbr_m.complex_rep_type_lov ;
 commit;
 
 
@@ -3577,7 +3579,7 @@ select DTL_NAME, DTL_NAME, DESCRIPTION,COMMENTS,
   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr), SCHEME_REFERENCE, ANNOTATION from sbr.datatypes_lov;
+               nvl(modified_by,v_dflt_usr), SCHEME_REFERENCE, ANNOTATION from sbr_m.datatypes_lov;
 commit;
 
 -- Format
@@ -3589,7 +3591,7 @@ select FORML_NAME, FORML_NAME,DESCRIPTION,COMMENTS,
   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbr.formats_lov;
+               nvl(modified_by,v_dflt_usr) from sbr_m.formats_lov;
 commit;
 
 -- UOM
@@ -3602,7 +3604,7 @@ DESCRIPTION,COMMENTS,
   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbr.unit_of_measures_lov;
+               nvl(modified_by,v_dflt_usr) from sbr_m.unit_of_measures_lov;
 commit;
 
 
@@ -3615,7 +3617,7 @@ insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts
 select 15, DEFL_NAME, description, DEFL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbrext.definition_types_lov_ext;
+               nvl(modified_by,v_dflt_usr) from sbrext_m.definition_types_lov_ext;
 
 
 commit;
@@ -3631,7 +3633,7 @@ insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd, CREAT_USR_ID
 select 18, SRC_NAME, description, SRC_NAME,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbrext.sources_ext;
+               nvl(modified_by,v_dflt_usr) from sbrext_m.sources_ext;
 
 
 commit;
@@ -3643,7 +3645,7 @@ insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd, CREAT_USR_ID
 select 22, QCDL_NAME, description, QCDL_NAME,    nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr), DISPLAY_ORDER from sbrext.QC_DISPLAY_LOV_EXT;
+               nvl(modified_by,v_dflt_usr), DISPLAY_ORDER from sbrext_m.QC_DISPLAY_LOV_EXT;
 
 
 commit;
@@ -3837,7 +3839,7 @@ insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts
 select 25, ATL_NAME, description, ATL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbr.ADDR_TYPES_LOV	;
+               nvl(modified_by,v_dflt_usr) from sbr_m.ADDR_TYPES_LOV	;
 commit;
 
 delete from obj_key where obj_typ_id = 26;  -- Communication Type
@@ -3846,7 +3848,7 @@ insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts
 select 26, CTL_NAME, description, CTL_NAME, comments,  nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbr.COMM_TYPES_LOV;
+               nvl(modified_by,v_dflt_usr) from sbr_m.COMM_TYPES_LOV;
  commit;
 --               insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (54,50);
 --insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (52,59);
@@ -3915,7 +3917,7 @@ select stus_id, obj_key_id,
   nvl(e.created_by,v_dflt_usr),
                 nvl(NVL (e.date_modified, e.date_created), v_dflt_date),
                nvl(e.modified_by,v_dflt_usr)
-from sbrext.ASL_ACTL_EXT e, stus_mstr s, obj_key o
+from sbrext_m.ASL_ACTL_EXT e, stus_mstr s, obj_key o
 where e.ASL_NAME = s.nci_stus and s.stus_typ_id = 2 and o.nci_cd = e.ACTL_NAME and o.obj_typ_id = 4;
 commit;
 
@@ -3925,7 +3927,7 @@ select stus_id, 53,               nvl(e.date_created,v_dflt_date) ,
   nvl(e.created_by,v_dflt_usr),
                 nvl(NVL (e.date_modified, e.date_created), v_dflt_date),
                nvl(e.modified_by,v_dflt_usr)
-from sbrext.ASL_ACTL_EXT e, stus_mstr s
+from sbrext_m.ASL_ACTL_EXT e, stus_mstr s
 where e.ASL_NAME = s.nci_stus and s.stus_typ_id = 2 and e.ACTL_NAME = 'VALUE_MEANING';
 commit;
 
@@ -3935,7 +3937,7 @@ select stus_id, 54,               nvl(e.date_created,v_dflt_date) ,
   nvl(e.created_by,v_dflt_usr),
                 nvl(NVL (e.date_modified, e.date_created), v_dflt_date),
                nvl(e.modified_by,v_dflt_usr)
-from sbrext.ASL_ACTL_EXT e, stus_mstr s
+from sbrext_m.ASL_ACTL_EXT e, stus_mstr s
 where e.ASL_NAME = s.nci_stus and s.stus_typ_id = 2 and e.ACTL_NAME = 'QUEST_CONTENT';
 commit;
 
@@ -3945,7 +3947,7 @@ select stus_id, 52,              nvl(e.date_created,v_dflt_date) ,
   nvl(e.created_by,v_dflt_usr),
                 nvl(NVL (e.date_modified, e.date_created), v_dflt_date),
                nvl(e.modified_by,v_dflt_usr)
-from sbrext.ASL_ACTL_EXT e, stus_mstr s
+from sbrext_m.ASL_ACTL_EXT e, stus_mstr s
 where e.ASL_NAME = s.nci_stus and s.stus_typ_id = 2 and e.ACTL_NAME = 'QUEST_CONTENT';
 commit;
 
@@ -4047,10 +4049,10 @@ BEGIN
                nvl(qc.date_created,v_dflt_date) ,
                nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr)
-           FROM sbr.administered_components  ac,
+           FROM sbr_m.administered_components  ac,
                admin_item                   cntxt,
                stus_mstr                    s,
-               sbrext.quest_contents_ext    qc
+               sbrext_m.quest_contents_ext    qc
          WHERE     qc.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND ac.actl_name = 'QUEST_CONTENT'
@@ -4081,7 +4083,7 @@ BEGIN
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
                nvl(modified_by,v_dflt_usr)
-          FROM sbrext.quest_contents_ext qc, obj_key ok
+          FROM sbrext_m.quest_contents_ext qc, obj_key ok
          WHERE     qc.qcdl_name = ok.nci_cd(+)
                AND ok.obj_typ_id(+) = 22
                AND qc.qtl_name IN ('TEMPLATE', 'CRF');
@@ -4133,10 +4135,10 @@ INSERT /*+ APPEND */
                nvl(qc.date_created,v_dflt_date) ,
                nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr)
-          FROM sbr.administered_components  ac,
+          FROM sbr_m.administered_components  ac,
                admin_item                   cntxt,
                stus_mstr                    s,
-               sbrext.quest_contents_ext    qc
+               sbrext_m.quest_contents_ext    qc
          WHERE     qc.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND ac.actl_name = 'QUEST_CONTENT'
@@ -4192,8 +4194,8 @@ INSERT /*+ APPEND */
                nvl(p.date_created,v_dflt_date) ,
                nvl(NVL (p.date_modified, p.date_created), v_dflt_date),
                nvl(p.modified_by,v_dflt_usr)
-          FROM sbr.administered_components ac, admin_item cntxt,
-               stus_mstr s      ,sbrext.protocols_ext p
+          FROM sbr_m.administered_components ac, admin_item cntxt,
+               stus_mstr s      ,sbrext_m.protocols_ext p
          WHERE     p.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND ac.actl_name = 'PROTOCOL'
@@ -4239,7 +4241,7 @@ nvl(cd.created_by,v_dflt_usr),
                APPROVED_DATE,
                APPROVED_BY,
                ORG.ENTTY_ID
-          FROM sbrext.protocols_ext cd, admin_item ai, obj_key ok, nci_org org
+          FROM sbrext_m.protocols_ext cd, admin_item ai, obj_key ok, nci_org org
          WHERE     ai.NCI_IDSEQ = cd.proto_IDSEQ
                AND TRIM (TYPE) = ok.nci_cd(+)
                AND ok.obj_typ_id(+) = 19
@@ -4311,8 +4313,8 @@ BEGIN
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date)
           FROM admin_item                   de,
                admin_item                   MOD,
-               sbrext.quest_contents_ext    qc,
-               sbrext.QUEST_ATTRIBUTES_EXT  qa
+               sbrext_m.quest_contents_ext    qc,
+               sbrext_m.QUEST_ATTRIBUTES_EXT  qa
          WHERE     de.nci_idseq = qc.De_idseq
                AND MOD.nci_idseq = qc.p_mod_idseq
                AND qc.qtl_name = 'QUESTION'
@@ -4359,8 +4361,8 @@ BEGIN
                nvl(qc.modified_by,v_dflt_usr),
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date)
           FROM admin_item                   MOD,
-               sbrext.quest_contents_ext    qc,
-               sbrext.QUEST_ATTRIBUTES_EXT  qa
+               sbrext_m.quest_contents_ext    qc,
+               sbrext_m.QUEST_ATTRIBUTES_EXT  qa
          WHERE     MOD.nci_idseq = qc.p_mod_idseq
                AND qc.qtl_name = 'QUESTION'
                AND MOD.admin_item_typ_id = 52
@@ -4395,7 +4397,7 @@ BEGIN
                         frm.ver_nr,
                         60
           --, qc.DISPLAY_ORDER
-          FROM admin_item pro, admin_item frm, sbrext.protocol_qc_ext qc
+          FROM admin_item pro, admin_item frm, sbrext_m.protocol_qc_ext qc
          WHERE     pro.nci_idseq = qc.proto_idseq
                AND frm.nci_idseq = qc.qc_idseq
                AND pro.admin_item_typ_id = 50
@@ -4428,7 +4430,7 @@ BEGIN
                         qc.CREATED_BY,
                         NVL (qc.MODIFIED_BY, qc.date_created),
                         DATE_MODIFIED
-          FROM admin_item MOD, admin_item frm, sbrext.quest_contents_ext qc
+          FROM admin_item MOD, admin_item frm, sbrext_m.quest_contents_ext qc
          WHERE     MOD.nci_idseq = qc.qc_idseq
                AND frm.nci_idseq = qc.dn_crf_idseq
                AND qc.qtl_name = 'MODULE'
@@ -4477,7 +4479,7 @@ BEGIN
           nvl(ta.created_by,v_dflt_usr),
                nvl(ta.modified_by,v_dflt_usr),
              nvl(NVL (ta.date_modified, ta.date_created), v_dflt_date)
-          FROM sbrext.triggered_actions_ext  ta,
+          FROM sbrext_m.triggered_actions_ext  ta,
                admin_item                    mod1,
                admin_item                    mod2
          WHERE     mod1.admin_item_typ_id = 52
@@ -4513,7 +4515,7 @@ BEGIN
           nvl(ta.created_by,v_dflt_usr),
                nvl(ta.modified_by,v_dflt_usr),
              nvl(NVL (ta.date_modified, ta.date_created), v_dflt_date)
-          FROM sbrext.triggered_actions_ext  ta,
+          FROM sbrext_m.triggered_actions_ext  ta,
                admin_item                    mod1,
                nci_admin_item_rel_alt_key    quest
          WHERE     mod1.admin_item_typ_id = 52
@@ -4551,7 +4553,7 @@ BEGIN
           nvl(ta.created_by,v_dflt_usr),
                nvl(ta.modified_by,v_dflt_usr),
              nvl(NVL (ta.date_modified, ta.date_created), v_dflt_date)
-          FROM sbrext.triggered_actions_ext  ta,
+          FROM sbrext_m.triggered_actions_ext  ta,
                nci_admin_item_rel_alt_key    quest1,
                nci_admin_item_rel_alt_key    quest2
          WHERE     --quest1.rel_typ_id = 63
@@ -4588,7 +4590,7 @@ nvl(ta.date_created,v_dflt_date) ,
           nvl(ta.created_by,v_dflt_usr),
                nvl(ta.modified_by,v_dflt_usr),
              nvl(NVL (ta.date_modified, ta.date_created), v_dflt_date)
-             FROM sbrext.triggered_actions_ext  ta,
+             FROM sbrext_m.triggered_actions_ext  ta,
                nci_quest_Valid_value         vv,
                nci_admin_item_rel_alt_key    quest
          WHERE     quest.rel_typ_id = 63
@@ -4624,7 +4626,7 @@ nvl(ta.date_created,v_dflt_date) ,
           nvl(ta.created_by,v_dflt_usr),
                nvl(ta.modified_by,v_dflt_usr),
              nvl(NVL (ta.date_modified, ta.date_created), v_dflt_date)
-          FROM sbrext.triggered_actions_ext  ta,
+          FROM sbrext_m.triggered_actions_ext  ta,
                nci_quest_Valid_value         vv,
                admin_item                    MOD
          WHERE     MOD.admin_item_typ_id = 52
@@ -4647,7 +4649,7 @@ nvl(ta.date_created,v_dflt_date) ,
           nvl(t.created_by,v_dflt_usr),
                nvl(t.modified_by,v_dflt_usr),
              nvl(NVL (t.date_modified, t.date_created), v_dflt_date)
-          FROM nci_form_ta ta, sbrext.ta_proto_csi_ext t, admin_item ai
+          FROM nci_form_ta ta, sbrext_m.ta_proto_csi_ext t, admin_item ai
          WHERE     ta.ta_idseq = t.ta_idseq
                AND t.proto_idseq = ai.nci_idseq
                AND t.proto_idseq IS NOT NULL;
@@ -4693,12 +4695,12 @@ BEGIN
                nvl(qc.date_created,v_dflt_date) ,
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr), qc.DISPLAY_ORDER
-                       FROM sbrext.quest_contents_ext    qc,
-               sbrext.quest_contents_ext    qc1,
-               sbrext.valid_values_att_ext  vv,
-               sbrext.vd_pvs  vp,
-                sbrext.permissible_Values pv,
-                sbrext.value_meanings vm
+                       FROM sbrext_m.quest_contents_ext    qc,
+               sbrext_m.quest_contents_ext    qc1,
+               sbrext_m.valid_values_att_ext  vv,
+               sbrext_m.vd_pvs  vp,
+                sbrext_m.permissible_Values pv,
+                sbrext_m.value_meanings vm
          WHERE     qc.qtl_name = 'VALID_VALUE'
                AND qc1.qtl_name = 'QUESTION'
                AND qc1.qc_idseq = qc.p_qst_idseq
@@ -4710,8 +4712,8 @@ BEGIN
 
     -- Added for enumerated valid values. Has to be here as Question VV is inserted here.
       update nci_admin_item_rel_alt_key q set deflt_val_id = (Select nci_pub_id from nci_quest_valid_value vv,
-    (select * from  sbrext.QUEST_ATTRIBUTES_EXT where vv_idseq is not null) qa where q.nci_idseq = qa.qc_idseq and qa.vv_idseq = vv.nci_idseq and qa.vv_idseq is not null)
-    where q.nci_idseq in (select qc_idseq from (select * from  sbrext.QUEST_ATTRIBUTES_EXT where vv_idseq is not null) temp1);
+    (select * from  sbrext_m.QUEST_ATTRIBUTES_EXT where vv_idseq is not null) qa where q.nci_idseq = qa.qc_idseq and qa.vv_idseq = vv.nci_idseq and qa.vv_idseq is not null)
+    where q.nci_idseq in (select qc_idseq from (select * from  sbrext_m.QUEST_ATTRIBUTES_EXT where vv_idseq is not null) temp1);
 
     commit;
 
@@ -4749,7 +4751,7 @@ BEGIN
 			   nvl(qvv.modified_by,v_dflt_usr),
                nvl(NVL (qvv.date_modified, date_created), v_dflt_date)*/
 
-          FROM sbrext.quest_vv_ext         qvv,
+          FROM sbrext_m.quest_vv_ext         qvv,
                NCI_ADMIN_ITEM_REL_ALT_KEY  q,
                NCI_QUEST_VALID_VALUE       vv
          WHERE     qvv.quest_idseq = q.NCI_IDSEQ
@@ -4779,7 +4781,7 @@ select ai.item_id, 'FORM', 'INSTRUCTION',ai.VER_NR, display_order, qc.LONG_NAME,
                nvl(qc.date_created,v_dflt_date) ,
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr)
-from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FORM_INSTR' and
+from sbrext_m.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FORM_INSTR' and
 qc.dn_crf_idseq = ai.nci_idseq;
 
 commit;
@@ -4793,7 +4795,7 @@ select ai.item_id, 'FORM', 'FOOTER',ai.VER_NR, display_order, qc.LONG_NAME,qc.pr
                nvl(qc.date_created,v_dflt_date) ,
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr)
-        from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and
+        from sbrext_m.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and
 qc.dn_crf_idseq = ai.nci_idseq;
 
 commit;
@@ -4806,7 +4808,7 @@ select ai.item_id, 'MODULE', 'INSTRUCTION',ai.VER_NR, display_order, qc.LONG_NAM
                nvl(qc.date_created,v_dflt_date) ,
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr)
-        from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'MODULE_INSTR' and
+        from sbrext_m.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'MODULE_INSTR' and
 qc.p_mod_idseq = ai.nci_idseq;
 
 commit;
@@ -4819,7 +4821,7 @@ select ai.nci_pub_id, 'QUESTION', 'INSTRUCTION',ai.NCI_VER_NR, display_order, qc
                nvl(qc.date_created,v_dflt_date) ,
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr)
-        from sbrext.quest_contents_ext qc, Nci_admin_item_rel_alt_key ai where qc.qtl_name = 'QUESTION_INSTR' and ai.rel_typ_id = 63 and
+        from sbrext_m.quest_contents_ext qc, Nci_admin_item_rel_alt_key ai where qc.qtl_name = 'QUESTION_INSTR' and ai.rel_typ_id = 63 and
 qc.p_qst_idseq = ai.nci_idseq;
 
 commit;
@@ -4832,7 +4834,7 @@ select ai.nci_pub_id, 'VALUE',1, display_order, qc.LONG_NAME,qc.preferred_name, 
                nvl(qc.date_created,v_dflt_date) ,
              nvl(NVL (qc.date_modified, qc.date_created), v_dflt_date),
                nvl(qc.modified_by,v_dflt_usr)
-        from sbrext.quest_contents_ext qc, Nci_QUEST_VALID_VALUE ai where qc.qtl_name = 'VALUE_INSTR' and
+        from sbrext_m.quest_contents_ext qc, Nci_QUEST_VALID_VALUE ai where qc.qtl_name = 'VALUE_INSTR' and
 qc.p_val_idseq = ai.nci_idseq ;
 commit;
 
@@ -4840,7 +4842,7 @@ commit;
 insert into NCI_QUEST_VALID_VALUE
 (NCI_PUB_ID, Q_PUB_ID, QVV_VM_NM, QVV_VM_LNM, QVV_VALUE, QVV_CMNTS, QVV_EDIT_IND, QVV_SEQ_NBR)
 select qc.qc_id, qc1.qc_id, qc.preferred_name, qc.preferred_definition
-from  sbrext.quest_contents_ext qc, sbrext.quest_contents_ext qc1
+from  sbrext_m.quest_contents_ext qc, sbrext_m.quest_contents_ext qc1
 where qc.qtl_name = 'VALID_VALUE' and and qc1.qtl_name = 'QUESTION' and qc1.qc_idseq = qc.p_qst_idseq;
 
 */
@@ -4853,23 +4855,23 @@ v_cnt integer;
 begin
 
 
-update nci_form f set HDR_INSTR = (select qc.preferred_definition from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FORM_INSTR' and
+update nci_form f set HDR_INSTR = (select qc.preferred_definition from sbrext_m.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FORM_INSTR' and
 ai.item_id = f.item_id and ai.ver_nr = f.ver_nr and ai.nci_idseq = qc.dn_crf_idseq and qc.qc_id in
-(select min(qc_id)  from sbrext.quest_contents_ext qc1 where qc1.qtl_name = 'FORM_INSTR' group by dn_crf_idseq));
+(select min(qc_id)  from sbrext_m.quest_contents_ext qc1 where qc1.qtl_name = 'FORM_INSTR' group by dn_crf_idseq));
 commit;
 
-update nci_form f set FTR_INSTR = (select qc.preferred_definition from sbrext.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and
+update nci_form f set FTR_INSTR = (select qc.preferred_definition from sbrext_m.quest_contents_ext qc, admin_item ai where qc.qtl_name = 'FOOTER' and
 ai.item_id = f.item_id and ai.ver_nr = f.ver_nr and ai.nci_idseq = qc.dn_crf_idseq and qc.qc_id in
-(select min(qc_id)  from sbrext.quest_contents_ext qc1 where qc1.qtl_name = 'FOOTER' group by dn_crf_idseq));
+(select min(qc_id)  from sbrext_m.quest_contents_ext qc1 where qc1.qtl_name = 'FOOTER' group by dn_crf_idseq));
 commit;
 
 
 delete from temp_import;
 commit;
 
-insert into temp_import (ITEM_ID, VER_NR, QC_ID, PREFERRED_DEFINITION, REP_NO) select  ai.item_id, ai.ver_nr,qc_id, qc.preferred_definition, display_order  from sbrext.quest_contents_ext qc, admin_item ai
+insert into temp_import (ITEM_ID, VER_NR, QC_ID, PREFERRED_DEFINITION, REP_NO) select  ai.item_id, ai.ver_nr,qc_id, qc.preferred_definition, display_order  from sbrext_m.quest_contents_ext qc, admin_item ai
 where qc.qtl_name = 'MODULE_INSTR' and ai.nci_idseq = qc.p_mod_idseq and (qc.p_mod_idseq, display_order) in (select p_mod_idseq, min(display_order)
-from sbrext.quest_contents_ext qc1 where qc1.qtl_name = 'MODULE_INSTR' group by p_mod_idseq);
+from sbrext_m.quest_contents_ext qc1 where qc1.qtl_name = 'MODULE_INSTR' group by p_mod_idseq);
 commit;
 
 delete from temp_import t1 where (qc_id) not in (select min(qc_id)from temp_import group by item_id, ver_nr);
@@ -4886,9 +4888,9 @@ commit;
 delete from temp_import;
 commit;
 
-insert into temp_import (ITEM_ID, VER_NR, qc_id, PREFERRED_DEFINITION) select  ai.nci_pub_id, ai.nci_ver_nr,qc.qc_id, qc.preferred_definition  from sbrext.quest_contents_ext qc, nci_admin_item_rel_alt_key ai
+insert into temp_import (ITEM_ID, VER_NR, qc_id, PREFERRED_DEFINITION) select  ai.nci_pub_id, ai.nci_ver_nr,qc.qc_id, qc.preferred_definition  from sbrext_m.quest_contents_ext qc, nci_admin_item_rel_alt_key ai
 where qc.qtl_name = 'QUESTION_INSTR' and ai.nci_idseq = qc.p_qst_idseq and (qc.p_qst_idseq, display_order) in (select p_qst_idseq, min(display_order)
- from sbrext.quest_contents_ext qc1 where qc1.qtl_name = 'QUESTION_INSTR' group by p_qst_idseq);
+ from sbrext_m.quest_contents_ext qc1 where qc1.qtl_name = 'QUESTION_INSTR' group by p_qst_idseq);
 commit;
 
 delete from temp_import t1 where (qc_id) not in (select min(qc_id)from temp_import group by item_id, ver_nr);
@@ -4904,9 +4906,9 @@ commit;
 delete from temp_import;
 commit;
 
-insert into temp_import (ITEM_ID, VER_NR, qc_id, PREFERRED_DEFINITION) select  ai.nci_pub_id, ai.nci_ver_nr,qc.qc_id,qc.preferred_definition  from sbrext.quest_contents_ext qc, nci_quest_valid_value ai
+insert into temp_import (ITEM_ID, VER_NR, qc_id, PREFERRED_DEFINITION) select  ai.nci_pub_id, ai.nci_ver_nr,qc.qc_id,qc.preferred_definition  from sbrext_m.quest_contents_ext qc, nci_quest_valid_value ai
 where qc.qtl_name = 'VALUE_INSTR' and ai.nci_idseq = qc.p_val_idseq and  (qc.p_val_idseq, display_order) in (select p_val_idseq, min(display_order)
- from sbrext.quest_contents_ext qc1 where qc1.qtl_name = 'VALUE_INSTR' group by p_val_idseq);
+ from sbrext_m.quest_contents_ext qc1 where qc1.qtl_name = 'VALUE_INSTR' group by p_val_idseq);
 commit;
 
 
@@ -4985,7 +4987,7 @@ BEGIN
                nvl(NVL (ac.date_modified, ac.date_created), v_dflt_date),
                nvl(ac.modified_by,v_dflt_usr),
                ac.definition_source
-          FROM admin_item cntxt, stus_mstr s, sbr.value_meanings ac
+          FROM admin_item cntxt, stus_mstr s, sbr_m.value_meanings ac
          WHERE     ac.conte_idseq = cntxt.nci_idseq
                AND TRIM (ac.asl_name) = TRIM (s.nci_STUS)
                AND --ac.end_date is null and
@@ -5010,7 +5012,7 @@ BEGIN
                nvl(cd.date_created,v_dflt_date) ,
                nvl(NVL (cd.date_modified, cd.date_created), v_dflt_date),
                nvl(cd.modified_by,v_dflt_usr)
-        FROM sbr.value_meanings cd, admin_item ai
+        FROM sbr_m.value_meanings cd, admin_item ai
          WHERE ai.NCI_IDSEQ = cd.VM_IDSEQ;
 
     COMMIT;
@@ -5045,7 +5047,7 @@ BEGIN
                nvl(cvm.date_created,v_dflt_date) ,
                nvl(NVL (cvm.date_modified, cvm.date_created), v_dflt_date),
                nvl(cvm.modified_by,v_dflt_usr)
-          FROM admin_item cd, admin_item vm, sbr.cd_vms cvm
+          FROM admin_item cd, admin_item vm, sbr_m.cd_vms cvm
          WHERE cvm.cd_idseq = cd.nci_idseq AND cvm.vm_idseq = vm.nci_idseq;
 
     COMMIT;
@@ -5081,10 +5083,10 @@ BEGIN
                pv.pv_idseq,
                ok.OBJ_KEY_ID,
                decode(ok.obj_key_id, null,pvs.origin, null)
-          FROM sbr.permissible_Values  pv,
+          FROM sbr_m.permissible_Values  pv,
                admin_item              vm,
                admin_item              vd,
-               sbr.vd_pvs              pvs,
+               sbr_m.vd_pvs              pvs,
                obj_key  ok
          WHERE     pv.pv_idseq = pvs.pv_idseq
                AND pvs.vd_idseq = vd.nci_idseq
@@ -5101,14 +5103,14 @@ as
 v_cnt integer;
 begin
 
-for cur in (select ac_idseq from sbr.administered_components) loop
+for cur in (select ac_idseq from sbr_m.administered_components) loop
 insert /*+ APPEND */ into nci_change_history (ACCH_IDSEQ,
 AC_IDSEQ,CHANGE_DATETIMESTAMP,CHANGE_ACTION,CHANGED_BY,
 CHANGED_TABLE,CHANGED_TABLE_IDSEQ,CHANGED_COLUMN,OLD_VALUE,NEW_VALUE)
 select ACCH_IDSEQ,
 AC_IDSEQ,CHANGE_DATETIMESTAMP,CHANGE_ACTION,CHANGED_BY,
 CHANGED_TABLE,CHANGED_TABLE_IDSEQ,CHANGED_COLUMN,OLD_VALUE,NEW_VALUE
-from sbrext.AC_CHANGE_HISTORY_EXT
+from sbrext_m.AC_CHANGE_HISTORY_EXT
 where ac_idseq = cur.ac_idseq;
 commit;
 end loop;
@@ -5126,7 +5128,7 @@ insert into nci_entty(NCI_IDSEQ, ENTTY_TYP_ID,CREAT_USR_ID,CREAT_DT,LST_UPD_USR_
                 nvl(date_created,v_dflt_date) ,
                nvl(modified_by,v_dflt_usr),
              nvl(NVL (date_modified, date_created), v_dflt_date)
-from sbr.organizations;
+from sbr_m.organizations;
 commit;
 
 insert into nci_org (ENTTY_ID, RAI,ORG_NM,RA_IND,MAIL_ADDR,CREAT_USR_ID,CREAT_DT,LST_UPD_USR_ID,LST_UPD_DT)
@@ -5135,7 +5137,7 @@ nvl(created_by,v_dflt_usr),
                 nvl(date_created,v_dflt_date) ,
                nvl(modified_by,v_dflt_usr),
              nvl(NVL (date_modified, date_created), v_dflt_date)
-from sbr.organizations o, nci_entty e where e.nci_idseq = o.org_idseq;
+from sbr_m.organizations o, nci_entty e where e.nci_idseq = o.org_idseq;
 commit;
 
 insert into nci_entty(NCI_IDSEQ, ENTTY_TYP_ID,CREAT_USR_ID,CREAT_DT,LST_UPD_USR_ID,LST_UPD_DT)
@@ -5144,7 +5146,7 @@ insert into nci_entty(NCI_IDSEQ, ENTTY_TYP_ID,CREAT_USR_ID,CREAT_DT,LST_UPD_USR_
                 nvl(date_created,v_dflt_date) ,
                nvl(modified_by,v_dflt_usr),
              nvl(NVL (date_modified, date_created), v_dflt_date)
-from sbr.persons;
+from sbr_m.persons;
 commit;
 
 
@@ -5155,7 +5157,7 @@ nvl(created_by,v_dflt_usr),
                 nvl(date_created,v_dflt_date) ,
                nvl(modified_by,v_dflt_usr),
              nvl(NVL (date_modified, date_created), v_dflt_date)
- from sbr.persons p, nci_entty e, nci_entty o where e.entty_typ_id = 73 and o.entty_typ_id (+)= 72 and e.nci_idseq = p.per_idseq and p.org_idseq = o.nci_idseq (+)  ;
+ from sbr_m.persons p, nci_entty e, nci_entty o where e.entty_typ_id = 73 and o.entty_typ_id (+)= 72 and e.nci_idseq = p.per_idseq and p.org_idseq = o.nci_idseq (+)  ;
 commit;
 
 insert into nci_entty_comm (ENTTY_ID,COMM_TYP_ID,RNK_ORD,CYB_ADDR,CREAT_DT,CREAT_USR_ID,LST_UPD_DT,LST_UPD_USR_ID)
@@ -5164,7 +5166,7 @@ select o.entty_id, ok.obj_key_id, RANK_ORDER,CYBER_ADDRESS,
 nvl(created_by,v_dflt_usr),
              nvl(NVL (date_modified, date_created), v_dflt_date),
                nvl(modified_by,v_dflt_usr)
-from sbr.CONTACT_COMMS c, obj_key ok, nci_entty o where
+from sbr_m.CONTACT_COMMS c, obj_key ok, nci_entty o where
 ORG_IDSEQ is not null and c.org_idseq = o.nci_idseq and ok.nci_cd = CTL_NAME and ok.obj_typ_id = 26;
 commit;
 
@@ -5174,7 +5176,7 @@ select o.entty_id, ok.obj_key_id, RANK_ORDER,CYBER_ADDRESS,
 nvl(created_by,v_dflt_usr),
              nvl(NVL (date_modified, date_created), v_dflt_date),
                nvl(modified_by,v_dflt_usr)
-from sbr.CONTACT_COMMS c, obj_key ok, nci_entty o where
+from sbr_m.CONTACT_COMMS c, obj_key ok, nci_entty o where
 per_IDSEQ is not null and c.per_idseq = o.nci_idseq and ok.nci_cd = CTL_NAME and ok.obj_typ_id = 26 ;
 commit;
 
@@ -5186,7 +5188,7 @@ select o.entty_id, ok.obj_key_id, RANK_ORDER,ADDR_LINE1,ADDR_LINE2,CITY,STATE_PR
 nvl(created_by,v_dflt_usr),
              nvl(NVL (date_modified, date_created), v_dflt_date),
                nvl(modified_by,v_dflt_usr)
-from sbr.CONTACT_ADDRESSES c, obj_key ok, nci_entty o where
+from sbr_m.CONTACT_ADDRESSES c, obj_key ok, nci_entty o where
 ORG_IDSEQ is not null and c.org_idseq = o.nci_idseq and ok.nci_cd = ATL_NAME and ok.obj_typ_id = 25;
 commit;
 
@@ -5198,7 +5200,7 @@ select o.entty_id, ok.obj_key_id, RANK_ORDER,ADDR_LINE1,ADDR_LINE2,CITY,STATE_PR
 nvl(created_by,v_dflt_usr),
              nvl(NVL (date_modified, date_created), v_dflt_date),
                nvl(modified_by,v_dflt_usr)
-    from sbr.CONTACT_ADDRESSES c, obj_key ok, nci_entty o where
+    from sbr_m.CONTACT_ADDRESSES c, obj_key ok, nci_entty o where
 PER_IDSEQ is not null and c.per_idseq = o.nci_idseq and ok.nci_cd = ATL_NAME and ok.obj_typ_id = 25;
 commit;
 
@@ -5212,7 +5214,7 @@ v_cnt integer;
 begin
 update admin_item set (REGSTR_STUS_ID, REGSTR_STUS_NM_DN) =
 (select s.stus_id, s.NCI_STUS
-from sbr.ac_registrations ar, stus_mstr s where
+from sbr_m.ac_registrations ar, stus_mstr s where
 upper(ar.REGISTRATION_STATUS) = upper(s.stus_nm) and ar.ac_idseq = admin_item.nci_idseq
 and ar.registration_status is not null);
 commit;
@@ -5221,43 +5223,43 @@ commit;
 --commit;
 
 update admin_item set (ORIGIN_ID, ORIGIN_ID_DN) =
-(Select obj_key_id, obj_key_desc from obj_key ok, sbr.administered_components ac where ac.public_id = admin_item.item_id
+(Select obj_key_id, obj_key_desc from obj_key ok, sbr_m.administered_components ac where ac.public_id = admin_item.item_id
 and admin_item.ver_nr = ac.version and ac.origin = ok.obj_key_desc and ok.obj_typ_id = 18);
 commit;
 
 update admin_item set (ORIGIN) =
-(Select origin from sbr.administered_components ac where ac.public_id = admin_item.item_id
+(Select origin from sbr_m.administered_components ac where ac.public_id = admin_item.item_id
 and admin_item.ver_nr = ac.version and origin not in (select obj_key_desc from obj_key where obj_typ_id = 18));
 commit;
 
 update perm_val set (PRNT_CNCPT_ITEM_ID, PRNT_CNCPT_VER_NR) = (
 select
-public_id, version from sbr.administered_components ac, sbr.vd_pvs pvs, admin_item vd where pvs.pv_idseq = perm_val.nci_idseq and ac.ac_idseq = pvs.con_idseq and
+public_id, version from sbr_m.administered_components ac, sbr_m.vd_pvs pvs, admin_item vd where pvs.pv_idseq = perm_val.nci_idseq and ac.ac_idseq = pvs.con_idseq and
 pvs.con_idseq is not null and vd.nci_idseq = pvs.vd_idseq and vd.item_id = perm_val.val_dom_item_id and vd.ver_nr = perm_val.val_dom_ver_nr)
-where nci_idseq in (select pv_idseq from sbr.vd_pvs where con_idseq is not null);
+where nci_idseq in (select pv_idseq from sbr_m.vd_pvs where con_idseq is not null);
 commit;
 
 
-update admin_item ai set submt_org_id = (select distinct entty_id from nci_entty e, sbr.ac_contacts a where e.nci_idseq = a.org_idseq and a.org_idseq is not null
+update admin_item ai set submt_org_id = (select distinct entty_id from nci_entty e, sbr_m.ac_contacts a where e.nci_idseq = a.org_idseq and a.org_idseq is not null
 and ai.nci_idseq = a.ac_idseq and rank_order = 1)
-where nci_idseq in (select ac_idseq from sbr.ac_contacts where org_idseq is not null and rank_order = 1);
+where nci_idseq in (select ac_idseq from sbr_m.ac_contacts where org_idseq is not null and rank_order = 1);
 commit;
 
 
-update admin_item ai set stewrd_org_id = (select entty_id from nci_entty e, sbr.ac_contacts a where e.nci_idseq = a.org_idseq and a.org_idseq is not null
+update admin_item ai set stewrd_org_id = (select entty_id from nci_entty e, sbr_m.ac_contacts a where e.nci_idseq = a.org_idseq and a.org_idseq is not null
 and ai.nci_idseq = a.ac_idseq and rank_order = 2)
-where nci_idseq in (select ac_idseq from sbr.ac_contacts where org_idseq is not null and rank_order = 2);
+where nci_idseq in (select ac_idseq from sbr_m.ac_contacts where org_idseq is not null and rank_order = 2);
 commit;
 
-update admin_item ai set submt_cntct_id = (select entty_id from nci_entty e, sbr.ac_contacts a where e.nci_idseq = a.per_idseq and a.per_idseq is not null
+update admin_item ai set submt_cntct_id = (select entty_id from nci_entty e, sbr_m.ac_contacts a where e.nci_idseq = a.per_idseq and a.per_idseq is not null
 and ai.nci_idseq = a.ac_idseq and rank_order = 2)
-where nci_idseq in (select ac_idseq from sbr.ac_contacts where per_idseq is not null and rank_order = 2);
+where nci_idseq in (select ac_idseq from sbr_m.ac_contacts where per_idseq is not null and rank_order = 2);
 commit;
 
 
-update admin_item ai set stewrd_cntct_id = (select entty_id from nci_entty e, sbr.ac_contacts a where e.nci_idseq = a.per_idseq and a.per_idseq is not null
+update admin_item ai set stewrd_cntct_id = (select entty_id from nci_entty e, sbr_m.ac_contacts a where e.nci_idseq = a.per_idseq and a.per_idseq is not null
 and ai.nci_idseq = a.ac_idseq and rank_order = 1)
-where nci_idseq in (select ac_idseq from sbr.ac_contacts where per_idseq is not null and rank_order = 1);
+where nci_idseq in (select ac_idseq from sbr_m.ac_contacts where per_idseq is not null and rank_order = 1);
 commit;
 
 insert into ref_doc (NCI_REF_ID,FILE_NM,NCI_MIME_TYPE,NCI_DOC_SIZE,
@@ -5269,7 +5271,7 @@ DAD_CHARSET,LAST_UPDATED,BLOB_CONTENT,
                nvl(date_created,v_dflt_date) ,
                nvl(modified_by,v_dflt_usr),
              nvl(NVL (date_modified, date_created), v_dflt_date)
-        from ref r, sbr.reference_blobs rb where r.nci_idseq = rb.rd_idseq;
+        from ref r, sbr_m.reference_blobs rb where r.nci_idseq = rb.rd_idseq;
 commit;
 
 update admin_item set creat_usr_id_x = creat_usr_id where creat_usr_id in (select cntct_secu_id from cntct);
