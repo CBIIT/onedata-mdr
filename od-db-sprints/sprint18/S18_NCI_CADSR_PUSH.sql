@@ -405,11 +405,12 @@ where ad.item_id = ai.item_id
 and   ad.ver_nr = ai.ver_nr
 and   ad.cntxt_item_id = c.item_id 
 and   ad.cntxt_ver_nr = c.ver_nr 
+and nvl(ad.fld_delete,0) = 0
 and   ad.nci_def_typ_id = ok.obj_key_id (+) 
 and   ad.nci_idseq not in (select defin_idseq from sbr.definitions)
 and   ad.lst_upd_dt >= sysdate - vDays;
 
-for cur in (select nci_idseq from alt_def where lst_upd_dt > creat_dt and lst_upd_dt >= sysdate - vDays and nci_idseq in (select defin_idseq from sbr.definitions)) loop
+for cur in (select nci_idseq from alt_def where lst_upd_dt > creat_dt and lst_upd_dt >= sysdate - vDays and  nvl(fld_delete,0) = 0 and nci_idseq in (select defin_idseq from sbr.definitions)) loop
 update sbr.definitions d set (DEFINITION, CONTE_IDSEQ, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY, LAE_NAME, DEFL_NAME) =
     (select  def_desc, c.nci_idseq, ad.CREAT_DT,ad.CREAT_USR_ID,  ad.LST_UPD_DT,ad.LST_UPD_USR_ID,decode(lang_id, 1000,'ENGLISH', 1007, 'Icelandic', 1004, 'Spanish'), ok.nci_cd
     from alt_def ad, admin_item ai, admin_item c, obj_key ok
@@ -421,6 +422,11 @@ update sbr.definitions d set (DEFINITION, CONTE_IDSEQ, DATE_CREATED, CREATED_BY,
     and   ad.nci_idseq = cur.nci_idseq)
 where d.defin_idseq = cur.nci_idseq;
 end loop; 
+
+for cur in (select nci_idseq from alt_def where lst_upd_dt > creat_dt and lst_upd_dt >= sysdate - vDays and  nvl(fld_delete,0) = 1 and nci_idseq in (select defin_idseq from sbr.definitions)) loop
+delete from sbr.definitions where  defin_idseq = cur.nci_idseq;
+end loop;
+
 commit;
 
 -- Designations
@@ -431,11 +437,12 @@ where ad.item_id = ai.item_id
 and   ad.ver_nr = ai.ver_nr
 and   ad.cntxt_item_id = c.item_id 
 and   ad.cntxt_ver_nr = c.ver_nr 
+and nvl(ad.fld_delete, 0) = 0
 and   ad.nm_typ_id = ok.obj_key_id (+) 
 and   ad.nci_idseq not in (select desig_idseq from sbr.designations)
 and   ad.lst_upd_dt >= sysdate - vDays;
 
-for cur in (select nci_idseq from alt_nms where lst_upd_dt > creat_dt and lst_upd_dt >= sysdate - vDays and nci_idseq in (select desig_idseq from sbr.designations)) loop
+for cur in (select nci_idseq from alt_nms where lst_upd_dt > creat_dt and lst_upd_dt >= sysdate - vDays and nvl(fld_delete, 0) = 0 and nci_idseq in (select desig_idseq from sbr.designations)) loop
 update sbr.designations d set (NAME, CONTE_IDSEQ, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY, LAE_NAME, DETL_NAME) =
     (select  nm_desc, c.nci_idseq, ad.CREAT_DT,ad.CREAT_USR_ID,  ad.LST_UPD_DT,ad.LST_UPD_USR_ID,decode(lang_id, 1000,'ENGLISH', 1007, 'Icelandic', 1004, 'Spanish'), ok.nci_cd
     from alt_nms ad, admin_item ai, admin_item c, obj_key ok
@@ -447,6 +454,11 @@ update sbr.designations d set (NAME, CONTE_IDSEQ, DATE_CREATED, CREATED_BY, DATE
     and   ad.nci_idseq = cur.nci_idseq)
 where d.desig_idseq = cur.nci_idseq;
 end loop;
+
+
+for cur in (select nci_idseq from alt_nms where lst_upd_dt > creat_dt and lst_upd_dt >= sysdate - vDays and nvl(fld_delete, 0) = 1 and nci_idseq in (select desig_idseq from sbr.designations)) loop
+delete from sbr.designations d where d.desig_idseq = cur.nci_idseq;
+end loop;
 commit;
 
 -- Reference Documents
@@ -457,12 +469,13 @@ where  ad.item_id = ai.item_id
     and   ad.ver_nr = ai.ver_nr
     and   ai.cntxt_item_id = c.item_id 
     and   ai.cntxt_ver_nr = c.ver_nr 
+    and nvl(ad.fld_delete, 0) = 0
 and   ad.ref_typ_id = ok.obj_key_id (+) 
 and   ad.nci_idseq not in (select rd_idseq from sbr.reference_documents)
 and   ad.lst_upd_dt >= sysdate - vDays;
 
 
-for cur in (select nci_idseq from ref where lst_upd_dt > creat_dt and  lst_upd_dt >= sysdate - vDays and nci_idseq in (select rd_idseq from sbr.reference_documents)) loop
+for cur in (select nci_idseq from ref where lst_upd_dt > creat_dt and  lst_upd_dt >= sysdate - vDays and nvl(fld_delete, 0) = 0 and nci_idseq in (select rd_idseq from sbr.reference_documents)) loop
 update sbr.reference_documents d set (NAME, CONTE_IDSEQ, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY, LAE_NAME, DcTL_NAME,display_order, doc_text, url) =
     (select  ref_nm, c.nci_idseq, ad.CREAT_DT,ad.CREAT_USR_ID,  ad.LST_UPD_DT,ad.LST_UPD_USR_ID,decode(lang_id, 1000,'ENGLISH', 1007, 'Icelandic', 1004, 'Spanish'), ok.nci_cd, ad.disp_ord, ad.ref_desc, ad.url
     from ref ad, admin_item ai, admin_item c, obj_key ok
@@ -476,6 +489,12 @@ where d.rd_idseq = cur.nci_idseq;
 end loop;
 
 
+for cur in (select nci_idseq from ref where lst_upd_dt > creat_dt and  lst_upd_dt >= sysdate - vDays and nvl(fld_delete, 0) = 1 and nci_idseq in (select rd_idseq from sbr.reference_documents)) loop
+delete from sbr.reference_documents d  where d.rd_idseq = cur.nci_idseq;
+end loop;
+
+commit;
+
 -- Classifications
 insert into sbr.ac_csi (CS_CSI_IDSEQ, AC_IDSEQ, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
 select nvl(csi.cs_csi_idseq, ai.nci_idseq),ai.nci_idseq , ad.CREAT_DT,ad.CREAT_USR_ID,  ad.LST_UPD_DT,ad.LST_UPD_USR_ID
@@ -484,6 +503,7 @@ where  ad.p_item_id = csiai.item_id
     and   ad.p_item_ver_nr = csiai.ver_nr
     and   csiai.item_id = csi.item_id 
     and   csiai.ver_nr = csi.ver_nr 
+    and nvl(ad.fld_delete, 0) = 0
 and   ad.rel_typ_id = 65 
 and ad.c_item_id = ai.item_id
 and ad.c_item_ver_nr = ai.ver_nr
@@ -491,7 +511,22 @@ and   (nvl(csi.cs_csi_idseq, ai.nci_idseq),ai.nci_idseq)  not in (select cs_csi_
 and   ad.lst_upd_dt >= sysdate - vDays;
 
 -- no update for classifications. only insert and delete.
-
+for cur in (select nvl(csi.cs_csi_idseq, ai.nci_idseq) cs_csi_idseq,ai.nci_idseq 
+from nci_admin_item_rel ad, admin_item csiai, nci_clsfctn_schm_item csi, admin_item ai
+where  ad.p_item_id = csiai.item_id 
+    and   ad.p_item_ver_nr = csiai.ver_nr
+    and   csiai.item_id = csi.item_id 
+    and   csiai.ver_nr = csi.ver_nr 
+    and nvl(ad.fld_delete, 0) = 1
+and   ad.rel_typ_id = 65 
+and ad.c_item_id = ai.item_id
+and ad.lst_upd_dt > ad.creat_dt
+and ad.c_item_ver_nr = ai.ver_nr
+and   (nvl(csi.cs_csi_idseq, ai.nci_idseq),ai.nci_idseq)  in (select cs_csi_idseq, ac_idseq from sbr.ac_csi)
+and   ad.lst_upd_dt >= sysdate - vDays) loop
+delete from sbr.ac_csi where cs_csi_idseq = cur.cs_csi_idseq and ac_idseq = cur.nci_idseq;
+end loop;
+commit;
 
 -- Alt names classification
 
@@ -503,6 +538,7 @@ and x.lst_upd_dt >= sysdate - vDays
 and x.nci_pub_id = csiai.item_id
 and x.nci_ver_nr = csiai.ver_nr
 and csiai.item_id = csi.item_id 
+and nvl(x.fld_delete, 0) = 0
 and csiai.ver_nr = csi.ver_nr
 and am.nm_id = x.nmdef_id
 and (nvl(csi.cs_csi_idseq, csiai.nci_idseq), am.nci_idseq) not in (select cs_csi_idseq, att_idseq from sbrext.AC_ATT_CSCSI_EXT);
@@ -517,6 +553,7 @@ where x.typ_nm = 'DEFINITION'
 and x.lst_upd_dt >= sysdate - vDays
 and x.nci_pub_id = csiai.item_id
 and x.nci_ver_nr = csiai.ver_nr
+and nvl(x.fld_delete, 0) = 0
 and csiai.item_id = csi.item_id 
 and csiai.ver_nr = csi.ver_nr
 and am.def_id = x.nmdef_id
@@ -646,8 +683,8 @@ update sbr.cd_vms set (CD_IDSEQ, VM_IDSEQ,  SHORT_MEANING, DATE_CREATED, CREATED
     and   (cd.nci_idseq, vm.nci_idseq) in (select cd_idseq, vm_idseq from sbr.cd_vms));
 */
 
-insert into sbr.cd_vms (CD_IDSEQ, VM_IDSEQ,  SHORT_MEANING, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)  --- Check what needs to go into short-meaning
-select cd.nci_idseq, vm.nci_idseq, vm.item_long_nm, cdvm.CREAT_DT,cdvm.CREAT_USR_ID,  cdvm.LST_UPD_DT,cdvm.LST_UPD_USR_ID
+insert into sbr.cd_vms (cv_idseq, CD_IDSEQ, VM_IDSEQ,  SHORT_MEANING, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)  --- Check what needs to go into short-meaning
+select nci_11179.cmr_guid, cd.nci_idseq, vm.nci_idseq, vm.item_long_nm, cdvm.CREAT_DT,cdvm.CREAT_USR_ID,  cdvm.LST_UPD_DT,cdvm.LST_UPD_USR_ID
 from conc_dom_val_mean cdvm, admin_item cd, admin_item vm
 where cdvm.conc_dom_item_id = cd.item_id 
 and   cdvm.conc_dom_ver_nr = cd.ver_nr
@@ -672,7 +709,7 @@ commit;
 */
 
 insert into sbr.permissible_Values(BEGIN_DATE, END_DATE, VALUE, SHORT_MEANING, pv_idseq, vm_idseq, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
-select min(PERM_VAL_BEG_DT), max(PERM_VAL_END_DT), PERM_VAL_NM, min(PERM_VAL_DESC_TXT),min(pv.nci_idseq), vm.nci_idseq, min(pv.CREAT_DT),min(pv.CREAT_USR_ID),min(pv.LST_UPD_DT),min(pv.LST_UPD_USR_ID)
+select min(PERM_VAL_BEG_DT), max(PERM_VAL_END_DT), PERM_VAL_NM, nvl(max(PERM_VAL_DESC_TXT), 'NO MEANING'),min(pv.nci_idseq), vm.nci_idseq, min(pv.CREAT_DT),min(pv.CREAT_USR_ID),min(pv.LST_UPD_DT),min(pv.LST_UPD_USR_ID)
 from perm_val pv, admin_item vm
 where pv.nci_val_mean_item_id = vm.item_id 
 and   pv.nci_val_mean_ver_nr = vm.ver_nr
