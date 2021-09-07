@@ -63,3 +63,37 @@ delete from onedata_ra.nci_usr_cart where CNTCT_SECU_ID = 'GUEST';
 commit;
 end;
 /
+
+create or replace procedure            sp_revprocess
+as
+v_cnt integer;
+begin
+
+nci_cadsr_push_core.spPushAI(1);
+
+nci_cadsr_push.spPushAIChildren(1);
+
+nci_cadsr_push.spPushAISpecific(1);
+
+raise_application_error(-20000, 'Completed');
+
+end;
+/
+
+create or replace procedure            sp_revform
+as
+v_cnt integer;
+begin
+
+nci_cadsr_push_core.spPushAIType(1,54);
+
+nci_cadsr_push_form.PushModule(1);
+
+nci_cadsr_push_form.PushQuestion(1);
+
+nci_cadsr_push_form.PushQuestValidValue(1);
+
+raise_application_error(-20000, 'Completed');
+
+end;
+/
