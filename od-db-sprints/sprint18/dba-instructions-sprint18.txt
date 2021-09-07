@@ -23,6 +23,9 @@ S18_NCI_CADSR_PUSH_FORM.sql
 -- Run as ONEDATA_RA DDL scripts
 S18_WA_RA_DDL.sql
 
+-- Run as SBR
+S18_SBREXT.sql
+
 -- DATA MIGRATION
 
 -- Run as ONEDATA_WA DM scripts
