@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE nci_caDSR_PULL AS
+create or replace PACKAGE nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
 procedure sp_create_ai_3;
@@ -30,9 +30,7 @@ procedure SP_SOURCE_TYPE;
   --    procedure sp_append_quest_pv;
 END;
 /
-
-
-CREATE OR REPLACE PACKAGE BODY nci_caDSR_PULL AS
+create or replace PACKAGE BODY nci_caDSR_PULL AS
 
 
 v_dflt_usr  varchar2(30) := 'ONEDATA';
@@ -1278,7 +1276,7 @@ for cur in ( SELECT TRIM (conte_idseq) conte_idseq,
                cur.created_by,
                cur.date_created,
    cur.date_modified,
-            cur.modified_by, 'Application', 'RELEASED',75,9);
+             cur.modified_by, 'Application', 'RELEASED',9,75);
           v_cnt := v_cnt + 1;
 end loop;
     COMMIT;
@@ -1320,8 +1318,8 @@ update SET
     a.ITEM_NM=c.name,
     a.ITEM_LONG_NM=c.name  ,
     a.CNTXT_NM_DN=c.name ,
-    a.LST_UPD_DT=c.date_modified,
-    a.LST_UPD_USR_ID=c.modified_by;
+     a.LST_UPD_DT=nvl(NVL (date_modified, date_created), v_dflt_date),
+     a.LST_UPD_USR_ID= nvl(c.modified_by,v_dflt_usr);
     COMMIT;
 MERGE INTO cntxt c
 USING  admin_item a
