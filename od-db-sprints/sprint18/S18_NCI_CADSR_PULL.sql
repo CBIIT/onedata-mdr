@@ -120,7 +120,7 @@ end loop;
                 select new_idseq, 1, CSI_NAME,CSITL_NAME,DESCRIPTION,COMMENTS,
                 sysdate,
                 CREATED_BY,DATE_MODIFIED,MODIFIED_BY,CONDR_IDSEQ,LONG_NAME ,PREFERRED_DEFINITION, v_id || 'v1.00' ,v_id,
-                CONTE_IDSEQ,ASL_NAME,DELETED_IND,LATEST_VERSION_IND, ORIGIN,BEGIN_DATE,END_DATE,CHANGE_NOTE from cs_items where csi_idseq = v_tab_csi_idseq(i);
+                CONTE_IDSEQ,ASL_NAME,DELETED_IND,LATEST_VERSION_IND, ORIGIN,BEGIN_DATE,END_DATE,CHANGE_NOTE from sbr_m.cs_items where csi_idseq = v_tab_csi_idseq(i);
             commit;
             update cs_csi_copy set csi_idseq = new_idseq where cs_csi_idseq = v_tab_cs_csi_idseq(i);
             commit;
