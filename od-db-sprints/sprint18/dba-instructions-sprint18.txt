@@ -6,7 +6,6 @@ S18_WA_RA_DDL.sql
 S18_WA_DDL.sql
 S18_NCI_11179.sql
 S18_NCI_11179_2.sql
-S18_sp_postprocess.sql
 S18_NCI_CHNG_MGMT.sql
 S18_NCI_DEC_MGMT.sql
 S18_NCI_DLOAD.sql
@@ -19,6 +18,7 @@ S18_NCI_CADSR_PUSH_CORE.sql
 S18_NCI_CADSR_PUSH.sql
 S18_PUSH_Migration.sql
 S18_NCI_CADSR_PUSH_FORM.sql
+S18_sp_postprocess.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S18_WA_RA_DDL.sql
