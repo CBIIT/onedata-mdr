@@ -697,6 +697,7 @@ end;
 procedure pushForm (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char)
 as
 v_id number;
+v_cnt integer;
 v_hdridseq  char(36);
 v_ftridseq  char(36);
 begin
@@ -716,22 +717,6 @@ update sbrext.quest_contents_ext set ( qtl_name,  qcdl_name,asl_name,begin_date,
             and ai.nci_idseq= vIdseq)
             where qc_idseq = vIdseq;
             
-            update sbrext.quest_contents_ext set ( preferred_definition,
-            date_modified, modified_by) =
-(select  nvl(frm.hdr_instr, ' ' ), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
-        from admin_item ai,  nci_form frm
-        where ai.item_id = frm.item_id and ai.ver_nr = frm.ver_nr
-            and ai.nci_idseq= vIdseq)
-            where dn_crf_idseq = vIdseq and qtl_name ='FORM_INSTR';     
-            
-                  update sbrext.quest_contents_ext set ( preferred_definition,
-            date_modified, modified_by) =
-(select  nvl(frm.ftr_instr, ' ' ), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
-        from admin_item ai,  nci_form frm
-        where ai.item_id = frm.item_id and ai.ver_nr = frm.ver_nr
-            and ai.nci_idseq= vIdseq)
-            where dn_crf_idseq = vIdseq and qtl_name ='FOOTER';     
-            commit;
 end if;
 if vActionType = 'I' then
 --raise_application_error(-20000, vItemId);
@@ -753,11 +738,25 @@ values ( curfrm.NCI_IDSEQ,curfrm.nci_idseq, curfrm.form_typ_id, curfrm.nci_cd, c
 curfrm.UNTL_DT, curfrm.CURRNT_VER_IND,
             curfrm.ITEM_NM, curfrm.ORIGIN,substr(curfrm.ITEM_DESC,1,2000),curfrm.ITEM_LONG_Nm,curfrm.ITEM_ID, curfrm.VER_NR, 
             curfrm.CREAT_USR_ID, curfrm.CREAT_DT, curfrm.LST_UPD_DT,curfrm.LST_UPD_USR_ID ,curfrm.fld_delete, 'Yes',1);
-          
+          end loop;
+end if;
 
 
+         
+
+select count(*) into v_cnt from sbrext.quest_contents_ext where dn_crf_idseq = vIdSeq and qtl_name = 'FORM_INSTR';
+if (v_cnt = 0) then
 v_id := nci_11179.getItemid;
 v_hdridseq := nci_11179.cmr_guid;
+for curfrm in (select  ai.NCI_IDSEQ,
+ ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq cntxt_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND ,
+            ai.ITEM_NM, ai.ORIGIN,substr(ai.ITEM_DESC,1,2000) ITEM_DESC,ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR, frm.ftr_instr, frm.hdr_instr,
+            ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes') FLD_DELETE, 'Yes',1
+        from admin_item ai, admin_item c, nci_form frm
+        where ai.cntxt_item_id = c.item_id and ai.cntxt_ver_nr = c.ver_nr
+            and ai.item_id = frm.item_id and ai.ver_nr = frm.ver_nr
+            and c.admin_item_typ_id = 8
+            and ai.nci_idseq= vIdseq) loop
 insert into sbrext.quest_contents_ext (qc_idseq, dn_crf_idseq, qtl_name, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,
             preferred_name,qc_id,
@@ -769,11 +768,8 @@ curfrm.UNTL_DT, curfrm.CURRNT_VER_IND,
             v_id,v_id, 
             curfrm.VER_NR, 
             curfrm.CREAT_USR_ID, curfrm.CREAT_DT, curfrm.LST_UPD_DT,curfrm.LST_UPD_USR_ID ,curfrm.fld_delete, 'Yes', 1);
-      --      and frm.hdr_instr is not null;
-     --    commit;   
-         
-         
-         insert into sbr.administered_components (ac_idseq, actl_name, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
+
+       insert into sbr.administered_components (ac_idseq, actl_name, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,
             preferred_name,public_id,
             version,
@@ -784,10 +780,37 @@ values ( v_hdridseq, 'QUEST_CONTENT' , curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, c
             curfrm.VER_NR, 
             curfrm.CREAT_USR_ID, curfrm.CREAT_DT, curfrm.LST_UPD_DT,curfrm.LST_UPD_USR_ID ,curfrm.fld_delete);
      
+insert into sbrext.qc_recs_ext (QR_IDSEQ,P_QC_IDSEQ,C_QC_IDSEQ,DISPLAY_ORDER,RL_NAME,DATE_CREATED,CREATED_BY,DATE_MODIFIED,MODIFIED_BY)
+select nci_11179.cmr_guid,curfrm.nci_idseq, v_hdridseq, 1 ,'FORM_INSTRUCTION',curfrm.CREAT_DT, curfrm.CREAT_USR_ID,  curfrm.LST_UPD_DT,curfrm.LST_UPD_USR_ID from dual;
+end loop;
+else
+            update sbrext.quest_contents_ext set ( preferred_definition,
+            date_modified, modified_by) =
+(select  nvl(frm.hdr_instr, ' ' ), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
+        from admin_item ai,  nci_form frm
+        where ai.item_id = frm.item_id and ai.ver_nr = frm.ver_nr
+            and ai.nci_idseq= vIdseq)
+            where dn_crf_idseq = vIdseq and qtl_name ='FORM_INSTR';     
+    end if;        
+                  --      and frm.hdr_instr is not null;
+     --    commit;   
          
+         
+        
+         select count(*) into v_cnt from sbrext.quest_contents_ext where dn_crf_idseq = vIdSeq and qtl_name = 'FOOTER';
+         
+         if (v_cnt = 0) then
 v_id := nci_11179.getItemid;
 v_ftridseq := nci_11179.cmr_guid;
-
+for curfrm in (select  ai.NCI_IDSEQ,
+ ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq cntxt_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND ,
+            ai.ITEM_NM, ai.ORIGIN,substr(ai.ITEM_DESC,1,2000) ITEM_DESC,ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR, frm.ftr_instr, frm.hdr_instr,
+            ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes') FLD_DELETE, 'Yes',1
+        from admin_item ai, admin_item c, nci_form frm
+        where ai.cntxt_item_id = c.item_id and ai.cntxt_ver_nr = c.ver_nr
+            and ai.item_id = frm.item_id and ai.ver_nr = frm.ver_nr
+            and c.admin_item_typ_id = 8
+            and ai.nci_idseq= vIdseq) loop
 insert into sbrext.quest_contents_ext (qc_idseq, dn_crf_idseq, qtl_name, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,
             preferred_name,qc_id,
@@ -813,20 +836,31 @@ values (  v_ftridseq, curfrm.nci_idseq, 'FOOTER' , curfrm.ADMIN_STUS_NM_DN, curf
             v_id,v_id, 
             curfrm.VER_NR, 
             curfrm.CREAT_USR_ID, curfrm.CREAT_DT, curfrm.LST_UPD_DT,curfrm.LST_UPD_USR_ID,curfrm.fld_delete);
-      
-      
-      
+            
+            
 insert into sbrext.qc_recs_ext (QR_IDSEQ,P_QC_IDSEQ,C_QC_IDSEQ,DISPLAY_ORDER,RL_NAME,DATE_CREATED,CREATED_BY,DATE_MODIFIED,MODIFIED_BY)
-select nci_11179.cmr_guid,curfrm.nci_idseq, v_hdridseq, 1 ,'FORM_INSTRUCTION',curfrm.CREAT_DT, curfrm.CREAT_USR_ID,  curfrm.LST_UPD_DT,curfrm.LST_UPD_USR_ID from dual;
+select nci_11179.cmr_guid,curfrm.nci_idseq, v_ftridseq, 2 ,'FORM_INSTRUCTION',curfrm.CREAT_DT, curfrm.CREAT_USR_ID,  curfrm.LST_UPD_DT,curfrm.LST_UPD_USR_ID from dual;
+
+            end loop;
+      else
+               update sbrext.quest_contents_ext set ( preferred_definition,
+            date_modified, modified_by) =
+(select  nvl(frm.ftr_instr, ' ' ), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
+        from admin_item ai,  nci_form frm
+        where ai.item_id = frm.item_id and ai.ver_nr = frm.ver_nr
+            and ai.nci_idseq= vIdseq)
+            where dn_crf_idseq = vIdseq and qtl_name ='FOOTER';     
+            commit;
+      end if;
+      
 
 /*
 insert into sbrext.qc_recs_ext (QR_IDSEQ,P_QC_IDSEQ,C_QC_IDSEQ,DISPLAY_ORDER,RL_NAME,DATE_CREATED,CREATED_BY,DATE_MODIFIED,MODIFIED_BY)
 select nci_11179.cmr_guid,curmod.mod_idseq, v_idseq, curmod.disp_ord ,'MODULE_INSTRUCTION', curmod.CREAT_USR_ID, curmod.CREAT_DT, curmod.LST_UPD_DT,curmod.LST_UPD_USR_ID from dual;
 */
 
-           end loop;
 
-end if;
+
 commit;
 end;
 
@@ -1089,31 +1123,30 @@ vExist integer;
 --v_condr_idseq char(36);
 
 begin
+
+
 select count(*) into v_cnt from cncpt_admin_item cai where cai.item_id = vItemId and cai.ver_nr = vVerNr;
 --raise_application_error(-20000, vItemID);
-if (vActionType = 'I') then
+select count(*) into v_cnt from sbrext.CON_DERIVATION_RULES_EXT where condr_idseq = vCondrIdseq;
+
+if (v_cnt = 0) then
 
 insert into sbrext.CON_DERIVATION_RULES_EXT (condr_idseq, date_created, created_by, crtl_name, name)
 select vCondrIdseq, nvl(max(cai.creat_dt), sysdate),nvl(max(cai.creat_usr_id), 'ONEDATA'), decode(v_cnt,0, 'Simple Concept',1, 'Simple Concept','CONCATENATION') ,  nvl(listagg(con.item_long_nm,':') within group (order by cai.NCI_ORD),'No concepts')
 from cncpt_admin_item cai, admin_item con where cai.item_id = vItemId and cai.ver_nr = vVerNr and cai.cncpt_item_id = con.item_id and cai.cncpt_ver_nr = con.ver_nr ;
-
-insert into sbrext.COMPONENT_CONCEPTS_EXT (CONDR_IDSEQ, CON_IDSEQ, DISPLAY_ORDER, DATE_CREATED, DATE_MODIFIED, MODIFIED_BY, CREATED_BY, PRIMARY_FLAG_IND, CONCEPT_VALUE)
-select vCondrIdseq, con.nci_idseq, nvl(nci_ord,1), cai.CREAT_DT, cai.LST_UPD_DT,cai.LST_UPD_USR_ID,cai.CREAT_USR_ID, decode(nci_prmry_ind, 1, 'Yes',0,'No'), nci_cncpt_val
-from cncpt_admin_item cai, admin_item con where cai.item_id = vItemId and cai.ver_nr = vVerNr and cai.cncpt_item_id = con.item_id and cai.cncpt_ver_nr = con.ver_nr;
-end if;
-
-if (vActionType = 'U') then
+else
 update sbrext.CON_DERIVATION_RULES_EXT set (condr_idseq, crtl_name, name)=
 (select vCondrIdseq, decode(v_cnt,0, 'Simple Concept',1, 'Simple Concept','CONCATENATION') ,  nvl(listagg(con.item_long_nm,':') within group (order by cai.NCI_ORD),'No concepts')
 from cncpt_admin_item cai, admin_item con where cai.item_id = vItemId and cai.ver_nr = vVerNr and cai.cncpt_item_id = con.item_id and cai.cncpt_ver_nr = con.ver_nr)
 where condr_idseq = vCondrIdseq;
 
+end if;
+
 delete from sbrext.COMPONENT_CONCEPTS_EXT where condr_idseq = vCondrIdseq;
 
 insert into sbrext.COMPONENT_CONCEPTS_EXT (CONDR_IDSEQ, CON_IDSEQ, DISPLAY_ORDER, DATE_CREATED, DATE_MODIFIED, MODIFIED_BY, CREATED_BY, PRIMARY_FLAG_IND, CONCEPT_VALUE)
-select vCondrIdseq, con.nci_idseq, nci_ord, cai.CREAT_DT, cai.LST_UPD_DT,cai.LST_UPD_USR_ID,cai.CREAT_USR_ID, decode(nci_prmry_ind, 1, 'Yes',0,'No'), nci_cncpt_val
+select vCondrIdseq, con.nci_idseq, nvl(nci_ord,1), cai.CREAT_DT, cai.LST_UPD_DT,cai.LST_UPD_USR_ID,cai.CREAT_USR_ID, decode(nci_prmry_ind, 1, 'Yes',0,'No'), nci_cncpt_val
 from cncpt_admin_item cai, admin_item con where cai.item_id = vItemId and cai.ver_nr = vVerNr and cai.cncpt_item_id = con.item_id and cai.cncpt_ver_nr = con.ver_nr;
-end if;
 
 
 
