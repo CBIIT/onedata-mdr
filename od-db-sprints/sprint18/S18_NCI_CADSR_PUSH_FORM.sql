@@ -655,6 +655,5 @@ where qvv.quest_idseq = q.NCI_IDSEQ and qvv.vv_idseq = vv.NCI_IDSEQ (+);
 commit;
 
 end;
-
 END;
 /
