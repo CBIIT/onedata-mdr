@@ -361,7 +361,7 @@ FROM ADMIN_ITEM , NCI_PROTCL p
 ADMIN_ITEM.CNTXT_NM_DN, ADMIN_ITEM.CURRNT_VER_IND, ADMIN_ITEM.REGSTR_STUS_NM_DN, ADMIN_ITEM.ADMIN_STUS_NM_DN, ADMIN_ITEM.CREAT_DT,
 ADMIN_ITEM.CREAT_USR_ID, ADMIN_ITEM.LST_UPD_USR_ID, ADMIN_ITEM.FLD_DELETE, ADMIN_ITEM.LST_DEL_DT, ADMIN_ITEM.S2P_TRN_DT,
 ADMIN_ITEM.LST_UPD_DT, ADMIN_ITEM.NCI_IDSEQ, CSI.P_ITEM_ID, CSI.P_ITEM_VER_NR,
-CAST(cs.item_nm || SYS_CONNECT_BY_PATH(replace(admin_item.ITEM_NM,'|',''), ' | ') as varchar2(4000)) FUL_PATH,
+substr(CAST(SYS_CONNECT_BY_PATH(replace(admin_item.ITEM_NM,'|',''), ' | ') as varchar2(4000)),4) FUL_PATH,
 cs.item_id cs_item_id, cs.ver_nr cs_ver_nr , cs.item_long_nm cs_long_nm, cs.item_nm cs_item_nm, cs.item_desc cs_item_desc,
  cs.admin_stus_nm_dn cs_admin_stus_nm_dn,CS.CLSFCTN_SCHM_TYP_ID
 FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
