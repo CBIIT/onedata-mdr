@@ -367,3 +367,9 @@ FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
        WHERE ADMIN_ITEM_TYP_ID = 51 and ADMIN_ITEM.ITEM_ID = CSI.ITEM_ID and ADMIN_ITEM.VER_NR = CSI.VER_NR and csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr
    start with p_item_id is null
    CONNECT BY PRIOR csi.item_id = csi.p_item_id;
+
+
+
+update obj_key set obj_key_desc = 'RAVE ALS' where obj_key_id = 90;
+update obj_key set obj_key_desc = 'Legacy Form Builder XML' where obj_key_id = 101;
+commit;
