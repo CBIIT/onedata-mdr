@@ -16,7 +16,6 @@ S18_NCI_VD.sql
 S18_NCI_CADSR_PULL.sql
 S18_NCI_CADSR_PUSH_CORE.sql
 S18_NCI_CADSR_PUSH.sql
-S18_PUSH_Migration.sql
 S18_NCI_CADSR_PUSH_FORM.sql
 S18_sp_postprocess.sql
 
