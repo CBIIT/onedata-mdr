@@ -13,5 +13,6 @@ alter table NCI_STG_AI_CNCPT_CREAT
  
   alter table 
  NCI_STG_PV_VM_BULK
- ADD ( blank_1 char(1));
+ ADD ( blank_1 char(1), blank_2 char(1), blank_3 char(1), blank_4 char(1), blank_5 char(1),
+     blank_6 char(1), blank_7 char(1), blank_8 char(1), blank_9 char(1), blank_10 char(1) );
  
