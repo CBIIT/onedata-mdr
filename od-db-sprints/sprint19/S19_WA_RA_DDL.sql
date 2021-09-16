@@ -17,3 +17,5 @@ alter table NCI_STG_AI_CNCPT_CREAT
      blank_6 char(1), blank_7 char(1), blank_8 char(1), blank_9 char(1), blank_10 char(1) );
  
 alter table nci_admin_item_ext add (CNCPT_CONCAT_WITH_INT varchar2(4000));
+
+alter table nci_admin_item_rel_alt_key add (PREF_NM_MIGRATED varchar2(30));
