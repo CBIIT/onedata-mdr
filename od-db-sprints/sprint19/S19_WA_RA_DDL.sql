@@ -20,4 +20,4 @@ alter table nci_admin_item_ext add (CNCPT_CONCAT_WITH_INT varchar2(4000));
 
 alter table nci_admin_item_rel_alt_key add (PREF_NM_MIGRATED varchar2(30));
 
-alter table NCI_CLSFCTN_SCHM_ITEM add (DISP_ORD integer);
+alter table NCI_CLSFCTN_SCHM_ITEM add (DISP_ORD integer default 0);
