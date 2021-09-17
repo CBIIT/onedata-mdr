@@ -21,3 +21,23 @@ alter table nci_admin_item_ext add (CNCPT_CONCAT_WITH_INT varchar2(4000));
 alter table nci_admin_item_rel_alt_key add (PREF_NM_MIGRATED varchar2(30));
 
 alter table NCI_CLSFCTN_SCHM_ITEM add (DISP_ORD integer default 0);
+
+
+
+
+CREATE OR REPLACE  VIEW VW_NCI_CSI_DE AS
+  select  aim.c_item_id item_id, aim.c_item_ver_nr ver_nr, aim.p_item_id csi_item_id, aim.p_item_ver_nr csi_ver_nr, 
+  csi.item_nm csi_ITEM_NM, csist.cs_item_id CS_ITEM_ID, csist.CS_ITEM_VER_NR CS_VER_NR, aim.rel_typ_id,
+ csi.item_long_nm  csi_item_long_nm, csi.item_desc csi_item_desc, csist.p_item_Id p_CS_ITEM_ID, csist.P_ITEM_VER_NR p_CS_VER_NR,
+aim.CREAT_DT, aim.CREAT_USR_ID, aim.LST_UPD_USR_ID, aim.FLD_DELETE, aim.LST_DEL_DT, aim.S2P_TRN_DT, aim.LST_UPD_DT,
+ csi.item_nm || ' ' || cs.ITEM_NM CSI_SEARCH_STR, cs.ITEM_NM  CS_ITEM_NM, cs.ITEM_LONG_NM CS_ITEM_LONG_NM
+from  admin_item csi, NCI_CLSFCTN_SCHM_ITEM csist, nci_admin_item_rel aim, vw_CLSFCTN_SCHM cs 
+where csi.item_id = aim.p_item_id and csi.ver_nr = aim.p_item_ver_nr 
+and aim.rel_typ_id = 65 
+and csi.item_id = csist.item_id and csi.ver_nr = csist.ver_nr
+and csist.cs_item_id = cs.item_id and csist.cs_item_ver_nr = cs.ver_nr;
+
+
+
+
+
