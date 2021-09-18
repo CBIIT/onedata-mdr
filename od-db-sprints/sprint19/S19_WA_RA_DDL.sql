@@ -54,3 +54,4 @@ and csist.cs_item_id = cs.item_id and csist.cs_item_ver_nr = cs.ver_nr;
 */
 
 
+alter table NCI_STG_AI_CNCPT_CREAT add (ITEM_1_LONG_NM_INT varchar2(255));
