@@ -55,3 +55,6 @@ and csist.cs_item_id = cs.item_id and csist.cs_item_ver_nr = cs.ver_nr;
 
 
 alter table NCI_STG_AI_CNCPT_CREAT add (ITEM_1_LONG_NM_INT varchar2(255));
+
+CREATE TABLE NCI_MODULE (ITEM_ID number not null, VER_NR number(4,2) not null, CMNTS varchar2(4000), primary key (ITEM_ID, VER_NR));
+
