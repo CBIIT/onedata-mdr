@@ -104,3 +104,5 @@ and air.NCI_PUB_ID = vv.q_pub_id (+)
 and air.nci_ver_nr = vv.q_ver_nr (+);
 
 
+alter table NCI_DLOAD_HDR add (GUEST_USR_NM varchar2(50), GUEST_USR_PWD number(6));
+
