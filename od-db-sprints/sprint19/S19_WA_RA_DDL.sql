@@ -67,13 +67,12 @@ alter table NCI_STG_AI_CNCPT_CREAT add (ITEM_1_LONG_NM_INT varchar2(255));
 	"S2P_TRN_DT" DATE DEFAULT sysdate, 
 	"LST_UPD_DT" DATE DEFAULT sysdate, 
 	 CONSTRAINT "PK_MODULE" PRIMARY KEY ("ITEM_ID", "VER_NR"));
-  
-create or replace view vw_value_dom_comp
+  create or replace view vw_value_dom_comp
 as
 select v.*, e.cncpt_concat rep_term_concepts, e.cncpt_concat_nm rep_term_concept_nms, 
 pv.code_name
 from value_dom v, nci_admin_item_Ext e, 
-(SELECT val_dom_item_id, val_dom_ver_nr, LISTAGG(PERM_VAL_NM|| ':' || PERM_VAL_DESC_TXT, '||') WITHIN GROUP (ORDER by VAL_DOM_ITEM_ID) AS CODE_NAME
+(SELECT val_dom_item_id, val_dom_ver_nr, LISTAGG(PERM_VAL_NM|| ':' || PERM_VAL_DESC_TXT, '   ,  ') WITHIN GROUP (ORDER by PERM_VAL_DESC_TXT) AS CODE_NAME
 FROM PERM_VAL
 GROUP BY val_dom_item_id, val_dom_ver_nr) pv
 where v.rep_cls_item_id = e.item_id and v.rep_cls_ver_nr = e.ver_nr
