@@ -56,5 +56,25 @@ and csist.cs_item_id = cs.item_id and csist.cs_item_ver_nr = cs.ver_nr;
 
 alter table NCI_STG_AI_CNCPT_CREAT add (ITEM_1_LONG_NM_INT varchar2(255));
 
-CREATE TABLE NCI_MODULE (ITEM_ID number not null, VER_NR number(4,2) not null, CMNTS varchar2(4000), primary key (ITEM_ID, VER_NR));
-
+  CREATE TABLE NCI_MODULE
+   (	"VER_NR" NUMBER(4,2) NOT NULL ENABLE, 
+	"ITEM_ID" NUMBER NOT NULL ENABLE, 
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	 CONSTRAINT "PK_MODULE" PRIMARY KEY ("ITEM_ID", "VER_NR"));
+  
+create or replace view vw_value_dom_comp
+as
+select v.*, e.cncpt_concat rep_term_concepts, e.cncpt_concat_nm rep_term_concept_nms, 
+pv.code_name
+from value_dom v, nci_admin_item_Ext e, 
+(SELECT val_dom_item_id, val_dom_ver_nr, LISTAGG(PERM_VAL_NM|| ':' || PERM_VAL_DESC_TXT, '||') WITHIN GROUP (ORDER by VAL_DOM_ITEM_ID) AS CODE_NAME
+FROM PERM_VAL
+GROUP BY val_dom_item_id, val_dom_ver_nr) pv
+where v.rep_cls_item_id = e.item_id and v.rep_cls_ver_nr = e.ver_nr
+and v.item_id = pv.val_dom_item_id and v.ver_nr = pv.val_dom_ver_nr;
