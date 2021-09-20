@@ -78,7 +78,6 @@ GROUP BY val_dom_item_id, val_dom_ver_nr) pv
 where v.rep_cls_item_id = e.item_id and v.rep_cls_ver_nr = e.ver_nr
 and v.item_id = pv.val_dom_item_id and v.ver_nr = pv.val_dom_ver_nr;
 
-
 CREATE OR REPLACE  VIEW VW_NCI_FORM_FLAT AS
   select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr,
 air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr,
@@ -88,7 +87,8 @@ aim.item_nm MOD_ITEM_NM, air.instr,
 air.nci_pub_id QUEST_ITEM_ID,air.nci_ver_nr QUEST_VER_NR,
 de.CNTXT_NM_DN CDE_CNTXT_NM, de.item_nm CDE_ITEM_NM, de.cntxt_item_id CDE_CNTXT_ITEM_ID, de.cntxt_VER_NR CDE_CNTXT_VER_NR,
 air.CREAT_DT, air.CREAT_USR_ID, air.LST_UPD_USR_ID, air.FLD_DELETE, air.LST_DEL_DT, air.S2P_TRN_DT, air.LST_UPD_DT, air.item_long_nm QUEST_LONG_TXT, air.item_nm QUEST_TXT,
-vv.VM_NM, vv.VM_LNM, vv.VM_DEF, vv.VALUE VV_VALUE, vv.EDIT_IND VV_EDIT_IND, vv.SEQ_NBR VV_SEQ_NR, vv.MEAN_TXT VV_MEAN_TXT, vv.DESC_TXT VV_DESC_TXT
+vv.VM_NM, vv.VM_LNM, vv.VM_DEF, vv.VALUE VV_VALUE, vv.EDIT_IND VV_EDIT_IND, vv.SEQ_NBR VV_SEQ_NR, vv.MEAN_TXT VV_MEAN_TXT, vv.DESC_TXT VV_DESC_TXT, nvl(vv.nci_pub_id, 1) VV_ITEM_ID,
+nvl(vv.nci_ver_nr, 1) VV_VER_NR
 from  nci_admin_item_rel_alt_key air, admin_item aim,
 admin_item frm, nci_admin_item_rel frm_mod , admin_item de, nci_quest_valid_value vv
 where  air.rel_typ_id = 63
@@ -100,4 +100,5 @@ and air.c_item_id = de.item_id (+)
 and air.c_item_ver_nr = de.ver_nr (+)
 and air.NCI_PUB_ID = vv.q_pub_id (+)
 and air.nci_ver_nr = vv.q_ver_nr (+);
+
 
