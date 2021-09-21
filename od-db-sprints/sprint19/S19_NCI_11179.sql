@@ -810,6 +810,8 @@ v_table_name := 'ADMIN_ITEM';
     action_rows.extend; action_rows(action_rows.last) := row;
     action := t_actionRowset(action_rows, 'Administered Item (No Sequence)',2, 10, 'insert');
     actions.extend; actions(actions.last) := action;
+    action := t_actionRowset(action_rows, 'Module',2, 11, 'insert');
+    actions.extend; actions(actions.last) := action;
 
 
     row := t_row();
