@@ -1,5 +1,6 @@
 create or replace PACKAGE            nci_11179_2 AS
 procedure spNCICompareDE (v_data_in in clob, v_data_out out clob);
+procedure spNCICompareVD (v_data_in in clob, v_data_out out clob);
 procedure spNCIShowVMDependency (v_data_in in clob, v_data_out out clob);
 procedure spNCIShowVMDependencyDE (v_data_in in clob, v_data_out out clob);
 procedure spNCIShowVMDependencyComb (v_data_in in clob, v_data_out out clob);
@@ -554,14 +555,7 @@ as
     row          t_row;
     row_cur t_row;
 
-    v_admin_item                admin_item%rowtype;
-    v_tab_admin_item            tab_admin_item_pk;
-
     v_found      boolean;
-    v_tab_val_dom    tab_admin_item_pk := tab_admin_item_pk();
-
-    type      t_admin_item_nm is table of admin_item.item_nm%type;
-    v_tab_admin_item_nm   t_admin_item_nm := t_admin_item_nm();
 
     v_val_mean_desc    val_mean.val_mean_desc%type;
     v_perm_val_nm    perm_val.perm_val_nm%type;
@@ -590,6 +584,47 @@ begin
     hookOutput.message := 'Data Element Compare';
     v_data_out := ihook.getHookOutput(hookOutput);
 end;
+
+/*  Pop-up compare VD for selected rows */
+procedure spNCICompareVD (v_data_in in clob, v_data_out out clob)
+as
+
+    hookInput           t_hookInput;
+    hookOutput           t_hookOutput := t_hookOutput();
+    showRowset     t_showableRowset;
+
+    rows      t_rows;
+    row          t_row;
+    row_cur t_row;
+
+
+    v_found      boolean;
+    v_item_id		 number;
+    v_ver_nr		 number;
+begin
+
+    hookInput := ihook.getHookInput(v_data_in);
+    hookOutput.invocationNumber := hookInput.invocationNumber;
+    hookOutput.originalRowset := hookInput.originalRowset;
+
+    rows := t_rows();
+
+    /* Iterate through all the selected VALUE Domains */
+    for i in 1 .. hookInput.originalRowset.Rowset.count loop
+        row := t_row();
+        row_cur := hookInput.originalRowset.Rowset(i);
+        ihook.setColumnValue(row,'ITEM_ID', ihook.getColumnValue(row_cur,'ITEM_ID'));
+        ihook.setColumnValue(row,'VER_NR', ihook.getColumnValue(row_cur,'VER_NR'));
+        rows.extend; rows(rows.last) := row;
+    end loop;
+
+    showRowset := t_showableRowset(rows, 'Compare Value Domains',2, 'unselectable');
+    hookOutput.showRowset := showRowset;
+
+    hookOutput.message := 'Value Domain Compare';
+    v_data_out := ihook.getHookOutput(hookOutput);
+end;
+
 
 /* PV Dependency called from NCI Data Elements */
 procedure spNCIShowVMDependency (v_data_in in clob, v_data_out out clob)
