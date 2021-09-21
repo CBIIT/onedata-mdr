@@ -2,13 +2,29 @@
 
 
 -- Run as ONEDATA_WA DDL scripts
+S19_WA_RA_DDL.sql
+S19_WA_DDL.sql
+S19_NCI_11179.sql
+S19_NCI_11179_2.sql
+S19_NCI_CHNG_MGMT.sql
+S19_NCI_DEC_MGMT.sql
+S19_NCI_DLOAD.sql
+S19_NCI_FORM_MGMT.sql
+--S18_NCI_POST_HOOK.sql
+S19_NCI_PV_VM.sql
+S19_NCI_VD.sql
+S19_NCI_CADSR_PULL.sql
+S19_NCI_CADSR_PUSH_CORE.sql
+S19_NCI_CADSR_PUSH.sql
+S19_NCI_CADSR_PUSH_FORM.sql
+S19_sp_postprocess.sql
 
 -- Run as ONEDATA_RA DDL scripts
+S19_WA_RA_DDL.sql
 
--- DATA MIGRATION
 
 -- Run as ONEDATA_WA DM scripts
-S19_WA_Data_migration.sql
+S18_WA_Data_migration.sql
 
 -- Run as ONEDATA_RA DM scripts
 S12_RA_Data_Migration.sql
