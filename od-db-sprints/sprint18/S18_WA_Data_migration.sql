@@ -1,7 +1,7 @@
 set serveroutput on size 1000000
-SPOOL S16_WA_DATA_MIGRATION.log
+SPOOL S18_WA_DATA_MIGRATION.log
 --create index SBREXT.AC_CHANGE_HISTORY_IDX on SBREXT.AC_CHANGE_HISTORY_EXT (AC_IDSEQ);
-exec sp_preprocess;
+
 
 --drop sequence od_seq_ADMIN_ITEM;
    
