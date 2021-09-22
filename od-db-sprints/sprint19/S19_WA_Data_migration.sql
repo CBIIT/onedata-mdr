@@ -90,6 +90,7 @@ truncate table NCI_FORM;
 truncate table NCI_PROTCL;
 truncate table NCI_VAL_MEAN;
 truncate table perm_val;
+truncate table nci_module;
 truncate table conc_dom_val_mean;
 truncate table cncpt_admin_item;
 truncate table nci_val_mean;
