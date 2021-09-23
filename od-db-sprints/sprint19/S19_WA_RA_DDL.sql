@@ -83,7 +83,7 @@ and v.item_id = pv.val_dom_item_id and v.ver_nr = pv.val_dom_ver_nr;
 CREATE OR REPLACE  VIEW VW_NCI_FORM_FLAT AS
   select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr, frm.item_desc  frm_item_def,
   frmst.hdr_instr, frmst.ftr_instr, 
-air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr,
+air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr, frm_mod.instr MOD_INSTR,
  air.c_item_id de_item_id, air.c_item_ver_nr de_ver_nr, air.disp_ord quest_disp_ord,frm_mod.disp_ord mod_disp_ord, frm_mod.rep_no  mod_rep_no,
 aim.item_nm MOD_ITEM_NM, air.instr QUEST_INSTR, air.REQ_IND  QUEST_REQ_IND, air.DEFLT_VAL QUEST_DEFLT_VAL,
  aim.item_long_nm  mod_item_long_nm, aim.item_desc mod_item_desc,
