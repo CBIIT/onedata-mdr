@@ -1,4 +1,4 @@
-create or replace PACKAGE nci_caDSR_PULL AS
+CREATE OR REPLACE PACKAGE nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
 procedure sp_create_ai_3;
@@ -30,7 +30,9 @@ procedure SP_SOURCE_TYPE;
   --    procedure sp_append_quest_pv;
 END;
 /
-create or replace PACKAGE BODY nci_caDSR_PULL AS
+
+
+CREATE OR REPLACE PACKAGE BODY nci_caDSR_PULL AS
 
 
 v_dflt_usr  varchar2(30) := 'ONEDATA';
@@ -4438,7 +4440,7 @@ BEGIN
                         MOD.ver_nr,
                         61,
                         qc.DISPLAY_ORDER,
-                        qc.REPEAT_NO,
+                        nvl(qc.REPEAT_NO,0),
                         qc.DATE_CREATED,
                         qc.CREATED_BY,
                         NVL (qc.MODIFIED_BY, qc.date_created),
