@@ -3438,8 +3438,11 @@ begin
 exception when others then
  null;
 end;
-delete from obj_key where obj_typ_id = 14;  -- Program Area
+delete from obj_key  where obj_typ_id in (1,3,11,14,15,18,19,20,21,22,23,25,26);
 commit;
+
+-- Program Area where obj_typ_id = 14
+
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 14, pal_name, description, pal_name, comments,               nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
@@ -3449,8 +3452,8 @@ select 14, pal_name, description, pal_name, comments,               nvl(created_
 commit;
 
 
-delete from obj_key where obj_typ_id = 11;  -- Name/designation
-commit;
+  -- Name/designation where obj_typ_id = 11;
+
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 11, detl_name, description, detl_name, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
@@ -3458,9 +3461,8 @@ select 11, detl_name, description, detl_name, comments,   nvl(created_by,v_dflt_
                nvl(modified_by,v_dflt_usr) from sbr_m.DESIGNATION_TYPES_LOV;
 commit;
 
--- DOcument type
-delete from obj_key where obj_typ_id = 1;  --
-commit;
+-- DOcument type where obj_typ_id = 1;  --
+
 
 -- Preferred Question Text ID needs to be static. Used in views.
 insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF, NCI_CD) values (80,1,'Preferred Question Text', 'Preferred Question Text for Data Element','Preferred Question Text');
@@ -3479,9 +3481,8 @@ select 1, DCTL_NAME, description, DCTL_NAME, comments,   nvl(created_by,v_dflt_u
 commit;
 
 
--- Classification Scheme Type
-delete from obj_key where obj_typ_id = 3;  --
-commit;
+-- Classification Scheme Type where obj_typ_id = 3;  --
+
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 3, CSTL_NAME, description, CSTL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
@@ -3489,9 +3490,8 @@ select 3, CSTL_NAME, description, CSTL_NAME, comments,   nvl(created_by,v_dflt_u
                nvl(modified_by,v_dflt_usr) from sbr_m.CS_TYPES_LOV;
 commit;
 
--- Classification Scheme Item Type
-delete from obj_key where obj_typ_id = 20;  --
-commit;
+-- Classification Scheme Item Type where obj_typ_id = 20;  --
+ 
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 20, CSITL_NAME, description, CSITL_NAME, comments,  nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
@@ -3499,24 +3499,16 @@ select 20, CSITL_NAME, description, CSITL_NAME, comments,  nvl(created_by,v_dflt
                nvl(modified_by,v_dflt_usr) from sbr_m.CSI_TYPES_LOV;
 commit;
 
--- Protocol Type
-delete from obj_key where obj_typ_id = 19;  --
-commit;
+-- Protocol Type where obj_typ_id = 19;  --
+
 insert into obj_key (obj_typ_id, obj_key_desc,  nci_cd)
 select distinct 19, TYPE, TYPE from sbrext_m.protocols_ext where type is not null ;
 commit;
 
 
 
--- Concept Source
-delete from obj_key where obj_typ_id = 23;  --
-commit;
---insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
---select  23, CONCEPT_SOURCE,DESCRIPTION, CONCEPT_SOURCE,   nvl(created_by,v_dflt_usr),
---               nvl(date_created,v_dflt_date) ,
---               nvl(NVL (date_modified, date_created), v_dflt_date),
---               nvl(modified_by,v_dflt_usr) from sbrext_m.concept_sources_lov_ext ;
---commit;
+-- Concept Source where obj_typ_id = 23;  --
+
 /*Insirt static typeID*/
 SP_SOURCE_TYPE;
 
@@ -3557,9 +3549,8 @@ COMMIT;
 
 
 
--- NCI Derivation Type
-delete from obj_key where obj_typ_id = 21;  --
-commit;
+-- NCI Derivation Type where obj_typ_id = 21;  --
+
 insert into obj_key (obj_typ_id, obj_key_desc,  nci_cd, obj_key_def,  CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 21, CRTL_NAME,CRTL_NAME, DESCRIPTION ,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
@@ -3611,9 +3602,8 @@ commit;
 
 
 
--- Definition type
-delete from obj_key where obj_typ_id = 15;  --
-commit;
+-- Definition type where obj_typ_id = 15;  --
+
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 15, DEFL_NAME, description, DEFL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
@@ -3627,9 +3617,8 @@ commit;
 
 
 
--- Origin
-delete from obj_key where obj_typ_id = 18;  --
-commit;
+-- Origin where obj_typ_id = 18;  --
+
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 18, SRC_NAME, description, SRC_NAME,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
@@ -3639,9 +3628,8 @@ select 18, SRC_NAME, description, SRC_NAME,   nvl(created_by,v_dflt_usr),
 
 commit;
 
--- Form Category
-delete from obj_key where obj_typ_id = 22;  --
-commit;
+-- Form Category where obj_typ_id = 22;  --
+
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID, DISP_ORD)
 select 22, QCDL_NAME, description, QCDL_NAME,    nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
@@ -3834,8 +3822,8 @@ commit;
 
 
 
-delete from obj_key where obj_typ_id = 25;  -- Address Type
-commit;
+ -- Address Type obj_typ_id = 25; 
+
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 25, ATL_NAME, description, ATL_NAME, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
@@ -3843,8 +3831,8 @@ select 25, ATL_NAME, description, ATL_NAME, comments,   nvl(created_by,v_dflt_us
                nvl(modified_by,v_dflt_usr) from sbr_m.ADDR_TYPES_LOV	;
 commit;
 
-delete from obj_key where obj_typ_id = 26;  -- Communication Type
-commit;
+ -- Communication Type obj_typ_id = 26;
+
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select 26, CTL_NAME, description, CTL_NAME, comments,  nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
