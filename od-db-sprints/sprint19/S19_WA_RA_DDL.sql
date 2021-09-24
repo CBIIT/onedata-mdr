@@ -69,16 +69,18 @@ alter table NCI_STG_AI_CNCPT_CREAT add (ITEM_1_LONG_NM_INT varchar2(255));
 	"S2P_TRN_DT" DATE DEFAULT sysdate, 
 	"LST_UPD_DT" DATE DEFAULT sysdate, 
 	 CONSTRAINT "PK_MODULE" PRIMARY KEY ("ITEM_ID", "VER_NR"));
-  create or replace view vw_value_dom_comp
+ 
+ create or replace view vw_value_dom_comp
 as
-select v.*, e.cncpt_concat rep_term_concepts, e.cncpt_concat_nm rep_term_concept_nms, 
+select v.*,
 pv.code_name
-from value_dom v, nci_admin_item_Ext e, 
-(SELECT val_dom_item_id, val_dom_ver_nr, LISTAGG(PERM_VAL_NM|| ':' || PERM_VAL_DESC_TXT, '   ,  ') WITHIN GROUP (ORDER by PERM_VAL_DESC_TXT) AS CODE_NAME
-FROM PERM_VAL
+from value_dom v,  
+(SELECT val_dom_item_id, val_dom_ver_nr, substr(LISTAGG(PERM_VAL_NM|| ':' || PERM_VAL_DESC_TXT || ':' || e.cncpt_concat_nm || ':' || e.cncpt_concat, '   ,  ') WITHIN GROUP (ORDER by PERM_VAL_DESC_TXT),1,2000) AS CODE_NAME
+FROM PERM_VAL, nci_admin_item_ext e
+ where perm_val.nci_val_mean_item_id = e.item_id
+ and perm_val.nci_val_mean_ver_nr = e.ver_nr
 GROUP BY val_dom_item_id, val_dom_ver_nr) pv
-where v.rep_cls_item_id = e.item_id and v.rep_cls_ver_nr = e.ver_nr
-and v.item_id = pv.val_dom_item_id and v.ver_nr = pv.val_dom_ver_nr;
+where v.item_id = pv.val_dom_item_id (+) and v.ver_nr = pv.val_dom_ver_nr (+);
 
 CREATE OR REPLACE  VIEW VW_NCI_FORM_FLAT AS
   select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr, frm.item_desc  frm_item_def,
