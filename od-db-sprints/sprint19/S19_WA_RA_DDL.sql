@@ -85,7 +85,7 @@ CREATE OR REPLACE  VIEW VW_NCI_FORM_FLAT AS
   frmst.hdr_instr, frmst.ftr_instr, 
 air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr, frm_mod.instr MOD_INSTR,
  air.c_item_id de_item_id, air.c_item_ver_nr de_ver_nr, air.disp_ord quest_disp_ord,frm_mod.disp_ord mod_disp_ord, frm_mod.rep_no  mod_rep_no,
-aim.item_nm MOD_ITEM_NM, air.instr QUEST_INSTR, air.REQ_IND  QUEST_REQ_IND, air.DEFLT_VAL QUEST_DEFLT_VAL,
+aim.item_nm MOD_ITEM_NM, air.instr QUEST_INSTR, air.REQ_IND  QUEST_REQ_IND, air.DEFLT_VAL QUEST_DEFLT_VAL, air.EDIT_IND QUEST_EDIT_IND,
  aim.item_long_nm  mod_item_long_nm, aim.item_desc mod_item_desc,
 air.nci_pub_id QUEST_ITEM_ID,air.nci_ver_nr QUEST_VER_NR,
 de.CNTXT_NM_DN CDE_CNTXT_NM, de.item_nm CDE_ITEM_NM, de.cntxt_item_id CDE_CNTXT_ITEM_ID, de.cntxt_VER_NR CDE_CNTXT_VER_NR,
