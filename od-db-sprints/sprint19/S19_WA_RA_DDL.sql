@@ -112,3 +112,6 @@ alter table NCI_DLOAD_HDR add (GUEST_USR_NM varchar2(50), GUEST_USR_PWD number(6
 
 alter table nci_dload_hdr modify (LST_TRIGGER_DT timestamp, LST_GEN_DT timestamp);
 
+alter table nci_dload_hdr modify (	GUEST_USR_NM varchar2(255));
+
+
