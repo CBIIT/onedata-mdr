@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE nci_caDSR_PULL AS
+create or replace PACKAGE nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
 procedure sp_create_ai_3;
@@ -30,9 +30,7 @@ procedure SP_SOURCE_TYPE;
   --    procedure sp_append_quest_pv;
 END;
 /
-
-
-CREATE OR REPLACE PACKAGE BODY nci_caDSR_PULL AS
+create or replace PACKAGE BODY nci_caDSR_PULL AS
 
 
 v_dflt_usr  varchar2(30) := 'ONEDATA';
@@ -3171,7 +3169,7 @@ BEGIN
 
 
 -- CSI with no CS - set Workflow status to Retired Withdrawn. Denise - 8/4/2021
- update ADMIN_ITEM set ADMIN_STUS_ID = 81, ADMIN_STUS_NM_DN = 'RETIRED WITHDRAWN', UNTL_DT = LST_UPD_DT where admin_item_typ_id = 51 and (item_id, ver_nr) in
+ update ADMIN_ITEM set ADMIN_STUS_ID = 77, ADMIN_STUS_NM_DN = 'RETIRED ARCHIVED', UNTL_DT = LST_UPD_DT where admin_item_typ_id = 51 and (item_id, ver_nr) in
  (select item_id, ver_nr from NCI_CLSFCTN_SCHM_ITEM where cs_item_id is null);
  commit;
 
@@ -3955,14 +3953,14 @@ commit;
 insert into NCI_AI_TYP_VALID_STUS (STUS_ID,ADMIN_ITEM_TYP_ID)
 select stus_id,51 from vw_admin_stus where
 nci_stus in (
-'APPRVD FOR TRIAL USE',
+--'APPRVD FOR TRIAL USE',
 'DRAFT MOD',
 'RELEASED',
-'RELEASED-NON-CMPLNT',
-'RETIRED ARCHIVED',
-'RETIRED DELETED',
-'RETIRED PHASED OUT',
-'RETIRED WITHDRAWN');
+--'RELEASED-NON-CMPLNT',
+'RETIRED ARCHIVED');
+--'RETIRED DELETED',
+--'RETIRED PHASED OUT',
+--'RETIRED WITHDRAWN');
 
 commit;
 
