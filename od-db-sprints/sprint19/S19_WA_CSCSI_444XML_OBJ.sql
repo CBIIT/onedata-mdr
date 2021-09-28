@@ -165,7 +165,7 @@ GRANT EXECUTE, DEBUG ON MDSR759_XML_CS_L5_LIST_T TO GUEST
 /
 GRANT EXECUTE, DEBUG ON MDSR759_XML_Context_T1 TO GUEST
 /
-CREATE OR REPLACE FORCE VIEW ONEDATA_WA.REL_CLASS_SCHEME_ITEM_VW
+CREATE OR REPLACE FORCE VIEW REL_CLASS_SCHEME_ITEM_VW
 (
     CS_ID,
     CS_VERSION,
@@ -191,7 +191,8 @@ CREATE OR REPLACE FORCE VIEW ONEDATA_WA.REL_CLASS_SCHEME_ITEM_VW
     CS_IDSEQ,
     CSI_IDSEQ,
     CS_CONTEXT_ID,
-    CSI_CONTEXT_ID
+    CSI_CONTEXT_ID,
+    CS_CSI_IDSEQ
 )
 BEQUEATH DEFINER
 AS
@@ -243,7 +244,8 @@ AS
                cs.CNTXT_ITEM_ID
                    CS_CONTEXT_ID,
                csi.CNTXT_ITEM_ID
-                   CSI_CONTEXT_ID
+                   CSI_CONTEXT_ID,
+               NODE.CS_CSI_IDSEQ
           FROM admin_item         CS,
                admin_item         CSI,
                NCI_CLSFCTN_SCHM_ITEM NODE,
@@ -264,8 +266,8 @@ AS
                AND node.ver_nr = node.P_ITEM_VER_NR
     START WITH node.P_ITEM_ID IS NULL
       ORDER BY CS_ITEM_ID, node.ITEM_ID, P_ITEM_ID;
-
-CREATE OR REPLACE FORCE VIEW ONEDATA_WA.MDSR444XML_5CSI_LEVEL_VIEW_N
+/
+CREATE OR REPLACE FORCE VIEW MDSR444XML_5CSI_LEVEL_VIEW_N
 (
     "PreferredName",
     "Version",
@@ -292,7 +294,7 @@ AS
                                              v1.csi_date_created,
                                              V1.CSI_IDSEQ,
                                              NULL,
-                                              NULL,
+                                             NULL,
                                              '',
                                              v1.LEAF,
                                              CAST (
@@ -304,10 +306,10 @@ AS
                                                               v2.CSI_VERSION,
                                                               v2.csi_date_created,
                                                               V2.CSI_IDSEQ,
-                                                               V1.CSI_IDSEQ,
+                                                              V1.CS_CSI_IDSEQ,
                                                               v2.P_ITEM_ID,
                                                               v2.P_ITEM_VER_NR,
-                                                                 v2.LEAF,
+                                                              v2.LEAF,
                                                               CAST (
                                                                   MULTISET (
                                                                         SELECT v3.CSI_LEVEL,
@@ -317,10 +319,10 @@ AS
                                                                                v3.CSI_VERSION,
                                                                                v3.csi_date_created,
                                                                                V3.CSI_IDSEQ,
-                                                                               V2.CSI_IDSEQ,
+                                                                               V2.CS_CSI_IDSEQ,
                                                                                v3.P_ITEM_ID,
                                                                                v3.P_ITEM_VER_NR,
-                                                                                  v3.LEAF,
+                                                                               v3.LEAF,
                                                                                CAST (
                                                                                    MULTISET (
                                                                                          SELECT v4.CSI_LEVEL,
@@ -330,10 +332,10 @@ AS
                                                                                                 v4.CSI_VERSION,
                                                                                                 v4.csi_date_created,
                                                                                                 V4.CSI_IDSEQ,
-                                                                                                V3.CSI_IDSEQ,
+                                                                                                V3.CS_CSI_IDSEQ,
                                                                                                 v4.P_ITEM_ID,
                                                                                                 v4.P_ITEM_VER_NR,
-                                                                                                   v4.LEAF,
+                                                                                                v4.LEAF,
                                                                                                 CAST (
                                                                                                     MULTISET (
                                                                                                           SELECT v5.CSI_LEVEL,
@@ -343,10 +345,10 @@ AS
                                                                                                                  v5.CSI_VERSION,
                                                                                                                  v5.csi_date_created,
                                                                                                                  V5.CSI_IDSEQ,
-                                                                                                                 V4.CSI_IDSEQ,
+                                                                                                                 V4.CS_CSI_IDSEQ,
                                                                                                                  v5.P_ITEM_ID,
                                                                                                                  v5.P_ITEM_VER_NR,
-                                                                                                                    v5.LEAF
+                                                                                                                 v5.LEAF
                                                                                                             FROM REL_CLASS_SCHEME_ITEM_VW
                                                                                                                  v5
                                                                                                            --   ,(select* from  REL_CLASS_SCHEME_ITEM_VW  where CSI_LEVEL=4)v4
