@@ -168,7 +168,7 @@ begin
    -- row := t_row();
     --setDefaultParamPVVM (row_ori, row);
 rows := t_rows();
- for i in 1..5 loop
+ for i in 1..10 loop
    row := t_row();
    ihook.setColumnValue(row, 'STG_AI_ID', i);
         rows.extend;    rows(rows.last) := row;
@@ -450,7 +450,7 @@ begin
             end if;
             -- IF concept ID specified and integer. Default for int is going to be 1
             if (v_cncpt_id = v_int_cncpt_id and v_cncpt_id_int is not null) then
-                select  v_cncpt_id_int , item_long_nm, item_long_nm || '(' || v_cncpt_id_int || ')', item_desc || '::' || v_cncpt_id_int into v_cncpt_nm, v_cncpt_long_nm,v_cncpt_long_nm_int, v_cncpt_def
+                select  v_cncpt_id_int , item_long_nm, item_long_nm || '::' || v_cncpt_id_int , item_desc || '::' || v_cncpt_id_int into v_cncpt_nm, v_cncpt_long_nm,v_cncpt_long_nm_int, v_cncpt_def
                 from admin_item where item_id = v_cncpt_id and ver_nr = v_cncpt_ver_nr;
             end if;
             -- if concept string specified
@@ -823,7 +823,7 @@ begin
         is_valid := true;
         k := 1;
         rowforms := t_rows();
-        for rep_idx in 1..5 loop
+        for rep_idx in 1..10 loop
             form1              := forms(rep_idx);
             rowform := form1.rowset.rowset(1);
            setDefaultParamPVVM2 (row_ori, rowform);
@@ -858,19 +858,19 @@ begin
          
          if (v_opt > 0) then
             if v_opt = 3 then
-                     for i in  1..5 loop
+                     for i in  1..10 loop
                             ihook.setColumnValue(rowform, 'CNCPT_' || k  ||'_ITEM_ID_' || i,'');
                             ihook.setColumnValue(rowform, 'CNCPT_' || k || '_VER_NR_' || i, '');
                     end loop;
                 nci_dec_mgmt.createValAIWithConcept(rowform , k,v_item_typ_glb ,'V','STRING',actions);
-                ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'VALIDATED: Concept String was used.');
+                ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'VALIDATED: Concept String will be used.');
                 ihook.setColumnValue(rowform, 'CTL_VAL_STUS', '3');
      end if;
 
         if v_opt = 4 then
           --  for k in  1..2  loop
                nci_dec_mgmt.createValAIWithConcept(rowform , k,v_item_typ_glb ,'V','DROP-DOWN',actions);
-               ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'VALIDATED: Concept drop-down was used.');
+               ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'VALIDATED: Concept drop-down will be used.');
                ihook.setColumnValue(rowform, 'CTL_VAL_STUS', '4');
          --   end loop;
         end if;
@@ -901,13 +901,16 @@ begin
     -- If all the tests have passed and the user has asked for create, then create DEC and optionally OC and Prop.
 
     v_cnt := 0;
-            for rep_idx in 1..5 loop
+            for rep_idx in 1..10 loop
 
                 rowform :=rowforms(rep_idx);
                 v_opt := nvl(ihook.getColumnValue(rowform, 'CTL_VAL_STUS'),0);
                 if (v_opt > 0) then
-                    IF v_opt in ( 3,4)   THEN  -- Create
+                    IF v_opt in ( 3,4) and nvl(ihook.getColumnValue(rowform, 'UOM_ID'),0) = 0  THEN  -- Create; no duplicate allowed
                         nci_dec_mgmt.createValAIWithConcept(rowform , 1,v_item_typ_glb ,'C','DROP-DOWN',actions); -- Vm
+                    end if;
+                     IF v_opt in ( 3,4) and nvl(ihook.getColumnValue(rowform, 'UOM_ID'),0) = 1  THEN  -- Create; Duplicate
+                        nci_dec_mgmt.createValAIWithConcept(rowform , 1,v_item_typ_glb ,'O','DROP-DOWN',actions); -- Vm
                     end if;
                     if (v_opt = 2 ) then
                         nci_dec_mgmt.createAIWithoutConcept(rowform , 1, 53, ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'),nvl(ihook.getColumnValue(rowform, 'ITEM_2_DEF'), ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM')),
@@ -1144,7 +1147,7 @@ begin
                         for cur in(select item_id, item_nm , item_long_nm , item_desc from admin_item where admin_item_typ_id = 49 and item_id = v_temp_id and ver_nr = v_temp_ver) loop
                                 v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
                                         if (cur.item_id = v_int_cncpt_id and trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) is not null ) then --- integer concept
-                                        v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm) || '(' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || ')';
+                                        v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm) || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
                                 else  
                                         v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm);
                    
@@ -1546,7 +1549,7 @@ function getPVVMCreateForm2 (v_init_rows in t_rows) return t_forms is
 begin
     forms                  := t_forms();
    -- raise_application_error(-20000, 'Error' || v_init_rows.count);
-    for i in 1..5 loop
+    for i in 1..10 loop
       row := v_init_rows(i);
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
     rowset := t_rowset(rows, 'AI Creation With Concepts', 1, 'NCI_STG_AI_CNCPT_CREAT'); -- Default values for form
