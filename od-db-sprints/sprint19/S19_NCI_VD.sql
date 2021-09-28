@@ -1398,7 +1398,8 @@ if (v_cncpt_src ='DROP-DOWN') then
                      --            v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
        
                                 if (cur.item_id = v_int_cncpt_id and trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) is not null) then --- integer concept
-                                        v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm) || '(' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || ')';
+       
+                                        v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm) || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
                                         v_nm := trim(v_nm || ' ' || cur.item_nm) || '::' ||  trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) ;
                                         v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
                           else  
@@ -1421,7 +1422,7 @@ if (v_cncpt_src ='DROP-DOWN') then
                               v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                                      --             v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
                                if (cur.item_id = v_int_cncpt_id and trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) is not null) then --- integer concept
-                                        v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm) || '(' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_1')) || ')';
+                                        v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm) || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_1')) ;
                                         v_nm := trim(v_nm || ' ' || cur.item_nm) || '::' ||  trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_1' )) ;
                                 v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
                      else  
