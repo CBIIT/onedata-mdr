@@ -1020,6 +1020,5 @@ end if;
 
     v_data_out := ihook.getHookOutput(hookOutput);
 end;
-
 end;
 /
