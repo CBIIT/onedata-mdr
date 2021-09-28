@@ -75,7 +75,9 @@ as
 select v.*,
 pv.code_name
 from value_dom v,  
-(SELECT val_dom_item_id, val_dom_ver_nr, substr(LISTAGG(PERM_VAL_NM|| ':' || PERM_VAL_DESC_TXT || ':' || e.cncpt_concat_nm || ':' || e.cncpt_concat, '   ,  ') WITHIN GROUP (ORDER by PERM_VAL_DESC_TXT),1,2000) AS CODE_NAME
+--(SELECT val_dom_item_id, val_dom_ver_nr, substr(LISTAGG(PERM_VAL_NM|| ':' || PERM_VAL_DESC_TXT || ':' || e.cncpt_concat_nm || ':' || e.cncpt_concat, '   ,  ') WITHIN GROUP (ORDER by PERM_VAL_DESC_TXT),1,2000) AS CODE_NAME
+--(SELECT val_dom_item_id, val_dom_ver_nr, substr(LISTAGG(PERM_VAL_NM|| ':' || PERM_VAL_DESC_TXT || ':' || e.cncpt_concat, '   ,  ') WITHIN GROUP (ORDER by PERM_VAL_DESC_TXT),1,2000) AS CODE_NAME
+(SELECT val_dom_item_id, val_dom_ver_nr, substr(LISTAGG(PERM_VAL_NM|| ':' ||  e.cncpt_concat_nm || ':' || e.cncpt_concat, '   ,  ') WITHIN GROUP (ORDER by PERM_VAL_DESC_TXT),1,2000) AS CODE_NAME
 FROM PERM_VAL, nci_admin_item_ext e
  where perm_val.nci_val_mean_item_id = e.item_id
  and perm_val.nci_val_mean_ver_nr = e.ver_nr
