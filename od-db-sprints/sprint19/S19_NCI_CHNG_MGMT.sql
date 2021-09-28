@@ -362,7 +362,7 @@ as
 
    row := t_row();
           nci_11179.spReturnAIRow(v_item_id, v_ver_nr, row);
-            ihook.setColumnValue(row,'ADMIN_STUS_ID', 78);
+            ihook.setColumnValue(row,'ADMIN_STUS_ID', 77);
               ihook.setColumnValue(row,'UNTL_DT', to_char(sysdate, DEFAULT_TS_FORMAT) );
 
             rows := t_rows();    rows.extend;    rows(rows.last) := row;
