@@ -4,6 +4,8 @@ function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return va
 FUNCTION get_concepts(v_item_id in number, v_ver_nr in number) return varchar2;
  Function get_concept_order(v_item_id in number, v_ver_nr in number) return varchar2 ;
  function cmr_guid return varchar2;
+ procedure spGetCartPin  ( hookoutput in out t_hookoutput,v_typ in char);
+
 FUNCTION getPrimaryConceptName(v_nm in varchar2) return varchar2;
 procedure spAddToCart ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_src varchar2);
 procedure spAddToCartGuest ( v_data_in in clob, v_data_out out clob);
@@ -74,6 +76,41 @@ v_temp := getWord(v_nm, i+1,i+1);
 return v_temp;
 end;
 
+
+procedure spGetCartPin  ( hookoutput in out t_hookoutput, v_typ in char)  -- v_typ C - Cart only, P - Pin only, B - Both, I - Initial
+as
+ question t_question;
+  answer t_answer;
+  answers t_answers;
+   forms t_forms;
+  form1 t_form;
+begin
+    ANSWERS                    := T_ANSWERS();
+
+    ANSWER                     := T_ANSWER(1, 1, 'Next');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    forms                  := t_forms();
+    
+    if (v_typ = 'C') then -- cart
+        QUESTION               := T_QUESTION('Specify Cart Name.', ANSWERS);
+        form1                  := t_form('User Cart (Hook)', 2,1);
+    elsif (v_typ = 'P') then
+       QUESTION               := T_QUESTION('Specify Pin.', ANSWERS);
+        form1                  := t_form('Pin Only (hook)', 2,1);
+    elsif     (v_typ = 'B') then
+          QUESTION               := T_QUESTION('Specify Cart Name and Pin.', ANSWERS);
+        form1                  := t_form('Cart Name And Pin (hook)', 2,1);
+     elsif     (v_typ = 'I') then
+            form1                  := t_form('Guest User Create Collection Initial (hook)', 2,1);
+            QUESTION               := T_QUESTION('Specify Your Name, 6 digit Pin and Collection Type.', ANSWERS);
+    end if;
+ --   form1.rowset :=v_rowset1;
+    forms.extend;    forms(forms.last) := form1;
+    hookoutput.forms := forms;
+    hookoutput.question := question;
+    
+end;
 
 
 procedure ReturnRow (v_sql varchar2,  v_table_name in varchar2, row in out t_row) as
