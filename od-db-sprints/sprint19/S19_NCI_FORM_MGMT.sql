@@ -418,21 +418,14 @@ AS
   action_rows       t_rows := t_rows();
   action_row		    t_row;
   rowset            t_rowset;
- question    t_question;
-answer     t_answer;
-answers     t_answers;
-showrowset	t_showablerowset;
+
   rowform t_row;
 v_found boolean;
   v_module_id integer;
   v_disp_ord integer;
   v_frm_id number;
   v_frm_ver_nr number(4,2);
-  v_ref varchar2(255);
-  v_add integer;
-  i integer := 0;
-  column  t_column;
-  msg varchar2(4000);
+ 
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
