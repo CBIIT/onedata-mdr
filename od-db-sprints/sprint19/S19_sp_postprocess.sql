@@ -27,7 +27,7 @@ from  admin_item ai,
 (SELECT cai.item_id, cai.ver_nr, LISTAGG(ai.item_long_nm, ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_CD ,
 LISTAGG(ai.item_nm, ' ')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_NM ,
  LISTAGG(substr(ai.item_desc,1, 750), '_')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_DEF,
- LISTAGG(decode(ai.item_long_nm, 'C45255',ai.item_long_nm || '(' || cai.NCI_CNCPT_VAL || ')', ai.item_long_nm), ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_CD_INT 
+ LISTAGG(decode(ai.item_long_nm, 'C45255',decode( cai.nci_cncpt_val,null, ai.item_long_nm, ai.item_long_nm || '::' || cai.NCI_CNCPT_VAL),ai.item_long_nm), ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_CD_INT 
 from cncpt_admin_item cai, admin_item ai where ai.item_id = cai.cncpt_item_id and ai.ver_nr = cai.cncpt_ver_nr
 group by cai.item_id, cai.ver_nr) b
 where ai.item_id = b.item_id (+) and ai.ver_nr = b.ver_nr (+)
