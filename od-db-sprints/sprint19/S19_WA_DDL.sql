@@ -1,4 +1,4 @@
-CREATE OR REPLACE TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
+TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
 BEGIN    IF (:NEW.ITEM_ID = -1  or :NEW.ITEM_ID is null)  THEN select od_seq_ADMIN_ITEM.nextval
  into :new.ITEM_ID  from  dual ;   END IF;
  :new.nci_idseq := nci_11179.cmr_guid();
@@ -30,7 +30,7 @@ if (:new.admin_item_typ_id  in (5,6)) then -- Set the default context
  :new.cntxt_item_id := 20000000024;
 :new.cntxt_ver_nr := 1;
 end if;
-if (:new.ITEM_LONG_NM is null or ((:new.ITEM_LONG_NM = 'SYSGEN' or :new.ITEM_LONG_NM = 'Enter Text or Auto-Generated') and :new.admin_item_typ_id !=4) or :new.admin_item_typ_id = 53) then
+if (:new.ITEM_LONG_NM is null or ((:new.ITEM_LONG_NM = 'SYSGEN' or :new.ITEM_LONG_NM = 'Enter Text or Auto-Generated') and :new.admin_item_typ_id not in (3,4)) or :new.admin_item_typ_id = 53) then
 :new.ITEM_LONG_NM := :new.ITEM_ID || 'v' || trim(to_char(:new.ver_nr, '9999.99'));
 end if;
 
@@ -40,6 +40,7 @@ if (:new.lst_upd_dt is null) then
 :new.lst_upd_dt := sysdate;
 end if;
 END ;
+/
 
 grant select on nci_module to onedata_ra;
 
