@@ -879,7 +879,6 @@ insert into sbrext.AC_ATT_CSCSI_EXT (CS_CSI_IDSEQ,ATT_IDSEQ,ATL_NAME,date_create
     and   (csi.nci_idseq, an.nci_idseq) not in (select CS_CSI_IDSEQ,ATT_IDSEQ from sbr.ac_att_cscsi_ext);
 commit;
 
-
 end;
 
 END;
