@@ -4299,8 +4299,8 @@ BEGIN
                         QC_ID,
                         qc.QC_IDSEQ,
                         QC.VERSION,
-                        DECODE (qa.editable_ind,  'Yes', 1,  'No', 0),
-                        DECODE (qa.mandatory_ind,  'Yes', 1,  'No', 0),
+                        DECODE (qa.editable_ind,  'Yes', 1,  'No', 0, null, 0),
+                        DECODE (qa.mandatory_ind,  'Yes', 1,  'No', 0, null, 0),
                         qa.DEFAULT_VALUE,
                         LONG_NAME
           , qc.DISPLAY_ORDER,
