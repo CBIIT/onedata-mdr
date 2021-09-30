@@ -1157,7 +1157,6 @@ select nci_11179.cmr_guid, vCondrIdseq, con.nci_idseq, nvl(nci_ord,1), cai.CREAT
 from cncpt_admin_item cai, admin_item con where cai.item_id = vItemId and cai.ver_nr = vVerNr and cai.cncpt_item_id = con.item_id and cai.cncpt_ver_nr = con.ver_nr;
 
 
-
 end;
 
 END;
