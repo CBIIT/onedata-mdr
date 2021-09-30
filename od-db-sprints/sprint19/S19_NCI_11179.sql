@@ -965,7 +965,10 @@ begin
          end loop;
     end loop;
 
-    action := t_actionRowset(action_rows, v_table_name, 12, 'insert');
+   -- action := t_actionRowset(action_rows, v_table_name, 12, 'insert');
+     action := t_actionRowset(action_rows, 'Alternate Names',2, 12, 'insert');
+ 
+   
     actions.extend; actions(actions.last) := action;
 ---  End of Alternate Names
 
@@ -1014,7 +1017,7 @@ begin
          end loop;
     end loop;
 
-    action := t_actionRowset(action_rows, v_table_name, 13, 'insert');
+    action := t_actionRowset(action_rows, 'Alternate Definitions',2, 13, 'insert');
     actions.extend; actions(actions.last) := action;
 
     action := t_actionRowset(action_rows_csi, 'Classification level Name/Definition 2',2, 25, 'insert');
@@ -1084,7 +1087,7 @@ begin
          */
     end loop;
 
-    action := t_actionRowset(action_rows, v_table_name, 14, 'insert');
+    action := t_actionRowset(action_rows, 'References (for Edit)',2, 14, 'insert');
     actions.extend; actions(actions.last) := action;
 
   --  action := t_actionRowset(action_rows_blob,'Ref Documents',2 ,15, 'insert');
