@@ -657,7 +657,6 @@ qvv.date_modified, qvv.modified_by
 from sbrext.quest_vv_ext qvv, NCI_ADMIN_ITEM_REL_ALT_KEY q, NCI_QUEST_VALID_VALUE vv
 where qvv.quest_idseq = q.NCI_IDSEQ and qvv.vv_idseq = vv.NCI_IDSEQ (+);
 commit;
-
 end;
 END;
 /
