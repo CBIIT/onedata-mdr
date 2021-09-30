@@ -2163,7 +2163,6 @@ V_VER:=to_char(P_VER);
 IF instr(V_ver,'.')=0 then
 V_DN :=P_ID||'v'||V_ver||'.00';
 
-
 ELSIF instr(V_ver,'.')>0 and length (substr (V_VER,INSTR(V_VER,'.')+1))<2 then
 V_DN :=P_ID||'v'||substr (V_VER,1,INSTR(V_VER,'.')-1)||'.'||substr (V_VER,INSTR(V_VER,'.')+1)||'0';
 
