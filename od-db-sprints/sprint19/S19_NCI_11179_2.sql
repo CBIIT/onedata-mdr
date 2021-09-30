@@ -162,7 +162,7 @@ begin
 
          for i in  1..cnt loop
                         v_item_id := nci_11179.getWord(v_str, i, cnt);
-        for cur in (select * from admin_item where item_id = v_item_id and currnt_ver_ind = 1 and admin_item_typ_id in (4,51,54) and (item_id, ver_nr) not in
+        for cur in (select * from admin_item where item_id = v_item_id and currnt_ver_ind = 1 and admin_item_typ_id in (4,52,54) and (item_id, ver_nr) not in
         (select item_id, ver_nr from nci_usr_cart  where cntct_secu_id = v_usr_id)) loop
 
         row := t_row();
@@ -1020,5 +1020,6 @@ end if;
 
     v_data_out := ihook.getHookOutput(hookOutput);
 end;
+
 end;
 /
