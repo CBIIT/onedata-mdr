@@ -164,12 +164,9 @@ begin
                                     v_cnt_valid_type := v_cnt_valid_type + 1;
                                     v_found := true;
               
-                                    for cur in (select ai.item_id, ai.ver_nr, ai.cntxt_item_id, ai.cntxt_ver_nr, item_long_nm item_long_nm, nvl(r.ref_desc, item_long_nm) QUEST_TEXT, item_nm
-                                    from admin_item ai, ref r where
-                                    ai.item_id =v_item_id and ai.currnt_ver_ind = 1 and ai.item_id = r.item_id (+) and ai.ver_nr = r.ver_nr (+)
-                                    and r.ref_typ_id (+) = 80 and       (ai.item_id, ai.ver_nr) not in 
-                                    (select c_item_id, c_item_ver_nr from nci_admin_item_rel_alt_key where p_item_id = ihook.getColumnValue(row_ori,'C_ITEM_ID')
-                                        and p_item_ver_nr = ihook.getColumnValue(row_ori,'C_ITEM_VER_NR'))) loop
+                                    for cur in (select ai.item_id, ai.ver_nr, ai.cntxt_item_id, ai.cntxt_ver_nr, item_long_nm item_long_nm, de.pref_quest_txt QUEST_TEXT, item_nm
+                                    from admin_item ai, de where
+                                    ai.item_id =v_item_id and ai.currnt_ver_ind = 1 and ai.item_id = de.item_id  and ai.ver_nr = de.ver_nr)  loop
                 
                                             row := t_row();
                     
@@ -210,7 +207,11 @@ begin
                                                     ihook.setColumnValue (row, 'DESC_TXT', substr(cur1.item_desc,1,2000));
                                                     ihook.setColumnValue (row, 'VAL_MEAN_ITEM_ID', cur1.NCI_VAL_MEAN_ITEM_ID);
                                                     ihook.setColumnValue (row, 'VAL_MEAN_VER_NR', cur1.NCI_VAL_MEAN_VER_NR);
-                                                    v_vvid := nci_11179.getItemId;
+                                                    ihook.setColumnValue (row, 'CNTCT_SECU_ID', v_usr_id);
+                                                    ihook.setColumnValue (row, 'GUEST_USR_NM', 'NONE');
+                                                    ihook.setColumnValue (row, 'ITEM_ID', cur.item_id);
+                                                           ihook.setColumnValue (row, 'VER_NR', cur.ver_nr);
+                                          v_vvid := nci_11179.getItemId;
                                                     ihook.setColumnValue (row, 'NCI_PUB_ID', v_vvid);
                                                     ihook.setColumnValue (row, 'NCI_VER_NR', 1);
                                                     ihook.setColumnValue (row, 'DISP_ORD', j);
@@ -258,9 +259,7 @@ begin
                 actions(actions.last) := action;
              end if;
     
-      if ( rows.count > 0 ) then  hookoutput.actions := actions;
-      end if;
-    
+   
                 /*  If item not already in cart */
                 if (rowscart.count  > 0) then
                     action := t_actionrowset(rowscart, 'User Cart', 2,0,'insert');
@@ -272,10 +271,11 @@ begin
                 hookoutput.actions := actions;
             end if;
             v_cnt_already :=  v_cnt_valid_type - nvl(rows.count,0) ;
-                 hookoutput.message := 'Total Items: ' || cnt ||  ';    Invalid Format/Type: ' || v_invalid_typ || ';     Duplicate: ' || v_dup_str || ';    Items added: ' || nvl(rows.count,0) ;
+                 hookoutput.message := 'Total Items: ' || cnt ||  ';    Invalid Format/Type: ' || v_invalid_typ || ';      Items added: ' || nvl(rows.count,0) ;
 
    end if;  -- if second invocation
 V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+ nci_util.debugHook('GENERAL',v_data_out);
 END;
 
 PROCEDURE spAddQuestVV
@@ -1127,6 +1127,28 @@ BEGIN
      nci_11179.spCopyModuleNCI (actions, cur2.c_item_id,cur2.c_item_ver_nr,    v_from_item_id, v_from_ver_nr,v_form_id, 1, cur2.disp_ord,'V');
     end loop;
 
+-- Protocol
+    action_rows := t_rows();
+    
+   for pro_cur in (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where
+        c_item_id = v_from_item_id and c_ITEM_ver_nr = v_from_ver_nr and rel_typ_id = 60 and nvl(fld_delete,0) = 0) loop
+          --    raise_application_error(-20000,'Herer');
+
+            row := t_row();
+            ihook.setColumnValue(row, 'P_ITEM_ID', pro_cur.P_ITEM_ID);
+          ihook.setColumnValue(row, 'P_ITEM_VER_NR', pro_cur.P_ITEM_VER_NR);
+          ihook.setColumnValue(row, 'C_ITEM_ID', v_form_id);
+          ihook.setColumnValue(row, 'REL_TYP_ID', pro_cur.rel_typ_id);
+            ihook.setColumnValue(row, 'C_ITEM_VER_NR',1);
+
+            action_rows.extend; action_rows(action_rows.last) := row;
+        end loop;
+      if (action_rows.count > 0) then
+        action := t_actionRowset(action_rows, 'Protocol-Form Relationship (Form View)',2, 22, 'insert');
+        actions.extend; actions(actions.last) := action;
+        end if;
+   
+    
         hookoutput.actions    := actions;
         hookoutput.message := 'Form Created Successfully with ID ' || v_form_id;
     END IF;
@@ -1511,19 +1533,19 @@ AS
 
 begin
         v_ori_rep := nvl(ihook.getColumnValue(row_ori, 'REP_NO'),0);
-        for i in v_ori_rep+1..rep loop
         for cur in (select nci_pub_id, nci_ver_nr, edit_ind, req_ind from nci_admin_item_rel_alt_key where p_item_id =ihook.getColumnValue(row_ori,'C_ITEM_ID') and
         P_item_ver_nr =  ihook.getColumnValue(row_ori,'C_ITEM_VER_NR') and nvl(fld_delete,0) = 0) loop
-
-        select count(*) into v_temp from nci_quest_vv_rep where quest_pub_id =cur.nci_pub_id and quest_ver_nr = cur.nci_ver_nr and rep_seq = i ;
+        for i in v_ori_rep+1..rep loop
+        select count(*) into v_temp from nci_quest_vv_rep where quest_pub_id =cur.nci_pub_id and quest_ver_nr = cur.nci_ver_nr and rep_seq = i;
 
             if v_temp = 0 then
             row := t_row();
             ihook.setColumnValue(row, 'QUEST_PUB_ID', cur.nci_pub_id);
             ihook.setColumnValue(row, 'QUEST_VER_NR', cur.nci_ver_nr);
             ihook.setColumnValue(row, 'REP_SEQ', i);
-            ihook.setColumnValue(row, 'EDIT_IND', cur.edit_ind);
-            ihook.setColumnValue(row, 'QUEST_VV_REP_ID',-1);
+            ihook.setColumnValue(row, 'EDIT_IND', nvl(cur.edit_ind,1));
+            ihook.setColumnValue(row, 'REQ_IND', nvl(cur.req_ind,0));
+         ihook.setColumnValue(row, 'QUEST_VV_REP_ID',-1);
         --    raise_application_error(-20000,i);
             rows.extend;
             rows(rows.last) := row;
@@ -1545,7 +1567,7 @@ begin
             ihook.setColumnValue(row, 'QUEST_PUB_ID',v_quest_id );
             ihook.setColumnValue(row, 'QUEST_VER_NR', 1);
             ihook.setColumnValue(row, 'REP_SEQ', i);
-         --   ihook.setColumnValue(row, 'EDIT_IND',1);
+           ihook.setColumnValue(row, 'EDIT_IND',1);
             ihook.setColumnValue(row, 'QUEST_VV_REP_ID',-1);
         --    raise_application_error(-20000,i);
             rows.extend;
@@ -2342,7 +2364,8 @@ BEGIN
                         ihook.setColumnValue (row, 'CNTXT_CS_VER_NR', cur.cntxt_ver_nr);
                         ihook.setColumnValue (row, 'ITEM_LONG_NM', cur.QUEST_TEXT );
                          ihook.setColumnValue (row, 'ITEM_NM', cur.ITEM_LONG_NM );
-
+                        ihook.setColumnValue (row, 'EDIT_IND', 1 );
+                        ihook.setColumnValue (row, 'REQ_IND', 0 );
                         ihook.setColumnValue (row, 'REL_TYP_ID', 63);
                         ihook.setColumnValue (row, 'DISP_ORD', v_disp_ord);
                         v_disp_ord := v_disp_ord + 1;
@@ -2638,7 +2661,9 @@ BEGIN
                         ihook.setColumnValue (row, 'CNTXT_CS_ITEM_ID', cur.cntxt_item_id);
                         ihook.setColumnValue (row, 'CNTXT_CS_VER_NR', cur.cntxt_ver_nr);
                         ihook.setColumnValue (row, 'ITEM_LONG_NM', cur.QUEST_TEXT );
-
+                        ihook.setColumnValue (row, 'EDIT_IND', 1 );
+                        ihook.setColumnValue (row, 'REQ_IND', 0 );
+                     
                         ihook.setColumnValue (row, 'REL_TYP_ID', 63);
                         ihook.setColumnValue (row, 'DISP_ORD', v_disp_ord);
                         v_disp_ord := v_disp_ord + 1;
