@@ -875,7 +875,7 @@ begin
          --   end loop;
         end if;
 
-       ihook.setColumnValue(rowform, 'GEN_STR',ihook.getColumnValue(rowform,'ITEM_1_NM') ) ;
+       ihook.setColumnValue(rowform, 'GEN_STR',replace(ihook.getColumnValue(rowform,'ITEM_1_NM'),'Integer::','') ) ;
        
         if (   ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is null and v_opt > 2) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'Concept missing');
@@ -1146,22 +1146,21 @@ begin
                         if (v_temp_id is not null) then
                         for cur in(select item_id, item_nm , item_long_nm , item_desc from admin_item where admin_item_typ_id = 49 and item_id = v_temp_id and ver_nr = v_temp_ver) loop
                                 v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
-                                        if (cur.item_id = v_int_cncpt_id and trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) is not null ) then --- integer concept
-                                        v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm) || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
+                                if (cur.item_id = v_int_cncpt_id and trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) is not null ) then --- integer concept
+                                            v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm) || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
+                                            v_def := v_def || '::' ||  trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
                                 else  
-                                        v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm);
-                   
+                                            v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm);
                                 end if;
-                      v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
-                   
-               
+                            v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                         end loop;
                         end if;
                 end loop;
-
+                
+              --  raise_application_error(-20000, v_long_nm_suf_int);
 
                  for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
-                where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat =substr(v_long_nm_suf_int,2) and a.admin_item_typ_id = v_item_typ_glb) loop
+                where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int =substr(v_long_nm_suf_int,2) and a.admin_item_typ_id = v_item_typ_glb) loop
                         hookoutput.message :=  'WARNING: Duplicate found based on concepts: ' || cur.item_id;
                         v_dup_item_id := cur.item_id;
                         v_dup_ver_nr :=cur.ver_nr;
