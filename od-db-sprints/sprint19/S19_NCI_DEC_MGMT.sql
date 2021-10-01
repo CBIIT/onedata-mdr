@@ -589,11 +589,11 @@ begin
 
         --- Update name, definition, context
             row := rowai;
-          --  ihook.setColumnValue(row, 'ITEM_NM', ihook.getColumnValue(rowform,'GEN_STR'));
-          --  ihook.setColumnValue(row, 'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
-           -- ihook.setColumnValue(row, 'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
+       
                ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 2);
      ihook.setColumnValue(row, 'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
+         ihook.setColumnValue(row,'ITEM_NM',  replace(ihook.getColumnValue(rowform, 'ITEM_1_NM')  || ' ' || ihook.getColumnValue(rowform, 'ITEM_2_NM'),'Integer::',''));
+   
             --  ihook.setColumnValue(row, 'ADMIN_STUS_ID', ihook.getColumnValue(rowform,'ADMIN_STUS_ID'));
            -- ihook.setColumnValue(row, 'REGSTR_STUS_ID', ihook.getColumnValue(rowform,'REGSTR_STUS_ID'));
       --      raise_application_error(-20000,  ihook.getColumnValue(rowform,'ITEM_LONG_NM'));
@@ -880,8 +880,14 @@ if (v_cncpt_src ='DROP-DOWN') then
 
   end if;
 
-                ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM', substr(v_long_nm_suf,2));
-                ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', v_nm);
+                    ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM', substr(v_long_nm_suf,2));
+                     if (v_item_typ_id = 53) then
+                            ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', replace(v_nm, 'Integer::',''));
+                    else
+                            ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', v_nm);
+                    end if;
+      
+           --     ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', v_nm);
              ihook.setColumnValue(rowform,'ITEM_' || idx || '_DEF', substr(v_def,2));
             ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM_INT', substr(v_long_nm_suf_int,2));
                 
@@ -896,9 +902,9 @@ if (v_cncpt_src ='DROP-DOWN') then
      --   raise_application_error(-20000, v_long_nm_suf_int);
         rows := t_rows();
         j := 0;
-        v_nm := '';
-        v_long_nm := '';
-        v_def := '';
+    --    v_nm := '';
+     --   v_long_nm := '';
+      --  v_def := '';
         for i in reverse 0..10 loop
             v_cncpt_id := ihook.getColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i);
              v_cncpt_ver_nr :=  ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i);
@@ -917,14 +923,14 @@ if (v_cncpt_src ='DROP-DOWN') then
                         else ihook.setColumnValue(row,'NCI_PRMRY_IND', 0);
                         end if;
                          if (v_cncpt_id = v_int_cncpt_id and trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) is not null) then
-                            v_nm := trim(cur.item_nm) ||  '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || ' ' || v_nm ;
+                       --     v_nm := trim(cur.item_nm) ||  '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || ' ' || v_nm ;
                             ihook.setColumnValue(row,'NCI_CNCPT_VAL',ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
-                            v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
+                      --      v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
                                            v_long_nm := trim(v_long_nm || ':' || cur.item_long_nm) || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
-                      else
-                            v_nm := trim(cur.item_nm) || ' ' || v_nm ;
-                                    v_def := substr( cur.item_desc || '_' || v_def,1,4000);
-                                       v_long_nm := trim(v_long_nm || ':' || cur.item_long_nm);
+                   --   else
+                        --    v_nm := trim(cur.item_nm) || ' ' || v_nm ;
+                        --            v_def := substr( cur.item_desc || '_' || v_def,1,4000);
+                         --              v_long_nm := trim(v_long_nm || ':' || cur.item_long_nm);
                          end if;
                         rows.extend;
                         rows(rows.last) := row;
@@ -943,21 +949,24 @@ if (v_cncpt_src ='DROP-DOWN') then
         rows := t_rows();      
         --row := rowform;
         row := t_row();
-        v_long_nm := substr(v_long_nm,1, length(v_long_nm)-1);
+        v_long_nm := substr(v_long_nm,2);
         v_nm := substr(trim(v_nm),1, c_nm_len);
 
         -- if lenght of short name is greater than 30, then use IDv1.00
-        if (length(v_long_nm) > 30) then
-            v_long_nm := v_id || c_ver_suffix;
+        if (length(v_long_nm_suf_int) > 30) then
+            v_long_nm_suf_int := v_id || c_ver_suffix;
         end if;
 
     -- Administered Item Row
         ihook.setColumnValue(row,'ITEM_ID', v_id);
         ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', v_item_typ_id);
         nci_11179_2.setStdAttr(row);
-        ihook.setColumnValue(row,'ITEM_LONG_NM', v_long_nm);
-        ihook.setColumnValue(row,'ITEM_DESC', substr(v_def, 1, length(v_def)-1));
+        ihook.setColumnValue(row,'ITEM_LONG_NM', substr(v_long_nm_suf_int,2));
+        ihook.setColumnValue(row,'ITEM_DESC', substr(v_def, 2));
      --   ihook.setColumnValue(row,'ITEM_DESC', v_def);
+       if (v_item_typ_id = 53) then
+        v_nm := replace(v_nm, 'Integer::', '');
+       end if;
         ihook.setColumnValue(row,'ITEM_NM', v_nm);
         ihook.setColumnValue(row,'CNTXT_ITEM_ID', nvl(ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'),20000000024 ));  --- NCIP
         ihook.setColumnValue(row,'CNTXT_VER_NR', nvl(ihook.getColumnValue(rowform,'CNTXT_VER_NR'),1));
@@ -973,7 +982,7 @@ if (v_cncpt_src ='DROP-DOWN') then
 
         -- Update form Name/Long Name/Definition so uer can see.
        ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM', v_long_nm);
-        ihook.setColumnValue(rowform,'ITEM_' || idx || '_DEF', substr(v_def, 1, length(v_def)-1));
+        ihook.setColumnValue(rowform,'ITEM_' || idx || '_DEF', substr(v_def, 2));
         ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', v_nm);
         ihook.setColumnValue(rowform, 'ITEM_' || idx || '_ID', v_id);
          ihook.setColumnValue(rowform, 'ITEM_' || idx || '_VER_NR', 1);
