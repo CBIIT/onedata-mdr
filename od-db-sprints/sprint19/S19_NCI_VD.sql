@@ -97,10 +97,14 @@ begin
          ihook.setColumnValue(row,'ITEM_LONG_NM', v_id || c_ver_suffix);
       end if;
 
-      if (ihook.getColumnValue(rowai, 'ITEM_NM') = v_dflt_txt) then
-         ihook.setColumnValue(row,'ITEM_NM',  replace(ihook.getColumnValue(rowvd, 'ITEM_1_NM'),'Integer::','')  );
+    -- Create New.
+      if (ihook.getColumnValue(rowai, 'ITEM_NM') = v_dflt_txt ) then
+         ihook.setColumnValue(row,'ITEM_NM', ihook.getColumnValue(rowvd, 'ITEM_1_NM')  );
       end if;
 
+    -- Remove INteger::
+     ihook.setColumnValue(row,'ITEM_NM', replace(ihook.getColumnValue(row, 'ITEM_NM'),'Integer::','')  );
+     
       if (ihook.getColumnValue(rowai, 'ITEM_DESC') = v_dflt_txt) then
         ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowvd, 'ITEM_1_DEF')  ,1,4000));
      end if;
@@ -162,6 +166,11 @@ begin
          ihook.setColumnValue(row,'ITEM_LONG_NM',nci_11179_2.getStdShortName(v_id, 1));
     end if;
     ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', v_item_typ_id);
+    
+    -- Remove Integer++ from VM only
+    if (v_item_typ_id = 53) then
+        ihook.setColumnValue(row, 'ITEM_NM', replace(ihook.getColumnValue(rowai, 'ITEM_NM'), 'Integer::',''));
+    end if;
     ihook.setColumnValue(row,'CNCPT_CONCAT', ihook.getColumnValue(rowcncpt, 'ITEM_1_LONG_NM'));
     ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', ihook.getColumnValue(rowai, 'ITEM_DESC'));
     ihook.setColumnValue(row,'CNCPT_CONCAT_NM', ihook.getColumnValue(rowai, 'ITEM_NM'));
@@ -537,6 +546,12 @@ AS
         ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', v_err_Str);
         end if;
          rows := t_rows();
+         
+              if (v_op = 'insert') then -- create from existing then update name and definition
+                    ihook.setColumnValue(rowai,'ITEM_NM', replace(ihook.getColumnValue(rowvd,'ITEM_1_NM' ),'Integer::',''));
+                    ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowvd,'ITEM_1_DEF'));
+
+                end if;
              -- If any of the test fails or if the user has triggered validation, then go back to the screen.
         if is_valid=false or hookinput.answerid in (1, 2) then
                 rows := t_rows();
@@ -562,11 +577,7 @@ AS
             end if;
 
                 ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 3);
-                if (v_op = 'insert') then -- create from existing then update name and definition
-                    ihook.setColumnValue(rowai,'ITEM_NM', ihook.getColumnValue(rowvd,'ITEM_1_NM' ));
-                    ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowvd,'ITEM_1_DEF'));
-
-                end if;
+           
                 rows(rows.last) := rowai;
                 rowsetai := t_rowset(rows, 'Administered Item (Hook Creation)', 1, 'ADMIN_ITEM');
                 rows := t_rows();
@@ -747,15 +758,16 @@ END;
         ihook.setColumnValue(rowcncpt, 'CTL_VAL_MSG', v_err_Str);
         end if;
          rows := t_rows();
+             if (ihook.getColumnValue(rowcncpt,'ITEM_1_NM') is not null) then
+        ihook.setColumnValue(rowai,'ITEM_NM', ihook.getColumnValue(rowcncpt,'ITEM_1_NM'));
+              ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowcncpt,'ITEM_1_DEF'));
+        end if;
+    
              -- If any of the test fails or if the user has triggered validation, then go back to the screen.
         if is_valid=false or hookinput.answerid in (1, 2) then
                 rows := t_rows();
                 rows.extend;
         ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', v_item_typ_id);
-        if (ihook.getColumnValue(rowcncpt,'ITEM_1_NM') is not null) then
-        ihook.setColumnValue(rowai,'ITEM_NM', ihook.getColumnValue(rowcncpt,'ITEM_1_NM'));
-              ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowcncpt,'ITEM_1_DEF'));
-        end if;
                 rows(rows.last) := rowai;
                 rowsetai := t_rowset(rows, 'Administered Item (Hook Creation)', 1, 'ADMIN_ITEM');
                 rows := t_rows();
@@ -886,16 +898,19 @@ END;
             ihook.setColumnValue(rowcncpt, 'CTL_VAL_MSG', v_err_Str);
         end if;
 
+                   if (ihook.getColumnValue(rowcncpt,'ITEM_1_NM') is not null) then
+                    ihook.setColumnValue(rowai,'ITEM_NM', ihook.getColumnValue(rowcncpt,'ITEM_1_NM'));
+                    ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowcncpt,'ITEM_1_DEF'));
+                end if;
+           
+                    ihook.setColumnValue(rowai, 'ITEM_NM', replace(ihook.getColumnValue(rowai, 'ITEM_NM'), 'Integer::',''));
+      
              -- If any of the test fails or if the user has triggered validation, then go back to the screen.
         if is_valid=false or hookinput.answerid in (1, 2) then
                 rows := t_rows();
                 rows.extend;
                 ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', v_item_typ_id);
-                if (ihook.getColumnValue(rowcncpt,'ITEM_1_NM') is not null) then
-                    ihook.setColumnValue(rowai,'ITEM_NM', ihook.getColumnValue(rowcncpt,'ITEM_1_NM'));
-                    ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowcncpt,'ITEM_1_DEF'));
-                end if;
-                rows(rows.last) := rowai;
+                 rows(rows.last) := rowai;
                 rowsetai := t_rowset(rows, 'Administered Item (Hook Creation)', 1, 'ADMIN_ITEM');
                 rows := t_rows();
                 rows.extend;
@@ -1396,17 +1411,17 @@ if (v_cncpt_src ='DROP-DOWN') then
                         if (v_temp_id is not null) then
                         for cur in(select item_id, item_nm , item_long_nm, item_desc from admin_item where admin_item_typ_id = 49 and item_id = v_temp_id and ver_nr = v_temp_ver) loop
                      --            v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
-       
+                         v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
+                
                                 if (cur.item_id = v_int_cncpt_id and trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) is not null) then --- integer concept
        
                                         v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm) || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
                                         v_nm := trim(v_nm || ' ' || cur.item_nm) || '::' ||  trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) ;
-                                        v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
-                          else  
+                                      v_def := v_def || '::' ||  trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
+                             else  
                                     v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm);
                                 v_nm := trim(v_nm || ' ' || cur.item_nm);
-                                                    v_def := substr( cur.item_desc || '_' || v_def,1,4000);
-        
+                      
                                 end if;
                             v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                       
@@ -1420,15 +1435,17 @@ if (v_cncpt_src ='DROP-DOWN') then
              and ver_nr  = ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_1')) loop
                           --       v_dec_nm := trim(v_dec_nm || ' ' || cur.item_nm) ;
                               v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
-                                     --             v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
+                                                  v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
                                if (cur.item_id = v_int_cncpt_id and trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) is not null) then --- integer concept
                                         v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm) || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_1')) ;
                                         v_nm := trim(v_nm || ' ' || cur.item_nm) || '::' ||  trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_1' )) ;
-                                v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
+                          --      v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
+                                                               v_def := v_def || '::' ||  trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
+          
                      else  
                                     v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm);
                                 v_nm := trim(v_nm || ' ' || cur.item_nm);
-                                                  v_def := substr( cur.item_desc || '_' || v_def,1,4000);
+                                --                  v_def := substr( cur.item_desc || '_' || v_def,1,4000);
           end if;
           
                                 --raise_application_error(-20000, 'In HEre' || cur.item_long_nm);
@@ -1452,9 +1469,9 @@ if (v_mode = 'C') AND V_ITEM_ID  is null then --- Create
        rows := t_rows();
    --     raise_application_error(-20000,'OC');
           j := 1;
-      v_nm := '';
+ --     v_nm := '';
        v_long_nm := '';
-       v_def := '';
+  --     v_def := '';
           for i in reverse 2..10 loop
 
           v_cncpt_id := ihook.getColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i);
@@ -1472,14 +1489,14 @@ if (v_mode = 'C') AND V_ITEM_ID  is null then --- Create
                 --   v_def := substr( cur.item_desc || '_' || v_def,1,4000);
      
                   if (v_cncpt_id = v_int_cncpt_id and trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) is not null) then
-                            v_nm := trim(cur.item_nm) ||  '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || ' ' || v_nm ;
+                        --    v_nm := trim(cur.item_nm) ||  '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || ' ' || v_nm ;
                             ihook.setColumnValue(row,'NCI_CNCPT_VAL',ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
-                               v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
+            --                   v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
          
-                        else
-                                            v_def := substr( cur.item_desc || '_' || v_def,1,4000);
-        
-                            v_nm := trim(cur.item_nm) || ' ' || v_nm ;
+                      --  else
+             --                               v_def := substr( cur.item_desc || '_' || v_def,1,4000);
+        --
+                      --      v_nm := trim(cur.item_nm) || ' ' || v_nm ;
                         end if;
             rows.extend;
             rows(rows.last) := row;
@@ -1505,13 +1522,13 @@ if (v_mode = 'C') AND V_ITEM_ID  is null then --- Create
    
             v_temp := v_temp || i || ':' ||  v_cncpt_id;
                  if (v_cncpt_id = v_int_cncpt_id and trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) is not null) then
-                            v_nm := trim(cur.item_nm) ||  '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || ' ' || v_nm ;
+                    --        v_nm := trim(cur.item_nm) ||  '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || ' ' || v_nm ;
                             ihook.setColumnValue(row,'NCI_CNCPT_VAL',ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i));
-                                  v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
+                --                  v_def := substr(cur.item_desc || '::' || trim(ihook.getColumnValue(rowform,'CNCPT_INT_' || idx || '_' || i)) || '_' || v_def,1,4000);
           
-                        else
-                            v_nm := trim(cur.item_nm) || ' ' || v_nm ;
-                                    v_def := substr( cur.item_desc || '_' || v_def,1,4000);
+                   --     else
+                     --       v_nm := trim(cur.item_nm) || ' ' || v_nm ;
+               --                     v_def := substr( cur.item_desc || '_' || v_def,1,4000);
                 end if;
                     
             rows.extend;
@@ -1547,12 +1564,12 @@ if (v_mode = 'C') AND V_ITEM_ID  is null then --- Create
    --     ihook.setColumnValue(row,'ITEM_LONG_NM', v_long_nm);
    -- REp Term short name change to IDvVersion
     ihook.setColumnValue(row,'ITEM_LONG_NM', nci_11179_2.getStdShortName(v_id, 1));
-        ihook.setColumnValue(row,'ITEM_DESC', substr(v_def, 1, length(v_def)-1));
+        ihook.setColumnValue(row,'ITEM_DESC', substr(v_def, 2));
         ihook.setColumnValue(row,'ITEM_NM', v_nm);
         ihook.setColumnValue(row,'CNTXT_ITEM_ID', 20000000024);
         ihook.setColumnValue(row,'CNTXT_VER_NR', 1);
         ihook.setColumnValue(row,'CNCPT_CONCAT', v_long_nm_suf);
-        ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', substr(v_def, 1, length(v_def)-1));
+        ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', substr(v_def,2));
         ihook.setColumnValue(row,'CNCPT_CONCAT_NM', v_nm);
         ihook.setColumnValue(row,'CNCPT_CONCAT_WITH_INT', substr(v_long_nm_suf_int,2));
         
