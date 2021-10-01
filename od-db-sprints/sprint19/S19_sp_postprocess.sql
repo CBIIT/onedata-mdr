@@ -53,7 +53,6 @@ where e.cncpt_concat is null and
 
 commit;
 
-
 insert into onedata_ra.NCI_ADMIN_ITEM_EXT select * from NCI_ADMIN_ITEM_EXT;
 commit;
 
