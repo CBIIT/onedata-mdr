@@ -24,8 +24,7 @@ alter table NCI_CLSFCTN_SCHM_ITEM add (DISP_ORD integer default 0);
 update NCI_ADMIN_ITEM_REL set  REP_NO=NVL(REP_NO,0) where REP_NO is null;
 commit;
 
-alter  NCI_ADMIN_ITEM_REL modify (REP_NO	NUMBER  default 0 not null );
-
+alter  table NCI_ADMIN_ITEM_REL modify (REP_NO	NUMBER  default 0 not null );
 
 
 -- Current
