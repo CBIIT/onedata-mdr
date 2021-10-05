@@ -14,3 +14,9 @@ alter table 	NCI_DS_HDR add (BTCH_NM  varchar2(50));
 
 
 drop table nci_ds_rslt_detl;
+
+truncate table NCI_FORM_TA;
+
+alter table NCI_FORM_TA add (FORM_ITEM_ID number not null, FORM_VER_NR number(4,2) not null, MOD_ITEM_ID number not null, MOD_VER_NR number(4,2) not null);
+
+
