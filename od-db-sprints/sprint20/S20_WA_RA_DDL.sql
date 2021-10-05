@@ -10,6 +10,7 @@
 	
 alter table 	NCI_DS_HDR add (NUM_CDE_MTCH  integer);
 alter table 	NCI_DS_HDR add (NUM_PV  integer);
+alter table 	NCI_DS_HDR add (BTCH_NM  varchar2(50));
 
 
 drop table nci_ds_rslt_detl;
