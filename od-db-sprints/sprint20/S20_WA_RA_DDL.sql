@@ -9,3 +9,5 @@
 	PV.VAL_DOM_VER_NR = DE.VAL_DOM_VER_NR;
 	
 alter table 	NCI_DS_HDR add (NUM_CDE_MTCH  integer);
+
+drop table nci_ds_rslt_detl;
