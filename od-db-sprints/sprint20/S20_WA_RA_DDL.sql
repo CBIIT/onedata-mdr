@@ -170,7 +170,6 @@ alter table NCI_FORM_TA add (FORM_ITEM_ID number not null, FORM_VER_NR number(4,
            AND OC.VER_NR = CONOC.VER_NR
            AND PROP.ITEM_ID = CONPROP.ITEM_ID
            AND PROP.VER_NR = CONPROP.VER_NR;
-
 create or replace view vw_nci_mod_quest_vv as
 select                mod.item_id NCI_PUB_id,
            mod.ver_nr nci_ver_nr,
@@ -203,7 +202,7 @@ select                mod.item_id NCI_PUB_id,
            select                nci_pub_id,
            nci_ver_nr,
            'VALID VALUE' LVL_NM,
-           mod.VALUE || ' ' || MEAN_TXT ITEM_NM ,
+           mod.VALUE ITEM_NM ,
            mod.VALUE || ' ' || MEAN_TXT  ITEM_DESC, 
            mod.CREAT_USR_ID,
            mod.LST_UPD_USR_ID,
@@ -213,7 +212,4 @@ select                mod.item_id NCI_PUB_id,
            mod.LST_UPD_DT,
           mod.CREAT_DT
           from NCI_QUEST_VALID_VALUE mod;
-	  
          
-
-
