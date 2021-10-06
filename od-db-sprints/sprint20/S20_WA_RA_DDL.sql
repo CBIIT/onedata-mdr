@@ -170,9 +170,14 @@ alter table NCI_FORM_TA add (FORM_ITEM_ID number not null, FORM_VER_NR number(4,
            AND OC.VER_NR = CONOC.VER_NR
            AND PROP.ITEM_ID = CONPROP.ITEM_ID
            AND PROP.VER_NR = CONPROP.VER_NR;
+	   
+	   
 create or replace view vw_nci_mod_quest_vv as
 select                mod.item_id NCI_PUB_id,
            mod.ver_nr nci_ver_nr,
+	   mod.ITEM_NM MOD_NM,
+	   '-' QUEST_NM, 
+	   '-' VALID_VALUE,
            'MODULE' LVL_NM,
            mod.ITEM_NM ,
            mod.ITEM_DESC, 
@@ -187,29 +192,37 @@ select                mod.item_id NCI_PUB_id,
           union
           select                nci_pub_id ,
            nci_ver_nr ,
+           mod.ITEM_NM MOD_NM,
+	   q.ITEM_LONG_NM QUEST_NM, 
+	   '-' VALID_VALUE,
            'QUESTION' LVL_NM,
-           mod.ITEM_LONG_NM ITEM_NM ,
-           mod.ITEM_LONG_NM ITEM_DESC, 
-           mod.CREAT_USR_ID,
-           mod.LST_UPD_USR_ID,
-           mod.FLD_DELETE,
-           mod.LST_DEL_DT,
-           mod.S2P_TRN_DT,
-           mod.LST_UPD_DT,
-          mod.CREAT_DT
-          from NCI_ADMIN_ITEM_REL_ALT_KEY mod 
+           q.ITEM_LONG_NM ITEM_NM ,
+           q.ITEM_LONG_NM ITEM_DESC, 
+           q.CREAT_USR_ID,
+           q.LST_UPD_USR_ID,
+           q.FLD_DELETE,
+           q.LST_DEL_DT,
+           q.S2P_TRN_DT,
+           q.LST_UPD_DT,
+          q.CREAT_DT
+          from NCI_ADMIN_ITEM_REL_ALT_KEY q , ADMIN_ITEM mod
+	  where q.p_item_id = mod.item_id and q.p_item_ver_nr = mod.ver_nr and mod.admin_item_typ_id = 52
           union
-           select                nci_pub_id,
-           nci_ver_nr,
-           'VALID VALUE' LVL_NM,
-           mod.VALUE ITEM_NM ,
-           mod.VALUE || ' ' || MEAN_TXT  ITEM_DESC, 
-           mod.CREAT_USR_ID,
-           mod.LST_UPD_USR_ID,
-           mod.FLD_DELETE,
-           mod.LST_DEL_DT,
-           mod.S2P_TRN_DT,
-           mod.LST_UPD_DT,
-          mod.CREAT_DT
-          from NCI_QUEST_VALID_VALUE mod;
+           select                vv.nci_pub_id ,
+           vv.nci_ver_nr ,
+           mod.ITEM_NM MOD_NM,
+	   q.ITEM_LONG_NM QUEST_NM, 
+	   vv.VALUE VALID_VALUE,
+           'VALID_VALUD' LVL_NM,
+           vv.VALUE ITEM_NM ,
+           vv.VALUE || ' ' || MEAN_TXT  ITEM_DESC, 
+           vv.CREAT_USR_ID,
+           vv.LST_UPD_USR_ID,
+           vv.FLD_DELETE,
+           vv.LST_DEL_DT,
+           vv.S2P_TRN_DT,
+           vv.LST_UPD_DT,
+          vv.CREAT_DT
+          from NCI_QUEST_VALID_VALUE vv,  NCI_ADMIN_ITEM_REL_ALT_KEY q , ADMIN_ITEM mod
+	  where vv.q_pub_id = q.nci_pub_id and vv.q_ver_Nr = q.nci_ver_nr and q.p_item_id = mod.item_id and q.p_item_ver_nr = mod.ver_nr and mod.admin_item_typ_id = 52;
          
