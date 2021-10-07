@@ -4,6 +4,12 @@
 -- Run as ONEDATA_WA DDL scripts
 S19_WA_RA_DDL.sql
 S19_WA_DDL.sql
+
+-- Run as ONEDATA_RA DDL scripts
+S19_WA_RA_DDL.sql
+S19_RA_DDL.sql
+
+-- Run as ONEDATA_WA DDL scripts
 S19_WA_VW_ALS.sql
 S19_NCI_11179.sql
 S19_NCI_11179_2.sql
@@ -25,11 +31,6 @@ S19_AI_INPUT_TAB_REV.sql
 S19_MIGR_VALID_MODIFIED1.sql
 S19_MIGR_VALID_MODIFIED2.sql
 S19_MIGR_VALID_MODIFIED3.sql
-
--- Run as ONEDATA_RA DDL scripts
-S19_WA_RA_DDL.sql
-S19_RA_DDL.sql
-
 
 -- Run as ONEDATA_WA DM scripts
 S19_WA_Data_migration.sql
