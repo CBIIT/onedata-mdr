@@ -190,8 +190,8 @@ select                mod.item_id NCI_PUB_id,
            mod.S2P_TRN_DT,
            mod.LST_UPD_DT,
           mod.CREAT_DT
-          from ADMIN_ITEM mod, nci_admin_item_rel r where admin_item_typ_id = 52 and mod.item_id = r.c_item_id and mod.ver_nd = r.c_item_ver_nr
-	  and r.rel_typ_id = 
+          from ADMIN_ITEM mod, nci_admin_item_rel r where admin_item_typ_id = 52 and mod.item_id = r.c_item_id and mod.ver_nr = r.c_item_ver_nr
+	  and r.rel_typ_id = 61
           union
           select                nci_pub_id ,
            nci_ver_nr ,
@@ -212,7 +212,7 @@ select                mod.item_id NCI_PUB_id,
           q.CREAT_DT
           from NCI_ADMIN_ITEM_REL_ALT_KEY q , ADMIN_ITEM mod, nci_admin_item_rel r
 	  where q.p_item_id = mod.item_id and q.p_item_ver_nr = mod.ver_nr and mod.admin_item_typ_id = 52
-	  and mod.item_id = r.c_item_id and mod.ver_nd = r.c_item_ver_nr
+	  and mod.item_id = r.c_item_id and mod.ver_nr = r.c_item_ver_nr and r.rel_typ_id = 61
           union
            select                vv.nci_pub_id ,
            vv.nci_ver_nr ,
@@ -233,5 +233,5 @@ select                mod.item_id NCI_PUB_id,
           vv.CREAT_DT
           from NCI_QUEST_VALID_VALUE vv,  NCI_ADMIN_ITEM_REL_ALT_KEY q , ADMIN_ITEM mod, nci_admin_item_rel r
 	  where vv.q_pub_id = q.nci_pub_id and vv.q_ver_Nr = q.nci_ver_nr and q.p_item_id = mod.item_id and q.p_item_ver_nr = mod.ver_nr and mod.admin_item_typ_id = 52
-	   and mod.item_id = r.c_item_id and mod.ver_nd = r.c_item_ver_nr;
+	   and mod.item_id = r.c_item_id and mod.ver_nr = r.c_item_ver_nr and r.rel_typ_id = 61;
          
