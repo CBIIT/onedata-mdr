@@ -235,3 +235,4 @@ select                mod.item_id NCI_PUB_id,
 	  where vv.q_pub_id = q.nci_pub_id and vv.q_ver_Nr = q.nci_ver_nr and q.p_item_id = mod.item_id and q.p_item_ver_nr = mod.ver_nr and mod.admin_item_typ_id = 52
 	   and mod.item_id = r.c_item_id and mod.ver_nr = r.c_item_ver_nr and r.rel_typ_id = 61;
          
+alter table NCI_QUEST_VALID_VALUE add (OLD_NCI_PUB_ID number);
