@@ -60,3 +60,22 @@ end if;
 
 END;
 /
+
+--MOD or PROTOCOL UPDATING from, MOD updates ADMIN_Item for MODE 
+CREATE OR REPLACE TRIGGER TRG_NCI_MOD_PROT_POST
+  AFTER INSERT OR UPDATE OR DELETE
+  on NCI_ADMIN_ITEM_REL
+  for each row
+BEGIN
+
+IF :new.REL_TYP_ID =60 then
+    update ADMIN_ITEM set LST_UPD_DT = :new.LST_UPD_DT, LST_UPD_USR_ID = :new.LST_UPD_USR_ID 
+    where ITEM_ID = :new.C_item_id and VER_NR = :new.C_ITEM_VER_NR ;   
+
+end IF;
+IF :new.REL_TYP_ID =61 then
+    update ADMIN_ITEM set LST_UPD_DT = :new.LST_UPD_DT, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.P_item_id and VER_NR = :new.P_ITEM_VER_NR;
+end IF;
+
+END;
+/
