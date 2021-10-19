@@ -96,8 +96,8 @@ BEGIN
 
 
     update NCI_ADMIN_ITEM_REL_ALT_KEY set LST_UPD_DT = :new.LST_UPD_DT, LST_UPD_USR_ID = :new.LST_UPD_USR_ID     
-    where  C_ITEM_ID = :new.Q_PUB_ID
-           AND C_ITEM_VER_NR=:new.Q_VER_NR;
+    where  NCI_PUB_ID = :new.Q_PUB_ID
+           AND NCI_VER_NR=:new.Q_VER_NR;
            
     update NCI_ADMIN_ITEM_REL set LST_UPD_DT = :new.LST_UPD_DT, LST_UPD_USR_ID = :new.LST_UPD_USR_ID     
     where  (C_ITEM_ID, C_ITEM_VER_NR) in (select p_item_id, p_item_ver_nr from nci_admin_item_rel_alt_key where c_item_id = :new.q_pub_id and 
