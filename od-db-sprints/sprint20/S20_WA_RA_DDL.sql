@@ -250,7 +250,7 @@ de.CNTXT_NM_DN CDE_CNTXT_NM, de.item_nm CDE_ITEM_NM, de.cntxt_item_id CDE_CNTXT_
 de.ADMIN_STUS_NM_DN CDE_ADMIN_STUS_NM,
 air.CREAT_DT, air.CREAT_USR_ID, air.LST_UPD_USR_ID, air.FLD_DELETE, air.LST_DEL_DT, air.S2P_TRN_DT, air.LST_UPD_DT, air.item_long_nm QUEST_LONG_TXT, air.item_nm QUEST_TXT,
 vv.VM_NM, vv.VM_LNM, vv.VM_DEF, vv.VALUE VV_VALUE, vv.EDIT_IND VV_EDIT_IND, vv.SEQ_NBR VV_SEQ_NR, vv.MEAN_TXT VV_MEAN_TXT, vv.DESC_TXT VV_DESC_TXT, nvl(vv.nci_pub_id, 1) VV_ITEM_ID,
-nvl(vv.nci_ver_nr, 1) VV_VER_NR, vv.INSTR VV_INSTR
+nvl(vv.nci_ver_nr, 1) VV_VER_NR, vv.INSTR VV_INSTR, vv.DISP_ORD VV_DISP_ORD
 from  nci_admin_item_rel_alt_key air, admin_item aim,
 admin_item frm, nci_admin_item_rel frm_mod , admin_item de, nci_quest_valid_value vv, nci_form frmst
 where  air.rel_typ_id = 63
@@ -263,5 +263,4 @@ and air.c_item_id = de.item_id (+)
 and air.c_item_ver_nr = de.ver_nr (+)
 and air.NCI_PUB_ID = vv.q_pub_id (+)
 and air.nci_ver_nr = vv.q_ver_nr (+);
-
 
