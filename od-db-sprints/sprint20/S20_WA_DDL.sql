@@ -61,7 +61,7 @@ end if;
 END;
 /
 
-/*
+
 --MOD or PROTOCOL UPDATING from, MOD updates ADMIN_Item for MODE 
 CREATE OR REPLACE TRIGGER TRG_NCI_MOD_PROT_POST
   AFTER INSERT OR UPDATE OR DELETE
@@ -80,4 +80,35 @@ end IF;
 
 END;
 /
-*/
+
+--VV modifyes Form
+CREATE OR REPLACE TRIGGER TRG_NCI_QVV_POST
+  AFTER INSERT OR UPDATE OR DELETE
+  on NCI_QUEST_VALID_VALUE
+  for each row
+BEGIN   
+                     
+    update ADMIN_ITEM set LST_UPD_DT = :new.LST_UPD_DT, LST_UPD_USR_ID = :new.LST_UPD_USR_ID     
+    where (ITEM_ID, VER_NR) in (select ak.P_ITEM_ID, ak.P_ITEM_VER_NR from NCI_ADMIN_ITEM_REL ak, NCI_ADMIN_ITEM_REL_ALT_KEy q
+                                where q.NCI_PUB_ID=:NEW.Q_PUB_ID and q.NCI_VER_NR= :NEW.Q_VER_NR and q.P_ITEM_ID = ak.C_ITEM_ID
+                                and q.P_ITEM_VER_NR = ak.C_ITEM_VER_NR and ak.rel_typ_id = 61);
+           
+END;
+/
+
+--Qustion updates Form
+CREATE OR REPLACE TRIGGER TRG_NCI_QS_MOD_POST
+  AFTER INSERT OR UPDATE OR DELETE
+  on NCI_ADMIN_ITEM_REL_ALT_KEY
+  for each row
+
+BEGIN   
+
+                   
+    update ADMIN_ITEM set LST_UPD_DT = :new.LST_UPD_DT, LST_UPD_USR_ID = :new.LST_UPD_USR_ID     
+    where  (ITEM_ID, VER_NR) in (select P_ITEM_ID, P_ITEM_VER_NR from NCI_ADMIN_ITEM_REL where C_ITEM_ID=:new.P_ITEM_ID
+           AND C_ITEM_VER_NR=:new.P_ITEM_VER_NR  and rel_typ_id = 61);   
+
+END;
+/
+
