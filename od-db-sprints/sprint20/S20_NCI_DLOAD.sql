@@ -731,6 +731,7 @@ AS
   v_invalid_fmt varchar2(50) := '';
   v_invalid_typ varchar2(100) := '';
   v_dup_str  varchar2(50) := '';
+  v_none_str varchar2(8) := 'none';
 begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -836,6 +837,8 @@ end loop;
                 hookoutput.message := hookoutput.message || ';    Invalid type sample: ' || v_invalid_typ ;
             end if;
 */
+             v_invalid_typ := NVL(trim(v_invalid_typ), v_none_str);
+             v_dup_str := NVL(trim(v_dup_str), v_none_str);
              hookoutput.message := 'Total Items: ' || cnt ||  ';    Invalid Format/Type: ' || v_invalid_typ || ';     Duplicate: ' || v_dup_str || ';    Items added: ' || nvl(rows.count,0) ;
 
    end if;
@@ -872,6 +875,7 @@ AS
   v_invalid_fmt varchar2(50) := '';
   v_invalid_typ varchar2(100) := '';
   v_dup_str  varchar2(50) := '';
+  v_none_str varchar2(8) := 'none';
 begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -984,6 +988,8 @@ end loop;
                 hookoutput.message := hookoutput.message || ';    Invalid type sample: ' || v_invalid_typ ;
             end if;
 */
+             v_invalid_typ := NVL(trim(v_invalid_typ), v_none_str);
+             v_dup_str := NVL(trim(v_dup_str), v_none_str);
              hookoutput.message := 'Total Items: ' || cnt ||  ';    Invalid Format/Type: ' || v_invalid_typ || ';     Duplicate: ' || v_dup_str || ';    Items added: ' || nvl(rows.count,0) ;
 
    end if;

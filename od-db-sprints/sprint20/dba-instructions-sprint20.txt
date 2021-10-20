@@ -3,6 +3,8 @@
 
 -- Run as ONEDATA_WA DDL scripts
 
+S20_NCI_DLOAD.sql
+
 -- Run as ONEDATA_RA DDL scripts
 
 -- DATA MIGRATION
