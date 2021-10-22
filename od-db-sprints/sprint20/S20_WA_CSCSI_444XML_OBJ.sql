@@ -1,5 +1,26 @@
+CREATE TABLE CSCSI_444_GENERATED_XML
+(
+  FILE_NAME     VARCHAR2(200 BYTE),
+  TEXT          CLOB,
+  CREATED_DATE  DATE ,
+  SEQ_ID        NUMBER
+);
+/
+CREATE TABLE CSCSI_444_REPORTS_ERR_LOG
+(
+  FILE_NAME         VARCHAR2(50 BYTE),
+  REPORT_ERROR_TXT  VARCHAR2(1100 BYTE),
+  DATE_PROCESSED    DATE
+);
+/
+GRANT SELECT ON CSCSI_444_GENERATED_XML TO GUEST;
 
-/* Formatted on 9/22/2021 9:12:06 AM (QP5 v5.354) */
+GRANT SELECT ON CSCSI_444_REPORTS_ERR_LOG TO GUEST;
+
+GRANT SELECT ON CSCSI_444_GENERATED_XML TO ONEDATA_RO;
+
+GRANT SELECT ON CSCSI_444_REPORTS_ERR_LOG TO ONEDATA_RO;
+
 CREATE OR REPLACE TYPE MDSR759_XML_CSI_L5_T as object(
 "CSILevel" number,
  "ClassificationSchemeItemName" VARCHAR2(255),
@@ -458,7 +479,7 @@ end if;
     WHEN OTHERS THEN
    errmsg := SQLERRM;
          dbms_output.put_line('errmsg  - '||errmsg);
-        insert into MDSR_REPORTS_ERR_LOG VALUES (l_file_name,  errmsg, sysdate);
+        insert into CSCSI_444_REPORTS_ERR_LOG VALUES (l_file_name,  errmsg, sysdate);
  commit;
 
 END ;
@@ -519,7 +540,7 @@ DBMS_SCHEDULER.CREATE_JOB (
    job_name           =>  'CSCSI_XML444_GENER_JOB',
    job_type           =>  'STORED_PROCEDURE',
    job_action         =>  'CSCSI_XML444_GENER',
-   start_date         =>  '13-SEP-21 10.00.00 PM',
+   start_date         =>  '22-OCT-21 10.00.00 PM',
    repeat_interval    =>  'FREQ=DAILY;INTERVAL=7',
    enabled            =>  TRUE);
 
