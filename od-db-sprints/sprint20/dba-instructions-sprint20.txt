@@ -4,7 +4,7 @@
 -- Run as ONEDATA_WA DDL scripts
 
 S20_NCI_DLOAD.sql
-
+S20_WA_CSCSI_444XML_OBJ.sql
 -- Run as ONEDATA_RA DDL scripts
 
 -- DATA MIGRATION
