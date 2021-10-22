@@ -11,6 +11,7 @@
 alter table 	NCI_DS_HDR add (NUM_CDE_MTCH  integer);
 alter table 	NCI_DS_HDR add (NUM_PV  integer);
 alter table 	NCI_DS_HDR add (BTCH_NM  varchar2(50));
+alter table NCI_DS_HDR add (CDE_ITEM_ID number, CDE_VER_NR number(4,2));
 
 
 drop table nci_ds_rslt_detl;
