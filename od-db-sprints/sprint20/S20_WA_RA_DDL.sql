@@ -1,3 +1,8 @@
+ 
+ -- Tracker 1276
+ insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Form MDF', 105, 'Form MDF', 'Form MDF');
+commit;
+ 
  CREATE OR REPLACE  VIEW VW_NCI_DE_PV_LEAN AS
   SELECT PV.PERM_VAL_BEG_DT, PERM_VAL_END_DT, PERM_VAL_NM, PERM_VAL_DESC_TXT ITEM_NM,
               DE.ITEM_ID  DE_ITEM_ID,
