@@ -1098,6 +1098,7 @@ AS
   cnt integer;
 j integer;
 k integer;
+z integer;
     actions t_actions := t_actions();
   action t_actionRowset;
   v_msg varchar2(1000);
@@ -1135,6 +1136,8 @@ begin
         k := 1;
         idx := 1;
         j :=0;
+         v_item_id := ihook.getColumnValue(rowform, 'ITEM_1_ID');
+          v_ver_nr :=ihook.getColumnValue(rowform, 'ITEM_1_VER_NR');
 
   --      if (HOOKINPUT.ANSWERID  in ( 1 ,3)) then  -- Validate using drop-down
              --- Only update definition and long name. No name change
@@ -1158,10 +1161,14 @@ begin
                 end loop;
 
               --  raise_application_error(-20000, v_long_nm_suf_int);
-
+                z := 1;
                  for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
-                where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int =substr(v_long_nm_suf_int,2) and a.admin_item_typ_id = v_item_typ_glb) loop
-                        hookoutput.message :=  'WARNING: Duplicate found based on concepts: ' || cur.item_id;
+                where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int =substr(v_long_nm_suf_int,2) and a.admin_item_typ_id = v_item_typ_glb
+                and ext.item_id <> v_item_id ) loop
+                        hookoutput.message :=  'WARNING: Duplicate found based on concepts. See Duplicates Section. ' ;
+                 ihook.setColumnValue(rowform, 'CNCPT_2_ITEM_ID_' || z,cur.item_id);
+                 ihook.setColumnValue(rowform, 'CNCPT_2_VER_NR_' || z,cur.ver_nr);
+                        z := z+ 1;
                         v_dup_item_id := cur.item_id;
                         v_dup_ver_nr :=cur.ver_nr;
                         is_dup := true;
@@ -1286,6 +1293,9 @@ begin
     if (hookinput.answerid = 3 and is_dup = true) then
         rows := t_rows();
         row := row_ori;
+        z := nvl(ihook.getColumnValue(rowform, 'NCI_DEC_PREC'),1);
+            v_dup_item_id := ihook.getColumnValue(rowform ,'CNCPT_2_ITEM_ID_' || z); 
+            v_dup_ver_nr := ihook.getColumnValue(rowform ,'CNCPT_2_VER_NR_' || z); 
         ihook.setColumnValue(row, 'NCI_VAL_MEAN_ITEM_ID', v_dup_item_id);
         ihook.setColumnValue(row, 'NCI_VAL_MEAN_VER_NR', v_dup_ver_nr);
        rows.extend;
@@ -1297,6 +1307,7 @@ begin
         hookoutput.message := 'Value Meaning assigned.' || v_dup_item_id;
 
     end if;
+
     if (actions.count > 0) then
         hookoutput.actions := actions;
     end if;
@@ -1497,12 +1508,6 @@ begin
     ANSWERS(ANSWERS.LAST) := ANSWER;
     end if;
 
- /*   if (v_dup = true) then
-    ANSWER                     := T_ANSWER(3, 3, 'Show Duplicates');
-    ANSWERS.EXTEND;
-    ANSWERS(ANSWERS.LAST) := ANSWER;
-    end if;
-*/
     QUESTION               := T_QUESTION('Edit VM', ANSWERS);
 
 return question;
