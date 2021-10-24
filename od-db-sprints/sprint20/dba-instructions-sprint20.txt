@@ -2,18 +2,37 @@
 
 
 -- Run as ONEDATA_WA DDL scripts
+S19_WA_RA_DDL.sql
+S19_WA_DDL.sql
 
-S20_NCI_DLOAD.sql
-S20_WA_CSCSI_444XML_OBJ.sql
 -- Run as ONEDATA_RA DDL scripts
+S19_WA_RA_DDL.sql
+S19_RA_DDL.sql
 
--- DATA MIGRATION
+-- Run as ONEDATA_WA DDL scripts
+S20_NCI_11179.sql
+S20_NCI_11179_2.sql
+S20_NCI_CHNG_MGMT.sql
+S20_NCI_DEC_MGMT.sql
+S20_NCI_DLOAD.sql
+S20_NCI_FORM_MGMT.sql
+S20_NCI_PV_VM.sql
+S20_NCI_VD.sql
+S20_NCI_CADSR_PULL.sql
+S20_NCI_CADSR_PUSH.sql
+S20_NCI_CADSR_PUSH_CORE.sql
+S20_NCI_CADSR_PUSH_FORM.sql
+S20_NCI_DS.sql
+S20_NCI_POSTHOOK.sql
+S20_sp_postprocess.sql
+S20_WA_CSCSI_444XML_OBJ.sql
 
 -- Run as ONEDATA_WA DM scripts
-
+S19_WA_Data_migration.sql
 
 -- Run as ONEDATA_RA DM scripts
-S12_RA_Data_Migration.sql
+S19_RA_Data_Migration.sql
 
 -- Run validate job as ONEDATA_WA
 exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
+
