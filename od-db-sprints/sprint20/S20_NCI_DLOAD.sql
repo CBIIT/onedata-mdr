@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE nci_dload AS
+create or replace PACKAGE nci_dload AS
   procedure spCreateDloadProfile (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
   procedure spCreateDloadProfileGuest (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
   procedure spEditDloadProfileGuest (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
@@ -14,10 +14,9 @@ procedure spDeleteDloadItem  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id 
 procedure spDeleteDloadItemGuest  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 function validatePin(v_hdr_id in number, v_pin in number) return boolean;
 END;
+
 /
-
-
-CREATE OR REPLACE PACKAGE BODY nci_dload AS
+create or replace PACKAGE BODY nci_dload AS
 
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
@@ -36,6 +35,10 @@ begin
     ANSWER                     := T_ANSWER(1, 1, 'Add');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
+    
+	   	 answer := t_answer(2, 2, 'Add All');
+  	   	 answers.extend; answers(answers.last) := answer;
+
     QUESTION               := T_QUESTION('Please select Items to Add.', ANSWERS);
 
 return question;
@@ -528,6 +531,11 @@ begin
     -- 92 - FOrm, 93 - CDE
     -- Depending on the type of collection, show either Forms or CDE's
 
+if (ihook.getColumnValue(row_ori,'DLOAD_TYP_ID') = 92) then
+            v_item_typ_id := 54;
+            else v_item_typ_id := 4;
+        end if;
+        
     if (hookinput.invocationnumber = 0) then
         if (ihook.getColumnValue(row_ori,'DLOAD_TYP_ID') = 92) then
             v_item_typ_id := 54;
@@ -559,6 +567,7 @@ begin
 
     if hookInput.invocationNumber = 1  then -- Items selected from cart. Second invocation
        rows := t_rows();
+       if (hookinput.answerid = 1) then
        for i in 1..hookInput.selectedRowset.rowset.count loop -- Loop thru all the selected items.
           row_sel := hookInput.selectedRowset.rowset(i);
 
@@ -572,7 +581,28 @@ begin
                 rows (rows.last) := row_sel;
            end if;
         end loop;
+        end if;
+        
+    row_sel := t_row();
+    
+        if (hookinput.answerid = 2) then -- selected all from cart
+     for cur in (select c.item_id, c.ver_nr from NCI_USR_CART c, admin_item ai where c.fld_delete= 0 and cntct_secu_id = v_usr_id and ai.item_id = c.item_id and ai.ver_nr = c.ver_nr and
+        ai.admin_item_typ_id = v_item_typ_id order by admin_item_typ_id) loop
+		     
+          ihook.setColumnValue(row_sel, 'HDR_ID', ihook.getColumnValue(row_ori,'HDR_ID'));
 
+          -- Add only if not already in collection.
+          select count(*) into v_temp from nci_dload_dtl where hdr_id = ihook.getColumnValue(row_ori,'HDR_ID') and item_id = cur.ITEM_ID
+          and ver_nr = cur.VER_NR;
+          if (v_temp = 0) then
+                ihook.setColumnValue(row_sel, 'ITEM_ID', cur.ITEM_ID);
+                ihook.setColumnValue(row_sel, 'VER_NR', cur.VER_NR);
+                rows.extend;
+                rows (rows.last) := row_sel;
+           end if;
+        end loop;
+        end if;
+        
         -- If something to add.
         if (rows.count > 0) then
             action := t_actionrowset(rows, 'Download Detail', 2,0,'insert');
