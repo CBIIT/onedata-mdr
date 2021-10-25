@@ -270,3 +270,27 @@ and air.c_item_ver_nr = de.ver_nr (+)
 and air.NCI_PUB_ID = vv.q_pub_id (+)
 and air.nci_ver_nr = vv.q_ver_nr (+);
 
+
+alter table  NCI_STG_PV_VM_BULK add 
+	("CNCPT_2_ITEM_ID_1" NUMBER, 
+	"CNCPT_2_VER_NR_1" NUMBER(4,2), 
+	"CNCPT_2_ITEM_ID_2" NUMBER, 
+	"CNCPT_2_VER_NR_2" NUMBER(4,2), 
+	"CNCPT_2_ITEM_ID_3" NUMBER, 
+	"CNCPT_2_VER_NR_3" NUMBER(4,2), 
+	"CNCPT_2_ITEM_ID_4" NUMBER, 
+	"CNCPT_2_VER_NR_4" NUMBER(4,2), 
+	"CNCPT_2_ITEM_ID_5" NUMBER, 
+	"CNCPT_2_VER_NR_5" NUMBER(4,2), 
+	"CNCPT_2_ITEM_ID_6" NUMBER, 
+	"CNCPT_2_VER_NR_6" NUMBER(4,2), 
+	"CNCPT_2_ITEM_ID_7" NUMBER, 
+	"CNCPT_2_VER_NR_7" NUMBER(4,2), 
+	"CNCPT_2_ITEM_ID_8" NUMBER, 
+	"CNCPT_2_VER_NR_8" NUMBER(4,2), 
+	"CNCPT_2_ITEM_ID_9" NUMBER, 
+	"CNCPT_2_VER_NR_9" NUMBER(4,2), 
+	"CNCPT_2_ITEM_ID_10" NUMBER, 
+	"CNCPT_2_VER_NR_10" NUMBER(4,2));
+	
+	
