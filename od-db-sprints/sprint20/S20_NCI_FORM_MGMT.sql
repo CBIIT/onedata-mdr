@@ -1,4 +1,5 @@
 create or replace PACKAGE            nci_form_mgmt AS
+function getAddComponentCreateQuestion return t_question ;
 procedure spAddForm (v_data_in in clob, v_data_out out clob);
 procedure spAddFormFromExisting (v_data_in in clob, v_data_out out clob);
 procedure spAddModule (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -46,6 +47,25 @@ select count(*) into v_temp from  onedata_md.vw_usr_row_filter  v, admin_item ai
         where ( ( v.CNTXT_ITEM_ID = ai.CNTXT_ITEM_ID and v.cntxt_VER_NR  = ai.CNTXT_VER_NR) or v.CNTXT_ITEM_ID = 100) and upper(v.USR_ID) = upper(v_user_id) and v.ACTION_TYP = 'I'
         and ai.item_id =v_frm_item_id and ai.ver_nr = v_frm_ver_nr;
 if (v_temp = 0) then return false; else return true; end if;
+end;
+
+-- Generic create question
+function getAddComponentCreateQuestion return t_question is
+  question t_question;
+  answer t_answer;
+  answers t_answers;
+begin
+
+ ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Add');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    
+	  
+
+    QUESTION               := T_QUESTION('Please select Items to Add.', ANSWERS);
+
+return question;
 end;
 
 
@@ -132,7 +152,7 @@ begin
         form1                  := t_form('Add Item to Collection (Hook)', 2,1);
         forms.extend;    forms(forms.last) := form1;
         hookoutput.forms := forms;
-       	 hookOutput.question := nci_dload.getAddComponentCreateQuestion;
+       	 hookOutput.question := getAddComponentCreateQuestion;
 	end if;
 
     if hookInput.invocationNumber = 1  then  -- Second invocation
