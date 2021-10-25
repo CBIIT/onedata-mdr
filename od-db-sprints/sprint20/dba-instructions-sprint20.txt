@@ -1,6 +1,3 @@
--- Run as ONEDATA_MD DDL scripts
-
-
 -- Run as ONEDATA_WA DDL scripts
 S19_WA_RA_DDL.sql
 S19_WA_DDL.sql
@@ -27,12 +24,5 @@ S20_NCI_POSTHOOK.sql
 S20_sp_postprocess.sql
 S20_WA_CSCSI_444XML_OBJ.sql
 
--- Run as ONEDATA_WA DM scripts
-S19_WA_Data_migration.sql
-
--- Run as ONEDATA_RA DM scripts
-S19_RA_Data_Migration.sql
-
--- Run validate job as ONEDATA_WA
-exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
-
+--Check that materialized views are valid in ONEDATA_WA schema
+--Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
