@@ -1145,8 +1145,9 @@ begin
         end if;
 
        --     raise_application_error(-20000, ihook.getColumnValue(row,'ITEM_LONG_NM') || length(v_long_nm));
-
         ihook.setColumnValue(row,'ITEM_NM',  replace(ihook.getColumnValue(rowform, 'ITEM_1_NM')  || ' ' || ihook.getColumnValue(rowform, 'ITEM_2_NM'),'Integer::',''));
+       
+        --ihook.setColumnValue(row,'ITEM_NM',  replace(ihook.getColumnValue(rowai, 'ITEM_NM') ,'Integer::',''));
         ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
 
         -- replace INTEGER :: from name
