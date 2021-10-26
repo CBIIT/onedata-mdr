@@ -4,6 +4,7 @@ S20_WA_DDL.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S20_WA_RA_DDL.sql
+S20_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S20_NCI_11179.sql
