@@ -853,6 +853,7 @@ k integer;
 rowx t_row;
 rowq t_row;
 v_dflt number;
+v_vv_id number;
 begin
 
  rowsvv:= t_rows();
@@ -960,11 +961,13 @@ if (v_src = 'V') then
         end loop;
     end if;
     
-      insert into NCI_QUEST_VV_REP (QUEST_PUB_ID, QUEST_VER_NR, REP_SEQ, EDIT_IND, VAL, DEFLT_VAL_ID)
-    values ( v_id, v_to_module_ver, cur2.rep_seq, cur2.edit_ind, cur2.val, v_dflt);
+    select seq_QUEST_VV_REP.nextval into v_vv_id from dual;
     
-      insert into onedata_ra.NCI_QUEST_VV_REP (QUEST_PUB_ID, QUEST_VER_NR, REP_SEQ, EDIT_IND, VAL, DEFLT_VAL_ID)
-    values ( v_id, v_to_module_ver, cur2.rep_seq, cur2.edit_ind, cur2.val, v_dflt);
+      insert into NCI_QUEST_VV_REP (QUEST_VV_REP_ID, QUEST_PUB_ID, QUEST_VER_NR, REP_SEQ, EDIT_IND, VAL, DEFLT_VAL_ID)
+    values ( v_vv_id, v_id, v_to_module_ver, cur2.rep_seq, cur2.edit_ind, cur2.val, v_dflt);
+    
+      insert into onedata_ra.NCI_QUEST_VV_REP (QUEST_VV_REP_ID, QUEST_PUB_ID, QUEST_VER_NR, REP_SEQ, EDIT_IND, VAL, DEFLT_VAL_ID)
+    values ( v_vv_id, v_id, v_to_module_ver, cur2.rep_seq, cur2.edit_ind, cur2.val, v_dflt);
     
   --  raise_application_error(-20000, 'Inside');
     end loop;
