@@ -26,3 +26,14 @@ S20_WA_CSCSI_444XML_OBJ.sql
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
+
+
+-- Run as ONEDATA_WA DM scripts
+S19_WA_Data_migration.sql
+
+-- Run as ONEDATA_RA DM scripts
+S19_RA_Data_Migration.sql
+
+-- Run validate job as ONEDATA_WA
+exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
+
