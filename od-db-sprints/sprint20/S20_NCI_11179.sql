@@ -865,6 +865,9 @@ for cur in (select * from nci_admin_item_rel_alt_key where p_item_id = v_from_mo
     rowq := t_row();
 
   v_id := nci_11179.getItemId;
+
+
+--raise_application_error(-20000, 'Here' || v_id);
   
   insert into nci_admin_item_rel_alt_key (NCI_PUB_ID, NCI_VER_NR, P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, CNTXT_CS_ITEM_ID, CNTXT_CS_VER_NR,
   ITEM_LONG_NM, ITEM_NM, REL_TYP_ID, DISP_ORD, EDIT_IND, REQ_IND, INSTR, DEFLT_VAL)
@@ -939,9 +942,6 @@ ihook.setColumnValue (row, 'OLD_NCI_PUB_ID', cur1.NCI_PUB_ID);  -- to set questi
  commit;
     end loop;
 
-if (v_src = 'V') then
-  -- Question Repetition
-
     for cur2 in (select * from  NCI_QUEST_vv_rep where quest_pub_id = cur.nci_pub_id and quest_ver_nr = cur.nci_ver_nr) loop
     
   
@@ -971,7 +971,6 @@ if (v_src = 'V') then
     
   --  raise_application_error(-20000, 'Inside');
     end loop;
-end if;
 commit;
    end loop;
 
