@@ -511,5 +511,5 @@ DBMS_SCHEDULER.CREATE_JOB (
    start_date         =>  '22-OCT-21 10.00.00 PM',
    repeat_interval    =>  'FREQ=DAILY;INTERVAL=7',
    enabled            =>  TRUE);
-
 END;
+/
