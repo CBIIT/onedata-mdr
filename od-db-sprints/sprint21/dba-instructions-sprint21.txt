@@ -2,6 +2,7 @@
 
 
 -- Run as ONEDATA_WA DDL scripts
+SP21_WA_ALS.sql
 
 
 -- Run as ONEDATA_RA DDL scripts
