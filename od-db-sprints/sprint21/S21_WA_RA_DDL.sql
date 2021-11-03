@@ -10,4 +10,4 @@ decode(ext.cncpt_concat, ext.cncpt_concat_nm, null, admin_item.item_long_nm, nul
 ext.cncpt_concat_nm, nvl(admin_item.origin_id_dn, origin) ORIGIN_NM, ok.nm_desc ALT_NM
 FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext, (select item_id, ver_nr, NM_DESC from ALT_NMS a, OBJ_KEY o where a.nm_typ_id = o.obj_key_id and o.obj_typ_id = 11 and o.obj_key_desc = 'Biomarker Synonym') ok
        WHERE ADMIN_ITEM_TYP_ID = 53 and admin_item.item_id = ext.item_id and admin_item.ver_nr = ext.ver_nr
-       and admin_item.item_id = ok.item_id and admin_item.ver_nr = ok.ver_nr;
+       and admin_item.item_id = ok.item_id (+) and admin_item.ver_nr = ok.ver_nr (+);
