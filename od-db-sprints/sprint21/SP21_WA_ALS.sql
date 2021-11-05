@@ -76,8 +76,10 @@ AS
                 WHERE     P.ADMIN_ITEM_TYP_ID = 50
                       AND p.ITEM_ID = r.P_ITEM_ID
                       AND p.VER_NR = r.P_ITEM_VER_NR
+                      and nvl(p.FLD_DELETE,0)=0
              GROUP BY C_ITEM_ID, C_ITEM_VER_NR) REL
      WHERE     FR.ADMIN_ITEM_TYP_ID = 54
+           and nvl(FR.FLD_DELETE,0)=0
            AND FR.ITEM_ID = REL.C_ITEM_ID(+)
            AND FR.VER_NR = REL.C_ITEM_VER_NR(+)
     UNION
@@ -153,12 +155,14 @@ AS
                WHERE     P.ADMIN_ITEM_TYP_ID = 50
                      AND p.ITEM_ID = r.P_ITEM_ID
                      AND p.VER_NR = r.P_ITEM_VER_NR
+                     and nvl(p.FLD_DELETE,0)=0
             GROUP BY C_ITEM_ID, C_ITEM_VER_NR) REL,
            (SELECT /*+ PARALLEL(4) */
                    REF.REF_DESC, REF.ITEM_ID, REF.VER_NR
               FROM REF, OBJ_KEY
              WHERE     REF.REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID
-                   AND OBJ_KEY.OBJ_KEY_DESC = 'Preferred Question Text') REF
+                   AND OBJ_KEY.OBJ_KEY_DESC = 'Preferred Question Text'
+                   and nvl(REF.FLD_DELETE,0)=0) REF
      WHERE     DE.ADMIN_ITEM_TYP_ID = 4                                -- (DE)
            AND VD.ADMIN_ITEM_TYP_ID = 3                                 --(VD)
            AND FR.ADMIN_ITEM_TYP_ID = 54
@@ -166,11 +170,15 @@ AS
            AND FORM.VER_NR = module.P_ITEM_VER_NR
            AND FR.ITEM_ID = REL.C_ITEM_ID(+)
            AND FR.VER_NR = REL.C_ITEM_VER_NR(+)
+           and nvl(FR.FLD_DELETE,0)=0
            AND module.REL_TYP_ID = 61
+           and nvl(module.FLD_DELETE,0)=0
            AND QUESTION.REL_TYP_ID = 63
+           and nvl(QUESTION.FLD_DELETE,0)=0
            AND QUESTION.P_ITEM_ID = module.C_ITEM_ID
            AND QUESTION.P_ITEM_VER_NR = module.C_ITEM_VER_NR
            AND QUESTION.C_ITEM_ID = de.ITEM_ID
+           and nvl(DE.FLD_DELETE,0)=0
            AND de.ITEM_ID = de2.ITEM_ID
            AND de.ver_nr = de2.VER_NR
            AND QUESTION.C_ITEM_VER_NR = de.VER_NR
@@ -180,6 +188,7 @@ AS
            AND VALUE_DOM.dttype_id = DT.dttype_id
            AND de2.VAL_DOM_ITEM_ID = VALUE_DOM.ITEM_ID
            AND de2.VAL_DOM_VER_NR = VALUE_DOM.VER_NR
+           and nvl(VD.FLD_DELETE,0)=0
            AND VD.ITEM_ID = VALUE_DOM.ITEM_ID
            AND VD.VER_NR = VALUE_DOM.VER_NR
            AND FORM.ITEM_ID = FR.ITEM_ID
@@ -280,8 +289,9 @@ AS
                        WITHIN GROUP (ORDER BY DISP_ORD)    GR_QVV_VALUE,
                        COUNT (DISP_ORD)                    max_VV
                   FROM NCI_QUEST_VALID_VALUE
+                  WHERE  nvl(FLD_DELETE,0)=0
               GROUP BY Q_PUB_ID, Q_VER_NR) QVV,
-             NCI_QUEST_VALID_VALUE VV,
+             (select*from NCI_QUEST_VALID_VALUE where  nvl(FLD_DELETE,0)=0) VV,
              NCI_DLOAD_DTL        ALS,
              NCI_DLOAD_HDR        H
        WHERE     FORM_ID = ALS.ITEM_ID
@@ -292,6 +302,7 @@ AS
              AND QUEST_VERSION = QVV.Q_VER_NR(+)
              AND QUEST_VERSION = VV.Q_VER_NR(+)
              AND QUEST_ID = VV.Q_PUB_ID(+)
+             
     -- and h.HDR_ID='1140'
     ORDER BY h.HDR_ID,
              Form_ID,
