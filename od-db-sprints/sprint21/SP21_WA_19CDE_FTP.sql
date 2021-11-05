@@ -57,6 +57,33 @@ CREATE OR REPLACE TYPE"ADMIN_COMPONENT_WITH_ID_T"                               
 );
 
 /
+/
+CREATE OR REPLACE TYPE"MDSR_749_ALTERNATENAME_ITEM_T"                                          as object(
+"ContextName"                             VARCHAR2(30),
+"ContextVersion"                        VARCHAR2(10),
+"AlternateName"                                VARCHAR2(2000)
+,"AlternateNameType"                                VARCHAR2(20)
+,"Language"                        VARCHAR2(30)
+);
+
+/
+CREATE OR REPLACE TYPE"MDSR_749_ALTERNATENAM_LIST_T"                                          as table of MDSR_749_ALTERNATENAME_ITEM_T;
+
+/
+CREATE OR REPLACE TYPE"MDSR_749_PV_VD_ITEM_T"                                          as object(ValidValue varchar2(255),
+    ValueMeaning varchar2(255),
+    MeaningDescription varchar2(2000),
+    MeaningConcepts varchar2(2000),
+    MeaningConceptOrigin               varchar2(2000),
+	MeaningConceptDisplayOrder varchar2(2000),
+    PvBeginDate Date,
+    PvEndDate Date,
+    VmPublicId Number,
+    VmVersion Number(4,2),
+    "ALTERNATENAMELIST"    MDSR_749_ALTERNATENAM_LIST_T);
+/
+CREATE OR REPLACE TYPE "MDSR_749_PV_VD_LIST_T"   as table of MDSR_749_PV_VD_ITEM_T;
+
 
 /
 CREATE OR REPLACE TYPE"CDEBROWSER_VD_T749"                                          AS OBJECT
@@ -193,32 +220,7 @@ CREATE OR REPLACE TYPE"DE_VALID_VALUE_T"                                        
 /
 CREATE OR REPLACE TYPE"DE_VALID_VALUE_LIST_T"                                          AS TABLE OF DE_VALID_VALUE_T;
 
-/
-CREATE OR REPLACE TYPE"MDSR_749_ALTERNATENAME_ITEM_T"                                          as object(
-"ContextName"                             VARCHAR2(30),
-"ContextVersion"                        VARCHAR2(10),
-"AlternateName"                                VARCHAR2(2000)
-,"AlternateNameType"                                VARCHAR2(20)
-,"Language"                        VARCHAR2(30)
-);
 
-/
-CREATE OR REPLACE TYPE"MDSR_749_ALTERNATENAM_LIST_T"                                          as table of MDSR_749_ALTERNATENAME_ITEM_T;
-
-/
-
-CREATE OR REPLACE TYPE"MDSR_749_PV_VD_ITEM_T"                                          as object(ValidValue varchar2(255),
-    ValueMeaning varchar2(255),
-    MeaningDescription varchar2(2000),
-    MeaningConcepts varchar2(2000),
-    MeaningConceptOrigin               varchar2(2000),
-	MeaningConceptDisplayOrder varchar2(2000),
-    PvBeginDate Date,
-    PvEndDate Date,
-    VmPublicId Number,
-    VmVersion Number(4,2),
-    "ALTERNATENAMELIST"    MDSR_749_ALTERNATENAM_LIST_T);
-/
 
 CREATE OR REPLACE FORCE VIEW CDEBROWSER_COMPLEX_DE_VIEW_N
 (
@@ -356,6 +358,59 @@ AS
            AND oc.admin_item_typ_id = 5
            AND pt.admin_item_typ_id = 6
            AND cd.admin_item_typ_id = 1;
+/
+CREATE OR REPLACE FORCE VIEW CDEBROWSER_CS_VIEW_N
+(
+    DE_ITEM_ID,
+    DE_VER_NR,
+    CS_ITEM_ID,
+    CS_ITEM_NM,
+    CS_ITEM_LONG_NM,
+    CS_PREF_DEF,
+    CS_VER_NR,
+    CS_ADMIN_STUS,
+    CS_CNTXT_NM,
+    CS_CNTXT_VER_NR,
+    CSI_LONG_NM,
+    CSITL_NM,
+    CSI_PREF_DEF,
+    CSI_ITEM_ID,
+    CSI_VER_NR,
+    CSI_ITEM_NM
+)
+BEQUEATH DEFINER
+AS
+    SELECT ac_csi.c_item_id         de_item_id,
+           ac_csi.c_item_ver_nr     de_ver_nr,
+           cs.item_id               cs_item_id,
+           cs.item_nm               cs_item_nm,
+           cs.item_long_nm          cs_item_long_nm,
+           cs.item_desc             cs_pref_def,
+           cs.ver_nr                cs_ver_nr,
+           cs.admin_stus_nm_dn      cs_admin_stus,
+           cs.cntxt_nm_dn           cs_cntxt_nm,
+           cs.cntxt_ver_nr          cs_cntxt_ver_nr,
+           csi.item_long_nm         csi_long_nm,
+           o.NCI_CD                 csitl_nm,
+           csi.item_desc            csi_pref_def,
+           csi.item_id              csi_item_id,
+           csi.ver_nr               csi_ver_nr,
+           csi.item_nm              csi_item_nm
+      FROM admin_item                  cs,
+           NCI_ADMIN_ITEM_REL_ALT_KEY  cs_csi,
+           ADMIN_ITEM                  csi,
+           NCI_ALT_KEY_ADMIN_ITEM_REL  ac_csi,
+           OBJ_KEY                     o,
+           NCI_CLSFCTN_SCHM_ITEM       ncsi
+     WHERE     cs.item_id = cs_csi.CNTXT_CS_ITEM_ID
+           AND cs.ver_nr = cs_csi.CNTXT_CS_VER_NR
+           AND csi.item_id = cs_csi.c_item_id
+           AND csi.ver_nr = cs_csi.c_item_ver_nr
+           AND cs_csi.nci_pub_id = ac_csi.nci_pub_id
+           AND cs_csi.nci_ver_nr = ac_csi.nci_ver_nr
+           AND csi.item_id = ncsi.item_id
+           AND csi.ver_nr = ncsi.ver_nr
+           AND ncsi.CSI_TYP_ID = o.obj_key_id;
 /
 CREATE OR REPLACE FORCE VIEW DE_CDE1_XML_GENERATOR_749VW
 (
@@ -564,7 +619,7 @@ AS
                                     MeaningConceptOrigin,  */
                               nci_11179.get_concepts (vm.item_id, vm.ver_nr)
                                   MeaningConceptOrigin,
-                              nci_11179.get_concept_order (vm.item_id,
+                               nci_11179.get_concept_order (vm.item_id,
                                                            vm.ver_nr)
                                   MeaningConceptDisplayOrder,
                               pv.PERM_VAL_BEG_DT,
