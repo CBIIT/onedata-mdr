@@ -2447,7 +2447,7 @@ BEGIN
                     for cur in (select ai.item_id, ai.ver_nr, ai.cntxt_item_id, ai.cntxt_ver_nr, item_long_nm item_long_nm, nvl(r.ref_desc, item_long_nm) QUEST_TEXT, item_nm
                     from admin_item ai, ref r where
                     ai.item_id = v_tab_item_id(i) and ai.ver_nr = v_tab_ver_nr(i) and ai.item_id = r.item_id (+) and ai.ver_nr = r.ver_nr (+) and upper(ai.admin_stus_nm_dn) not like '%RETIRED%'
-                    and r.ref_typ_id (+) = 80) loop
+                    and r.ref_typ_id (+) = 80 and upper(ai.regstr_stus_nm_dn) not like '%RETIRED%') loop
               --      and (ai.item_id, ai.ver_nr) not in (select c_item_id, c_item_ver_nr from nci_admin_item_rel_alt_key where p_item_id = ihook.getColumnValue(row_ori,'C_ITEM_ID') and
                --             p_item_ver_nr = ihook.getColumnValue(row_ori, 'C_ITEM_VER_NR') and rel_typ_id = 63 )) loop
                         row := t_row();
