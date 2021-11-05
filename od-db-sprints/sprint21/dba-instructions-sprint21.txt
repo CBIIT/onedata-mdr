@@ -1,15 +1,24 @@
--- Run as ONEDATA_MD DDL scripts
 
+-- Run as ONEDATA_RA DDL scripts
+S21_WA_RA_DDL.sql
+--S21_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S21_NCI_11179.sql
+S21_NCI_11179_2.sql
+S21_NCI_CHNG_MGMT.sql
+S21_NCI_DEC_MGMT.sql
+S21_NCI_DLOAD.sql
+S21_NCI_FORM_MGMT.sql
+S21_NCI_PV_VM.sql
+S21_NCI_VD.sql
+S21_NCI_CADSR_PULL.sql
+S21_NCI_POST_HOOK.sql
 SP21_WA_ALS.sql
 SP21_WA_19CDE_FTP.sql
 
-
--- Run as ONEDATA_RA DDL scripts
-
-
--- Run as ONEDATA_WA DDL scripts
+--Check that materialized views are valid in ONEDATA_WA schema
+--Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
 
 
 -- Run as ONEDATA_WA DM scripts
@@ -17,6 +26,11 @@ S19_WA_Data_migration.sql
 
 -- Run as ONEDATA_RA DM scripts
 S19_RA_Data_Migration.sql
+
+-- Run validate job as ONEDATA_WA
+exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
+
+
 
 -- Run validate job as ONEDATA_WA
 exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
