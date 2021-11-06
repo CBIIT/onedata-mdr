@@ -30,7 +30,3 @@ S19_RA_Data_Migration.sql
 -- Run validate job as ONEDATA_WA
 exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
 
-
-
--- Run validate job as ONEDATA_WA
-exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
