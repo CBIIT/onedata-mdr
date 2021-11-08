@@ -6,7 +6,7 @@ S21_DROP_OBJ_WA.sql
 -- Run as ONEDATA_RA DDL scripts
 S21_WA_RA_DDL.sql
 S21_DROP_OBJ_RA.sql
---S21_RA_DDL.sql
+
 
 -- Run as ONEDATA_WA DDL scripts
 S21_NCI_11179.sql
