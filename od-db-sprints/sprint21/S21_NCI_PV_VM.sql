@@ -87,10 +87,10 @@ j := 1;
         ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 53);
         nci_11179_2.setStdAttr(row);
         nci_11179_2.setItemLongNm (row, v_id);
-        ihook.setColumnValue(row,'ITEM_DESC',v_desc);
+        ihook.setColumnValue(row,'ITEM_DESC',nvl(v_desc, v_long_nm));
         ihook.setColumnValue(row,'ITEM_NM', v_long_nm);
-        ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
-        ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
+        ihook.setColumnValue(row,'CNTXT_ITEM_ID', nvl(ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'),20000000024 ));  -- NCIP
+        ihook.setColumnValue(row,'CNTXT_VER_NR', nvl(ihook.getColumnValue(rowform,'CNTXT_VER_NR'),1));
         ihook.setColumnValue(row,'CNCPT_CONCAT', v_long_nm);
         ihook.setColumnValue(row,'CNCPT_CONCAT_DEF',v_long_nm);
         ihook.setColumnValue(row,'CNCPT_CONCAT_NM', v_long_nm);
@@ -98,6 +98,7 @@ j := 1;
           ihook.setColumnValue(row,'LST_UPD_DT',sysdate );
 
       ihook.setColumnValue(rowform,'ITEM_2_ID', v_id);
+      ihook.setColumnValue(rowform,'ITEM_2_VER_NR', 1);
         ihook.setColumnValue(rowform,'ITEM_2_DEF', v_desc);
         
         
@@ -1516,6 +1517,7 @@ begin
         k := 1;
         v_opt := 0;
         
+       -- raise_application_error(-20000,'First' || v_opt);
         
             if ( ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then  -- Associate using specified but no value specified
                 v_opt := 1;
@@ -1543,8 +1545,8 @@ begin
             else
                     hookoutput.message := 'Please select VM to use or specify atleast one concept.';
             end if;
+      --  raise_application_error(-20000,'herer' || v_opt);
         end if;
-        
         if (HOOKINPUT.ANSWERID = 1 or v_opt = 0) then
                 ihook.setColumnValue(rowform, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));
                   ihook.setColumnValue(rowform, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));
@@ -1565,7 +1567,7 @@ begin
                end if; 
          
          
-            if (v_opt = 3) then -- duplicate found
+            if (v_opt = 3 ) then -- duplicate found
             
             v_dup_nbr := nvl(ihook.getColumnValue(rowform, 'NCI_DEC_PREC'),1);
             ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID', ihook.getColumnValue(rowform, 'CNCPT_2_ITEM_ID_' || v_dup_nbr));
@@ -1580,7 +1582,8 @@ begin
               end if;
             
             if (v_opt = 5) then -- new vm creation using drop-down
-                  nci_dec_mgmt.createValAIWithConcept(rowform , k,v_item_typ_glb ,'C','DROP-DOWN',actions);
+                  nci_dec_mgmt.createValAIWithConcept(rowform , k,v_item_typ_glb ,'O','DROP-DOWN',actions);
+               --   raise_application_error(-20000, ihook.getColumnValue(rowform, 'ITEM_1_ID'));
                 ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID', ihook.getColumnValue(rowform, 'ITEM_1_ID'));
               ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'));
               end if;
@@ -1904,6 +1907,7 @@ ITEM_2_ID holds Item ID of VM and ITEM_2_VER_NR holds Version number
 
 
 end;
+
 
 
 END;
