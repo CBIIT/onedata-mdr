@@ -1,4 +1,4 @@
-CREATE OR REPLACE TYPE"DATA_ELEMENT_DERIVATION_T"                                          as object (
+CREATE OR REPLACE TYPE DATA_ELEMENT_DERIVATION_T                                          as object (
   "PublicId"               number,
   "LongName"			   varchar2(255),
   "PreferredName"          varchar2(30),
@@ -10,10 +10,10 @@ CREATE OR REPLACE TYPE"DATA_ELEMENT_DERIVATION_T"                               
   );
 
 /
-CREATE OR REPLACE TYPE"DATA_ELEMENT_DERIVATION_LIST_T"                                          
+CREATE OR REPLACE TYPE DATA_ELEMENT_DERIVATION_LIST_T                                          
                                         AS TABLE OF data_element_derivation_t;
 /
-CREATE OR REPLACE TYPE"CONCEPT_DETAIL_T"                                          AS OBJECT (
+CREATE OR REPLACE TYPE CONCEPT_DETAIL_T                                          AS OBJECT (
 preferred_name         varchar2(30)
 ,long_name             varchar2(255)
 ,con_id                number
@@ -23,10 +23,10 @@ preferred_name         varchar2(30)
 ,primary_flag_ind  varchar2(3)
 ,display_order    number);
 /
-CREATE OR REPLACE TYPE"CONCEPTS_LIST_T"                                          AS TABLE OF CONCEPT_DETAIL_T;
+CREATE OR REPLACE TYPE CONCEPTS_LIST_T                                          AS TABLE OF CONCEPT_DETAIL_T;
 
 /
-CREATE OR REPLACE TYPE"ADMIN_COMPONENT_WITH_CON_T"                                          AS OBJECT
+CREATE OR REPLACE TYPE ADMIN_COMPONENT_WITH_CON_T                                          AS OBJECT
 ("PublicId"          number,
  "ContextName"	    varchar2(30),
  "ContextVersion"   number(4,2),
@@ -36,7 +36,7 @@ CREATE OR REPLACE TYPE"ADMIN_COMPONENT_WITH_CON_T"                              
  "ConceptDetails"   Concepts_list_t
 );
 /
-CREATE OR REPLACE TYPE"ADMIN_COMPONENT_WITH_ID_LN_T"                                          AS OBJECT
+CREATE OR REPLACE TYPE ADMIN_COMPONENT_WITH_ID_LN_T                                          AS OBJECT
  ("PublicId"          number,
  "ContextName"     varchar2(30),
  "ContextVersion"   number(4,2),
@@ -44,11 +44,9 @@ CREATE OR REPLACE TYPE"ADMIN_COMPONENT_WITH_ID_LN_T"                            
  "Version"       number(4,2),
  "LongName"   varchar2(255)
   );
-
 /
 
-
-CREATE OR REPLACE TYPE"ADMIN_COMPONENT_WITH_ID_T"                                          AS OBJECT
+CREATE OR REPLACE TYPE ADMIN_COMPONENT_WITH_ID_T                                          AS OBJECT
 ("PublicId"          number,
  "ContextName"	    varchar2 (30),
  "ContextVersion"   number (4,2),
@@ -58,19 +56,19 @@ CREATE OR REPLACE TYPE"ADMIN_COMPONENT_WITH_ID_T"                               
 
 /
 /
-CREATE OR REPLACE TYPE"MDSR_749_ALTERNATENAME_ITEM_T"                                          as object(
+CREATE OR REPLACE TYPE MDSR_749_ALTERNATENAME_ITEM_T                                          as object(
 "ContextName"                             VARCHAR2(30),
 "ContextVersion"                        VARCHAR2(10),
 "AlternateName"                                VARCHAR2(2000)
-,"AlternateNameType"                                VARCHAR2(20)
+,"AlternateNameTYPE"                           VARCHAR2(20)
 ,"Language"                        VARCHAR2(30)
 );
 
 /
-CREATE OR REPLACE TYPE"MDSR_749_ALTERNATENAM_LIST_T"                                          as table of MDSR_749_ALTERNATENAME_ITEM_T;
+CREATE OR REPLACE TYPE MDSR_749_ALTERNATENAM_LIST_T                                          as table of MDSR_749_ALTERNATENAME_ITEM_T;
 
 /
-CREATE OR REPLACE TYPE"MDSR_749_PV_VD_ITEM_T"                                          as object(ValidValue varchar2(255),
+CREATE OR REPLACE TYPE MDSR_749_PV_VD_ITEM_T                                          as object(ValidValue varchar2(255),
     ValueMeaning varchar2(255),
     MeaningDescription varchar2(2000),
     MeaningConcepts varchar2(2000),
@@ -82,11 +80,11 @@ CREATE OR REPLACE TYPE"MDSR_749_PV_VD_ITEM_T"                                   
     VmVersion Number(4,2),
     "ALTERNATENAMELIST"    MDSR_749_ALTERNATENAM_LIST_T);
 /
-CREATE OR REPLACE TYPE "MDSR_749_PV_VD_LIST_T"   as table of MDSR_749_PV_VD_ITEM_T;
+CREATE OR REPLACE TYPE MDSR_749_PV_VD_LIST_T   as table of MDSR_749_PV_VD_ITEM_T;
 
 
 /
-CREATE OR REPLACE TYPE"CDEBROWSER_VD_T749"                                          AS OBJECT
+CREATE OR REPLACE TYPE CDEBROWSER_VD_T749                                          AS OBJECT
 ( "PublicId"         NUMBER,
   "PreferredName"          VARCHAR2 (30),
   "PreferredDefinition"    VARCHAR2 (2000),
@@ -96,8 +94,8 @@ CREATE OR REPLACE TYPE"CDEBROWSER_VD_T749"                                      
   "ContextName"         VARCHAR2 (30),
   "ContextVersion"     NUMBER (4,2),
   "ConceptualDomain"    admin_component_with_id_ln_t,
-  "Datatype"               VARCHAR2 (20),
-  "ValueDomainType"        VARCHAR2 (50),
+  "DataTYPE"                VARCHAR2 (20),
+  "ValueDomainTYPE"         VARCHAR2 (50),
   "UnitOfMeasure"          VARCHAR2 (20),
   "DisplayFormat"          VARCHAR2 (20),
   "MaximumLength"          NUMBER (8),
@@ -113,7 +111,7 @@ CREATE OR REPLACE TYPE"CDEBROWSER_VD_T749"                                      
 );
 /
 
-CREATE OR REPLACE TYPE"CDEBROWSER_DEC_T"                                          AS OBJECT
+CREATE OR REPLACE TYPE CDEBROWSER_DEC_T                                          AS OBJECT
  ("PublicId"      number,
   "PreferredName"          varchar2 (30),
   "PreferredDefinition"    varchar2 (2000),
@@ -131,8 +129,8 @@ CREATE OR REPLACE TYPE"CDEBROWSER_DEC_T"                                        
   );
 /
 
-CREATE OR REPLACE TYPE"DERIVED_DATA_ELEMENT_T"                                          as object (
-  "DerivationType"                varchar2(30),
+CREATE OR REPLACE TYPE DERIVED_DATA_ELEMENT_T                                          as object (
+  "DerivationTYPE"                 varchar2(30),
   "DerivationTypeDescription"     varchar2(200),
   "Methods"                       varchar2(4000),
   "Rule"						  varchar2(4000),
@@ -142,10 +140,10 @@ CREATE OR REPLACE TYPE"DERIVED_DATA_ELEMENT_T"                                  
 
 /
 
-CREATE OR REPLACE TYPE"CDEBROWSER_RD_T"                                          AS OBJECT (
+CREATE OR REPLACE TYPE CDEBROWSER_RD_T                                          AS OBJECT (
   "Name"           	   	   VARCHAR2(255),
   "OrganizationName"       VARCHAR2(80),
-  "DocumentType"      	   VARCHAR2(60),
+  "DocumentTYPE"       	   VARCHAR2(60),
   "DocumentText"       	   VARCHAR2(4000),
   "URL"            		     VARCHAR2(240),
   "Language"       		     VARCHAR2(30),
@@ -153,13 +151,11 @@ CREATE OR REPLACE TYPE"CDEBROWSER_RD_T"                                         
 );
 
 /
-
-
-CREATE OR REPLACE TYPE"CDEBROWSER_RD_LIST_T"                                          as TABLE of CDEBROWSER_RD_T;
+CREATE OR REPLACE TYPE CDEBROWSER_RD_LIST_T                                          as TABLE of CDEBROWSER_RD_T;
 
 /
 
-CREATE OR REPLACE TYPE"CDEBROWSER_DEC_T"                                          AS OBJECT
+CREATE OR REPLACE TYPE CDEBROWSER_DEC_T                                          AS OBJECT
  ("PublicId"      number,
   "PreferredName"          varchar2 (30),
   "PreferredDefinition"    varchar2 (2000),
@@ -177,39 +173,37 @@ CREATE OR REPLACE TYPE"CDEBROWSER_DEC_T"                                        
   );
 /
 
-
-CREATE OR REPLACE TYPE"CDEBROWSER_ALTNAME_T"                                          as object(
+CREATE OR REPLACE TYPE CDEBROWSER_ALTNAME_T                                          as object(
     "ContextName"                                        VARCHAR2(30)
     ,"ContextVersion"                                     NUMBER(4,2)
     ,"AlternateName"                                      VARCHAR2(2000)
-    ,"AlternateNameType"                                  VARCHAR2(20)
+    ,"AlternateNameTYPE"                                   VARCHAR2(20)
     ,"Language"                                           VARCHAR2(30));
 
 /
-
-CREATE OR REPLACE TYPE"CDEBROWSER_ALTNAME_T2"                                          as object(
+CREATE OR REPLACE TYPE CDEBROWSER_ALTNAME_T2                                           as object(
     "ContextName"                                        VARCHAR2(30)
     ,"ContextVersion"                                     NUMBER(4,2)
     ,"AlternateName"                                      VARCHAR2(2000)
-    ,"AlternateNameType"                                  VARCHAR2(20)
+    ,"AlternateNameTYPE"                                  VARCHAR2(20)
     ,"Language"                                           VARCHAR2(30));
 
 /
-CREATE OR REPLACE TYPE"CDEBROWSER_ALTNAME_LIST_T"                                          AS TABLE OF CDEBROWSER_ALTNAME_T2
+CREATE OR REPLACE TYPE CDEBROWSER_ALTNAME_LIST_T                                          AS TABLE OF CDEBROWSER_ALTNAME_T2
 
 /
 
-CREATE OR REPLACE TYPE"CDEBROWSER_CSI_T"                                          as object
+CREATE OR REPLACE TYPE CDEBROWSER_CSI_T                                          as object
 ("ClassificationScheme"					admin_component_with_id_t
 ,"ClassificationSchemeItemName"			varchar2(255)
-,"ClassificationSchemeItemType"			varchar2(20)
+,"ClassificationSchemeItemTYPE" 			varchar2(20)
 ,"CsiPublicId"                                  number
 ,"CsiVersion"                                  number(4,2)
 );
 /
-CREATE OR REPLACE TYPE"CDEBROWSER_CSI_LIST_T"                                          AS TABLE OF CDEBROWSER_CSI_T;
+CREATE OR REPLACE TYPE CDEBROWSER_CSI_LIST_T                                          AS TABLE OF CDEBROWSER_CSI_T;
 /
-CREATE OR REPLACE TYPE"DE_VALID_VALUE_T"                                          as object(
+CREATE OR REPLACE TYPE DE_VALID_VALUE_T                                          as object(
     ValidValue varchar2(255),
     ValueMeaning varchar2(255),
     MeaningDescription varchar2(2000),
@@ -218,9 +212,8 @@ CREATE OR REPLACE TYPE"DE_VALID_VALUE_T"                                        
     ;
 
 /
-CREATE OR REPLACE TYPE"DE_VALID_VALUE_LIST_T"                                          AS TABLE OF DE_VALID_VALUE_T;
-
-
+CREATE OR REPLACE TYPE DE_VALID_VALUE_LIST_T                                          AS TABLE OF DE_VALID_VALUE_T;
+/
 
 CREATE OR REPLACE FORCE VIEW CDEBROWSER_COMPLEX_DE_VIEW_N
 (

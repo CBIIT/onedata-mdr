@@ -193,9 +193,7 @@ AS
            AND VD.VER_NR = VALUE_DOM.VER_NR
            AND FORM.ITEM_ID = FR.ITEM_ID
            AND FORM.VER_NR = FR.VER_NR
-    -- AND PROTO_ID IS NOT NULL
-    -- AND FORM.ITEM_ID = 3284264
-    ORDER BY 3, 5, 7;
+      ORDER BY 3, 5, 7;
 /
 CREATE OR REPLACE FORCE VIEW VW_ALS_FIELD_FORM_DD
 (
@@ -302,8 +300,6 @@ AS
              AND QUEST_VERSION = QVV.Q_VER_NR(+)
              AND QUEST_VERSION = VV.Q_VER_NR(+)
              AND QUEST_ID = VV.Q_PUB_ID(+)
-             
-    -- and h.HDR_ID='1140'
     ORDER BY h.HDR_ID,
              Form_ID,
              MODULE_DISPLAY_ORDER NULLS FIRST,
@@ -311,4 +307,5 @@ AS
              GR_QVV_VALUE NULLS FIRST,
              QUEST_DISP_ORD DESC,
              VV.DISP_ORD;
+/
 
