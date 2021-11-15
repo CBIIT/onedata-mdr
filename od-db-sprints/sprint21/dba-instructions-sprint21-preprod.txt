@@ -1,0 +1,28 @@
+
+
+-- Run as ONEDATA_WA DDL scripts
+S21_WA_RA_DDL.sql
+S21_DROP_OBJ_WA.sql
+
+-- Run as ONEDATA_RA DDL scripts
+S21_WA_RA_DDL.sql
+S21_DROP_OBJ_RA.sql
+
+
+-- Run as ONEDATA_WA DDL scripts
+S21_NCI_11179.sql
+S21_NCI_11179_2.sql
+S21_NCI_CHNG_MGMT.sql
+S21_NCI_DEC_MGMT.sql
+S21_NCI_DLOAD.sql
+S21_NCI_FORM_MGMT.sql
+S21_NCI_PV_VM.sql
+S21_NCI_VD.sql
+S21_NCI_CADSR_PULL.sql
+S21_NCI_POST_HOOK.sql
+SP21_WA_ALS.sql
+SP21_WA_19CDE_FTP.sql
+
+--Check that materialized views are valid in ONEDATA_WA schema
+--Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
+
