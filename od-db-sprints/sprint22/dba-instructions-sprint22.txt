@@ -2,7 +2,7 @@
 -- Run as ONEDATA_WA DDL scripts
 
 S22_LOAD_CONCEPT_ADMIN_ITEM_DESIG.sql
-
+S22_WA_19CDE_FTP.sql
 -- Run as ONEDATA_RA DDL scripts
 
 --Check that materialized views are valid in ONEDATA_WA schema
