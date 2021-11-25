@@ -1,3 +1,4 @@
+
 create or replace function get_concepts2(v_item_id in number, v_ver_nr in number) return varchar2 is
 cursor con is
 select c.item_long_nm, cai.NCI_CNCPT_VAL
@@ -525,6 +526,7 @@ AS
            AND ncsi.CSI_TYP_ID = o.obj_key_id;
 /
 
+
 CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW
 (
     RAI,
@@ -647,7 +649,7 @@ AS
                                     AND con.admin_item_typ_id(+) = 49
                                     AND com.cncpt_item_id = cncpt.item_id(+)
                                     AND com.cncpt_ver_nr = cncpt.ver_nr(+)
-                           ORDER BY nci_ord DESC)
+                           ORDER BY nci_ord DESC,cncpt.evs_src)
                            AS Concepts_list_t)),
                dec.obj_class_qualifier,
                dec.property_qualifier,
@@ -669,7 +671,7 @@ AS
                                              cd.item_long_nm,
                                              cd.ver_nr,
                                              cd.item_nm),                /* */
-               data_typ.DTTYPE_NM ,
+               data_typ.DTTYPE_NM,
                DECODE (vd.VAL_DOM_TYP_ID,
                        17, 'Enumerated',
                        18, 'Non-enumerated'),
@@ -717,52 +719,53 @@ AS
                                     AND con.admin_item_typ_id(+) = 49
                                     AND com.cncpt_item_id = cncpt.item_id(+)
                                     AND com.cncpt_ver_nr = cncpt.ver_nr(+)
-                           ORDER BY nci_ord DESC)
+                           ORDER BY nci_ord DESC,cncpt.evs_src,con.item_id)
                            AS Concepts_list_t)),
                CAST (
                    MULTISET (
-                       SELECT pv.PERM_VAL_NM,
-                              pv.PERM_VAL_DESC_TXT,
-                              vm.item_desc,
-                            get_concepts2 (vm.item_id,
-                                                      vm.ver_nr)
-                                  MeaningConcepts,
-                              /*  SBREXT.MDSR_CDEBROWSER.get_condr_origin (
-                                    vm.condr_idseq)
-                                    MeaningConceptOrigin,  */
-                              get_concept_origin (vm.item_id, vm.ver_nr)
-                                  MeaningConceptOrigin,
-                              nci_11179.get_concept_order (vm.item_id,
-                                                           vm.ver_nr)
-                                  MeaningConceptDisplayOrder,
-                              pv.PERM_VAL_BEG_DT,
-                              pv.PERM_VAL_END_DT,
-                              vm.item_id,
-                              vm.ver_nr,
-                              NVL (vm.LST_UPD_DT, vm.CREATION_DT) ,
-                              CAST (
-                                  MULTISET (
-                                      SELECT des.cntxt_nm_dn,
-                                             TO_CHAR (des.cntxt_ver_nr),
-                                             des.NM_DESC,
-                                             ok.obj_key_desc,
-                                             DECODE (des.lang_id,
-                                                     1000, 'ENGLISH',
-                                                     1004, 'SPANISH',
-                                                     1007, 'ICELANDIC') -- decode
-                                        FROM alt_nms des, obj_key ok
-                                       WHERE     vm.item_id = des.item_id(+)
-                                             AND vm.ver_nr = des.ver_nr(+)
-                                             AND des.NM_TYP_ID =
-                                                 ok.obj_key_id(+))
-                                      AS MDSR_749_ALTERNATENAM_LIST_T)
-                                  "AlternateNameList"
-                         FROM PERM_VAL pv, ADMIN_ITEM vm
-                        WHERE     pv.val_dom_item_id = vd.item_id
-                              AND pv.Val_dom_ver_nr = vd.ver_nr
-                              AND pv.NCI_VAL_MEAN_ITEM_ID = vm.ITEM_ID
-                              AND pv.NCI_VAL_MEAN_VER_NR = vm.VER_NR
-                              AND vm.ADMIN_ITEM_TYP_ID = 53)
+                         SELECT pv.PERM_VAL_NM,
+                                pv.PERM_VAL_DESC_TXT,
+                                vm.item_desc,
+                                get_concepts2 (vm.item_id, vm.ver_nr)
+                                    MeaningConcepts,
+                                /*  SBREXT.MDSR_CDEBROWSER.get_condr_origin (
+                                      vm.condr_idseq)
+                                      MeaningConceptOrigin,  */
+                                get_concept_origin (vm.item_id, vm.ver_nr)
+                                    MeaningConceptOrigin,
+                                nci_11179.get_concept_order (vm.item_id,
+                                                             vm.ver_nr)
+                                    MeaningConceptDisplayOrder,
+                                pv.PERM_VAL_BEG_DT,
+                                pv.PERM_VAL_END_DT,
+                                vm.item_id,
+                                vm.ver_nr,
+                                NVL (vm.LST_UPD_DT, vm.CREATION_DT),
+                                CAST (
+                                    MULTISET (
+                                          SELECT des.cntxt_nm_dn,
+                                                 TO_CHAR (des.cntxt_ver_nr),
+                                                 des.NM_DESC,
+                                                 ok.obj_key_desc,
+                                                 DECODE (des.lang_id,
+                                                         1000, 'ENGLISH',
+                                                         1004, 'SPANISH',
+                                                         1007, 'ICELANDIC') -- decode
+                                            FROM alt_nms des, obj_key ok
+                                           WHERE     vm.item_id = des.item_id(+)
+                                                 AND vm.ver_nr = des.ver_nr(+)
+                                                 AND des.NM_TYP_ID =
+                                                     ok.obj_key_id(+)
+                                        ORDER BY des.cntxt_nm_dn,des.NM_DESC )
+                                        AS MDSR_749_ALTERNATENAM_LIST_T)
+                                    "AlternateNameList"
+                           FROM PERM_VAL pv, ADMIN_ITEM vm
+                          WHERE     pv.val_dom_item_id = vd.item_id
+                                AND pv.Val_dom_ver_nr = vd.ver_nr
+                                AND pv.NCI_VAL_MEAN_ITEM_ID = vm.ITEM_ID
+                                AND pv.NCI_VAL_MEAN_VER_NR = vm.VER_NR
+                                AND vm.ADMIN_ITEM_TYP_ID = 53
+                       ORDER BY vm.item_id, pv.PERM_VAL_NM)
                        AS MDSR_749_PV_VD_LIST_T),
                CAST (
                    MULTISET (
@@ -792,7 +795,7 @@ AS
                                 AND con.admin_item_typ_id(+) = 49
                                 AND com.cncpt_item_id = cncpt.item_id(+)
                                 AND com.cncpt_ver_nr = cncpt.ver_nr(+)
-                       ORDER BY nci_ord DESC)
+                       ORDER BY nci_ord DESC,con.item_id,cncpt.evs_src )
                        AS Concepts_list_t))               "ValueDomain",
            CAST (
                MULTISET (
@@ -812,7 +815,8 @@ AS
                           AND rd.ORG_ID = org.ENTTY_ID(+)
                           --, sbr.organizations org
                           AND de.item_id = rd.item_id
-                          AND de.ver_nr = rd.ver_nr)
+                          AND de.ver_nr = rd.ver_nr
+                          order by rd.disp_ord)
                    AS cdebrowser_rd_list_t)               "ReferenceDocumentsList",
            CAST (
                MULTISET (
@@ -827,7 +831,9 @@ AS
                           csv.csi_ver_nr
                      FROM cdebrowser_cs_view_n csv
                     WHERE     de.item_id = csv.de_item_id
-                          AND de.ver_nr = csv.de_ver_nr)
+                          AND de.ver_nr = csv.de_ver_nr
+                          order by csv.cs_item_id,csv.cs_ver_nr,csv.csi_item_id,
+                          csv.csi_ver_nr)  
                    AS cdebrowser_csi_list_t)              "ClassificationsList",
            CAST (
                MULTISET (
@@ -842,7 +848,8 @@ AS
                      FROM alt_nms des, obj_key ok
                     WHERE     de.item_id = des.item_id
                           AND de.ver_nr = des.ver_nr
-                          AND des.nm_typ_id = ok.obj_key_id(+))
+                          AND des.nm_typ_id = ok.obj_key_id(+)
+                          order by des.cntxt_nm_dn,des.NM_DESC)
                    AS cdebrowser_altname_list_t)          "AlternateNameList",
            derived_data_element_t (ccd.CRTL_NAME,
                                    ccd.DESCRIPTION,
@@ -879,9 +886,33 @@ AS
            AND de.val_dom_ver_nr = vd.ver_nr
            AND ai.item_id = ccd.item_id(+)
            AND ai.ver_nr = ccd.ver_nr(+)
-           and vd.dttype_id=DATA_TYP.DTTYPE_ID(+);
+           AND vd.dttype_id = DATA_TYP.DTTYPE_ID(+)
+           ORDER BY ai.ITEM_ID ,ai.ver_nr   ;
+
+		   
 /
-CREATE OR REPLACE PROCEDURE ONEDATA_WA.CDE_XML_19_INSERT as
+CREATE TABLE CDE_19_REPORTS_ERR_LOG
+(
+  FILE_NAME         VARCHAR2(50 BYTE),
+  REPORT_ERROR_TXT  VARCHAR2(1100 BYTE),
+  DATE_PROCESSED    DATE
+)
+;
+
+GRANT SELECT ON CDE_19_REPORTS_ERR_LOG TO ONEDATA_RA;
+
+GRANT SELECT ON CDE_19_REPORTS_ERR_LOG TO ONEDATA_RO;
+/
+CREATE TABLE CDE_19_GENERATED_XML
+(
+  FILE_NAME     VARCHAR2(200 BYTE),
+  TEXT          CLOB,
+  CREATED_DATE  DATE                            DEFAULT SYSDATE,
+  SEQ_ID        NUMBER
+);
+/
+
+CREATE OR REPLACE PROCEDURE CDE_XML_19_INSERT as
 /*insert XML*/
 P_file number;
 l_file_name      VARCHAR2(100);
