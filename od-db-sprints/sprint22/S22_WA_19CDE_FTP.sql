@@ -931,7 +931,7 @@ end if;
 
          l_file_name := 'CDE_XML_'||P_file||'.xml';
 
-        SELECT dbms_xmlgen.getxml( 'select* from DE_CDE1_XML_GENERATOR_749VW where PUBLICID=62')
+        SELECT dbms_xmlgen.getxml( 'select* from DE_CDE1_XML_GENERATOR_749VW ')
         INTO l_result
         FROM DUAL ;
         insert into CDE_19_GENERATED_XML VALUES ( l_file_name ,l_result,SYSDATE,P_file);
