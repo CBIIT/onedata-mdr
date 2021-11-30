@@ -466,7 +466,7 @@ AS
            AND pt.admin_item_typ_id = 6
            AND cd.admin_item_typ_id = 1;
 /
-    CREATE OR REPLACE FORCE VIEW ONEDATA_WA.CDEBROWSER_CS_VIEW_N
+    CREATE OR REPLACE FORCE VIEW CDEBROWSER_CS_VIEW_N
 (
     DE_ITEM_ID,
     DE_VER_NR,
@@ -526,7 +526,7 @@ AS
 /
 
 
-CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW
+CREATE OR REPLACE FORCE VIEW DE_CDE1_XML_GENERATOR_749VW
 (
     RAI,
     PUBLICID,
@@ -538,6 +538,7 @@ CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW
     CONTEXTNAME,
     CONTEXTVERSION,
     ORIGIN,
+    REGISTRATIONSTATUS,
     "dateModified",
     DATAELEMENTCONCEPT,
     VALUEDOMAIN,
@@ -559,7 +560,7 @@ AS
              ai.CNTXT_NM_DN                                 "ContextName",
              ai.CNTXT_VER_NR                                "ContextVersion",
              NVL (ai.origin, ai.ORIGIN_ID_DN)               "Origin",
-             -- ai.REGSTR_STUS_NM_DN                           "RegistrationStatus",
+             ai.REGSTR_STUS_NM_DN                           "RegistrationStatus",
              NVL (ai.LST_UPD_DT, ai.CREATION_DT)            "dateModified",
              cdebrowser_dec_t (
                  dec.dec_id,
@@ -570,12 +571,13 @@ AS
                  dec.ASL_NAME,
                  dec.dec_context_name,
                  dec.dec_context_version,
-                 onedata_wa.admin_component_with_id_ln_t (dec.cd_id,
-                                               dec.cd_context_name,
-                                               dec.cd_context_version,
-                                               dec.cd_long_name,
-                                               dec.cd_version,
-                                               dec.cd_preferred_name),
+                 admin_component_with_id_ln_t (
+                     dec.cd_id,
+                     dec.cd_context_name,
+                     dec.cd_context_version,
+                     dec.cd_long_name,
+                     dec.cd_version,
+                     dec.cd_preferred_name),
                  admin_component_with_con_t (
                      dec.oc_id,
                      dec.oc_context_name,
@@ -664,12 +666,13 @@ AS
                  NVL (vdai.LST_UPD_DT, vdai.CREATION_DT),
                  vdai.cntxt_nm_dn,
                  vdai.cntxt_ver_nr,
-                onedata_WA.admin_component_with_id_ln_T (cd.item_id,
-                                               cd.cntxt_nm_dn,
-                                               cd.cntxt_ver_nr,
-                                               cd.item_long_nm,
-                                               cd.ver_nr,
-                                               cd.item_nm),              /* */
+                 admin_component_with_id_ln_T (
+                     cd.item_id,
+                     cd.cntxt_nm_dn,
+                     cd.cntxt_ver_nr,
+                     cd.item_long_nm,
+                     cd.ver_nr,
+                     cd.item_nm),                                        /* */
                  data_typ.DTTYPE_NM,
                  DECODE (vd.VAL_DOM_TYP_ID,
                          17, 'Enumerated',
@@ -828,11 +831,10 @@ AS
                               csv.csitl_nm,
                               csv.csi_item_id,
                               csv.csi_ver_nr
-                         FROM cdebrowser_cs_view_n2 csv
+                         FROM cdebrowser_cs_view_n csv
                         WHERE     de.item_id = csv.de_item_id
                               AND de.ver_nr = csv.de_ver_nr
-                     ORDER BY csv.cs_cntxt_nm,
-                              csv.cs_item_id,
+                     ORDER BY csv.cs_item_id,
                               csv.cs_ver_nr,
                               csv.csi_item_id,
                               csv.csi_ver_nr)
@@ -890,6 +892,7 @@ AS
              AND ai.ver_nr = ccd.ver_nr(+)
              AND vd.dttype_id = DATA_TYP.DTTYPE_ID(+)
     ORDER BY ai.ITEM_ID, ai.ver_nr;
+
 /
 CREATE TABLE CDE_19_REPORTS_ERR_LOG
 (
