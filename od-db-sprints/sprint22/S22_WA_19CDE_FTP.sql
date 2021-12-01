@@ -56,60 +56,6 @@ begin
 return v_name;
 end;
 /
-DROP TYPE CDEBROWSER_VD_T749     
-/
-DROP TYPE CDEBROWSER_DEC_T  
-/
-DROP TYPE DERIVED_DATA_ELEMENT_T  
-/
-DROP TYPE DATA_ELEMENT_DERIVATION_LIST_T 
-/
-DROP TYPE DATA_ELEMENT_DERIVATION_T
-/
-DROP TYPE CDEBROWSER_RD_LIST_T  ;
-/
-DROP TYPE CDEBROWSER_RD_T ;
-/
-DROP TYPE CDEBROWSER_CSI_LIST_T   
-/
-DROP TYPE CDEBROWSER_CSI_T   
-/
-DROP TYPE DE_VALID_VALUE_LIST_T      
-/
-DROP TYPE DE_VALID_VALUE_T    
-/
-DROP TYPE MDSR_749_PV_VD_LIST_T 
-/
-DROP  TYPE MDSR_749_PV_VD_ITEM_T            
-/
-DROP TYPE CDEBROWSER_ALTNAME_LIST_T   
-/
-DROP TYPE CDEBROWSER_ALTNAME_T2     
-/
-DROP TYPE MDSR_749_ALTERNATENAM_LIST_T  
-/
-DROP TYPE MDSR_749_ALTERNATENAME_ITEM_T   
-/
-DROP TYPE MDSR_749_PV_VD_LIST_T 
-/
-DROP  TYPE MDSR_749_PV_VD_ITEM_T            
-/
-DROP TYPE CDEBROWSER_ALTNAME_LIST_T   
-/
-DROP TYPE CDEBROWSER_ALTNAME_T2     
-/
-DROP TYPE ADMIN_COMPONENT_WITH_CON_T        
-/
-DROP TYPE ADMIN_COMPONENT_WITH_ID_LN_T       
-/
-DROP TYPE ADMIN_COMPONENT_WITH_ID_T    
-/
-DROP TYPE CONCEPTS_LIST_T    
-/
-DROP TYPE CONCEPT_DETAIL_T  
-/
-
-
 CREATE OR REPLACE TYPE DATA_ELEMENT_DERIVATION_T                                          as object (
   "PublicId"               number,
   "LongName"			   varchar2(255),
@@ -328,6 +274,166 @@ CREATE OR REPLACE TYPE DE_VALID_VALUE_T                                         
 /
 CREATE OR REPLACE TYPE DE_VALID_VALUE_LIST_T                                          AS TABLE OF DE_VALID_VALUE_T;
 /
+CREATE OR REPLACE FORCE VIEW ONEDATA_WA.CDEBROWSER_DE_DEC_VIEW
+(
+    DE_ID,
+    DE_VERSION,
+    DEC_PREFERRED_NAME,
+    DEC_LONG_NAME,
+    PREFERRED_DEFINITION,
+    DEC_VERSION,
+    ASL_NAME,
+    DEC_CONTEXT_NAME,
+    DEC_CONTEXT_VERSION,
+    OC_PREFERRED_NAME,
+    OC_VERSION,
+    OC_LONG_NAME,
+    OC_CONTEXT_NAME,
+    OC_CONTEXT_VERSION,
+    PT_PREFERRED_NAME,
+    PT_VERSION,
+    PT_LONG_NAME,
+    PT_CONTEXT_NAME,
+    PT_CONTEXT_VERSION,
+    CD_PREFERRED_NAME,
+    CD_VERSION,
+    CD_LONG_NAME,
+    CD_CONTEXT_NAME,
+    CD_CONTEXT_VERSION,
+    OBJ_CLASS_QUALIFIER,
+    PROPERTY_QUALIFIER,
+    OC_ID,
+    PROP_ID,
+    CD_ID,
+    DEC_ID,
+    DEC_ORIGIN,
+    OC_IDSEQ,
+    PROP_IDSEQ,
+    OC_CONDR_IDSEQ,
+    PROP_CONDR_IDSEQ
+)
+BEQUEATH DEFINER
+AS
+    SELECT de.item_id                             de_id,
+           de.ver_nr                              de_version,
+           dec.ITEM_NM                            dec_preferred_name,
+           dec.ITEM_LONG_NM                       dec_long_name,
+           dec.ITEM_DESC                          PREFERRED_DEFINITION,
+           dec.ver_nr                             dec_version,
+           dec.admin_stus_nm_dn                   ASL_NAME,
+           dec.CNTXT_NM_DN                        dec_context_name,
+           dec.CNTXT_ver_NR                       dec_context_version,
+           oc.ITEM_NM                             oc_preferred_name,
+           oc.VER_NR                              oc_version,
+           oc.ITEM_LONG_NM                        oc_long_name,
+           oc.CNTXT_NM_DN                         oc_context_name,
+           oc.ver_NR                              oc_context_version,
+           pt.ITEM_NM                             pt_preferred_name,
+           pt.ver_NR                              pt_version,
+           pt.item_long_nm                        pt_long_name,
+           pt.CNTXT_NM_DN                         pt_context_name,
+           pt.cntxt_VER_NR                        pt_context_version,
+           cd.ITEM_NM                             cd_preferred_name,
+           cd.ver_NR                              cd_version,
+           cd.ITEM_LONG_NM                        cd_long_name,
+           cd.CNTXT_NM_DN                         cd_context_name,
+           cd.cntxt_ver_NR                        cd_context_version,
+           de_conc.obj_cls_qual                   obj_class_qualifier,
+           de_conc.prop_qual                      property_qualifier,
+           oc.item_id                             oc_id,
+           pt.item_id                             prop_id,
+           cd.item_id                             cd_id,
+           dec.item_id                            dec_id,
+           NVL (dec.origin, dec.ORIGIN_ID_DN)     dec_origin,
+           oc.nci_idseq                           oc_idseq,
+           pt.nci_idseq                           prop_idseq,
+           oc.nci_idseq                           oc_condr_idseq,
+           pt.nci_idseq                           prop_condr_idseq
+      FROM DE          de,
+           ADMIN_ITEM  dec,
+           DE_CONC     de_conc,
+           ADMIN_ITEM  oc,
+           ADMIN_ITEM  pt,
+           ADMIN_ITEM  cd
+     WHERE     de.de_conc_item_id = dec.item_id
+           AND dec.item_id = de_conc.item_id
+           AND dec.ver_nr = de_conc.ver_nr
+           AND de_conc.obj_cls_item_id = oc.item_id
+           AND de_conc.prop_item_id = pt.item_id
+           AND de_conc.conc_dom_item_id = cd.item_id
+           AND de.de_conc_ver_nr = dec.ver_nr
+           AND de_conc.obj_cls_ver_nr = oc.ver_nr
+           AND de_conc.prop_ver_nr = pt.ver_nr
+           AND de_conc.conc_dom_ver_nr = cd.ver_nr
+           AND dec.admin_item_typ_id = 2
+           AND oc.admin_item_typ_id = 5
+           AND pt.admin_item_typ_id = 6
+           AND cd.admin_item_typ_id = 1;
+/
+CREATE OR REPLACE FORCE VIEW ONEDATA_WA.VW_CNCPT_19
+(
+    ITEM_ID,
+    VER_NR,
+    ITEM_NM,
+    ITEM_LONG_NM,
+    ITEM_DESC,
+    CREATION_DT,
+    EFF_DT,
+    ORIGIN,
+    UNTL_DT,
+    CURRNT_VER_IND,
+    REGSTR_STUS_NM_DN,
+    ADMIN_STUS_NM_DN,
+    CREAT_DT,
+    CREAT_USR_ID,
+    LST_UPD_USR_ID,
+    FLD_DELETE,
+    LST_DEL_DT,
+    S2P_TRN_DT,
+    LST_UPD_DT,
+    PRMRY_CNCPT_IND,
+    DEF_SRC,
+    EVS_SRC
+)
+BEQUEATH DEFINER
+AS
+    SELECT ADMIN_ITEM.ITEM_ID,
+           ADMIN_ITEM.VER_NR,
+           ADMIN_ITEM.ITEM_NM,
+           ADMIN_ITEM.ITEM_LONG_NM,
+           ADMIN_ITEM.ITEM_DESC,
+           ADMIN_ITEM.CREATION_DT,
+           ADMIN_ITEM.EFF_DT,
+           ADMIN_ITEM.ORIGIN,
+           ADMIN_ITEM.UNTL_DT,
+           ADMIN_ITEM.CURRNT_VER_IND,
+           ADMIN_ITEM.REGSTR_STUS_NM_DN,
+           ADMIN_ITEM.ADMIN_STUS_NM_DN,
+           ADMIN_ITEM.CREAT_DT,
+           ADMIN_ITEM.CREAT_USR_ID,
+           ADMIN_ITEM.LST_UPD_USR_ID,
+           ADMIN_ITEM.FLD_DELETE,
+           ADMIN_ITEM.LST_DEL_DT,
+           ADMIN_ITEM.S2P_TRN_DT,
+           ADMIN_ITEM.LST_UPD_DT,
+           CNCPT.PRMRY_CNCPT_IND,
+           NVL (
+               DECODE (TRIM (ADMIN_ITEM.DEF_SRC),
+                       'NCI', '1-NCI',
+                       ADMIN_ITEM.DEF_SRC),
+               'No Def Source')             DEF_SRC,
+           DECODE (TRIM (OBJ_KEY.OBJ_KEY_DESC),
+                   'NCI_CONCEPT_CODE', '1-NCC',
+                   'NCI_META_CUI', '2-NMC',
+                   OBJ_KEY.OBJ_KEY_DESC)    EVS_SRC
+      FROM ADMIN_ITEM, CNCPT, OBJ_KEY
+     WHERE     ADMIN_ITEM_TYP_ID = 49
+           AND ADMIN_ITEM.ITEM_ID = CNCPT.ITEM_ID
+           AND ADMIN_ITEM.VER_NR = CNCPT.VER_NR
+           AND cncpt.EVS_SRC_ID = OBJ_KEY.OBJ_KEY_ID(+)
+           AND admin_item.ADMIN_STUS_NM_DN NOT IN
+                   ('RETIRED WITHDRAWN', 'RETIRED DELETED');
+/
 
 CREATE OR REPLACE FORCE VIEW CDEBROWSER_COMPLEX_DE_VIEW_N
 (
@@ -526,7 +632,7 @@ AS
 /
 
 
-CREATE OR REPLACE FORCE VIEW DE_CDE1_XML_GENERATOR_749VW
+CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW
 (
     RAI,
     PUBLICID,
@@ -571,7 +677,7 @@ AS
                  dec.ASL_NAME,
                  dec.dec_context_name,
                  dec.dec_context_version,
-                 admin_component_with_id_ln_t (
+                 onedata_wa.admin_component_with_id_ln_t (
                      dec.cd_id,
                      dec.cd_context_name,
                      dec.cd_context_version,
@@ -605,7 +711,7 @@ AS
                                           display_order
                                  FROM cncpt_admin_item com,
                                       Admin_item    con,
-                                      VW_CNCPT      cncpt
+                                      VW_CNCPT_19   cncpt
                                 WHERE     dec.oc_id = com.item_id(+)
                                       AND dec.oc_version = com.ver_nr(+)
                                       AND com.cncpt_item_id = con.item_id(+)
@@ -642,7 +748,7 @@ AS
                                           display_order
                                  FROM cncpt_admin_item com,
                                       Admin_item    con,
-                                      VW_CNCPT      cncpt
+                                      VW_CNCPT_19   cncpt
                                 WHERE     dec.prop_id = com.item_id(+)
                                       AND dec.pt_version = com.ver_nr(+)
                                       AND com.cncpt_item_id = con.item_id(+)
@@ -666,7 +772,7 @@ AS
                  NVL (vdai.LST_UPD_DT, vdai.CREATION_DT),
                  vdai.cntxt_nm_dn,
                  vdai.cntxt_ver_nr,
-                 admin_component_with_id_ln_T (
+                 onedata_WA.admin_component_with_id_ln_T (
                      cd.item_id,
                      cd.cntxt_nm_dn,
                      cd.cntxt_ver_nr,
@@ -713,7 +819,7 @@ AS
                                           display_order
                                  FROM cncpt_admin_item com,
                                       Admin_item    con,
-                                      VW_CNCPT      cncpt
+                                      VW_CNCPT_19   cncpt
                                 WHERE     rep.item_id = com.item_id(+)
                                       AND rep.ver_nr = com.ver_nr(+)
                                       AND com.cncpt_item_id = con.item_id(+)
@@ -789,7 +895,7 @@ AS
                                       display_order
                              FROM cncpt_admin_item com,
                                   Admin_item    con,
-                                  VW_CNCPT      cncpt
+                                  VW_CNCPT_19   cncpt
                             WHERE     vd.item_id = com.item_id(+)
                                   AND vd.ver_nr = com.ver_nr(+)
                                   AND com.cncpt_item_id = con.item_id(+)
@@ -891,7 +997,7 @@ AS
              AND ai.item_id = ccd.item_id(+)
              AND ai.ver_nr = ccd.ver_nr(+)
              AND vd.dttype_id = DATA_TYP.DTTYPE_ID(+)
-    ORDER BY ai.ITEM_ID, ai.ver_nr;
+    ORDER BY  ai.CNTXT_NM_DN ,ai.ITEM_ID, ai.ver_nr;
 
 /
 CREATE TABLE CDE_19_REPORTS_ERR_LOG
