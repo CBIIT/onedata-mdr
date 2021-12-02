@@ -274,7 +274,7 @@ CREATE OR REPLACE TYPE DE_VALID_VALUE_T                                         
 /
 CREATE OR REPLACE TYPE DE_VALID_VALUE_LIST_T                                          AS TABLE OF DE_VALID_VALUE_T;
 /
-CREATE OR REPLACE FORCE VIEW ONEDATA_WA.CDEBROWSER_DE_DEC_VIEW
+CREATE OR REPLACE FORCE VIEW CDEBROWSER_DE_DEC_VIEW
 (
     DE_ID,
     DE_VERSION,
@@ -370,7 +370,7 @@ AS
            AND pt.admin_item_typ_id = 6
            AND cd.admin_item_typ_id = 1;
 /
-CREATE OR REPLACE FORCE VIEW ONEDATA_WA.VW_CNCPT_19
+CREATE OR REPLACE FORCE VIEW VW_CNCPT_19
 (
     ITEM_ID,
     VER_NR,
@@ -631,8 +631,7 @@ AS
            AND csi.CSI_TYP_ID = o.obj_key_id;
 /
 
-
-CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW
+CREATE OR REPLACE FORCE VIEW DE_CDE1_XML_GENERATOR_749VW
 (
     RAI,
     PUBLICID,
@@ -677,7 +676,7 @@ AS
                  dec.ASL_NAME,
                  dec.dec_context_name,
                  dec.dec_context_version,
-                 onedata_wa.admin_component_with_id_ln_t (
+                 admin_component_with_id_ln_t (
                      dec.cd_id,
                      dec.cd_context_name,
                      dec.cd_context_version,
@@ -772,7 +771,7 @@ AS
                  NVL (vdai.LST_UPD_DT, vdai.CREATION_DT),
                  vdai.cntxt_nm_dn,
                  vdai.cntxt_ver_nr,
-                 onedata_WA.admin_component_with_id_ln_T (
+                 admin_component_with_id_ln_T (
                      cd.item_id,
                      cd.cntxt_nm_dn,
                      cd.cntxt_ver_nr,
@@ -783,8 +782,8 @@ AS
                  DECODE (vd.VAL_DOM_TYP_ID,
                          17, 'Enumerated',
                          18, 'Non-enumerated'),
-                 vd.uom_id,
-                 vd.VAL_DOM_FMT_ID,
+                 UOM.UOM_NM,
+                 FMT.FMT_NM,
                  vd.VAL_DOM_MAX_CHAR,
                  vd.VAL_DOM_MIN_CHAR,
                  vd.NCI_DEC_PREC,
@@ -975,7 +974,9 @@ AS
              value_dom                   vd,
              de                          de,
              CDEBROWSER_COMPLEX_DE_VIEW_N ccd,
-             data_typ
+             data_typ,
+             FMT,
+             UOM
        WHERE     ai.item_id = dec.de_id
              AND ai.ver_nr = dec.de_version
              AND ai.ADMIN_STUS_NM_DN NOT IN
@@ -997,7 +998,10 @@ AS
              AND ai.item_id = ccd.item_id(+)
              AND ai.ver_nr = ccd.ver_nr(+)
              AND vd.dttype_id = DATA_TYP.DTTYPE_ID(+)
+             AND vd.VAL_DOM_FMT_ID = FMT.FMT_ID(+)
+             AND vd.uom_id=UOM.UOM_ID(+)
     ORDER BY  ai.CNTXT_NM_DN ,ai.ITEM_ID, ai.ver_nr;
+
 
 /
 CREATE TABLE CDE_19_REPORTS_ERR_LOG
