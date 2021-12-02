@@ -95,7 +95,9 @@ INSERT INTO /*+ APPEND */ admin_item (--NCI_IDSEQ,
 select --'D12B8399-3EE0-0244-E053-5801D00A0E12', --for test
 49, 75, 'RELEASED', v_eff_date, 
 20000000024, 1, 'NCIP',
-code, substr(NVL(definition, 'No value exists.'), 1, 4000), NVL (display_name, code), 1,
+code, -- ITEM_LONG_NM
+substr(NVL(definition, 'No value exists.'), 1, 4000), 
+EVS_PREF_NAME, 1, 
 'ONEDATA', v_eff_date, v_eff_date, 
 'ONEDATA', 'NCI'
 from SAG_LOAD_CONCEPTS_EVS where
@@ -147,9 +149,12 @@ for record in (select ld.synonyms synonyms,
 from SAG_LOAD_CONCEPTS_EVS ld, admin_item ai 
      where ai.admin_item_typ_id = 49
      and ld.code = ai.item_long_nm
-     and CONCEPT_STATUS is NULL and CON_IDSEQ is not null)
+     and CONCEPT_STATUS is NULL and CON_IDSEQ is not null
+     and instr (SYNONYMS, '|') > 0) -- just one synonym is pref name
 LOOP
-     SAG_LOAD_CONCEPT_SYNONYMS(record.synonyms, record.ITEM_ID, record.VER_NR, 
+     SAG_LOAD_CONCEPT_SYNONYMS(
+     substr(record.synonyms, instr(record.synonyms, '|')+1),
+     record.ITEM_ID, record.VER_NR, 
      record.CREAT_USR_ID, record.CREAT_DT, 
      record.LST_UPD_USR_ID, record.LST_UPD_DT);
 END LOOP;
