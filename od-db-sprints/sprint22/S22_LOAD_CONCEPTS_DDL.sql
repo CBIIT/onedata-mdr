@@ -11,7 +11,7 @@ CREATE TABLE SAG_LOAD_CONCEPTS_EVS
   evs_pref_name VARCHAR2(255 BYTE), --long name the first synonym
   synonyms      VARCHAR2(4000 BYTE), -- alt name
   definition    VARCHAR2(16000 BYTE), --preferred definition 2000
-  display_name  VARCHAR2(4000 BYTE), -- long name 255
+  display_name  VARCHAR2(4000 BYTE), -- not used in caDSR
   concept_status  VARCHAR2(4000 BYTE), --ALS_NAME 20
   semantic      VARCHAR2(4000 BYTE), -- TBD
   FLD_DELETE    NUMBER (1, 0) DEFAULT 0,
