@@ -40,3 +40,6 @@ exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
 -- Run as ONEDATA_WA DM scripts
 --copy the table SAG_LOAD_CONCEPTS_EVS from DEV tier
 S22_WA_EXEC_LOAD_CONCEPTS.sql
+
+-- Run as ONEDATA_RA DM scripts
+S22_RA_EXEC_LOAD_CONCEPTS.sql
