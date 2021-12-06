@@ -1,0 +1,35 @@
+CREATE SEQUENCE SAG_LOAD_CONCEPTS_EVS_SEQ  MINVALUE 100 MAXVALUE 999999999999999999999999999 INCREMENT BY 5 
+START WITH 100 CACHE 10 NOORDER  NOCYCLE  NOKEEP  NOSCALE  GLOBAL;
+drop table SAG_LOAD_CONCEPTS_EVS;
+CREATE TABLE SAG_LOAD_CONCEPTS_EVS
+(
+  REC_ID        NUMBER NOT NULL,--PK
+  CON_IDSEQ     CHAR(36 BYTE),
+  code          VARCHAR2(30 BYTE)    NOT NULL,
+  concept_name  VARCHAR2(4000 BYTE), -- not used
+  parents       VARCHAR2(120 BYTE), -- not used
+  evs_pref_name VARCHAR2(255 BYTE), --long name the first synonym
+  synonyms      VARCHAR2(4000 BYTE), -- alt name
+  definition    VARCHAR2(16000 BYTE), --preferred definition 2000
+  display_name  VARCHAR2(4000 BYTE), -- long name 255
+  concept_status  VARCHAR2(4000 BYTE), --ALS_NAME 20
+  semantic      VARCHAR2(4000 BYTE), -- TBD
+  FLD_DELETE    NUMBER (1, 0) DEFAULT 0,
+  DATE_CREATED  DATE    DEFAULT sysdate,
+  CREATED_BY    VARCHAR2(30 BYTE)   DEFAULT user
+);
+alter table SAG_LOAD_CONCEPTS_EVS ADD CONSTRAINT PK_SAG_LOAD_CONCEPTS_EVS PRIMARY KEY (REC_ID);
+
+CREATE OR REPLACE TRIGGER TR_SAG_LOAD_CONCEPTS_EVS  BEFORE INSERT ON SAG_LOAD_CONCEPTS_EVS for each row
+BEGIN    
+IF (:NEW.REC_ID <= 0  or :NEW.REC_ID is null)  THEN --this is to allow copying rec_id values
+  select SAG_LOAD_CONCEPTS_EVS_SEQ.nextval into :new.REC_ID  from  dual ;
+END IF;
+END;
+/
+create index IDX_SAG_LOAD_CONCEPTS_EVS_CODE on SAG_LOAD_CONCEPTS_EVS (CODE);
+create index IDX_SAG_LOAD_CONCEPTS_EVS_PRS on SAG_LOAD_CONCEPTS_EVS (PARENTS);
+-- origin - admin_item trigger takes care of this
+-- EVS_SOURCE NCI_CONCEPT_CODE
+-- definition_source -- NCI
+GRANT ALL ON SAG_LOAD_CONCEPTS_EVS to PUBLIC;

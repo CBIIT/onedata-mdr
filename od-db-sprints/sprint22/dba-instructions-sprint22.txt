@@ -1,8 +1,10 @@
 
 -- Run as ONEDATA_WA DDL scripts
 
+S22_LOAD_CONCEPTS_DDL.sql
 S22_LOAD_CONCEPT_ADMIN_ITEM_DESIG.sql
 S22_WA_19CDE_FTP.sql
+
 -- Run as ONEDATA_RA DDL scripts
 
 --Check that materialized views are valid in ONEDATA_WA schema
@@ -17,3 +19,6 @@ S19_RA_Data_Migration.sql
 
 -- Run validate job as ONEDATA_WA
 exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
+
+-- Run as ONEDATA_WA DM scripts
+S22_WA_EXEC_LOAD_CONCEPTS.sql
