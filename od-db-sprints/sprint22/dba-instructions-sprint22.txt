@@ -4,6 +4,23 @@
 S22_LOAD_CONCEPTS_DDL.sql-- do not run on DEV
 S22_LOAD_CONCEPT_ADMIN_ITEM_DESIG.sql
 S22_WA_19CDE_FTP.sql
+S22_WA_RA_DDL.sql
+
+-- Run as ONEDATA_RA DDL scripts
+S22_WA_RA_DDL.sql
+
+-- Run as ONEDATA_WA DDL scripts
+S22_NCI_11179.sql
+S22_NCI_11179_2.sql
+S22_NCI_CHNG_MGMT.sql
+S22_NCI_DEC_MGMT.sql
+S22_NCI_DLOAD.sql
+S22_NCI_FORM_MGMT.sql
+S22_NCI_PV_VM.sql
+S22_NCI_VD.sql
+S22_NCI_CADSR_PULL.sql
+S22_NCI_POST_HOOK.sql
+S22_sp_postprocess.sql
 
 -- Run as ONEDATA_RA DDL scripts
 
