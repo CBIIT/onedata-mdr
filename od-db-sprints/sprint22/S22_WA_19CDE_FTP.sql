@@ -1,4 +1,6 @@
-
+CREATE INDEX INX_CNCPT_AI_VR ON CNCPT_ADMIN_ITEM
+(ITEM_ID, VER_NR);
+/
 create or replace function get_concepts2(v_item_id in number, v_ver_nr in number) return varchar2 is
 cursor con is
 select c.item_long_nm, cai.NCI_CNCPT_VAL
