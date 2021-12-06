@@ -50,7 +50,7 @@ commit;
 
 
 insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR,  CNCPT_CONCAT, CNCPT_CONCAT_NM, cncpt_concat_def, CNCPT_CONCAT_WITH_INT)
-select ai.item_id, ai.ver_nr, b.cncpt_cd, b.CNCPT_nm, b.cncpt_def, b.cncpt_cd_int-
+select ai.item_id, ai.ver_nr, b.cncpt_cd, b.CNCPT_nm, b.cncpt_def, b.cncpt_cd_int
 from  admin_item ai,
 (SELECT cai.item_id, cai.ver_nr, LISTAGG(ai.item_long_nm, ':')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_CD ,
 LISTAGG(decode(ai.item_long_nm, 'C45255',decode( cai.nci_cncpt_val,null, ai.item_nm, ai.item_nm || '::' || cai.NCI_CNCPT_VAL),ai.item_nm), ' ')WITHIN GROUP (ORDER by cai.nci_ord desc) as CNCPT_NM ,
