@@ -8,9 +8,11 @@ create or replace PACKAGE nci_dload AS
    procedure spAddComponentToDloadIDGuest (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
    function getAddComponentCreateQuestion return t_question;
 function getALSCreateQuestion (v_typ in integer) return t_question;
+function getValidCollectionName (v_coll_nm in varchar2) return varchar2;
 function getALSCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset, v_dload_typ in integer) return t_forms;
 function getCollectionCreateFormGuest (v_rowset1 in t_rowset, v_rowset2 in t_rowset, v_dload_typ in integer) return t_forms;
 procedure spDeleteDloadItem  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
+procedure spDloadHdrPostHook  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 procedure spDeleteDloadItemGuest  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 function validatePin(v_hdr_id in number, v_pin in number) return boolean;
 END;
@@ -61,7 +63,66 @@ begin
 return question;
 end;
 
+procedure spDloadHdrPostHook  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
+as
+ hookInput        t_hookInput;
+    hookOutput       t_hookOutput := t_hookOutput ();
+    row_ori          t_row;
+  v_coll_nm varchar2(255);
+  v_usr_hdr varchar2(100);
+  v_err_str varchar2(255);
+  BEGIN
+   hookinput := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber := hookinput.invocationnumber;
+    hookoutput.originalrowset := hookinput.originalrowset;
+   row_ori := hookInput.originalRowset.rowset (1);
+    v_coll_nm := ihook.getColumnValue(row_ori, 'DLOAD_HDR_NM');
 
+ select creat_usr_id into v_usr_hdr from nci_dload_hdr where
+hdr_id = ihook.getColumnValue(row_ori, 'HDR_ID');
+ if (upper(v_usr_hdr) <> upper(v_usr_id)) then
+ raise_application_error(-20000,'You are not authorized to update this collection.');
+return;
+ end if;
+
+--- Doanload collection name - restrictions
+v_err_str := getValidCollectionName(trim(v_coll_nm));
+
+--raise_application_error (-20000, v_err_str);
+if (v_err_str  is not null) then
+
+ raise_application_error(-20000,v_err_str);
+ return;
+end if;
+
+ V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+end;
+
+function getValidCollectionName (v_coll_nm in varchar2) return varchar2 is
+v_err_str varchar2(255):= '';
+begin
+
+if (trim(length(v_coll_nm)) > 118) then
+ v_err_str :='Collection name is longer than 118 characters.';
+end if;
+
+if (instr(v_coll_nm, ';') > 0) or instr(v_coll_nm, ':') > 0  or
+instr(v_coll_nm, ':') > 0 or 
+instr(v_coll_nm, '{') > 0 or 
+instr(v_coll_nm, '}') > 0 or 
+instr(v_coll_nm, '\') > 0 or 
+instr(v_coll_nm, '/') > 0 or 
+instr(v_coll_nm, '%') > 0 or 
+instr(v_coll_nm, '#') > 0 or 
+instr(v_coll_nm, '@') > 0 or 
+instr(v_coll_nm, '$') > 0 or 
+instr(v_coll_nm, '(') > 0 or 
+instr(v_coll_nm, '}') > 0 then
+
+ v_err_str :='Retricted characters in collection name: [     ]     \     /     ;     :     %     #     @     $     {     }     |';
+end if;
+return v_err_str;
+end;
 procedure spDeleteDloadItem  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2)
 AS
     hookInput t_hookInput;
@@ -128,6 +189,7 @@ AS
   forms t_forms;
   form1 t_form;
   rowform t_row;
+  v_err_str varchar2(255);
 
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -153,7 +215,13 @@ hdr_id = ihook.getColumnValue(row_ori, 'HDR_ID');
          forms              := hookInput.forms;
            form1              := forms(1);
         rowform := form1.rowset.rowset(1);
+v_err_str := getValidCollectionName(trim(ihook.getColumnValue(rowform,'DLOAD_HDR_NM')));
 
+if (v_err_str is not null) then
+
+ raise_application_error(-20000,v_err_str);
+ return;
+end if;
           --  raise_application_error(-20000, ihook.getColumnValue(rowform, 'HDR_ID'));
         if (validatePin(ihook.getColumnValue(row_ori, 'HDR_ID'), ihook.getColumnValue(rowform, 'GUEST_USR_PWD')) = false) then
             raise_application_error(-20000, 'Invalid Pin. Please check and try again.');
@@ -206,6 +274,7 @@ AS
     v_add integer :=0;
     v_already integer :=0;
     i integer := 0;
+    v_err_str varchar2(255);
     v_id number;
 begin
     hookinput := ihook.gethookinput (v_data_in);
@@ -238,7 +307,13 @@ begin
         ihook.setColumnValue(rowhdr, 'HDR_ID', v_id);
         ihook.setColumnValue(rowals, 'HDR_ID', v_id);
            ihook.setColumnValue(rowhdr, 'DLOAD_FMT_ID',90 );
+v_err_str := getValidCollectionName(trim(ihook.getColumnValue(rowhdr,'DLOAD_HDR_NM')));
 
+if (v_err_str is not null) then
+
+ raise_application_error(-20000,v_err_str);
+ return;
+end if;
        rows := t_rows();
     rows.extend;
     rows(rows.last) := rowhdr;
@@ -1098,4 +1173,5 @@ begin
 end;
 
 END;
-/
+		   /
+		   
