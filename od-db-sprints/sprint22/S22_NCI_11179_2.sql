@@ -549,7 +549,7 @@ begin
         return;
     end if;
 
-    if (hookinput.originalRowset.tablename = 'NCI_ADMIN_ITEM_REL' and ihook.getColumnValue(row_ori,'REL_TYP_ID') = 60) then   ---  checked form before. Now check Protocol
+  /*  if (hookinput.originalRowset.tablename = 'NCI_ADMIN_ITEM_REL' and ihook.getColumnValue(row_ori,'REL_TYP_ID') = 60) then   ---  checked form before. Now check Protocol
         v_item_id := ihook.getColumnValue(row_ori, 'P_ITEM_ID');
         v_ver_nr := ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR');
 
@@ -558,7 +558,7 @@ begin
             return;
         end if;
     end if;
-
+*/
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
 end;
