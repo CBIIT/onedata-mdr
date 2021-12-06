@@ -785,7 +785,7 @@ begin
     IF HOOKINPUT.ANSWERID in ( 3,4)  and is_valid = true THEN  -- Create
         nci_dec_mgmt.createValAIWithConcept(rowform , 1,v_item_typ_glb ,'C','DROP-DOWN',actions); -- Vm
     elsif (hookinput.answerid = 5 and is_Valid = true) then
-        nci_dec_mgmt.createAIWithoutConcept(rowform , 1, 53, ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'),nvl(ihook.getColumnValue(rowform, 'ITEM_2_DEF'), ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM')),
+        nci_dec_mgmt.createAIWithoutConcept(rowform , 1, 53, ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'),nvl(ihook.getColumnValue(rowform, 'ITEM_2_DEF'), ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM')),'C',
         actions);
     end if;
       -- Create PV
@@ -893,6 +893,7 @@ k integer;
   v_def varchar2(4000);
   v_temp integer;
   is_valid boolean;
+  v_dup integer;
   v_item_typ_glb integer;
   v_pv  varchar2(255);
   rep_idx integer;
@@ -996,15 +997,20 @@ begin
 
                 rowform :=rowforms(rep_idx);
                 v_opt := nvl(ihook.getColumnValue(rowform, 'CTL_VAL_STUS'),0);
+                v_dup := nvl(ihook.getColumnValue(rowform, 'UOM_ID'),0);
                 if (v_opt > 0) then
-                    IF v_opt in ( 3,4) and nvl(ihook.getColumnValue(rowform, 'UOM_ID'),0) = 0  THEN  -- Create; no duplicate allowed
+                    IF v_opt in ( 3,4) and v_dup =0  THEN  -- Create; no duplicate allowed
                         nci_dec_mgmt.createValAIWithConcept(rowform , 1,v_item_typ_glb ,'C','DROP-DOWN',actions); -- Vm
                     end if;
-                     IF v_opt in ( 3,4) and nvl(ihook.getColumnValue(rowform, 'UOM_ID'),0) = 1  THEN  -- Create; Duplicate
+                     IF v_opt in ( 3,4) and v_dup = 1  THEN  -- Create; Duplicate
                         nci_dec_mgmt.createValAIWithConcept(rowform , 1,v_item_typ_glb ,'O','DROP-DOWN',actions); -- Vm
                     end if;
-                    if (v_opt = 2 ) then
-                        nci_dec_mgmt.createAIWithoutConcept(rowform , 1, 53, ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'),nvl(ihook.getColumnValue(rowform, 'ITEM_2_DEF'), ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM')),
+                    if (v_opt = 2 ) and v_dup = 0 then
+                        nci_dec_mgmt.createAIWithoutConcept(rowform , 1, 53, ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'),nvl(ihook.getColumnValue(rowform, 'ITEM_2_DEF'), ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM')),'C',
+                        actions);
+                    end if;
+                          if (v_opt = 2 ) and v_dup = 1 then
+                        nci_dec_mgmt.createAIWithoutConcept(rowform , 1, 53, ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'),nvl(ihook.getColumnValue(rowform, 'ITEM_2_DEF'), ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM')),'O',
                         actions);
                     end if;
 
@@ -1117,7 +1123,7 @@ begin
     when v_typ = 'CONCEPTS' then
         nci_dec_mgmt.createValAIWithConcept(row_ori , 1,v_item_typ_glb ,'C','DROP-DOWN',actions); -- Vm
      when v_typ = 'TEXT' then
-        nci_dec_mgmt.createAIWithoutConcept(row_ori , 1, 53, ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'),nvl(ihook.getColumnValue(row_ori, 'ITEM_1_DEF'), ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1')),
+        nci_dec_mgmt.createAIWithoutConcept(row_ori , 1, 53, ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'),nvl(ihook.getColumnValue(row_ori, 'ITEM_1_DEF'), ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1')),'C',
         actions);
 
     end case;
