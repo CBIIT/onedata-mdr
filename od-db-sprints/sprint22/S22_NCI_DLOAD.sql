@@ -16,7 +16,6 @@ procedure spDloadHdrPostHook  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id
 procedure spDeleteDloadItemGuest  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 function validatePin(v_hdr_id in number, v_pin in number) return boolean;
 END;
-
 /
 create or replace PACKAGE BODY nci_dload AS
 
@@ -106,10 +105,15 @@ if (trim(length(v_coll_nm)) > 118) then
  v_err_str :='Collection name is longer than 118 characters.';
 end if;
 
+
+if (substr(v_coll_nm,1,1) >='0' and substr(v_coll_nm,1,1) <='9') then
+ v_err_str :='Collection name cannot start with a digit.';
+end if;
+
 if (instr(v_coll_nm, ';') > 0) or instr(v_coll_nm, ':') > 0  or
 instr(v_coll_nm, ':') > 0 or 
-instr(v_coll_nm, '{') > 0 or 
-instr(v_coll_nm, '}') > 0 or 
+instr(v_coll_nm, '[') > 0 or 
+instr(v_coll_nm, ']') > 0 or 
 instr(v_coll_nm, '\') > 0 or 
 instr(v_coll_nm, '/') > 0 or 
 instr(v_coll_nm, '%') > 0 or 
