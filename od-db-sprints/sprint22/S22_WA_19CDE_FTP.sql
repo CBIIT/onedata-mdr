@@ -1068,3 +1068,50 @@ END ;
 /
 GRANT EXECUTE on CDE_XML_19_INSERT TO ONEDATA_RO;
 /
+CREATE OR REPLACE PROCEDURE CDE_XML_19_INSERT_ARG(p_arg IN CHAR, p_type IN number) as
+/*insert XML*/
+P_file number;
+l_file_name      VARCHAR2(100);
+l_file_path      VARCHAR2(200);
+l_result         CLOB:=null;
+l_xmldoc          CLOB:=null;
+errmsg VARCHAR2(500):='Non';
+
+BEGIN
+
+select count(*) into P_file from CDE_19_GENERATED_XML;
+IF P_file>0 then
+ select max(NVL(SEQ_ID,0))+1 into P_file from CDE_19_GENERATED_XML;
+end if;
+        l_file_path := 'SBREXT_DIR';
+
+         l_file_name := 'CDE_XML_'||P_file||'.xml';
+IF p_type =3
+then
+        SELECT dbms_xmlgen.getxml( 'select* from DE_CDE1_XML_GENERATOR_749VW')
+        INTO l_result
+        FROM DUAL ;
+elsif   p_type =2     then
+  SELECT dbms_xmlgen.getxml( 'select* from DE_CDE1_XML_GENERATOR_749VW where CONTEXTNAME='||''''||p_arg||'''')
+      -- SELECT dbms_xmlgen.getxml( 'select*from  MDSR_CD_XML_VIEW where "publicid"||"version" ='||''''||l_pid||'''')
+        INTO l_result
+        FROM DUAL ;
+ELSE
+ SELECT dbms_xmlgen.getxml( 'select* from DE_CDE1_XML_GENERATOR_749VW where PUBLICID in('||p_arg||')')
+        INTO l_result
+        FROM DUAL ;
+end if;
+        insert into CDE_19_GENERATED_XML VALUES ( l_file_name ,l_result,SYSDATE,P_file);
+
+ commit;
+ EXCEPTION
+    WHEN OTHERS THEN
+   errmsg := SQLERRM;
+         dbms_output.put_line('errmsg  - '||errmsg);
+        insert into CDE_19_REPORTS_ERR_LOG VALUES (l_file_name,  errmsg, sysdate);
+ commit;
+
+END ;
+/
+GRANT EXECUTE on CDE_XML_19_INSERT_ARG TO ONEDATA_RO;
+/
