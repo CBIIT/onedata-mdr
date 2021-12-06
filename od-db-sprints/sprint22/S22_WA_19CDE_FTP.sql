@@ -1003,8 +1003,10 @@ AS
              AND vd.VAL_DOM_FMT_ID = FMT.FMT_ID(+)
              AND vd.uom_id=UOM.UOM_ID(+)
     ORDER BY  ai.CNTXT_NM_DN ,ai.ITEM_ID, ai.ver_nr;
+/
+GRANT SELECT ON DE_CDE1_XML_GENERATOR_749VW TO ONEDATA_RA;
 
-
+GRANT SELECT ON DE_CDE1_XML_GENERATOR_749VW TO ONEDATA_RO;
 /
 CREATE TABLE CDE_19_REPORTS_ERR_LOG
 (
@@ -1049,7 +1051,7 @@ end if;
 
          l_file_name := 'CDE_XML_'||P_file||'.xml';
 
-        SELECT dbms_xmlgen.getxml( 'select* from DE_CDE1_XML_GENERATOR_749VW where PUBLICID=62')
+        SELECT dbms_xmlgen.getxml( 'select* from DE_CDE1_XML_GENERATOR_749VW')
         INTO l_result
         FROM DUAL ;
         insert into CDE_19_GENERATED_XML VALUES ( l_file_name ,l_result,SYSDATE,P_file);
