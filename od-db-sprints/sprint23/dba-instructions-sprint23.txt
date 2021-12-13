@@ -1,5 +1,6 @@
 
 -- Run as ONEDATA_WA DDL scripts
+ALS_SP_23.sql
 
 
 -- Run as ONEDATA_RA DDL scripts
