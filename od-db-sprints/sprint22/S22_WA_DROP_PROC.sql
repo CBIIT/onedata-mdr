@@ -4,3 +4,5 @@ DROP procedure  SPCREATEDECSIMPLE
 /
 DROP procedure  SPCREATEDE
 /
+DROP procedure SPAIUPDPOST
+/
