@@ -1,4 +1,6 @@
-create or replace PACKAGE            nci_form_mgmt AS
+DROP PACKAGE NCI_FORM_MGMT;
+
+CREATE OR REPLACE PACKAGE nci_form_mgmt AS
 function getAddComponentCreateQuestion return t_question ;
 procedure spAddForm (v_data_in in clob, v_data_out out clob);
 procedure spAddFormFromExisting (v_data_in in clob, v_data_out out clob);
@@ -35,7 +37,10 @@ function getReorderQuestion (v_cur_disp_ord in integer) return t_question;
 procedure updFormModuleQuestion (v_quest_id in number, v_quest_ver_nr in number, v_usr_id in varchar2);
 END;
 /
-create or replace PACKAGE BODY            nci_form_mgmt AS
+
+DROP PACKAGE BODY NCI_FORM_MGMT;
+
+CREATE OR REPLACE PACKAGE BODY nci_form_mgmt AS
 c_ver_suffix varchar2(5) := 'v1.00';
 v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
 
@@ -2139,7 +2144,7 @@ BEGIN
 
   -- if (v_found) then
     ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Set default');
+    ANSWER                     := T_ANSWER(1, 1, 'Set Default');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Set', ANSWERS);
