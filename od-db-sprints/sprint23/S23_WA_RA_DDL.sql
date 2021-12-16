@@ -21,7 +21,7 @@ STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.L
  where ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null ;
  --and ai.admin_stus_nm_dn not like '%RETIRED%';
 
- Tracker 1442
+ --Tracker 1442
  insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy VD Download', 106, 'Legacy VD Download', 'Legacy VD Download');
 commit;
  insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy DEC Download', 107, 'Legacy DEC Download', 'Legacy DEC Download');
