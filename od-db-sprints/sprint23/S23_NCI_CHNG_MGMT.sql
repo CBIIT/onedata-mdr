@@ -369,12 +369,16 @@ as
             action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,1,'update');
             actions.extend;    actions(actions.last) := action;
 
- row := t_row();
-          nci_11179.spReturnSubTypeRow(v_item_id, v_ver_nr, 51, row);
-            ihook.setColumnValue(row,'CS_ITEM_ID', '');
-            ihook.setColumnValue(row,'CS_ITEM_VER_NR', '');
-              ihook.setColumnValue(row,'P_ITEM_ID', '');
-            ihook.setColumnValue(row,'P_ITEM_VER_NR', '');
+update nci_clsfctn_schm_item set CS_ITEM_ID = null, CS_ITEM_VER_NR = null, P_ITEM_ID = null, P_ITEM_VER_NR = null where 
+item_id = v_item_id and ver_nr = v_ver_nr;
+commit;
+
+ --row := t_row();
+   --       nci_11179.spReturnSubTypeRow(v_item_id, v_ver_nr, 51, row);
+       --    ihook.setColumnValue(row,'CS_ITEM_ID',' ');
+        --  ihook.setColumnValue(row,'CS_ITEM_VER_NR', ' ');
+         --     ihook.setColumnValue(row,'P_ITEM_ID', '');
+         --   ihook.setColumnValue(row,'P_ITEM_VER_NR', '');
             
            rows := t_rows();    rows.extend;    rows(rows.last) := row;
             action := t_actionrowset(rows, 'CSI', 2,2,'update');
@@ -2201,3 +2205,4 @@ RETURN V_DN;
 END;
 END;
 /
+
