@@ -33,7 +33,7 @@ commit;
 air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr, frm_mod.instr MOD_INSTR,
  air.c_item_id de_item_id, air.c_item_ver_nr de_ver_nr, air.disp_ord quest_disp_ord,frm_mod.disp_ord mod_disp_ord, frm_mod.rep_no  mod_rep_no,
 aim.item_nm MOD_ITEM_NM, air.instr QUEST_INSTR, air.REQ_IND  QUEST_REQ_IND, air.DEFLT_VAL QUEST_DEFLT_VAL, 
-decode(DEFLT_VAL_ID, nvl(vv.nci_pub_id, 1), vv.value) QUEST_DEFLT_VAL_ENUM, 
+decode(DEFLT_VAL_ID, nvl(vv.nci_pub_id, 1), vv.vm_nm) QUEST_DEFLT_VAL_ENUM, 
        air.EDIT_IND QUEST_EDIT_IND,
  aim.item_long_nm  mod_item_long_nm, aim.item_desc mod_item_desc,
 air.nci_pub_id QUEST_ITEM_ID,air.nci_ver_nr QUEST_VER_NR,
