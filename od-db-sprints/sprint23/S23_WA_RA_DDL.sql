@@ -22,9 +22,9 @@ STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.L
  --and ai.admin_stus_nm_dn not like '%RETIRED%';
 
  --Tracker 1442
- insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy VD Download', 106, 'Legacy VD Download', 'Legacy VD Download');
+ insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy VD Excel', 106, 'Legacy VD Excel', 'Legacy VD Excel');
 commit;
- insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy DEC Download', 107, 'Legacy DEC Download', 'Legacy DEC Download');
+ insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy DEC Excel', 107, 'Legacy DEC Excel', 'Legacy DEC Excel');
 commit;
 
  CREATE OR REPLACE VIEW VW_NCI_FORM_FLAT AS
