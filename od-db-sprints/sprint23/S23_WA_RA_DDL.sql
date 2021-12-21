@@ -89,7 +89,7 @@ and air.nci_ver_nr = vv.q_ver_nr (+);
            AND ak.C_ITEM_VER_NR = ai.VER_NR
            AND ai.ADMIN_ITEM_TYP_ID = ok.obj_key_id
     UNION
-    SELECT distinct ak.CREAT_DT,
+    SELECT distinct ai.CREAT_DT,
            ai.CREAT_USR_ID,
            ai.LST_UPD_USR_ID,
            ai.LST_UPD_DT,
