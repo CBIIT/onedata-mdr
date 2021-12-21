@@ -54,3 +54,70 @@ and air.c_item_id = de.item_id (+)
 and air.c_item_ver_nr = de.ver_nr (+)
 and air.NCI_PUB_ID = vv.q_pub_id (+)
 and air.nci_ver_nr = vv.q_ver_nr (+);
+
+
+-- Tracker 1434
+
+  CREATE OR REPLACE  VIEW VW_CSI_NODE_DE_REL AS
+  SELECT  ak.CREAT_DT,
+           ak.CREAT_USR_ID,
+           ak.LST_UPD_USR_ID,
+           ak.LST_UPD_DT,
+           ak.S2P_TRN_DT,
+           ak.LST_DEL_DT,
+           ak.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           ak.P_ITEM_ID,
+           ak.P_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           ak.CREAT_USR_ID       CREAT_USR_ID_X,
+           ak.LST_UPD_USR_ID     LST_UPD_USR_ID_X,
+	   ai.admin_item_typ_id,
+	   ok.obj_key_desc  ADMIN_ITEM_TYP_DESC
+      FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, vw_obj_key_4 ok
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR
+           AND ai.ADMIN_ITEM_TYP_ID = ok.obj_key_id
+    UNION
+    SELECT distinct ak.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           csi.CS_ITEM_ID,
+           csi.CS_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           ai.CREAT_USR_ID       CREAT_USR_ID_X,
+           ai.LST_UPD_USR_ID     LST_UPD_USR_ID_X,
+	   	   ai.admin_item_typ_id,
+	   ok.obj_key_desc  ADMIN_ITEM_TYP_DESC
+      FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,vw_obj_key_4 ok
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR
+           AND ai.ADMIN_ITEM_TYP_ID = ok.obj_key_id
+           AND ak.P_ITEM_ID = csi.ITEM_ID
+           AND ak.P_ITEM_VER_NR = csi.VER_NR;
+
