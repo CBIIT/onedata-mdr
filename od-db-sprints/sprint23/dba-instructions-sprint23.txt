@@ -1,6 +1,6 @@
 
 -- Run as ONEDATA_WA DDL scripts
-ALS_SP_23.sql
+S23_WA_ALS_VIEW.sql
 S23_WA_DROP_JIRA19_OBJ.sql 
 S23_WA_19CDE_FTP.sql
 
