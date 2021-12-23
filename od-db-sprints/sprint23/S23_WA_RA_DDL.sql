@@ -139,4 +139,11 @@ FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
        WHERE ADMIN_ITEM_TYP_ID = 51 and ADMIN_ITEM.ITEM_ID = CSI.ITEM_ID and ADMIN_ITEM.VER_NR = CSI.VER_NR and csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr
   ;
 
+
+  CREATE TABLE TEMP_CSI_PATH
+   (	"ITEM_ID" NUMBER NOT NULL ENABLE, 
+	"VER_NR" NUMBER(4,2) NOT NULL ENABLE, 
+	"FUL_PATH" VARCHAR2(16000 BYTE) COLLATE "USING_NLS_COMP"
+   )  ;
+
    
