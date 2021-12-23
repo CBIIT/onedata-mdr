@@ -124,3 +124,4 @@ and air.nci_ver_nr = vv.q_ver_nr (+);
            AND ak.P_ITEM_ID = csi.ITEM_ID
            AND ak.P_ITEM_VER_NR = csi.VER_NR;
 
+alter table NCI_CLSFCTN_SCHM_ITEM add (FUL_PATH varchar(12000));
