@@ -3,8 +3,10 @@
 S23_WA_ALS_VIEW.sql
 S23_WA_DROP_JIRA19_OBJ.sql 
 S23_WA_19CDE_FTP.sql
+S23_WA_RA_DDL.sql
 
 -- Run as ONEDATA_RA DDL scripts
+S23_WA_RA_DDL.sql
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA

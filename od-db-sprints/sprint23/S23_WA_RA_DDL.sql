@@ -26,8 +26,11 @@ STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.L
 commit;
  insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Legacy DEC Excel', 107, 'Legacy DEC Excel', 'Legacy DEC Excel');
 commit;
+--Tracker 1432
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'REDCap DD', 108, 'REDCap DD', 'REDCap DD');
+commit;
 
- CREATE OR REPLACE VIEW VW_NCI_FORM_FLAT AS
+CREATE OR REPLACE VIEW VW_NCI_FORM_FLAT AS
   select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr, frm.item_desc  frm_item_def,
   frmst.hdr_instr, frmst.ftr_instr,
 air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr, frm_mod.instr MOD_INSTR,
