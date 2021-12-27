@@ -243,7 +243,7 @@ v_found boolean;
   column  t_column;
   msg varchar2(4000);
   v_item_typ  integer;
- v_err_str  varchar2(4000);
+ v_err_str  varchar2(4000) := '';
   form1 t_form;
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -292,9 +292,14 @@ BEGIN
             where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') and admin_item_typ_id = i
             and (ITEM_LONG_NM, VER_NR) not in (select ITEM_LONG_NM, VER_NR from ADMIN_ITEM where admin_item_typ_id = i and
             cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR'));
-        end if;
-        select substr(v_err_str || ';' || listagg(item_id,';'), 1, 4000) into v_err_str from admin_item where cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR');
-     
+            commit;
+          select substr(v_err_str || ';' || listagg(item_id,';'), 1, 4000) into v_err_str from admin_item 
+       where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') and admin_item_typ_id = i;
+    -- select listagg(item_id,';') into v_err_str from admin_item 
+     --   where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') and admin_item_typ_id = i;
+    -- raise_application_error(-20000,v_err_str);
+          end if;
+ 
         end loop;
         end if;
 
@@ -318,7 +323,7 @@ BEGIN
 if (v_err_str is null) then
         hookoutput.message := 'Context reassigned. ';
     else
-        hookoutput.message := 'Item not reassigned due to short name duplication: ' || v_err_str;
+        hookoutput.message := 'Item not reassigned due to short name duplication: ' || substr(v_err_str,2);
     end if;  
     end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -433,8 +438,13 @@ BEGIN
        delete from onedata_ra.NCI_CSI_ALT_DEFNMS  where       NCI_PUB_ID = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and NCI_VER_NR =  ihook.getColumnValue(rowform, 'CNTXT_VER_NR');
        commit;
 
-
-        hookoutput.message := 'CSI reassigned.';
+        if hookinput.answerId = 1 then
+               hookoutput.message := 'Reclassified successfully.';
+ 
+        elsif hookinput.answerId = 2 then
+               hookoutput.message := 'Unclassifies successfully.';
+ 
+        end if;
     end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
  -- nci_util.debugHook('GENERAL',v_data_out);
