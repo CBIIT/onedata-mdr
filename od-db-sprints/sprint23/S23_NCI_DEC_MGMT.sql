@@ -290,7 +290,7 @@ begin
     spDECCommon(rowsetai,rowsetcncpt ,'insert',2, hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-    nci_util.debugHook('GENERAL',v_data_out);
+  --  nci_util.debugHook('GENERAL',v_data_out);
 
 end;
 
@@ -332,7 +332,7 @@ begin
     spDECCommon(rowsetai,rowsetcncpt, 'insert',1, hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-    nci_util.debugHook('GENERAL',v_data_out);
+  --  nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 -- Edit an existing DEC
@@ -412,7 +412,7 @@ begin
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
-nci_util.debugHook('GENERAL', v_data_out);
+--nci_util.debugHook('GENERAL', v_data_out);
 
 end;
 
@@ -597,7 +597,7 @@ begin
     if (ihook.getColumnValue(rowai, 'ITEM_NM_CURATED') is not null) then
         ihook.setColumnValue(row,'ITEM_NM', ihook.getColumnValue(rowai, 'ITEM_NM_CURATED'));
        end if;
-       
+
             --  ihook.setColumnValue(row, 'ADMIN_STUS_ID', ihook.getColumnValue(rowform,'ADMIN_STUS_ID'));
            -- ihook.setColumnValue(row, 'REGSTR_STUS_ID', ihook.getColumnValue(rowform,'REGSTR_STUS_ID'));
       --      raise_application_error(-20000,  ihook.getColumnValue(rowform,'ITEM_LONG_NM'));
@@ -683,7 +683,7 @@ begin
 
         ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND', '');
         ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND', '' );
-   
+
        if (   ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null and ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then
               for cur in (select de_conc.* from de_conc, admin_item ai where obj_cls_item_id =  ihook.getColumnValue(rowform, 'ITEM_1_ID') and obj_cls_ver_nr =  ihook.getColumnValue(rowform, 'ITEM_1_VER_NR') and
                prop_item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID') and prop_ver_nr =  ihook.getColumnValue(rowform, 'ITEM_2_VER_NR') and
@@ -693,7 +693,7 @@ begin
                     ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND', cur.ver_nr );
                      return;
                end loop;
-             
+
         end if;
         if (   ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is null or ihook.getColumnValue(rowform, 'CNCPT_2_ITEM_ID_1') is null) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'OC or PROP missing.' || chr(13));
@@ -704,7 +704,7 @@ begin
                 ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'DEC Conceptual Domain is missing.' || chr(13));
                   v_val_ind:= false;
         end if;
-   
+
          rows := t_rows();
 
     IF v_val_ind = true and v_op = 'C' and ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID_FND') is null THEN  -- Create
