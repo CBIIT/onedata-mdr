@@ -91,7 +91,7 @@ where ai.admin_item_typ_id in (8,9,50,51,52,54,56);
 commit;
 
 
-update nci_admin_item_ext e set (cncpt_concat, cncpt_concat_nm) = (select item_nm, item_nm from admin_item ai where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.admin_item_typ_id = 53)
+update nci_admin_item_ext e set (cncpt_concat, cncpt_concat_nm, cncpt_concat_with_int) = (select item_nm, item_nm, item_nm from admin_item ai where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.admin_item_typ_id = 53)
 where e.cncpt_concat is null and
 (e.item_id, e.ver_nr) in (select item_id, ver_nr from admin_item where admin_item_typ_id= 53);
 
@@ -278,6 +278,7 @@ hookInput        t_hookInput;
     v_item_id number;
     v_ver_nr number(4,2);
        actions          t_actions := t_actions ();
+       v_ful_path varchar2(4000) := '';
     action           t_actionRowset;
   BEGIN
     hookinput := Ihook.gethookinput (v_data_in);
@@ -293,15 +294,22 @@ hookInput        t_hookInput;
 
 rows := t_rows();
 
+if ihook.getColumnValue(row_ori, 'P_ITEM_ID') is not null then
+    select ful_path into v_ful_path from nci_clsfctn_schm_item where item_id = ihook.getColumnValue(row_ori, 'P_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR');
+end if;
 if (ihook.getColumnValue(row_ori, 'CS_ITEM_ID') <> ihook.getColumnOldValue(row_ori, 'CS_ITEM_ID')) then -- cs has changed, chnge cs for all children
 
-for cur in (select item_id, ver_nr from nci_clsfctn_schm_item 
+for cur in (select item_id, ver_nr  from nci_clsfctn_schm_item 
     START WITH p_item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and p_item_ver_nr =  ihook.getColumnValue(row_ori, 'VER_NR')
     CONNECT BY PRIOR item_id = p_item_id) loop
     if (cur.item_id <> ihook.getColumnValue(row_ori, 'ITEM_ID')) then
+    row := t_row();
     nci_11179.spReturnSubtypeRow(cur.item_id, cur.ver_nr, 51, row);
     ihook.setColumnValue (row, 'CS_ITEM_ID', ihook.getColumnValue(row_ori, 'CS_ITEM_ID'));
     ihook.setColumnValue (row, 'CS_ITEM_VER_NR', ihook.getColumnValue(row_ori, 'CS_ITEM_VER_NR'));
+    
+ --   if (ihook.getColumnValue(row_ori, 'P_ITEM_ID') <> ihook.getColumnOldValue(row_ori, 'P_ITEM_ID')) then --Parent has changed. Change Full Path
+
         rows.EXTEND;
             rows (rows.LAST) := row;
     end if;   
@@ -313,9 +321,12 @@ for cur in (select item_id, ver_nr from nci_clsfctn_schm_item
             hookoutput.actions := actions;
     end if;
 end if;
-    
+
+
+
+
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-  
+
 end;
 
 
