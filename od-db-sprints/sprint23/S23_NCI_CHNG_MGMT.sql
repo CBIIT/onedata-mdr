@@ -308,7 +308,7 @@ as
     end if;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-  nci_util.debugHook('GENERAL', v_data_out);
+  --nci_util.debugHook('GENERAL', v_data_out);
 END;
 
 
@@ -790,7 +790,7 @@ BEGIN
         end if;
  end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-  nci_util.debugHook('GENERAL', v_data_out);
+ -- nci_util.debugHook('GENERAL', v_data_out);
 END;
 
 PROCEDURE spDEValCreateImport (rowform in out t_row, v_op in varchar2, actions in out t_actions, v_val_ind in out boolean)
@@ -1811,7 +1811,7 @@ BEGIN
 
          end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-  nci_util.debugHook('GENERAL', v_data_out);
+ -- nci_util.debugHook('GENERAL', v_data_out);
 END;
 
 PROCEDURE spDesignateNew
@@ -1971,7 +1971,7 @@ if (actions.count > 0) then
 end if;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-  nci_util.debugHook('GENERAL', v_data_out);
+ -- nci_util.debugHook('GENERAL', v_data_out);
 END;
 
 PROCEDURE spUndesignate
@@ -2204,5 +2204,4 @@ end if ;
 RETURN V_DN;
 END;
 END;
-
 /
