@@ -513,7 +513,7 @@ begin
 --raise_application_error(-20000,hookoutput.message);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-       nci_util.debugHook('GENERAL',v_data_out);
+ --      nci_util.debugHook('GENERAL',v_data_out);
 
 END;
 
@@ -1968,11 +1968,10 @@ begin
 
     v_data_out := ihook.getHookOutput(hookOutput);
 
-     nci_util.debugHook('GENERAL',v_data_out);
+  --   nci_util.debugHook('GENERAL',v_data_out);
     -- insert into junk_debug (id, test) values (sysdate, v_data_out);
     -- commit;
 
 end;
 END;
-
 /
