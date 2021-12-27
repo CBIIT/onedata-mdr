@@ -1194,7 +1194,7 @@ from value_dom where item_id = v_item_id and ver_nr = v_ver_nr;
 
 --
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-     nci_util.debugHook('GENERAL',v_data_out);
+   --  nci_util.debugHook('GENERAL',v_data_out);
 end;
 --
 
