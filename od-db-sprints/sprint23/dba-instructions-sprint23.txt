@@ -1,3 +1,5 @@
+--Run as ONEDATA_MD DDL Scripts
+S23_MD_DDL.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S23_WA_RA_DDL.sql
