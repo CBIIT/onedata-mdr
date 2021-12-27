@@ -315,7 +315,7 @@ begin
 
    end if;  -- if second invocation
 V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
- nci_util.debugHook('GENERAL',v_data_out);
+-- nci_util.debugHook('GENERAL',v_data_out);
 END;
 
 PROCEDURE spAddQuestVV
@@ -976,7 +976,7 @@ BEGIN
     hookoutput.actions:= actions;
 
     v_data_out := ihook.getHookOutput(hookOutput);
-    nci_util.debugHook('FORM',v_data_out);
+ --   nci_util.debugHook('FORM',v_data_out);
 
 END;
 
@@ -1215,7 +1215,7 @@ BEGIN
         hookoutput.message := 'Form Created Successfully with ID ' || v_form_id;
     END IF;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-  nci_util.debugHook('GENERAL',v_data_out);
+ -- nci_util.debugHook('GENERAL',v_data_out);
   
 END;
 
@@ -1484,7 +1484,7 @@ BEGIN
   END IF;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-    nci_util.debugHook('GENERAL',v_data_out);
+  --  nci_util.debugHook('GENERAL',v_data_out);
 END;
 
 PROCEDURE spEditModule  (    v_data_in IN CLOB,    v_data_out OUT CLOB,    v_user_id in varchar2)
@@ -2815,7 +2815,7 @@ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.get
     --hookoutput.message := v_add || ' concepts added.';
     end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-  nci_util.debugHook('GENERAL',v_data_out);
+--  nci_util.debugHook('GENERAL',v_data_out);
 
 END;
 
