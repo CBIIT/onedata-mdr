@@ -261,7 +261,7 @@ rows := t_rows();
     spPVVMCommon2(rows, 'insert', hookinput, hookoutput);
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
- nci_util.debugHook('GENERAL',v_data_out);
+ --nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 
@@ -305,7 +305,7 @@ begin
 
     end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-     nci_util.debugHook('GENERAL',v_data_out);
+   --  nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 
@@ -399,7 +399,7 @@ begin
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
-nci_util.debugHook('GENERAL', v_data_out);
+--nci_util.debugHook('GENERAL', v_data_out);
 
 end;
 
@@ -479,7 +479,7 @@ begin
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
-nci_util.debugHook('GENERAL', v_data_out);
+--nci_util.debugHook('GENERAL', v_data_out);
 
 end;
 
@@ -1258,7 +1258,14 @@ begin
                         end loop;
                         end if;
                 end loop;
-
+                end if;
+                if  (ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is null) then
+                    for cur in(select item_id, item_nm , item_desc from admin_item where  item_id = v_item_id and ver_nr = v_ver_nr) loop
+                         v_def := ':' || cur.item_desc;
+                         v_long_nm_suf_int := ':' || cur.item_nm;
+                         v_long_nm_suf := ':' || cur.item_nm;
+                    end loop;
+                end if;
               --  raise_application_error(-20000, v_long_nm_suf_int);
                 z := 1;
                  for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
@@ -1277,12 +1284,7 @@ begin
                ihook.setColumnValue(rowform, 'ITEM_1_LONG_NM_INT', substr(v_long_nm_suf_int,2));
                rows := t_rows();  rows.extend;  rows(rows.last) := rowform;
                rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
-               else
-                  is_Valid := false;
-                  hookoutput.message := 'You need to specify at least one concept.';
-               rows := t_rows();  rows.extend;  rows(rows.last) := rowform;
-               rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
-                end if;
+              
   --      end if;
         v_err_str := '';
      --    nci_11179_2.stdCncptRowValidation(rowform, 1,is_valid, v_err_str );
@@ -1572,7 +1574,7 @@ begin
            row_vm_cd := t_row();
            ihook.setColumnValue(row_vm_cd, 'CONC_DOM_ITEM_ID', ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID'));
             ihook.setColumnValue(row_vm_cd, 'CONC_DOM_VER_NR', ihook.getColumnValue(rowform, 'CONC_DOM_VER_NR'));
-  
+
             if (v_opt = 1 ) then -- use specified
             ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_ITEM_ID', ihook.getColumnValue(rowform, 'ITEM_2_ID'));
               ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'));
@@ -1597,8 +1599,8 @@ begin
                       ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'));
                       ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_ITEM_ID', ihook.getColumnValue(rowform, 'ITEM_2_ID'));
                       ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'));
-                    
-  
+
+
           end if;
 
             if (v_opt = 5) then -- new vm creation using drop-down
@@ -1608,7 +1610,7 @@ begin
               ihook.setColumnValue(row_ori, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'));
                 ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_ITEM_ID', ihook.getColumnValue(rowform, 'ITEM_1_ID'));
               ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'));
-              
+
               end if;
 
               rows := t_rows();
@@ -1623,7 +1625,7 @@ begin
         and conc_dom_ver_nr = ihook.getColumnValue(row_vm_cd, 'CONC_DOM_VER_NR')
         and NCI_VAL_MEAN_ITEM_ID = ihook.getColumnValue(row_vm_cd, 'NCI_VAL_MEAN_ITEM_ID')
         and NCI_VAL_MEAN_VER_NR = ihook.getColumnValue(row_vm_cd, 'NCI_VAL_MEAN_VER_NR');
-        
+
         if (v_temp = 0) then
               rows := t_rows();
                    rows.extend;
