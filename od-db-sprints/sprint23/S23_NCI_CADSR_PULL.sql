@@ -5337,6 +5337,25 @@ commit;
 
 update admin_item set regstr_stus_id = 9, regstr_stus_nm_dn = 'APPLICATION' where regstr_stus_id is null; -- Tracker 806
 commit;
+
+delete from TEMP_CSI_PATH;
+
+insert into TEMP_CSI_PATH 
+select ai.item_id, ai.ver_nr, substr(CAST(SYS_CONNECT_BY_PATH(replace
+(ai.ITEM_NM,'|',''), ' | ') as varchar2(4000)),1,4000) FUL_PATH
+FROM ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi
+       WHERE ADMIN_ITEM_TYP_ID = 51 and ai.ITEM_ID = CSI.ITEM_ID and ai.VER_NR 
+= CSI.VER_NR 
+   start with p_item_id is null
+   CONNECT BY PRIOR csi.item_id = csi.p_item_id;
+
+   commit;
+   
+update NCI_CLSFCTN_SCHM_ITEM c set FUL_PATH = (select FUL_PATH from   
+    temp_csi_path b where b.item_id = c.item_id and b.ver_nr = c.ver_nr);
+    commit;
+    
+    
 end;
  function get_stus_mstr_id (STATUS_NAME VARCHAR2, STATUS_TYPE_ID number) return number is
 v_status_id number;
