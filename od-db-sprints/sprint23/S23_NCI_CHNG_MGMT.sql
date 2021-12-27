@@ -379,7 +379,7 @@ commit;
         --  ihook.setColumnValue(row,'CS_ITEM_VER_NR', ' ');
          --     ihook.setColumnValue(row,'P_ITEM_ID', '');
          --   ihook.setColumnValue(row,'P_ITEM_VER_NR', '');
-            
+
            rows := t_rows();    rows.extend;    rows(rows.last) := row;
             action := t_actionrowset(rows, 'CSI', 2,2,'update');
             actions.extend;    actions(actions.last) := action;
@@ -2204,5 +2204,5 @@ end if ;
 RETURN V_DN;
 END;
 END;
-/
 
+/
