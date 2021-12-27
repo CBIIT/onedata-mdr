@@ -93,11 +93,11 @@ begin
     hookOutput.invocationNumber := hookInput.invocationNumber;
     hookOutput.originalRowset := hookInput.originalRowset;
   rows := t_rows();
- 
+
 for i in 1..hookinput.originalRowset.rowset.count loop
 
     row_ori := hookInput.originalRowset.rowset(i);
-       
+
    -- if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null and ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID') is null and v_mode='V')    then
     if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null  and v_mode='V')    then
         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', '');
@@ -105,7 +105,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         nci_dec_mgmt.createValAIWithConcept(row_ori, 1,5,'V', 'DROP-DOWN', actions) ;
         nci_dec_mgmt.createValAIWithConcept(row_ori, 2,6,'V', 'DROP-DOWN', actions) ;
   --      nci_vd.createValAIWithConcept(row_ori, 3,7,'V', 'DROP-DOWN', actions) ;
-  
+
         nci_dec_mgmt.spDECValCreateImport(row_ori, 'V', actions, v_val_ind);
    --     nci_vd.spVDValCreateImport(row_ori, 'V', actions, v_val_ind);
    --     nci_chng_mgmt.spDEValCreateImport(row_ori, 'V', actions, v_val_ind);
@@ -120,27 +120,27 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     --    if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null and ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID') is null and  ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_FND') is null
    --     and v_mode = 'C') then
         if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null and  ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_FND') is null        and v_mode = 'C') then
-        
+
         --and v_val_ind = true)    then
         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', '');
         v_val_ind := true;
    --     nci_dec_mgmt.createValAIWithConcept(row_ori, 1,5,'C', 'DROP-DOWN', actions) ;
      --   nci_dec_mgmt.createValAIWithConcept(row_ori, 2,6,'C', 'DROP-DOWN', actions) ;
     --  raise_application_error(-20000, 'HEre  9');
-  
+
         nci_dec_mgmt.spDECValCreateImport(row_ori, 'C', actions, v_val_ind);
       end if;
     rows.extend; rows(rows.last) := row_ori;
  --  end if; -- only if not processed     
 end loop;
 --raise_application_error(-20000,'heddddrereffffrter');
- 
+
     action := t_actionrowset(rows, 'DEC Import', 2,10,'update');
         actions.extend;
         actions(actions.last) := action;
         hookoutput.actions := actions;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
- nci_util.debugHook('GENERAL',v_data_out);
+ --nci_util.debugHook('GENERAL',v_data_out);
 
 end;
 
@@ -238,7 +238,7 @@ begin
     nci_dec_mgmt.createValAIWithConcept(row_ori, 2,6,'V', 'STRING', actions) ;
     end if;
  --   nci_dec_mgmt.spDECValCreateImport(row_ori, 'V', actions, v_val_ind);
-  
+
    --    raise_application_error(-20000, ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR_FND'));
   /*  if (v_val_ind = false) then 
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
@@ -301,7 +301,7 @@ end loop;
         actions(actions.last) := action;
         hookoutput.actions := actions;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
- nci_util.debugHook('GENERAL',v_data_out);
+ --nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 --  PV/VM
@@ -499,8 +499,9 @@ end loop;
         actions(actions.last) := action;
         hookoutput.actions := actions;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
- nci_util.debugHook('GENERAL',v_data_out);
+ --nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 end;
+/
 /
