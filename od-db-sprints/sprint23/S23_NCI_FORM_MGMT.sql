@@ -1136,9 +1136,9 @@ BEGIN
         nci_11179.spReturnSubtypeRow (v_from_item_id, v_from_ver_nr, 54, action_row);
          ihook.setColumnValue(action_row, 'ADMIN_STUS_ID', 66);
          ihook.setColumnValue(action_row, 'REGSTR_STUS_ID', 9);
-        ihook.setColumnValue(action_row, 'P_ITEM_ID', '');
-                 ihook.setColumnValue(action_row, 'P_ITEM_VER_NR', '');
---
+    --    ihook.setColumnValue(action_row, 'P_ITEM_ID', '');
+     --            ihook.setColumnValue(action_row, 'P_ITEM_VER_NR', '');
+----
         ihook.setColumnValue(action_row, 'FORM_TYP_ID', 70);
         action_rows.extend; action_rows(action_rows.last) := action_row;
         rowset := t_rowset(action_rows, 'Forms (Hook From Existing)', 1,'VW_NCI_FORM');
@@ -1153,10 +1153,10 @@ BEGIN
         rowform := form1.rowset.rowset(1);
 
    --    raise_application_error(-20000, 'yyy' || nvl(ihook.getColumnValue(rowform, 'P_ITEM_VER_NR'),'1') || 'kkk');
-       if (nvl(ihook.getColumnValue(rowform, 'P_ITEM_VER_NR'),0) = 0) then
+    /*   if (nvl(ihook.getColumnValue(rowform, 'P_ITEM_VER_NR'),0) = 0) then
                 ihook.setColumnValue(rowform, 'P_ITEM_ID', 1);
                 ihook.setColumnValue(rowform, 'P_ITEM_VER_NR', 1);
-            end if;
+            end if;*/
         v_form_id :=  nci_11179.getItemId;
         row := t_row();
         row := rowform;
@@ -1182,11 +1182,17 @@ BEGIN
         actions.extend;
         actions(actions.last) := action;
 
-        -- Insert form-protocol relationship if protocol specified
-          --   raise_application_error(-20000, 'yyy' || ihook.getColumnValue(rowform, 'P_ITEM_ID') || 'kkk');
-
-        if (ihook.getColumnValue(rowform,'P_ITEM_ID')  > 1) then
-    --    raise_application_error(-20000,'In Herer');
+    
+        --Copy all modules
+        for cur2 in (select c_item_id, c_item_ver_nr, disp_ord from nci_admin_item_rel where p_item_id = v_from_item_id and p_item_ver_nr = v_from_ver_nr
+     and nvl(fld_delete,0) = 0) loop
+     nci_11179.spCopyModuleNCI (actions, cur2.c_item_id,cur2.c_item_ver_nr,    v_from_item_id, v_from_ver_nr,v_form_id, 1, cur2.disp_ord,'V', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'),
+     ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
+    end loop;
+            nci_11179.spCreateCommonChildrenNCI(actions, v_from_item_id,v_from_ver_nr, v_form_id, 1);
+ 
+         -- Insert form-protocol relationship if protocol specified
+  for cur in (select item_id, ver_nr from admin_item where item_id = nvl(ihook.getColumnValue(rowform,'P_ITEM_ID'),0) and ver_nr = nvl(ihook.getColumnValue(rowform,'P_ITEM_VER_NR'),0)) loop
             rows:= t_rows();
             rowrel := t_row();
             ihook.setColumnValue(rowrel, 'P_ITEM_ID', ihook.getColumnValue(rowform,'P_ITEM_ID'));
@@ -1202,42 +1208,15 @@ BEGIN
             action             := t_actionrowset(rows, 'Generic AI Relationship', 2, 7,'insert');
             actions.extend;
             actions(actions.last) := action;
-        end if;
-         nci_11179.spCreateCommonChildrenNCI(actions, v_from_item_id,v_from_ver_nr, v_form_id, 1);
-        --Copy all modules
-        for cur2 in (select c_item_id, c_item_ver_nr, disp_ord from nci_admin_item_rel where p_item_id = v_from_item_id and p_item_ver_nr = v_from_ver_nr
-     and nvl(fld_delete,0) = 0) loop
-     nci_11179.spCopyModuleNCI (actions, cur2.c_item_id,cur2.c_item_ver_nr,    v_from_item_id, v_from_ver_nr,v_form_id, 1, cur2.disp_ord,'V', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'),
-     ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
-    end loop;
-
--- Protocol
- /*   action_rows := t_rows();
-
-   for pro_cur in (select P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID from NCI_ADMIN_ITEM_REL where
-        c_item_id = v_from_item_id and c_ITEM_ver_nr = v_from_ver_nr and rel_typ_id = 60 and nvl(fld_delete,0) = 0) loop
-          --    raise_application_error(-20000,'Herer');
-
-            row := t_row();
-            ihook.setColumnValue(row, 'P_ITEM_ID', pro_cur.P_ITEM_ID);
-          ihook.setColumnValue(row, 'P_ITEM_VER_NR', pro_cur.P_ITEM_VER_NR);
-          ihook.setColumnValue(row, 'C_ITEM_ID', v_form_id);
-          ihook.setColumnValue(row, 'REL_TYP_ID', pro_cur.rel_typ_id);
-            ihook.setColumnValue(row, 'C_ITEM_VER_NR',1);
-
-            action_rows.extend; action_rows(action_rows.last) := row;
         end loop;
-      if (action_rows.count > 0) then
-        action := t_actionRowset(action_rows, 'Protocol-Form Relationship (Form View)',2, 22, 'insert');
-        actions.extend; actions(actions.last) := action;
-        end if;
-*/
-
+   
         hookoutput.actions    := actions;
+        
         hookoutput.message := 'Form Created Successfully with ID ' || v_form_id;
     END IF;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
   nci_util.debugHook('GENERAL',v_data_out);
+  
 END;
 
 PROCEDURE spAddModule  (    v_data_in IN CLOB,    v_data_out OUT CLOB,    v_user_id in varchar2)
@@ -1326,14 +1305,14 @@ BEGIN
             ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
             ihook.setColumnValue(row, 'VER_NR',ihook.getColumnValue(row_ori,'VER_NR') );
             ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 52);
-            
+
               for cur in (select cntxt_item_id, cntxt_ver_nr from admin_item where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')) loop
            ihook.setColumnValue(row, 'CNTXT_ITEM_ID', cur.CNTXT_ITEM_ID);
             ihook.setColumnValue(row, 'CNTXT_VER_NR', cur.CNTXT_VER_NR);
         end loop;
         ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66);
         ihook.setColumnValue(row, 'REGSTR_STUS_ID', 9);
-        
+
        --     if ( ihook.getColumnValue(rowform,'ITEM_LONG_NM')= v_dflt_txt) then
                    ihook.setColumnValue(row, 'ITEM_LONG_NM', v_module_id ||  c_ver_suffix);
         --    else
@@ -1977,22 +1956,22 @@ BEGIN
         form1              := forms(1);
 
         row_sel := form1.rowset.rowset(1);
-        
+
         v_start_rep := ihook.getColumnValue(row_sel, 'ITEM_ID');
         v_end_rep := ihook.getColumnValue(row_sel, 'VER_NR');
-        
+
         if (v_start_rep > v_rep or v_end_rep > v_rep) then
         hookoutput.message :='From or To Repetition Number outside the total number of repetitions: '|| v_rep;
          V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
         return;
         end if;
-        
+
         if (v_start_rep < 0 or v_end_rep < 0 or v_end_rep < v_start_rep) then
         hookoutput.message := 'From or To Repetition Number have to be positive. From Repitition Number has to be less than or equal to End Repitition Number '|| v_rep;
          V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
         return;
         end if;
-        
+
         rows := t_rows();
      --   v_rep_sel := ihook.getColumnValue(row_sel, 'Repetition');
         rows := t_rows();
@@ -3088,7 +3067,7 @@ nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.ge
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Change Value Meaning Text', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
-       	 showrowset := t_showablerowset (rows, 'Alternate Names', 2, 'single');
+       	 showrowset := t_showablerowset (rows, 'Alternate Names (All Types for Hook)', 2, 'single');
        	 hookoutput.showrowset := showrowset;
         else
         hookoutput.message := 'No alternate names found.';
@@ -3197,7 +3176,7 @@ nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.ge
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Change VM Alternate Description', ANSWERS);
     HOOKOUTPUT.QUESTION    := QUESTION;
-       	 showrowset := t_showablerowset (rows, 'Alternate Definitions', 2, 'single');
+       	 showrowset := t_showablerowset (rows, 'Alternate Definitions (All Types for Hook)', 2, 'single');
        	 hookoutput.showrowset := showrowset;
         else
         hookoutput.message := 'No alternate definitions found.';
