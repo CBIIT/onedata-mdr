@@ -1,4 +1,3 @@
-
 CREATE OR REPLACE FORCE VIEW VW_ALS_CDE_VD_PV_RAW_DATA_DD
 (
     COLLECT_ID,
@@ -98,9 +97,7 @@ AS
                    AND VM.VER_NR = PERM_VAL.NCI_VAL_MEAN_VER_NR) PVM,
           (select count(*) NMR_PV ,VAL_DOM_ITEM_ID,VAL_DOM_VER_NR
           from PERM_VAL
-                  
-                   GROUP BY PERM_VAL.VAL_DOM_ITEM_ID,PERM_VAL.VAL_DOM_VER_NR) CPVM,
-
+		  GROUP BY PERM_VAL.VAL_DOM_ITEM_ID,PERM_VAL.VAL_DOM_VER_NR) CPVM,
            FMT,
            DATA_TYP       DT,
            NCI_DLOAD_DTL  ALS,
