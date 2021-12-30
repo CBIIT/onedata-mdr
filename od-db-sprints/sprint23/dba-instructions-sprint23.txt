@@ -28,13 +28,10 @@ S23_WA_VALIDATE-MIGR-UPD.sql
 
 
 -- Run as ONEDATA_WA DM scripts
-S23_WA_Data_migration.sql
 
 -- Run as ONEDATA_RA DM scripts
-S19_RA_Data_Migration.sql
 
 -- Run validate job as ONEDATA_WA
-exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
 
 -- Run as ONEDATA_WA DM scripts
 truncate table SAG_LOAD_CONCEPTS_EVS
