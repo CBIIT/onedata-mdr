@@ -21,6 +21,7 @@ S23_NCI_PV_VM.sql
 S23_NCI_VD.sql
 S23_NCI_POST_HOOK.sql
 S23_sp_postprocess.sql
+S23_WA_VALIDATE-MIGR-UPD.sql
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
