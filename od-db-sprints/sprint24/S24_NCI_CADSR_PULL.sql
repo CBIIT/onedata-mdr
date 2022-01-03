@@ -1,4 +1,6 @@
-create or replace PACKAGE nci_caDSR_PULL AS
+DROP PACKAGE ONEDATA_WA.NCI_CADSR_PULL;
+
+CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
 procedure sp_create_ai_3;
@@ -30,7 +32,10 @@ procedure SP_SOURCE_TYPE;
   --    procedure sp_append_quest_pv;
 END;
 /
-create or replace PACKAGE BODY nci_caDSR_PULL AS
+
+DROP PACKAGE BODY ONEDATA_WA.NCI_CADSR_PULL;
+
+CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_caDSR_PULL AS
 
 
 v_dflt_usr  varchar2(30) := 'ONEDATA';
@@ -51,8 +56,7 @@ begin
 
 
 
-delete from temp_import;
-commit;
+execute immediate 'truncate table temp_import';
 
 insert into temp_import(item_id, ver_nr, rep_no)
 select c_item_id, c_item_ver_nr, rep_no from nci_admin_item_rel r where rel_typ_id = 61 and nvl(rep_no ,0) >0 ;
@@ -133,9 +137,8 @@ AS
     v_cnt   INTEGER;
 BEGIN
     -- Context creation
-    DELETE FROM cntxt;
-
-    COMMIT;
+  --  DELETE FROM cntxt;
+execute immediate 'truncate table cntxt';
 
     DELETE FROM admin_item
           WHERE admin_item_typ_id = 8;
@@ -1334,9 +1337,8 @@ update SET
  COMMIT;
 
     -- Conceptual Domain Creation
-    DELETE FROM conc_dom;
 
-    COMMIT;
+execute immediate 'truncate table conc_dom';
 
     DELETE FROM admin_item
           WHERE admin_item_typ_id = 1;
@@ -1420,13 +1422,10 @@ update SET
     COMMIT;
 
     -- Object class and Property creation. Need to confirm the OC and Property specific attributes
-    DELETE FROM obj_cls;
 
-    COMMIT;
+execute immediate 'truncate table obj_cls';
 
-    DELETE FROM prop;
-
-    COMMIT;
+execute immediate 'truncate table prop';
 
     DELETE FROM admin_item
           WHERE admin_item_typ_id IN (5, 6);
@@ -1581,13 +1580,10 @@ update SET
     COMMIT;
 
     -- Classification Scheme and Representation Class creation
-    DELETE FROM CLSFCTN_SCHM;
+   execute immediate 'truncate table CLSFCTN_SCHM';
 
-    COMMIT;
+   execute immediate 'truncate table REP_CLS';
 
-    DELETE FROM REP_CLS;
-
-    COMMIT;
 
     DELETE FROM admin_item
           WHERE admin_item_typ_id IN (7, 9);
@@ -1755,17 +1751,12 @@ PROCEDURE            sp_create_ai_2
 AS
     v_cnt   INTEGER;
 BEGIN
-    DELETE FROM de;
+    execute immediate 'truncate table de';
 
-    COMMIT;
+    execute immediate 'truncate table value_dom';
 
-    DELETE FROM value_dom;
+    execute immediate 'truncate table de_conc';
 
-    COMMIT;
-
-    DELETE FROM de_conc;
-
-    COMMIT;
 
     -- Creation of Value DOmain, DEC and DE
 
@@ -1943,17 +1934,11 @@ AS
     un_oc number;
     un_prop number;
 BEGIN
-    DELETE FROM de;
+    execute immediate 'truncate table de';
 
-    COMMIT;
+    execute immediate 'truncate table value_dom';
 
-    DELETE FROM value_dom;
-
-    COMMIT;
-
-    DELETE FROM de_conc;
-
-    COMMIT;
+    execute immediate 'truncate table de_conc';
 
    un_oc := 7318107;
    un_prop := 7318108;
@@ -2393,9 +2378,7 @@ PROCEDURE            sp_create_ai_4
 AS
     v_cnt   INTEGER;
 BEGIN
-    DELETE FROM nci_oc_recs;
-
-    COMMIT;
+    execute immediate 'truncate table nci_oc_recs';
 
     DELETE FROM admin_item
           WHERE admin_item_typ_id = 56;
@@ -2506,9 +2489,8 @@ AS
     v_cnt   INTEGER;
 BEGIN
     -- Alternate Definitions
-    DELETE FROM alt_def;
+    execute immediate 'truncate table alt_def';
 
-    COMMIT;
 
     INSERT INTO alt_def (ITEM_ID,
                          VER_NR,
@@ -2548,9 +2530,8 @@ BEGIN
                AND ok.obj_typ_id(+) = 15;
 
     -- Alternate Names
-    DELETE FROM alt_nms;
+    execute immediate 'truncate table alt_nms';
 
-    COMMIT;
 
     INSERT INTO alt_nms (ITEM_ID,
                          VER_NR,
@@ -2640,10 +2621,7 @@ BEGIN
     COMMIT;
 
 
-    DELETE FROM NCI_CSI_ALT_DEFNMS;
-
-    COMMIT;
-
+   execute immediate 'truncate table NCI_CSI_ALT_DEFNMS';
 
 
     INSERT INTO NCI_CSI_ALT_DEFNMS (NCI_PUB_ID,
@@ -2694,14 +2672,11 @@ PROCEDURE            sp_create_ai_cncpt
 AS
     v_cnt   INTEGER;
 BEGIN
-    DELETE FROM cncpt_admin_item;
+    execute immediate 'truncate table cncpt_admin_item';
 
-    COMMIT;
+    execute immediate 'truncate table cncpt';
 
-    DELETE FROM cncpt;
-
-    COMMIT;
-
+   
     -- Concept and concept relationships
     DELETE FROM admin_item
           WHERE admin_item_typ_id = 49;
@@ -3042,9 +3017,9 @@ BEGIN
 
     COMMIT;
 
-    DELETE FROM nci_clsfctn_schm_item;
+    execute immediate 'truncate table nci_clsfctn_schm_item';
 
-    COMMIT;
+   
 
 
     INSERT INTO admin_item (NCI_IDSEQ,
@@ -3266,8 +3241,8 @@ as
 v_cnt integer;
 v_found varchar2(5);
 begin
-delete from ONEDATA_WA.STUS_MSTR ;
-commit;
+execute immediate 'truncate table STUS_MSTR';
+
 Insert into ONEDATA_WA.STUS_MSTR (STUS_ID,STUS_NM,STUS_DESC,STUS_TYP_ID,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT,STUS_MSK,STUS_ACRO,NCI_STUS,NCI_CMNTS,NCI_DISP_ORDR) 
 values (9,'Application','The AC is part of a computer program or application and may not have all the metadata generally required by the registry.',1,to_date('26-MAY-04','DD-MON-RR'),'SBR','CHENR',0,to_date('19-APR-21','DD-MON-RR'),to_date('19-APR-21','DD-MON-RR'),to_date('02-DEC-16','DD-MON-RR'),'000000',null,'Application',null,55);
 Insert into ONEDATA_WA.STUS_MSTR (STUS_ID,STUS_NM,STUS_DESC,STUS_TYP_ID,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT,STUS_MSK,STUS_ACRO,NCI_STUS,NCI_CMNTS,NCI_DISP_ORDR) values (10,'Historical','Historical',1,to_date('02-DEC-16','DD-MON-RR'),'CHENR','CHENR',0,to_date('19-APR-21','DD-MON-RR'),to_date('19-APR-21','DD-MON-RR'),to_date('02-DEC-16','DD-MON-RR'),'000000',null,'Historical',null,58);
@@ -3564,8 +3539,7 @@ commit;
 
 --- Data type
 
-delete from data_typ;
-commit;
+execute immediate 'truncate table data_typ';
 insert into data_typ ( DTTYPE_NM, NCI_CD, DTTYPE_DESC, NCI_DTTYPE_CMNTS,
 CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID,
 DTTYPE_SCHM_REF, DTTYPE_ANNTTN)
@@ -3577,8 +3551,8 @@ select DTL_NAME, DTL_NAME, DESCRIPTION,COMMENTS,
 commit;
 
 -- Format
-delete from FMT;
-commit;
+execute immediate 'truncate table FMT';
+
 insert into FMT ( FMT_NM, NCI_CD,FMT_DESC,FMT_CMNTS,
 CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select FORML_NAME, FORML_NAME,DESCRIPTION,COMMENTS,
@@ -3589,8 +3563,8 @@ select FORML_NAME, FORML_NAME,DESCRIPTION,COMMENTS,
 commit;
 
 -- UOM
-delete from UOM;
-commit;
+execute immediate 'truncate table UOM';
+
 insert into UOM ( UOM_NM,NCI_CD, UOM_PREC,UOM_DESC,UOM_CMNTS,
 CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID)
 select UOML_NAME,UOML_NAME,PRECISION,
@@ -3811,8 +3785,8 @@ Real	Real
 */
 
 
-delete from lang;
-commit;
+execute immediate 'truncate table lang';
+
 
 INSERT INTO LANG ( CNTRY_ISO_CD, LANG_ISO_CD, LANG_ID, LANG_NM,
 LANG_DESC ) VALUES (
@@ -3988,13 +3962,9 @@ BEGIN
 
 
 
-    DELETE FROM nci_form;
+   execute immediate 'truncate table nci_form';
 
-    COMMIT;
-
-    DELETE FROM nci_protcl;
-
-    COMMIT;
+   execute immediate 'truncate table nci_protcl';
 
     DELETE FROM admin_item
           WHERE admin_item_typ_id IN (50,
@@ -4063,9 +4033,7 @@ BEGIN
 
     COMMIT;
 
-    DELETE FROM nci_form;
-
-    COMMIT;
+    execute immediate 'truncate table nci_form';
 
 
     INSERT INTO nci_form (item_id,
@@ -4459,13 +4427,9 @@ END;
 AS
     v_cnt   INTEGER;
 BEGIN
-    DELETE FROM nci_form_ta_rel;
+    execute immediate 'truncate table nci_form_ta_rel';
 
-    COMMIT;
-
-    DELETE FROM nci_form_ta;
-
-    COMMIT;
+    execute immediate 'truncate table nci_form_ta';
 
 
     --MODULE MODULE
@@ -4694,9 +4658,7 @@ END;
 AS
     v_cnt   INTEGER;
 BEGIN
-    DELETE FROM NCI_QUEST_VALID_VALUE;
-
-    COMMIT;
+    execute immediate 'truncate table NCI_QUEST_VALID_VALUE';
 
     INSERT INTO NCI_QUEST_VALID_VALUE (NCI_PUB_ID,
                                        Q_PUB_ID,
@@ -4750,9 +4712,7 @@ BEGIN
 
     commit;
 
-    DELETE FROM NCI_QUEST_VV_REP;
-
-    COMMIT;
+    execute immediate 'truncate table NCI_QUEST_VV_REP';
 
     -- Changed as per tracker 863
     --added CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, LST_UPD_DT
@@ -4803,8 +4763,7 @@ as
 v_cnt integer;
 begin
 
-delete from nci_instr;
-commit;
+execute immediate 'truncate table nci_instr';
 
 insert into NCI_INSTR
 (NCI_PUB_ID, NCI_LVL, NCI_TYP, NCI_VER_NR, SEQ_NR,INSTR_LNG, INSTR_SHRT, INSTR_DEF,
@@ -4899,8 +4858,7 @@ ai.item_id = f.item_id and ai.ver_nr = f.ver_nr and ai.nci_idseq = qc.dn_crf_ids
 commit;
 
 
-delete from temp_import;
-commit;
+execute immediate 'truncate table temp_import';
 
 insert into temp_import (ITEM_ID, VER_NR, QC_ID, PREFERRED_DEFINITION, REP_NO) select  ai.item_id, ai.ver_nr,qc_id, qc.preferred_definition, display_order  from sbrext_m.quest_contents_ext qc, admin_item ai
 where qc.qtl_name = 'MODULE_INSTR' and ai.nci_idseq = qc.p_mod_idseq and (qc.p_mod_idseq, display_order) in (select p_mod_idseq, min(display_order)
@@ -4918,8 +4876,7 @@ where m.rel_typ_id = 61;
 commit;
 
 
-delete from temp_import;
-commit;
+execute immediate 'truncate table temp_import';
 
 insert into temp_import (ITEM_ID, VER_NR, qc_id, PREFERRED_DEFINITION) select  ai.nci_pub_id, ai.nci_ver_nr,qc.qc_id, qc.preferred_definition  from sbrext_m.quest_contents_ext qc, nci_admin_item_rel_alt_key ai
 where qc.qtl_name = 'QUESTION_INSTR' and ai.nci_idseq = qc.p_qst_idseq and (qc.p_qst_idseq, display_order) in (select p_qst_idseq, min(display_order)
@@ -4936,8 +4893,7 @@ commit;
 
 
 
-delete from temp_import;
-commit;
+execute immediate 'truncate table temp_import';
 
 insert into temp_import (ITEM_ID, VER_NR, qc_id, PREFERRED_DEFINITION) select  ai.nci_pub_id, ai.nci_ver_nr,qc.qc_id,qc.preferred_definition  from sbrext_m.quest_contents_ext qc, nci_quest_valid_value ai
 where qc.qtl_name = 'VALUE_INSTR' and ai.nci_idseq = qc.p_val_idseq and  (qc.p_val_idseq, display_order) in (select p_val_idseq, min(display_order)
@@ -4961,9 +4917,7 @@ PROCEDURE            sp_create_pv
 AS
     v_cnt   INTEGER;
 BEGIN
-    DELETE FROM nci_val_mean;
-
-    COMMIT;
+   execute immediate 'truncate table  nci_val_mean';
 
     -- Value Meaning
     DELETE FROM admin_item
@@ -5055,13 +5009,9 @@ END;
 AS
     v_cnt   INTEGER;
 BEGIN
-    DELETE FROM perm_val;
+    execute immediate 'truncate table perm_val';
 
-    COMMIT;
-
-    DELETE FROM conc_dom_val_mean;
-
-    COMMIT;
+    execute immediate 'truncate table conc_dom_val_mean';
 
     -- Value Meaning - Conceptual Domain relationship
     INSERT INTO conc_dom_val_mean (conc_dom_item_id,
@@ -5338,7 +5288,7 @@ commit;
 update admin_item set regstr_stus_id = 9, regstr_stus_nm_dn = 'APPLICATION' where regstr_stus_id is null; -- Tracker 806
 commit;
 
-delete from TEMP_CSI_PATH;
+execute immediate 'truncate table TEMP_CSI_PATH';
 
 insert into TEMP_CSI_PATH 
 select ai.item_id, ai.ver_nr, substr(CAST(SYS_CONNECT_BY_PATH(replace
