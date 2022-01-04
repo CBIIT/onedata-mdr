@@ -16,3 +16,6 @@ commit;
 insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'REDCap DD CDE', 108, 'REDCap DD CDE', 'REDCap DD CDE');
 insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'RAVE ALS Form', 110, 'RAVE ALS Form', 'RAVE ALS Form');
 commit;
+
+
+alter table nci_dload_hdr modify (DLOAD_TYP_ID integer null);
