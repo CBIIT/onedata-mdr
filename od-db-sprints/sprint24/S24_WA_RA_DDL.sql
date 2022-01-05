@@ -52,7 +52,4 @@ and air.c_item_id = de.item_id (+)
 and air.c_item_ver_nr = de.ver_nr (+)
 and air.NCI_PUB_ID = rep.quest_pub_id (+)
 and air.nci_ver_nr = rep.quest_ver_nr (+)
-and rep.VV_PUB_ID = vv.nci_pub_id (+)
-and rep.VV_VER_NR = vv.nci_ver_nr (+);
-
-
+and rep.DEFLT_VAL_ID = vv.nci_pub_id (+);
