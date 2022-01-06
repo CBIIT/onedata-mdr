@@ -55,3 +55,18 @@ and air.c_item_ver_nr = de.ver_nr (+)
 and air.NCI_PUB_ID = rep.quest_pub_id (+)
 and air.nci_ver_nr = rep.quest_ver_nr (+)
 and rep.DEFLT_VAL_ID = vv.nci_pub_id (+);
+
+
+create table nci_dload_als_form
+( hdr_id number,
+als_form_nm  varchar2(255),
+als_prot_nm  varchar2(255),
+PV_VM_IND  number,
+ CREAT_DT             DATE DEFAULT sysdate NULL,
+       CREAT_USR_ID         VARCHAR2(50) DEFAULT user NULL,
+       LST_UPD_USR_ID       VARCHAR2(50) DEFAULT user NULL,
+       FLD_DELETE           NUMBER(1) DEFAULT 0 NULL,
+       LST_DEL_DT           DATE DEFAULT sysdate NULL,
+       S2P_TRN_DT           DATE DEFAULT sysdate NULL,
+       LST_UPD_DT           DATE DEFAULT sysdate NULL,
+primary key (hdr_id));
