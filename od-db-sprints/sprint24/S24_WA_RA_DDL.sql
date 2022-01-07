@@ -70,3 +70,10 @@ PV_VM_IND  number,
        S2P_TRN_DT           DATE DEFAULT sysdate NULL,
        LST_UPD_DT           DATE DEFAULT sysdate NULL,
 primary key (hdr_id));
+
+alter table NCI_STG_CDE_CREAT add (IMP_TYP_NM varchar2(10) );
+
+update nci_stg_cde_creat set imp_typ_nm = 'DEC';
+commit;
+
+alter table NCI_STG_CDE_CREAT modify (IMP_TYP_NM varchar2(10) not null );
