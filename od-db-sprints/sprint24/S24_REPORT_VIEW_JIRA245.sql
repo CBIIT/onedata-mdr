@@ -40,7 +40,7 @@ AS
              AND cx.NCI_PRG_AREA_ID = OBJ_KEY.OBJ_KEY_ID
              AND OBJ_KEY.OBJ_TYP_ID = 14
     ORDER BY 4;
-CREATE OR REPLACE FORCE VIEW DATA_ELEMENT_CONCEPTS_VIEW
+CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DATA_ELEMENT_CONCEPTS_VIEW
 (
     DEC_IDSEQ,
     VERSION,
@@ -61,6 +61,7 @@ CREATE OR REPLACE FORCE VIEW DATA_ELEMENT_CONCEPTS_VIEW
     ORIGIN,
     CD_IDSEQ,
     CONTE_IDSEQ,
+    CONTE_NAME,
     PROPL_NAME,
     OCL_NAME,
     OBJ_CLASS_QUALIFIER,
@@ -113,6 +114,7 @@ AS
                CD_IDSEQ,
            CONTE.NCI_IDSEQ
                CONTE_IDSEQ,
+               ai.CNTXT_NM_DN,
            PROP.ITEM_NM
                PROPL_NAME,
            OC.ITEM_NM
@@ -135,7 +137,7 @@ AS
       /* ai.UNRSLVD_ISSUE,
        ai.UNTL_DT,
        ai.REGSTR_STUS_NM_DN,
-       ai.CNTXT_NM_DN,
+       
        ai.CNTXT_ITEM_ID,
        ai.CNTXT_VER_NR,*/
       --       select count(*)
