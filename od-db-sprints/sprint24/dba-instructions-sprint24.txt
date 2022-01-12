@@ -13,7 +13,7 @@ S24_WA_RA_DDL.sql
 
 
 -- Run as ONEDATA_WA DM scripts
-S19_WA_Data_migration.sql
+S24_WA_Data_migration.sql
 
 -- Run as ONEDATA_RA DM scripts
 S19_RA_Data_Migration.sql
