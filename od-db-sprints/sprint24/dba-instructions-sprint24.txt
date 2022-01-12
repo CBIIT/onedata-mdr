@@ -1,6 +1,6 @@
 
 -- Run as ONEDATA_WA DDL scripts
-
+S24_REPORT_VIEW_JIRA245.sql
 
 -- Run as ONEDATA_RA DDL scripts
 
