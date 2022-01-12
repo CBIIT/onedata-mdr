@@ -1,10 +1,11 @@
 
 -- Run as ONEDATA_WA DDL scripts
 S24_WA_DDL.sql
+S24_WA_RA_DDL.sql
 S24_REPORT_VIEW_JIRA245.sql
 
 -- Run as ONEDATA_RA DDL scripts
-
+S24_WA_RA_DDL.sql
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
 
