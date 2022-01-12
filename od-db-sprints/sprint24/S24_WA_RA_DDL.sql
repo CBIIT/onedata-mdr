@@ -110,3 +110,8 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
 	and cncpt.EVS_SRC_ID = OBJ_KEY.OBJ_KEY_ID (+) and admin_item.admin_stus_nm_dn = 'RELEASED' and ADMIN_ITEM.ITEM_ID = a.ITEM_ID (+) and ADMIN_ITEM.VER_NR = a.VER_NR (+);
     
 
+
+--create unique index udxAltNames on alt_nms (item_id, ver_nr, decode(nm_typ_id, 83, 83, nm_id));
+
+create unique index udxAltDef on alt_def (item_id, ver_nr, decode(nci_def_typ_id, 82, 82, def_id));
+
