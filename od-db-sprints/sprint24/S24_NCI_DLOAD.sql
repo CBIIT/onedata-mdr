@@ -8,7 +8,7 @@ create or replace PACKAGE nci_dload AS
    procedure spAddComponentToDloadID (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
    procedure spAddComponentToDloadIDGuest (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
    function getAddComponentCreateQuestion return t_question;
-function getALSCreateQuestion (v_coll_typ in varchar2) return t_question;
+function getALSCreateQuestion ( v_initial in boolean) return t_question;
 function getValidCollectionName (v_coll_nm in varchar2) return varchar2;
 function getALSCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset, v_coll_typ in integer) return t_forms;
 function getCollectionCreateFormGuest (v_rowset1 in t_rowset, v_rowset2 in t_rowset, v_dload_typ in integer) return t_forms;
@@ -310,7 +310,7 @@ begin
           rowsetals := t_rowset(rows, 'ALS Specific', 1, 'NCI_DLOAD_HDR');
 
           hookOutput.forms := getALSCreateForm(rowsethdr, rowsetals, v_coll_typ);
-          HOOKOUTPUT.QUESTION    := getALSCreateQuestion(v_coll_typ);
+          HOOKOUTPUT.QUESTION    := getALSCreateQuestion(false);
     else --- Second invocation
          forms              := hookInput.forms;
 
@@ -386,6 +386,7 @@ AS
     i integer := 0;
     v_err_str varchar2(255);
     v_id number;
+    rowsel t_row;
 begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -395,15 +396,24 @@ begin
     if (hookinput.invocationnumber = 0) then -- Get Collection Type
         rows := t_rows();
         row := t_row();
-          hookOutput.forms := getALSCreateForm(rowsethdr, rowsetals, v_coll_typ);
-          HOOKOUTPUT.QUESTION    := getALSCreateQuestion(v_coll_typ);
+       
+        
+        forms                  := t_forms();
+    form1                  := t_form('Download Format Selection (Hook)', 2,1);
+    forms.extend;    forms(forms.last) := form1;
+     hookOutput.forms  := forms;
+          HOOKOUTPUT.QUESTION    := getALSCreateQuestion( true);
     end if;
     
     if (hookinput.invocationnumber = 1) then -- show create form
+       forms              := hookInput.forms;
+           form1              := forms(1);
+      rowsel := form1.rowset.rowset(1);
+      v_coll_typ := ihook.getColumnValue(rowsel, 'DLOAD_FMT_ID');
         rows := t_rows();
         row := t_row();
-        ihook.setColumnValue(row, 'HDR_ID', -1);
-        ihook.setColumnValue(row, 'DLOAD_FMT_ID',90 );
+        ihook.setColumnValue(row, 'HDR_ID', v_coll_typ);
+        ihook.setColumnValue(row, 'DLOAD_FMT_ID',v_coll_typ );
         rows.extend;          rows(rows.last) := row;
           rowsethdr := t_rowset(rows, 'Download Header', 1, 'NCI_DLOAD_HDR');
         rows := t_rows();
@@ -413,7 +423,7 @@ begin
           rowsetals := t_rowset(rows, 'ALS Specific', 1, 'NCI_DLOAD_HDR');
 
           hookOutput.forms := getALSCreateForm(rowsethdr, rowsetals, v_coll_typ);
-          HOOKOUTPUT.QUESTION    := getALSCreateQuestion(v_coll_typ);
+          HOOKOUTPUT.QUESTION    := getALSCreateQuestion(false);
     end if;
     
     if (hookinput.invocationNumber = 2) then 
@@ -421,7 +431,11 @@ begin
 
            form1              := forms(1);
       rowhdr := form1.rowset.rowset(1);
-      if (v_coll_typ = 'A') then
+    -- Non-eitable lookup values are lost. So workaround.
+      v_coll_typ := ihook.getColumnValue(rowhdr, 'HDR_ID');
+    ihook.setColumnValue (rowhdr, 'DLOAD_FMT_ID', v_coll_typ);
+        
+      if (v_coll_typ in (90, 110)) then
       form1              := forms(2);
       rowals := form1.rowset.rowset(1);
       else
@@ -462,7 +476,7 @@ end if;
     hookoutput.message := 'Collection Successfully Created with ID ' || v_id;
     end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
---     nci_util.debugHook('GENERAL', v_data_out);
+     nci_util.debugHook('GENERAL', v_data_out);
 END;
 
     -- Not used at this time.
@@ -522,7 +536,7 @@ begin
 
                 hookOutput.forms := getCollectionCreateFormGuest(rowsethdr, rowsetals,v_fmt);
 
-          HOOKOUTPUT.QUESTION    := getALSCreateQuestion (v_fmt);
+          HOOKOUTPUT.QUESTION    := getALSCreateQuestion ( false);
       end if;
     if  hookinput.invocationnumber = 2 then--- Second invocation
          forms              := hookInput.forms;
@@ -636,7 +650,7 @@ begin
           rowsetals := t_rowset(rows, 'ALS Specific', 1, 'NCI_DLOAD_ALS');
 
           hookOutput.forms := getALSCreateForm(rowsethdr, rowsetals,v_coll_typ);
-          HOOKOUTPUT.QUESTION    := getALSCreateQuestion(v_coll_typ);
+          HOOKOUTPUT.QUESTION    := getALSCreateQuestion( false);
       end if;
     if  hookinput.invocationnumber = 2 then--- Second invocation
          forms              := hookInput.forms;
@@ -1235,23 +1249,26 @@ end loop;
 V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
-function getALSCreateQuestion (v_coll_typ in varchar2) return t_question is
+function getALSCreateQuestion ( v_initial in boolean) return t_question is
   question t_question;
   answer t_answer;
   answers t_answers;
 begin
     ANSWERS                    := T_ANSWERS();
    -- raise_application_error(-20000, v_typ);
-    ANSWER                     := T_ANSWER(1,1,  'Create');
+    if (v_initial = true) then
+    ANSWER                     := T_ANSWER(1,1,  'Next');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
 
-    if (v_coll_typ = 'A') then
-    QUESTION               := T_QUESTION('Create New RAVE ALS Collection', ANSWERS);
-    else
-    QUESTION               := T_QUESTION('Create New Collection', ANSWERS);
+    QUESTION               := T_QUESTION('Select Collection Type', ANSWERS);
+  else
+  ANSWER                     := T_ANSWER(1,1,  'Create');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
 
-    end if;
+    QUESTION               := T_QUESTION('Create New Collection', ANSWERS);
+end if;
 return question;
 end;
 
@@ -1272,7 +1289,7 @@ begin
     form1.rowset :=v_rowset2;
     forms.extend;    forms(forms.last) := form1;
     elsif (v_coll_typ = 110 ) then
-    form1                  := t_form('ALS Specific Form', 2,1);
+    form1                  := t_form('ALS Specific for Form', 2,1);
 
     form1.rowset :=v_rowset2;
     forms.extend;    forms(forms.last) := form1;
@@ -1300,4 +1317,6 @@ begin
 end;
 
 END;
-/
+     
+      /
+      
