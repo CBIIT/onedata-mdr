@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE nci_caDSR_PULL AS
+create or replace PACKAGE nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
 procedure sp_create_ai_3;
@@ -30,8 +30,7 @@ procedure SP_SOURCE_TYPE;
   --    procedure sp_append_quest_pv;
 END;
 /
-
-CREATE OR REPLACE PACKAGE BODY nci_caDSR_PULL AS
+create or replace PACKAGE BODY nci_caDSR_PULL AS
 
 
 v_dflt_usr  varchar2(30) := 'ONEDATA';
@@ -2672,7 +2671,7 @@ BEGIN
 
     execute immediate 'truncate table cncpt';
 
-   
+
     -- Concept and concept relationships
     DELETE FROM admin_item
           WHERE admin_item_typ_id = 49;
@@ -3015,7 +3014,7 @@ BEGIN
 
     execute immediate 'truncate table nci_clsfctn_schm_item';
 
-   
+
 
 
     INSERT INTO admin_item (NCI_IDSEQ,
@@ -3431,7 +3430,8 @@ insert into obj_key (obj_typ_id, obj_key_desc, obj_key_def, nci_cd,obj_key_cmnts
 select 11, detl_name, description, detl_name, comments,   nvl(created_by,v_dflt_usr),
                nvl(date_created,v_dflt_date) ,
                nvl(NVL (date_modified, date_created), v_dflt_date),
-               nvl(modified_by,v_dflt_usr) from sbr_m.DESIGNATION_TYPES_LOV;
+               nvl(modified_by,v_dflt_usr) from sbr_m.DESIGNATION_TYPES_LOV
+               where upper(detl_name) <> 'MANUALLY-CURATED' ;
 commit;
 
 -- DOcument type where obj_typ_id = 1;  --
@@ -5296,12 +5296,12 @@ FROM ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi
    CONNECT BY PRIOR csi.item_id = csi.p_item_id;
 
    commit;
-   
+
 update NCI_CLSFCTN_SCHM_ITEM c set FUL_PATH = (select FUL_PATH from   
     temp_csi_path b where b.item_id = c.item_id and b.ver_nr = c.ver_nr);
     commit;
-    
-    
+
+
 end;
  function get_stus_mstr_id (STATUS_NAME VARCHAR2, STATUS_TYPE_ID number) return number is
 v_status_id number;
