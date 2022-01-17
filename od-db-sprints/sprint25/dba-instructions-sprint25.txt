@@ -1,8 +1,10 @@
 
 -- Run as ONEDATA_WA DDL scripts
+S25_WA_EXEC_LOAD_CONCEPTS_JOB.sql
 
 
 -- Run as ONEDATA_RA DDL scripts
+S25_RA_EXEC_LOAD_CONCEPTS_JOB.sql
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
