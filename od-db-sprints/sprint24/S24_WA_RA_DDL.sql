@@ -31,6 +31,10 @@ update nci_dload_hdr set dload_fmt_id = 110 where dload_typ_id = 92 and dload_fm
 update nci_dload_hdr set dload_fmt_id = 109 where dload_typ_id = 92 and dload_fmt_id = 108;
 commit;
 
+insert into nci_dload_als_form select * from nci_dload_als where hdr_id in (select hdr_id from nci_dload_hdr where dload_fmt_id = 110);
+
+commit;
+
   CREATE OR REPLACE  VIEW VW_NCI_FORM_FLAT_REP AS
   select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr, frm.item_desc  frm_item_def,
   frmst.hdr_instr, frmst.ftr_instr,
@@ -130,4 +134,4 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
 --create unique index udxAltNames on alt_nms (item_id, ver_nr, decode(nm_typ_id, 83, 83, nm_id));
 
 --create unique index udxAltDef on alt_def (item_id, ver_nr, decode(nci_def_typ_id, 82, 82, def_id));
-
+alter table NCI_STG_CDE_CREAT add (DEC_ITEM_NM  varchar(255), DEC_ITEM_LONG_NM varchar2(30), VD_ITEM_LONG_NM varchar2(30), CMNTS_DESC_TXT varchar2(4000));
