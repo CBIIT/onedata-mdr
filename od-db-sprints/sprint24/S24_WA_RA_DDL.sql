@@ -135,3 +135,5 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
 
 --create unique index udxAltDef on alt_def (item_id, ver_nr, decode(nci_def_typ_id, 82, 82, def_id));
 alter table NCI_STG_CDE_CREAT add (DEC_ITEM_NM  varchar(255), DEC_ITEM_LONG_NM varchar2(30), VD_ITEM_LONG_NM varchar2(30), CMNTS_DESC_TXT varchar2(4000));
+
+alter table NCI_STG_CDE_CREAT modify (CTL_VAL_STUS default 'IMPORTED');
