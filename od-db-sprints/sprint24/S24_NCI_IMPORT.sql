@@ -291,6 +291,7 @@ begin
     v_val_ind := true;
     if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_3') is not null) then
       nci_vd.VDImportPost(row_ori, 3,7,'V', 'STRING', actions) ;
+   --nci_vd.createValAIWithConcept (row_ori, 3,7,'V', 'STRING', actions);
    --   raise_application_error(-20000, 'here');
     end if;
     rows := t_rows();
@@ -568,9 +569,11 @@ begin
     hookInput := ihook.getHookInput(v_data_in);
     hookOutput.invocationNumber := hookInput.invocationNumber;
     hookOutput.originalRowset := hookInput.originalRowset;
-
+  rows := t_rows();
+  
 for i in 1..hookinput.originalRowset.rowset.count loop
     row_ori := hookInput.originalRowset.rowset(i);
+    if (ihook.getColumNValue(row_ori, 'CTL_VAL_STUS')<> 'PROCESSED') then
     v_val_ind := true;
     ihook.setColumnValue(row_ori,'CTL_VAL_MSG', '');
             nci_vd.spVDValCreateImport(row_ori, 'V', actions, v_val_ind);
@@ -589,12 +592,11 @@ for i in 1..hookinput.originalRowset.rowset.count loop
       if ( v_val_ind = false and v_mode = 'V') then -- only go thru creating new if not specified
                 iHook.setColumnValue (row_ori, 'CTL_VAL_STUS', 'ERRORS');
         end if;
-    rows := t_rows();
     rows.extend; rows(rows.last) := row_ori;
-    action := t_actionrowset(rows, 'VD Import', 2,10,'update');
-    
+   
+end if;    
 end loop;
-
+ action := t_actionrowset(rows, 'VD Import', 2,10,'update');
         actions.extend;
         actions(actions.last) := action;
         hookoutput.actions := actions;
