@@ -246,9 +246,11 @@ as
           HOOKOUTPUT.QUESTION    := nci_chng_mgmt.getCSICreateQuestion(2);
           v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
           v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+       --   raise_application_error(-20000, v_item_id);
           row := t_row();
           nci_11179.spReturnAIRow(v_item_id, v_ver_nr, row);
-
+   --   raise_application_error(-20000, ihook.getColumnValue(row, 'ADMIN_STUS_ID'));
+   
           rows := t_rows(); rows.extend;          rows(rows.last) := row;
           rowset := t_rowset(rows, 'Administered Item', 1, 'ADMIN_ITEM');
           row := t_row();
@@ -256,7 +258,7 @@ as
 
                  rows := t_rows(); rows.extend;          rows(rows.last) := row;
                  rowsetde := t_rowset(rows, 'CSI', 1, 'NCI_CLSFCTN_SCHM_ITEM');
-          hookOutput.forms := nci_chng_mgmt.getCSICreateForm(rowset, rowsetde);
+          hookOutput.forms := getCSICreateForm(rowset, rowsetde);
   ELSE
             forms              := hookInput.forms;
             form1              := forms(1);
