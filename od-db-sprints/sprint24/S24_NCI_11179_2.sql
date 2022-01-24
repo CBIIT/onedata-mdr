@@ -332,18 +332,18 @@ BEGIN
            form1              := forms(1);
       rowform := form1.rowset.rowset(1);
 
-        if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1) then
+    /*    if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1) then
             update admin_item set cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
             where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform,'CNTXT_VER_NR') and
-            (ITEM_LONG_NM, VER_NR, ADMIN_ITEM_TYP_ID) not in (select ITEM_LONG_NM, VER_NR, ADMIN_ITEM_TYP_ID from ADMIN_ITEM where admin_item_typ_id = i and
+            (ITEM_LONG_NM, VER_NR, ADMIN_ITEM_TYP_ID) not in (select ITEM_LONG_NM, VER_NR, ADMIN_ITEM_TYP_ID from ADMIN_ITEM where 
             cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR'));
             commit;
             
             select substr(listagg(item_id,';'), 1, 4000) into v_err_str from admin_item where cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR');
-            
-        else
+      */      
+    --    else
         for i in 1..60 loop
-        if (nvl(ihook.getColumnValue(rowform,'IND_TYP_' || i),0) = 1) then
+        if (nvl(ihook.getColumnValue(rowform,'IND_TYP_' || i),0) = 1 or nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1) then
         update admin_item set cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
             where cntxt_item_id = ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') and cntxt_ver_nr =  ihook.getColumnValue(rowform,'CNTXT_VER_NR') and admin_item_typ_id = i
             and (ITEM_LONG_NM, VER_NR) not in (select ITEM_LONG_NM, VER_NR from ADMIN_ITEM where admin_item_typ_id = i and
@@ -357,7 +357,7 @@ BEGIN
           end if;
  
         end loop;
-        end if;
+    --    end if;
 
         if (nvl(ihook.getColumnValue(rowform,'IND_ALL_TYPES'),0) = 1 or nvl(ihook.getColumnValue(rowform,'IND_ALT_NMS'),0) = 1 ) then
               update alt_nms set cntxt_item_id = ihook.getColumnValue(rowform,'TO_CNTXT_ITEM_ID'), cntxt_ver_nr = ihook.getColumnValue(rowform,'TO_CNTXT_VER_NR')
