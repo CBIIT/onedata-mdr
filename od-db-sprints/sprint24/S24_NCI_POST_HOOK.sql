@@ -2,6 +2,7 @@ create or replace PACKAGE            nci_post_hook AS
 
 procedure spRefDocInsUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure spAISTUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spAIDel ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spAINmDef ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spAISTIns ( v_data_in in clob, v_data_out out clob);
 procedure spDervCompIns ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
@@ -108,6 +109,19 @@ commit;
 
 delete from onedata_ra.nci_usr_cart where CNTCT_SECU_ID = 'GUEST';
 commit;
+
+-- Insert DE-CSI relationship if Form-CSI is created. Tracker 1449
+
+for cur in (Select r.* from admin_item ai, nci_admin_item_rel r where ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr and
+r.rel_typ_id = 65 and r.creat_dt > sysdate - 1 and ai.admin_item_typ_id = 54) loop
+ insert into nci_admin_item_rel (p_item_id, p_item_ver_nr, c_item_id, c_item_ver_nr, rel_typ_id, creat_usr_id, lst_upd_usr_id)
+ select distinct cur.p_item_id, cur.p_item_ver_nr ,v.de_item_id, v.de_ver_nr, 65, cur.creat_usr_id, cur.creat_usr_id
+ from VW_NCI_MODULE_DE v where v.frm_item_id = cur.c_item_id and v.frm_ver_nr = cur.c_item_ver_nr 
+ and (cur.p_item_id, cur.p_item_ver_nr, v.de_item_id, v.de_ver_nr) not in (select p_item_id, p_item_ver_nr, c_item_id, c_item_ver_nr from
+ nci_admin_item_rel where rel_typ_id = 65);
+ commit;
+end loop;
+
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
 end;
@@ -305,6 +319,34 @@ end loop;
 end;
 
 
+procedure spAIDel ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2)
+as
+hookInput        t_hookInput;
+    hookOutput       t_hookOutput := t_hookOutput ();
+    row_ori          t_row;
+    v_item_id number;
+    v_ver_nr number(4,2);
+  BEGIN
+    hookinput := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber := hookinput.invocationnumber;
+    hookoutput.originalrowset := hookinput.originalrowset;
+
+    row_ori := hookInput.originalRowset.rowset (1);
+   v_item_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
+        v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
+
+     if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_usr_id) = false) then
+     raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ');
+        return;
+    end if;
+
+for cur in (select * from admin_item where item_id = v_item_id and ver_nr = v_ver_nr and nvl(currnt_ver_ind,0) = 1 ) loop
+      raise_application_error(-20000, 'Cannot delete the latest version. Please set another version to latest and then delete.');
+    return;
+end loop;
+
+ V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+end;
 
 procedure spCSIUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2)
 as
