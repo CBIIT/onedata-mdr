@@ -33,9 +33,7 @@ procedure VMCreateEditCore ( v_init in t_rowset,  hookInput in t_hookInput, hook
 procedure createVMConcept (rowform in out t_row, v_cncpt_src in varchar2, v_mode in varchar2,  actions in out t_actions);
 
 END;
-
 /
-
 create or replace PACKAGE BODY            nci_PV_VM AS
 
 c_long_nm_len  integer := 30;
