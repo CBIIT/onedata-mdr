@@ -675,6 +675,8 @@ AS
   v_temp_id  number;
   v_temp_ver number(4,2);
   is_valid boolean;
+  v_oc_str varchar2(4000);
+v_prop_str varchar2(4000);
 begin
     -- Show generated name
     if (ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID') is null) then --- only execute if not specified
@@ -684,19 +686,27 @@ begin
         ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND', '');
         ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND', '' );
 
-       if (   ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null and ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then
-              for cur in (select de_conc.* from de_conc, admin_item ai where obj_cls_item_id =  ihook.getColumnValue(rowform, 'ITEM_1_ID') and obj_cls_ver_nr =  ihook.getColumnValue(rowform, 'ITEM_1_VER_NR') and
-               prop_item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID') and prop_ver_nr =  ihook.getColumnValue(rowform, 'ITEM_2_VER_NR') and
-              de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr and ai.currnt_ver_ind = 1
+  if (   ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null and ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then
+  
+            select cncpt_concat into v_oc_str from nci_admin_item_ext where item_id = ihook.getColumnValue(rowform, 'ITEM_1_ID') and ver_nr= ihook.getColumnValue(rowform, 'ITEM_1_VER_NR');
+            select cncpt_concat into v_prop_str from nci_admin_item_ext where item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID') and ver_nr= ihook.getColumnValue(rowform, 'ITEM_2_VER_NR');
+            for oc_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_oc_str and ai.admin_item_typ_id = 5) loop
+            for prop_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_prop_str and ai.admin_item_typ_id = 6) loop
+               for cur in (select de_conc.* from de_conc, admin_item ai where obj_cls_item_id =  oc_cur.item_id and obj_cls_ver_nr =  oc_cur.ver_nr and
+               prop_item_id = prop_cur.item_id and prop_ver_nr =  prop_cur.ver_nr and
+               cntxt_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform, 'CNTXT_VER_NR') and
+              de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr 
              ) loop
-                    ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND', cur.item_id );
-                    ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND', cur.ver_nr );
-                       ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'Existing DEC found.' || chr(13));
-                     v_val_ind:= false;
-                     return;
-               end loop;
+     --    raise_application_error(-20000, 'Here');
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'DUPLICATE DEC found:' || cur.item_id || 'v' || cur.ver_nr);
+                                      v_val_ind:= false;
 
+              end loop;
+              end loop;
+              end loop;
         end if;
+        
+     
         if (   ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is null or ihook.getColumnValue(rowform, 'CNCPT_2_ITEM_ID_1') is null) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'OC or PROP missing.' || chr(13));
                   v_val_ind:= false;
@@ -1213,9 +1223,9 @@ begin
         ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
         ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 2);
    --     ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_1_LONG_NM')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'));
-            ihook.setColumnValue(row,'ITEM_LONG_NM', v_id || c_ver_suffix);
+            ihook.setColumnValue(row,'ITEM_LONG_NM', nvl(ihook.getColumnValue(rowform,'DEC_ITEM_LONG_NM'),v_id || c_ver_suffix));
 
-        ihook.setColumnValue(row,'ITEM_NM',  ihook.getColumnValue(rowform, 'GEN_DE_CONC_NM'));
+        ihook.setColumnValue(row,'ITEM_NM',  nvl(ihook.getColumnValue(rowform,'DEC_ITEM_NM'), ihook.getColumnValue(rowform, 'GEN_DE_CONC_NM')));
         ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
         ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
         ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
@@ -1240,7 +1250,7 @@ begin
        actions.extend;
         actions(actions.last) := action;
  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'DEC Created Successfully with ID ' || v_id||c_ver_suffix || chr(13)) ;
-ihook.setColumnValue(rowform, 'CTL_VAL_STUS', '1. DEC CREATED') ;
+ihook.setColumnValue(rowform, 'CTL_VAL_STUS', 'PROCESSED') ;
 
 --r
 end;
