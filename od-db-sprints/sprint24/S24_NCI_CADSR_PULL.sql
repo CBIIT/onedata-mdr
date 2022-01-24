@@ -5213,9 +5213,9 @@ commit;
 
 update perm_val set (PRNT_CNCPT_ITEM_ID, PRNT_CNCPT_VER_NR) = (
 select
-public_id, version from sbr_m.administered_components ac, sbr_m.vd_pvs pvs, admin_item vd where pvs.pv_idseq = perm_val.nci_idseq and ac.ac_idseq = pvs.con_idseq and
+public_id, version from sbr_m.administered_components ac, sbr_m.vd_pvs pvs, admin_item vd where pvs.vp_idseq = perm_val.nci_idseq and ac.ac_idseq = pvs.con_idseq and
 pvs.con_idseq is not null and vd.nci_idseq = pvs.vd_idseq and vd.item_id = perm_val.val_dom_item_id and vd.ver_nr = perm_val.val_dom_ver_nr)
-where nci_idseq in (select pv_idseq from sbr_m.vd_pvs where con_idseq is not null);
+where nci_idseq in (select vp_idseq from sbr_m.vd_pvs where con_idseq is not null);
 commit;
 
 
