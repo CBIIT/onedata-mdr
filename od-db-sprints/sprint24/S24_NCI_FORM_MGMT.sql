@@ -2103,6 +2103,7 @@ BEGIN
 
    ihook.setColumnValue(row, 'Level', 'Question Default');
    ihook.setColumnValue(row, 'Sequence', 0);
+   ihook.setColumnValue(row, 'Default', ihook.getColumnValue(row_ori, 'VALUE'));
 
             rows.extend;
             rows(rows.last) := row;
@@ -2111,6 +2112,7 @@ BEGIN
 
     ihook.setColumnValue(row, 'Level', 'Repetition: '|| cur.rep_seq);
    ihook.setColumnValue(row, 'Sequence', cur.rep_seq);
+ihook.setColumnValue(row, 'Default', ihook.getColumnValue(row_ori, 'VALUE'));
 
             rows.extend;
             rows(rows.last) := row;
