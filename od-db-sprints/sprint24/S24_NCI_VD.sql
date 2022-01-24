@@ -383,8 +383,8 @@ AS
     v_dtype_id integer;
  BEGIN
 
- if (ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') is null) then --- only if Value Domain not specified
-        if (   ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is null ) then
+ if (ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') is null and ihook.getColumNValue(rowform, 'CTL_VAL_STUS')<> 'PROCESSED') then --- only if Value Domain not specified
+        if (   ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is null and ihook.getColumnValue(rowform, 'REP_CLS_ITEM_ID') is null ) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'Rep Term primary concept missing.' || chr(13));
                   v_val_ind  := false;
         end if;
@@ -422,10 +422,10 @@ AS
 
         end if;
 
- else -- if VD specified
+ /*else -- if VD specified
         for cur in (select item_nm from admin_item where item_id = ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') and ver_nr = ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR')) loop
        ihook.setColumnValue(rowform, 'VAL_DOM_NM',cur.item_nm ) ;
-        end loop;
+        end loop; */
 end if;
 
 
@@ -452,7 +452,7 @@ begin
         ihook.setColumnValue(row,'ITEM_ID', v_id);
         ihook.setColumnValue(rowform,'VAL_DOM_ITEM_ID_CREAT', v_id);
 
-         ihook.setColumnValue(row,'ITEM_LONG_NM', v_id || c_ver_suffix);
+         ihook.setColumnValue(row,'ITEM_LONG_NM',  nvl(ihook.getColumnValue(rowform, 'VD_ITEM_LONG_NM'), v_id || c_ver_suffix));
 
          ihook.setColumnValue(row,'ITEM_NM',  nvl(ihook.getColumnValue(rowform, 'VAL_DOM_NM'),ihook.getColumnValue(rowform, 'ITEM_3_NM'))  );
         ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_3_DEF')  ,1,4000));
@@ -1779,11 +1779,14 @@ if (v_cncpt_src ='STRING') then
                 v_long_nm_suf := '';
                 v_long_nm_suf_int := '';
                 v_def := '';
+                
                 for i in  1..cnt loop
-                if (v_item_typ_id = 7) then
-                        j := i+1;
-                else
-                        j :=i;
+          --      if (v_item_typ_id = 7) then
+           --             j := i+1;
+            --    else
+            if (i = cnt) then
+                      j :=1;
+                    else j := i+1;
                 end if;
                         v_cncpt_nm := nci_11179.getWord(v_str, i, cnt);
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || j,'');
@@ -1805,13 +1808,7 @@ if (v_cncpt_src ='STRING') then
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, '');
                 end loop;
                 end if;
-                   if (v_item_typ_id = 53) then
-                for i in  cnt+1..10 loop
-                        ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
-                        ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, '');
-                end loop;
-                end if;
-
+                
     --            ihook.setColumnValue(rowform, 'ITEM_' || idx || '_NM', v_nm);
   --
             end if;
