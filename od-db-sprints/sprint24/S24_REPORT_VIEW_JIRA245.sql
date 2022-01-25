@@ -1,3 +1,48 @@
+CREATE OR REPLACE TYPE ONEDATA_WA.VALID_VALUE_T_245                                          as object(
+    ValidValue varchar2(255),
+    ValueMeaning varchar2(255),
+    MeaningDescription varchar2(2000),
+    MeaningConcepts varchar2(2000),
+    PvBeginDate Date,
+    PvEndDate Date,
+    VmPublicId Number,
+    VmVersion Number(4,2),
+    VmAlternateDefinitions varchar2(2000));
+/
+CREATE OR REPLACE TYPE ONEDATA_WA.VALID_VALUE_LIST_T_245 AS TABLE OF VALID_VALUE_T_245;
+/
+CREATE OR REPLACE function ONEDATA_WA.get_concepts_PRN(v_item_id in number, v_ver_nr in number) return varchar2 is
+cursor con is
+select c.item_nm, cai.NCI_CNCPT_VAL,Item_long_nm
+from cncpt_admin_item cai, admin_item c
+where cai.item_id = v_item_id and cai.ver_nr = v_ver_nr 
+and cai.cncpt_item_id = c.item_id and cai.cncpt_ver_nr = c.ver_nr and c.admin_item_typ_id = 49
+order by  nci_ord desc;
+
+v_name varchar2(255);
+
+begin
+    for c_rec in con loop
+        if v_name is null then
+            v_name := ':'||c_rec.Item_long_nm;
+
+            /* Check if Integer Concept */
+            if c_rec.item_nm = 'C45255' then
+                v_name := v_name||'::'||c_rec.nci_cncpt_val;
+            end if;
+        else
+            v_name := v_name||':'||c_rec.Item_long_nm;
+
+            /* Check if Integer Concept */
+            if c_rec.item_nm = 'C45255' then
+                v_name := v_name||'::'||c_rec.nci_cncpt_val;
+            end if;
+        end if;
+
+    end loop;
+return v_name;
+end;
+/
 CREATE OR REPLACE FORCE VIEW CONTEXTS_VIEW
 (
     CONTE_IDSEQ,
@@ -40,7 +85,8 @@ AS
              AND cx.NCI_PRG_AREA_ID = OBJ_KEY.OBJ_KEY_ID
              AND OBJ_KEY.OBJ_TYP_ID = 14
     ORDER BY 4;
-CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DATA_ELEMENT_CONCEPTS_VIEW
+
+CREATE OR REPLACE FORCE VIEW DATA_ELEMENT_CONCEPTS_VIEW
 (
     DEC_IDSEQ,
     VERSION,
@@ -133,14 +179,7 @@ AS
            dec.PROP_ITEM_ID,
            dec.PROP_VER_NR,
            dec.OBJ_CLS_ITEM_ID,
-           dec.OBJ_CLS_VER_NR
-      /* ai.UNRSLVD_ISSUE,
-       ai.UNTL_DT,
-       ai.REGSTR_STUS_NM_DN,
-       
-       ai.CNTXT_ITEM_ID,
-       ai.CNTXT_VER_NR,*/
-      --       select count(*)
+           dec.OBJ_CLS_VER_NR    
       FROM ADMIN_ITEM  ai,
            DE_CONC     dec,
            ADMIN_ITEM  CONTE,
