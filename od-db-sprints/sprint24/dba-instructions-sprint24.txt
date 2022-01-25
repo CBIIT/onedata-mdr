@@ -31,7 +31,7 @@ S24_LOAD_CONCEPT_ADMIN_ITEM_DESIG.sql
 S24_WA_Data_migration.sql
 
 -- Run as ONEDATA_RA DM scripts
-S24_RA_Data_Migration.sql
+S24_RA_Migration.sql
 
 -- Run validate job as ONEDATA_WA
 exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
