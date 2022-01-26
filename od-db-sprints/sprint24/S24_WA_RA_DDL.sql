@@ -72,6 +72,10 @@ PV_VM_IND  number,
        LST_UPD_DT           DATE DEFAULT sysdate NULL,
 primary key (hdr_id));
 
+insert into nci_dload_als_form select * from nci_dload_als
+where hdr_id in (select hdr_id from nci_dload_hdr where dload_fmt_id = 110);
+commit;
+
 alter table NCI_STG_CDE_CREAT add (IMP_TYP_NM varchar2(10) );
 
 update nci_stg_cde_creat set imp_typ_nm = 'DEC';
