@@ -129,3 +129,69 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
 
 --create unique index udxAltDef on alt_def (item_id, ver_nr, decode(nci_def_typ_id, 82, 82, def_id));
 
+alter table NCI_DS_HDR add (BTCH_USR_NM varchar2(100));
+
+drop view vw_clsfctn_schm_item;
+
+
+  create materialized view VW_CLSFCTN_SCHM_ITEM 
+  BUILD IMMEDIATE
+  REFRESH FORCE
+  ON DEMAND AS
+  SELECT ADMIN_ITEM.ITEM_ID,
+               ADMIN_ITEM.VER_NR,
+               ADMIN_ITEM.ITEM_NM,
+               ADMIN_ITEM.ITEM_LONG_NM,
+               ADMIN_ITEM.ITEM_DESC,
+               ADMIN_ITEM.CNTXT_NM_DN,
+               ADMIN_ITEM.CURRNT_VER_IND,
+               ADMIN_ITEM.REGSTR_STUS_NM_DN,
+               ADMIN_ITEM.ADMIN_STUS_NM_DN,
+               ADMIN_ITEM.CREAT_DT,
+               ADMIN_ITEM.CREAT_USR_ID,
+               ADMIN_ITEM.LST_UPD_USR_ID,
+               ADMIN_ITEM.FLD_DELETE,
+               ADMIN_ITEM.LST_DEL_DT,
+               ADMIN_ITEM.S2P_TRN_DT,
+               ADMIN_ITEM.LST_UPD_DT,
+               ADMIN_ITEM.NCI_IDSEQ,
+               CSI.P_ITEM_ID,
+               CSI.P_ITEM_VER_NR,
+               CSI.CS_ITEM_ID,
+               CSI.CS_ITEM_VER_NR,
+               CAST (
+                      cs.item_nm
+                   || SYS_CONNECT_BY_PATH (REPLACE (admin_item.ITEM_NM, '|', ''),
+                                           ' | ')
+                       AS VARCHAR2 (4000))    FUL_PATH
+          FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
+         WHERE     ADMIN_ITEM_TYP_ID = 51
+               AND ADMIN_ITEM.ITEM_ID = CSI.ITEM_ID
+               AND ADMIN_ITEM.VER_NR = CSI.VER_NR
+               AND csi.cs_item_id = cs.item_id
+               AND csi.cs_item_ver_nr = cs.ver_nr
+    START WITH p_item_id IS NULL
+    CONNECT BY PRIOR csi.item_id = csi.p_item_id;
+
+
+alter table NCI_STG_AI_CNCPT_CREAT add (BTCH_SEQ_NBR number);
+
+
+alter table NCI_STG_CDE_CREAT modify (CTL_VAL_STUS default 'IMPORTED');
+
+alter table NCI_STG_CDE_CREAT add (DEC_ITEM_NM  varchar(255), DEC_ITEM_LONG_NM varchar2(30), VD_ITEM_LONG_NM varchar2(30), CMNTS_DESC_TXT varchar2(4000));
+
+CREATE OR REPLACE VIEW VW_NCI_CSI_NODE AS
+  SELECT ADMIN_ITEM.ITEM_ID, ADMIN_ITEM.VER_NR, ADMIN_ITEM.ITEM_NM, ADMIN_ITEM.ITEM_LONG_NM,  ADMIN_ITEM.ITEM_DESC,
+CS.CNTXT_NM_DN, ADMIN_ITEM.CURRNT_VER_IND, ADMIN_ITEM.REGSTR_STUS_NM_DN, ADMIN_ITEM.ADMIN_STUS_NM_DN, ADMIN_ITEM.CREAT_DT,
+ADMIN_ITEM.CREAT_USR_ID, ADMIN_ITEM.LST_UPD_USR_ID, ADMIN_ITEM.FLD_DELETE, ADMIN_ITEM.LST_DEL_DT, ADMIN_ITEM.S2P_TRN_DT,
+ADMIN_ITEM.LST_UPD_DT, ADMIN_ITEM.NCI_IDSEQ, CSI.P_ITEM_ID, CSI.P_ITEM_VER_NR,
+csi.FUL_PATH,
+cs.item_id cs_item_id, cs.ver_nr cs_ver_nr , cs.item_long_nm cs_long_nm, cs.item_nm cs_item_nm, cs.item_desc cs_item_desc,
+ cs.admin_stus_nm_dn cs_admin_stus_nm_dn,CS.CLSFCTN_SCHM_TYP_ID
+FROM ADMIN_ITEM, VW_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
+       WHERE ADMIN_ITEM_TYP_ID = 51 and ADMIN_ITEM.ITEM_ID = CSI.ITEM_ID and ADMIN_ITEM.VER_NR = CSI.VER_NR and csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr;
+
+
+
+
