@@ -13,6 +13,7 @@ BEGIN
 END ;
 /
 
+/*
 CREATE OR REPLACE EDITIONABLE  TRIGGER TR_CSI_FORM_POST
   AFTER INSERT OR UPDATE
   on
@@ -39,4 +40,5 @@ if (:new.rel_typ_id = 65 ) then
   end if;
  end;
  /
+ */
  
