@@ -271,8 +271,8 @@ hookInput        t_hookInput;
 
     row_ori := hookInput.originalRowset.rowset (1);
   
-    v_csi_item_id := ihook.getColumnValue(row_ori ,'C_ITEM_ID');
-    v_csi_ver_nr := ihook.getColumnValue(row_ori, 'C_ITEM_VER_NR');
+    v_csi_item_id := ihook.getColumnValue(row_ori ,'P_ITEM_ID');
+    v_csi_ver_nr := ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR');
  
 -- Insert DE-CSI relationship if Form-CSI is created. Tracker 1449
 
@@ -427,6 +427,7 @@ hookInput        t_hookInput;
 
 rows := t_rows();
 
+/*
 if ihook.getColumnValue(row_ori, 'P_ITEM_ID') is not null then
     select ful_path into v_ful_path from nci_clsfctn_schm_item where item_id = ihook.getColumnValue(row_ori, 'P_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR');
 end if;
@@ -440,7 +441,7 @@ if (actions.count > 0) then
     end if;
 end if;
 
-
+*/
 
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -562,7 +563,7 @@ BEGIN
 
 
     -- Tracker 554
-  --  raise_application_error(-20000, hookinput.originalRowset.tablename);
+  -- raise_application_error(-20000, hookinput.originalRowset.tablename);
 
   if (hookinput.originalRowset.tablename = 'ADMIN_ITEM') then
     if (ihook.getColumnValue (row_ori, 'ITEM_DESC') <>  ihook.getColumnOldValue (row_ori, 'ITEM_DESC')
@@ -579,8 +580,28 @@ BEGIN
     end loop;
 
 
+    if (ihook.getColumnValue(row_ori, 'UNTL_DT') is not null and ihook.getColumnValue(row_ori, 'UNTL_DT') < nvl(ihook.getColumnValue(row_ori, 'EFF_DT'), sysdate) ) then
+        raise_application_error(-20000, 'Expiration date has to be the same or greater than Effective date.');
+
+         return;
+    end if;
+
+
+        for cur in (select ai.item_id item_id from admin_item ai
+            where
+            trim(ai.ITEM_LONG_NM)=trim(ihook.getColumnValue(row_ori,'ITEM_LONG_NM'))
+        --    and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')
+            and ai.cntxt_item_id = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')
+            and  ai.cntxt_ver_nr = ihook.getColumnValue(row_ori, 'CNTXT_VER_NR')
+            and ai.item_id <>  nvl(ihook.getColumnValue(row_ori, 'ITEM_ID'),0)
+            and ai.admin_item_typ_id = ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') )
+            loop
+               raise_application_error(-20000, 'Duplicate found based on context/short name: ' || cur.item_id || chr(13));
+                return;
+            end loop;
+
     if (ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') = 4) then -- Data Element
-   -- raise_application_error (-20000, 'here');
+ --   raise_application_error (-20000, 'here');
            for cur     IN (SELECT ai.item_id
                   FROM admin_item ai, de de
                  WHERE     ai.item_id = de.item_id
@@ -597,32 +618,13 @@ BEGIN
                                      'Duplicate DE found. ' || cur.item_id);
             RETURN;
         END LOOP;
+        
+     
 
     end if;
 
- if (ihook.getColumnValue(row_ori, 'UNTL_DT') is not null and ihook.getColumnValue(row_ori, 'UNTL_DT') < nvl(ihook.getColumnValue(row_ori, 'EFF_DT'), sysdate) ) then
- raise_application_error(-20000, 'Expiration date has to be the same or greater than Effective date.');
-
-    return;
-end if;
-
-for cur in (select ai.item_id item_id from admin_item ai
-            where
-            trim(ai.ITEM_LONG_NM)=trim(ihook.getColumnValue(row_ori,'ITEM_LONG_NM'))
-        --    and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')
-            and ai.cntxt_item_id = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')
-            and  ai.cntxt_ver_nr = ihook.getColumnValue(row_ori, 'CNTXT_VER_NR')
-            and ai.item_id <>  nvl(ihook.getColumnValue(row_ori, 'ITEM_ID'),0)
-            and ai.admin_item_typ_id = ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') )
-            loop
-               raise_application_error(-20000, 'Duplicate found based on context/short name: ' || cur.item_id || chr(13));
-                return;
-            end loop;
 
 
-end if;
-
- if (hookinput.originalRowset.tablename = 'ADMIN_ITEM') then  -- Value domain/released without PV
     if (ihook.getColumnValue (row_ori, 'ADMIN_ITEM_TYP_ID')= 3 and ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID') = 75) then
     for cur in (select item_id, ver_nr from value_dom where item_id = v_item_id and ver_nr = v_ver_nr and VAL_DOM_TYP_ID = 17) loop
       select count(*) into v_temp from perm_val where val_dom_item_id = v_item_id and val_dom_Ver_nr = v_ver_nr and nvl(fld_delete,0) = 0;
@@ -632,7 +634,49 @@ end if;
             end if;
     end loop;
     end if;
+    
+  
   end if;
+  
+  
+-- Released DE cannot have a retired DEC and VD
+
+  
+      IF (hookinput.originalRowset.tablename = 'ADMIN_ITEM' and ihook.getColumnValue (row_ori, 'ADMIN_ITEM_TYP_ID')= 4) then
+  
+   if (ihook.getColumnValue (row_ori, 'ADMIN_STUS_ID') = 75) then
+  --     raise_application_error(-20000,'Here');
+     for curdec in (select de.item_id from admin_item dec , de where de.item_id =  ihook.getColumnValue (row_ori, 'ITEM_ID') and de.ver_nr =  ihook.getColumnValue (row_ori, 'VER_NR')
+    and de.de_conc_item_id = dec.item_id  
+    and de.de_conc_ver_nr  = dec.ver_nr and upper(dec.admin_stus_nm_dn) like '%RETIRED%' union
+    select vd.item_id from admin_item vd, de where de.val_dom_item_id = vd.item_id and de.item_id =  ihook.getColumnValue (row_ori, 'ITEM_ID') and de.ver_nr =  ihook.getColumnValue (row_ori, 'VER_NR')
+    and de.val_dom_Ver_nr = vd.ver_nr and  upper(vd.admin_stus_nm_dn) like '%RETIRED%' ) loop
+    
+            raise_application_error (-20000,
+                                     'Cannot associated Retired DEC or VD with a Released CDE. ' );
+            RETURN;
+        END LOOP;
+   end if;
+   end if;
+   
+   
+ IF (hookinput.originalRowset.tablename = 'DE') then
+  
+  for cur in (select * from admin_item where item_id = ihook.getColumnValue (row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue (row_ori, 'VER_NR')
+  and admin_stus_id = 75) loop
+  --     raise_application_error(-20000,'Here');
+     for curdec in (select dec.item_id from admin_item dec  where dec.item_id =  ihook.getColumnValue (row_ori, 'DE_CONC_ITEM_ID') and dec.ver_nr =  ihook.getColumnValue (row_ori, 'DE_CONC_VER_NR')
+  and upper(dec.admin_stus_nm_dn) like '%RETIRED%' union
+    select vd.item_id from admin_item vd where vd.item_id =  ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID') and vd.ver_nr =  ihook.getColumnValue (row_ori, 'VAL_DOM_VER_NR')
+   and  upper(vd.admin_stus_nm_dn) like '%RETIRED%' ) loop
+    
+            raise_application_error (-20000,
+                                     'Cannot associated Retired DEC or VD with a Released CDE. ' );
+            RETURN;
+        END LOOP;
+   end loop;
+   end if;
+   
     IF (hookinput.originalRowset.tablename = 'DE')
     THEN
         FOR cur
@@ -660,6 +704,7 @@ end if;
             RETURN;
         END LOOP;
 
+
         IF (   ihook.getColumnValue (row_ori, 'DE_CONC_ITEM_ID') <>
                ihook.getColumnOldValue (row_ori, 'DE_CONC_ITEM_ID')
             OR ihook.getColumnValue (row_ori, 'DE_CONC_VER_NR') <>
@@ -670,17 +715,6 @@ end if;
                ihook.getColumnOldValue (row_ori, 'VAL_DOM_VER_NR'))
         THEN
 
--- Released DE cannot have a retired DEC and VD
-
-    for cur in (select ai.* from admin_item ai, admin_item dec, admin_item vd where ai.item_id = ihook.getColumnValue (row_ori, 'ITEM_ID') and
-    ai.ver_nr = ihook.getColumnValue (row_ori, 'VER_NR') and dec.item_id = ihook.getColumnValue (row_ori, 'DE_CONC_ITEM_ID')
-    and dec.ver_nr = ihook.getColumnValue (row_ori, 'DE_CONC_VER_NR') and vd.item_id =ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID')
-    and vd.ver_nr = ihook.getColumnValue (row_ori, 'VAL_DOM_VER_NR') and ai.admin_stus_id = 75 and
-    (upper(dec.admin_stus_nm_dn) like '%RETIRED%' or upper(vd.admin_stus_nm_dn) like '%RETIRED%')) loop
-            raise_application_error (-20000,
-                                     'Cannot associated Retired DEC or VD with a Released CDE. ' );
-            RETURN;
-        END LOOP;
 
 
             SELECT SUBSTR (dec.item_nm || ' ' || vd.item_nm, 1, 255),
