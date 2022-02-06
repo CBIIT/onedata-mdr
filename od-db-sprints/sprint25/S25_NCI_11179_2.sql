@@ -1013,7 +1013,8 @@ as
     v_tab_admin_item_nm   t_admin_item_nm := t_admin_item_nm();
     k integer;
     v_val_mean_desc    val_mean.val_mean_desc%type;
-    v_perm_val_nm    perm_val.perm_val_nm%type;
+    --v_perm_val_nm    perm_val.perm_val_nm%type;
+    v_perm_val_nm varchar2(255);
     v_item_id		 number;
     v_ver_nr		 number;
     v_cart boolean;
@@ -1065,7 +1066,7 @@ end if;
         select ai.item_id || '-' || ai.item_nm into  vd_id_nm from admin_item ai, de where ai.item_id = de.val_dom_item_id and ai.ver_nr = de.val_dom_ver_nr and de.item_id =ihook.getColumnValue(row_cur,'ITEM_ID')
         and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR');
 
-        v_tab_admin_item_nm(v_tab_admin_item_nm.count) := 'CDE:' || ihook.getColumnValue(row_cur,'ITEM_ID') || '-' || ihook.getColumnValue(row_cur,'ITEM_NM') || chr(13) || 'VD:' ||  vd_id_nm ;
+        v_tab_admin_item_nm(v_tab_admin_item_nm.count) := 'CDE:' || ihook.getColumnValue(row_cur,'ITEM_ID') || '-' || substr(ihook.getColumnValue(row_cur,'ITEM_NM'),1,75) || chr(13) || 'VD:' ||  substr(vd_id_nm,1,75) ;
      end if;
     end loop;
   end if;
@@ -1093,7 +1094,7 @@ end if;
         end loop;
       v_tab_admin_item_nm.extend();
 
-      v_tab_admin_item_nm(v_tab_admin_item_nm.count) := 'VD:' || ihook.getColumnValue(row_cur,'ITEM_ID') || '-' || ihook.getColumnValue(row_cur,'ITEM_NM');
+      v_tab_admin_item_nm(v_tab_admin_item_nm.count) := substr('VD:' || ihook.getColumnValue(row_cur,'ITEM_ID') || '-' || ihook.getColumnValue(row_cur,'ITEM_NM'),1,255);
     end if;
     end loop;
    end if;
@@ -1125,6 +1126,7 @@ end if;
             and a.val_dom_ver_nr=de.val_dom_ver_nr and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR') and a.fld_delete=0) loop
                 v_perm_val_nm := rec.perm_val_nm;
             end loop;
+           -- raise_application_error(-20000, nci_11179.replaceChar(v_perm_val_nm));
             ihook.setColumnValue(row, v_tab_admin_item_nm(k), nci_11179.replaceChar(v_perm_val_nm));
             k := k + 1;
             end if;
