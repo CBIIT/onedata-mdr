@@ -610,6 +610,5 @@ end loop;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
  --nci_util.debugHook('GENERAL',v_data_out);
 end;
-
 end;
 /
