@@ -1,17 +1,31 @@
 
--- Run as ONEDATA_WA DDL scripts
-S25_WA_EXEC_LOAD_CONCEPTS_JOB.sql
-
 
 -- Run as ONEDATA_RA DDL scripts
 S25_RA_EXEC_LOAD_CONCEPTS_JOB.sql
+S25_WA_RA_DDL.sql
+
+-- Run as ONEDATA_WA DDL scripts
+S25_WA_EXEC_LOAD_CONCEPTS_JOB.sql
+S25_WA_RA_DDL.sql
+S25_WA_DDL.sql
+S25_NCI_11179.sql
+S25_NCI_11179_2.sql
+S25_NCI_DEC_MGMT.sql
+S25_NCI_IMPORT.sql
+S25_NCI_CHNG_MGMT.sql
+S25_NCI_FORM_MGMT.sql
+S25_NCI_VD.sql
+S25_NCI_PV_VM.sql
+S25_NCI_DLOAD.sql
+S25_NCI_DS.sql
+S25_NCI_POST_HOOK.sql
+
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
 
 
 -- Run as ONEDATA_WA DM scripts
-
 
 -- Run as ONEDATA_RA DM scripts
 
