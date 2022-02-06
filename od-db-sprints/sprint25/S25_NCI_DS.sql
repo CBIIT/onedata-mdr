@@ -331,7 +331,7 @@ begin
         if (v_temp = 0) then        -- Non enumerated section
             for cur in (select * from nci_ds_hdr where hdr_id = v_hdr_id ) loop
            select '''' || upper(nvl(cur.entty_nm_usr, cur.entty_nm)) || '''' into v_entty_nm from dual;
-              select '''%' || upper(nvl(cur.entty_nm_usr, cur.entty_nm)) || '%''' into v_entty_nm_like from dual;
+              select '''' || upper(nvl(cur.entty_nm_usr, cur.entty_nm)) || '''' into v_entty_nm_like from dual;
           
                   v_sql := 'insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_id, score, rule_desc) select ' ||  v_hdr_id || ', de.item_id, de.ver_nr,  1, 100, ''Preferred Name Exact Match'' from 
                   vw_de de where ' ||v_entty_nm || ' = upper(de.item_nm)    and currnt_ver_ind = 1                     and de.val_dom_typ_id = 18 and ' || v_flt_str ;
@@ -346,7 +346,7 @@ begin
                  
                     v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_id, score, rule_desc)
                     select distinct ' ||  v_hdr_id || ', r.item_id, r.ver_nr,  2, 100, ''Question Text Exact Match'' from ref r, obj_key ok, vw_de de 
-                    where ' || v_entty_nm || ' = upper(r.ref_nm)
+                    where ' || v_entty_nm || ' = upper(r.ref_desc)
                     and r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
                     and (' || v_hdr_id || ',r.item_id, r.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt)
                     and de.val_dom_typ_id = 18 and ' || v_flt_str;
@@ -370,33 +370,59 @@ begin
             -- Non enumerated only
             
            -- Rule id 4; Only for non-enumerated, Like
+           /*
                     v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_id, score, rule_desc)
-                    select distinct ' ||  v_hdr_id || ', de.item_id, de.ver_nr,  4, 100, ''Preferred Name Like Match'' from vw_de  de where (upper(de.item_nm) like ' || v_entty_nm_like || ' or '
-                     || v_entty_nm || ' like ''% upper(de.item_nm)  %'')
+                    select distinct ' ||  v_hdr_id || ', de.item_id, de.ver_nr,  4, 100, ''Preferred Name Like Match'' from vw_de  de where (instr(upper(de.item_nm), ' || v_entty_nm || ',1) > 0 or instr( '
+                     || v_entty_nm || ', upper(de.item_nm),1) > 0)
                      and currnt_ver_ind = 1 and de.val_dom_typ_id = 18
-                     and (' || v_hdr_id || ') not in (select distinct hdr_id from nci_ds_rslt) and ' || v_flt_str;
+                     and (' || v_hdr_id || ', de.item_id, de.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt) and ' || v_flt_str;
+                   --  raise_application_error(-20000, v_sql);
                      execute immediate v_sql;
-                    commit;
-        
-                
-                    -- Rule id 5:  Entity alternate question text name like match for non-enumerated
+                    commit; */
                     
-                    v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_id, score, rule_desc)
-                    select distinct ' ||  v_hdr_id || ', r.item_id, r.ver_nr,  5, 100, ''Question Text Like Match'' from ref r, obj_key ok, vw_de de
-                    where (upper(r.ref_nm) like ' || v_entty_nm_like || '  
-                    or ' || v_entty_nm || '  like ''% upper(r.ref_nm) %'') and
-                    r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and r.ref_nm != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
-                    and (' || v_hdr_id || ') not in (select distinct hdr_id from nci_ds_rslt) and de.val_dom_typ_id = 18 and ' || v_flt_str;
+                       v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_id, score, rule_desc)
+                    select distinct ' ||  v_hdr_id || ', de.item_id, de.ver_nr,  4, 100, ''Preferred Name Like Match'' from vw_de  de 
+                    where (instr(upper(de.item_nm), ' || v_entty_nm || ',1) > 0 )
+                     and currnt_ver_ind = 1 and de.val_dom_typ_id = 18
+                     and (' || v_hdr_id || ') not in (select hdr_id from nci_ds_rslt) and ' || v_flt_str;
+                   --  raise_application_error(-20000, v_sql);
                      execute immediate v_sql;
+                     
+                        -- Rule id 5:  Entity alternate question text name like match for non-enumerated
+                    /*
+                    v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_id, score, rule_desc, mtch_desc_txt)
+                    select distinct ' ||  v_hdr_id || ', r.item_id, r.ver_nr,  5, 100, ''Question Text Like Match'', r.ref_desc from ref r, obj_key ok, vw_de de
+                    where (instr(upper(r.ref_desc),' || v_entty_nm || ', 1) > 0  
+                    or instr(' || v_entty_nm || ',  upper(r.ref_desc),1) > 0) and
+                    r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%PREFERRED QUESTION%'' and r.ref_nm != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
+                    and (' || v_hdr_id || ', r.item_id, r.ver_nr) not in (select  hdr_id, item_id, ver_nr from nci_ds_rslt) and de.val_dom_typ_id = 18 and ' || v_flt_str;
+                    --  raise_application_error(-20000, v_sql);
+                execute immediate v_sql;
+                    commit;
+                   */
+                    v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_id, score, rule_desc, mtch_desc_txt)
+                    select distinct ' ||  v_hdr_id || ', r.item_id, r.ver_nr,  5, 100, ''Question Text Like Match'', r.ref_desc from ref r, obj_key ok, vw_de de
+                    where (instr(upper(r.ref_desc),' || v_entty_nm || ', 1) > 0  ) and
+                    r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and r.ref_nm != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
+                    and (' || v_hdr_id || ', r.item_id, r.ver_nr) not in (select  hdr_id, item_id, ver_nr from nci_ds_rslt) and de.val_dom_typ_id = 18 and ' || v_flt_str;
+                    --  raise_application_error(-20000, v_sql);
+                execute immediate v_sql;
                     commit;
                                 
                     -- Rule id 6:  Entity alternate  name like match for non-enumerated
-                    
+                    /*
                     v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr, rule_id, score, rule_desc)
                     select distinct ' ||  v_hdr_id || ', r.item_id, r.ver_nr,  6, 100, ''Alternate Name Like Match'' from alt_nms r, vw_de de
-                    where (upper(r.nm_desc) like ' || v_entty_nm_like || ' or ' || v_entty_nm || '  like ''% ||  upper(r.nm_desc) || %'')
+                    where (instr(upper(r.nm_desc), ' || v_entty_nm || ',1) > 0 or instr(' || v_entty_nm || ', upper(r.nm_desc),1) > 0)
                     and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1 and de.val_dom_typ_id = 18
-                    and (' || v_hdr_id || ') not in (select distinct hdr_id from nci_ds_rslt) and ' || v_flt_str;
+                    and (' || v_hdr_id || ',r.item_id, r.ver_nr) not  in (select hdr_id, item_id,Ver_nr from nci_ds_rslt) and ' || v_flt_str;
+                    */
+                    v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr, rule_id, score, rule_desc)
+                    select distinct ' ||  v_hdr_id || ', r.item_id, r.ver_nr,  6, 100, ''Alternate Name Like Match'' from alt_nms r, vw_de de
+                    where (instr(upper(r.nm_desc), ' || v_entty_nm || ',1) > 0)
+                    and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1 and de.val_dom_typ_id = 18
+                    and (' || v_hdr_id || ',r.item_id, r.ver_nr) not  in (select hdr_id, item_id,Ver_nr from nci_ds_rslt) and ' || v_flt_str;
+                    
                      execute immediate v_sql;
                     commit;
         end loop;
@@ -424,7 +450,7 @@ begin
         
         -- Rule id 2:  Entity alternate question text name exact match
         v_sql := ' insert into nci_ds_rslt_dtl (hdr_id, item_id, ver_nr, perm_val_nm, rule_id, score, rule_desc)
-        select distinct ' || cur.hdr_id || ', r.item_id, r.ver_nr, ''NA'', 2, 100, ''Question Text Exact Match'' from ref r, obj_key ok, vw_de de  where ' || v_entty_nm || '  = upper(r.ref_nm)         and
+        select distinct ' || cur.hdr_id || ', r.item_id, r.ver_nr, ''NA'', 2, 100, ''Question Text Exact Match'' from ref r, obj_key ok, vw_de de  where ' || v_entty_nm || '  = upper(r.ref_desc)         and
         r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
         and (' || cur.hdr_id || ',r.item_id, r.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt_dtl) and de.val_dom_typ_id = 17 and ' || v_flt_str;
          execute immediate v_sql;
@@ -442,12 +468,15 @@ begin
         
         -- Rule id 4; Only for enumerated, Like
         v_sql := ' insert into nci_ds_rslt_dtl (hdr_id, item_id, ver_nr, perm_val_nm, rule_id, score, rule_desc)
-        select ' ||  cur.hdr_id || ' , de.item_id, de.ver_nr, ''NA'', 4, 100, ''Preferred Name Like Match'' from vw_de  de where  upper(de.item_nm) 
-        like ' || v_entty_nm_like ||
+        select ' ||  cur.hdr_id || ' , de.item_id, de.ver_nr, ''NA'', 4, 100, ''Preferred Name Like Match'' from vw_de  de 
+                    where (instr(upper(de.item_nm), ' || v_entty_nm || ',1) > 0 ) ' ||
          ' and currnt_ver_ind = 1 and de.val_dom_typ_id = 17
         and (' || cur.hdr_id || ' , de.item_id, de.ver_nr) not in (select  hdr_id, item_id, ver_nr from nci_ds_rslt_dtl) and de.val_dom_typ_id = 17 and ' || v_flt_str;
          execute immediate v_sql;
         commit;
+        
+        
+                     
         end loop;
 
 
