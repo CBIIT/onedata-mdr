@@ -387,7 +387,7 @@ begin
                      and (' || v_hdr_id || ') not in (select hdr_id from nci_ds_rslt) and ' || v_flt_str;
                    --  raise_application_error(-20000, v_sql);
                      execute immediate v_sql;
-                     
+                     commit;
                         -- Rule id 5:  Entity alternate question text name like match for non-enumerated
                     /*
                     v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_id, score, rule_desc, mtch_desc_txt)
@@ -400,12 +400,12 @@ begin
                 execute immediate v_sql;
                     commit;
                    */
-                    v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_id, score, rule_desc, mtch_desc_txt)
-                    select distinct ' ||  v_hdr_id || ', r.item_id, r.ver_nr,  5, 100, ''Question Text Like Match'', r.ref_desc from ref r, obj_key ok, vw_de de
+                    v_sql := ' insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_id, score, rule_desc)
+                    select distinct ' ||  v_hdr_id || ', r.item_id, r.ver_nr,  5, 100, ''Question Text Like Match'' from ref r, obj_key ok, vw_de de
                     where (instr(upper(r.ref_desc),' || v_entty_nm || ', 1) > 0  ) and
                     r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and r.ref_nm != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
-                    and (' || v_hdr_id || ', r.item_id, r.ver_nr) not in (select  hdr_id, item_id, ver_nr from nci_ds_rslt) and de.val_dom_typ_id = 18 and ' || v_flt_str;
-                    --  raise_application_error(-20000, v_sql);
+                    and (' || v_hdr_id || ') not in (select  hdr_id from nci_ds_rslt) and de.val_dom_typ_id = 18 and ' || v_flt_str;
+                --      raise_application_error(-20000, v_sql);
                 execute immediate v_sql;
                     commit;
                                 
@@ -421,8 +421,8 @@ begin
                     select distinct ' ||  v_hdr_id || ', r.item_id, r.ver_nr,  6, 100, ''Alternate Name Like Match'' from alt_nms r, vw_de de
                     where (instr(upper(r.nm_desc), ' || v_entty_nm || ',1) > 0)
                     and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1 and de.val_dom_typ_id = 18
-                    and (' || v_hdr_id || ',r.item_id, r.ver_nr) not  in (select hdr_id, item_id,Ver_nr from nci_ds_rslt) and ' || v_flt_str;
-                    
+                    and (' || v_hdr_id || ') not  in (select hdr_id from nci_ds_rslt) and ' || v_flt_str;
+              --    raise_application_error(-20000, v_sql);
                      execute immediate v_sql;
                     commit;
         end loop;
