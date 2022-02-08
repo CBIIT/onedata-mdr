@@ -233,7 +233,7 @@ begin
 
     row_ori := hookInput.originalRowset.rowset(1);
     v_val_ind := true;
-    if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1') is not null) then
+    if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_SaTR_1') is not null) then
       nci_dec_mgmt.createValAIWithConcept(row_ori, 1,5,'V', 'STRING', actions) ;
     end if;
     if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_2') is not null) then  
@@ -254,7 +254,7 @@ begin
     rows := t_rows();
     rows.extend; rows(rows.last) := row_ori;
 
-    action := t_actionrowset(rows, 'CDE Import', 2,10,'update');
+    action := t_actionrowset(rows, 'DEC Import', 2,10,'update');
     actions.extend;
     actions(actions.last) := action;
     hookoutput.actions := actions;
@@ -610,5 +610,6 @@ end loop;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
  --nci_util.debugHook('GENERAL',v_data_out);
 end;
+
 end;
 /
