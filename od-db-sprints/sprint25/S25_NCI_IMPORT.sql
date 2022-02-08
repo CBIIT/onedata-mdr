@@ -233,7 +233,7 @@ begin
 
     row_ori := hookInput.originalRowset.rowset(1);
     v_val_ind := true;
-    if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_SaTR_1') is not null) then
+    if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1') is not null) then
       nci_dec_mgmt.createValAIWithConcept(row_ori, 1,5,'V', 'STRING', actions) ;
     end if;
     if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_2') is not null) then  
