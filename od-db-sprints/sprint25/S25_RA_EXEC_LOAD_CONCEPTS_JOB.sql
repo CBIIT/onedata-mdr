@@ -10,17 +10,13 @@ insert into onedata_ra.alt_nms
 select * from onedata_wa.alt_nms where creat_usr_id = 'ONEDATA' and lst_upd_usr_id = 'ONEDATA' and nm_typ_id = 1064
 and (item_id, ver_nr) not in (select item_id, ver_nr from onedata_ra.alt_nms);
 commit;
-
 dbms_output.put_line('ONEDATA_RA load concepts is completed');
-
-
 DBMS_MVIEW.REFRESH('VW_CNCPT'); 
-
 END;
-
+/
 BEGIN
 DBMS_SCHEDULER.CREATE_JOB (
-   job_name           =>  'ONEDATA_RA.EXEC_LOAD_CONCEPTS_JOB_RA',
+   job_name           =>  'EXEC_LOAD_CONCEPTS_JOB_RA',
    job_type           =>  'STORED_PROCEDURE',
    job_action         =>  'EXEC_LOAD_CONCEPTS_RA',
    start_date         =>  '22-OCT-22 10.00.00 PM',
