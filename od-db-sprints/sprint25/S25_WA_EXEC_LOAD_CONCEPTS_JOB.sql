@@ -6,10 +6,11 @@ END;
 /
 BEGIN
 DBMS_SCHEDULER.CREATE_JOB (
-   job_name           =>  'EXEC_LOAD_CONCEPTS_JOB_WA',
+   job_name           =>  'ONEDATA_WA.EXEC_LOAD_CONCEPTS_JOB_WA',
    job_type           =>  'STORED_PROCEDURE',
    job_action         =>  'EXEC_LOAD_CONCEPTS',
    start_date         =>  '22-OCT-22 10.00.00 PM',
    repeat_interval    =>  'FREQ=DAILY',
    enabled            =>   TRUE);
 END;
+/

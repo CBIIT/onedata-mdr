@@ -16,10 +16,11 @@ END;
 /
 BEGIN
 DBMS_SCHEDULER.CREATE_JOB (
-   job_name           =>  'EXEC_LOAD_CONCEPTS_JOB_RA',
+   job_name           =>  'LOAD_CONCEPTS_JOB_RA_S25',
    job_type           =>  'STORED_PROCEDURE',
    job_action         =>  'EXEC_LOAD_CONCEPTS_RA',
    start_date         =>  '22-OCT-22 10.00.00 PM',
    repeat_interval    =>  'FREQ=DAILY',
    enabled            =>   TRUE);
 END;
+/
