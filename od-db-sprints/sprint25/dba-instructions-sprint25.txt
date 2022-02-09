@@ -1,25 +1,46 @@
 
-
 -- Run as ONEDATA_RA DDL scripts
-
-S25_WA_RA_DDL.sql
+@C:\meta\UPLOAD\S25_RA_EXEC_LOAD_CONCEPTS_JOB.sql
+@C:\meta\UPLOAD\S25_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
-
-S25_WA_RA_DDL.sql
-S25_WA_DDL.sql
-S25_NCI_11179.sql
-S25_NCI_11179_2.sql
-S25_NCI_DEC_MGMT.sql
-S25_NCI_IMPORT.sql
-S25_NCI_CHNG_MGMT.sql
-S25_NCI_FORM_MGMT.sql
-S25_NCI_VD.sql
-S25_NCI_PV_VM.sql
-S25_NCI_DLOAD.sql
-S25_NCI_DS.sql
-S25_NCI_POST_HOOK.sql
+@C:\meta\UPLOAD\S25_WA_EXEC_LOAD_CONCEPTS_JOB.sql
+@C:\meta\UPLOAD\S25_WA_RA_DDL.sql
+@C:\meta\UPLOAD\S25_WA_DDL.sql
+@C:\meta\UPLOAD\S25_NCI_11179.sql
+@C:\meta\UPLOAD\S25_NCI_11179_2.sql
+@C:\meta\UPLOAD\S25_NCI_DEC_MGMT.sql
+@C:\meta\UPLOAD\S25_NCI_IMPORT.sql
+@C:\meta\UPLOAD\S25_NCI_CHNG_MGMT.sql
+@C:\meta\UPLOAD\S25_NCI_FORM_MGMT.sql
+@C:\meta\UPLOAD\S25_NCI_VD.sql
+@C:\meta\UPLOAD\S25_NCI_PV_VM.sql
+@C:\meta\UPLOAD\S25_NCI_DLOAD.sql
+@C:\meta\UPLOAD\S25_NCI_DS.sql
+@C:\meta\UPLOAD\S25_NCI_POST_HOOK.sql
 
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
+
+
+-- Run as ONEDATA_WA DM scripts
+@C:\meta\UPLOAD\S25_WA_Data_migration.sql
+
+-- Run as ONEDATA_RA DM scripts
+@C:\meta\UPLOAD\S25_RA_Data_Migration.sql
+-- Run as ONEDATA_RA DM scripts
+
+-- Run validate job as ONEDATA_WA
+-- exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
+
+-- Concepts Loading steps below
+-- ! Attention DBAs: import the table SAG_LOAD_CONCEPTS_EVS data from DEV tier to your deployment tier before running the next script
+
+-- Run as ONEDATA_WA DM scripts
+S22_WA_EXEC_LOAD_CONCEPTS.sql
+EXECUTE DBMS_MVIEW.REFRESH('VW_CNCPT'); 
+
+-- Run as ONEDATA_RA DM scripts
+S24_RA_EXEC_LOAD_CONCEPTS.sql
+EXECUTE DBMS_MVIEW.REFRESH('VW_CNCPT');
