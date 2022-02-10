@@ -2,6 +2,8 @@
 
 alter table nci_ds_hdr add (CMNTS_DESC_TXT varchar2(4000));
 
+alter table nci_ds_rslt add (MTCH_DESC_TXT	VARCHAR2(4000 BYTE));
+
 alter table NCI_STG_AI_CNCPT_CREAT add (CMNTS_DESC_TXT varchar2(4000));
 
 --drop view VW_CLSFCTN_SCHM;
