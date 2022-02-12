@@ -4,6 +4,7 @@ create table nci_job_log
  job_step_desc  varchar2(255) not null,
  run_param varchar2(255),
  end_dt timestamp,
+ exec_by varchar2(50),
  "CREAT_DT" DATE DEFAULT sysdate, 
 	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
 	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
