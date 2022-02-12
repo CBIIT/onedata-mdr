@@ -1,0 +1,11 @@
+Delete command hooks related to reverse from NCI User Cart
+
+
+
+-- Tracker 1499
+-- Valid WorkflowStatus for Context
+
+
+insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (8,75);
+insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (8,77);
+commit;
