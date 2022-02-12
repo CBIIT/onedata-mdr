@@ -1,0 +1,4 @@
+ CREATE SEQUENCE OD_SEQ_NCI_JOB_LOG
+          INCREMENT BY 1
+          START WITH 1000;
+          
