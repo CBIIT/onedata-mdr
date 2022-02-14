@@ -1,25 +1,24 @@
 -- Run as ONEDATA_RA DDL scripts
-@C:\meta\UPLOAD\S25_RA_EXEC_LOAD_CONCEPTS_JOB.sql
-@C:\meta\UPLOAD\S25_WA_RA_DDL.sql
+S25_RA_EXEC_LOAD_CONCEPTS_JOB.sql
+S25_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
-@C:\meta\UPLOAD\S25_WA_EXEC_LOAD_CONCEPTS_JOB.sql
-@C:\meta\UPLOAD\S25_WA_RA_DDL.sql
-@C:\meta\UPLOAD\S25_WA_DDL.sql
-@C:\meta\UPLOAD\S25_NCI_11179.sql
-@C:\meta\UPLOAD\S25_NCI_11179_2.sql
-@C:\meta\UPLOAD\S25_NCI_DEC_MGMT.sql
-@C:\meta\UPLOAD\S25_NCI_IMPORT.sql
-@C:\meta\UPLOAD\S25_NCI_CHNG_MGMT.sql
-@C:\meta\UPLOAD\S25_NCI_FORM_MGMT.sql
-@C:\meta\UPLOAD\S25_NCI_VD.sql
-@C:\meta\UPLOAD\S25_NCI_PV_VM.sql
-@C:\meta\UPLOAD\S25_NCI_DLOAD.sql
-@C:\meta\UPLOAD\S25_NCI_DS.sql
-@C:\meta\UPLOAD\S25_NCI_POST_HOOK.sql
+S25_WA_EXEC_LOAD_CONCEPTS_JOB.sql
+S25_WA_RA_DDL.sql
+S25_WA_DDL.sql
+S25_NCI_11179.sql
+S25_NCI_11179_2.sql
+S25_NCI_DEC_MGMT.sql
+S25_NCI_IMPORT.sql
+S25_NCI_CHNG_MGMT.sql
+S25_NCI_FORM_MGMT.sql
+S25_NCI_VD.sql
+S25_NCI_PV_VM.sql
+S25_NCI_DLOAD.sql
+S25_NCI_DS.sql
+S25_NCI_POST_HOOK.sql
 
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
-
 
