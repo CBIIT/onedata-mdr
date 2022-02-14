@@ -11,6 +11,6 @@ DBMS_SCHEDULER.CREATE_JOB (
    job_action         =>  'EXEC_LOAD_CONCEPTS',
    start_date         =>  '22-OCT-22 10.00.00 PM',
    repeat_interval    =>  'FREQ=DAILY',
-   enabled            =>   TRUE);
+   enabled            =>   FALSE);
 END;
 /
