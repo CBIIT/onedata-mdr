@@ -13,3 +13,4 @@ create table nci_job_log
 	"S2P_TRN_DT" DATE DEFAULT sysdate, 
 	"LST_UPD_DT" DATE DEFAULT sysdate);
  
+alter table NCI_STG_CDE_CREAT add (DE_CONC_VER_NR_CREAT number(4,2), VAL_DOM_VER_NR_CREAT number(4,2));
