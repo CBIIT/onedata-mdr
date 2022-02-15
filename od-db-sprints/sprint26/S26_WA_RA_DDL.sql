@@ -41,8 +41,8 @@ and frm_mod.rel_typ_id in (61,62)
 and frm.admin_item_typ_id in ( 54,55)
 and air.c_item_id = de.item_id (+)
 and air.c_item_ver_nr = de.ver_nr (+)
-and air.NCI_PUB_ID = rep.quest_pub_id (+)
-and air.nci_ver_nr = rep.quest_ver_nr (+)
+and air.NCI_PUB_ID = rep.quest_pub_id 
+and air.nci_ver_nr = rep.quest_ver_nr 
 and rep.DEFLT_VAL_ID = vv.nci_pub_id (+)
 union
   select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr, frm.item_desc  frm_item_def,
