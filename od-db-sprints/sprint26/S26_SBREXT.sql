@@ -5,3 +5,7 @@ alter table quest_vv_ext drop constraint QVT_QVT_FK;
 
 
 create index od_quest_rep_seq on QUEST_VV_EXT (QUEST_IDSEQ, REPEAT_SEQUENCE);
+
+
+create unique index od_quest_id_ver on QUEST_contents_EXT (qc_id,  version);
+
