@@ -9,3 +9,19 @@ Delete command hooks related to reverse from NCI User Cart
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (8,75);
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (8,77);
 commit;
+
+
+-- Data migration change
+truncate table ref_doc;
+
+insert into ref_doc (NCI_IDSEQ, NCI_REF_ID,FILE_NM,NCI_MIME_TYPE,NCI_DOC_SIZE,
+ NCI_CHARSET,NCI_DOC_LST_UPD_DT,BLOB_COL,
+CREAT_USR_ID,CREAT_DT,LST_UPD_USR_ID,LST_UPD_DT)
+select RD_IDSEQ,r.ref_id, rb.NAME,MIME_TYPE,DOC_SIZE,
+DAD_CHARSET,LAST_UPDATED,BLOB_CONTENT,
+    nvl(created_by,'ONEDATA'),
+               nvl(date_created,sysdate) ,
+               nvl(modified_by,'ONEDATA'),
+             nvl(NVL (date_modified, date_created), sysdate)
+        from ref r, sbr_m.reference_blobs rb where r.nci_idseq = rb.rd_idseq;
+commit;
