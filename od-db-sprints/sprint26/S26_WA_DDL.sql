@@ -13,7 +13,7 @@ CREATE OR REPLACE TRIGGER OD_TR_REF_DOC  BEFORE INSERT  on REF_DOC  for each row
                   select od_seq_REF_DOC.nextval
             into :new.REF_DOC_ID  from  dual ;   END IF; 
   
-             IF (new.nci_idseq is null)  THEN 
+             IF (:new.nci_idseq is null)  THEN 
                   :new.nci_idseq := nci_11179.cmr_guid();  END IF; 
                   END ;          
 /
