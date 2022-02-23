@@ -258,3 +258,5 @@ alter table NCI_STG_CDE_CREAT add (CDE_ITEM_DESC varchar2(4000), CDE_ORIGIN  var
 
 
 
+alter table ref_doc add (NCI_IDSEQ char(36));
+
