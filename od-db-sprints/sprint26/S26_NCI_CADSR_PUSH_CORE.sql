@@ -13,7 +13,7 @@ procedure pushProt (vIdseq in char, vItemId in number, vVerNr in number, vAction
 procedure pushVM (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char);
 procedure pushOCRecs (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char);
 procedure pushCS (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char);
-procedure pushContext (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char);
+procedure spPushContext (vHours in integer);
 procedure pushCSI (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char);
 procedure pushCondr (vCondrIdseq in char, vItemId in number, vVerNr in number, vActionType in char);
 procedure spPushAI (vHours in integer);
@@ -50,7 +50,7 @@ begin
 
 
 for cur in (select nci_idseq, item_id, ver_nr, admin_item_typ_id from admin_item ai, obj_key ok where admin_item_typ_id <> 52 and ai.admin_item_typ_id = ok.obj_key_id and ok.obj_typ_id = 4
-and ai.lst_upd_dt >= sysdate -vHours/24 order by ok.disp_ord) loop
+and ai.lst_upd_dt >= sysdate -vHours/24 and admin_item_typ_id <> 8 order by ok.disp_ord, ai.creat_dt) loop
 select count(*) into v_cnt  from sbr.administered_components where ac_idseq = cur.nci_idseq;
 if (v_cnt = 0) then ActionType := 'I';
 else ActionType := 'U';
@@ -80,8 +80,8 @@ nci_cadsr_push_core.pushProp(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType)
 when 7 then ---Representation Class
 nci_cadsr_push_core.pushRC(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
 
-when 8 then --- Context
-nci_cadsr_push_core.pushContext(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
+--when 8 then --- Context
+--nci_cadsr_push_core.pushContext(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
 
 when 9 then --- Classification Scheme
 nci_cadsr_push_core.pushCS(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
@@ -170,8 +170,8 @@ nci_cadsr_push_core.pushProp(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType)
 when 7 then ---Representation Class
 nci_cadsr_push_core.pushRC(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
 
-when 8 then --- Context
-nci_cadsr_push_core.pushContext(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
+--when 8 then --- Context
+--nci_cadsr_push_core.pushContext(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
 
 when 9 then --- Classification Scheme
 nci_cadsr_push_core.pushCS(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
@@ -260,8 +260,8 @@ nci_cadsr_push_core.pushProp(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType)
 when 7 then ---Representation Class
 nci_cadsr_push_core.pushRC(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
 
-when 8 then --- Context
-nci_cadsr_push_core.pushContext(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
+--when 8 then --- Context
+--nci_cadsr_push_core.pushContext(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
 
 when 9 then --- Classification Scheme
 nci_cadsr_push_core.pushCS(cur.nci_idseq, cur.item_id, cur.ver_nr, ActionType);
@@ -414,11 +414,13 @@ select nci_11179.cmr_guid, vIdSeq, nci_stus, ai.creat_dt, ai.creat_usr_id from s
 and ai.nci_idseq = vIdSeq and ai.regstr_stus_id is not null ;
 
 end if;
+commit;
 end;
 
 
 procedure pushDE (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char)
 as
+v_cnt integer;
 begin
 if vActionType = 'U' then
 update sbr.data_elements set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
@@ -436,30 +438,6 @@ update sbr.data_elements set ( asl_name,begin_date,change_note,conte_idseq,end_d
 where de_idseq = vIdseq;
 
 
---- Update Complex_data_elements
-for cur2 in (select DERV_MTHD	, DERV_RUL , DERV_TYP_ID, CONCAT_CHAR, DERV_DE_IND from de where item_id = vItemId and ver_nr = vVerNr and derv_de_ind = 1) loop
-update sbr.complex_data_elements set (METHODS,RULE, CRTL_NAME, CONCAT_CHAR) =
-(select DERV_MTHD, DERV_RUL , ok.nci_cd, CONCAT_CHAR
-        from de, obj_key ok
-        where item_id = vItemId and ver_nr = vVerNr and de.DERV_TYP_ID = ok.obj_key_id (+))
-where p_de_idseq = vIdseq;
-end loop;
-
--- Derivation components update
-for cur3 in (select vIdseq, c.nci_idseq c_de_idseq, disp_ord,rel.CREAT_USR_ID, rel.CREAT_DT, rel.LST_UPD_DT,rel.LST_UPD_USR_ID
-from nci_admin_item_rel rel, admin_item c where rel_typ_id = 65 and rel.p_item_id = vItemId and p_item_ver_nr = vVerNr and
-c.item_id = rel.c_item_id and c.ver_nr = rel.c_item_ver_nr and (vIdseq, c.nci_idseq) in (select p_de_idseq, c_de_idseq from sbr.COMPLEX_DE_RELATIONSHIPS) )loop
-update sbr.complex_de_relationships set (DISPLAY_ORDER,DATE_MODIFIED,MODIFIED_BY) =
-(select cur3.disp_ord, cur3.lst_upd_dt, cur3.lst_upd_usr_id from dual)
-where p_de_idseq = vIdseq and c_de_idseq = cur3.c_de_idseq;
-end loop;
-
-for cur4 in (select vIdseq, c.nci_idseq c_de_idseq, disp_ord,rel.CREAT_USR_ID, rel.CREAT_DT, rel.LST_UPD_DT,rel.LST_UPD_USR_ID
-from nci_admin_item_rel rel, admin_item c where rel_typ_id = 65 and rel.p_item_id = vItemId and p_item_ver_nr = vVerNr and
-c.item_id = rel.c_item_id and c.ver_nr = rel.c_item_ver_nr and (vIdseq, c.nci_idseq) not in (select p_de_idseq, c_de_idseq from sbr.COMPLEX_DE_RELATIONSHIPS)) loop
-insert into sbr.complex_de_relationships (p_de_idseq, c_de_idseq, DISPLAY_ORDER,DATE_MODIFIED,MODIFIED_BY,DATE_CREATED, CREATED_BY )
-select vIdseq, cur4.c_de_idseq, cur4.disp_ord, cur4.lst_upd_dt, cur4.lst_upd_usr_id, cur4.creat_dt, cur4.creat_usr_id from dual;
-end loop;
 end if;
 
 if vActionType = 'I' then
@@ -479,12 +457,8 @@ select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq
             and ai.nci_idseq= vIdseq;
 
 
-for cur2 in (select DERV_MTHD	, DERV_RUL , DERV_TYP_ID, CONCAT_CHAR, DERV_DE_IND from de where item_id = vItemId and ver_nr = vVerNr and derv_de_ind = 1) loop
-insert into sbr.complex_data_elements (p_de_idseq, METHODS,RULE, CRTL_NAME, CONCAT_CHAR)
-select vIdseq, DERV_MTHD, DERV_RUL , ok.nci_cd, CONCAT_CHAR
-from de, obj_key ok where item_id = vItemId and ver_nr = vVerNr and de.DERV_TYP_ID = ok.obj_key_id (+);
-end loop;
 
+/*
 for cur4 in (select vIdseq, c.nci_idseq c_de_idseq, disp_ord,rel.CREAT_USR_ID, rel.CREAT_DT, rel.LST_UPD_DT,rel.LST_UPD_USR_ID
 from nci_admin_item_rel rel, admin_item c where rel_typ_id = 65 and rel.p_item_id = vItemId and p_item_ver_nr = vVerNr and
 C.item_id = rel.c_item_id and c.ver_nr = rel.c_item_ver_nr ) loop
@@ -492,8 +466,31 @@ insert into sbr.complex_de_relationships (p_de_idseq, c_de_idseq, DISPLAY_ORDER,
 select vIdseq, cur4.c_de_idseq, cur4.disp_ord, cur4.lst_upd_dt, cur4.lst_upd_usr_id, cur4.creat_dt, cur4.creat_usr_id from dual;
 
 end loop;
-
+*/
 end if;
+
+select count(*) into v_cnt from sbr.complex_data_elements where p_de_idseq = vIdSeq;
+
+if (v_cnt = 0) then
+for cur2 in (select DERV_MTHD	, DERV_RUL , DERV_TYP_ID, CONCAT_CHAR, DERV_DE_IND from de where item_id = vItemId and ver_nr = vVerNr and derv_de_ind = 1) loop
+insert into sbr.complex_data_elements (p_de_idseq, METHODS,RULE, CRTL_NAME, CONCAT_CHAR,DATE_MODIFIED,MODIFIED_BY,DATE_CREATED, CREATED_BY  )
+select vIdseq, DERV_MTHD, DERV_RUL , ok.nci_cd, CONCAT_CHAR, de.lst_upd_dt, de.lst_upd_usr_id, De.creat_dt, de.creat_usr_id
+from de, obj_key ok where item_id = vItemId and ver_nr = vVerNr and de.DERV_TYP_ID = ok.obj_key_id (+);
+end loop;
+end if;
+
+
+--- Update Complex_data_elements
+if v_cnt = 1 then
+for cur2 in (select DERV_MTHD	, DERV_RUL , DERV_TYP_ID, CONCAT_CHAR, DERV_DE_IND from de where item_id = vItemId and ver_nr = vVerNr and derv_de_ind = 1) loop
+update sbr.complex_data_elements set (METHODS,RULE, CRTL_NAME, CONCAT_CHAR,DATE_MODIFIED,MODIFIED_BY) =
+(select DERV_MTHD, DERV_RUL , ok.nci_cd, CONCAT_CHAR, de.lst_upd_dt, de.lst_upd_usr_id
+        from de, obj_key ok
+        where item_id = vItemId and ver_nr = vVerNr and de.DERV_TYP_ID = ok.obj_key_id (+))
+where p_de_idseq = vIdseq;
+end loop; 
+end if;
+
 end;
 
 procedure pushDEC (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char)
@@ -864,9 +861,14 @@ select nci_11179.cmr_guid,curmod.mod_idseq, v_idseq, curmod.disp_ord ,'MODULE_IN
 
 insert into sbrext.protocol_qc_ext (pq_idseq, proto_idseq, qc_idseq, date_created, created_by)
 select nci_11179.cmr_guid, pr.nci_idseq, vIdseq, r.creat_dt, r.creat_usr_id from admin_item pr, nci_admin_item_rel r where r.p_item_id = pr.item_id and r.p_item_ver_nr = pr.ver_nr 
-and r.c_item_id = vItemId and r.c_item_ver_nr = vVerNr and r.rel_typ_id = 60 and (pr.nci_idseq, vIdSeq) not in (select proto_idseq, qc_idseq from sbrext.protocol_qc_ext);
+and r.c_item_id = vItemId and r.c_item_ver_nr = vVerNr and r.rel_typ_id = 60 and nvl(r.fld_delete,0) = 0 and (pr.nci_idseq, vIdSeq) not in (select proto_idseq, qc_idseq from sbrext.protocol_qc_ext);
 commit;
 
+-- Delete if Protocol deleted
+delete from sbrext.protocol_qc_ext where (proto_idseq, qc_idseq) in 
+(select  pr.nci_idseq, vIdseq from admin_item pr, nci_admin_item_rel r where r.p_item_id = pr.item_id and r.p_item_ver_nr = pr.ver_nr 
+and r.c_item_id = vItemId and r.c_item_ver_nr = vVerNr and r.rel_typ_id = 60 and nvl(r.fld_delete,0) = 1) ;
+commit;
 /*
   INSERT INTO nci_admin_item_rel (P_ITEM_ID,
                                     P_ITEM_VER_NR,
@@ -894,12 +896,15 @@ end;
 procedure pushProt (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char)
 as
 begin
+
+--raise_application_error(-20000, vItemid || vActionType);
+
 if vActionType = 'U' then
 update sbrext.protocols_ext set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name, CHANGE_TYPE,CHANGE_NUMBER,REVIEWED_DATE,REVIEWED_BY,APPROVED_DATE, APPROVED_BY, type,
             protocol_id,     LEAD_ORG,               PHASE,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'YES',0,'NO'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm, CHNG_TYP,	CHNG_NBR,	RVWD_DT,	RVWD_USR_ID, APPRVD_DT,	APPRVD_USR_ID, ok.nci_cd,
             PROTCL_ID,    org.ORG_NM,                     PROTCL_PHASE,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
@@ -909,7 +914,8 @@ update sbrext.protocols_ext set ( asl_name,begin_date,change_note,conte_idseq,en
             and ai.item_id = con.item_id and ai.ver_nr = con.ver_nr
             and con.protcl_typ_id = ok.obj_key_id (+)
             and proto_idseq = ai.nci_idseq
-            and con.LEAD_ORG_ID =org.ENTTY_ID(+)) ;
+            and con.LEAD_ORG_ID =org.ENTTY_ID(+))
+            where proto_idseq = vIdSeq ;
 
 end if;
 if vActionType = 'I' then
@@ -1055,10 +1061,10 @@ end if;
 if vActionType = 'I' then
 --raise_application_error(-20000, vIdseq);
 
-insert into sbr.cs_items (csi_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
+insert into sbr.cs_items (csi_idseq, csi_name, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,csi_id, csitl_name, description, comments,version,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ITEM_NM, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ok.nci_cd, csi_desc_txt, csi_cmnts,ai.VER_NR,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c, NCI_CLSFCTN_SCHM_ITEM con, obj_key ok
@@ -1101,19 +1107,36 @@ end if;
 
 end;
 
-procedure pushContext (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char)
+procedure spPushContext (vHours in Integer)
 as
+v_cnt integer;
 begin
---if vActionType = 'U' then
---end if;
-if vActionType = 'I' then
 
-insert into sbr.contexts (conte_idseq, description, name, version, pal_name, LL_Name)
-select ai.nci_idseq,  nci_cadsr_push.getShortDef(ai.ITEM_DESC), ai.ITEM_Nm, ai.VER_NR, ok.nci_cd, 'UNASSIGNED'
+for cur in (select * from admin_item where admin_item_typ_id = 8 and lst_upd_dt >= sysdate -vHours/24 ) loop
+
+select count(*) into v_cnt from sbr.contexts where conte_idseq = cur.nci_idseq;
+
+if (v_cnt = 1) then -- update
+update sbr.contexts set (description, name, pal_name, MODIFIED_BY, DATE_MODIFIED) = 
+( select  nci_cadsr_push.getShortDef(ai.ITEM_DESC), ai.ITEM_Nm,  ok.nci_cd,  ai.lst_upd_usr_id, ai.lst_upd_dt
 from admin_item ai, cntxt c, obj_key ok
 where ai.admin_item_typ_id = 8 and ai.item_id = c.item_id and ai.ver_nr = c.ver_nr and c.NCI_PRG_AREA_ID = ok.obj_key_id
-and ai.item_id = vItemId and ai.ver_nr = vVerNr;
+and ai.item_id = cur.item_id and ai.ver_nr = cur.ver_nr)
+where conte_idseq = cur.nci_idseq;
+
 end if;
+--raise_application_error(-20000, 'Test' || vItemId);
+
+if v_cnt = 0 then
+
+insert into sbr.contexts (conte_idseq, description, name, version, pal_name, LL_Name, LANGUAGE, CREATED_BY, DATE_CREATED, MODIFIED_BY, DATE_MODIFIED)
+select ai.nci_idseq,  nci_cadsr_push.getShortDef(ai.ITEM_DESC), ai.ITEM_Nm, ai.VER_NR, ok.nci_cd, 'UNASSIGNED', 'ENGLISH', ai.creat_usr_id, ai.creat_dt, ai.lst_upd_usr_id, ai.lst_upd_dt
+from admin_item ai, cntxt c, obj_key ok
+where ai.admin_item_typ_id = 8 and ai.item_id = c.item_id and ai.ver_nr = c.ver_nr and c.NCI_PRG_AREA_ID = ok.obj_key_id
+and ai.item_id = cur.item_id and ai.ver_nr = cur.ver_nr;
+end if;
+commit;
+end loop;
 end;
 
 procedure pushCS (vIdseq in char, vItemId in number, vVerNr in number, vActionType in char)
