@@ -40,7 +40,19 @@ select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq
             and con.item_id = ai.item_id and con.ver_nr = ai.ver_nr
             and ai.nci_idseq not in (select con_idseq from sbrext.concepts_ext);
 commit;
-
+insert into sbr.administered_components (ac_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
+            long_name,origin,preferred_definition,preferred_name,public_id, version,
+            created_by, date_created,date_modified, modified_by, actl_name, deleted_ind)
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+            ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef (ai.ITEM_DESC),ai.ITEM_LONG_NM,ai.ITEM_ID,  ai.VER_NR,
+            ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID, 'CONCEPT', decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
+    from admin_item ai, admin_item c
+    where ai.cntxt_item_id = c.item_id and ai.cntxt_ver_nr = c.ver_nr
+            and c.admin_item_typ_id = 8
+            and ai.admin_item_typ_id = 49
+            and ai.nci_idseq not in (select ac_idseq from sbr.administered_components);
+    commit;
+    
 insert into sbr.cs_items (csi_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,csi_id, csitl_name, description, comments,version,
             created_by, date_created,date_modified, modified_by, deleted_ind)
@@ -54,6 +66,66 @@ select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq
             and con.item_id = ai.item_id and con.ver_nr = ai.ver_nr
             and ai.nci_idseq not in (select csi_idseq from sbr.cs_items);
 commit;
+
+
+insert into sbr.administered_components (ac_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
+            long_name,origin,preferred_definition,preferred_name,public_id, version,
+            created_by, date_created,date_modified, modified_by, actl_name, deleted_ind)
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+            ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef (ai.ITEM_DESC),ai.ITEM_LONG_NM,ai.ITEM_ID,  ai.VER_NR,
+            ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID, 'CS_ITEM', decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
+    from admin_item ai, admin_item c
+    where ai.cntxt_item_id = c.item_id and ai.cntxt_ver_nr = c.ver_nr
+            and c.admin_item_typ_id = 8
+            and ai.admin_item_typ_id = 51
+            and ai.nci_idseq not in (select ac_idseq from sbr.administered_components);
+    commit;
+
+-- Alternate names - Synonyms
+insert into sbr.designations (DEsig_IDSEQ, AC_IDSEQ, NAME, CONTE_IDSEQ, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY, LAE_NAME, DETL_NAME)
+select ad.nci_idseq, ai.nci_idseq,  nm_desc, c.nci_idseq, ad.CREAT_DT,ad.CREAT_USR_ID,  ad.LST_UPD_DT,ad.LST_UPD_USR_ID,decode(lang_id, 1000,'ENGLISH', 1007, 'Icelandic', 1004, 'Spanish'), ok.nci_cd
+from alt_nms ad, admin_item ai, admin_item c, obj_key ok
+where ad.item_id = ai.item_id
+and   ad.ver_nr = ai.ver_nr
+and   ad.cntxt_item_id = c.item_id
+and   ad.cntxt_ver_nr = c.ver_nr
+and nvl(ad.fld_delete, 0) = 0
+and   ad.nm_typ_id = ok.obj_key_id (+)
+and   ad.nci_idseq not in (select desig_idseq from sbr.designations);
+commit;
+
+-- Reference Documents - Preferred question text
+insert into sbr.reference_documents (RD_IDSEQ, AC_IDSEQ, NAME, CONTE_IDSEQ, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY, LAE_NAME, DcTL_NAME,display_order, doc_text,URL)
+select ad.nci_idseq, ai.nci_idseq,  ad.ref_nm, c.nci_idseq, ad.CREAT_DT,ad.CREAT_USR_ID,  ad.LST_UPD_DT,ad.LST_UPD_USR_ID,decode(lang_id, 1000,'ENGLISH', 1007, 'Icelandic', 1004, 'Spanish'), ok.nci_cd, ad.disp_ord, ad.ref_desc, ad.url
+from ref ad, admin_item ai, admin_item c, obj_key ok
+where  ad.item_id = ai.item_id
+    and   ad.ver_nr = ai.ver_nr
+    and   ai.cntxt_item_id = c.item_id
+    and   ai.cntxt_ver_nr = c.ver_nr
+    and nvl(ad.fld_delete, 0) = 0
+and   ad.ref_typ_id = ok.obj_key_id (+)
+and   ad.nci_idseq not in (select rd_idseq from sbr.reference_documents);
+
+commit;
+
+-- Reorder module
+
+-- CSI update
+
+
+update sbr.cs_csi cscsi set csi_idseq = (Select  nci_idseq from admin_item ai, nci_clsfctn_schm_item csi where ai.item_id = csi.item_id
+and ai.ver_nr = csi.ver_nr and csi.cs_csi_idseq = cscsi.cs_csi_idseq)
+where (cs_csi_idseq, csi_idseq) not in 
+(Select cs_csi_idseq, nci_idseq from admin_item ai, nci_clsfctn_schm_item csi where ai.item_id = csi.item_id
+and ai.ver_nr = csi.ver_nr);
+commit;
+
+
+-- Module name
+
+-- Ref blobs
+
+-- Registration Status
 
  
  end;
@@ -488,6 +560,13 @@ and   creat_dt > sysdate - vHours/24
 and   upper(nci_cd) not in (select upper(CTL_NAME) from  sbr.COMM_TYPES_LOV);
 commit;
 
+-- Language - added 2/16/2022
+
+insert into sbr.LANGUAGES_LOV (NAME,DATE_CREATED,DATE_MODIFIED,MODIFIED_BY,CREATED_BY,DESCRIPTION)
+select LANG_NM,CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID,CREAT_USR_ID, LANG_DESC from LANG
+where upper(lang_nm) not in (select upper(name) from sbr.LANGUAGES_LOV);
+commit;
+
 
 end;
 
@@ -588,7 +667,13 @@ where d.rd_idseq = cur.nci_idseq;
 end loop;
 
 
+for cur in (select r.nci_idseq from ref r, ref_doc rd where   rd.lst_upd_dt >= sysdate - vHours/24 and nvl(rd.fld_delete, 0) = 1 and r.nci_idseq in (select rd_idseq from sbr.reference_blobs)
+and r.ref_id = rd.nci_ref_id) loop
+delete from sbr.reference_blobs where rd_idseq = cur.nci_idseq;
+end loop;
+
 for cur in (select nci_idseq from ref where lst_upd_dt > creat_dt and  lst_upd_dt >= sysdate - vHours/24 and nvl(fld_delete, 0) = 1 and nci_idseq in (select rd_idseq from sbr.reference_documents)) loop
+delete from sbr.reference_blobs where rd_idseq = cur.nci_idseq;
 delete from sbr.reference_documents d  where d.rd_idseq = cur.nci_idseq;
 end loop;
 
@@ -660,45 +745,57 @@ and (nvl(csi.cs_csi_idseq, csiai.nci_idseq), am.nci_idseq) not in (select cs_csi
 commit;
 
 
-/*
+
 -- Reference Blobs
 insert into sbr.reference_blobs (RD_IDSEQ, NAME, DOC_SIZE, DAD_CHARSET, LAST_UPDATED, BLOB_CONTENT, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
 select ad.nci_idseq, file_nm, nci_doc_size, nci_charset, nci_doc_lst_upd_dt, blob_col, ad.CREAT_DT, ad.CREAT_USR_ID, ad.LST_UPD_DT,ad.LST_UPD_USR_ID
-from ref ad, ref_doc rd, admin_item ai, admin_item c, obj_key ok
-where ad.item_id = ai.item_id
-and   ad.ver_nr = ai.ver_nr
-and   ai.cntxt_item_id = c.item_id
-and   ai.cntxt_ver_nr = c.ver_nr
-and   ad.ref_typ_id = ok.obj_key_id (+)
+from ref ad, ref_doc rd
+where ad.ref_id = rd.nci_ref_id
 and   ad.nci_idseq not in (select rd_idseq from sbr.reference_blobs)
+and nvl(rd.fld_delete,0) = 0
 and ad.lst_upd_dt >= sysdate - vHours/24;
 
 
-for cur in (select nci_idseq from ref where lst_upd_dt > creat_dt and lst_upd_dt >= sysdate - vHours/24 and nci_idseq in (select rd_idseq from sbr.reference_documents)) loop
-update sbr.reference_blobs d set(RD_IDSEQ, NAME, DOC_SIZE, DAD_CHARSET, LAST_UPDATED, BLOB_CONTENT, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY) =
-    (select ad.nci_idseq, file_nm, nci_doc_size, nci_charset, nci_doc_lst_upd_dt, blob_col, ad.CREAT_DT, ad.CREAT_USR_ID, ad.LST_UPD_DT,ad.LST_UPD_USR_ID
-    from ref ad, ref_doc rd, admin_item ai, admin_item c, obj_key ok
-    where ad.item_id = ai.item_id
-    and   ad.ver_nr = ai.ver_nr
-    and   ai.cntxt_item_id = c.item_id
-    and   ai.cntxt_ver_nr = c.ver_nr
-    and   ad.ref_typ_id = ok.obj_key_id (+)
-    and   ad.nci_idseq not in (select rd_idseq from sbr.reference_blobs)
-    and   ad.lst_upd_dt >= sysdate - vHours/24);
+for cur in (select r.nci_idseq from ref_doc rd, ref r where rd.lst_upd_dt > rd.creat_dt and rd.lst_upd_dt >= sysdate - vHours/24 and r.ref_id = rd.nci_ref_id and 
+r.nci_idseq in (select rd_idseq from sbr.reference_documents) and nvl(rd.fld_Delete,0) = 0) loop
+update sbr.reference_blobs d set(NAME, DOC_SIZE, DAD_CHARSET, LAST_UPDATED, BLOB_CONTENT,DATE_MODIFIED, MODIFIED_BY) =
+    (select file_nm, nci_doc_size, nci_charset, nci_doc_lst_upd_dt, blob_col, rd.LST_UPD_DT,rd.LST_UPD_USR_ID
+    from ref ad, ref_doc rd where
+     ad.ref_id = rd.nci_ref_id
+    and   ad.nci_idseq = cur.nci_idseq)
+    where d.rd_idseq = cur.nci_idseq;
 end loop;
-*/
+
 commit;
 
 
 -- DE Derivation Components
-/*
-insert into sbr.complex_de_relationships (p_de_idseq, c_de_idseq, display_order,created_by, date_created, date_modified, modified_by)
-select prnt.nci_idseq, chld.nci_idseq, disp_ord, r.CREAT_USR_ID,    r.CREAT_DT,   r.LST_UPD_DT,    r.LST_UPD_USR_ID from nci_admin_item_rel r, admin_item         prnt,
-               admin_item     chld
-where rel_typ_id= 66 and r.p_item_id = prnt.item_id and r.p_item_ver_nr = prnt.ver_nr and r.c_item_id = chld.item_id and r.c_item_ver_nr = chld.ver_nr
-and r.lst_upd_dt >= sysdate - vHours/24
-and (prnt.nci_idseq, chld.nci_idseq) not in (select p_de_idseq, c_de_idseq from sbr.complex_de_relationships);
+
+for cur in (select * from nci_admin_item_rel where rel_typ_id = 66 and lst_upd_dt >= sysdate - vHours/24) loop
+
+for curdtl in (Select p.nci_idseq p_de_idseq, c.nci_idseq c_de_idseq from admin_item p, admin_item c where p.item_id = cur.p_item_id and p.ver_nr = cur.p_item_ver_nr
+and c.item_id = cur.c_item_id and c.ver_nr = cur.c_item_ver_nr) loop
+
+select count(*) into v_cnt from sbr.complex_de_relationships where p_de_idseq = curdtl.p_de_idseq and c_de_idseq = curdtl.c_de_idseq;
+
+if (v_cnt = 0 and nvl(cur.fld_delete,0) = 0) then  -- Insert
+insert into sbr.complex_de_relationships (cdr_idseq, p_de_idseq, c_de_idseq, DISPLAY_ORDER,DATE_MODIFIED,MODIFIED_BY,DATE_CREATED, CREATED_BY )
+select nci_11179.cmr_guid(), curdtl.p_de_idseq, curdtl.c_de_idseq, cur.disp_ord, cur.lst_upd_dt, cur.lst_upd_usr_id, cur.creat_dt, cur.creat_usr_id from dual;
+end if;
+if (v_cnt = 1 and nvl(cur.fld_delete,0) = 0) then -- Update
+update sbr.complex_de_relationships set ( DISPLAY_ORDER,DATE_MODIFIED,MODIFIED_BY ) = 
+(select  cur.disp_ord, cur.lst_upd_dt, cur.lst_upd_usr_id from dual)
+where p_de_idseq = curdtl.p_de_idseq and c_de_idseq = curdtl.c_de_idseq;
+end if;
+if (v_cnt = 1 and nvl(cur.fld_delete,0) = 1) then -- Delete
+delete from sbr.complex_de_relationships 
+where p_de_idseq = curdtl.p_de_idseq and c_de_idseq = curdtl.c_de_idseq;
+end if;
 commit;
+
+end loop;
+end loop;
+
 
 -- update sbr.complex_de_relationships  set (display_order  ,date_modified, modified_by) = (select disp_ord,
 
@@ -786,20 +883,46 @@ nci_cadsr_push.spPushLov(vHours);
 update nci_job_log set job_step_desc = 'Step 1: LOV Migration completed. ' where log_id = v_batch;
 commit;
 
+insert into sbr.concepts_ext (con_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
+            long_name,origin,preferred_definition,preferred_name,con_id, evs_source,definition_source,version,
+            created_by, date_created,date_modified, modified_by)
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+            ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ok.nci_cd, ai.def_src,ai.VER_NR,
+            ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID
+        from admin_item ai, admin_item c, cncpt con, obj_key ok
+        where ai.cntxt_item_id = c.item_id and ai.cntxt_ver_nr = c.ver_nr
+            and c.admin_item_typ_id = 8
+            and con.evs_src_id = ok.obj_key_id (+)
+            and con.item_id = ai.item_id and con.ver_nr = ai.ver_nr
+            and ai.nci_idseq not in (select con_idseq from sbrext.concepts_ext);
+commit;
+insert into sbr.administered_components (ac_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
+            long_name,origin,preferred_definition,preferred_name,public_id, version,
+            created_by, date_created,date_modified, modified_by, actl_name, deleted_ind)
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+            ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef (ai.ITEM_DESC),ai.ITEM_LONG_NM,ai.ITEM_ID,  ai.VER_NR,
+            ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID, 'CONCEPT', decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
+    from admin_item ai, admin_item c
+    where ai.cntxt_item_id = c.item_id and ai.cntxt_ver_nr = c.ver_nr
+            and c.admin_item_typ_id = 8
+            and ai.admin_item_typ_id = 49
+            and ai.nci_idseq not in (select ac_idseq from sbr.administered_components);
+    commit;
+--nci_cadsr_push_core.spPushAIType(100, 49);
+
 nci_cadsr_push_core.spPushAI(vHours);
 
 update nci_job_log set job_step_desc = 'Step 2: AI Migration completed. ' where log_id = v_batch;
 commit;
 
-nci_cadsr_push_form.PushModule(vHours);
+--nci_cadsr_push_form.PushModule(vHours);
 
 
-update nci_job_log set job_step_desc = 'Step 3: Form Migration completed. ' where log_id = v_batch;
-commit;
 
-nci_cadsr_push_form.PushQuestion(vHours);
 
-nci_cadsr_push_form.PushQuestValidValue(vHours);
+--nci_cadsr_push_form.PushQuestion(vHours);
+
+--nci_cadsr_push_form.PushQuestValidValue(vHours);
 
 update nci_job_log set job_step_desc = 'Step 3: Form Migration completed. ' where log_id = v_batch;
 commit;
