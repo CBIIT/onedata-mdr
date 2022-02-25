@@ -2,9 +2,8 @@
 -- Run as ONEDATA_WA DDL scripts
 S26_LOAD_CONCEPT_ADMIN_ITEM_DESIG.sql
 
-
 -- Run as ONEDATA_RA DDL scripts
-
+S26_RA_PROC_LOAD_CONCEPTS.sql
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
@@ -25,5 +24,5 @@ S22_WA_EXEC_LOAD_CONCEPTS.sql
 EXECUTE DBMS_MVIEW.REFRESH('VW_CNCPT'); 
 
 -- Run as ONEDATA_RA DM scripts
-S24_RA_EXEC_LOAD_CONCEPTS.sql
+exec SAG_LOAD_CONCEPTS_SYN_RA;
 EXECUTE DBMS_MVIEW.REFRESH('VW_CNCPT');
