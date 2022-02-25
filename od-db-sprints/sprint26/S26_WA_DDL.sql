@@ -17,3 +17,17 @@ CREATE OR REPLACE TRIGGER OD_TR_REF_DOC  BEFORE INSERT  on REF_DOC  for each row
                   :new.nci_idseq := nci_11179.cmr_guid();  END IF; 
                   END ;          
 /
+
+create or replace TRIGGER TR_AI_MV_REFRESH
+  AFTER INSERT ON ADMIN_ITEM
+  FOR EACH ROW
+  begin
+  case :new.admin_item_typ_id
+  when 8 then  DBMS_MVIEW.REFRESH('VW_CNTXT');
+  when 9 then DBMS_MVIEW.REFRESH('VW_CLSFCTN_SCHM');
+  when 51 then DBMS_MVIEW.REFRESH('VW_CLSFCTN_SCHM_ITEM');
+  when 49 then DBMS_MVIEW.REFRESH('VW_CNCPT');
+  when 1 then DBMS_MVIEW.REFRESH('VW_CONC_DOM');
+  end case;
+END;
+/
