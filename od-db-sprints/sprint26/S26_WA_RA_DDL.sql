@@ -269,4 +269,4 @@ ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, a
 ai.REGSTR_AUTH_ID,ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN, 
 e.CNCPT_CONCAT, e.CNCPT_CONCAT_NM, e.CNCPT_CONCAT_DEF, e.CNCPT_CONCAT_SRC_TYP
 FROM ADMIN_ITEM ai, nci_admin_item_ext e
-       WHERE ai.ADMIN_ITEM_TYP_ID = 7 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and regstr_stus_id in (1,2);
+       WHERE ai.ADMIN_ITEM_TYP_ID = 7 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr ;
