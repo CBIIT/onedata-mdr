@@ -34,10 +34,10 @@ S26_NCI_PUSH_FORM.sql
 
 
 -- Run as ONEDATA_WA DM scripts
-S25 WA Data Migration.sql
+S25_WA_Data_Migration.sql
 
 -- Run as ONEDATA_RA DM scripts
-S25 RA Data Migration.sql
+S25_RA_Data_Migration.sql
 
 -- Run validate job as ONEDATA_WA
 -- exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
