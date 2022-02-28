@@ -714,24 +714,35 @@ commit;
 
 -- Alt names classification
 
-insert into sbrext.AC_ATT_CSCSI_EXT (aca_idseq, cs_csi_idseq, att_idseq,atl_name)
-select nci_11179.cmr_guid, nvl(csi.cs_csi_idseq, csiai.nci_idseq), am.nci_idseq, 'DESIGNATION'
+for cur in (select  nvl(csi.cs_csi_idseq, csiai.nci_idseq) cs_csi_idseq, am.nci_idseq att_idseq, nvl(x.fld_delete,0) fld_delete, x.creat_dt, x.lst_upd_dt, x.creat_usr_id, 
+x.lst_upd_usr_id
 from alt_nms am, admin_item csiai, nci_clsfctn_schm_item csi, NCI_CSI_ALT_DEFNMS  x
 where x.typ_nm = 'DESIGNATION'
 and x.lst_upd_dt >= sysdate - vHours/24
 and x.nci_pub_id = csiai.item_id
 and x.nci_ver_nr = csiai.ver_nr
 and csiai.item_id = csi.item_id
-and nvl(x.fld_delete, 0) = 0
 and csiai.ver_nr = csi.ver_nr
-and am.nm_id = x.nmdef_id
-and (nvl(csi.cs_csi_idseq, csiai.nci_idseq), am.nci_idseq) not in (select cs_csi_idseq, att_idseq from sbrext.AC_ATT_CSCSI_EXT);
+and am.nm_id = x.nmdef_id) loop
+
+insert into sbrext.AC_ATT_CSCSI_EXT (aca_idseq, cs_csi_idseq, att_idseq,atl_name, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
+(select nci_11179.cmr_guid, cur.cs_csi_idseq, cur.att_idseq, 'DESIGNATION', cur.CREAT_DT, cur.CREAT_USR_ID, cur.LST_UPD_DT,cur.LST_UPD_USR_ID
+from dual where cur.fld_delete = 0 and 
+ (cur.cs_csi_idseq, cur.att_idseq) not in (select cs_csi_idseq, att_idseq from sbrext.AC_ATT_CSCSI_EXT));
 commit;
 
+-- Delete
+
+delete from sbrext.AC_ATT_CSCSI_EXT e where 
+( cs_csi_idseq, att_idseq ) in 
+(select  cur.cs_csi_idseq, cur.att_idseq from dual where cur.fld_delete = 1);
+commit;
+end loop;
 -- Alt def classification
 
-insert into sbrext.AC_ATT_CSCSI_EXT (aca_idseq, cs_csi_idseq, att_idseq, atl_name)
-select nci_11179.cmr_guid, nvl(csi.cs_csi_idseq, csiai.nci_idseq), am.nci_idseq, 'DEFINITION'
+for cur in (
+select  nvl(csi.cs_csi_idseq, csiai.nci_idseq) cs_csi_idseq, am.nci_idseq att_idseq, nvl(x.fld_delete,0) fld_delete,x.creat_dt, x.lst_upd_dt, x.creat_usr_id, 
+x.lst_upd_usr_id
 from alt_def am, admin_item csiai, nci_clsfctn_schm_item csi, NCI_CSI_ALT_DEFNMS  x
 where x.typ_nm = 'DEFINITION'
 and x.lst_upd_dt >= sysdate - vHours/24
@@ -740,30 +751,42 @@ and x.nci_ver_nr = csiai.ver_nr
 and nvl(x.fld_delete, 0) = 0
 and csiai.item_id = csi.item_id
 and csiai.ver_nr = csi.ver_nr
-and am.def_id = x.nmdef_id
-and (nvl(csi.cs_csi_idseq, csiai.nci_idseq), am.nci_idseq) not in (select cs_csi_idseq, att_idseq from sbrext.AC_ATT_CSCSI_EXT);
+and am.def_id = x.nmdef_id) loop
+
+insert into sbrext.AC_ATT_CSCSI_EXT (aca_idseq, cs_csi_idseq, att_idseq, atl_name, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
+(select nci_11179.cmr_guid, cur.cs_csi_idseq, cur.att_idseq , 'DEFINITION', cur.CREAT_DT, cur.CREAT_USR_ID, cur.LST_UPD_DT,cur.LST_UPD_USR_ID from dual
+where cur.fld_Delete = 0 and (cur.cs_csi_idseq, cur.att_idseq) not in (select cs_csi_idseq, att_idseq from sbrext.AC_ATT_CSCSI_EXT));
 commit;
 
+-- Delete
 
+delete from sbrext.AC_ATT_CSCSI_EXT e where 
+( cs_csi_idseq, att_idseq ) in 
+(select  cur.cs_csi_idseq, cur.att_idseq from dual where cur.fld_delete = 1);
+commit;
+end loop;
 
 -- Reference Blobs
+
 insert into sbr.reference_blobs (RD_IDSEQ, NAME, DOC_SIZE, DAD_CHARSET, LAST_UPDATED, BLOB_CONTENT, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
-select ad.nci_idseq, file_nm, nci_doc_size, nci_charset, nci_doc_lst_upd_dt, blob_col, ad.CREAT_DT, ad.CREAT_USR_ID, ad.LST_UPD_DT,ad.LST_UPD_USR_ID
+select ad.nci_idseq, file_nm, nci_doc_size, nci_charset, nci_doc_lst_upd_dt, blob_col, rd.CREAT_DT, rd.CREAT_USR_ID, rd.LST_UPD_DT,rd.LST_UPD_USR_ID
 from ref ad, ref_doc rd
 where ad.ref_id = rd.nci_ref_id
-and   ad.nci_idseq not in (select rd_idseq from sbr.reference_blobs)
+and   rd.file_nm not in (select name from sbr.reference_blobs)
 and nvl(rd.fld_delete,0) = 0
-and ad.lst_upd_dt >= sysdate - vHours/24;
+and rd.lst_upd_dt >= sysdate - 1/24;
+commit;
 
-
-for cur in (select r.nci_idseq from ref_doc rd, ref r where rd.lst_upd_dt > rd.creat_dt and rd.lst_upd_dt >= sysdate - vHours/24 and r.ref_id = rd.nci_ref_id and 
+for cur in (select r.nci_idseq, file_nm from ref_doc rd, ref r where rd.lst_upd_dt > rd.creat_dt and rd.lst_upd_dt >= sysdate - vHours/24 and r.ref_id = rd.nci_ref_id and 
 r.nci_idseq in (select rd_idseq from sbr.reference_documents) and nvl(rd.fld_Delete,0) = 0) loop
-update sbr.reference_blobs d set(NAME, DOC_SIZE, DAD_CHARSET, LAST_UPDATED, BLOB_CONTENT,DATE_MODIFIED, MODIFIED_BY) =
-    (select file_nm, nci_doc_size, nci_charset, nci_doc_lst_upd_dt, blob_col, rd.LST_UPD_DT,rd.LST_UPD_USR_ID
+update sbr.reference_blobs d set( DOC_SIZE, DAD_CHARSET, LAST_UPDATED, BLOB_CONTENT,DATE_MODIFIED, MODIFIED_BY) =
+    (select  nci_doc_size, nci_charset, nci_doc_lst_upd_dt, blob_col, rd.LST_UPD_DT,rd.LST_UPD_USR_ID
     from ref ad, ref_doc rd where
      ad.ref_id = rd.nci_ref_id
-    and   ad.nci_idseq = cur.nci_idseq)
-    where d.rd_idseq = cur.nci_idseq;
+    and   ad.nci_idseq = cur.nci_idseq
+    and rd.file_nm = cur.file_nm
+    )
+    where d.name = cur.file_nm ;
 end loop;
 
 commit;
@@ -915,14 +938,14 @@ nci_cadsr_push_core.spPushAI(vHours);
 update nci_job_log set job_step_desc = 'Step 2: AI Migration completed. ' where log_id = v_batch;
 commit;
 
---nci_cadsr_push_form.PushModule(vHours);
+nci_cadsr_push_form.PushModule(vHours);
 
 
 
 
---nci_cadsr_push_form.PushQuestion(vHours);
+nci_cadsr_push_form.PushQuestion(vHours);
 
---nci_cadsr_push_form.PushQuestValidValue(vHours);
+nci_cadsr_push_form.PushQuestValidValue(vHours);
 
 update nci_job_log set job_step_desc = 'Step 3: Form Migration completed. ' where log_id = v_batch;
 commit;
@@ -986,8 +1009,10 @@ update sbr.permissible_Values set (BEGIN_DATE, END_DATE, VALUE, SHORT_MEANING, v
 commit;
 */
 
-insert into sbr.permissible_Values(pv_idseq, BEGIN_DATE, END_DATE, VALUE, SHORT_MEANING, vm_idseq, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
-select nci_11179.cmr_guid, min(PERM_VAL_BEG_DT), max(PERM_VAL_END_DT), PERM_VAL_NM, nvl(max(PERM_VAL_DESC_TXT), 'NO MEANING'), vm.nci_idseq, min(pv.CREAT_DT),min(pv.CREAT_USR_ID),min(pv.LST_UPD_DT),min(pv.LST_UPD_USR_ID)
+
+
+insert into sbr.permissible_Values(pv_idseq,  BEGIN_DATE, END_DATE, VALUE, SHORT_MEANING, vm_idseq, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
+select nci_11179.cmr_guid, min(PERM_VAL_BEG_DT), max(PERM_VAL_END_DT), PERM_VAL_NM, max(vm.item_nm), vm.nci_idseq, min(pv.CREAT_DT),min(pv.CREAT_USR_ID),min(pv.LST_UPD_DT),min(pv.LST_UPD_USR_ID)
 from perm_val pv, admin_item vm
 where pv.nci_val_mean_item_id = vm.item_id
 and   pv.nci_val_mean_ver_nr = vm.ver_nr
@@ -996,6 +1021,7 @@ and nvl(pv.fld_delete,0) = 0
 and   (perm_val_nm, vm.nci_idseq) not in (select value, vm_idseq  from sbr.permissible_Values)
 group by perm_val_nm, vm.nci_idseq;
 commit;
+
 
 /*
 update sbr.vd_pvs set (BEGIN_DATE, END_DATE, pv_idseq, vd_idseq, DATE_MODIFIED, MODIFIED_BY) =
@@ -1027,15 +1053,16 @@ and ai.nci_idseq = pv.vm_idseq and pv.value = cur.perm_val_nm;
 select nci_idseq into v_vd_idseq from admin_item where item_id = cur.val_dom_item_id and ver_nr = cur.val_dom_ver_nr;
 
 --select count(*) into v_temp from sbr.vd_pvs where pv_idseq = v_pv_idseq and vd_idseq = v_vd_idseq;
-select count(*) into v_temp from sbr.vd_pvs where vp_idseq = cur.nci_idseq
-or (vd_idseq, pv_idseq) in (select v_vd_idseq, v_pv_idseq from dual) ;
+select count(*) into v_temp from sbr.vd_pvs where vp_idseq = cur.nci_idseq;
+
+--or (vd_idseq, pv_idseq) in (select v_vd_idseq, v_pv_idseq from dual) ;
 
 if (v_temp = 0) then
 insert into sbr.vd_pvs (vp_idseq, BEGIN_DATE, END_DATE, pv_idseq, vd_idseq, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
 select cur.nci_idseq, cur.PERM_VAL_BEG_DT, cur.PERM_VAL_END_DT, v_pv_idseq, v_vd_idseq, cur.CREAT_DT, cur.CREAT_USR_ID, cur.LST_UPD_DT,cur.LST_UPD_USR_ID from dual;
---elsif v_temp = 1 then
---update sbr.vd_pvs set (BEGIN_DATE, END_DATE, pv_idseq, DATE_MODIFIED, MODIFIED_BY)  =  (select cur.PERM_VAL_BEG_DT, cur.PERM_VAL_END_DT, v_pv_idseq,cur.LST_UPD_DT,cur.LST_UPD_USR_ID from dual )
---where vp_idseq = ;
+elsif v_temp = 1 then
+update sbr.vd_pvs set (BEGIN_DATE, END_DATE, pv_idseq, DATE_MODIFIED, MODIFIED_BY)  =  (select cur.PERM_VAL_BEG_DT, cur.PERM_VAL_END_DT, v_pv_idseq,cur.LST_UPD_DT,cur.LST_UPD_USR_ID from dual )
+where vp_idseq = cur.nci_idseq;
 end if;
 end loop;
 commit;
