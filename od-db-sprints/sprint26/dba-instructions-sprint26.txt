@@ -1,20 +1,43 @@
+--Run as SBREXT
+S26_SBREXT.sql
+
+-- Run as ONEDATA_RA DDL scripts
+S26_RA_PROC_LOAD_CONCEPTS.sql
+S26_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S26_LOAD_CONCEPT_ADMIN_ITEM_DESIG.sql
 S26_MIGR_VAL_MODIFIED_DDL.sql
 S26_MIGR_VALID_MODIFIED1.sql
 S26_TEST_ALL_REV_OBJ.sql
+S26_WA_RA_DDL.sql
+S26_WA_DDL.sql
+S26_NCI_11179.sql
+S26_NCI_11179_2.sql
+S26_NCI_DEC_MGMT.sql
+S26_NCI_IMPORT.sql
+S26_NCI_CHNG_MGMT.sql
+S26_NCI_FORM_MGMT.sql
+S26_NCI_VD.sql
+S26_NCI_PV_VM.sql
+S26_NCI_DLOAD.sql
+S26_NCI_DS.sql
+S26_NCI_POST_HOOK.sql
+S26_NCI_PUSH.sql
+S26_NCI_PUSH_CORE.sql
+S26_NCI_PUSH_FORM.sql
 
--- Run as ONEDATA_RA DDL scripts
-S26_RA_PROC_LOAD_CONCEPTS.sql
+
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
 
 
 -- Run as ONEDATA_WA DM scripts
+S25 WA Data Migration.sql
 
 -- Run as ONEDATA_RA DM scripts
+S25 RA Data Migration.sql
 
 -- Run validate job as ONEDATA_WA
 -- exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
