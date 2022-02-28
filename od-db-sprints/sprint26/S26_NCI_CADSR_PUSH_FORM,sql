@@ -269,7 +269,7 @@ curqst.CURRNT_VER_IND,
 
 insert into sbrext.QUEST_ATTRIBUTES_EXT (qc_idseq, quest_idseq , editable_ind,mandatory_ind,DEFAULT_VALUE,
             created_by, date_created,date_modified, modified_by, vv_idseq)
-select curqst.qst_idseq, curqst.qst_idseq, decode(nvl(curqst.EDIT_IND,0), 1, 'Yes', 'No'), decode(nvl(curqst.REQ_IND,0), 1, 'Yes', 'No'), curqst.DEFLT_VAL,
+select curqst.qst_idseq, curqst.qst_idseq, decode(curqst.EDIT_IND, 1, 'Yes', 'No'), decode(curqst.REQ_IND, 1, 'Yes', 'No'), curqst.DEFLT_VAL,
 curqst.CREAT_USR_ID, curqst.CREAT_DT, curqst.LST_UPD_DT,curqst.LST_UPD_USR_ID, v_vv_idseq  from dual;
 commit;
 
@@ -294,12 +294,23 @@ update sbrext.quest_contents_ext set ( display_order, latest_version_ind,
 
 
 --raise_application_error (-20000, curqst.gst_idseq, curqst.deflt_val_id
+select count(*) into v_cnt from sbrext.QUEST_ATTRIBUTES_EXT where qc_idseq = curqst.qst_idseq;
+if (v_cnt = 1) then
 update sbrext.QUEST_ATTRIBUTES_EXT set ( editable_ind,mandatory_ind,DEFAULT_VALUE
             ,date_modified, modified_by, vv_idseq)=
 (select  decode(curqst.EDIT_IND, 1, 'Yes', 'No'), decode(curqst.REQ_IND, 1, 'Yes', 'No'), curqst.DEFLT_VAL,
  curqst.LST_UPD_DT,curqst.LST_UPD_USR_ID, v_vv_idseq from dual 
-) where quest_idseq = curqst.qst_idseq;
+) where qc_idseq = curqst.qst_idseq;
 commit;
+else
+
+
+insert into sbrext.QUEST_ATTRIBUTES_EXT (qc_idseq, quest_idseq , editable_ind,mandatory_ind,DEFAULT_VALUE,
+            created_by, date_created,date_modified, modified_by, vv_idseq)
+select curqst.qst_idseq, curqst.qst_idseq, decode(curqst.EDIT_IND, 1, 'Yes', 'No'), decode(curqst.REQ_IND, 1, 'Yes', 'No'), curqst.DEFLT_VAL,
+curqst.CREAT_USR_ID, curqst.CREAT_DT, curqst.LST_UPD_DT,curqst.LST_UPD_USR_ID, v_vv_idseq  from dual;
+commit;
+end if;
 
 
 -- Update display order
@@ -405,8 +416,9 @@ BEGIN
                        q.qc_idseq,--rel.disp_ord,
                        q.conte_idseq ,
                        q.latest_version_ind,
+                       q.asl_name,
                        vv.VALUE,
-                       vv.VM_DEF,
+                       substr(vv.VM_DEF,1,2000) VM_DEF,
                        vv.desc_txt,
                        vv.mean_txt,
                        vv.NCI_PUB_ID,
@@ -439,10 +451,10 @@ v_vp_idseq := curvpidseq.nci_idseq;
 end loop;
   IF (v_cnt = 0)
         THEN                      -- new
-
             INSERT INTO sbrext.quest_contents_ext (qc_idseq,
                                                    p_mod_idseq,
                                                    qtl_name,
+                                                   asl_name,
                                                    dn_crf_idseq,
                                                    p_qst_idseq,
                                                 conte_idseq,
@@ -459,6 +471,7 @@ end loop;
                 values ( curvv.NCI_IDSEQ,
                        curvv.p_mod_idseq,
                        'VALID_VALUE',
+                       curvv.asl_name,
                        curvv.dn_crf_idseq,
                        curvv.qc_idseq,--rel.disp_ord,
                     curvv.conte_idseq,
@@ -476,6 +489,7 @@ end loop;
 
    INSERT INTO sbr.administered_components (ac_idseq,actl_name,
                                                   conte_idseq,
+                                                  asl_name,
                                                    latest_version_ind,
                                                    long_name,
                                                    preferred_definition,
@@ -489,6 +503,7 @@ end loop;
                values ( curvv.NCI_IDSEQ,
                        'QUEST_CONTENT',
                      curvv.conte_idseq,
+                     curvv.asl_name,
                        curvv.latest_version_ind,
                        curvv.VALUE,
                        curvv.VM_DEF,
@@ -509,6 +524,7 @@ v_idseq := nci_11179.cmr_guid;
    INSERT INTO sbrext.quest_contents_ext (qc_idseq,p_val_idseq,
                                                    p_mod_idseq,
                                                    qtl_name,
+                                                   asl_name,
                                                    dn_crf_idseq,
                                                    p_qst_idseq,
                                                   conte_idseq,
@@ -525,6 +541,7 @@ v_idseq := nci_11179.cmr_guid;
                 values ( v_idseq, curvv.nci_idseq,
                        curvv.p_mod_idseq,
                        'VALUE_INSTR',
+                       curvv.asl_name,
                        curvv.dn_crf_idseq,
                        curvv.qc_idseq,
                       curvv.conte_idseq,
@@ -593,24 +610,20 @@ insert into sbrext.qc_recs_ext (QR_IDSEQ,P_QC_IDSEQ,C_QC_IDSEQ,DISPLAY_ORDER,RL_
 select nci_11179.cmr_guid,curvv.nci_idseq, v_idseq, curvv.disp_ord ,'VALUE_INSTRUCTION',  curvv.CREAT_USR_ID, curvv.CREAT_DT, curvv.LST_UPD_DT,curvv.LST_UPD_USR_ID from dual;
         END IF;
         if (v_cnt = 1) then
-            update sbrext.quest_contents_ext set ( latest_version_ind,
+            update sbrext.quest_contents_ext set ( 
                                                    long_name,
                                                    preferred_definition,display_order,
                                                    date_modified,
                                                    modified_by, deleted_ind, vp_idseq)=
-               ( SELECT q.latest_version_ind,
-                       vv.VALUE,
-                       vv.VM_DEF,
-                       vv.disp_ord,
-                       vv.LST_UPD_DT,
-                       vv.LST_UPD_USR_ID,
-                       decode(nvl(vv.fld_delete,0),0,'No',1,'Yes'), v_vp_idseq
-                                        FROM sbrext.quest_contents_ext q,
-                  nci_quest_valid_value       vv
-                 WHERE     vv.Q_PUB_ID = q.qc_ID
-                 and   vv.q_ver_nr = q.version
-                       AND vv.nci_idseq = curvv.nci_idseq)
-                       where qc_idseq = curvv.nci_idseq;
+               ( SELECT
+                       curvv.VALUE,
+                       curvv.VM_DEF,
+                       curvv.disp_ord,
+                       curvv.LST_UPD_DT,
+                       curvv.LST_UPD_USR_ID,
+                       curvv.fld_delete, v_vp_idseq
+                                        FROM dual)
+                                        where qc_idseq = curvv.nci_idseq;
 
 
             update sbrext.valid_values_att_ext set ( description_text,
@@ -618,12 +631,11 @@ select nci_11179.cmr_guid,curvv.nci_idseq, v_idseq, curvv.disp_ord ,'VALUE_INSTR
                                                      date_modified,
                                                      modified_by) =
                 (SELECT
-                       desc_txt,
-                       mean_txt,
-                       vv.LST_UPD_DT,
-                       vv.LST_UPD_USR_ID
-                  FROM nci_quest_valid_value vv
-                 WHERE nci_idseq = curvv.nci_idseq)
+                       curvv.desc_txt,
+                       curvv.mean_txt,
+                       curvv.LST_UPD_DT,
+                       curvv.LST_UPD_USR_ID
+                  FROM  dual)
                  where qc_idseq = curvv.nci_idseq;
                  
                  
@@ -651,6 +663,7 @@ v_idseq := nci_11179.cmr_guid;
    INSERT INTO sbrext.quest_contents_ext (qc_idseq,p_val_idseq,
                                                    p_mod_idseq,
                                                    qtl_name,
+                                                   asl_name,
                                                    dn_crf_idseq,
                                                    p_qst_idseq,
                                                    conte_idseq,
@@ -667,6 +680,7 @@ v_idseq := nci_11179.cmr_guid;
                 values ( v_idseq, curvv.nci_idseq,
                        curvv.p_mod_idseq,
                        'VALUE_INSTR',
+                       curvv.asl_name,
                        curvv.dn_crf_idseq,
                        curvv.qc_idseq,
                          curvv.conte_idseq,
