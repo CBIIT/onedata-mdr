@@ -11,7 +11,6 @@ CREATE TABLE OD_CADSR_TABLES_TEST_RESULTS
   LST_UPD_USR_ID  VARCHAR2(50 BYTE)             DEFAULT user,
   LST_UPD_DT      DATE                          DEFAULT sysdate
 );
-/
 CREATE OR REPLACE procedure sp_test_all_NEW 
 as
 v_cnt integer;
