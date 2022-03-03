@@ -361,7 +361,7 @@ action           t_actionRowset;
 v_found      boolean;
 v_item_id		 number;
 v_ver_nr		 number;
-
+v_version number(4,2);
 begin
     hookInput := ihook.getHookInput(v_data_in);
     hookOutput.invocationNumber := hookInput.invocationNumber;
@@ -395,6 +395,7 @@ begin
 	elsif hookInput.invocationNumber = 1 then  -- Second invocation - set the actions
 		  if hookInput.answerId = 1 then -- selected form
                row_sel := hookInput.selectedRowset.rowset(1);  -- Row selected to be the latest version
+               v_version := ihook.getColumnValue(row_sel, 'VER_NR');
                 rows :=         t_rows();
                 hookOutput.message := 'Already latest version.';
 
@@ -413,6 +414,23 @@ begin
                     end loop;
                     action := t_actionRowset(rows, 'Administered Item', 2, 1,'update');
                     actions.extend; actions(actions.last) := action;
+                    
+                    if (ihook.getColumnValue(row_cur, 'ADMIN_ITEM_TYP_ID') = 9) then -- Classification Scheme
+                    rows :=         t_rows();
+                    for curcsi in (select item_id csi_item_id, ver_nr csi_ver_nr from nci_clsfctn_schm_item where cs_item_id =  ihook.getColumnValue(row_sel, 'ITEM_ID')) loop
+                            row := t_row();
+                            ihook.setColumnValue(row, 'ITEM_ID', curcsi.csi_item_id);
+                            ihook.setColumnValue(row, 'VER_NR', curcsi.csi_ver_nr);
+                        if (curcsi.csi_ver_nr = v_version) then
+                            ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);  -- unselect current version for the original latest version
+                        else
+                          ihook.setColumnValue(row, 'CURRNT_VER_IND', 0);  -- unselect current version for the original latest version
+                        end if;
+                            rows.extend; rows(rows.last) := row;
+                    end loop;
+                    action := t_actionRowset(rows, 'Administered Item', 2, 1,'update');
+                    actions.extend; actions(actions.last) := action;
+                    end if;
                     hookOutput.actions := actions;
                     hookOutput.message := 'Successfully changed latest version.';
                 end if;
@@ -2245,7 +2263,6 @@ begin
 
 
             hookOutput.actions := actions;
-
             hookOutput.message := 'Version created successfully.';
         end if;
     
