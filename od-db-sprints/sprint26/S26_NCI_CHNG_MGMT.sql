@@ -816,18 +816,83 @@ AS
     v_vd_item_nm varchar2(255);
     v_vd_item_def  varchar2(4000);
     v_item_def varchar2(4000);
+    v_err_str varchar2(4000) := ' ';
+    v_retired boolean := false;
 
 BEGIN
        row := t_row();
        rows := t_rows();
 
+     v_dec_item_id := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID');
+        v_dec_ver_nr := ihook.getColumnValue(rowform, 'DE_CONC_VER_NR');
+       
 -- if DEC specified or found, if VD specified
+   if (v_dec_item_id is null) then
+    for cur in (select * from admin_item where admin_item_typ_id = 2 and item_id = ihook.getColumnValue(rowform, 'ITEM_1_ID')
+    and ver_nr =  ihook.getColumnValue(rowform, 'ITEM_1_VER_NR')  and nvl(fld_delete,0) = 0) loop
+    if (upper(cur.admin_stus_nm_dn) like '%RETIRED%') then
+        v_val_ind := false;
+         v_err_str :=  'Error: DEC is Retired.' || chr(13);
+    else
+        ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID',cur.item_id);
+        ihook.setColumnValue(rowform, 'DE_CONC_VER_NR', cur.ver_nr);
         v_dec_item_id := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID');
         v_dec_ver_nr := ihook.getColumnValue(rowform, 'DE_CONC_VER_NR');
+     --   raise_application_error(-20000, cur.admin_stus_nm_dn);
+         if (upper(cur.admin_stus_nm_dn) not like '%RELEASED%') then
+     --        v_val_ind := false;
+         v_err_str :=  v_err_str || 'Warning: DEC is not Released.' || chr(13);
+         end if;
+    end if;
+    end loop;
+     if (v_dec_item_id is null and v_val_ind = true) then
+        v_val_ind := false;
+         v_err_str := v_err_str  || 'Error: DEC not found.'|| chr(13);
+        end if;
+    end if;
+    
+      v_vd_item_id := ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') ;
+        v_vd_ver_nr := ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR') ;
+        v_retired := false;
+         if (v_vd_item_id is null) then
+      for cur in (select * from admin_item where admin_item_typ_id = 3  and item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID')
+    and ver_nr =  ihook.getColumnValue(rowform, 'ITEM_2_VER_NR') and nvl(fld_delete,0) = 0 ) loop
+   --  raise_application_error(-20000, 'HErer');
+ if (upper(cur.admin_stus_nm_dn) like '%RETIRED%') then
+        v_val_ind := false;
+          v_err_str :=  v_err_str ||'Error: VD is Retired.' || chr(13);
+          v_retired := true;
+    else
+        ihook.setColumnValue(rowform, 'VAL_DOM_ITEM_ID', cur.item_id);
+        ihook.setColumnValue(rowform, 'VAL_DOM_VER_NR', cur.ver_nr);
         v_vd_item_id := ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') ;
         v_vd_ver_nr := ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR') ;
-
-
+           if (upper(cur.admin_stus_nm_dn) not like '%RELEASED%') then
+     --        v_val_ind := false;
+         v_err_str :=  v_err_str ||'Warning: VD is not Released.' || chr(13);
+         end if;
+    end if;
+    end loop;
+   end if;
+    if (v_vd_item_id is null and v_retired = false ) then
+        v_val_ind := false;
+         v_err_str := v_err_str  || 'Error: VD not found.'|| chr(13);
+        end if;
+   /* 
+Warning: PQT null, default used
+*/
+   
+         if (ihook.getColumnValue(row, 'PREF_QUEST_TXT') is null) then
+         
+           v_err_str := v_err_str  || 'Warning: PQT null, default will be used'|| chr(13);
+           end if;
+        
+         ihook.setColumnValue(rowform, 'CTL_VAL_MSG', v_err_str);
+           
+        if (v_val_ind = false) then
+        
+            return;
+        end if;
  --       if (v_op = 'V') then  --- check if CDE is a duplicate
             for cur in (select ai.item_id item_id from admin_item ai, de de
             where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
@@ -884,8 +949,8 @@ BEGIN
         else
           ihook.setColumnValue(row, 'ITEM_DESC',v_dec_item_def);
           end if;
-            ihook.setColumnValue(row, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || v_item_nm|| ' does not have Preferred Question Text.'   ));
-            ihook.setColumnValue(rowform, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || v_item_nm|| ' does not have Preferred Question Text.'   ));
+            ihook.setColumnValue(row, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || ihook.getColumnValue(row, 'ITEM_NM')|| ' does not have Preferred Question Text.'   ));
+            ihook.setColumnValue(rowform, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || ihook.getColumnValue(row, 'ITEM_NM')|| ' does not have Preferred Question Text.'   ));
 
        v_id := nci_11179.getItemId;
 
