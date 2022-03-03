@@ -27,6 +27,7 @@ create or replace PACKAGE body nci_caDSR_push AS
  as
  v_cnt integer;
  begin
+ 
  insert into sbr.concepts_ext (con_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,con_id, evs_source,definition_source,version,
             created_by, date_created,date_modified, modified_by)
@@ -121,6 +122,26 @@ and ai.ver_nr = csi.ver_nr);
 commit;
 
 
+insert into  sbr.cs_csi (CS_CSI_IDSEQ, CS_IDSEQ,csi_idseq, P_CS_CSI_IDSEQ,  DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY, LABEL)
+select nvl(csi.cs_csi_idseq, csiai.nci_idseq) cs_csi_idseq, cs.nci_idseq cs_idseq, csiai.nci_idseq csi_idseq, nvl(pcsi.cs_csi_idseq, pcsiai.nci_idseq) p_cs_csi_idseq,
+csi.creat_dt, csi.lst_upd_dt, csi.creat_usr_id, csi.lst_upd_usr_id, '1'
+from admin_item csiai, nci_clsfctn_schm_item csi, admin_item cs, admin_item pcsiai, nci_clsfctn_schm_item pcsi where
+ csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr
+and csi.p_item_id = pcsiai.item_id and csi.p_item_ver_nr = pcsiai.ver_nr and csi.p_item_id = pcsi.item_id and csi.p_item_ver_nr = pcsi.ver_nr
+and csi.p_item_id is not null and csi.item_id = csiai.item_id and csi.ver_nr = csiai.ver_nr 
+and nvl(csi.cs_csi_idseq, csiai.nci_idseq) not in (Select cs_csi_idseq from sbr.cs_csi);
+
+commit;
+
+insert into  sbr.cs_csi (CS_CSI_IDSEQ, CS_IDSEQ, csi_idseq, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY, LABEL)
+select nvl(csi.cs_csi_idseq, csiai.nci_idseq) cs_csi_idseq, cs.nci_idseq cs_idseq, csiai.nci_idseq csi_idseq,
+csi.creat_dt, csi.creat_usr_id, csi.lst_upd_dt, csi.lst_upd_usr_id, 1
+from admin_item csiai, nci_clsfctn_schm_item csi, admin_item cs where
+ csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr
+ and csi.item_id = csiai.item_id and csi.ver_nr = csiai.ver_nr
+and csi.p_item_id is null  and nvl(csi.cs_csi_idseq, csiai.nci_idseq) not in (Select cs_csi_idseq from sbr.cs_csi);
+
+commit;
 -- Module name
 
 -- Ref blobs
@@ -950,12 +971,12 @@ nci_cadsr_push_form.PushQuestValidValue(vHours);
 update nci_job_log set job_step_desc = 'Step 3: Form Migration completed. ' where log_id = v_batch;
 commit;
 
+nci_cadsr_push.spPushAISpecific(vHours);
 nci_cadsr_push.spPushAIChildren(vHours);
 
 update nci_job_log set job_step_desc = 'Step 4: Common Children Migration completed. ' where log_id = v_batch;
 commit;
 
-nci_cadsr_push.spPushAISpecific(vHours);
 
 
 update nci_job_log set job_step_desc = 'Job Completed', end_dt = sysdate where log_id = v_batch;
