@@ -305,7 +305,7 @@ if vActionType = 'U' then
 update sbrext.object_classes_ext set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,definition_source,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq, ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq, ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,  ai.def_src,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
     from admin_item ai, admin_item c
@@ -318,7 +318,7 @@ if vActionType = 'I' then
 insert into sbrext.object_classes_ext (oc_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,oc_id,CONDR_IDSEQ,version,definition_source,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.NCI_IDSEQ,ai.VER_NR,ai.def_src,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
     from admin_item ai, admin_item c
@@ -338,7 +338,7 @@ if vActionType = 'U' then
 update sbrext.properties_ext set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name, definition_source,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.origin,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_NM, ai.def_src,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
     from admin_item ai, admin_item c
@@ -351,7 +351,7 @@ if vActionType = 'I' then
 insert into sbrext.properties_Ext (prop_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,prop_id,CONDR_IDSEQ, version,definition_source,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_NM,ai.ITEM_ID, ai.nci_idseq, ai.VER_NR,ai.def_src,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
     from admin_item ai, admin_item c
@@ -373,7 +373,7 @@ if vActionType = 'U' then
 update sbr.administered_components set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.origin,nci_cadsr_push.getShortDef (ai.ITEM_DESC),ai.ITEM_LONG_NM,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID, decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
     from admin_item ai, admin_item c
@@ -386,7 +386,7 @@ if vActionType = 'I' then
 insert into sbr.administered_components (ac_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,public_id, version,
             created_by, date_created,date_modified, modified_by, actl_name, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef (ai.ITEM_DESC),ai.ITEM_LONG_NM,ai.ITEM_ID,  ai.VER_NR,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID, decode(ai.admin_item_typ_id, 52, 'QUEST_CONTENT', 54, 'QUEST_CONTENT', ok.NCI_CD), decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
     from admin_item ai, admin_item c, obj_key ok
@@ -426,7 +426,7 @@ if vActionType = 'U' then
 update sbr.data_elements set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,ORIGIN,preferred_definition,preferred_name, dec_idseq, vd_idseq,
             date_modified, modified_by, deleted_ind, question) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_NM,   dec.nci_idseq, vd.nci_idseq,
             ai.LST_UPD_DT,ai.LST_UPD_USR_Id ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes'), de.pref_quest_txt
     from admin_item ai, admin_item c, de de, admin_item vd,  admin_item dec
@@ -445,7 +445,7 @@ if vActionType = 'I' then
 insert into sbr.data_elements (de_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,ORIGIN,preferred_definition,preferred_name,cde_id,version, dec_idseq, vd_idseq,
             created_by, date_created,date_modified, modified_by, deleted_ind, question)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_NM,ai.ITEM_ID, ai.VER_NR, dec.nci_idseq, vd.nci_idseq,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes'), de.pref_quest_txt
         from admin_item ai, admin_item c, de de, admin_item vd,  admin_item dec
@@ -500,7 +500,7 @@ if vActionType = 'U' then
 update  sbr.data_element_concepts  set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,ORIGIN,preferred_definition,preferred_name, oc_idseq, prop_idseq, cd_idseq,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_NM, oc.nci_idseq, prop.nci_idseq, cd.nci_idseq ,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
     from admin_item ai, admin_item c, de_conc dec, admin_item oc, admin_item prop, admin_item cd
@@ -518,7 +518,7 @@ if vActionType = 'I' then
 insert into sbr.data_element_concepts (dec_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,ORIGIN,preferred_definition,preferred_name,dec_id,oc_idseq, prop_idseq, cd_idseq,version,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_NM,ai.ITEM_ID, oc.nci_idseq, prop.nci_idseq, cd.nci_idseq,ai.VER_NR,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c, de_conc dec, admin_item oc, admin_item prop, admin_item cd
@@ -539,7 +539,7 @@ if vActionType = 'U' then
 update sbrext.concepts_ext set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name, evs_source, definition_source,
             date_modified, modified_by) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm, ok.NCI_CD,  ai.def_src,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID
         from admin_item ai, admin_item c, obj_key ok, cncpt con
@@ -555,7 +555,7 @@ if vActionType = 'I' then
 insert into sbr.concepts_ext (con_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,con_id, evs_source,definition_source,version,
             created_by, date_created,date_modified, modified_by)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ok.nci_cd, ai.def_src,ai.VER_NR,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID
         from admin_item ai, admin_item c, cncpt con, obj_key ok
@@ -581,7 +581,7 @@ update sbr.value_domains set ( asl_name,begin_date,change_note,conte_idseq,end_d
                 long_name,ORIGIN,preferred_definition,preferred_name, high_value_num,low_value_num, max_length_num, min_length_num,
                 decimal_place,rep_idseq, cd_idseq,uoml_name, dtl_name, forml_name,vd_type_flag,
                 date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
                 ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_NM,  VAL_DOM_HIGH_VAL_NUM,VAL_DOM_LOW_VAL_NUM,VAL_DOM_MAX_CHAR,VAL_DOM_MIN_CHAR,
                 NCI_DEC_PREC, rc.nci_idseq, cd.nci_idseq, uom.nci_cd, dt.nci_cd, fmt.nci_cd,decode(VAL_DOM_TYP_ID, 17,'E' ,18, 'N'),
                 ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
@@ -603,7 +603,7 @@ insert into sbr.value_domains (vd_idseq, asl_name,begin_date,change_note,conte_i
             high_value_num,low_value_num, max_length_num, min_length_num,
             decimal_place,rep_idseq, cd_idseq,uoml_name, dtl_name, forml_name,vd_type_flag,version,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_NM,ai.ITEM_ID,
             VAL_DOM_HIGH_VAL_NUM,VAL_DOM_LOW_VAL_NUM,VAL_DOM_MAX_CHAR,VAL_DOM_MIN_CHAR,
             NCI_DEC_PREC, rc.nci_idseq, cd.nci_idseq, uom.nci_cd, dt.nci_cd, fmt.nci_cd,decode(Val_dom_typ_id, 17,'E' ,18, 'N')ai,ai.VER_NR,
@@ -631,7 +631,7 @@ if vActionType = 'U' then
 update sbrext.representations_ext set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name, definition_source,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm, ai.def_src,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c
@@ -644,7 +644,7 @@ if vActionType = 'I' then
 insert into sbrext.representations_ext (rep_idseq,asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,rep_id,CONDR_IDSEQ,version,definition_source,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.nci_idseq,ai.VER_NR,ai.def_src,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c
@@ -666,7 +666,7 @@ if vActionType = 'U' then
 update sbr.conceptual_domains set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name, dimensionality,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef (ai.ITEM_DESC),ai.ITEM_LONG_Nm, DIMNSNLTY,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c, conc_dom cd
@@ -680,7 +680,7 @@ if vActionType = 'I' then
 insert into sbr.conceptual_domains (cd_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,cd_id,version,dimensionality,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR,DIMNSNLTY,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c, conc_dom cd
@@ -705,7 +705,7 @@ if vActionType = 'U' then
 update sbrext.quest_contents_ext set ( qtl_name,  qcdl_name,asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,qc_id,
             created_by, date_created,date_modified, modified_by, deleted_ind) =
-(select   decode(frm.form_typ_id,70, 'CRF', 71, 'TEMPLATE') , ok.nci_cd, ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select   decode(frm.form_typ_id,70, 'CRF', 71, 'TEMPLATE') , ok.nci_cd, ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c,  nci_form frm, obj_key ok
@@ -720,7 +720,7 @@ end if;
 if vActionType = 'I' then
 --raise_application_error(-20000, vItemId);
 for curfrm in (select  ai.NCI_IDSEQ, decode(frm.form_typ_id,70, 'CRF', 71, 'TEMPLATE') FORM_TYP_ID ,
-ok.nci_cd, ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq cntxt_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND ,
+ok.nci_cd, ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq cntxt_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND ,
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC) ITEM_DESC,ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR, frm.ftr_instr, frm.hdr_instr,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes') FLD_DELETE, 'Yes',1
         from admin_item ai, admin_item c,  nci_form frm, obj_key ok
@@ -733,7 +733,7 @@ ok.nci_cd, ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq cntxt_ids
  insert into sbrext.quest_contents_ext (qc_idseq,dn_crf_idseq, qtl_name,  qcdl_name,asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,qc_id,version,
             created_by, date_created,date_modified, modified_by, deleted_ind, display_ind, display_order)
-values ( curfrm.NCI_IDSEQ,curfrm.nci_idseq, curfrm.form_typ_id, curfrm.nci_cd, curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, curfrm.ADMIN_NOTES, curfrm.cntxt_idseq,
+values ( curfrm.NCI_IDSEQ,curfrm.nci_idseq, curfrm.form_typ_id, curfrm.nci_cd, curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, curfrm.chng_desc_txt, curfrm.cntxt_idseq,
 curfrm.UNTL_DT, curfrm.CURRNT_VER_IND,
             curfrm.ITEM_NM, curfrm.ORIGIN,substr(curfrm.ITEM_DESC,1,2000),curfrm.ITEM_LONG_Nm,curfrm.ITEM_ID, curfrm.VER_NR,
             curfrm.CREAT_USR_ID, curfrm.CREAT_DT, curfrm.LST_UPD_DT,curfrm.LST_UPD_USR_ID ,curfrm.fld_delete, 'Yes',1);
@@ -748,7 +748,7 @@ if (v_cnt = 0) then
 v_id := nci_11179.getItemid;
 v_hdridseq := nci_11179.cmr_guid;
 for curfrm in (select  ai.NCI_IDSEQ,
- ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq cntxt_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND ,
+ ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq cntxt_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND ,
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC) ITEM_DESC,ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR, frm.ftr_instr, frm.hdr_instr,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes') FLD_DELETE, 'Yes',1
         from admin_item ai, admin_item c, nci_form frm
@@ -761,7 +761,7 @@ insert into sbrext.quest_contents_ext (qc_idseq, dn_crf_idseq, qtl_name, asl_nam
             preferred_name,qc_id,
             version,
             created_by, date_created,date_modified, modified_by, deleted_ind,display_ind, display_order)
-values (v_hdridseq, curfrm.nci_idseq, 'FORM_INSTR' , curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, curfrm.ADMIN_NOTES, curfrm.cntxt_idseq,
+values (v_hdridseq, curfrm.nci_idseq, 'FORM_INSTR' , curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, curfrm.chng_desc_txt, curfrm.cntxt_idseq,
 curfrm.UNTL_DT, curfrm.CURRNT_VER_IND,
             curfrm.ITEM_NM, curfrm.ORIGIN,nvl(curfrm.hdr_instr, ' '),
             v_id,v_id,
@@ -773,7 +773,7 @@ curfrm.UNTL_DT, curfrm.CURRNT_VER_IND,
             preferred_name,public_id,
             version,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-values ( v_hdridseq, 'QUEST_CONTENT' , curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, curfrm.ADMIN_NOTES, curfrm.cntxt_idseq,curfrm.UNTL_DT, curfrm.CURRNT_VER_IND,
+values ( v_hdridseq, 'QUEST_CONTENT' , curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, curfrm.chng_desc_txt, curfrm.cntxt_idseq,curfrm.UNTL_DT, curfrm.CURRNT_VER_IND,
             curfrm.ITEM_NM, curfrm.ORIGIN,nvl(curfrm.hdr_instr, ' '),
             v_id,v_id,
             curfrm.VER_NR,
@@ -801,7 +801,7 @@ else
 v_id := nci_11179.getItemid;
 v_ftridseq := nci_11179.cmr_guid;
 for curfrm in (select  ai.NCI_IDSEQ,
- ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq cntxt_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND ,
+ ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq cntxt_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND ,
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC) ITEM_DESC,ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR, frm.ftr_instr, frm.hdr_instr,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes') FLD_DELETE, 'Yes',1
         from admin_item ai, admin_item c, nci_form frm
@@ -814,7 +814,7 @@ insert into sbrext.quest_contents_ext (qc_idseq, dn_crf_idseq, qtl_name, asl_nam
             preferred_name,qc_id,
             version,
             created_by, date_created,date_modified, modified_by, deleted_ind,display_ind, display_order)
-values (  v_ftridseq, curfrm.nci_idseq, 'FOOTER' , curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, curfrm.ADMIN_NOTES,curfrm.cntxt_idseq,
+values (  v_ftridseq, curfrm.nci_idseq, 'FOOTER' , curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, curfrm.chng_desc_txt,curfrm.cntxt_idseq,
          curfrm.UNTL_DT, curfrm.CURRNT_VER_IND,
             curfrm.ITEM_NM, curfrm.ORIGIN,nvl(curfrm.ftr_instr, ' '),
             v_id,v_id,
@@ -829,7 +829,7 @@ values (  v_ftridseq, curfrm.nci_idseq, 'FOOTER' , curfrm.ADMIN_STUS_NM_DN, curf
             preferred_name,public_id,
             version,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-            values (  v_ftridseq,  'QUEST_CONTENT' , curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, curfrm.ADMIN_NOTES,curfrm.cntxt_idseq,curfrm.UNTL_DT, curfrm.CURRNT_VER_IND,
+            values (  v_ftridseq,  'QUEST_CONTENT' , curfrm.ADMIN_STUS_NM_DN, curfrm.EFF_DT, curfrm.chng_desc_txt,curfrm.cntxt_idseq,curfrm.UNTL_DT, curfrm.CURRNT_VER_IND,
             curfrm.ITEM_NM, curfrm.ORIGIN,nvl(curfrm.ftr_instr, ' ' ),
             v_id,v_id,
             curfrm.VER_NR,
@@ -904,7 +904,7 @@ update sbrext.protocols_ext set ( asl_name,begin_date,change_note,conte_idseq,en
             long_name,origin,preferred_definition,preferred_name, CHANGE_TYPE,CHANGE_NUMBER,REVIEWED_DATE,REVIEWED_BY,APPROVED_DATE, APPROVED_BY, type,
             protocol_id,     LEAD_ORG,               PHASE,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm, CHNG_TYP,	CHNG_NBR,	RVWD_DT,	RVWD_USR_ID, APPRVD_DT,	APPRVD_USR_ID, ok.nci_cd,
             PROTCL_ID,    org.ORG_NM,                     PROTCL_PHASE,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
@@ -924,7 +924,7 @@ insert into sbrext.protocols_ext (proto_idseq, asl_name,begin_date,change_note,c
             long_name,origin,preferred_definition,preferred_name,proto_id, type, CHANGE_TYPE,CHANGE_NUMBER,REVIEWED_DATE,REVIEWED_BY,APPROVED_DATE, APPROVED_BY,version,
                      protocol_id,     LEAD_ORG,               PHASE,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ok.nci_cd, 	CHNG_TYP,	CHNG_NBR,	RVWD_DT,	RVWD_USR_ID, APPRVD_DT,	APPRVD_USR_ID,ai.VER_NR,
            PROTCL_ID,  org.ORG_NM,  PROTCL_PHASE,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
@@ -949,7 +949,7 @@ if vActionType = 'U' then
 update sbrext.value_meanings set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,description, comments,CONDR_IDSEQ,definition_source,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm, vm_desc_txt, vm_cmnts,ai.nci_idseq,ai.DEF_SRC,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c,   nci_val_mean con
@@ -963,7 +963,7 @@ if vActionType = 'I' then
 insert into sbr.value_meanings (vm_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,vm_id, description, comments,version,condr_idseq,definition_source,
             created_by, date_created,date_modified, modified_by, deleted_ind, short_meaning)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, vm_desc_txt, vm_cmnts ,ai.VER_NR, ai.nci_idseq,ai.DEF_SRC,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes'), ai.item_nm
         from admin_item ai, admin_item c, NCI_val_mean con
@@ -984,7 +984,7 @@ update sbrext.oc_recs_ext set ( asl_name,begin_date,change_note,conte_idseq,end_
             long_name,origin,preferred_definition,preferred_name,date_modified, modified_by,
             t_oc_idseq, s_oc_idseq, rl_name, source_role, target_role, direction, source_low_multiplicity,
             source_high_multiplicity,target_low_multiplicity,target_high_multiplicity,display_order,dimensionality,array_ind ) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm, ai.LST_UPD_DT,ai.LST_UPD_USR_ID,
             toc.nci_idseq, soc.nci_idseq, REL_TYP_NM,SRC_ROLE,TRGT_ROLE,DRCTN,SRC_LOW_MULT,SRC_HIGH_MULT,
             TRGT_LOW_MULT,TRGT_HIGH_MULT,DISP_ORD,DIMNSNLTY,ARRAY_IND
@@ -1003,7 +1003,7 @@ insert into sbrext.oc_recs_ext (ocr_idseq, asl_name,begin_date,change_note,conte
             created_by, date_created,date_modified, modified_by,
             t_oc_idseq, s_oc_idseq, rl_name, source_role, target_role, direction, source_low_multiplicity,
             source_high_multiplicity,target_low_multiplicity,target_high_multiplicity,display_order,dimensionality,array_ind )
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID,
             toc.nci_idseq, soc.nci_idseq, REL_TYP_NM,SRC_ROLE,TRGT_ROLE,DRCTN,SRC_LOW_MULT,SRC_HIGH_MULT,
@@ -1029,7 +1029,7 @@ if vActionType = 'U' then
 update sbr.cs_items set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,csitl_name, description, comments,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm, ok.NCI_CD,  csi_desc_txt, csi_cmnts,
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c, obj_key ok, nci_clsfctn_schm_item con
@@ -1064,7 +1064,7 @@ if vActionType = 'I' then
 insert into sbr.cs_items (csi_idseq, csi_name, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,csi_id, csitl_name, description, comments,version,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ITEM_NM, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ITEM_NM, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ok.nci_cd, csi_desc_txt, csi_cmnts,ai.VER_NR,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c, NCI_CLSFCTN_SCHM_ITEM con, obj_key ok
@@ -1146,7 +1146,7 @@ if vActionType = 'U' then
 update sbr.classification_schemes set ( asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name, cstl_name, label_type_flag,
             date_modified, modified_by, deleted_ind) =
-(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+(select  ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,  ok.nci_cd, nvl(nci_label_typ_flg, 'A'),
             ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c, clsfctn_schm cs, obj_key ok
@@ -1160,7 +1160,7 @@ if vActionType = 'I' then
 insert into sbr.classification_schemes (cs_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,cs_id,version, cstl_name, label_type_flag,
             created_by, date_created,date_modified, modified_by, deleted_ind)
-select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
+select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR, ok.nci_cd, nvl(cs.nci_label_typ_flg, 'A'),
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes')
         from admin_item ai, admin_item c, clsfctn_schm cs, obj_key ok
