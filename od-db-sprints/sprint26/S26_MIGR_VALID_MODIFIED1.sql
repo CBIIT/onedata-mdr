@@ -215,7 +215,7 @@ ITEM_ID,VER_NR from
 CASE WHEN ORIGIN_ID IS NULL 
 THEN ORIGIN 
 ELSE ORIGIN_ID_DN END ORIGIN,
-ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID,ADMIN_STUS_NM_DN
+nci_cadsr_push.getShortDef(ITEM_DESC) ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID,ADMIN_STUS_NM_DN
  from ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = '
             || Y.ITEM_TYPE_CODE
@@ -260,7 +260,7 @@ ITEM_ID,VER_NR from
 CASE WHEN ORIGIN_ID IS NULL 
 THEN ORIGIN 
 ELSE ORIGIN_ID_DN END ORIGIN,
-ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID,ADMIN_STUS_NM_DN
+nci_cadsr_push.getShortDef(ITEM_DESC) ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID,ADMIN_STUS_NM_DN
  from ADMIN_ITEM
  where ADMIN_ITEM_TYP_ID = '
             || Y.ITEM_TYPE_CODE
@@ -305,7 +305,7 @@ END CASE;
                                 ITEM_NM
                   FROM (SELECT admin_item_typ_id,
                                NCI_iDSEQ,
-                               ITEM_DESC,
+                               nci_cadsr_push.getShortDef(ITEM_DESC)  ITEM_DESC,
                                ITEM_NM,
                                ITEM_LONG_NM,
                                VER_NR,
