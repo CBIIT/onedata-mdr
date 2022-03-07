@@ -825,11 +825,15 @@ BEGIN
 
      v_dec_item_id := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID');
         v_dec_ver_nr := ihook.getColumnValue(rowform, 'DE_CONC_VER_NR');
-       
+        v_val_ind := true;
+        --   raise_application_error(-20000,'Test');
+ -- 
 -- if DEC specified or found, if VD specified
    if (v_dec_item_id is null) then
+ --  raise_application_error(-20000,'TEst');
     for cur in (select * from admin_item where admin_item_typ_id = 2 and item_id = ihook.getColumnValue(rowform, 'ITEM_1_ID')
     and ver_nr =  ihook.getColumnValue(rowform, 'ITEM_1_VER_NR')  and nvl(fld_delete,0) = 0) loop
+  
     if (upper(cur.admin_stus_nm_dn) like '%RETIRED%') then
         v_val_ind := false;
          v_err_str :=  'Error: DEC is Retired.' || chr(13);
@@ -845,9 +849,10 @@ BEGIN
          end if;
     end if;
     end loop;
+    
      if (v_dec_item_id is null and v_val_ind = true) then
         v_val_ind := false;
-         v_err_str := v_err_str  || 'Error: DEC not found.'|| chr(13);
+        v_err_str := v_err_str  || 'Error: DEC not found.'|| chr(13);
         end if;
     end if;
     
@@ -882,7 +887,7 @@ BEGIN
 Warning: PQT null, default used
 */
    
-         if (ihook.getColumnValue(row, 'PREF_QUEST_TXT') is null) then
+         if (ihook.getColumnValue(rowform, 'PREF_QUEST_TXT') is null) then
          
            v_err_str := v_err_str  || 'Warning: PQT null, default will be used'|| chr(13);
            end if;
@@ -893,6 +898,8 @@ Warning: PQT null, default used
         
             return;
         end if;
+        
+   --     raise_application_error(-20000,'Test');
  --       if (v_op = 'V') then  --- check if CDE is a duplicate
             for cur in (select ai.item_id item_id from admin_item ai, de de
             where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
@@ -922,7 +929,11 @@ Warning: PQT null, default used
             end loop;
         end if;
 
-
+  if (v_val_ind = true) then
+                      ihook.setColumnValue(rowform, 'CTL_VAL_STUS', 'VALIDATED');
+   
+           
+        end if;
 
     if (v_op = 'C') then -- create
         row := t_row();
@@ -998,7 +1009,9 @@ Warning: PQT null, default used
     action := t_actionrowset(rows, 'References (for hook insert)', 2,12,'insert');
     actions.extend;
     actions(actions.last) := action;
-    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'CDE Created Successfully with ID ' || v_id ||  chr(13)) ;
+  --  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'CDE Created Successfully with ID ' || v_id ||  chr(13)) ;
+    ihook.setColumnValue(rowform, 'CTL_VAL_MSG',  'CDE Created Successfully with ID ' || v_id ||  chr(13)) ;
+    ihook.setColumnValue(rowform, 'CTL_VAL_STUS', 'PROCESSED') ;
 
 
  end if;

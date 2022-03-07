@@ -45,9 +45,10 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     row_ori := hookInput.originalRowset.rowset(i);
     if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') <> 'PROCESSED') then
         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', '');
+        
         nci_chng_mgmt.spDEValCreateImport(row_ori, 'V', actions, v_val_ind);
 
-   --    raise_application_error(-20000, ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR_FND'));
+   --   raise_application_error(-20000, 'Import');
         if (v_val_ind = false) then 
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
         else
@@ -602,27 +603,27 @@ begin
     hookInput := ihook.getHookInput(v_data_in);
     hookOutput.invocationNumber := hookInput.invocationNumber;
     hookOutput.originalRowset := hookInput.originalRowset;
-
+   rows := t_rows();
+ 
 for i in 1..hookinput.originalRowset.rowset.count loop
     row_ori := hookInput.originalRowset.rowset(i);
     v_val_ind := true;
     ihook.setColumnValue(row_ori,'CTL_VAL_MSG', '');
 
-    if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') = 'VALIDATED') then
-        if (ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') is null and ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID_FND') is null) then -- only go thru creating new if not specified and not existing
-            nci_dec_mgmt.spDECValCreateImport(row_ori, 'C', actions, v_val_ind);
-        end if;
-        if (ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') is null) then -- only go thru creating new if not specified
-            nci_vd.spVDValCreateImport(row_ori, 'C', actions, v_val_ind);
-        end if;
+  --  if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') = 'VALIDATED') then
+   --     if (ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') is null and ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID_FND') is null) then -- only go thru creating new if not specified and not existing
+    --        nci_dec_mgmt.spDECValCreateImport(row_ori, 'C', actions, v_val_ind);
+     --   end if;
+      --  if (ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') is null) then -- only go thru creating new if not specified
+       --     nci_vd.spVDValCreateImport(row_ori, 'C', actions, v_val_ind);
+       -- end if;
 
        nci_chng_mgmt.spDEValCreateImport(row_ori, 'C', actions, v_val_ind);
         if (v_val_ind = true) then
         iHook.setColumnValue (row_ori, 'CTL_VAL_STUS', 'PROCESSED');
         end if;
-    rows := t_rows();
     rows.extend; rows(rows.last) := row_ori;
-    end if;
+  --  end if;
 end loop;
   action := t_actionrowset(rows, 'CDE Import', 2,10,'update');
         actions.extend;
