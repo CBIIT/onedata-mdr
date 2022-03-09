@@ -24,13 +24,12 @@ AFTER DELETE
    ON NCI_ADMIN_ITEM_REL
     FOR EACH ROW 
 begin
-if (:old.rel_typ_id - 65) then
-delete from sbrext.ac_csi where cs_csi_idseq = 
+if (:old.rel_typ_id = 65) then
+delete from sbr.ac_csi where cs_csi_idseq = 
 (select nvl(csi.cs_csi_idseq, csiai.nci_idseq) from admin_item csiai, nci_clsfctn_schm_item csi where csiai.item_id = csi.item_id and csiai.ver_nr = csi.ver_nr
  and csiai.item_id = :old.p_item_id and csiai.ver_nr = :old.p_item_ver_nr)
- and ac_idseq = (select nci_idseq from admin_item ai where ai.item_id = :old.c_item_id and ai.ver_nr = :old.c_item_ver_nr));
+ and ac_idseq = (select nci_idseq from admin_item ai where ai.item_id = :old.c_item_id and ai.ver_nr = :old.c_item_ver_nr);
 
 end if;
 end;
 /
-
