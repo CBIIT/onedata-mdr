@@ -1,1 +1,2 @@
 Tracker 1652  Natalia - Please add to your release notes. REmove post-hook spAIDel from Data Object Form/Template on Delete.
+Remove "Test PV VM Post: command hook from PV/VM Import Data Object. 
