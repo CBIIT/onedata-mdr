@@ -357,3 +357,60 @@ FROM SBR.VALUE_MEANINGS AC
 WHERE VM_IDSEQ IN (select IDSEQ from ONEDATA_REVERSE_ERROR
 where ACTL_NAME='VALUE MEANING'  and DESTINATION='ADMIN_ITEM')
 order by NCI_IDSEQ, tier;
+
+-- Validate Context 
+SELECT 'ONEDATA' TIER, admin_item_typ_id,
+                               NCI_iDSEQ,
+                               ITEM_DESC,
+                               ITEM_NM,
+                               ITEM_LONG_NM,
+                               VER_NR,
+                               CNTXT_NM_DN,
+                               CREAT_USR_ID,
+                               CREAT_DT,
+                               LST_UPD_DT,
+                               LST_UPD_USR_ID
+                          FROM ONEDATA_WA.ADMIN_ITEM
+                         WHERE ADMIN_ITEM_TYP_ID = '8'
+                        and NCI_IDSEQ IN (select IDSEQ from ONEDATA_REVERSE_ERROR
+where ACTL_NAME='CONTEXTS' and DESTINATION='ADMIN_ITEM')
+                        UNION ALL
+                        SELECT 'SBR' TIER, 8,
+                               TRIM (conte_idseq),
+                               description,
+                               name,
+                               name,
+                               version,
+                               name,
+                               NVL(created_by,'ONEDATA'),
+                               NVL(date_created,to_date('8/18/2020','mm/dd/yyyy')),
+                               NVL(NVL (date_modified, date_created),to_date('8/18/2020','mm/dd/yyyy')),
+                               NVL(modified_by,'ONEDATA')
+                          FROM SBR.CONTEXTS AC
+                          WHERE conte_idseq IN (select IDSEQ from ONEDATA_REVERSE_ERROR
+where ACTL_NAME='CONTEXTS' and DESTINATION='ADMIN_ITEM')
+order by NCI_IDSEQ, tier;
+
+--CONCEPT
+select 'ONEDATA' TIER, NCI_IDSEQ, ADMIN_ITEM_TYP_ID,EFF_DT,CHNG_DESC_TXT,UNTL_DT,CURRNT_VER_IND,ITEM_LONG_NM,
+CASE WHEN ORIGIN_ID IS NULL 
+THEN ORIGIN 
+ELSE ORIGIN_ID_DN END ORIGIN,
+ITEM_DESC,ITEM_ID,ITEM_NM,VER_NR,CREAT_USR_ID,CREAT_DT,LST_UPD_DT,LST_UPD_USR_ID
+ from ONEDATA_WA.ADMIN_ITEM
+ where ADMIN_ITEM_TYP_ID = 49 and item_id not in (-20000,-20001,-20002,-20005,-20004,-20003)
+  and NCI_IDSEQ IN (select IDSEQ from ONEDATA_REVERSE_ERROR
+where ACTL_NAME='CONCEPT' and DESTINATION='ADMIN_ITEM')
+ UNION ALL
+ select 'SBREXT',CON_IDSEQ --Change
+ , 49 ,AC.BEGIN_DATE,AC.CHANGE_NOTE,AC.END_DATE,
+DECODE(UPPER(AC.LATEST_VERSION_IND),'YES', 1,'NO',0) LATEST_VERSION_IND,AC.PREFERRED_NAME,
+AC.ORIGIN,AC.PREFERRED_DEFINITION, 
+CON_ID, --Change
+SUBSTR(NVL(AC.LONG_NAME,AC.PREFERRED_NAME),0,255),AC.VERSION,
+NVL(AC.CREATED_BY,'ONEDATA'), NVL(AC.DATE_CREATED,to_date('8/18/2020','mm/dd/yyyy')),
+NVL(NVL(AC.DATE_MODIFIED, AC.DATE_CREATED),to_date('8/18/2020','mm/dd/yyyy')), NVL(AC.MODIFIED_BY,'ONEDATA')
+FROM SBREXT.CONCEPTS_EXT AC
+WHERE CON_IDSEQ IN (select IDSEQ from ONEDATA_REVERSE_ERROR
+where ACTL_NAME='CONCEPT' and DESTINATION='ADMIN_ITEM')
+order by NCI_IDSEQ, tier;
