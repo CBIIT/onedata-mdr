@@ -33,3 +33,10 @@ delete from sbr.ac_csi where cs_csi_idseq =
 end if;
 end;
 /
+
+CREATE OR REPLACE TRIGGER OD_TR_STG_ALT_NMS  BEFORE INSERT  on NCI_STG_ALT_NMS  for each row
+     BEGIN    IF (:NEW.STG_AI_ID = -1  or :NEW.STG_AI_ID is null)  THEN select od_seq_CDE_IMPORT.nextval
+ into :new.STG_AI_ID  from  dual ;   END IF;
+ END;
+/
+
