@@ -35,3 +35,5 @@ FROM ADMIN_ITEM ai,conc_dom cd
 	"BTCH_NM" VARCHAR2(100 BYTE) COLLATE "USING_NLS_COMP" NOT NULL ENABLE, 
 	"BTCH_SEQ_NBR" NUMBER(*,0) NOT NULL ENABLE,
    ADMIN_ITEM_TYP_ID  integer not null);
+
+--alter table ref_doc add constraint uni_ref_doc_name unique(FILE_NM);
