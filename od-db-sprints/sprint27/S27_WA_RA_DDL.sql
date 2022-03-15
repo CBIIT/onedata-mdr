@@ -36,4 +36,7 @@ FROM ADMIN_ITEM ai,conc_dom cd
 	"BTCH_SEQ_NBR" NUMBER(*,0) NOT NULL ENABLE,
    ADMIN_ITEM_TYP_ID  integer not null);
 
---alter table ref_doc add constraint uni_ref_doc_name unique(FILE_NM);
+delete from ref_doc where creat_usr_id <> 'FORMBUILDER';
+commit;
+
+alter table ref_doc add constraint uni_ref_doc_name unique(FILE_NM);
