@@ -15,13 +15,13 @@ BEGIN
                                        VER_NR
                 FROM (SELECT ITEM_ID,
                              VER_NR,
-                             CREAT_DT,
-                             CREAT_USR_ID,
-                             LST_UPD_USR_ID,
-                             TO_CHAR (REPLACE (FLD_DELETE, 0, 'No'))
+                             ai1.CREAT_DT,
+                             ai1.CREAT_USR_ID,
+                             ai1.LST_UPD_USR_ID,
+                             TO_CHAR (REPLACE (de.FLD_DELETE, 0, 'No'))
                                  FLD_DELETE,
-                             LST_UPD_DT
-                        FROM DE
+                             ai1.LST_UPD_DT
+                        FROM DE inner join admin_item ai1 using (item_id, ver_nr)
                        WHERE item_id <> -20005
                       UNION ALL
                       SELECT CDE_ID,
@@ -125,12 +125,11 @@ BEGIN
                 FROM (SELECT ITEM_ID,
                              VER_NR,
                              DIMNSNLTY,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
-                        FROM CONC_DOM
-                       WHERE item_id <> -20002
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID
+                        FROM CONC_DOM inner join admin_item ai1 using (item_id, ver_nr)
                       UNION ALL
                       SELECT ai.ITEM_ID,
                              version,
@@ -179,11 +178,11 @@ BEGIN
                                        VER_NR
                 FROM (SELECT ITEM_ID,
                              VER_NR,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
-                        FROM OBJ_CLS
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID
+                        FROM OBJ_CLS inner join ADMIN_ITEM ai1 using (ITEM_ID,VER_NR)
                        WHERE item_id <> -20000
                       UNION ALL
                       SELECT ai.ITEM_ID,
@@ -232,11 +231,11 @@ BEGIN
                                        VER_NR
                 FROM (SELECT ITEM_ID,
                              VER_NR,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
-                        FROM PROP
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID
+                        FROM PROP inner join ADMIN_ITEM ai1 using (ITEM_ID,VER_NR)
                        WHERE item_id <> -20001
                       UNION ALL
                       SELECT ai.ITEM_ID,
@@ -286,11 +285,11 @@ BEGIN
                              VER_NR,
                              CLSFCTN_SCHM_TYP_ID,
                              NCI_LABEL_TYP_FLG,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
-                        FROM CLSFCTN_SCHM
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID
+                        FROM CLSFCTN_SCHM cs inner join ADMIN_ITEM ai1 using (ITEM_ID,VER_NR)
                       UNION ALL
                       SELECT ai.ITEM_ID,
                              version,
@@ -346,11 +345,11 @@ BEGIN
                                        VER_NR
                 FROM (SELECT ITEM_ID,
                              VER_NR,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
-                        FROM REP_CLS
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID
+                        FROM REP_CLS inner join admin_item ai1 using (item_id, ver_nr)
                       UNION ALL
                       SELECT ai.ITEM_ID,
                              version,
@@ -401,11 +400,11 @@ BEGIN
                              VER_NR,
                              OBJ_CLS_QUAL,
                              PROP_QUAL,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
-                        FROM DE_CONC
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID
+                        FROM DE_CONC inner join admin_item ai1 using (item_id, ver_nr)
                        WHERE item_id NOT IN -20003
                       UNION ALL
                       SELECT ai.ITEM_ID,
@@ -471,11 +470,11 @@ BEGIN
                              VAL_DOM_LOW_VAL_NUM,
                              VAL_DOM_MAX_CHAR,
                              VAL_DOM_MIN_CHAR,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
-                        FROM VALUE_DOM
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID
+                        FROM VALUE_DOM inner join admin_item ai1 using (item_id, ver_nr)
                        WHERE item_id <> -20004
                       UNION ALL
                       SELECT ai.ITEM_ID,
@@ -606,11 +605,11 @@ BEGIN
                 FROM (SELECT ITEM_ID,
                              VER_NR,
                              evs_src_id,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
-                        FROM CNCPT
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID
+                        FROM CNCPT inner join admin_item ai1 using (item_id, ver_nr)
                       UNION ALL
                       SELECT con_id,
                              version,
@@ -661,11 +660,11 @@ BEGIN
                              VER_NR,
                              CSI_DESC_TXT,
                              CSI_CMNTS,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
-                        FROM NCI_CLSFCTN_SCHM_ITEM
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID
+                        FROM NCI_CLSFCTN_SCHM_ITEM inner join admin_item ai1 using (item_id, ver_nr)
                       UNION ALL
                       SELECT item_id,
                              version,
@@ -719,11 +718,11 @@ BEGIN
                              VER_NR,
                              VM_DESC_TXT,
                              VM_CMNTS,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
-                        FROM NCI_VAL_MEAN
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID
+                        FROM NCI_VAL_MEAN inner join admin_item ai1 using (item_id, ver_nr)
                       UNION ALL
                       SELECT item_id,
                              version,
@@ -838,17 +837,17 @@ BEGIN
                              PROTCL_ID,
                              LEAD_ORG,
                              PROTCL_PHASE,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID,
+                             ai1.CREAT_USR_ID,
+                             ai1.CREAT_DT,
+                             ai1.LST_UPD_DT,
+                             ai1.LST_UPD_USR_ID,
                              CHNG_TYP,
                              CHNG_NBR,
                              RVWD_DT,
                              RVWD_USR_ID,
                              APPRVD_DT,
                              APPRVD_USR_ID
-                        FROM NCI_PROTCL
+                        FROM NCI_PROTCL inner join admin_item ai1 using (item_id, ver_nr)
                       UNION ALL
                       SELECT ai.item_id,
                              version,
@@ -926,11 +925,11 @@ BEGIN
                              VALUE,
                              NCI_IDSEQ,
                              DESC_TXT,
-                             MEAN_TXT,
-                             CREAT_USR_ID,
-                             CREAT_DT,
-                             LST_UPD_DT,
-                             LST_UPD_USR_ID
+                             MEAN_TXT
+                             --, CREAT_USR_ID,
+                             --CREAT_DT,
+                             --LST_UPD_DT,
+                             --LST_UPD_USR_ID
                         FROM NCI_QUEST_VALID_VALUE
                       UNION ALL
                       SELECT qc.qc_id,
@@ -941,13 +940,13 @@ BEGIN
                              qc.long_name,
                              qc.qc_idseq,
                              vv.description_text,
-                             vv.meaning_text,
-                             NVL (qc.created_by, 'ONEDATA'),
-                             NVL (qc.DATE_CREATED,
-                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
-                             NVL (NVL (qc.date_modified, qc.date_created),
-                                  TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
-                             NVL (qc.modified_by, 'ONEDATA')
+                             vv.meaning_text
+                             --, NVL (qc.created_by, 'ONEDATA'),
+                             --NVL (qc.DATE_CREATED,
+                                  --TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             --NVL (NVL (qc.date_modified, qc.date_created),
+                                  --TO_DATE ('8/18/2020', 'mm/dd/yyyy')),
+                             --NVL (qc.modified_by, 'ONEDATA')
                         FROM sbrext.QUEST_CONTENTS_EXT  qc,
                              sbrext.quest_contents_ext  qc1,
                              sbrext.valid_values_att_ext vv
@@ -963,11 +962,11 @@ BEGIN
                      VALUE,
                      NCI_IDSEQ,
                      DESC_TXT,
-                     MEAN_TXT,
-                     CREAT_USR_ID,
-                     CREAT_DT,
-                     LST_UPD_DT,
-                     LST_UPD_USR_ID
+                     MEAN_TXT
+                     --, CREAT_USR_ID,
+                     --CREAT_DT,
+                     --LST_UPD_DT,
+                     --LST_UPD_USR_ID
               HAVING COUNT (*) <> 2
             ORDER BY NCI_PUB_ID, Q_VER_NR)
     LOOP
@@ -1056,10 +1055,10 @@ FOR x
                                       cai.nci_ord,
                                       cai.nci_prmry_ind,
                                       nci_cncpt_val,
-                                      cai.CREAT_USR_ID,
-                                      cai.CREAT_DT,
-                                      cai.LST_UPD_DT,
-                                      cai.LST_UPD_USR_ID
+                                      ai.CREAT_USR_ID,
+                                      ai.CREAT_DT,
+                                      ai.LST_UPD_DT,
+                                      ai.LST_UPD_USR_ID
     from cncpt_admin_item cai, admin_item ai
     where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
     and ADMIN_ITEM_TYP_ID=5
@@ -1121,10 +1120,10 @@ FOR x
                                       cai.nci_ord,
                                       cai.nci_prmry_ind,
                                       nci_cncpt_val,
-                                      cai.CREAT_USR_ID,
-                                      cai.CREAT_DT,
-                                      cai.LST_UPD_DT,
-                                      cai.LST_UPD_USR_ID
+                                      ai.CREAT_USR_ID,
+                                      ai.CREAT_DT,
+                                      ai.LST_UPD_DT,
+                                      ai.LST_UPD_USR_ID
     from cncpt_admin_item cai, admin_item ai
     where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
     and ADMIN_ITEM_TYP_ID=6 --106,987
@@ -1317,10 +1316,10 @@ FOR x
                                   cai.nci_ord,
                                   cai.nci_prmry_ind,
                                   nci_cncpt_val,
-                                  cai.CREAT_USR_ID,
-                                  cai.CREAT_DT,
-                                  cai.LST_UPD_DT,
-                                  cai.LST_UPD_USR_ID
+                                  ai.CREAT_USR_ID,
+                                  ai.CREAT_DT,
+                                  ai.LST_UPD_DT,
+                                  ai.LST_UPD_USR_ID
 from cncpt_admin_item cai, admin_item ai
 where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
 and ADMIN_ITEM_TYP_ID=3 --85,641
@@ -1382,10 +1381,10 @@ SELECT con.item_id,
                                       cai.nci_ord,
                                       cai.nci_prmry_ind,
                                       nci_cncpt_val,
-                                      cai.CREAT_USR_ID,
-                                      cai.CREAT_DT,
-                                      cai.LST_UPD_DT,
-                                      cai.LST_UPD_USR_ID
+                                      ai.CREAT_USR_ID,
+                                      ai.CREAT_DT,
+                                      ai.LST_UPD_DT,
+                                      ai.LST_UPD_USR_ID
     from cncpt_admin_item cai, admin_item ai
     where cai.ITEM_ID=ai.ITEM_ID and cai.VER_NR=ai.VER_NR
     and ADMIN_ITEM_TYP_ID=1
