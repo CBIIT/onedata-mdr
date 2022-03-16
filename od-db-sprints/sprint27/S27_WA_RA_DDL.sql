@@ -40,3 +40,5 @@ delete from ref_doc where creat_usr_id <> 'FORMBUILDER';
 commit;
 
 alter table ref_doc add constraint uni_ref_doc_name unique(FILE_NM);
+
+alter table ADMIN_ITEM add ITEM_NM_ID_VER varchar2(300);
