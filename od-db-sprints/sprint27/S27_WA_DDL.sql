@@ -79,7 +79,7 @@ end if;
 :new.creat_usr_id_x := :new.creat_usr_id;
 :new.lst_upd_usr_id_x := :new.lst_upd_usr_id;
 if (:new.admin_item_typ_id = 53) then -- Value Meaning
-:new.ITEM_NM_ID_VER := :new.ITEM_ID || ' | ' || :new.ver_nr || ' | ' || :new.item_nm;
+:new.ITEM_NM_ID_VER :=  :new.item_nm || '|' || :new.ITEM_ID || '|' || :new.ver_nr ;
 else
 :new.ITEM_NM_ID_VER :=  :new.item_nm;
 
@@ -121,7 +121,7 @@ if (:new.LST_UPD_USR_ID_X is null) then
 end if;
 
 if (:new.admin_item_typ_id = 53) then -- Value Meaning
-:new.ITEM_NM_ID_VER := :new.ITEM_ID || ' | ' || :new.ver_nr || ' | ' || :new.item_nm;
+:new.ITEM_NM_ID_VER :=  :new.item_nm || '|' || :new.ITEM_ID || '|' || :new.ver_nr ;
 else
 :new.ITEM_NM_ID_VER :=  :new.item_nm;
 
