@@ -88,7 +88,7 @@ if (:new.lst_upd_dt is null) then
 :new.lst_upd_dt := sysdate;
 end if;
 END ;
-
+/
 CREATE OR REPLACE TRIGGER TR_AI_AUD_TS
   BEFORE UPDATE ON ADMIN_ITEM
    FOR EACH ROW
@@ -128,4 +128,4 @@ else
 end if;
 
 END TR_AI_AUD_TS;
-
+/
