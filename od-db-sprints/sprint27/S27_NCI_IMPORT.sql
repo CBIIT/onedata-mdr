@@ -17,7 +17,6 @@ procedure spCreateValDesigImport (v_data_in in clob, v_data_out out clob, v_usr_
 END;
 /
 
-
 CREATE OR REPLACE PACKAGE BODY nci_import AS
 
 procedure spValCDEImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2)

@@ -30,7 +30,6 @@ function get_AI_id(P_ID NUMBER,P_VER in number) RETURN VARCHAR2;
 END;
 /
 
-
 CREATE OR REPLACE PACKAGE BODY nci_CHNG_MGMT AS
 v_temp_rep_ver_nr varchar2(10):='0';
 v_temp_rep_id VARCHAR2(10):='0';

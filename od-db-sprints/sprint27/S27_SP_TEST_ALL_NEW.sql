@@ -1,4 +1,4 @@
-CREATE OR REPLACE procedure ONEDATA_WA.sp_test_all_NEW 
+CREATE OR REPLACE procedure sp_test_all_NEW 
 as
 v_cnt integer;
 begin
@@ -565,3 +565,4 @@ CASE
     commit;
 end;
 /
+
