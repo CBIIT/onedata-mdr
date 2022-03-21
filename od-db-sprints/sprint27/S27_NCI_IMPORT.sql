@@ -1,4 +1,4 @@
-create or replace PACKAGE            nci_import AS
+CREATE OR REPLACE PACKAGE nci_import AS
 procedure spValCDEImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure spValCDEImportCons (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure spCreateCDEImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
@@ -12,10 +12,13 @@ procedure spPostPVVMImport (v_data_in in clob, v_data_out out clob, v_usr_id in 
 procedure spPVVMValidate (row_ori in out t_row);
 procedure spCreateValDECImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode in varchar2);
 procedure spCreateValVDImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode in varchar2);
+procedure spCreateValDesigImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 
 END;
 /
-create or replace PACKAGE BODY            nci_import AS
+
+
+CREATE OR REPLACE PACKAGE BODY nci_import AS
 
 procedure spValCDEImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2)
 as
@@ -68,6 +71,89 @@ end loop;
 
 end;
 
+
+procedure spCreateValDesigImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2)
+as
+    hookInput           t_hookInput;
+    hookOutput           t_hookOutput := t_hookOutput();
+    showRowset     t_showableRowset;
+
+    rows      t_rows;
+    rowins  t_rows;
+    row          t_row;
+    row_ori t_row;
+    row_cur t_row;
+    v_item_id number;
+    v_ver_nr number(4,2);
+ action t_actionRowset;
+ v_temp integer;
+ v_val_ind  boolean;
+   actions t_actions := t_actions();
+begin
+
+
+    hookInput := ihook.getHookInput(v_data_in);
+    hookOutput.invocationNumber := hookInput.invocationNumber;
+    hookOutput.originalRowset := hookInput.originalRowset;
+  rows := t_rows();
+  rowins := t_rows();
+
+for i in 1..hookinput.originalRowset.rowset.count loop
+
+    row_ori := hookInput.originalRowset.rowset(i);
+    ihook.setColumnValue(row_ori, 'CTL_VAL_MSG','' );                      
+    v_val_ind := true;
+    if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') <> 'PROCESSED') then
+    
+        if (ihook.getColumnValue(row_ori, 'NM_TYP_ID')  is null) then
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'Designation Type is null.' || chr(13) );                      
+                v_val_ind := false;   
+        end if;
+        
+              if (ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')  is null) then
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'Context is null.' || chr(13) );                      
+                v_val_ind := false;   
+        end if;
+        
+      select count(*) into v_temp from admin_item where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr =      ihook.getColumnValue(row_ori, 'VER_NR')  
+      and admin_item_typ_id = ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') ;
+      if (v_temp = 0) then
+           ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'Item ID/Type do not match.' || chr(13) );                      
+                v_val_ind := false;   
+        end if;
+     
+        
+   --   raise_application_error(-20000, 'Import');
+        if (v_val_ind = false) then 
+            ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
+        else
+          select count(*) into v_temp from alt_nms where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr =      ihook.getColumnValue(row_ori, 'VER_NR')  
+         and nm_desc = ihook.getColumnValue(row_ori, 'NM_DESC') and nm_typ_id = ihook.getColumnValue(row_ori, 'NM_TYP_ID') and cntxt_item_id  = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')
+         and cntxt_ver_nr = ihook.getColumnValue(row_ori, 'CNTXT_VER_NR')  ;
+         if (v_temp = 1) then
+                ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'DUPLICATE');
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'Alternate name already exists.');                      
+        end if;
+        if (v_temp = 0) then
+             ihook.setColumnValue(row_ori, 'NM_ID', -1);
+              ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'PROCESSED');
+               rowins.extend; rowins(rowins.last) := row_ori;
+        end if;
+        end if;
+    rows.extend; rows(rows.last) := row_ori;
+   end if; -- only if not processed     
+end loop;
+    action := t_actionrowset(rows, 'Designation Import', 2,11,'update');
+        actions.extend;
+        actions(actions.last) := action;
+         action := t_actionrowset(rowins, 'Alternate Names (All Types for Hook)', 2,10,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+        hookoutput.actions := actions;
+    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+ --nci_util.debugHook('GENERAL',v_data_out);
+
+end;
 
 procedure spValCDEImportCons (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2)
 as
@@ -533,7 +619,7 @@ as
 --   raise_application_error(-20000, 'TEst');
        nci_dec_mgmt.createValAIWithConcept(row_ori, 1,53,'V', 'STRING', actions) ;
        if (ihook.getColumnValue(row_ori, 'CNCPT_1_ITEM_ID_1') is null) then
-             ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',  ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || ';' || 'No valid concepts specified for Value Meaning.');                      
+             ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',   'No valid concepts specified for Value Meaning.' || chr(13));                      
         v_val_ind := false;
        end if;
     end if;
@@ -542,15 +628,21 @@ as
     if (upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP')) = 'ID') then
      select count(*) into v_temp from admin_item where item_id = ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1') and currnt_ver_ind = 1 and admin_item_typ_id = 53;
      if (v_temp = 0) then
-             ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || ';' || 'Specified VM ID is not found.');                      
+             ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'Specified VM ID is not found.' || chr(13));                      
         v_val_ind := false;
        end if;
     end if;
-
+if (upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP'))  = 'TEXT') then
+        nci_dec_mgmt.createAIWithoutConcept(row_ori , 1, 53, ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'),nvl(ihook.getColumnValue(row_ori, 'ITEM_1_DEF'), ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1')),'C',
+        actions);
+         v_item_id := ihook.getColumnValue(row_ori,'ITEM_1_ID');
+        v_ver_nr :=  ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR');
+        ihook.setColumnValue(row_ori, 'GEN_STR', ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'));
+    end if;
     -- check if value already exists for the VD
     for cur in (select * from perm_val where val_dom_item_id= ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID')
     and val_dom_ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') and upper(perm_val_nm) = upper(ihook.getColumnValue(row_ori, 'PERM_VAL_NM'))) loop
-       ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',       ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || ';' ||  'Value already exists in the specified Value Domain');                      
+       ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',       ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') ||  'Value already exists in the specified Value Domain.' || chr(13));                      
         v_val_ind := false;
     end loop;
 
@@ -559,7 +651,7 @@ as
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
     else
                 ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'VALIDATED');
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG','No Errors' ||  ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') );                      
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG','No Errors' ||  chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') );                      
 
     end if;
    -- end of validation
@@ -594,6 +686,9 @@ as
     row_cur t_row;
     v_item_id number;
     v_ver_nr number(4,2);
+    k integer;
+    row_to_comp t_row;
+    v_batch_nbr integer;
     v_val_ind  boolean;
  action t_actionRowset;
    actions t_actions := t_actions();
@@ -609,21 +704,35 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     row_ori := hookInput.originalRowset.rowset(i);
     v_val_ind := true;
     ihook.setColumnValue(row_ori,'CTL_VAL_MSG', '');
-
-  --  if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') = 'VALIDATED') then
-   --     if (ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') is null and ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID_FND') is null) then -- only go thru creating new if not specified and not existing
-    --        nci_dec_mgmt.spDECValCreateImport(row_ori, 'C', actions, v_val_ind);
-     --   end if;
-      --  if (ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') is null) then -- only go thru creating new if not specified
-       --     nci_vd.spVDValCreateImport(row_ori, 'C', actions, v_val_ind);
-       -- end if;
-
+  if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') <> 'PROCESSED') then
+        for k in 1..rows.count loop
+            row_to_comp := rows(k);
+            
+    if ((ihook.getColumnValue(row_to_comp, 'DE_CONC_ITEM_ID') = ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') 
+    and ihook.getColumnValue(row_to_comp, 'DE_CONC_VER_NR') = ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR')
+    and ihook.getColumnValue(row_to_comp, 'VAL_DOM_ITEM_ID') = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') 
+    and ihook.getColumnValue(row_to_comp, 'VAL_DOM_VER_NR') = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR')
+    and ihook.getColumnValue(row_to_comp, 'CNTXT_ITEM_ID') = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID') 
+    and ihook.getColumnValue(row_to_comp, 'CNTXT_VER_NR') = ihook.getColumnValue(row_ori, 'CNTXT_VER_NR') ) or
+    (ihook.getColumnValue(row_to_comp, 'CDE_ITEM_LONG_NM') = ihook.getColumnValue(row_ori, 'CDE_ITEM_LONG_NM') 
+    and ihook.getColumnValue(row_to_comp, 'CNTXT_ITEM_ID') = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID') 
+    and ihook.getColumnValue(row_to_comp, 'CNTXT_VER_NR') = ihook.getColumnValue(row_ori, 'CNTXT_VER_NR')) ) 
+     then
+    v_val_ind := false;
+    v_batch_nbr := ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR');
+   end if;
+   end loop;
+    if (v_val_ind = false) then 
+            ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
+              ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'Duplicate found in the same import file. Batch Number: ' || v_batch_nbr );  
+    else
        nci_chng_mgmt.spDEValCreateImport(row_ori, 'C', actions, v_val_ind);
         if (v_val_ind = true) then
         iHook.setColumnValue (row_ori, 'CTL_VAL_STUS', 'PROCESSED');
         end if;
+    end if;
     rows.extend; rows(rows.last) := row_ori;
-  --  end if;
+    end if;
 end loop;
   action := t_actionrowset(rows, 'CDE Import', 2,10,'update');
         actions.extend;

@@ -1,4 +1,4 @@
-create or replace PACKAGE            nci_chng_mgmt AS
+CREATE OR REPLACE PACKAGE nci_chng_mgmt AS
 v_temp_rep_ver_nr varchar2(10);
 v_temp_rep_id VARCHAR2(10);
 
@@ -22,7 +22,6 @@ function getDECreateQuestion(v_from in number,v_first in boolean) return t_quest
 function getDECreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
 function getCSICreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
 function getCSCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return t_forms;
-procedure createDE (rowform in t_row, actions in out t_actions, v_id out number);
 procedure spAddCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 procedure spEditCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
 procedure spDeleteCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN varchar2);
@@ -30,7 +29,9 @@ procedure spDeleteCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN var
 function get_AI_id(P_ID NUMBER,P_VER in number) RETURN VARCHAR2;
 END;
 /
-create or replace PACKAGE BODY nci_CHNG_MGMT AS
+
+
+CREATE OR REPLACE PACKAGE BODY nci_CHNG_MGMT AS
 v_temp_rep_ver_nr varchar2(10):='0';
 v_temp_rep_id VARCHAR2(10):='0';
 v_err_str      varchar2(1000) := '';
@@ -950,15 +951,19 @@ Warning: PQT null, default used
         else
             ihook.setColumnValue(row, 'ITEM_NM',substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255));
         end if;
+        ihook.setColumnValue(rowform,'GEN_DE_NM', ihook.getColumnValue(row,'ITEM_NM'));
+        -- Generated dte
+          ihook.setColumnValue(rowform,'PROCESS_DT',to_char(sysdate, DEFAULT_TS_FORMAT) );
+      
     -- item def - DEC def - specified/found.genetered; vd def - specified/generated
  --  raise_application_error(-20000, 'Above ' || v_dec_item_def || 'After');
    -- raise_application_error(-20000, 'Above ' );
 
-          ihook.setColumnValue(row, 'ITEM_DESC',substr(v_dec_item_def || ' ' || v_vd_item_def,1,4000));
+   --       ihook.setColumnValue(row, 'ITEM_DESC',substr(v_dec_item_def || ':' || v_vd_item_def,1,4000));
           if (ihook.getColumnValue(rowform, 'CDE_ITEM_DESC') is not null) then
             ihook.setColumnValue(row, 'ITEM_DESC',ihook.getColumnValue(rowform, 'CDE_ITEM_DESC'));
         else
-          ihook.setColumnValue(row, 'ITEM_DESC',v_dec_item_def);
+          ihook.setColumnValue(row, 'ITEM_DESC',substr(v_dec_item_def || ':' || v_vd_item_def,1,4000));
           end if;
             ihook.setColumnValue(row, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || ihook.getColumnValue(row, 'ITEM_NM')|| ' does not have Preferred Question Text.'   ));
             ihook.setColumnValue(rowform, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || ihook.getColumnValue(row, 'ITEM_NM')|| ' does not have Preferred Question Text.'   ));
@@ -970,8 +975,7 @@ Warning: PQT null, default used
         ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
         ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 4);
 
-        ihook.setColumnValue(row,'ITEM_LONG_NM', nvl( ihook.getColumnValue(rowform, 'CDE_ITEM_LONG_NM'), v_id || c_ver_suffix));
-
+   
         ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
         ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
         ihook.setColumnValue(row,'ADMIN_STUS_ID',66);
@@ -981,7 +985,10 @@ Warning: PQT null, default used
         ihook.setColumnValue(row,'VAL_DOM_ITEM_ID',nvl(v_vd_item_id, ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID_CREAT') ));
         ihook.setColumnValue(row,'VAL_DOM_VER_NR',nvl(v_vd_ver_nr, 1 ));
   --  raise_application_error(-20000, 'Here' || ihook.getColumnValue(row, 'ITEM_DESC') );
-
+     ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(row, 'DE_CONC_ITEM_ID') || 'v'
+        || trim(to_char(ihook.getColumnValue(row, 'DE_CONC_VER_NR'), '9999.99')) || ':' || ihook.getColumnValue(row, 'VAL_DOM_ITEM_ID') || 'v' ||
+        trim(to_char(ihook.getColumnValue(row, 'VAL_DOM_VER_NR'), '9999.99')));
+   
         rows.extend;
         rows(rows.last) := row;
         action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,10,'insert');
@@ -1687,53 +1694,6 @@ begin
         actions(actions.last) := action;
 
 
-end;
-
-
-procedure createDE (rowform in t_row, actions in out t_actions, v_id out  number) as
-v_nm  varchar2(255);
-v_long_nm varchar2(255);
-v_def  varchar2(4000);
-row t_row;
-rows t_rows;
- action t_actionRowset;
- --v_id number;
-begin
-   rows := t_rows();
-   row := t_row();
-     v_id := nci_11179.getItemId;
-        ihook.setColumnValue(row,'ITEM_ID', v_id);
-      --  raise_application_error (-20000, ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID')  || ihook.getColumnValue(rowform, 'ITEM_1_ID') || ihook.getColumnValue(rowform, 'ITEM_2_ID'));
-        ihook.setColumnValue(row,'VER_NR', 1);
-        ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
-        ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 2);
-   --     ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_1_LONG_NM')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_LONG_NM'));
-        ihook.setColumnValue(row,'ITEM_LONG_NM',  v_id || c_ver_suffix);
-        ihook.setColumnValue(row,'ITEM_NM',  ihook.getColumnValue(rowform, 'ITEM_1_NM')  || ' ' || ihook.getColumnValue(rowform, 'ITEM_2_NM'));
-        ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
-        ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
-        ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
-        ihook.setColumnValue(row,'ADMIN_STUS_ID',66);
-        ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',nvl(ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID'),1) );
-        ihook.setColumnValue(row,'CONC_DOM_VER_NR',nvl(ihook.getColumnValue(rowform,'CONC_DOM_VER_NR'),1) );
-        ihook.setColumnValue(row,'OBJ_CLS_ITEM_ID',nvl(ihook.getColumnValue(rowform, 'ITEM_1_ID'),1) );
-        ihook.setColumnValue(row,'OBJ_CLS_VER_NR',nvl(ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'),1) );
-        ihook.setColumnValue(row,'PROP_ITEM_ID',nvl(ihook.getColumnValue(rowform, 'ITEM_2_ID'),1));
-        ihook.setColumnValue(row,'PROP_VER_NR',nvl(ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'),1));
-        ihook.setColumnValue(row,'LST_UPD_DT',sysdate );
-        rows.extend;
-        rows(rows.last) := row;
---raise_application_error(-20000, 'Deep' || ihook.getColumnValue(row,'CNTXT_ITEM_ID') || 'ggg'|| ihook.getColumnValue(row,'ADMIN_STUS_ID') || 'GGGG' || ihook.getColumnValue(row,'ITEM_ID'));
-
-        action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,7,'insert');
-        actions.extend;
-        actions(actions.last) := action;
-
-      action := t_actionrowset(rows, 'Data Element Concept', 2,8,'insert');
-       actions.extend;
-        actions(actions.last) := action;
-
---r
 end;
 
 PROCEDURE spDEPrefQuestPost
