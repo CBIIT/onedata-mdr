@@ -1,4 +1,6 @@
-create or replace PACKAGE nci_caDSR_push AS
+DROP PACKAGE ONCI_CADSR_PUSH;
+
+CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_caDSR_push AS
  procedure spPushLov (vHours in Integer);
   procedure spPushAIChildren (vHours in integer);
   procedure spPushAISpecific (vHours in integer);
@@ -8,8 +10,10 @@ create or replace PACKAGE nci_caDSR_push AS
   procedure spRevGetHours ( v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
   procedure spPushInitial;
 END;
+
 /
-create or replace PACKAGE body nci_caDSR_push AS
+
+CREATE OR REPLACE PACKAGE body nci_caDSR_push AS
 
 
  function getShortDef(v_def in varchar2) return varchar
@@ -21,15 +25,15 @@ create or replace PACKAGE body nci_caDSR_push AS
         return v_def;
     end if;
  end;
- 
- 
+
+
  procedure spPushInitial
  as
  v_cnt integer;
  begin
 
  nci_cadsr_push_core.spPushAIType(500, 9);
- 
+
  insert into sbr.concepts_ext (con_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,con_id, evs_source,definition_source,version,
             created_by, date_created,date_modified, modified_by)
@@ -55,7 +59,7 @@ select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq
             and ai.admin_item_typ_id = 49
             and ai.nci_idseq not in (select ac_idseq from sbr.administered_components);
     commit;
-    
+
 insert into sbr.cs_items (csi_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,csi_id, csitl_name, description, comments,version,
             created_by, date_created,date_modified, modified_by, deleted_ind)
@@ -150,13 +154,13 @@ commit;
 
 -- Registration Status
 
- 
+
  end;
- 
+
 
  procedure spRevGetHours ( v_data_in in clob, v_data_out out clob, v_usr_id in varchar2)
  as
- 
+
  hookInput t_hookInput;
     hookOutput t_hookOutput := t_hookOutput();
 
@@ -165,7 +169,7 @@ commit;
     actions t_actions := t_actions();
     action t_actionRowset;
     row t_row;
- 
+
     rows  t_rows;
      question t_question;
   answer t_answer;
@@ -179,7 +183,7 @@ commit;
     if (hookinput.invocationnumber = 0) then -- show create form
         rows := t_rows();
         row := t_row();
-   
+
          ANSWERS                    := T_ANSWERS();
     ANSWER                     := T_ANSWER(1, 1, 'Start');
     ANSWERS.EXTEND;
@@ -189,9 +193,9 @@ HOOKOUTPUT.QUESTION    := question;
   forms                  := t_forms();
     form1                  := t_form('Reverse Hours (Hook)', 2,1);
     forms.extend;    forms(forms.last) := form1;
-  
+
            hookOutput.forms := forms;
-          
+
     else --- Second invocation
          forms              := hookInput.forms;
 
@@ -201,7 +205,7 @@ HOOKOUTPUT.QUESTION    := question;
       end if;
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);     
 end;
-   
+
  procedure spPushLov (vHours in Integer)
 as
 v_cnt integer;
@@ -771,7 +775,6 @@ where x.typ_nm = 'DEFINITION'
 and x.lst_upd_dt >= sysdate - vHours/24
 and x.nci_pub_id = csiai.item_id
 and x.nci_ver_nr = csiai.ver_nr
-and nvl(x.fld_delete, 0) = 0
 and csiai.item_id = csi.item_id
 and csiai.ver_nr = csi.ver_nr
 and am.def_id = x.nmdef_id) loop
@@ -923,7 +926,7 @@ select od_seq_nci_job_Log.nextval    into v_batch  from  dual ;
 insert into nci_job_log (log_id,start_dt, job_step_desc, run_param, exec_by)
 select v_batch, sysdate, 'Job started.', vHours, v_usr_id from dual;
 commit;
-         
+
 nci_cadsr_push.spPushLov(vHours);
 
 update nci_job_log set job_step_desc = 'Step 1: LOV Migration completed. ' where log_id = v_batch;
@@ -1090,6 +1093,17 @@ end if;
 end loop;
 commit;
 
+-- Deleted PV/VM
+for cur in (select * from perm_val where  lst_upd_dt >= sysdate - vHours/24 and nvl(fld_delete,0) = 1) loop
+select pv_idseq into v_pv_idseq from admin_item ai, sbr.permissible_values pv where ai.item_id = cur.nci_val_mean_item_id and ai.ver_nr = cur.nci_val_mean_ver_nr
+and ai.nci_idseq = pv.vm_idseq and pv.value = cur.perm_val_nm;
+select nci_idseq into v_vd_idseq from admin_item where item_id = cur.val_dom_item_id and ver_nr = cur.val_dom_ver_nr;
+
+
+delete from sbr.vd_pvs where vp_idseq = cur.nci_idseq;
+commit;
+end loop;
+commit;
 end;
 
 procedure sp_create_csi (vHours in integer)
