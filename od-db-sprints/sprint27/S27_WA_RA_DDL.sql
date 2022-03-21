@@ -42,3 +42,5 @@ commit;
 alter table ref_doc add constraint uni_ref_doc_name unique(FILE_NM);
 
 alter table ADMIN_ITEM add ITEM_NM_ID_VER varchar2(300);
+
+alter table NCI_STG_CDE_CREAT add (PROCESS_DT timestamp);
