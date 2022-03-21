@@ -1,6 +1,5 @@
-DROP PACKAGE ONCI_CADSR_PUSH;
 
-CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_caDSR_push AS
+CREATE OR REPLACE PACKAGE nci_caDSR_push AS
  procedure spPushLov (vHours in Integer);
   procedure spPushAIChildren (vHours in integer);
   procedure spPushAISpecific (vHours in integer);
