@@ -621,7 +621,7 @@ begin
     rows := t_rows();
     if hookInput.invocationNumber = 0 then  ---First invocation of the hook - prompt for user name
             ANSWERS                    := T_ANSWERS();
-            ANSWER                     := T_ANSWER(1, 1, 'Add to cart.' );
+            ANSWER                     := T_ANSWER(1, 1, 'Add to Guest User Cart' );
             ANSWERS.EXTEND;
             ANSWERS(ANSWERS.LAST):= ANSWER;
             QUESTION             := T_QUESTION('Specify a name that is easily remembered to store selections in your user cart. Please use the same cart name each time you want to add items to the same cart during your daily use. Guest user carts and their contents are deleted at 11:00 PM ET each day.' , ANSWERS);            HOOKOUTPUT.QUESTION    := QUESTION;
