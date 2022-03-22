@@ -6,7 +6,7 @@
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
-
+--
 
 -- Run as ONEDATA_WA DM scripts
 S25_WA_Data_Migration.sql
