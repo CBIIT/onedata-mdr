@@ -1,13 +1,31 @@
 -- Run as SBREXT
 
 -- Run as ONEDATA_RA DDL scripts
-
+S27_WA_RA_DDL.sql
 -- Run as ONEDATA_WA DDL scripts
-S27_NCI_CADSR_PUSH.sql
+
 S27_MIGR_VALID_MODIFIED1.sql
 S27_MIGR_VALID_MODIFIED2.sql
 S27_VW_ALS_CDE.sql
 S27_SP_TEST_ALL_NEW.sql
+S27_WA_RA_DDL.sql
+S27_WA_DDL.sql
+S27_NCI_11179.sql
+S27_NCI_11179_2.sql
+S27_NCI_CADSR_PULL.sql
+S27_NCI_DEC_MGMT.sql
+S27_NCI_IMPORT.sql
+S27_NCI_CHNG_MGMT.sql
+S27_NCI_FORM_MGMT.sql
+S27_NCI_VD.sql
+S27_NCI_PV_VM.sql
+S27_NCI_UTIL.sql
+S27_NCI_DLOAD.sql
+S27_NCI_DS.sql
+S27_NCI_POST_HOOK.sql
+S27_NCI_CADSR_PUSH.sql
+S27_NCI_CADSR_PUSH_CORE.sql
+S27_NCI_CADSR_PUSH_FORM.sql
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
