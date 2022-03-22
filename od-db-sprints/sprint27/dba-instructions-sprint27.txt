@@ -2,14 +2,12 @@
 
 -- Run as ONEDATA_RA DDL scripts
 S27_WA_RA_DDL.sql
--- Run as ONEDATA_WA DDL scripts
 
-S27_MIGR_VALID_MODIFIED1.sql
-S27_MIGR_VALID_MODIFIED2.sql
-S27_VW_ALS_CDE.sql
-S27_SP_TEST_ALL_NEW.sql
+-- Run as ONEDATA_WA DDL scripts
 S27_WA_RA_DDL.sql
 S27_WA_DDL.sql
+S27_VW_ALS_CDE.sql
+S27_SP_TEST_ALL_NEW.sql
 S27_NCI_11179.sql
 S27_NCI_11179_2.sql
 S27_NCI_CADSR_PULL.sql
@@ -26,10 +24,11 @@ S27_NCI_POST_HOOK.sql
 S27_NCI_CADSR_PUSH.sql
 S27_NCI_CADSR_PUSH_CORE.sql
 S27_NCI_CADSR_PUSH_FORM.sql
+S27_MIGR_VALID_MODIFIED1.sql
+S27_MIGR_VALID_MODIFIED2.sql
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
-
 
 -- Run as ONEDATA_WA DM scripts
 S25_WA_Data_Migration.sql
