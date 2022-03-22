@@ -1,4 +1,6 @@
-CREATE OR REPLACE PACKAGE nci_caDSR_PULL AS
+DROP PACKAGE ONEDATA_WA.NCI_CADSR_PULL;
+
+CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_caDSR_PULL AS
 procedure sp_create_ai_1;
 procedure sp_create_ai_2;
 procedure sp_create_ai_3;
@@ -31,7 +33,11 @@ procedure SP_SOURCE_TYPE;
 END;
 
 /
-CREATE OR REPLACE PACKAGE BODY nci_caDSR_PULL AS
+
+DROP PACKAGE BODY ONEDATA_WA.NCI_CADSR_PULL;
+
+CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_caDSR_PULL AS
+
 
 v_dflt_usr  varchar2(30) := 'ONEDATA';
 
@@ -2185,11 +2191,11 @@ nvl(vd.created_by,v_dflt_usr),
                     DE_CONC_VER_NR,
                     VAL_DOM_ITEM_ID,
                     VAL_DOM_VER_NR,
+                    DERV_DE_IND,
                     CREAT_USR_ID,
                     CREAT_DT,
                     LST_UPD_DT,
-                    LST_UPD_USR_ID,
-                    DERV_DE_IND)
+                    LST_UPD_USR_ID)
         SELECT ai.item_id,
                ai.ver_nr,
                dec.ITEM_ID,
