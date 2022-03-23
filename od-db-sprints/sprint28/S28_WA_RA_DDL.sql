@@ -1,1 +1,2 @@
-drop trigger TR_NCI_ALT_NMS_DENORM_INS;
+--drop trigger TR_NCI_ALT_NMS_DENORM_INS;
+
