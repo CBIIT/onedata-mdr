@@ -26,6 +26,7 @@ S27_NCI_CADSR_PUSH_CORE.sql
 S27_NCI_CADSR_PUSH_FORM.sql
 S27_MIGR_VALID_MODIFIED1.sql
 S27_MIGR_VALID_MODIFIED2.sql
+S27_LOAD_CONCEPT_SYNONYMS.sql
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
