@@ -1,4 +1,4 @@
-CREATE OR REPLACE procedure sp_test_all_NEW
+CREATE OR REPLACE procedure ONEDATA_WA.sp_test_all_NEW
 as
 v_cnt integer;
 begin
@@ -66,9 +66,6 @@ select 'UOM',
 from dual;
 commit;
 
-
-
-
 --insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
 --select 'VV Repetition', 
 --(select count(*) from onedata_wa.NCI_QUEST_VV_REP) WA_CNT,
@@ -76,10 +73,6 @@ commit;
 --(select count(*) from sbrext.quest_vv_ext ) caDSR_CNT,NULL
 --from dual;
 --commit;
-
-
-
-
 
 insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
 select 'Conceptual Domain', 
@@ -412,6 +405,13 @@ where qc1.qtl_name = 'VALUE_INSTR'and preferred_definition !=' ' group by P_VAL_
 from dual;
 commit;
 
+ /***table NCI_ALT_KEY_ADMIN_ITEM_REL is replaced  by NCI_CLSFCTN_SCHM_ITEM*/
+insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
+select 'CS CSI', 
+(select count(*) from onedata_wa.NCI_CLSFCTN_SCHM_ITEM where CS_CSI_IDSEQ is not null) WA_CNT,
+((select count(*) from onedata_wa.NCI_CLSFCTN_SCHM_ITEM where CS_CSI_IDSEQ is not null )-(select count(*) from sbr.cs_csi) ) DIFF_CNT,
+(select count(*) from sbr.cs_csi) caDSR_CNT,NULL
+from dual;
 
 /***table NCI_ALT_KEY_ADMIN_ITEM_REL is replaced by NCI_ADMIN_ITEM_REL***/
 insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
