@@ -10,7 +10,7 @@ SPOOL S18_WA_DATA_MIGRATION.log
 alter trigger TRG_NCI_QVV_POST disable;
 alter trigger TRG_NCI_QS_MOD_POST disable;
 alter trigger TRG_NCI_MOD_PROT_POST disable;
---alter trigger TR_NCI_ALT_NMS_DENORM_INS disable;
+alter trigger TR_NCI_ALT_NMS_DENORM_INS disable;
 alter trigger TR_NCI_AI_DENORM_INS disable;
 alter trigger TR_AI_AUD_TS disable;
 alter trigger OD_TR_ADMIN_ITEM disable;
@@ -239,7 +239,7 @@ begin
 dbms_output.put_line('all sps are completed!!!!');
 end;
 /
---alter trigger TR_NCI_ALT_NMS_DENORM_INS enable;
+alter trigger TR_NCI_ALT_NMS_DENORM_INS enable;
 alter trigger TR_NCI_AI_DENORM_INS enable;
 alter trigger OD_TR_ADMIN_ITEM enable;
 alter trigger TR_AI_AUD_TS enable;
