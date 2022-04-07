@@ -16,4 +16,6 @@ create index nci_const_qst on sbrext.quest_contents_ext (p_qst_idseq);
 create index nci_const_mod on sbrext.quest_contents_ext (p_mod_idseq);
 
 
+EXEC DBMS_STATS.GATHER_TABLE_STATS ('SBREXT', 'QUEST_CONTENTS_EXT');
+
 
