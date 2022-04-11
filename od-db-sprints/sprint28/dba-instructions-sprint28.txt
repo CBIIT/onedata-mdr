@@ -1,10 +1,10 @@
 -- Run as SBREXT
 S28_SBREXT.sql
-
 -- Run as ONEDATA_RA DDL scripts
 S28_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+
 S28_WA_RA_DDL.sql
 S28_WA_DDL.sql
 S28_NCI_11179.sql
@@ -21,6 +21,8 @@ S28_NCI_CADSR_PUSH.sql
 S28_NCI_CADSR_PUSH_CORE.sql
 S28_NCI_CADSR_PUSH_FORM.sql
 S28_NCI_FORM_CURATOR.sql
+S28_SP_TEST_ALL_NEW.sql
+
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
