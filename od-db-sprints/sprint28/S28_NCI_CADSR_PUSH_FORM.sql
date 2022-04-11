@@ -37,7 +37,7 @@ end if;
 
 
 -- Module
-for curmod in (select  ai.NCI_IDSEQ MOD_IDSEQ, frm.nci_idseq FRM_IDSEQ,  rel.disp_ord,rel.rep_no,ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq CNTXT_IDSEQ,ai.UNTL_DT,
+for curmod in (select  ai.NCI_IDSEQ MOD_IDSEQ, frm.nci_idseq FRM_IDSEQ,  rel.disp_ord,nvl(rel.rep_no,0) rep_no,ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq CNTXT_IDSEQ,ai.UNTL_DT,
 decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND, rel.instr,
             ai.ITEM_NM, ai.ORIGIN,ai.ITEM_DESC,ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR,
             rel.CREAT_USR_ID, rel.CREAT_DT, rel.LST_UPD_DT,rel.LST_UPD_USR_ID ,decode(nvl(rel.fld_delete,0),0,'No',1,'Yes') FLD_DELETE from admin_item ai, admin_item c, NCI_ADMIN_ITEM_REL rel, admin_item frm
@@ -134,6 +134,7 @@ update sbrext.qc_recs_ext set (DISPLAY_ORDER)=
 where p_qc_idseq = curmod.frm_idseq and c_qc_idseq  = curmod.mod_idseq;
 commit;
 
+
 select count(*) into v_cnt from sbrext.quest_contents_ext  where p_mod_idseq = curmod.mod_idseq and qtl_name = 'MODULE_INSTR';
 
 if (v_cnt = 1) then
@@ -145,9 +146,9 @@ update sbrext.quest_contents_ext set ( preferred_definition,
             where  p_mod_idseq = curmod.mod_idseq and qtl_name = 'MODULE_INSTR';
             commit;
 
-update sbr.administered_components set ( preferred_definition,
+update sbr.administered_components set ( long_name, preferred_definition,
             date_modified, modified_by, deleted_ind) =
-(select  nvl(curmod.instr, ' '),
+(select curmod.item_nm,  nvl(curmod.instr, ' '),
             curmod.LST_UPD_DT,curmod.LST_UPD_USR_ID ,curmod.fld_delete from dual)
             where  ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where p_mod_idseq = curmod.mod_idseq and qtl_name = 'MODULE_INSTR');
             commit;
@@ -187,6 +188,12 @@ commit;
 end if;
 
 end if;
+
+
+-- delete repetitions 
+delete from sbrext.quest_vv_ext  where quest_idseq  in (select nci_idseq from nci_admin_item_rel_alt_key where p_item_id = cur.item_id and p_item_ver_nr = cur.ver_nr)
+and repeat_sequence > curmod.rep_no;
+commit;
 
 end loop;
 
@@ -239,7 +246,7 @@ end if;
 --vidseq := cur.nci_idseq;
 --raise_application_error(-20000,cur.nci_idseq);
 
-for curqst in (select  ak.NCI_IDSEQ QST_IDSEQ, mod.nci_idseq MOD_IDSEQ,  frm.nci_idseq FRM_IDSEQ, de.nci_idseq DE_IDSEQ,
+for curqst in (select  ak.NCI_IDSEQ QST_IDSEQ, mod.nci_idseq MOD_IDSEQ,  nvl(rel.rep_no,0) mod_rep_no, frm.nci_idseq FRM_IDSEQ, de.nci_idseq DE_IDSEQ,
 ak.disp_ord,frm.ADMIN_STUS_NM_DN, frm.EFF_DT, frm.ADMIN_NOTES, c.nci_idseq CNTXT_IDSEQ,frm.UNTL_DT,
 decode(frm.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND, ak.instr, nvl(ak.EDIT_IND,0) EDIT_IND, nvl(ak.req_ind,0) REQ_IND, ak.DEFLT_VAL,ak.deflt_val_id,
             ak.ITEM_LONG_NM, frm.ORIGIN,substr(de.ITEM_DESC,1,2000) ITEM_DESC,ak.ITEM_Nm,ak.NCI_PUB_ID, ak.NCI_VER_NR,
@@ -430,11 +437,12 @@ end if;
 
 end if;
 
-end loop;
 
 end loop;
 
-commit;
+
+end loop;
+
 
 -- Repetitions
 
@@ -462,6 +470,8 @@ currep.lst_upd_dt, currep.lst_upd_usr_id from dual) where QUEST_IDSEQ = cur.nci_
 end if;
 commit;
 end if; -- not deleted
+
+
 end loop;
 end loop;
 
