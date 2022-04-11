@@ -22,6 +22,7 @@ S28_NCI_CADSR_PUSH_CORE.sql
 S28_NCI_CADSR_PUSH_FORM.sql
 S28_NCI_FORM_CURATOR.sql
 S28_SP_TEST_ALL_NEW.sql
+S28_VW_ALS_CDE.sql
 
 
 --Check that materialized views are valid in ONEDATA_WA schema
