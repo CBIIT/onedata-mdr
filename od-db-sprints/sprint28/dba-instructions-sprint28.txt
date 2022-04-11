@@ -1,5 +1,5 @@
 -- Run as SBREXT
-S28_SBREXT_DDL.sql
+S28_SBREXT.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S28_WA_RA_DDL.sql
@@ -27,7 +27,7 @@ S28_NCI_FORM_CURATOR.sql
 --
 
 -- Run as ONEDATA_WA DM scripts
-S25_WA_Data_Migration.sql
+S28_WA_Data_Migration.sql
 
 -- Run as ONEDATA_RA DM scripts
 S25_RA_Data_Migration.sql
