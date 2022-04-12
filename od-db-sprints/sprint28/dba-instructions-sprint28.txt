@@ -1,3 +1,6 @@
+--Run as MD
+S28_MD.sql
+
 -- Run as SBREXT
 S28_SBREXT.sql
 -- Run as ONEDATA_RA DDL scripts
