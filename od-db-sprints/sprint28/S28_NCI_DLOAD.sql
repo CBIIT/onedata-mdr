@@ -41,7 +41,7 @@ begin
 	   	 answer := t_answer(2, 2, 'Add All');
   	   	 answers.extend; answers(answers.last) := answer;
 
-    QUESTION               := T_QUESTION('Please select Items to Add.' || chr(13) || '“Add All” from Cart can take a several seconds per item to load. Please try not to click “Add All” twice
+    QUESTION               := T_QUESTION('Please select Items to Add.' || chr(13) || '*Add All* from Cart can take a several seconds per item to load. Please try not to click *Add All* twice
     or you may get a unique constraint violation. Items will have been added only once. Check Details to see if they look correct.' , ANSWERS);
 
 return question;
@@ -1337,4 +1337,5 @@ begin
 end;
 
 END;
-/
+      /
+      
