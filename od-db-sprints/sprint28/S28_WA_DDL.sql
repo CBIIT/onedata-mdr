@@ -7,10 +7,12 @@ BEGIN
   update NCI_DLOAD_HDR set LST_UPD_DT = sysdate, lst_upd_usr_id =:new.lst_upd_usr_id where hdr_id = :new.hdr_id;
  END;
 /
-
-TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
-BEGIN    IF (:NEW.ITEM_ID = -1  or :NEW.ITEM_ID is null)  THEN select od_seq_ADMIN_ITEM.nextval
- into :new.ITEM_ID  from  dual ;   END IF;
+CREATE OR REPLACE TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
+BEGIN    
+IF (:NEW.ITEM_ID = -1  or :NEW.ITEM_ID is null)  THEN 
+select od_seq_ADMIN_ITEM.nextval
+ into :new.ITEM_ID  from  dual ;   
+END IF;
  :new.nci_idseq := nci_11179.cmr_guid();
 if (:new.admin_item_typ_id  in (4,3,2,1,54) and :new.ver_nr = 1 and :new.admin_stus_id is null) then -- draft new
 :new.admin_stus_id := 66;
