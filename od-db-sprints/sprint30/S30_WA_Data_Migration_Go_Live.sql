@@ -83,13 +83,14 @@ truncate table NCI_DS_HDR;
 truncate table NCI_STG_CDE_CREAT;
 truncate table NCI_STG_ALT_NMS;
 truncate table NCI_STG_PV_VM_IMPORT;
-NCI_STG_AI_CNCPT;
-NCI_STG_AI_CNCPT_CREAT; 
-NCI_STG_AI_REL;
+truncate table NCI_STG_AI_CNCPT;
+truncate table NCI_STG_AI_CNCPT_CREAT; 
+truncate table NCI_STG_AI_REL;
 
 -- Control tables
 truncate table NCI_JOB_LOG;
 truncate table NCI_MDR_DEBUG;
+truncate table NCI_MDR_CNTRL;
 
 
 truncate table NCI_CSI_ALT_DEFNMS;
