@@ -12,6 +12,12 @@ truncate table NCI_DS_HDR;
 truncate table NCI_STG_CDE_CREAT;
 truncate table NCI_STG_ALT_NMS;
 truncate table NCI_STG_PV_VM_IMPORT;
+truncate table NCI_STG_AI_CNCPT;
+truncate table NCI_STG_AI_CNCPT_CREAT; 
+truncate table NCI_STG_AI_REL;
+
+-- Control tables
+truncate table NCI_JOB_LOG;
 
 
 --- Run in Release Area
