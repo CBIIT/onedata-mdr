@@ -3,9 +3,10 @@ SPOOL S18_WA_DATA_MIGRATION.log
 --create index SBREXT.AC_CHANGE_HISTORY_IDX on SBREXT.AC_CHANGE_HISTORY_EXT (AC_IDSEQ);
 
 
---drop sequence od_seq_ADMIN_ITEM;
+drop sequence od_seq_ADMIN_ITEM;
    
---create sequence od_seq_ADMIN_ITEM MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 start with 10000000 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE  GLOBAL ;
+create sequence od_seq_ADMIN_ITEM  INCREMENT BY 1 start with 10000000 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE  GLOBAL ;
+
 
 alter trigger TRG_NCI_QVV_POST disable;
 alter trigger TRG_NCI_QS_MOD_POST disable;
@@ -82,7 +83,13 @@ truncate table NCI_DS_HDR;
 truncate table NCI_STG_CDE_CREAT;
 truncate table NCI_STG_ALT_NMS;
 truncate table NCI_STG_PV_VM_IMPORT;
+NCI_STG_AI_CNCPT;
+NCI_STG_AI_CNCPT_CREAT; 
+NCI_STG_AI_REL;
 
+-- Control tables
+truncate table NCI_JOB_LOG;
+truncate table NCI_MDR_DEBUG;
 
 
 truncate table NCI_CSI_ALT_DEFNMS;
