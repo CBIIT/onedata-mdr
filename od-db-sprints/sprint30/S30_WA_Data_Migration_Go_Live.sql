@@ -69,6 +69,18 @@ insert into cs_items_copy
 select *  from sbr_m.cs_items;
 
 exec nci_cadsr_pull.spCreateNewNode;
+-- New table truncated
+truncate table NCI_DLOAD_ALS;
+truncate table NCI_DLOAD_ALS_FORM;
+truncate table NCI_DLOAD_DTL;
+truncate table NCI_DLOAD_HDR;
+truncate table NCI_DS_RSLT;
+truncate table NCI_DS_DTL;
+truncate table NCI_DS_HDR;
+truncate table NCI_STG_CDE_CREAT;
+truncate table NCI_STG_ALT_NMS;
+truncate table NCI_STG_PV_VM_IMPORT;
+
 
 
 truncate table NCI_CSI_ALT_DEFNMS;
