@@ -75,6 +75,7 @@ truncate table NCI_DLOAD_ALS;
 truncate table NCI_DLOAD_ALS_FORM;
 truncate table NCI_DLOAD_DTL;
 truncate table NCI_DLOAD_HDR;
+truncate table NCI_DS_RSLT_DTL;
 truncate table NCI_DS_RSLT;
 truncate table NCI_DS_DTL;
 truncate table NCI_DS_HDR;
