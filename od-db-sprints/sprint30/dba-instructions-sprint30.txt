@@ -8,7 +8,9 @@ S30_NCI_11179.sql
 S30_NCI_11179_2.sql
 S30_NCI_POST_HOOK.sql
 S30_NCI_CADSR_PUSH_CORE.sql
+S30_NCI_CADSR_PUSH_FORM.sql
 S30_NCI_CADSR_PUSH.sql
+
 
 --Check that materialized views are valid in ONEDATA_WA schema
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
