@@ -45,7 +45,7 @@ exec SAG_LOAD_CONCEPTS_SYN_RA;
 EXECUTE DBMS_MVIEW.REFRESH('VW_CNCPT');
 
 -- Run as ONEDATA_MD
-exec sp_create_contact;
+exec sp_create_cntct;
 
 -- Run as ONEDATA_WA initial Reverse from OD to caDSR schemas
 exec nci_cadsr_push.spPushInitial;
