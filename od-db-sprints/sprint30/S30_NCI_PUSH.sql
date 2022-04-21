@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE nci_caDSR_push AS
+create or replace PACKAGE nci_caDSR_push AS
  procedure spPushLov (vHours in Integer);
   procedure spPushAIChildren (vHours in integer);
   procedure spPushAISpecific (vHours in integer);
@@ -10,8 +10,7 @@ CREATE OR REPLACE PACKAGE nci_caDSR_push AS
   procedure spPushInitial;
 END;
 /
-
-CREATE OR REPLACE PACKAGE body nci_caDSR_push AS
+create or replace PACKAGE body nci_caDSR_push AS
 
 
  function getShortDef(v_def in varchar2) return varchar
@@ -44,10 +43,10 @@ function getLongName(v_nm in varchar2) return varchar
 
  insert into sbr.concepts_ext (con_idseq, asl_name,begin_date,change_note,conte_idseq,end_date,latest_version_ind,
             long_name,origin,preferred_definition,preferred_name,con_id, evs_source,definition_source,version,
-            created_by, date_created,date_modified, modified_by)
+            created_by, date_created,date_modified, modified_by, deleted_ind)
 select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No'),
             ai.ITEM_NM, ai.ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC),ai.ITEM_LONG_Nm,ai.ITEM_ID, ok.nci_cd, ai.def_src,ai.VER_NR,
-            ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID
+            ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID, 'No'
         from admin_item ai, admin_item c, cncpt con, obj_key ok
         where ai.cntxt_item_id = c.item_id and ai.cntxt_ver_nr = c.ver_nr
             and c.admin_item_typ_id = 8
