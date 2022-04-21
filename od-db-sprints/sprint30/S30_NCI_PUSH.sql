@@ -935,6 +935,7 @@ select v_batch, sysdate, 'Job started.', vHours, v_usr_id from dual;
 commit;
 
 nci_cadsr_push.spPushLov(vHours);
+nci_cadsr_push_core.spPushContext (vHours );
 
 update nci_job_log set job_step_desc = 'Step 1: LOV Migration completed. ' where log_id = v_batch;
 commit;
@@ -965,7 +966,7 @@ select  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN,ai.EFF_DT, ai.ADMIN_NOTES, c.nci_idseq
             and ai.nci_idseq not in (select ac_idseq from sbr.administered_components);
     commit;
 --nci_cadsr_push_core.spPushAIType(100, 49);
-nci_cadsr_push_core.spPushContext (vHours );
+
 nci_cadsr_push_core.spPushAI(vHours);
 
 update nci_job_log set job_step_desc = 'Step 2: AI Migration completed. ' where log_id = v_batch;
