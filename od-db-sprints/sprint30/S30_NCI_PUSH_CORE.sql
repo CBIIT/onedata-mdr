@@ -1171,11 +1171,13 @@ where ai.admin_item_typ_id = 8 and ai.item_id = c.item_id and ai.ver_nr = c.ver_
 and ai.item_id = cur.item_id and ai.ver_nr = cur.ver_nr)
 where conte_idseq = cur.nci_idseq;
 
+
 update sbr.sc_contexts set scl_name =
-( select  ai.ITEM_LONG_NM
+( select  ai.ITEM_NM || '_SC'
 from admin_item ai
-where conte_idseq = cur.nci_idseq);
-commit;
+where nci_idseq = cur.nci_idseq)
+where conte_idseq = cur.nci_idseq;
+commit; 
 end if;
 --raise_application_error(-20000, 'Test' || vItemId);
 
@@ -1186,13 +1188,13 @@ select ai.nci_idseq,  nci_cadsr_push.getShortDef(ai.ITEM_DESC), ai.ITEM_Nm, ai.V
 from admin_item ai, cntxt c, obj_key ok
 where ai.admin_item_typ_id = 8 and ai.item_id = c.item_id and ai.ver_nr = c.ver_nr and c.NCI_PRG_AREA_ID = ok.obj_key_id 
 and ai.item_id = cur.item_id and ai.ver_nr = cur.ver_nr;
-end if;
 
 insert into sbr.sc_contexts (conte_idseq, scl_name, CREATED_BY, DATE_CREATED, MODIFIED_BY, DATE_MODIFIED)
-select ai.nci_idseq,ai.ITEM_LONG_NM, ai.creat_usr_id, ai.creat_dt, ai.lst_upd_usr_id, ai.lst_upd_dt
+select ai.nci_idseq,ai.ITEM_NM || '_SC' , ai.creat_usr_id, ai.creat_dt, ai.lst_upd_usr_id, ai.lst_upd_dt
 from admin_item ai
-where ai.admin_item_typ_id = 8 and creat_dt > sysdate -1;
+where ai.admin_item_typ_id = 8 and ai.item_id = cur.item_id and ai.ver_nr = cur.ver_nr;
 commit;
+end if;
 
 end loop;
 end;
