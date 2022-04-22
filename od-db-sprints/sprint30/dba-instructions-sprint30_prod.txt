@@ -14,11 +14,11 @@ S30_NCI_CADSR_PUSH.sql
 --Check that all the packages and procedures are compiled (no error) in ONEDATA_WA, ONEDATA_RA
 
 
----- Run Data Migration as ONEDATA_WA
+-- Run as ONEDATA_WA DM scripts
+S28_WA_Data_Migration.sql
 
-
----- Run Data Migration as ONEDATA_RA
-
+-- Run as ONEDATA_RA DM scripts
+S25_RA_Data_Migration.sql
 
 ---- Run as ONEDATA_WA
 truncate table SAG_LOAD_CONCEPTS_EVS
