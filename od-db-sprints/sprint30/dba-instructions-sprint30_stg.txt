@@ -18,12 +18,6 @@ truncate table SAG_LOAD_CONCEPTS_EVS
 
 -- ! Attention DBAs: import the table SAG_LOAD_CONCEPTS_EVS data from DEV tier to deployment tier before running the next scripts
 
--- Run validate job as ONEDATA_WA
- exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
-
--- Run as ONEDATA_WA validate reverse 
-S28_WA_RUN_VALIDATE_REVERSE_INIT.sql
-
 -- Concepts Loading steps below
 -- ! Attention DBAs: import the table SAG_LOAD_CONCEPTS_EVS data from DEV tier to your deployment tier before running the next script
 
