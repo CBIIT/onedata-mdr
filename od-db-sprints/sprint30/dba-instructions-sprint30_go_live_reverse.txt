@@ -6,7 +6,7 @@ S28_SBREXT.sql
 
 -- Run incremental
 
-nci_cadsr_push.spRevInitiate(26, 'ONEDATA');
+exec nci_cadsr_push.spRevInitiate(26, 'ONEDATA');
 
 -- Export
 
