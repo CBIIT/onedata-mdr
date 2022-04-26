@@ -1,0 +1,40 @@
+-- Run as SBR/SBREXT on on-prem caDSR instance
+S18_SBREXT.sql
+S26_SBREXT.sql
+S28_SBREXT.sql
+
+---- Run as ONEDATA_WA
+truncate table SAG_LOAD_CONCEPTS_EVS
+
+-- Run as ONEDATA_WA DM scripts
+S30_WA_Data_Migration_Go_Live.sql
+
+-- Run as ONEDATA_RA DM scripts
+S30_RA_Data_Migration_Go_Live.sql
+
+-- Run validate job as ONEDATA_WA
+ exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
+
+
+-- Concepts Loading steps below
+-- ! Attention DBAs: import the table SAG_LOAD_CONCEPTS_EVS data from DEV tier to your deployment tier before running the next script
+
+-- Run as ONEDATA_WA DM scripts
+S22_WA_EXEC_LOAD_CONCEPTS.sql
+EXECUTE DBMS_MVIEW.REFRESH('VW_CNCPT'); 
+EXECUTE DBMS_MVIEW.REFRESH('VW_CNTXT');
+EXECUTE DBMS_MVIEW.REFRESH('VW_CLSFCTN_SCHM_ITEM');
+EXECUTE DBMS_MVIEW.REFRESH('VW_CLSFCTN_SCHM');
+
+-- Run as ONEDATA_RA DM scripts
+exec SAG_LOAD_CONCEPTS_SYN_RA;
+EXECUTE DBMS_MVIEW.REFRESH('VW_CNCPT');
+EXECUTE DBMS_MVIEW.REFRESH('VW_CNTXT');
+EXECUTE DBMS_MVIEW.REFRESH('VW_CLSFCTN_SCHM_ITEM');
+EXECUTE DBMS_MVIEW.REFRESH('VW_CLSFCTN_SCHM');
+
+-- Run as ONEDATA_MD
+exec sp_create_cntct;
+
+-- Run as ONEDATA_WA initial Reverse from OD to caDSR schemas
+exec nci_cadsr_push.spPushInitial;
