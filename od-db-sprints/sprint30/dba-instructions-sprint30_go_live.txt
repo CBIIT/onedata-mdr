@@ -1,10 +1,8 @@
 -- Run as SBR/SBREXT on on-prem caDSR instance
+-- Disable constraints in PROD 
 S18_SBREXT.sql
 S26_SBREXT.sql
 S28_SBREXT.sql
-
----- Run as ONEDATA_WA
-truncate table SAG_LOAD_CONCEPTS_EVS
 
 -- Run as ONEDATA_WA DM scripts
 S30_WA_Data_Migration_Go_Live.sql
@@ -14,10 +12,6 @@ S30_RA_Data_Migration_Go_Live.sql
 
 -- Run validate job as ONEDATA_WA
  exec dbms_scheduler.run_job('VALIDATE_DATA_MIGRATION');
-
-
--- Concepts Loading steps below
--- ! Attention DBAs: import the table SAG_LOAD_CONCEPTS_EVS data from DEV tier to your deployment tier before running the next script
 
 -- Run as ONEDATA_WA DM scripts
 S22_WA_EXEC_LOAD_CONCEPTS.sql
