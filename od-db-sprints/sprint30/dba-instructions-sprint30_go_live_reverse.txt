@@ -1,0 +1,13 @@
+-- Run as SBR/SBREXT on on-prem caDSR instance
+-- Disable constraints in PROD 
+S18_SBREXT.sql
+S26_SBREXT.sql
+S28_SBREXT.sql
+
+-- Run incremental
+
+nci_cadsr_push.spRevInitiate(26, 'ONEDATA');
+
+-- Export
+
+-- Import
