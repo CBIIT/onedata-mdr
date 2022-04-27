@@ -30,5 +30,5 @@ EXECUTE DBMS_MVIEW.REFRESH('VW_CLSFCTN_SCHM');
 -- Run as ONEDATA_MD
 exec sp_create_cntct;
 
--- Run as ONEDATA_WA initial Reverse from OD to caDSR schemas
-exec nci_cadsr_push.spPushInitial;
+-- Run as ONEDATA_WA initial Reverse from OD to caDSR schemas - DO NOT RUN
+--exec nci_cadsr_push.spPushInitial;
