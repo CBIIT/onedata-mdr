@@ -11,3 +11,12 @@ exec nci_cadsr_push.spRevInitiate(26, 'ONEDATA');
 -- Export
 
 -- Import
+
+-- Run reverse validation
+exec spTestReverseRange(26);
+
+--Send validation report 
+select table_name, WA_CNT, caDSR_CNT from test_results where wa_cnt <> cadsr_cnt order by table_name
+
+
+
