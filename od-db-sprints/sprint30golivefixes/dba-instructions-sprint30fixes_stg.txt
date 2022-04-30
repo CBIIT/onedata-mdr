@@ -1,1 +1,8 @@
---Test
+-- Run as SBR_M/SBREXT_M
+-- Disable constraints in STG Data Migration Schema 
+S18_SBREXT.sql
+S26_SBREXT.sql
+S28_SBREXT.sql
+
+-- Run as ONEDATA_WA
+SGL_NCI_CADSR_PUSH_CORE.sql
