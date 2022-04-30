@@ -1,1 +1,3 @@
---Test
+
+-- Run as ONEDATA_WA
+SGL_NCI_CADSR_PUSH_CORE.sql
