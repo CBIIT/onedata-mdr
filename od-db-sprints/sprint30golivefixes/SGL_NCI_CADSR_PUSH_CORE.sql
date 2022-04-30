@@ -52,7 +52,7 @@ begin
 
 
 for cur in (select nci_idseq, item_id, ver_nr, admin_item_typ_id from admin_item ai where admin_item_typ_id <> 52 
-and ai.lst_upd_dt >= sysdate -vHours/24 and admin_item_typ_id = 54 and nvl(ai.fld_delete,0) = 1 order by  ai.creat_dt) loop
+and ai.lst_upd_dt >= sysdate -vHours/24 and admin_item_typ_id = 54 and nvl(ai.fld_delete,0) = 1 order by  ai.lst_upd_dt) loop
 
 delete from sbr.administered_components where ac_idseq = cur.nci_idseq;
 commit;
