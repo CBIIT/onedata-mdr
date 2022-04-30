@@ -1,3 +1,4 @@
 
--- Run as ONEDATA_WA
+-- Run as ONEDATA_WA to resolve the issue with CSI being created before CS
+-- Tracker 1810
 SGL_NCI_CADSR_PUSH_CORE.sql
