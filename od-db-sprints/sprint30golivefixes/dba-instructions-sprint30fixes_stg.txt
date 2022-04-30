@@ -8,3 +8,6 @@ S28_SBREXT.sql
 -- Run as ONEDATA_WA to resolve the issue with CSI being created before CS
 -- Tracker 1810
 SGL_NCI_CADSR_PUSH_CORE.sql
+
+-- Import into sbr_m/sbrext_m from the prod export
+--continue with the rest of the STG process that stopped.
