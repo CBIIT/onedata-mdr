@@ -35,7 +35,7 @@ alter sequence    OD_SEQ_REF  restart start with 60000000;  -- 60 million
 -- Reference Document BLOB- Internal ID
 alter sequence    OD_SEQ_REF_DOC  restart start with 60000000;  -- 60 million
 -- Old Import Staging table - just in case- Internal ID
-alter sequence    OD_SEQ_STG_AI  restart start with -60000000;  -- 60 million
+alter sequence    OD_SEQ_STG_AI  restart start with 60000000;  -- 60 million
 -- Reference table - REgistration and workflow status
 alter sequence     OD_SEQ_STUS_MSTR  restart start with 60000; -- 60 thousand
 -- Reference table - UOM
