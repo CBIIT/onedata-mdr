@@ -1,6 +1,9 @@
--- Run as SBREXT
+-- Run as SBR
+S31_SBR.sql
 
 -- Run as ONEDATA_RA DDL scripts
+S31_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S31_NCI_11179.sql
 
