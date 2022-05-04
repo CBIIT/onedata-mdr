@@ -13,7 +13,7 @@ alter sequence  OD_SEQ_CHARSET  restart start with 40000; -- 40 thousand
 -- Named Users/Contacts for drop-down - internal ID
 alter sequence  OD_SEQ_CNTCT  restart start with 400000; -- 4 hundred thousand
 -- Download collection - Collection ID
-alter sequence  OD_SEQ_DLOAD_HDR  restart start with 4000000; - 4 million
+alter sequence  OD_SEQ_DLOAD_HDR  restart start with 4000000; -- 4 million
 -- Matching - Internal ID
 alter sequence  OD_SEQ_DS_HDR  restart start with 40000000; -- 40 milllion
 -- Reference table - Data type LOV
