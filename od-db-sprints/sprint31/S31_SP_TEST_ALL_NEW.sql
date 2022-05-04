@@ -180,7 +180,7 @@ commit;
 insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
 select 'CD-VM', 
 (select count(*) from onedata_wa.conc_dom_val_mean where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.conc_dom_val_mean )) DIFF_CNT,
+((select count(*) from onedata_wa.conc_dom_val_mean )-(select count(*) from sbr.cd_vms )) DIFF_CNT,
 (select count(*) from sbr.cd_vms ) caDSR_CNT,NULL
 from dual;
 commit;
