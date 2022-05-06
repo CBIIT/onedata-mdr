@@ -2560,7 +2560,7 @@ v_found boolean;
   v_disp_ord integer;
   v_frm_id number;
   v_frm_ver_nr number(4,2);
-  v_ref varchar2(255);
+  v_ref varchar2(4000);
   v_add integer;
   i integer := 0;
   column  t_column;
