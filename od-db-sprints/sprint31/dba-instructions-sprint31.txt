@@ -1,15 +1,15 @@
--- Run as SBR
+-- Run as SBR DSRMWS-1824
 S31_SBR.sql
 
--- Run as SBREXT
+-- Run as SBREXT DSRMWS-1827
 S31_SBR_2_DDL.sql
 
--- Run as ONEDATA_RA DDL scripts
+-- Run as ONEDATA_RA DDL scripts DSRMWS-1824
 S31_WA_RA_DDL.sql
 
--- Run as ONEDATA_WA DDL scripts
+-- Run as ONEDATA_WA DDL scripts DSRMWS-1824,1818,1826
 S31_WA_RA_DDL.sql
 S31_NCI_11179.sql
 S31_NCI_FORM_MGMT.sql
-S31_NCI_CADSR_PUSH.sql
+S31_NCI_CADSR_PUSH.sql 
 S31_SP_TEST_ALL_NEW.sql
