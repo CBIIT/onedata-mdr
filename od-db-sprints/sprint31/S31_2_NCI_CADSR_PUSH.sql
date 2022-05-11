@@ -19,7 +19,7 @@ create or replace PACKAGE body nci_caDSR_push AS
     if length(v_def) > 2000 then
         return substr(v_def,1,1996) || ' ...';
     else
-        return v_def;
+        return nvl(v_def,' ');
     end if;
  end;
 
@@ -30,7 +30,7 @@ function getLongName(v_nm in varchar2) return varchar
     if length(v_nm) > 255 then
         return substr(v_nm,1,250) || ' ...';
     else
-        return v_nm;
+        return nvl(v_nm,' ');
     end if;
  end;
 
@@ -129,7 +129,7 @@ commit;
 
 update sbr.cs_csi cscsi set csi_idseq = (Select  nci_idseq from admin_item ai, nci_clsfctn_schm_item csi where ai.item_id = csi.item_id
 and ai.ver_nr = csi.ver_nr and csi.cs_csi_idseq = cscsi.cs_csi_idseq)
-where (cs_csi_idseq, csi_idseq) not in
+where (cs_csi_idseq, csi_idseq) not in 
 (Select cs_csi_idseq, nci_idseq from admin_item ai, nci_clsfctn_schm_item csi where ai.item_id = csi.item_id
 and ai.ver_nr = csi.ver_nr);
 commit;
@@ -141,7 +141,7 @@ csi.creat_dt, csi.lst_upd_dt, csi.creat_usr_id, csi.lst_upd_usr_id, '1'
 from admin_item csiai, nci_clsfctn_schm_item csi, admin_item cs, admin_item pcsiai, nci_clsfctn_schm_item pcsi where
  csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr
 and csi.p_item_id = pcsiai.item_id and csi.p_item_ver_nr = pcsiai.ver_nr and csi.p_item_id = pcsi.item_id and csi.p_item_ver_nr = pcsi.ver_nr
-and csi.p_item_id is not null and csi.item_id = csiai.item_id and csi.ver_nr = csiai.ver_nr
+and csi.p_item_id is not null and csi.item_id = csiai.item_id and csi.ver_nr = csiai.ver_nr 
 and nvl(csi.cs_csi_idseq, csiai.nci_idseq) not in (Select cs_csi_idseq from sbr.cs_csi);
 
 commit;
@@ -210,7 +210,7 @@ HOOKOUTPUT.QUESTION    := question;
       row := form1.rowset.rowset(1);
       spRevInitiate(ihook.getColumnValue(row,'ITEM_ID'), v_usr_id);
       end if;
- V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+ V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);     
 end;
 
  procedure spPushLov (vHours in Integer)
@@ -748,7 +748,7 @@ commit;
 
 -- Alt names classification
 
-for cur in (select  nvl(csi.cs_csi_idseq, csiai.nci_idseq) cs_csi_idseq, am.nci_idseq att_idseq, nvl(x.fld_delete,0) fld_delete, x.creat_dt, x.lst_upd_dt, x.creat_usr_id,
+for cur in (select  nvl(csi.cs_csi_idseq, csiai.nci_idseq) cs_csi_idseq, am.nci_idseq att_idseq, nvl(x.fld_delete,0) fld_delete, x.creat_dt, x.lst_upd_dt, x.creat_usr_id, 
 x.lst_upd_usr_id
 from alt_nms am, admin_item csiai, nci_clsfctn_schm_item csi, NCI_CSI_ALT_DEFNMS  x
 where x.typ_nm = 'DESIGNATION'
@@ -761,21 +761,21 @@ and am.nm_id = x.nmdef_id) loop
 
 insert into sbrext.AC_ATT_CSCSI_EXT (aca_idseq, cs_csi_idseq, att_idseq,atl_name, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
 (select nci_11179.cmr_guid, cur.cs_csi_idseq, cur.att_idseq, 'DESIGNATION', cur.CREAT_DT, cur.CREAT_USR_ID, cur.LST_UPD_DT,cur.LST_UPD_USR_ID
-from dual where cur.fld_delete = 0 and
+from dual where cur.fld_delete = 0 and 
  (cur.cs_csi_idseq, cur.att_idseq) not in (select cs_csi_idseq, att_idseq from sbrext.AC_ATT_CSCSI_EXT));
 commit;
 
 -- Delete
 
-delete from sbrext.AC_ATT_CSCSI_EXT e where
-( cs_csi_idseq, att_idseq ) in
+delete from sbrext.AC_ATT_CSCSI_EXT e where 
+( cs_csi_idseq, att_idseq ) in 
 (select  cur.cs_csi_idseq, cur.att_idseq from dual where cur.fld_delete = 1);
 commit;
 end loop;
 -- Alt def classification
 
 for cur in (
-select  nvl(csi.cs_csi_idseq, csiai.nci_idseq) cs_csi_idseq, am.nci_idseq att_idseq, nvl(x.fld_delete,0) fld_delete,x.creat_dt, x.lst_upd_dt, x.creat_usr_id,
+select  nvl(csi.cs_csi_idseq, csiai.nci_idseq) cs_csi_idseq, am.nci_idseq att_idseq, nvl(x.fld_delete,0) fld_delete,x.creat_dt, x.lst_upd_dt, x.creat_usr_id, 
 x.lst_upd_usr_id
 from alt_def am, admin_item csiai, nci_clsfctn_schm_item csi, NCI_CSI_ALT_DEFNMS  x
 where x.typ_nm = 'DEFINITION'
@@ -793,8 +793,8 @@ commit;
 
 -- Delete
 
-delete from sbrext.AC_ATT_CSCSI_EXT e where
-( cs_csi_idseq, att_idseq ) in
+delete from sbrext.AC_ATT_CSCSI_EXT e where 
+( cs_csi_idseq, att_idseq ) in 
 (select  cur.cs_csi_idseq, cur.att_idseq from dual where cur.fld_delete = 1);
 commit;
 end loop;
@@ -810,7 +810,7 @@ and nvl(rd.fld_delete,0) = 0
 and rd.lst_upd_dt >= sysdate - 1/24;
 commit;
 
-for cur in (select r.nci_idseq, file_nm from ref_doc rd, ref r where rd.lst_upd_dt > rd.creat_dt and rd.lst_upd_dt >= sysdate - vHours/24 and r.ref_id = rd.nci_ref_id and
+for cur in (select r.nci_idseq, file_nm from ref_doc rd, ref r where rd.lst_upd_dt > rd.creat_dt and rd.lst_upd_dt >= sysdate - vHours/24 and r.ref_id = rd.nci_ref_id and 
 r.nci_idseq in (select rd_idseq from sbr.reference_documents) and nvl(rd.fld_Delete,0) = 0) loop
 update sbr.reference_blobs d set( DOC_SIZE, DAD_CHARSET, LAST_UPDATED, BLOB_CONTENT,DATE_MODIFIED, MODIFIED_BY) =
     (select  nci_doc_size, nci_charset, nci_doc_lst_upd_dt, blob_col, rd.LST_UPD_DT,rd.LST_UPD_USR_ID
@@ -839,12 +839,12 @@ insert into sbr.complex_de_relationships (cdr_idseq, p_de_idseq, c_de_idseq, DIS
 select nci_11179.cmr_guid(), curdtl.p_de_idseq, curdtl.c_de_idseq, cur.disp_ord, cur.lst_upd_dt, cur.lst_upd_usr_id, cur.creat_dt, cur.creat_usr_id from dual;
 end if;
 if (v_cnt = 1 and nvl(cur.fld_delete,0) = 0) then -- Update
-update sbr.complex_de_relationships set ( DISPLAY_ORDER,DATE_MODIFIED,MODIFIED_BY ) =
+update sbr.complex_de_relationships set ( DISPLAY_ORDER,DATE_MODIFIED,MODIFIED_BY ) = 
 (select  cur.disp_ord, cur.lst_upd_dt, cur.lst_upd_usr_id from dual)
 where p_de_idseq = curdtl.p_de_idseq and c_de_idseq = curdtl.c_de_idseq;
 end if;
 if (v_cnt = 1 and nvl(cur.fld_delete,0) = 1) then -- Delete
-delete from sbr.complex_de_relationships
+delete from sbr.complex_de_relationships 
 where p_de_idseq = curdtl.p_de_idseq and c_de_idseq = curdtl.c_de_idseq;
 end if;
 commit;
@@ -928,7 +928,7 @@ select nvl(max(log_id),0) into v_log_id from nci_job_log where end_dt is not nul
 select nvl(max(log_id),0) into v_cmp_log_id from nci_job_log where end_dt is null;
 
 if (v_log_id = v_cmp_log_id or v_cmp_log_id = 0) then
-select od_seq_nci_job_Log.nextval    into v_batch  from  dual ;
+select od_seq_nci_job_Log.nextval    into v_batch  from  dual ; 
 
 insert into nci_job_log (log_id,start_dt, job_step_desc, run_param, exec_by)
 select v_batch, sysdate, 'Job started.', vHours, v_usr_id from dual;
