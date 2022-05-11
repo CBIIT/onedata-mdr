@@ -1,6 +1,7 @@
 -- Run as SBREXT
 
 -- Run as ONEDATA_RA DDL scripts
+S32_VW_NCI_DE.SQL
 
 -- Run as ONEDATA_WA DDL scripts
-
+S32_VW_NCI_DE.SQL
