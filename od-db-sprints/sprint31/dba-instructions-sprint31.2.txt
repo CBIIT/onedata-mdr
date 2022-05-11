@@ -1,3 +1,5 @@
 -- Run as ONEDATA_WA
 S31_2_NCI_CADSR_PUSH_CORE.sql
 S31_2_NCI_CADSR_PUSH_FORM.sql
+S31_2_sptestreverserange.sql
+
