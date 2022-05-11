@@ -75,6 +75,11 @@ end loop;
 delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where (preferred_definition is null or preferred_definition = ' ')
 and qtl_name in ('QUESTION_INSTR', 'VALUE_INSTR','MODULE_INSTR','FOOTER', 'FORM_INSTR') and date_modified >= sysdate -(vHours+1)/24);
 commit;
+
+delete from sbrext.qc_recs_ext where c_qc_idseq in (select qc_idseq from sbrext.quest_contents_ext where (preferred_definition is null or preferred_definition = ' ')
+and qtl_name in ('QUESTION_INSTR', 'VALUE_INSTR','MODULE_INSTR','FOOTER', 'FORM_INSTR') and date_modified >= sysdate -(vHours+1)/24);
+commit;
+
 delete from sbrext.quest_contents_ext where (preferred_definition is null or preferred_definition = ' ')
 and qtl_name in ('QUESTION_INSTR', 'VALUE_INSTR','MODULE_INSTR','FOOTER', 'FORM_INSTR')  and date_modified >= sysdate -(vHours+1)/24;
 commit;
