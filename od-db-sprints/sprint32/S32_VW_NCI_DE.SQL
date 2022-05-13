@@ -51,9 +51,7 @@ SELECT ADMIN_ITEM.ITEM_ID,
         trim(SUBSTR (
                  trim(ADMIN_ITEM.ITEM_LONG_NM)
               || '||'
-              || trim(ADMIN_ITEM.ITEM_NM)
-              || '||'
-              || trim(ADMIN_ITEM.ITEM_DESC),1,
+              || trim(ADMIN_ITEM.ITEM_NM) ,1,
               4290))
               || '||'
               ||
