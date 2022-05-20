@@ -257,7 +257,7 @@ to_date(to_char(NVL(DATE_MODIFIED,DATE_CREATED),'MM/DD/YYYY HH:MI:SS AM'),'MM/DD
 (select count(*) from sbrext.quest_contents_ext where qtl_name = 'QUESTION' and nvl(deleted_ind,'No') ='No' and P_MOD_IDSEQ is not null and 
 to_date(to_char(DATE_CREATED,'MM/DD/YYYY HH:MI:SS AM'),'MM/DD/YYYY HH:MI:SS AM')<to_date('5/20/2022 01:29:00 AM','MM/DD/YYYY HH:MI:SS AM') and 
 to_date(to_char(NVL(DATE_MODIFIED,DATE_CREATED),'MM/DD/YYYY HH:MI:SS AM'),'MM/DD/YYYY HH:MI:SS AM')<to_date('5/20/2022 01:29:00 AM','MM/DD/YYYY HH:MI:SS AM')) caDSR_CNT,NULL
-from dual;
+from dual
 UNION
 
 select 'Question VV',
