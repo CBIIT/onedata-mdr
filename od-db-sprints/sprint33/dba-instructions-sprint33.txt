@@ -4,4 +4,4 @@
 
 -- Run as ONEDATA_WA DDL scripts
 S33_SP_TEST_ALL_NEW.sql
-
+S33_LOAD_CONCEPT_UPDATES.sql
