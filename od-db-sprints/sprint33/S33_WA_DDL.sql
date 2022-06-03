@@ -1,4 +1,5 @@
 CREATE OR REPLACE TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
+declare 
 v_item_typ_nm varchar2(100);
 BEGIN    IF (:NEW.ITEM_ID = -1  or :NEW.ITEM_ID is null)  THEN select od_seq_ADMIN_ITEM.nextval
  into :new.ITEM_ID  from  dual ;   END IF;
