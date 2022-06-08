@@ -361,9 +361,14 @@ commit;
 insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
 select 'Question VV', 
 (select count(*) from onedata_wa.NCI_QUEST_VALID_VALUE where  nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_QUEST_VALID_VALUE where  nvl(fld_delete,0)=0)-(select count(*) from sbrext.quest_contents_ext where qtl_name = 'VALID_VALUE' and nvl(deleted_ind,'No') ='No' and P_QST_IDSEQ is not null)) DIFF_CNT,
-(select count(*) from sbrext.quest_contents_ext where qtl_name = 'VALID_VALUE' and nvl(deleted_ind,'No') ='No' and P_QST_IDSEQ is not null and nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
+((select count(*) from onedata_wa.NCI_QUEST_VALID_VALUE where  nvl(fld_delete,0)=0)-
+(select count(*) from sbrext.quest_contents_ext vv ,sbrext.quest_contents_ext q 
+where vv.P_QST_IDSEQ =q.QC_IDSEQ and q.qtl_name = 'QUESTION' and nvl(q.deleted_ind,'No') ='No'
+and vv.qtl_name = 'VALID_VALUE' and nvl(vv.deleted_ind,'No') ='No' )) DIFF_CNT,
+(select count(*) from sbrext.quest_contents_ext vv ,sbrext.quest_contents_ext q 
+where vv.P_QST_IDSEQ =q.QC_IDSEQ and q.qtl_name = 'QUESTION' and nvl(q.deleted_ind,'No') ='No'
+and vv.qtl_name = 'VALID_VALUE' and nvl(vv.deleted_ind,'No') ='No' ) caDSR_CNT, null 
+from dual
 commit;
 
 /****added NCI_INSTR****/
