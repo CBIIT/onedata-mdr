@@ -334,8 +334,8 @@ commit;
 
 insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
 select 'Form', 
-(select count(*) from onedata_wa.ADMIN_ITEM where admin_item_typ_id = 54 and nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.ADMIN_ITEM where admin_item_typ_id = 54 and nvl(fld_delete,0)=0)-
+(select count(*) from onedata_wa.NCI_FORM where nvl(fld_delete,0)=0) WA_CNT,
+((select count(*) from onedata_wa.NCI_FORM where nvl(fld_delete,0)=0)-
 (select count(*) from sbrext.quest_contents_ext where qtl_name in ( 'CRF','TEMPLATE'))) DIFF_CNT,
 (select count(*) from sbrext.quest_contents_ext where qtl_name in ( 'CRF','TEMPLATE') ) caDSR_CNT,NULL
 from dual;
@@ -343,11 +343,12 @@ commit;
 
 insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
 select 'Module', 
-(select count(*) from onedata_wa.ADMIN_ITEM where admin_item_typ_id = 52 and nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.ADMIN_ITEM where admin_item_typ_id = 52 and nvl(fld_delete,0)=0)-(select count(*) from sbrext.quest_contents_ext 
-where qtl_name = 'MODULE' and nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbrext.quest_contents_ext where qtl_name = 'MODULE' and nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
+(select count(*) from NCI_ADMIN_ITEM_REL  where REL_TYP_ID=61 and nvl(fld_delete,0)=0) WA_CNT,
+((select count(*) from NCI_ADMIN_ITEM_REL where REL_TYP_ID=61 and nvl(fld_delete,0)=0)-(select count(*) from sbrext.quest_contents_ext 
+where qtl_name = 'MODULE' and nvl(deleted_ind,'No') ='No' and DN_CRF_IDSEQ is not null)) DIFF_CNT,
+(select count(*) from sbrext.quest_contents_ext m where qtl_name = 'MODULE' and nvl(deleted_ind,'No') ='No'
+and m.DN_CRF_IDSEQ is not null) caDSR_CNT,null
+from dual
 commit;
 
 insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
