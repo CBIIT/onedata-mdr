@@ -3,6 +3,7 @@
 -- Run as ONEDATA_RA DDL scripts
 S33_WA_RA_DDL.sql
 -- Run as ONEDATA_WA DDL scripts
+S33_WA_DDL.sql
 S33_WA_RA_DDL.sql
 S33_VIEW_ODCADSR_COUNTS_ALL.sql
 S33_SP_TEST_ALL_NEW.sql
