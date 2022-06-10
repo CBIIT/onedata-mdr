@@ -1,5 +1,5 @@
 -- Run as SBREXT
-
+S33_SBR.sql
 -- Run as ONEDATA_RA DDL scripts
 S33_WA_RA_DDL.sql
 -- Run as ONEDATA_WA DDL scripts
