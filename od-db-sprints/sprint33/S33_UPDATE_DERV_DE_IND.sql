@@ -1,0 +1,5 @@
+ALTER TABLE DE DISABLE ALL TRIGGERS;
+Update DE set DERV_DE_IND=0 where DERV_DE_IND is null;
+commit;
+ALTER TABLE DE enable  ALL TRIGGERS;
+
