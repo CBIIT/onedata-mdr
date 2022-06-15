@@ -16,7 +16,10 @@ commit;
 
 alter table PERM_VAL DISABLE ALL TRIGGERS;
 
-update PERM_VAL pv set ORIGIN_ID =  (select obj_key_id from sbr.vd_pvs pvs, obj_key ok where ok.obj_typ_id = 18 and ok.nci_cd = pvs.origin and pvs.vp_idseq = pv.nci_idseq);
+update PERM_VAL pv set NCI_ORIGIN_ID =  (select obj_key_id from sbr_m.vd_pvs pvs, obj_key ok where ok.obj_typ_id = 18 and ok.nci_cd = pvs.origin and pvs.vp_idseq = pv.nci_idseq);
+commit;
+
+update PERM_VAL pv set NCI_ORIGIN =  (select ORIGIN from sbr_m.vd_pvs pvs where pvs.vp_idseq = pv.nci_idseq);
 commit;
 
 alter table PERM_VAL  ENABLE ALL TRIGGERS;
