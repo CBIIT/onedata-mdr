@@ -13,3 +13,10 @@ from SBREXT.quest_contents_ext where QTL_NAME = 'VALUE_INSTR'
 and qc_idseq not in
 (select C_QC_IDSEQ from sbrext.QC_RECS_EXT where RL_NAME= 'VALUE_INSTRUCTION');
 commit;
+
+alter table PERM_VAL DISABLE ALL TRIGGERS;
+
+update PERM_VAL pv set ORIGIN_ID =  (select obj_key_id from sbr.vd_pvs pvs, obj_key ok where ok.obj_typ_id = 18 and ok.nci_cd = pvs.origin and pvs.vp_idseq = pv.nci_idseq);
+commit;
+
+alter table PERM_VAL  ENABLE ALL TRIGGERS;
