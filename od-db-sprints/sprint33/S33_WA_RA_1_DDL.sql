@@ -30,4 +30,4 @@ and air.c_item_id = de.item_id
 and air.c_item_ver_nr = de.ver_nr;
 
 
-GRANT SELECT ON ONEDATA_WA.VW_NCI_MODULE_DE TO ONEDATA_RO;
+GRANT SELECT ON VW_NCI_MODULE_DE TO ONEDATA_RO;
