@@ -32,4 +32,11 @@ stus_typ_id = 1 and stus_id = ai.regstr_stus_id
 and ai.regstr_stus_id is not null  and nci_idseq not in (select ac_idseq from sbr.ac_registrations);
 commit;
 
+update sbrext.quest_contents_ext e set display_order = (select rel.disp_ord from  admin_item ai, nci_admin_item_rel rel
+where rel.c_item_id = ai.item_id and rel.c_item_ver_nr = ai.ver_nr and ai.nci_idseq = e.qc_idseq and ai.admin_item_typ_id = 52
+and rel.rel_typ_id = 61 and e.display_order <> rel.disp_ord)
+where qc_idseq in (select qc_idseq from sbrext.quest_contents_ext e1, admin_item ai, nci_admin_item_rel rel
+where rel.c_item_id = ai.item_id and rel.c_item_ver_nr = ai.ver_nr and ai.nci_idseq = e1.qc_idseq and ai.admin_item_typ_id = 52
+and rel.rel_typ_id = 61 and e.display_order <> rel.disp_ord)
+commit;
 
