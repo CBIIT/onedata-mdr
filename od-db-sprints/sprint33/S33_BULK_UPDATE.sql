@@ -23,3 +23,13 @@ update PERM_VAL pv set NCI_ORIGIN =  (select ORIGIN from sbr_m.vd_pvs pvs where 
 commit;
 
 alter table PERM_VAL  ENABLE ALL TRIGGERS;
+
+--- reconciling initial reverse
+
+insert into sbr.ac_registrations (ar_idseq, ac_idseq, registration_status, date_created, created_by)
+select nci_11179.cmr_guid,nci_idseq, nci_stus, ai.creat_dt, ai.creat_usr_id from stus_mstr, admin_item ai where admin_item_typ_id <> 8 and
+stus_typ_id = 1 and stus_id = ai.regstr_stus_id
+and ai.regstr_stus_id is not null  and nci_idseq not in (select ac_idseq from sbr.ac_registrations);
+commit;
+
+
