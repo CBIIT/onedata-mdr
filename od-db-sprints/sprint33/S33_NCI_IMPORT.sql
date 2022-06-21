@@ -509,11 +509,12 @@ for i in 1..hookinput.originalRowset.rowset.count loop
 end loop;
    action := t_actionrowset(rows, 'PV VM Import', 2,10,'update');
 
+
         actions.extend;
         actions(actions.last) := action;
         hookoutput.actions := actions;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
- --nci_util.debugHook('GENERAL',v_data_out);
+--nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 --  PV/VM
@@ -569,7 +570,11 @@ as
     rows      t_rows;
     row          t_row;
     row_ori t_row;
-
+i integer;
+cnt integer;
+idx integer;
+v_cncpt_nm varchar2(255);
+v_str varchar2(255);
   action t_actionRowset;
    actions t_actions := t_actions();
 begin
@@ -581,15 +586,37 @@ begin
     hookOutput.originalRowset := hookInput.originalRowset;
 
     row_ori := hookInput.originalRowset.rowset(1);
-   
-    spPVVMValidate(row_ori);
-    rows := t_rows();
+   idx := 1;
+  
+         if (upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP')) = 'CONCEPTS' and nvl(ihook.getColumnValue(row_ori,'CTL_VAL_STUS'),'XX') ='I') then
+                v_str := trim(ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_'|| idx));
+                cnt := nci_11179.getwordcount(v_str);
+  -- raise_application_error(-20000, v_str);
+ 
+                for i in  1..cnt loop
+                        v_cncpt_nm := nci_11179.getWord(v_str, i, cnt);
+                           for cur in(select item_id, ver_nr, item_nm , item_long_nm, item_desc, admin_stus_nm_dn 
+                           from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))
+                           and admin_stus_nm_dn = 'RELEASED') loop
+                    -- raise_application_error(-20000, cur.item_id);
+                        ihook.setColumnValue(row_ori, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,cur.item_id);
+                        ihook.setColumnValue(row_ori, 'CNCPT_' || idx || '_VER_NR_' || i, cur.ver_nr); 
+                        end loop;
+                end loop;
+                for i in  cnt+1..10 loop
+                        ihook.setColumnValue(row_ori, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
+                        ihook.setColumnValue(row_ori, 'CNCPT_' || idx || '_VER_NR_' || i, '');
+                end loop;
+         
+         ihook.setColumnValue(row_ori,'CTL_VAL_STUS','IMPORTED');
+          rows := t_rows();
     rows.extend; rows(rows.last) := row_ori;
-
+    
     action := t_actionrowset(rows, 'PV VM Import', 2,10,'update');
     actions.extend;
     actions(actions.last) := action;
     hookoutput.actions := actions;
+    end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 -- nci_util.debugHook('GENERAL',v_data_out);
 
@@ -607,15 +634,18 @@ as
     v_item_id number;
     v_ver_nr number(4,2);
     v_temp integer;
+    vd_status string(64);
+    vd_valdom_id number;
  begin
-
+ 
+  
 -- ITEM_2_ID : Value Domain public Id; ITEM_2_VER_NR: Value Domain Version; ITEM_2_LONG_NM: Used to see if Concept or String - VM String Type
     v_val_ind := true;
    ihook.setColumnValue(row_ori, 'CTL_VAL_MSG','');
 -- If string type is CONCEPTS, then decompose and check to make sure atleast one concept is valid
    if (upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP')) = 'CONCEPTS') then
 --   raise_application_error(-20000, 'TEst');
-       nci_dec_mgmt.createValAIWithConcept(row_ori, 1,53,'V', 'STRING', actions) ;
+       nci_dec_mgmt.createValAIWithConcept(row_ori, 1,53,'V', 'DROP-DOWN', actions) ;
        if (ihook.getColumnValue(row_ori, 'CNCPT_1_ITEM_ID_1') is null) then
              ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',   'No valid concepts specified for Value Meaning.' || chr(13));                      
         v_val_ind := false;
@@ -636,21 +666,59 @@ if (upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP'))  = 'TEXT') then
          v_item_id := ihook.getColumnValue(row_ori,'ITEM_1_ID');
         v_ver_nr :=  ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR');
         ihook.setColumnValue(row_ori, 'GEN_STR', ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'));
+            --------------3. check if VM ID is found------------------
+    ---if (ihook.getColumnValue(row_ori, 'ITEM_1_ID') is not null) then
+       -- ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'VM Exists: ' || ihook.getColumnValue(row_ori, 'ITEM_1_ID'));
+       -- else
+            --ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'New VM created.');
+       -- end if;
+    ----------------------------------------------------------
     end if;
+
     -- check if value already exists for the VD
     for cur in (select * from perm_val where val_dom_item_id= ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID')
     and val_dom_ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') and upper(perm_val_nm) = upper(ihook.getColumnValue(row_ori, 'PERM_VAL_NM'))) loop
-       ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',       ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') ||  'Value already exists in the specified Value Domain.' || chr(13));                      
+       ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',       ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') ||  'PV already exists in the VD' || chr(13));                      
         v_val_ind := false;
     end loop;
 
    -- nci_pv_vm.spValCreateImport(row_ori, 'V', actions, v_val_ind);
-           if (v_val_ind = false) then 
+   -- 
+   --raise_application_error(-20000, 'Before select item id, admin status');
+   for cur_vd in (select item_id, admin_stus_nm_dn from admin_item where admin_item_typ_id = 3 and ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') = ver_nr and ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') = item_id) loop
+   vd_valdom_id := cur_vd.item_id;
+   vd_status := cur_vd.admin_stus_nm_dn;
+   end loop;
+--raise_application_error(-20000, 'after select item id, admin status');
+   -- select ASL_NAME into vd_asl_name from value_domains_view where vd_id = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID');
+        if (v_val_ind = false) then 
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
-    else
+            --check if VD is retired. set message
+        end if;
+         if (vd_valdom_id is null) then
+            ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'VD is not valid' || chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG'));
+            ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
+            v_val_ind := false;
+        end if;    
+        if (vd_status = 'RELEASED ARCHIVED' ) then
+           --raise_application_error(-20000, 'in Retired Archived condition');
+            ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'VD is Retired - PV/VM cannot be Imported' || chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG'));
+            ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
+            v_val_ind := false;
+        end if;
+        
+         if (ihook.getcolumnValue(row_ori, 'ITEM_1_ID') is not null) then
+                
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG','Exisiting VM Found: ' ||  ihook.getcolumnValue(row_ori, 'ITEM_1_ID')  || chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') );
+                ihook.setcolumnvalue(row_ori, 'ITEM_1_ID','');
+                ihook.setcolumnvalue(row_ori, 'ITEM_1_VER_NR','');
+          end if;
+          
+        if (v_Val_ind = true) then
                 ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'VALIDATED');
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG','No Errors' ||  chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') );                      
-    end if;
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG','No Errors' ||  chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') );
+        end if;
+        
    -- end of validation
 
    for cur in (select * from value_dom where item_id = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR')
