@@ -1,70 +1,70 @@
-CREATE OR REPLACE procedure sp_test_all_NEW
-as
-v_cnt integer;
-begin
+CREATE OR REPLACE PROCEDURE SP_TEST_ALL_NEW
+AS
+V_CNT INTEGER;
+BEGIN
 
-delete from OD_CADSR_TABLES_TEST_RESULTS;
-commit;
+DELETE FROM OD_CADSR_TABLES_TEST_RESULTS;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'DE', 
-(select count(*) from onedata_wa.de where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_Wa.de  where nvl(fld_delete,0)=0)-(select count(*) from sbr.data_elements where nvl(deleted_ind,'No') ='No') ) DIFF_CNT,
-(select count(*) from sbr.data_elements where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
-
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'DE Concept', 
-(select count(*) from onedata_wa.de_conc  where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.de_conc  where nvl(fld_delete,0)=0)- (select count(*) from sbr.data_element_concepts  where nvl(deleted_ind,'No') ='No'))DIFF_CNT,
-(select count(*) from sbr.data_element_concepts  where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'DE', 
+(SELECT COUNT(*) FROM ONEDATA_WA.DE WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.DE  WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.DATA_ELEMENTS WHERE NVL(DELETED_IND,'No') ='No') ) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.DATA_ELEMENTS WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Format', 
-(select count(*) from onedata_wa.fmt) WA_CNT,
-((select count(*) from onedata_wa.fmt)-(select count(*) from sbr.formats_lov)) DIFF_CNT,
-(select count(*) from sbr.formats_lov) caDSR_CNT,NULL
-from dual;
-commit;
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Data type', 
-(select count(*) from onedata_wa.data_typ where nci_dttype_typ_id = 1) WA_CNT,
-((select count(*) from onedata_wa.data_typ where nci_dttype_typ_id = 1)- (select count(*) from sbr.datatypes_lov))DIFF_CNT,
-(select count(*) from sbr.datatypes_lov) caDSR_CNT,NULL
-from dual;
-commit;
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Registration Status', 
-(select count(*) from onedata_wa.stus_mstr where stus_typ_id = 1 and FLD_DELETE=0) WA_CNT,
-((select count(*) from onedata_wa.stus_mstr where stus_typ_id = 1 and FLD_DELETE=0)-(select count(*) from sbr.reg_status_lov)) DIFF_CNT,
-(select count(*) from sbr.reg_status_lov) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'DE Concept', 
+(SELECT COUNT(*) FROM ONEDATA_WA.DE_CONC  WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.DE_CONC  WHERE NVL(FLD_DELETE,0)=0)- (SELECT COUNT(*) FROM SBR.DATA_ELEMENT_CONCEPTS  WHERE NVL(DELETED_IND,'No') ='No'))DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.DATA_ELEMENT_CONCEPTS  WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Workflow Status', 
-(select count(*) from onedata_wa.stus_mstr where stus_typ_id = 2 and FLD_DELETE=0) WA_CNT,
-((select count(*) from onedata_wa.stus_mstr where stus_typ_id = 2 and FLD_DELETE=0)-(select count(*) from sbr.ac_status_lov)) DIFF_CNT,
-(select count(*) from sbr.ac_status_lov) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Format', 
+(SELECT COUNT(*) FROM ONEDATA_WA.FMT) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.FMT)-(SELECT COUNT(*) FROM SBR.FORMATS_LOV)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.FORMATS_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Data type', 
+(SELECT COUNT(*) FROM ONEDATA_WA.DATA_TYP WHERE NCI_DTTYPE_TYP_ID = 1) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.DATA_TYP WHERE NCI_DTTYPE_TYP_ID = 1)- (SELECT COUNT(*) FROM SBR.DATATYPES_LOV))DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.DATATYPES_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Registration Status', 
+(SELECT COUNT(*) FROM ONEDATA_WA.STUS_MSTR WHERE STUS_TYP_ID = 1 AND FLD_DELETE=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.STUS_MSTR WHERE STUS_TYP_ID = 1 AND FLD_DELETE=0)-(SELECT COUNT(*) FROM SBR.REG_STATUS_LOV)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.REG_STATUS_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'UOM', 
-(select count(*) from onedata_wa.UOM) WA_CNT,
-((select count(*) from onedata_wa.UOM)-(select count(*) from sbr.unit_of_measures_lov)) DIFF_CNT,
-(select count(*) from sbr.unit_of_measures_lov) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Workflow Status', 
+(SELECT COUNT(*) FROM ONEDATA_WA.STUS_MSTR WHERE STUS_TYP_ID = 2 AND FLD_DELETE=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.STUS_MSTR WHERE STUS_TYP_ID = 2 AND FLD_DELETE=0)-(SELECT COUNT(*) FROM SBR.AC_STATUS_LOV)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.AC_STATUS_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'UOM', 
+(SELECT COUNT(*) FROM ONEDATA_WA.UOM) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.UOM)-(SELECT COUNT(*) FROM SBR.UNIT_OF_MEASURES_LOV)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.UNIT_OF_MEASURES_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 --insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
 --select 'VV Repetition', 
@@ -74,125 +74,125 @@ commit;
 --from dual;
 --commit;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Conceptual Domain', 
-(select count(*) from onedata_wa.conc_dom  where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.conc_dom  where nvl(fld_delete,0)=0)-(select count(*) from sbr.conceptual_domains  where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbr.conceptual_domains where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Conceptual Domain', 
+(SELECT COUNT(*) FROM ONEDATA_WA.CONC_DOM  WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.CONC_DOM  WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.CONCEPTUAL_DOMAINS  WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.CONCEPTUAL_DOMAINS WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Object Class', 
-(select count(*) from onedata_wa.obj_cls  where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.obj_cls  where nvl(fld_delete,0)=0)-(select count(*) from sbrext.object_classes_ext where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbrext.object_classes_ext where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Object Class', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_CLS  WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_CLS  WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBREXT.OBJECT_CLASSES_EXT WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.OBJECT_CLASSES_EXT WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Property', 
-(select count(*) from onedata_wa.prop  where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.prop where nvl(fld_delete,0)=0)-(select count(*) from sbrext.properties_ext where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbrext.properties_ext where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Property', 
+(SELECT COUNT(*) FROM ONEDATA_WA.PROP  WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.PROP WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBREXT.PROPERTIES_EXT WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.PROPERTIES_EXT WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Value Domain', 
-(select count(*) from onedata_wa.value_dom where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.value_dom where nvl(fld_delete,0)=0)-(select count(*) from sbr.value_domains where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbr.value_domains where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Value Domain', 
+(SELECT COUNT(*) FROM ONEDATA_WA.VALUE_DOM WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.VALUE_DOM WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.VALUE_DOMAINS WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.VALUE_DOMAINS WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Concept', 
-(select count(*) from onedata_wa.CNCPT where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.CNCPT  where nvl(fld_delete,0)=0)-(select count(*) from sbrext.concepts_ext where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbrext.concepts_ext  where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Concept', 
+(SELECT COUNT(*) FROM ONEDATA_WA.CNCPT WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.CNCPT  WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBREXT.CONCEPTS_EXT WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.CONCEPTS_EXT  WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'CSI', 
-(select count(*) from onedata_wa.NCI_CLSFCTN_SCHM_ITEM  where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_CLSFCTN_SCHM_ITEM where nvl(fld_delete,0)=0)-(select count(*) from sbr.cs_items where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbr.cs_items where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'CSI', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_CLSFCTN_SCHM_ITEM  WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_CLSFCTN_SCHM_ITEM WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.CS_ITEMS WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.CS_ITEMS WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Classification Scheme', 
-(select count(*) from onedata_wa.CLSFCTN_SCHM where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.CLSFCTN_SCHM  where nvl(fld_delete,0)=0)-(select count(*) from sbr.classification_schemes where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbr.classification_schemes where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Classification Scheme', 
+(SELECT COUNT(*) FROM ONEDATA_WA.CLSFCTN_SCHM WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.CLSFCTN_SCHM  WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.CLASSIFICATION_SCHEMES WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.CLASSIFICATION_SCHEMES WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Representation Class', 
-(select count(*) from onedata_wa.REP_CLS where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.REP_CLS where nvl(fld_delete,0)=0)-(select count(*) from sbrext.representations_ext where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbrext.representations_ext where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Representation Class', 
+(SELECT COUNT(*) FROM ONEDATA_WA.REP_CLS WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.REP_CLS WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBREXT.REPRESENTATIONS_EXT WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.REPRESENTATIONS_EXT WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Value Meaning', 
-(select count(*) from onedata_wa.NCI_VAL_MEAN where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_VAL_MEAN  where nvl(fld_delete,0)=0)-(select count(*) from sbr.value_meanings where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbr.value_meanings where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
-
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Protocol', 
-(select count(*) from onedata_wa.NCI_PROTCL  where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_PROTCL  where nvl(fld_delete,0)=0)-(select count(*) from sbrext.protocols_ext where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbrext.protocols_ext where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Value Meaning', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_VAL_MEAN WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_VAL_MEAN  WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.VALUE_MEANINGS WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.VALUE_MEANINGS WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'OC Recs', 
-(select count(*) from onedata_wa.NCI_OC_RECS  where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_OC_RECS  where nvl(fld_delete,0)=0)-(select count(*) from sbrext.oc_recs_ext where nvl(deleted_ind,'No') ='No')) DIFF_CNT,
-(select count(*) from sbrext.oc_recs_ext where nvl(deleted_ind,'No') ='No') caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Protocol', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_PROTCL  WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_PROTCL  WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBREXT.PROTOCOLS_EXT WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.PROTOCOLS_EXT WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Context', 
-(select count(*) from onedata_wa.CNTXT where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.CNTXT where nvl(fld_delete,0)=0)-(select count(*) from sbr.contexts )) DIFF_CNT,
-(select count(*) from sbr.contexts ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'OC Recs', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_OC_RECS  WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_OC_RECS  WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBREXT.OC_RECS_EXT WHERE NVL(DELETED_IND,'No') ='No')) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.OC_RECS_EXT WHERE NVL(DELETED_IND,'No') ='No') CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'CD-VM', 
-(select count(*) from onedata_wa.conc_dom_val_mean where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.conc_dom_val_mean )-(select count(*) from sbr.cd_vms )) DIFF_CNT,
-(select count(*) from sbr.cd_vms ) caDSR_CNT,NULL
-from dual;
-commit;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'PV', 
-(select count(*) from onedata_wa.PERM_VAL where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.PERM_VAL where nvl(fld_delete,0)=0)-
-(select count(*) from sbr.vd_pvs )) DIFF_CNT,
-(select count(*) from sbr.vd_pvs) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Context', 
+(SELECT COUNT(*) FROM ONEDATA_WA.CNTXT WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.CNTXT WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.CONTEXTS )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.CONTEXTS ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'CD-VM', 
+(SELECT COUNT(*) FROM ONEDATA_WA.CONC_DOM_VAL_MEAN WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.CONC_DOM_VAL_MEAN )-(SELECT COUNT(*) FROM SBR.CD_VMS )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.CD_VMS ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'PV', 
+(SELECT COUNT(*) FROM ONEDATA_WA.PERM_VAL WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.PERM_VAL WHERE NVL(FLD_DELETE,0)=0)-
+(SELECT COUNT(*) FROM SBR.VD_PVS )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.VD_PVS) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 --insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
 --select 'Concept - AI',  
@@ -202,404 +202,411 @@ commit;
 --(select count(*) from sbrext.COMPONENT_CONCEPTS_EXT ) caDSR_CNT,NULL
 --from dual;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Concept - AI',  
-(select count(*) from onedata_wa.CNCPT_ADMIN_ITEM where nvl(fld_delete,0)=0)  WA_CNT,
-(SELECT count(*) from onedata_wa.CNCPT_ADMIN_ITEM c where nvl(c.fld_delete,0)=0 )-         
-(select count(*)
-FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
-               SBR.concepts_ext con ,
-               (select OC_IDSEQ NCI_IDSEQ,condr_idseq from sbrext.object_classes_ext
-               union 
-               select PROP_IDSEQ,condr_idseq from sbrext.properties_ext 
-                union 
-               select rep_IDSEQ,condr_idseq from SBREXT.REPRESENTATIONS_EXT
-               union
-               select VD_IDSEQ,condr_idseq from SBR.VALUE_DOMAINS
-               union
-               select VM_IDSEQ,condr_idseq from SBR.VALUE_MEANINGS
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Concept - AI',  
+(SELECT COUNT(*) FROM ONEDATA_WA.CNCPT_ADMIN_ITEM WHERE NVL(FLD_DELETE,0)=0)  WA_CNT,
+(SELECT COUNT(*) FROM ONEDATA_WA.CNCPT_ADMIN_ITEM C WHERE NVL(C.FLD_DELETE,0)=0 )-         
+(SELECT COUNT(*)
+FROM SBREXT.COMPONENT_CONCEPTS_EXT  CC,
+               SBR.CONCEPTS_EXT CON ,
+               (SELECT OC_IDSEQ NCI_IDSEQ,CONDR_IDSEQ FROM SBREXT.OBJECT_CLASSES_EXT
                UNION 
-               select CD_IDSEQ,condr_idseq from sbr.conceptual_domains 
-               )ai
-         WHERE    cc.con_idseq = con.con_idseq
-         and ai.condr_idseq= cc.CONDR_IDSEQ)  DIFF_CNT,
-( select count(*)
-FROM sbrext.COMPONENT_CONCEPTS_EXT  cc,
-               SBR.concepts_ext con ,
-               (select OC_IDSEQ NCI_IDSEQ,condr_idseq from sbrext.object_classes_ext
-               union 
-               select PROP_IDSEQ,condr_idseq from sbrext.properties_ext 
-                union 
-               select rep_IDSEQ,condr_idseq from SBREXT.REPRESENTATIONS_EXT
-               union
-               select VD_IDSEQ,condr_idseq from SBR.VALUE_DOMAINS
-               union
-               select VM_IDSEQ,condr_idseq from SBR.VALUE_MEANINGS
+               SELECT PROP_IDSEQ,CONDR_IDSEQ FROM SBREXT.PROPERTIES_EXT 
+                UNION 
+               SELECT REP_IDSEQ,CONDR_IDSEQ FROM SBREXT.REPRESENTATIONS_EXT
+               UNION
+               SELECT VD_IDSEQ,CONDR_IDSEQ FROM SBR.VALUE_DOMAINS
+               UNION
+               SELECT VM_IDSEQ,CONDR_IDSEQ FROM SBR.VALUE_MEANINGS
                UNION 
-               select CD_IDSEQ,condr_idseq from sbr.conceptual_domains 
-               )ai
-         WHERE    cc.con_idseq = con.con_idseq
-         and ai.condr_idseq= cc.CONDR_IDSEQ) caDSR_CNT,NULL 
-from dual;
-commit;
+               SELECT CD_IDSEQ,CONDR_IDSEQ FROM SBR.CONCEPTUAL_DOMAINS 
+               )AI
+         WHERE    CC.CON_IDSEQ = CON.CON_IDSEQ
+         AND AI.CONDR_IDSEQ= CC.CONDR_IDSEQ)  DIFF_CNT,
+( SELECT COUNT(*)
+FROM SBREXT.COMPONENT_CONCEPTS_EXT  CC,
+               SBR.CONCEPTS_EXT CON ,
+               (SELECT OC_IDSEQ NCI_IDSEQ,CONDR_IDSEQ FROM SBREXT.OBJECT_CLASSES_EXT
+               UNION 
+               SELECT PROP_IDSEQ,CONDR_IDSEQ FROM SBREXT.PROPERTIES_EXT 
+                UNION 
+               SELECT REP_IDSEQ,CONDR_IDSEQ FROM SBREXT.REPRESENTATIONS_EXT
+               UNION
+               SELECT VD_IDSEQ,CONDR_IDSEQ FROM SBR.VALUE_DOMAINS
+               UNION
+               SELECT VM_IDSEQ,CONDR_IDSEQ FROM SBR.VALUE_MEANINGS
+               UNION 
+               SELECT CD_IDSEQ,CONDR_IDSEQ FROM SBR.CONCEPTUAL_DOMAINS 
+               )AI
+         WHERE    CC.CON_IDSEQ = CON.CON_IDSEQ
+         AND AI.CONDR_IDSEQ= CC.CONDR_IDSEQ) CADSR_CNT,NULL 
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Designations', 
-(select count(*) from onedata_wa.ALT_NMS where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.ALT_NMS where nvl(fld_delete,0)=0)-(select count(*) from sbr.designations )) DIFF_CNT,
-(select count(*) from sbr.designations ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Designations', 
+(SELECT COUNT(*) FROM ONEDATA_WA.ALT_NMS WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.ALT_NMS WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.DESIGNATIONS )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.DESIGNATIONS ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Definitions', 
-(select count(*) from onedata_wa.ALT_DEF where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.ALT_DEF where nvl(fld_delete,0)=0)-
-(select count(*) from sbr.definitions )) DIFF_CNT,
-(select count(*) from sbr.definitions ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Definitions', 
+(SELECT COUNT(*) FROM ONEDATA_WA.ALT_DEF WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.ALT_DEF WHERE NVL(FLD_DELETE,0)=0)-
+(SELECT COUNT(*) FROM SBR.DEFINITIONS )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.DEFINITIONS ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Reference Documents', 
-(select count(*) from onedata_wa.REF where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.REF where nvl(fld_delete,0)=0)-(select count(*) from sbr.reference_documents )) DIFF_CNT,
-(select count(*) from sbr.reference_documents ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Reference Documents', 
+(SELECT COUNT(*) FROM ONEDATA_WA.REF WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.REF WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.REFERENCE_DOCUMENTS )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.REFERENCE_DOCUMENTS ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Trigger Actions', 
-(select count(*) from onedata_wa.NCI_FORM_TA where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_FORM_TA where nvl(fld_delete,0)=0)-(select count(*) from sbrext.triggered_actions_ext 
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Trigger Actions', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_FORM_TA WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_FORM_TA WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBREXT.TRIGGERED_ACTIONS_EXT 
 )) DIFF_CNT,
-(select count(*) from sbrext.triggered_actions_ext ) caDSR_CNT,NULL
-from dual;
-commit;
+(SELECT COUNT(*) FROM SBREXT.TRIGGERED_ACTIONS_EXT ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Trigger Actions Protocol/CSI', 
-(select count(*) from onedata_wa.NCI_FORM_TA_REL where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_FORM_TA_REL where nvl(fld_delete,0)=0)-(select count(*) from sbrext.ta_proto_csi_ext )) DIFF_CNT,
-(select count(*) from sbrext.ta_proto_csi_ext ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Trigger Actions Protocol/CSI', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_FORM_TA_REL WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_FORM_TA_REL WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBREXT.TA_PROTO_CSI_EXT )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.TA_PROTO_CSI_EXT ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Organization', 
-(select count(*) from onedata_wa.NCI_ORG where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_ORG where nvl(fld_delete,0)=0)-(select count(*) from sbr.ORGANIZATIONS )) DIFF_CNT,
-(select count(*) from sbr.ORGANIZATIONS ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Organization', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_ORG WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_ORG WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.ORGANIZATIONS )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.ORGANIZATIONS ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Person', 
-(select count(*) from onedata_wa.NCI_PRSN where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_PRSN where nvl(fld_delete,0)=0)-
-(select count(*) from sbr.persons )) DIFF_CNT,
-(select count(*) from sbr.persons ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Person', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_PRSN WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_PRSN WHERE NVL(FLD_DELETE,0)=0)-
+(SELECT COUNT(*) FROM SBR.PERSONS )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.PERSONS ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Addresses', 
-(select count(*) from onedata_wa.NCI_ENTTY_ADDR  where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_ENTTY_ADDR  where nvl(fld_delete,0)=0)-(select count(*) from sbr.contact_addresses)) DIFF_CNT,
-(select count(*) from sbr.contact_addresses ) caDSR_CNT,NULL
-from dual;
-commit;
-
-
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Communications', 
-(select count(*) from onedata_wa.NCI_ENTTY_COMM where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_ENTTY_COMM where nvl(fld_delete,0)=0)-(select count(*) from sbr.contact_comms ) )DIFF_CNT,
-(select count(*) from sbr.contact_comms ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Addresses', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_ENTTY_ADDR  WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_ENTTY_ADDR  WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.CONTACT_ADDRESSES)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.CONTACT_ADDRESSES ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Form', 
-(select count(*) from onedata_wa.NCI_FORM where nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_FORM where nvl(fld_delete,0)=0)-
-(select count(*) from sbrext.quest_contents_ext where qtl_name in ( 'CRF','TEMPLATE'))) DIFF_CNT,
-(select count(*) from sbrext.quest_contents_ext where qtl_name in ( 'CRF','TEMPLATE') ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Communications', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_ENTTY_COMM WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_ENTTY_COMM WHERE NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBR.CONTACT_COMMS ) )DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.CONTACT_COMMS ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Module', 
-(select count(*) from NCI_ADMIN_ITEM_REL  where REL_TYP_ID=61 and nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from NCI_ADMIN_ITEM_REL where REL_TYP_ID=61 and nvl(fld_delete,0)=0)-(select count(*) from sbrext.quest_contents_ext 
-where qtl_name = 'MODULE' and nvl(deleted_ind,'No') ='No' and DN_CRF_IDSEQ is not null)) DIFF_CNT,
-(select count(*) from sbrext.quest_contents_ext m where qtl_name = 'MODULE' and nvl(deleted_ind,'No') ='No'
-and m.DN_CRF_IDSEQ is not null) caDSR_CNT,null
-from dual
-commit;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Question', 
-(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL_ALT_KEY where rel_typ_id = 63 and nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL_ALT_KEY where rel_typ_id = 63 and nvl(fld_delete,0)=0)-(select count(*) from sbrext.quest_contents_ext where qtl_name = 'QUESTION' and nvl(deleted_ind,'No') ='No'and P_MOD_IDSEQ is not null)) DIFF_CNT,
-(select count(*) from sbrext.quest_contents_ext where qtl_name = 'QUESTION' and nvl(deleted_ind,'No') ='No' and P_MOD_IDSEQ is not null) caDSR_CNT,NULL
-from dual;
-commit;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Question VV', 
-(select count(*) from onedata_wa.NCI_QUEST_VALID_VALUE where  nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_QUEST_VALID_VALUE where  nvl(fld_delete,0)=0)-
-(select count(*) from sbrext.quest_contents_ext vv ,sbrext.quest_contents_ext q 
-where vv.P_QST_IDSEQ =q.QC_IDSEQ and q.qtl_name = 'QUESTION' and nvl(q.deleted_ind,'No') ='No'
-and vv.qtl_name = 'VALID_VALUE' and nvl(vv.deleted_ind,'No') ='No' )) DIFF_CNT,
-(select count(*) from sbrext.quest_contents_ext vv ,sbrext.quest_contents_ext q 
-where vv.P_QST_IDSEQ =q.QC_IDSEQ and q.qtl_name = 'QUESTION' and nvl(q.deleted_ind,'No') ='No'
-and vv.qtl_name = 'VALID_VALUE' and nvl(vv.deleted_ind,'No') ='No' ) caDSR_CNT, null 
-from dual
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Form', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_FORM WHERE NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_FORM WHERE NVL(FLD_DELETE,0)=0)-
+(SELECT COUNT(*) FROM SBREXT.QUEST_CONTENTS_EXT WHERE QTL_NAME IN ( 'CRF','TEMPLATE'))) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.QUEST_CONTENTS_EXT WHERE QTL_NAME IN ( 'CRF','TEMPLATE') ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Module', 
+(SELECT COUNT(*) FROM NCI_ADMIN_ITEM_REL  WHERE REL_TYP_ID=61 AND NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM NCI_ADMIN_ITEM_REL WHERE REL_TYP_ID=61 AND NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBREXT.QUEST_CONTENTS_EXT 
+WHERE QTL_NAME = 'MODULE' AND NVL(DELETED_IND,'No') ='No' AND DN_CRF_IDSEQ IS NOT NULL)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.QUEST_CONTENTS_EXT M WHERE QTL_NAME = 'MODULE' AND NVL(DELETED_IND,'No') ='No'
+AND M.DN_CRF_IDSEQ IS NOT NULL) CADSR_CNT,NULL
+FROM DUAL
+COMMIT;
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Question', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_ADMIN_ITEM_REL_ALT_KEY WHERE REL_TYP_ID = 63 AND NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_ADMIN_ITEM_REL_ALT_KEY WHERE REL_TYP_ID = 63 AND NVL(FLD_DELETE,0)=0)-(SELECT COUNT(*) FROM SBREXT.QUEST_CONTENTS_EXT WHERE QTL_NAME = 'QUESTION' AND NVL(DELETED_IND,'No') ='No'AND P_MOD_IDSEQ IS NOT NULL)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.QUEST_CONTENTS_EXT WHERE QTL_NAME = 'QUESTION' AND NVL(DELETED_IND,'No') ='No' AND P_MOD_IDSEQ IS NOT NULL) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Question VV', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_QUEST_VALID_VALUE WHERE  NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_QUEST_VALID_VALUE WHERE  NVL(FLD_DELETE,0)=0)-
+(SELECT COUNT(*) FROM SBREXT.QUEST_CONTENTS_EXT VV ,SBREXT.QUEST_CONTENTS_EXT Q 
+WHERE VV.P_QST_IDSEQ =Q.QC_IDSEQ AND Q.QTL_NAME = 'QUESTION' AND NVL(Q.DELETED_IND,'No') ='No'
+AND VV.QTL_NAME = 'VALID_VALUE' AND NVL(VV.DELETED_IND,'No') ='No' )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.QUEST_CONTENTS_EXT VV ,SBREXT.QUEST_CONTENTS_EXT Q 
+WHERE VV.P_QST_IDSEQ =Q.QC_IDSEQ AND Q.QTL_NAME = 'QUESTION' AND NVL(Q.DELETED_IND,'No') ='No'
+AND VV.QTL_NAME = 'VALID_VALUE' AND NVL(VV.DELETED_IND,'No') ='No' ) CADSR_CNT, NULL 
+FROM DUAL
+COMMIT;
 
 /****added NCI_INSTR****/
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'From HDR Instruction', 
-(select count(*) from onedata_wa.NCI_FORM where HDR_INSTR is not null  and nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_FORM where HDR_INSTR is not null and nvl(fld_delete,0)=0)-
-(select count(*) from(
-select min(qc_id) qc_id,min(version) version ,dn_crf_idseq from sbrext.quest_contents_ext qc1 
-where qc1.qtl_name = 'FORM_INSTR'and preferred_definition !=' ' and nvl(deleted_ind,'No') ='No' group by dn_crf_idseq) f)) DIFF_CNT,
-(select count(*) from(
-select min(qc_id) qc_id,min(version) version ,dn_crf_idseq from sbrext.quest_contents_ext qc1 
-where qc1.qtl_name = 'FORM_INSTR'and preferred_definition !=' ' and nvl(deleted_ind,'No') ='No' group by dn_crf_idseq))
- caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'From HDR Instruction', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_FORM WHERE HDR_INSTR IS NOT NULL  AND NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_FORM WHERE HDR_INSTR IS NOT NULL AND NVL(FLD_DELETE,0)=0)-
+(SELECT COUNT(*) FROM(
+SELECT MIN(QC_ID) QC_ID,MIN(VERSION) VERSION ,DN_CRF_IDSEQ FROM SBREXT.QUEST_CONTENTS_EXT QC1 
+WHERE QC1.QTL_NAME = 'FORM_INSTR'AND PREFERRED_DEFINITION !=' ' AND NVL(DELETED_IND,'No') ='No' GROUP BY DN_CRF_IDSEQ) F)) DIFF_CNT,
+(SELECT COUNT(*) FROM(
+SELECT MIN(QC_ID) QC_ID,MIN(VERSION) VERSION ,DN_CRF_IDSEQ FROM SBREXT.QUEST_CONTENTS_EXT QC1 
+WHERE QC1.QTL_NAME = 'FORM_INSTR'AND PREFERRED_DEFINITION !=' ' AND NVL(DELETED_IND,'No') ='No' GROUP BY DN_CRF_IDSEQ))
+ CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'From FOOTER Instruction', 
-(select count(*) from onedata_wa.NCI_FORM where FTR_INSTR is not NULL  and nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_FORM where FTR_INSTR is not NULL and nvl(fld_delete,0)=0)-
-(select count(*) from(
-select min(qc_id) qc_id,min(version) version ,dn_crf_idseq from sbrext.quest_contents_ext qc1 
-where qc1.qtl_name like'FOOTER%'and preferred_definition !=' ' and nvl(deleted_ind,'No') ='No' group by dn_crf_idseq) f)) DIFF_CNT,
-(select count(*) from(
-select min(qc_id) qc_id,min(version) version ,dn_crf_idseq from sbrext.quest_contents_ext qc1 
-where qc1.qtl_name like'FOOTER%'and preferred_definition !=' ' and nvl(deleted_ind,'No') ='No' group by dn_crf_idseq))
- caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'From FOOTER Instruction', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_FORM WHERE FTR_INSTR IS NOT NULL  AND NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_FORM WHERE FTR_INSTR IS NOT NULL AND NVL(FLD_DELETE,0)=0)-
+(SELECT COUNT(*) FROM(
+SELECT MIN(QC_ID) QC_ID,MIN(VERSION) VERSION ,DN_CRF_IDSEQ FROM SBREXT.QUEST_CONTENTS_EXT QC1 
+WHERE QC1.QTL_NAME LIKE'FOOTER%'AND PREFERRED_DEFINITION !=' ' AND NVL(DELETED_IND,'No') ='No' GROUP BY DN_CRF_IDSEQ) F)) DIFF_CNT,
+(SELECT COUNT(*) FROM(
+SELECT MIN(QC_ID) QC_ID,MIN(VERSION) VERSION ,DN_CRF_IDSEQ FROM SBREXT.QUEST_CONTENTS_EXT QC1 
+WHERE QC1.QTL_NAME LIKE'FOOTER%'AND PREFERRED_DEFINITION !=' ' AND NVL(DELETED_IND,'No') ='No' GROUP BY DN_CRF_IDSEQ))
+ CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Module Instruction', 
-(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL  where REL_TYP_ID=61 and INSTR is not null and nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL  where REL_TYP_ID=61 and INSTR is not null  and nvl(fld_delete,0)=0)-
-(select count(*) from(
-select min(qc_id) qc_id,min(version) version ,p_mod_idseq from sbrext.quest_contents_ext qc1 
-where qc1.qtl_name = 'MODULE_INSTR'and preferred_definition !=' ' and nvl(deleted_ind,'No') ='No' group by p_mod_idseq))) DIFF_CNT,
-(select count(*) from(
-select min(qc_id) qc_id,min(version) version ,p_mod_idseq from sbrext.quest_contents_ext qc1 
-where qc1.qtl_name = 'MODULE_INSTR'and preferred_definition !=' ' and nvl(deleted_ind,'No') ='No' group by p_mod_idseq))
- caDSR_CNT,NULL
-from dual;
-commit;
-
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Question Instruction', 
-(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL_ALT_KEY
-  where REL_TYP_ID=63 and INSTR is not null  and nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL_ALT_KEY
-  where REL_TYP_ID=63 and INSTR is not null  and nvl(fld_delete,0)=0)-
-(select count(*) from(
-select min(qc_id) qc_id,min(version) version ,p_qst_idseq from sbrext.quest_contents_ext qc1 
-where qc1.qtl_name = 'QUESTION_INSTR'and preferred_definition !=' ' and nvl(deleted_ind,'No') ='No' group by p_qst_idseq))) DIFF_CNT,
-(select count(*) from(
-select min(qc_id) qc_id,min(version) version ,p_qst_idseq from sbrext.quest_contents_ext qc1 
-where qc1.qtl_name = 'QUESTION_INSTR'and preferred_definition !=' ' and nvl(deleted_ind,'No') ='No' group by p_qst_idseq))
- caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Module Instruction', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_ADMIN_ITEM_REL  WHERE REL_TYP_ID=61 AND INSTR IS NOT NULL AND NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_ADMIN_ITEM_REL  WHERE REL_TYP_ID=61 AND INSTR IS NOT NULL  AND NVL(FLD_DELETE,0)=0)-
+(SELECT COUNT(*) FROM(
+SELECT MIN(QC_ID) QC_ID,MIN(VERSION) VERSION ,P_MOD_IDSEQ FROM SBREXT.QUEST_CONTENTS_EXT QC1 
+WHERE QC1.QTL_NAME = 'MODULE_INSTR'AND PREFERRED_DEFINITION !=' ' AND NVL(DELETED_IND,'No') ='No' GROUP BY P_MOD_IDSEQ))) DIFF_CNT,
+(SELECT COUNT(*) FROM(
+SELECT MIN(QC_ID) QC_ID,MIN(VERSION) VERSION ,P_MOD_IDSEQ FROM SBREXT.QUEST_CONTENTS_EXT QC1 
+WHERE QC1.QTL_NAME = 'MODULE_INSTR'AND PREFERRED_DEFINITION !=' ' AND NVL(DELETED_IND,'No') ='No' GROUP BY P_MOD_IDSEQ))
+ CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'VV Instruction', 
-(select count(*) from onedata_wa.nci_quest_valid_value where INSTR is not null and nvl(fld_delete,0) = 0) WA_CNT,
-((select count(*) from onedata_wa.nci_quest_valid_value where INSTR is not null and nvl(fld_delete,0) = 0))-
-(select count(*) from(
-select min(qc_id) qc_id,min(version) version ,P_VAL_IDSEQ from sbrext.quest_contents_ext qc1 
-where qc1.qtl_name = 'VALUE_INSTR'and preferred_definition !=' ' and nvl(deleted_ind,'No') ='No' group by P_VAL_IDSEQ)) DIFF_CNT,
-(select count(*) from(
-select min(qc_id) qc_id,min(version) version ,P_VAL_IDSEQ from sbrext.quest_contents_ext qc1 
-where qc1.qtl_name = 'VALUE_INSTR'and preferred_definition !=' ' and nvl(deleted_ind,'No') ='No' group by P_VAL_IDSEQ))
- caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'Question Instruction', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_ADMIN_ITEM_REL_ALT_KEY
+  WHERE REL_TYP_ID=63 AND INSTR IS NOT NULL  AND NVL(FLD_DELETE,0)=0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_ADMIN_ITEM_REL_ALT_KEY
+  WHERE REL_TYP_ID=63 AND INSTR IS NOT NULL  AND NVL(FLD_DELETE,0)=0)-
+(SELECT COUNT(*) FROM(
+SELECT MIN(QC_ID) QC_ID,MIN(VERSION) VERSION ,P_QST_IDSEQ FROM SBREXT.QUEST_CONTENTS_EXT QC1 
+WHERE QC1.QTL_NAME = 'QUESTION_INSTR'AND PREFERRED_DEFINITION !=' ' AND NVL(DELETED_IND,'No') ='No' GROUP BY P_QST_IDSEQ))) DIFF_CNT,
+(SELECT COUNT(*) FROM(
+SELECT MIN(QC_ID) QC_ID,MIN(VERSION) VERSION ,P_QST_IDSEQ FROM SBREXT.QUEST_CONTENTS_EXT QC1 
+WHERE QC1.QTL_NAME = 'QUESTION_INSTR'AND PREFERRED_DEFINITION !=' ' AND NVL(DELETED_IND,'No') ='No' GROUP BY P_QST_IDSEQ))
+ CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'VV Instruction', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_QUEST_VALID_VALUE WHERE INSTR IS NOT NULL AND NVL(FLD_DELETE,0) = 0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_QUEST_VALID_VALUE WHERE INSTR IS NOT NULL AND NVL(FLD_DELETE,0) = 0))-
+(SELECT COUNT(*) FROM(
+SELECT MIN(QC_ID) QC_ID,MIN(VERSION) VERSION ,P_VAL_IDSEQ FROM SBREXT.QUEST_CONTENTS_EXT QC1 
+WHERE QC1.QTL_NAME = 'VALUE_INSTR'AND PREFERRED_DEFINITION !=' ' AND NVL(DELETED_IND,'No') ='No' GROUP BY P_VAL_IDSEQ)) DIFF_CNT,
+(SELECT COUNT(*) FROM(
+SELECT MIN(QC_ID) QC_ID,MIN(VERSION) VERSION ,P_VAL_IDSEQ FROM SBREXT.QUEST_CONTENTS_EXT QC1 
+WHERE QC1.QTL_NAME = 'VALUE_INSTR'AND PREFERRED_DEFINITION !=' ' AND NVL(DELETED_IND,'No') ='No' GROUP BY P_VAL_IDSEQ))
+ CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
  /***table NCI_ALT_KEY_ADMIN_ITEM_REL is replaced  by NCI_CLSFCTN_SCHM_ITEM*/
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'CS CSI', 
-(select count(*) from onedata_wa.NCI_CLSFCTN_SCHM_ITEM where CS_CSI_IDSEQ is not null and nvl(fld_delete,0) = 0) WA_CNT,
-((select count(*) from onedata_wa.NCI_CLSFCTN_SCHM_ITEM where CS_CSI_IDSEQ is not null and nvl(fld_delete,0) = 0)-(select count(*) from sbr.cs_csi ) ) DIFF_CNT,
-(select count(*) from sbr.cs_csi ) caDSR_CNT,NULL
-from dual;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'CS CSI', 
+((SELECT COUNT(*) FROM ONEDATA_WA.ADMIN_ITEM CSIAI, ONEDATA_WA.NCI_CLSFCTN_SCHM_ITEM CSI, ONEDATA_WA.ADMIN_ITEM CS WHERE
+ CSI.CS_ITEM_ID = CS.ITEM_ID AND CSI.CS_ITEM_VER_NR = CS.VER_NR
+ AND CSI.ITEM_ID = CSIAI.ITEM_ID AND CSI.VER_NR = CSIAI.VER_NR  AND NVL(CSI.FLD_DELETE,0) = 0)) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.ADMIN_ITEM CSIAI, ONEDATA_WA.NCI_CLSFCTN_SCHM_ITEM CSI, ONEDATA_WA.ADMIN_ITEM CS WHERE
+ CSI.CS_ITEM_ID = CS.ITEM_ID AND CSI.CS_ITEM_VER_NR = CS.VER_NR
+ AND CSI.ITEM_ID = CSIAI.ITEM_ID AND CSI.VER_NR = CSIAI.VER_NR  AND NVL(CSI.FLD_DELETE,0) = 0)-
+ ((SELECT COUNT(*) FROM SBR.CS_CSI )-(select count(*)from SBR.ADMINISTERED_COMPONENTS a where ASL_NAME like 'RETIRED%'
+and a.MODIFIED_BY= 'GDEEN' and actl_name='CS_ITEM')) ) DIFF_CNT,
+((SELECT COUNT(*) FROM SBR.CS_CSI )-(select count(*)from SBR.ADMINISTERED_COMPONENTS a where ASL_NAME like 'RETIRED%'
+and a.MODIFIED_BY= 'GDEEN' and actl_name='CS_ITEM')) CADSR_CNT,NULL
+FROM DUAL;
 
 /***table NCI_ALT_KEY_ADMIN_ITEM_REL is replaced by NCI_ADMIN_ITEM_REL***/
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'CS CSI DE Relationship', 
-(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL where rel_typ_id = 65 and nvl(fld_delete,0) = 0) WA_CNT,
-((select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL where rel_typ_id = 65 and nvl(fld_delete,0) = 0)- (select count(*) from sbr.ac_csi )) DIFF_CNT,
-(select count(*) from sbr.ac_csi ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'CS CSI DE Relationship', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_ADMIN_ITEM_REL WHERE REL_TYP_ID = 65 AND NVL(FLD_DELETE,0) = 0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_ADMIN_ITEM_REL WHERE REL_TYP_ID = 65 AND NVL(FLD_DELETE,0) = 0)- (SELECT COUNT(*) FROM SBR.AC_CSI )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.AC_CSI ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
 /********  ADDED**********/
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'COMPLEX DE Relationship', 
-(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL where rel_typ_id = 66 and nvl(fld_delete,0) = 0) WA_CNT,
-((select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL where rel_typ_id = 66 and nvl(fld_delete,0) = 0)- 
-(select count(*) from sbr.complex_de_relationships)) DIFF_CNT,
-(select count(*) from sbr.complex_de_relationships) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'COMPLEX DE Relationship', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_ADMIN_ITEM_REL WHERE REL_TYP_ID = 66 AND NVL(FLD_DELETE,0) = 0) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_ADMIN_ITEM_REL WHERE REL_TYP_ID = 66 AND NVL(FLD_DELETE,0) = 0)- 
+(SELECT COUNT(*) FROM SBR.COMPLEX_DE_RELATIONSHIPS)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.COMPLEX_DE_RELATIONSHIPS) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Program Area', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 14) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 14 )-
-(select count(*) from sbr.PROGRAM_AREAS_LOV )) DIFF_CNT,
-(select count(*) from sbr.PROGRAM_AREAS_LOV ) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'PROGRAM AREA', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 14) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 14 )-
+(SELECT COUNT(*) FROM SBR.PROGRAM_AREAS_LOV )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.PROGRAM_AREAS_LOV ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Designation Type', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 11) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 11 )-(select count(*) from sbr.DESIGNATION_TYPES_LOV)) DIFF_CNT,
-(select count(*) from sbr.DESIGNATION_TYPES_LOV) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'DESIGNATION TYPE', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 11) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 11 )-(SELECT COUNT(*) FROM SBR.DESIGNATION_TYPES_LOV)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.DESIGNATION_TYPES_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Address Type', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 25) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 25 )-(select count(*) from sbr.ADDR_TYPES_LOV)) DIFF_CNT,
-(select count(*) from sbr.ADDR_TYPES_LOV) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'ADDRESS TYPE', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 25) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 25 )-(SELECT COUNT(*) FROM SBR.ADDR_TYPES_LOV)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.ADDR_TYPES_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Communication Type', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 26) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 26 )-(select count(*) from sbr.COMM_TYPES_LOV)) DIFF_CNT,
-(select count(*) from sbr.COMM_TYPES_LOV) caDSR_CNT,NULL
-from dual;
-commit;
-
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Status-Admin Type Relationship', 
-(select count(*) from onedata_wa.NCI_AI_TYP_VALID_STUS ) WA_CNT,
-((select count(*) from onedata_wa.NCI_AI_TYP_VALID_STUS)-
-(select count(*) from sbrext.ASL_ACTL_EXT)) DIFF_CNT,
-(select count(*) from sbrext.ASL_ACTL_EXT)caDSR_CNT,NULL
-from dual;
-commit;
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Derivation Type', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 21) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 21 )-(select count(*) from sbr.complex_rep_type_lov)) DIFF_CNT,
-(select count(*) from sbr.complex_rep_type_lov) caDSR_CNT,NULL
-from dual;
-commit;
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Document Type', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 1) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 1)-(select count(*) from sbr.document_TYPES_LOV) ) DIFF_CNT,
-(select count(*) from sbr.document_TYPES_LOV) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'COMMUNICATION TYPE', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 26) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 26 )-(SELECT COUNT(*) FROM SBR.COMM_TYPES_LOV)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.COMM_TYPES_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'STATUS-ADMIN TYPE RELATIONSHIP', 
+(SELECT COUNT(*) FROM ONEDATA_WA.NCI_AI_TYP_VALID_STUS ) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.NCI_AI_TYP_VALID_STUS)-
+(SELECT COUNT(*) FROM SBREXT.ASL_ACTL_EXT)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.ASL_ACTL_EXT)CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Classification Scheme Type', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 3) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 3 )-(select count(*) from sbr.CS_TYPES_LOV)) DIFF_CNT,
-(select count(*) from sbr.CS_TYPES_LOV) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'DERIVATION TYPE', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 21) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 21 )-(SELECT COUNT(*) FROM SBR.COMPLEX_REP_TYPE_LOV)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.COMPLEX_REP_TYPE_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'CSI Type', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 20) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 20 )-(select count(*) from sbr.CSI_TYPES_LOV )) DIFF_CNT,
-(select count(*) from sbr.CSI_TYPES_LOV ) caDSR_CNT,NULL
-from dual;
-commit;
-
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Definition Type', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 15) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 15 )-(select count(*) from sbrext.definition_types_lov_ext)) DIFF_CNT,
-(select count(*) from sbrext.definition_types_lov_ext) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'DOCUMENT TYPE', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 1) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 1)-(SELECT COUNT(*) FROM SBR.DOCUMENT_TYPES_LOV) ) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.DOCUMENT_TYPES_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
 
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Origin', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 18) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 18 )-(select count(*) from sbrext.sources_ext)) DIFF_CNT,
-(select count(*) from sbrext.sources_ext) caDSR_CNT,NULL
-from dual;
-commit;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'CLASSIFICATION SCHEME TYPE', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 3) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 3 )-(SELECT COUNT(*) FROM SBR.CS_TYPES_LOV)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.CS_TYPES_LOV) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
 
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Protocol Type', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 19) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 19 )-(select count(*) from (select distinct 19, TYPE, TYPE 
-from sbrext.protocols_ext where type is not null and nvl(deleted_ind,'No') ='No'))) DIFF_CNT,
-(select count(*) from (select distinct 19, TYPE, TYPE from sbrext.protocols_ext where type is not null and nvl(deleted_ind,'No') ='No') ) caDSR_CNT,NULL
-from dual;
-commit;
--- Form Category where obj_typ_id = 22;
-insert into OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, caDSR_CNT,COMMENTS)
-select 'Form Category', 
-(select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 22) WA_CNT,
-((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 22 )-(select count(*) from sbrext.QC_DISPLAY_LOV_EXT)) DIFF_CNT,
-(select count(*) from sbrext.QC_DISPLAY_LOV_EXT) caDSR_CNT,NULL
-from dual;
-commit;
 
-Update OD_CADSR_TABLES_TEST_RESULTS set comments =
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'CSI TYPE', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 20) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 20 )-(SELECT COUNT(*) FROM SBR.CSI_TYPES_LOV )) DIFF_CNT,
+(SELECT COUNT(*) FROM SBR.CSI_TYPES_LOV ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'DEFINITION TYPE', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 15) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 15 )-(SELECT COUNT(*) FROM SBREXT.DEFINITION_TYPES_LOV_EXT)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.DEFINITION_TYPES_LOV_EXT) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'ORIGIN', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 18) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 18 )-(SELECT COUNT(*) FROM SBREXT.SOURCES_EXT)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.SOURCES_EXT) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'PROTOCOL TYPE', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 19) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 19 )-(SELECT COUNT(*) FROM (SELECT DISTINCT 19, TYPE, TYPE 
+FROM SBREXT.PROTOCOLS_EXT WHERE TYPE IS NOT NULL AND NVL(DELETED_IND,'NO') ='NO'))) DIFF_CNT,
+(SELECT COUNT(*) FROM (SELECT DISTINCT 19, TYPE, TYPE FROM SBREXT.PROTOCOLS_EXT WHERE TYPE IS NOT NULL AND NVL(DELETED_IND,'NO') ='NO') ) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+-- FORM CATEGORY WHERE OBJ_TYP_ID = 22;
+INSERT INTO OD_CADSR_TABLES_TEST_RESULTS (TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT,COMMENTS)
+SELECT 'FORM CATEGORY', 
+(SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 22) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.OBJ_KEY WHERE OBJ_TYP_ID = 22 )-(SELECT COUNT(*) FROM SBREXT.QC_DISPLAY_LOV_EXT)) DIFF_CNT,
+(SELECT COUNT(*) FROM SBREXT.QC_DISPLAY_LOV_EXT) CADSR_CNT,NULL
+FROM DUAL;
+COMMIT;
+
+UPDATE OD_CADSR_TABLES_TEST_RESULTS SET COMMENTS =
 CASE 
     WHEN DIFF_CNT>0
-    THEN 'The table '||TABLE_NAME||' has for '||DIFF_CNT||' recors more in OD'
+    THEN 'THE TABLE '||TABLE_NAME||' HAS FOR '||DIFF_CNT||' RECORS MORE IN OD'
     WHEN DIFF_CNT<0
-    THEN 'The table '||TABLE_NAME||' has for '||-1*(DIFF_CNT)||' recors more in caDSR'
+    THEN 'THE TABLE '||TABLE_NAME||' HAS FOR '||-1*(DIFF_CNT)||' RECORS MORE IN CADSR'
     END 
-    where DIFF_CNT<>0;
-    commit;
-end;
+    WHERE DIFF_CNT<>0;
+    COMMIT;
+END;
 /
 
