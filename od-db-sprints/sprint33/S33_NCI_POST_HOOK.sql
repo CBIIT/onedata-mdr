@@ -1,6 +1,8 @@
 create or replace PACKAGE nci_post_hook AS
 
 procedure spRefDocInsUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+
+procedure spRefDocBlobIns ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure spAISTUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spAICDEUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spAIVDUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
@@ -11,6 +13,7 @@ procedure spDervCompIns ( v_data_in in clob, v_data_out out clob, v_user_id varc
 procedure spModRestore ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_mode in varchar2);
 procedure spQuestRestore ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_mode in varchar2);
 procedure spQuestUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spQuestRepUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure spQuestVVRestore ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_mode in varchar2);
 procedure spAIIns ( v_data_in in clob, v_data_out out clob);
 procedure spCSFormIns ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -22,8 +25,123 @@ procedure spOrgUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2)
 
 END;
 /
+
 create or replace PACKAGE BODY NCI_POST_HOOK AS
 
+PROCEDURE            spDEPrefQuestPost (
+    row_ori   IN     t_row,
+    actions   IN OUT t_actions)
+AS
+    action           t_actionRowset;
+    row              t_row;
+    rows             t_rows;
+    action_rows      t_rows := t_rows ();
+    action_row       t_row;
+    rowset           t_rowset;
+    v_add            INTEGER := 0;
+    v_action_typ     VARCHAR2 (30);
+    v_item_id        NUMBER;
+    v_ver_nr         NUMBER (4, 2);
+    v_nm_id          NUMBER;
+    v_cntxt_id       NUMBER;
+    long_nm          VARCHAR(200);
+    v_cntxt_ver_nr   NUMBER (4, 2);
+    i                INTEGER := 0;
+    column           t_column;
+    msg              VARCHAR2 (4000);
+BEGIN
+    v_item_id := ihook.getColumnValue (row_ori, 'ITEM_ID');
+    v_ver_nr := ihook.getColumnValue (row_ori, 'VER_NR');
+    rows := t_rows ();
+
+    IF (ihook.getColumnValue (row_ori, 'PREF_QUEST_TXT') IS NOT NULL)
+    THEN
+        SELECT cntxt_item_id, cntxt_ver_nr
+          INTO v_cntxt_id, v_cntxt_ver_nr
+          FROM admin_item
+         WHERE item_id = v_item_id AND ver_nr = v_ver_nr;
+
+        row := t_row ();
+        ihook.setColumnValue (row, 'ITEM_ID', v_item_id);
+        ihook.setColumnValue (row, 'VER_NR', v_ver_nr);
+        ihook.setColumnValue (            row,
+            'REF_NM',
+            'PQT');
+        ihook.setColumnValue (
+            row,
+            'REF_DESC',
+            ihook.getColumnValue (row_ori, 'PREF_QUEST_TXT'));
+        ihook.setColumnValue (row, 'LANG_ID', 1000);
+        ihook.setColumnValue (row, 'NCI_CNTXT_ITEM_ID', v_cntxt_id);
+        ihook.setColumnValue (row, 'NCI_CNTXT_VER_NR', v_cntxt_ver_nr);
+        ihook.setColumnValue (row, 'REF_TYP_ID', 80);
+
+        ihook.setColumnValue (row, 'REF_ID', -1);
+        v_action_typ := 'insert';
+
+        FOR cur
+            IN (SELECT REF_ID
+                  FROM REF
+                 WHERE     item_id = v_item_id
+                       AND ver_nr = v_ver_nr
+                       AND ref_typ_id = 80)
+        LOOP
+            ihook.setColumnValue (row, 'REF_ID', cur.ref_id);
+            v_action_typ := 'update';
+        END LOOP;
+
+        rows.EXTEND;
+        rows (rows.LAST) := row;
+        action :=
+            t_actionrowset (rows,
+                            'References (for Edit)',
+                            2,
+                            0,
+                            v_action_typ);
+        actions.EXTEND;
+        actions (actions.LAST) := action;
+        /*DSRMWS-455 PREF_QUEST_TXT IS NULL Start 01/08/2021 AT*/
+        ELSE
+        
+        SELECT SUBSTR(ITEM_NM,1,195)
+          INTO LONG_NM
+          FROM admin_item
+         WHERE item_id = v_item_id AND ver_nr = v_ver_nr;
+
+        row := t_row ();
+        ihook.setColumnValue (row, 'ITEM_ID', v_item_id);
+        ihook.setColumnValue (row, 'VER_NR', v_ver_nr);
+        ihook.setColumnValue (row, 'REF_NM', 'PQT');
+        
+        ihook.setColumnValue (
+            row,
+            'REF_DESC',
+            'Data Element ' || LONG_NM || ' does not have Preferred Question Text');
+        
+        FOR cur
+            IN (SELECT REF_ID
+                  FROM REF
+                 WHERE     item_id = v_item_id
+                       AND ver_nr = v_ver_nr
+                       AND ref_typ_id = 80)
+        LOOP
+            ihook.setColumnValue (row, 'REF_ID', cur.ref_id);
+            v_action_typ := 'update';
+        END LOOP;
+
+        rows.EXTEND;
+        rows (rows.LAST) := row;
+        action :=
+            t_actionrowset (rows,
+                            'References (for Edit)',
+                            2,
+                            0,
+                            v_action_typ);
+        actions.EXTEND;
+        actions (actions.LAST) := action;
+        /*DSRMWS-455 PREF_QUEST_TXT IS NULL END 01/08/2021 AT*/
+        END IF;
+END;
 
 procedure            sp_postprocess ( v_data_in in clob, v_data_out out clob)
 as
@@ -267,7 +385,7 @@ as
 hookInput        t_hookInput;
     hookOutput       t_hookOutput := t_hookOutput ();
     row_ori          t_row;
-
+    v_temp integer :=0;
   BEGIN
     hookinput := Ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber := hookinput.invocationnumber;
@@ -277,6 +395,43 @@ hookInput        t_hookInput;
    -- raise_application_error(-20000, ihook.getColumnValue(row_ori,'REF_TYP_ID'));
   if (ihook.getColumnValue(row_ori,'REF_TYP_ID') = 80 or ihook.getColumnOldValue(row_ori,'REF_TYP_ID') = 80) then
     raise_application_error(-20000,'You cannot insert or update Preferred Question Text from Reference Documents. Please use Section 4 - Relational/Representation Attributes.');
+ end if;
+
+select count(*) into v_temp from obj_key  where obj_key_id = ihook.getColumnValue(row_ori,'REF_TYP_ID') and upper(obj_key_desc) like '%QUESTION TEXT%';
+
+ if (ihook.getColumnValue(row_ori,'REF_DESC') is null and v_temp > 0 ) then
+    raise_application_error(-20000,'Please specify Reference Document Text for this document type.');
+ end if;
+
+ V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+end;
+
+
+procedure spRefDocBlobIns ( v_data_in in clob, v_data_out out clob, v_user_id varchar2)
+as
+hookInput        t_hookInput;
+    hookOutput       t_hookOutput := t_hookOutput ();
+    row_ori          t_row;
+    v_temp integer :=0;
+    v_item_id number;
+    v_ver_nr number(4,2);
+  BEGIN
+    hookinput := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber := hookinput.invocationnumber;
+    hookoutput.originalrowset := hookinput.originalrowset;
+
+    row_ori := hookInput.originalRowset.rowset (1);
+          select nci_cntxt_item_id, nci_cntxt_ver_nr into v_item_id, v_ver_nr from ref where
+        ref_id = ihook.getColumnValue(row_ori, 'NCI_REF_ID');
+ if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_user_id) = false) then
+    -- raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ' || v_item_id || ' ' || v_user_id);
+    raise_application_error(-20000, 'You are not authorized to insert/update or delete in this Context. ' );
+        return;
+    end if;
+select count(*) into v_temp from obj_key ok, ref r  where obj_key_id = r.REF_TYP_ID and upper(obj_key_desc) like '%QUESTION TEXT%' and r.ref_id = ihook.getColumnValue(row_ori,'NCI_REF_ID');
+
+ if ( v_temp > 0 ) then
+    raise_application_error(-20000,'Blobs cannot be added for this type of document.');
  end if;
 
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -448,6 +603,31 @@ end if;
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
+
+procedure spQuestRepUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2)
+as
+hookInput        t_hookInput;
+    hookOutput       t_hookOutput := t_hookOutput ();
+    row_ori          t_row;
+    v_item_id number;
+    v_ver_nr number(4,2);
+  BEGIN
+    hookinput := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber := hookinput.invocationnumber;
+    hookoutput.originalrowset := hookinput.originalrowset;
+
+    row_ori := hookInput.originalRowset.rowset (1);
+   if (ihook.getColumnValue(row_ori, 'VAL') is not null ) then
+   -- Check if valid values
+    for cur in (select * from   nci_quest_valid_value where q_pub_id = ihook.getColumnValue(row_ori, 'QUEST_PUB_ID') 
+    and q_ver_nr = ihook.getColumnValue(row_ori, 'QUEST_VER_NR')) loop
+      raise_application_error(-20000, 'Cannot set non-enumerated default for question with valid values.');
+    return;
+end loop;
+end if;
+
+ V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+end;
 
 procedure spOrgUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2)
 as
@@ -689,6 +869,8 @@ BEGIN
     end if;
 
 
+-- if form context is changed, then change context for all modules. 
+
     if (ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') = 8 and ihook.getColumnValue(row_ori,'ITEM_NM') <> ihook.getColumnOldValue(row_ori,'ITEM_NM')) then
     -- if context name has changed
     -- disable all triggers on admin_item and alt_nms
@@ -906,6 +1088,7 @@ AS
     v_item_nm        VARCHAR2 (255);
     v_item_def       VARCHAR2 (4000);
     v_item_desc       VARCHAR2 (4000);
+    v_long_nm       varchar2(30);
     v_admin_item_typ    number;
     msg              VARCHAR2 (4000);
 BEGIN
@@ -1006,6 +1189,15 @@ BEGIN
             ihook.setColumnValue (row, 'ITEM_ID', v_item_id);
             ihook.setColumnValue (row, 'VER_NR', v_ver_nr);
             ihook.setColumnValue (row, 'ITEM_NM', v_item_nm);
+            select item_long_nm into v_long_nm from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
+         --   raise_application_Error(-20000, 'Here' || instr(v_long_nm,ihook.getColumnOldValue(row_ori, 'DE_CONC_ITEM_ID')));
+            if (instr(v_long_nm,ihook.getColumnOldValue(row_ori, 'DE_CONC_ITEM_ID')) > 0 and
+             instr(v_long_nm,ihook.getColumnOldValue(row_ori, 'VAL_DOM_ITEM_ID')) > 0) then
+        
+            ihook.setColumnValue (row, 'ITEM_LONG_NM', ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') || 'v'
+        || trim(to_char(ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR'), '9999.99')) || ':' || ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') || 'v' ||
+        trim(to_char(ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'), '9999.99')));
+        end if;
             ihook.setColumnValue (row, 'ITEM_DESC', v_item_def);
             rows.EXTEND;
             rows (rows.LAST) := row;
@@ -1019,7 +1211,7 @@ BEGIN
             actions (actions.LAST) := action;
         END IF;
 
-        spDEPrefQuestPost2 (row_ori, actions);
+        spDEPrefQuestPost (row_ori, actions);
 
         -- Tracker 818 - if Derivation Rule is set, then
 
@@ -1238,3 +1430,4 @@ END;
 
 END;
 /
+
