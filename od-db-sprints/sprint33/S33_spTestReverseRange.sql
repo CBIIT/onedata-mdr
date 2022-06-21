@@ -159,7 +159,7 @@ commit;
 
 insert into TEST_RESULTS (TABLE_NAME, WA_CNT,  caDSR_CNT)
 select 'Common - Designations', 
-(select count(*) from onedata_wa.ALT_NMS where  nvl(fld_delete,0) = 0 and lst_upd_dt >= sysdate - vHours/24) WA_CNT,
+(select count(*) from onedata_wa.ALT_NMS where  nvl(fld_delete,0) = 0 and lst_upd_dt >= sysdate - vHours/24 and nvl(fld_delete,0) = 0) WA_CNT,
 (select count(*) from sbr.designations where nvl(date_modified, date_created) >= sysdate - vHours/24) caDSR_CNT
 from dual;
 commit;
@@ -168,7 +168,7 @@ commit;
 
 insert into TEST_RESULTS (TABLE_NAME, WA_CNT,  caDSR_CNT)
 select 'Common - Definitions', 
-(select count(*) from onedata_wa.ALT_DEF where  nvl(fld_delete,0) = 0 and lst_upd_dt >= sysdate - vHours/24) WA_CNT,
+(select count(*) from onedata_wa.ALT_DEF where  nvl(fld_delete,0) = 0 and lst_upd_dt >= sysdate - vHours/24 and nvl(fld_delete,0) = 0) WA_CNT,
 (select count(*) from sbr.definitions where nvl(date_modified, date_created) >= sysdate - vHours/24) caDSR_CNT
 from dual;
 commit;
@@ -177,7 +177,7 @@ commit;
 
 insert into TEST_RESULTS (TABLE_NAME, WA_CNT,  caDSR_CNT)
 select 'Common - Reference Documents', 
-(select count(*) from onedata_wa.REF where  nvl(fld_delete,0) = 0 and lst_upd_dt >= sysdate - vHours/24) WA_CNT,
+(select count(*) from onedata_wa.REF where  nvl(fld_delete,0) = 0 and lst_upd_dt >= sysdate - vHours/24 and nvl(fld_delete,0) = 0) WA_CNT,
 (select count(*) from sbr.reference_documents where nvl(date_modified, date_created) >= sysdate - vHours/24) caDSR_CNT
 from dual;
 commit;
@@ -255,7 +255,7 @@ commit;
 
 insert into TEST_RESULTS (TABLE_NAME, WA_CNT,  caDSR_CNT)
 select 'Form - VV Instruction', 
-(select count(*) from onedata_wa.nci_quest_valid_value where  lst_upd_dt >= sysdate - vHours/24 and instr is not null) WA_CNT,
+(select count(*) from onedata_wa.nci_quest_valid_value where  lst_upd_dt >= sysdate - vHours/24 and nvl(fld_delete,0) = 0 and instr is not null) WA_CNT,
 (select count(*) from sbrext.quest_contents_ext where qtl_name in ('VALUE_INSTR') and nvl(date_modified, date_created) >= sysdate - vHours/24)
  caDSR_CNT
 from dual;
@@ -265,7 +265,7 @@ commit;
 /***table NCI_ALT_KEY_ADMIN_ITEM_REL is replaced by NCI_ADMIN_ITEM_REL***/
 insert into TEST_RESULTS (TABLE_NAME, WA_CNT,  caDSR_CNT)
 select 'Common - Classifications', 
-(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL where rel_typ_id = 65  and lst_upd_dt >= sysdate - vHours/24) WA_CNT,
+(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL where rel_typ_id = 65  and lst_upd_dt >= sysdate - vHours/24 and nvl(fld_delete,0) = 0) WA_CNT,
 (select count(*) from sbr.ac_csi where nvl(date_modified, date_created) >= sysdate - vHours/24) caDSR_CNT
 from dual;
 commit;
@@ -274,10 +274,11 @@ commit;
 /********  ADDED**********/
 insert into TEST_RESULTS (TABLE_NAME, WA_CNT,  caDSR_CNT)
 select 'Administered Item Specific - DDE', 
-(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL where rel_typ_id = 66 and lst_upd_dt >= sysdate - vHours/24) WA_CNT,
+(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL where rel_typ_id = 66 and nvl(fld_delete,0) = 0 and lst_upd_dt >= sysdate - vHours/24) WA_CNT,
 (select count(*) from sbr.complex_de_relationships where nvl(date_modified, date_created) >= sysdate - vHours/24) caDSR_CNT
 from dual;
 commit;
 
 
 end;
+/
