@@ -33,8 +33,8 @@ procedure VMCreateEditCore ( v_init in t_rowset,  hookInput in t_hookInput, hook
 procedure createVMConcept (rowform in out t_row, v_cncpt_src in varchar2, v_mode in varchar2,  actions in out t_actions);
 
 END;
-
 /
+
 create or replace PACKAGE BODY            nci_PV_VM AS
 
 c_long_nm_len  integer := 30;
@@ -1113,6 +1113,7 @@ k integer;
   v_item_typ_glb integer;
   v_pv  varchar2(255);
   v_vm_nm varchar2(255);
+  v_cur_item_id number;
 begin
     v_item_typ_glb := 53;
         row := t_row();        rows := t_rows();
@@ -1121,6 +1122,8 @@ begin
 
     v_typ := upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP'));
 
+    select max(item_id) into v_cur_item_id from admin_item where admin_item_typ_id <> 8;
+    
     case
     when v_typ = 'CONCEPTS' then
         nci_dec_mgmt.createValAIWithConcept(row_ori , 1,v_item_typ_glb ,'C','DROP-DOWN',actions); -- Vm
@@ -1144,6 +1147,7 @@ begin
         select count(*) into v_temp from CONC_DOM_VAL_MEAN where CONC_DOM_ITEM_ID = ihook.getColumnValue(row_ori, 'CONC_DOM_ITEM_ID') and
         CONC_DOM_VER_NR = ihook.getColumnValue(row_ori, 'CONC_DOM_VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = v_ver_nr;
 
+        
 --  If VM/CONC_DOM new
         if (v_temp = 0) then
         rows := t_rows();
@@ -1175,8 +1179,7 @@ begin
           action := t_actionrowset(rows, 'Permissible Values (Edit AI)', 2,19,'insert');
            actions.extend;
            actions(actions.last) := action;
-
-
+     
     -- VM Alternate Name
         if (ihook.getColumnValue(row_ori, 'VM_ALT_NM') is not null and ihook.getColumnValue(row_ori, 'VM_ALT_NM_TYP_ID') is not null) then
         rows := t_rows();
@@ -1198,7 +1201,14 @@ begin
         end if;
         
         ihook.setColumnValue(row_ori,'CTL_VAL_STUS',  'PROCESSED');
-        ihook.setColumnValue(row_ori,'CTL_VAL_MSG', 'Value Meaning ID: ' || v_item_id);
+        ihook.setColumnValue(row_ori,'CTL_VAL_MSG', 'Value Meaning ID: ' || v_item_id );
+
+
+        if (v_item_id <= v_cur_item_id) then
+                    ihook.setColumnValue(row_ori, 'ITEM_1_ID', '');
+                    ihook.setColumnValue(row_ori, 'ITEM_1_VER_NR', '');
+      end if; 
+        -- end if
 
 
 
@@ -1982,3 +1992,4 @@ end;
 
 END;
 /
+
