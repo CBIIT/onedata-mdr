@@ -1,5 +1,9 @@
-create or replace view VW_ODcaDSR_Counts_All as
+DROP VIEW ONEDATA_WA.VW_ODCADSR_COUNTS_ALL;
 
+CREATE OR REPLACE FORCE VIEW ONEDATA_WA.VW_ODCADSR_COUNTS_ALL
+(TABLE_NAME, WA_CNT, DIFF_CNT, CADSR_CNT)
+BEQUEATH DEFINER
+AS 
 select 'DE' Table_Name, 
 (select count(*) from onedata_wa.de where nvl(fld_delete,0)=0) WA_CNT,
 ((select count(*) from onedata_Wa.de  where nvl(fld_delete,0)=0)-(select count(*) from sbr.data_elements where nvl(deleted_ind,'No') ='No') ) DIFF_CNT,
@@ -317,11 +321,18 @@ where qc1.qtl_name = 'VALUE_INSTR'and preferred_definition !=' ' and nvl(deleted
  caDSR_CNT
 from dual
 UNION
-select 'CS CSI', 
-(select count(*) from onedata_wa.NCI_CLSFCTN_SCHM_ITEM where CS_CSI_IDSEQ is not null and nvl(fld_delete,0) = 0) WA_CNT,
-((select count(*) from onedata_wa.NCI_CLSFCTN_SCHM_ITEM where CS_CSI_IDSEQ is not null and nvl(fld_delete,0) = 0)-(select count(*) from sbr.cs_csi ) ) DIFF_CNT,
-(select count(*) from sbr.cs_csi ) caDSR_CNT
-from dual
+SELECT 'CS CSI', 
+((SELECT COUNT(*) FROM ONEDATA_WA.ADMIN_ITEM CSIAI, ONEDATA_WA.NCI_CLSFCTN_SCHM_ITEM CSI, ONEDATA_WA.ADMIN_ITEM CS WHERE
+ CSI.CS_ITEM_ID = CS.ITEM_ID AND CSI.CS_ITEM_VER_NR = CS.VER_NR
+ AND CSI.ITEM_ID = CSIAI.ITEM_ID AND CSI.VER_NR = CSIAI.VER_NR  AND NVL(CSI.FLD_DELETE,0) = 0)) WA_CNT,
+((SELECT COUNT(*) FROM ONEDATA_WA.ADMIN_ITEM CSIAI, ONEDATA_WA.NCI_CLSFCTN_SCHM_ITEM CSI, ONEDATA_WA.ADMIN_ITEM CS WHERE
+ CSI.CS_ITEM_ID = CS.ITEM_ID AND CSI.CS_ITEM_VER_NR = CS.VER_NR
+ AND CSI.ITEM_ID = CSIAI.ITEM_ID AND CSI.VER_NR = CSIAI.VER_NR  AND NVL(CSI.FLD_DELETE,0) = 0)-
+ ((SELECT COUNT(*) FROM SBR.CS_CSI )-(select count(*)from SBR.ADMINISTERED_COMPONENTS a where ASL_NAME like 'RETIRED%'
+and a.MODIFIED_BY= 'GDEEN' and actl_name='CS_ITEM')) ) DIFF_CNT,
+((SELECT COUNT(*) FROM SBR.CS_CSI )-(select count(*)from SBR.ADMINISTERED_COMPONENTS a where ASL_NAME like 'RETIRED%'
+and a.MODIFIED_BY= 'GDEEN' and actl_name='CS_ITEM')) CADSR_CNT
+FROM DUAL
 UNION
 select 'CS CSI DE Relationship', 
 (select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL where rel_typ_id = 65 and nvl(fld_delete,0) = 0) WA_CNT,
@@ -415,8 +426,4 @@ select 'Form Category',
 (select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 22) WA_CNT,
 ((select count(*) from onedata_wa.OBJ_KEY where obj_typ_id = 22 )-(select count(*) from sbrext.QC_DISPLAY_LOV_EXT)) DIFF_CNT,
 (select count(*) from sbrext.QC_DISPLAY_LOV_EXT) caDSR_CNT
-from dual
-;
-
-
-
+from dual;
