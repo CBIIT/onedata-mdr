@@ -430,8 +430,8 @@ where upper(dtl_name) in
     where nci_dttype_typ_id=1
     and lst_upd_dt >=  sysdate - vHours/24 );
 
-insert into sbr.datatypes_lov (dtl_name, DESCRIPTION,COMMENTS, date_modified, modified_by, SCHEME_REFERENCE, ANNOTATION)
-select  NCI_CD, DTTYPE_DESC, NCI_DTTYPE_CMNTS, LST_UPD_DT,LST_UPD_USR_ID, DTTYPE_SCHM_REF, DTTYPE_ANNTTN
+insert into sbr.datatypes_lov (dtl_name, DESCRIPTION,COMMENTS,date_created, created_by,  date_modified, modified_by, SCHEME_REFERENCE, ANNOTATION)
+select  NCI_CD, DTTYPE_DESC, NCI_DTTYPE_CMNTS, CREAT_DT,CREAT_USR_ID, LST_UPD_DT,LST_UPD_USR_ID, DTTYPE_SCHM_REF, DTTYPE_ANNTTN
 from data_typ
 where lst_upd_Dt >= sysdate - vHours/24
 and   nci_dttype_typ_id = 1
@@ -463,7 +463,7 @@ created_by, date_created,date_modified, modified_by from sbr.formats_lov;
 -- UOM
 
 insert into sbr.unit_of_measures_lov (UOML_NAME,PRECISION, DESCRIPTION,COMMENTS, created_by, date_created,date_modified, modified_by)
-select NCI_CD, UOM_PREC,UOM_DESC,UOM_CMNTS, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID
+select NCI_CD, nvl(UOM_PREC,0),UOM_DESC,UOM_CMNTS, CREAT_USR_ID, CREAT_DT, LST_UPD_DT,LST_UPD_USR_ID
 from UOM
 where creat_dt >= sysdate - vHours/24
 and upper(NCI_CD) not in (select upper(UOML_NAME) from sbr.unit_of_measures_lov);
@@ -1002,6 +1002,7 @@ v_temp integer;
 v_nci_idseq char(36);
 v_vd_idseq char(36);
 v_pv_idseq char(36);
+v_nci_cd  varchar2(255);
 begin
 
 --- CD-VM relationship
@@ -1045,34 +1046,36 @@ select nci_idseq into v_vd_idseq from admin_item where item_id = cur.val_dom_ite
 select count(*) into v_temp from sbr.vd_pvs where vp_idseq = cur.nci_idseq;
 
 --or (vd_idseq, pv_idseq) in (select v_vd_idseq, v_pv_idseq from dual) ;
+if (cur.nci_origin_id is not null) then
+select nci_cd into v_nci_cd from obj_key where obj_key_id= cur.nci_origin_id and obj_typ_id = 18;
+end if;
 
 if (v_temp = 0) then
-insert into sbr.vd_pvs (vp_idseq, BEGIN_DATE, END_DATE, pv_idseq, vd_idseq, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
-select cur.nci_idseq, cur.PERM_VAL_BEG_DT, cur.PERM_VAL_END_DT, v_pv_idseq, v_vd_idseq, cur.CREAT_DT, cur.CREAT_USR_ID, cur.LST_UPD_DT,cur.LST_UPD_USR_ID from dual;
+insert into sbr.vd_pvs (vp_idseq, ORIGIN,BEGIN_DATE, END_DATE, pv_idseq, vd_idseq, DATE_CREATED, CREATED_BY, DATE_MODIFIED, MODIFIED_BY)
+select cur.nci_idseq, v_nci_cd, cur.PERM_VAL_BEG_DT, cur.PERM_VAL_END_DT, v_pv_idseq, v_vd_idseq, cur.CREAT_DT, cur.CREAT_USR_ID, cur.LST_UPD_DT,cur.LST_UPD_USR_ID from dual;
 commit;
-if (cur.nci_origin_id is not null) then
-insert into sbrext.vd_pvs_sources_ext (VPS_IDSEQ,VP_IDSEQ,SRC_NAME,DATE_CREATED,CREATED_BY)
-select nci_11179.cmr_guid, cur.nci_idseq, ok.obj_key_desc, cur.creat_dt, cur.creat_usr_id from obj_key ok where ok.obj_key_id = cur.nci_origin_id  ;
-end if;
-commit;
-elsif v_temp = 1 then
-update sbr.vd_pvs set (BEGIN_DATE, END_DATE, pv_idseq, DATE_MODIFIED, MODIFIED_BY)  =  (select cur.PERM_VAL_BEG_DT, cur.PERM_VAL_END_DT, v_pv_idseq,cur.LST_UPD_DT,cur.LST_UPD_USR_ID from dual )
+else -- update
+update  sbr.vd_pvs set (origin, begin_date,end_date, pv_idseq, date_modified, modified_by) = 
+(select v_nci_cd, cur.PERM_VAL_BEG_DT, cur.PERM_VAL_END_DT,v_pv_idseq, cur.LST_UPD_DT,cur.LST_UPD_USR_ID from dual)
 where vp_idseq = cur.nci_idseq;
+commit;
+end if;
+/*
 if (cur.nci_origin_id is not null) then
 select count(*) into v_temp from sbrext.vd_pvs_sources_ext where vp_idseq = cur.nci_idseq;
 if (v_temp = 0) then
 insert into sbrext.vd_pvs_sources_ext (VPS_IDSEQ,VP_IDSEQ,SRC_NAME,DATE_CREATED,CREATED_BY)
-select nci_11179.cmr_guid, cur.nci_idseq, ok.obj_key_desc, cur.creat_dt, cur.creat_usr_id from obj_key ok where ok.obj_key_id = cur.nci_origin_id  ;
+select nci_11179.cmr_guid, cur.nci_idseq, ok.obj_key_desc, sysdate, cur.creat_usr_id from obj_key ok where ok.obj_key_id = cur.nci_origin_id  ;
 else
-update sbrext.vd_pvs_sources_ext set src_name = (select obj_key_desc from obj_key where obj_key_id = cur.nci_origin_id)
+update sbrext.vd_pvs_sources_ext set (src_name, modified_by) = (select obj_key_desc, cur.lst_upd_usr_id from obj_key where obj_key_id = cur.nci_origin_id)
 where vp_idseq = cur.nci_idseq;
 commit;
 end if;
 
 
 end if;
+*/
 
-end if;
 end loop;
 commit;
 
@@ -1082,8 +1085,10 @@ for cur in (select * from perm_val where  lst_upd_dt >= sysdate - vHours/24 and 
 --and ai.nci_idseq = pv.vm_idseq and pv.value = cur.perm_val_nm ) loop
 select nci_idseq into v_vd_idseq from admin_item where item_id = cur.val_dom_item_id and ver_nr = cur.val_dom_ver_nr;
 
+/*
 delete from sbrext.VD_PVS_SOURCES_EXT where vp_idseq = cur.nci_idseq;
 commit;
+*/
 
 delete from sbr.vd_pvs where vp_idseq = cur.nci_idseq;
 commit;
