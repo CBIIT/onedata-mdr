@@ -49,3 +49,6 @@ if (:new.lst_upd_dt is null) then
 end if;
 END ;
 /
+
+alter type t_column modify attribute value varchar2(32000)  CASCADE;
+
