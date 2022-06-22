@@ -1,16 +1,23 @@
 create or replace Procedure SAG_LOAD_CONCEPT_RETIRE (p_END_DATE IN date default sysdate)
 AS
 v_end_date DATE;
+v_updated_by2 varchar2(64) = '. Updated by caDSR II Monthly Concept Load.';
+v_updated_by1 varchar2(256) = 'Updated caDSR information to match EVS retirement status, concept was retired on ';
+v_updated_by varchar2(512);
 BEGIN
-	v_end_date := p_END_DATE;
+     v_end_date := p_END_DATE;
+     v_updated_by := v_updated_by1 || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
 update admin_item set admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
-	LST_UPD_USR_ID = 'ONEDATA', 
-	UNTL_DT = v_end_date,
-	REGSTR_STUS_ID = 11 -- 'Retired'
-	where admin_item_typ_id = 49 and -- Concept
-	admin_stus_id <> 77 and 
-	item_long_nm in ( -- EVS provided list - parents of retired concepts
-	select code from sag_load_concepts_evs where parents in(
+     LST_UPD_USR_ID = 'ONEDATA', 
+     UNTL_DT = v_end_date,
+     CHNG_DESC_TXT = v_updated_by,
+     REGSTR_STUS_ID = 11 -- 'Retired'
+     where admin_item_typ_id = 49 and -- Concept
+     admin_stus_id <> 77 and 
+     and CNTXT_ITEM_ID = 20000000024 --NCIP
+     and CNTXT_VER_NR = 1
+     item_long_nm in ( -- EVS provided list - parents of retired concepts
+     select code from sag_load_concepts_evs where parents in(
 'C176957',
 'C167277',
 'C157491',
@@ -35,8 +42,8 @@ update admin_item set admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
 commit;
 exception
  when OTHERS then
-   DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_RETIRE error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 128));
-   rollback;
+  DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_RETIRE error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 128));
+  rollback;
 END;
 /
 create or replace Procedure SAG_LOAD_CONCEPT_ADMIN_ITEM_DESIG AS
@@ -149,5 +156,46 @@ dbms_output.put_line('loaded concepts synonyms to ALT_NMS !!!');
 	EXECUTE IMMEDIATE 'DROP INDEX IDX_SAG_LOAD_CNCPT_ID_VER';
 
 	SAG_LOAD_CONCEPT_RETIRE(v_eff_date); --retire EVS-retired concepts
+END;
+/
+ccreate or replace procedure SAG_LOAD_CONCEPT_PREPARE_UPD
+AS
+BEGIN
+
+--prepare CHANGED_NAME indicator
+MERGE INTO SAG_LOAD_CONCEPTS_EVS t1
+USING
+(
+SELECT * FROM ADMIN_ITEM where ADMIN_ITEM_TYP_ID = 49 
+and cntxt_item_id = 20000000024 -- and context restriction NCIP
+and cntxt_ver_nr = 1
+AND admin_stus_id = 75 --RELEASED Only
+)t2
+ON(t1.code = t2.item_long_nm)
+WHEN MATCHED THEN UPDATE SET
+t1.CHANGED_NAME = 1
+where t1.evs_pref_name <> t2.item_nm;
+--prepare CHANGED_DEF indicator
+MERGE INTO SAG_LOAD_CONCEPTS_EVS t1
+USING
+(
+SELECT * FROM ADMIN_ITEM where ADMIN_ITEM_TYP_ID = 49 
+and cntxt_item_id = 20000000024 -- and context restriction NCIP
+and cntxt_ver_nr = 1
+AND admin_stus_id = 75 --RELEASED Only
+)t2
+ON(t1.code = t2.item_long_nm)
+WHEN MATCHED THEN UPDATE SET
+t1.CHANGED_DEF = 1
+where t1.definition is not null
+and substr(NVL(t1.definition, 'No value exists.'), 1, 4000) <> t2.ITEM_DESC;
+--
+UPDATE SAG_LOAD_CONCEPTS_EVS set CHANGED_BOTH = 1
+where CHANGED_DEF = 1 and CHANGED_NAME = 1;
+commit;
+exception
+ when OTHERS then
+  DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PREPARE_UPD error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 128));
+  rollback;
 END;
 /
