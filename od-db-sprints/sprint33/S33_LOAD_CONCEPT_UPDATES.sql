@@ -1,8 +1,8 @@
 create or replace Procedure SAG_LOAD_CONCEPT_RETIRE (p_END_DATE IN date default sysdate)
 AS
 v_end_date DATE;
-v_updated_by2 varchar2(64) = '. Updated by caDSR II Monthly Concept Load.';
-v_updated_by1 varchar2(256) = 'Updated caDSR information to match EVS retirement status, concept was retired on ';
+v_updated_by2 varchar2(64) := '. Updated by caDSR II Monthly Concept Load.';
+v_updated_by1 varchar2(256) := 'Updated caDSR information to match EVS retirement status, concept was retired on ';
 v_updated_by varchar2(512);
 BEGIN
      v_end_date := p_END_DATE;
@@ -14,8 +14,8 @@ update admin_item set admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
      REGSTR_STUS_ID = 11 -- 'Retired'
      where admin_item_typ_id = 49 and -- Concept
      admin_stus_id <> 77 and 
-     and CNTXT_ITEM_ID = 20000000024 --NCIP
-     and CNTXT_VER_NR = 1
+     CNTXT_ITEM_ID = 20000000024 and --NCIP
+     CNTXT_VER_NR = 1 and
      item_long_nm in ( -- EVS provided list - parents of retired concepts
      select code from sag_load_concepts_evs where parents in(
 'C176957',
@@ -158,7 +158,7 @@ dbms_output.put_line('loaded concepts synonyms to ALT_NMS !!!');
 	SAG_LOAD_CONCEPT_RETIRE(v_eff_date); --retire EVS-retired concepts
 END;
 /
-ccreate or replace procedure SAG_LOAD_CONCEPT_PREPARE_UPD
+create or replace procedure SAG_LOAD_CONCEPT_PREPARE_UPD
 AS
 BEGIN
 
