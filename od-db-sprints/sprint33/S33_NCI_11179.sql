@@ -1,6 +1,4 @@
-DROP PACKAGE ONEDATA_WA.NCI_11179;
-
-CREATE OR REPLACE PACKAGE ONEDATA_WA.NCI_11179 AS
+CREATE OR REPLACE PACKAGE NCI_11179 AS
 function getWordCount(v_nm in varchar2) return integer;
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
 FUNCTION get_concepts(v_item_id in number, v_ver_nr in number) return varchar2;
@@ -49,11 +47,7 @@ END;
 /
 
 
-GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;
-
-DROP PACKAGE BODY ONEDATA_WA.NCI_11179;
-
-CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.NCI_11179 AS
+CREATE OR REPLACE PACKAGE BODY NCI_11179 AS
 
 v_err_str      varchar2(1000) := '';
 DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
@@ -2483,6 +2477,3 @@ end;
 
 END;
 /
-
-
-GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;
