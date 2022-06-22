@@ -1,4 +1,6 @@
-create or replace PACKAGE NCI_11179 AS
+DROP PACKAGE ONEDATA_WA.NCI_11179;
+
+CREATE OR REPLACE PACKAGE ONEDATA_WA.NCI_11179 AS
 function getWordCount(v_nm in varchar2) return integer;
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
 FUNCTION get_concepts(v_item_id in number, v_ver_nr in number) return varchar2;
@@ -45,7 +47,13 @@ spCreateVerNCI - Create new version customized
 */
 END;
 /
-create or replace PACKAGE BODY NCI_11179 AS
+
+
+GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;
+
+DROP PACKAGE BODY ONEDATA_WA.NCI_11179;
+
+CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.NCI_11179 AS
 
 v_err_str      varchar2(1000) := '';
 DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
@@ -2191,6 +2199,13 @@ begin
             ihook.setColumnValue(row, 'LST_UPD_USR_ID', hookInput.userId);
             ihook.setColumnValue(row, 'ADMIN_STUS_ID', 65 );
             ihook.setColumnValue(row, 'REGSTR_STUS_ID',9 );
+            
+            -- if VD, then change the short name only if short name has ID in it
+            if (ihook.getColumnValue(row, 'ADMIN_ITEM_TYP_ID') = 3 and instr(ihook.getColumnValue(row, 'ITEM_LONG_NM'),ihook.getColumnValue(row,'ITEM_ID')) > 0) then
+                ihook.setColumnValue(row, 'ITEM_LONG_NM',ihook.getColumnValue(row, 'ITEM_ID' || 'v' || trim(to_char(v_version, '9999.99'))  ));
+
+            end if;
+            
             if (v_admin_item.admin_item_typ_id in (54)) then -- Form needs to Draft NEw
                 ihook.setColumnValue(row, 'ADMIN_STUS_ID', 66 );
                 ihook.setColumnValue(row, 'REGSTR_STUS_ID','' );
@@ -2468,3 +2483,6 @@ end;
 
 END;
 /
+
+
+GRANT EXECUTE ON ONEDATA_WA.NCI_11179 TO ONEDATA_RO;
