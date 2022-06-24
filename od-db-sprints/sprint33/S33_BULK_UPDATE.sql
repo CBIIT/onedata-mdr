@@ -46,7 +46,7 @@ commit;
 
 
 update sbr.cs_items  set asl_name = 'RETIRED ARCHIVED' where csi_idseq in (select csi_idseq from admin_item ai, sbr.cs_items csi
-where csi.csi_idseq = ai.nci_idseq and ai.admin_stus_nm_dn <> csi.asl_name and ai.admin_stus_nm_dn = 'RETIRED ARCHIVED')
+where csi.csi_idseq = ai.nci_idseq and ai.admin_stus_nm_dn <> csi.asl_name and ai.admin_stus_nm_dn = 'RETIRED ARCHIVED');
 commit;
 
 update sbr.administered_components  set asl_name = 'RETIRED ARCHIVED' where ac_idseq in (select csi_idseq from  sbr.cs_items csi
