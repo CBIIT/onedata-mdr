@@ -1,9 +1,6 @@
 alter table ref_doc drop constraint UNI_REF_DOC_NAME;
-
-alter table ref modify lang_id default 1000
-
-
-  CREATE OR REPLACE  VIEW VW_NCI_FORM_FLAT_REP AS
+alter table ref modify LANG_ID  DEFAULT 1000;
+CREATE OR REPLACE  VIEW VW_NCI_FORM_FLAT_REP AS
   select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr, frm.item_desc  frm_item_def,
   frmst.hdr_instr, frmst.ftr_instr,
 air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr, frm_mod.instr MOD_INSTR,
