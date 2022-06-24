@@ -1,7 +1,7 @@
 create or replace Procedure SAG_LOAD_CONCEPT_RETIRE (p_END_DATE IN date default sysdate)
 AS
 v_end_date DATE;
-v_updated_by2 varchar2(64) := '. Updated by caDSR II Monthly Concept Load.';
+v_updated_by2 varchar2(64) := '. Updated by caDSR II Monthly Concept Load.';--added :before=
 v_updated_by1 varchar2(256) := 'Updated caDSR information to match EVS retirement status, concept was retired on ';
 v_updated_by varchar2(512);
 BEGIN
