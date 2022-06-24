@@ -13,10 +13,10 @@ update admin_item set admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
      CHNG_DESC_TXT = v_updated_by,
      REGSTR_STUS_ID = 11 -- 'Retired'
      where admin_item_typ_id = 49 and -- Concept
-     admin_stus_id <> 77 and 
-     CNTXT_ITEM_ID = 20000000024 and --NCIP
-     CNTXT_VER_NR = 1 and
-     item_long_nm in ( -- EVS provided list - parents of retired concepts
+     admin_stus_id <> 77 
+     and CNTXT_ITEM_ID = 20000000024 --NCIP
+     and CNTXT_VER_NR = 1
+     and item_long_nm in ( -- EVS provided list - parents of retired concepts
      select code from sag_load_concepts_evs where parents in(
 'C176957',
 'C167277',
