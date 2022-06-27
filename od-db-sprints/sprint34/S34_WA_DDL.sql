@@ -2,6 +2,9 @@
 CREATE OR REPLACE TRIGGER TR_AI_AUD_TS
   BEFORE UPDATE ON ADMIN_ITEM
    FOR EACH ROW
+   declare 
+v_item_typ_nm varchar2(100);
+
 BEGIN
   :new.LST_UPD_DT := SYSDATE;
   :new.LST_UPD_USR_ID_X := :new.LST_UPD_USR_ID;
@@ -29,12 +32,10 @@ end if;
 if (:new.LST_UPD_USR_ID_X is null) then
 :new.LST_UPD_USR_ID_X := :new.LST_UPD_USR_ID;
 end if;
+select obj_key_desc into v_item_typ_nm from obj_key where obj_key_id = :new.admin_item_typ_id;
 
 :new.ITEM_NM_ID_VER :=  :new.item_nm || '|' || :new.ITEM_ID || '|' || :new.ver_nr || '|' || v_item_typ_nm ;
 
-end if;
 
-END TR_AI_AUD_TS;
+END;
 /
-
-
