@@ -2,6 +2,7 @@ Hooks
 spDeleteQuest
 spDeleteMod
 spDeleteForm
+spPostTypeDetails
 
 Hook Commands
 Delete Form
@@ -12,6 +13,7 @@ Object
 Form/Template/
 Question (Edit) - Questions
 Form-Module Relationship - 6. Modules
+Type Details
 
 Roles
 Super Curator
