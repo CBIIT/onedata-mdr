@@ -11,3 +11,12 @@ stus_typ_id = 1 and stus_id = ai.regstr_stus_id
 and ai.regstr_stus_id is not null  and nci_idseq not in (select ac_idseq from sbr.ac_registrations);
 commit;
 
+
+update sbr.ac_registrations r set Registration_Status = (select nci_stus from stus_mstr, admin_item ai where admin_item_typ_id <> 8 and
+stus_typ_id = 1 and stus_id = ai.regstr_stus_id
+and ai.regstr_stus_id is not null and r.ac_idseq = ai.nci_idseq)
+where Registration_Status is null
+and r.ac_idseq in (select nci_idseq from admin_item where regstr_stus_id is not null);
+
+commit;
+/
