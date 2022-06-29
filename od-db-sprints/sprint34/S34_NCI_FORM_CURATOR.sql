@@ -1,0 +1,663 @@
+create or replace PACKAGE            nci_form_curator AS
+procedure spAddRef (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spAddProt (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spClassify (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spAddRefBlob (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spDeleteForm (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spDeleteMod (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spDeleteQuest (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure DeleteQuest (v_id in number, v_ver_nr in number, v_idseq in char);
+procedure DeleteModule (v_id in number, v_ver_nr in number, v_idseq in char);
+procedure DeleteCommonChildren (v_id in number, v_ver_nr in number, v_idseq in char);
+
+END;
+/
+create or replace PACKAGE BODY            nci_form_curator AS
+c_ver_suffix varchar2(5) := 'v1.00';
+v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
+
+procedure spAddRef (v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rowrel t_row;
+  rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+  forms t_forms;
+  form1 t_form;
+  rowform t_row;
+v_found boolean;
+  v_module_id integer;
+  v_disp_ord integer;
+  v_add integer;
+  i integer := 0;
+  column  t_column;
+  msg varchar2(4000);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ rows := t_rows();
+ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to add a Reference Document this form.');
+ end if;
+
+ if hookInput.invocationNumber = 0 then
+    ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Add');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    QUESTION               := T_QUESTION('Add Reference Document', ANSWERS);
+    HOOKOUTPUT.QUESTION    := QUESTION;
+
+    rows := t_rows();
+    row := t_row();
+        ihook.setColumnValue(row, 'REF_ID', -1);
+        ihook.setColumnValue(row, 'ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
+        ihook.setColumnValue(row, 'VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
+       ihook.setColumnValue(row, 'LANG_ID', 1000);
+    
+
+        rows.extend; rows(rows.last) := row;
+        rowset := t_rowset(rows, 'Reference Documents (Form CO)', 1,'REF');
+
+    forms                  := t_forms();
+    form1                  := t_form('Reference Documents (Form CO)', 2,1);
+    form1.rowset :=rowset;
+    forms.extend;
+    forms(forms.last) := form1;
+    hookOutput.forms := forms;
+ ELSE
+        forms              := hookInput.forms;
+        form1              := forms(1);
+
+        rowform := form1.rowset.rowset(1);
+   ihook.setColumnValue(rowform, 'ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
+        ihook.setColumnValue(rowform, 'VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
+    
+            rows:= t_rows();
+            rows.extend;
+            rows(rows.last) := rowform;
+
+            action             := t_actionrowset(rows, 'Reference Documents (Form CO)', 2, 0,'insert');
+            actions.extend;
+            actions(actions.last) := action;
+    hookoutput.actions    := actions;
+    hookoutput.message := 'Reference Document created successfully.';
+
+  END IF;
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
+
+procedure spAddRefBlob (v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rowrel t_row;
+  rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+  forms t_forms;
+  form1 t_form;
+  rowform t_row;
+v_found boolean;
+  v_module_id integer;
+  v_disp_ord integer;
+  v_add integer;
+  i integer := 0;
+  column  t_column;
+  msg varchar2(4000);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ rows := t_rows();
+ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to add a Reference Document Blob this form.');
+ end if;
+
+ if hookInput.invocationNumber = 0 then
+    ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Add');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    QUESTION               := T_QUESTION('Add Reference Document', ANSWERS);
+    HOOKOUTPUT.QUESTION    := QUESTION;
+
+    rows := t_rows();
+    row := t_row();
+        ihook.setColumnValue(row, 'REF_DOC_ID', -1);
+        ihook.setColumnValue(row, 'ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
+        ihook.setColumnValue(row, 'VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
+   --    ihook.setColumnValue(row, 'LANG_ID', 1000);
+    
+
+        rows.extend; rows(rows.last) := row;
+        rowset := t_rowset(rows, 'Reference Document Blobs (Form CO)', 1,'REF');
+
+    forms                  := t_forms();
+    form1                  := t_form('Reference Document Blobs (Form CO)', 2,1);
+ --   form1                  := t_form('Reference Document Blobs (Form Curator Hook)', 2,1);
+    form1.rowset :=rowset;
+    forms.extend;
+    forms(forms.last) := form1;
+    hookOutput.forms := forms;
+ ELSE
+        forms              := hookInput.forms;
+        form1              := forms(1);
+
+        rowform := form1.rowset.rowset(1);
+   ihook.setColumnValue(rowform, 'NCI_REF_ID', ihook.getColumnValue(row_ori, 'REF_ID'));
+   ihook.setColumnValue(rowform, 'FILE_NM', 'TEST' || ihook.getColumnValue(row_ori, 'REF_ID') );
+   
+    ihook.setColumnValue(rowform, 'REF_DOC_ID', -1);
+      -- ihook.setColumnValue(rowform, 'VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
+   raise_application_error (-20000, dbms_lob.getlength(ihook.getColumnValue(row_ori, 'BLOB_COL')));
+            rows:= t_rows();
+            rows.extend;
+            rows(rows.last) := rowform;
+
+            action             := t_actionrowset(rows, 'Reference Document Blobs (Form CO)', 2, 0,'insert');
+            actions.extend;
+            actions(actions.last) := action;
+    hookoutput.actions    := actions;
+    hookoutput.message := 'Reference Document created successfully.';
+
+  END IF;
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
+procedure spAddProt (v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rowrel t_row;
+  rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+  forms t_forms;
+  form1 t_form;
+  rowform t_row;
+v_found boolean;
+  v_module_id integer;
+  v_disp_ord integer;
+  v_temp integer;
+  i integer := 0;
+  column  t_column;
+  msg varchar2(4000);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ rows := t_rows();
+ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to add Protocol to this form.');
+ end if;
+
+ if hookInput.invocationNumber = 0 then
+    ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Add');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    QUESTION               := T_QUESTION('Add Protocol', ANSWERS);
+    HOOKOUTPUT.QUESTION    := QUESTION;
+
+    rows := t_rows();
+    row := t_row();
+   --     ihook.setColumnValue(row, 'REF_ID', -1);
+        ihook.setColumnValue(row, 'C_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
+        ihook.setColumnValue(row, 'C_ITEM_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
+          ihook.setColumnValue(row, 'REL_TYP_ID',60);
+  
+
+        rows.extend; rows(rows.last) := row;
+        rowset := t_rowset(rows, 'Protocol-Form Relationship (Form View)', 1,'NCI_ADMIN_ITEM_REL');
+
+    forms                  := t_forms();
+    form1                  := t_form('Protocol-Form Relationship (Form View)', 2,1);
+    form1.rowset :=rowset;
+    forms.extend;
+    forms(forms.last) := form1;
+    hookOutput.forms := forms;
+ ELSE
+        forms              := hookInput.forms;
+        form1              := forms(1);
+
+        rowform := form1.rowset.rowset(1);
+
+ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(rowform, 'P_ITEM_ID'), ihook.getColumnValue(rowform,'P_ITEM_VER_NR'), v_user_id) = false) then
+-- raise_application_error(-20000,'Protocol not in your authorized contexts.');
+hookoutput.message := 'Protocol not in your authorized Context and was not added.';
+ V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+return;
+ end if;
+ 
+   ihook.setColumnValue(rowform, 'C_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
+        ihook.setColumnValue(rowform, 'C_ITEM_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
+          ihook.setColumnValue(rowform, 'REL_TYP_ID',60);
+ 
+
+select count(*) into v_temp from nci_admin_item_rel where rel_typ_id = 60 and c_item_id =  ihook.getColumnValue(row_ori, 'ITEM_ID') and 
+c_item_ver_nr = ihook.getColumnValue(row_ori, 'VER_NR') and p_item_id = ihook.getColumnValue(rowform, 'P_ITEM_ID') and p_item_ver_nr = ihook.getColumnValue(rowform,'P_ITEM_VER_NR');
+if (v_temp = 0) then
+            rows:= t_rows();
+            rows.extend;
+            rows(rows.last) := rowform;
+
+            action             := t_actionrowset(rows, 'Protocol-Form Relationship (Form View)', 2, 0,'insert');
+            actions.extend;
+            actions(actions.last) := action;
+    hookoutput.actions    := actions;
+    hookoutput.message := 'Protocol relationship created successfully.';
+else
+ hookoutput.message := 'Protocol relationship already exists.';
+ end if;
+  END IF;
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
+-- Classify/Unclassify for Super Curators
+PROCEDURE spClassify
+  (
+    v_data_in IN CLOB,
+    v_data_out OUT CLOB,
+    v_user_id  IN varchar2)
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+
+  actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+  row_ori t_row;
+  rowform t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+
+  question    t_question;
+  answer     t_answer;
+  answers     t_answers;
+
+  forms     t_forms;
+  form1  t_form;
+
+  v_temp integer;
+  v_cnt integer;
+  v_item_id number;
+  v_ver_nr number(4,2);
+  v_default_txt varchar2(30) := 'Default is Context Name.' ;
+
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+
+    if hookInput.invocationNumber = 0  then
+            answers := t_answers();
+            answer := t_answer(1, 1, 'Classify');
+            answers.extend;          answers(answers.last) := answer;
+
+            question := t_question('Choose Option', answers);
+
+            hookOutput.question := question;
+
+        -- Form only has only pop-up to select Classification
+            forms                  := t_forms();
+            form1                  := t_form('Unclassify (Hook for Form Curator)', 2,1);
+            forms.extend;    forms(forms.last) := form1;
+
+            hookoutput.forms := forms;
+  	elsif hookInput.invocationNumber = 1 then
+            forms              := hookInput.forms;
+            form1              := forms(1);
+            rowform := form1.rowset.rowset(1);  -- entered values from user
+            rows := t_rows();
+            ihook.setColumnValue(rowform, 'REL_TYP_ID', 65);
+
+            v_cnt := 0;   -- Count of total added rows
+select cs_item_id, cs_item_ver_nr into v_item_id, v_ver_nr from nci_clsfctn_schm_item where item_id = ihook.getColumnValue(rowform,'P_ITEM_ID') and ver_nr = ihook.getColumnValue(rowform,'P_ITEM_VER_NR');
+
+      
+            for i in 1..hookinput.originalrowset.rowset.count loop
+
+                row_ori :=  hookInput.originalRowset.rowset(i);
+                row := rowform;
+
+                ihook.setColumnValue(row,'C_ITEM_ID',ihook.getColumnValue(row_ori,'ITEM_ID'));
+                ihook.setColumnValue(row,'C_ITEM_VER_NR',ihook.getColumnValue(row_ori,'VER_NR'));
+if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), v_user_id) = true) then
+            -- check if row exists if unclassify and not exists if classify
+-- Check context of Classification Scheme
+if (nci_form_mgmt.isUserAuth(v_item_id, v_ver_nr, v_user_id) = true) then
+
+                    select count(*) into v_temp from nci_admin_item_rel where
+                    p_item_id =  ihook.getColumnValue(rowform,'P_ITEM_ID') and
+                    p_item_ver_nr = ihook.getColumnValue(rowform,'P_ITEM_VER_NR') and
+                    c_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and
+                    c_item_ver_nr = ihook.getColumnValue(row_ori,'VER_NR') and
+                    rel_typ_id = 65;
+                    if (v_temp = 0) then
+                        rows.extend;  rows(rows.last) := row;
+                        v_cnt := v_cnt + 1;
+                     end if;
+                     end if;
+                     end if;
+            end loop;
+
+            if rows.count > 0 then
+                        action := t_actionrowset(rows, 'NCI CSI - DE Relationship', 2,1,'insert');
+                        actions.extend; actions(actions.last) := action;
+                        hookoutput.message := rows.count || ' items classified. You can only classify Forms and Classifications that are in your authorized contexts.';
+       hookoutput.actions := actions;
+       else
+         hookoutput.message := 'Classification not in your authorized Context and was not added.';
+ 
+            end if;
+    end if;
+    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
+
+procedure spDeleteQuest  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    rowrel t_row;
+    row_sel t_row;
+    rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+
+  rowform t_row;
+v_found boolean;
+  v_module_id integer;
+  v_disp_ord integer;
+  v_frm_id number;
+  v_frm_ver_nr number(4,2);
+
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ rows := t_rows();
+
+ row_ori :=  hookInput.originalRowset.rowset(1);
+
+ select frm_item_id, frm_ver_nr into v_frm_id, v_frm_ver_nr from vw_nci_module_de where
+nci_pub_id = ihook.getColumnValue(row_ori, 'NCI_PUB_ID') and nci_ver_nr = ihook.getColumnValue(row_ori, 'NCI_VER_NR');
+ if (nci_form_mgmt.isUserAuth(v_frm_id, v_frm_ver_nr, v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to delete questions on this form.');
+ end if;
+for i in 1..hookinput.originalrowset.rowset.count loop
+ row_ori :=  hookInput.originalRowset.rowset(i);
+ for cur1 in (select * from nci_admin_item_rel_alt_key where nci_pub_id  = ihook.getCOlumnValue(row_ori,'NCI_PUB_ID') and 
+ nci_ver_nr =  ihook.getColumnValue(row_ori,'NCI_VER_NR')) loop
+ DeleteQuest(cur1.nci_pub_id, cur1.nci_ver_nr, cur1.nci_idseq);
+ end loop;
+end loop;
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
+
+procedure spDeleteMod  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    rowrel t_row;
+    row_sel t_row;
+    rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+
+  rowform t_row;
+v_found boolean;
+  v_module_id integer;
+  v_disp_ord integer;
+  v_frm_id number;
+  v_frm_ver_nr number(4,2);
+
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ rows := t_rows();
+
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'P_ITEM_ID'), ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR'), v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to delete modules on this form.');
+ end if;
+ 
+for i in 1..hookinput.originalrowset.rowset.count loop
+ row_ori :=  hookInput.originalRowset.rowset(i);
+ for cur1 in (select * from admin_item where item_id  = ihook.getCOlumnValue(row_ori,'C_ITEM_ID') and 
+ ver_nr =  ihook.getColumnValue(row_ori,'C_ITEM_VER_NR')) loop
+ DeleteModule(cur1.item_id, cur1.ver_nr, cur1.nci_idseq);
+ end loop;
+end loop;
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
+procedure spDeleteForm  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    rowrel t_row;
+    row_sel t_row;
+    rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+
+  rowform t_row;
+v_found boolean;
+  v_module_id integer;
+  v_disp_ord integer;
+  v_id number;
+  v_ver_nr number(4,2);
+    v_idseq  char(36);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ rows := t_rows();
+
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ v_id := ihook.getColumnValue(row_ori, 'ITEM_ID');
+ v_ver_nr := ihook.getColumnValue(row_ori, 'VER_NR');
+ 
+ if (nci_form_mgmt.isUserAuth(v_id, v_ver_nr, v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to delete  this form.');
+ end if;
+ 
+ for cur1 in (select ai.* from admin_item ai, nci_admin_item_rel r where ai.item_id  = r.c_item_id
+ and ai.ver_nr = r.c_item_ver_nr and r.p_item_id = v_id and r.p_item_ver_nr = v_ver_nr and
+ r.rel_typ_id = 61) loop
+ DeleteModule(cur1.item_id, cur1.ver_nr, cur1.nci_idseq);
+ end loop;
+ 
+DeleteCommonChildren(v_id, v_ver_nr, v_idseq);
+ 
+delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where dn_crf_idseq =  v_idseq);
+delete from sbr.administered_components where ac_idseq =  v_idseq;
+delete from sbrext.qc_recs_ext where p_qc_idseq = v_idseq ;--and rl_name  = 'ELEMENT_INSTRUCTION';
+delete from sbrext.qc_recs_ext where c_qc_idseq = v_idseq ;--and rl_name  = 'ELEMENT_INSTRUCTION';
+delete from sbrext.quest_contents_ext where dn_crf_idseq =  v_idseq;
+delete from sbrext.quest_contents_ext where qc_idseq =  v_idseq;
+delete from nci_admin_item_rel where p_item_id = v_id and p_item_ver_nr = v_ver_nr;
+delete from nci_form where item_id = v_id and ver_nr = v_ver_nr;
+
+delete from admin_item where item_id = v_id and ver_nr = v_ver_nr;
+
+commit;
+
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
+
+procedure DeleteQuest (v_id in number, v_ver_nr in number, v_idseq in char)
+AS
+  v_frm_id number;
+  v_frm_ver_nr number(4,2);
+  i integer;
+BEGIN
+
+--raise_application_error(-20000,v_id || ' '|| v_ver_nr ||  ' ' || v_idseq);
+
+-- delete from question vv-rep
+delete from nci_quest_vv_rep where quest_pub_id = v_id and quest_ver_nr = v_ver_nr;
+--delete vv
+delete from nci_quest_valid_value where q_pub_id = v_id and q_ver_nr = v_ver_nr;
+delete from nci_admin_item_rel_alt_key where nci_pub_id = v_id and nci_ver_nr = v_ver_nr;
+
+-- SBR repetitions
+
+delete from sbrext.quest_vv_ext  where quest_idseq =v_idseq;
+
+delete from sbrext.valid_values_att_ext where qc_idseq in (select qc_idseq from  sbrext.quest_contents_ext where p_qst_idseq = v_idseq and 
+qtl_name = 'VALID_VALUE');
+
+delete from sbrext.qc_recs_ext where p_qc_idseq in (select qc_idseq from  sbrext.quest_contents_ext where p_qst_idseq = v_idseq and 
+qtl_name = 'VALID_VALUE');
+
+
+delete from QUEST_ATTRIBUTES_EXT where quest_idseq = v_idseq;
+
+delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where p_qst_idseq =  v_idseq);
+delete from sbr.administered_components where ac_idseq  =  v_idseq;
+delete from sbrext.qc_recs_ext where p_qc_idseq = v_idseq ;--and rl_name  = 'ELEMENT_INSTRUCTION';
+delete from sbrext.qc_recs_ext where c_qc_idseq = v_idseq ;--and rl_name  = 'ELEMENT_INSTRUCTION';
+delete from sbrext.quest_contents_ext where p_qst_idseq =  v_idseq;
+delete from sbrext.quest_contents_ext where qc_idseq =  v_idseq;
+commit;
+-- delete vv
+
+end;
+
+
+procedure DeleteCommonChildren (v_id in number, v_ver_nr in number, v_idseq in char)
+AS
+  i integer;
+BEGIN
+
+delete from sbrext.AC_ATT_CSCSI_EXT e where 
+att_idseq  in 
+(select  nci_idseq from alt_nms where item_id = v_id and ver_nr = v_ver_nr)
+and atl_name = 'DESIGNATION';
+
+delete from sbrext.AC_ATT_CSCSI_EXT e where 
+att_idseq  in 
+(select  nci_idseq from alt_def where item_id = v_id and ver_nr = v_ver_nr)
+and atl_name = 'DEFINITION';
+
+delete from NCI_CSI_ALT_DEFNMS where NMDEF_ID in (select nm_id from alt_nms where item_id = v_id and ver_nr = v_ver_nr)
+and TYP_NM = 'DESIGNATION';
+
+delete from NCI_CSI_ALT_DEFNMS where NMDEF_ID in (select def_id from alt_def where item_id = v_id and ver_nr = v_ver_nr)
+and TYP_NM = 'DEFINITION';
+
+
+delete from alt_nms where item_id = v_id and ver_nr = v_ver_nr;
+delete from sbr.designations where ac_idseq =  v_idseq;
+delete from alt_def where item_id = v_id and ver_nr = v_ver_nr;
+delete from sbr.definitions where ac_idseq =  v_idseq;
+-- Classifications
+--delete from sbrext.AC_ATT_CSCSI_EXT e where 
+--( cs_csi_idseq, att_idseq ) in 
+--(select  cur.cs_csi_idseq, cur.att_idseq from dual where cur.fld_delete = 1);
+
+delete from sbr.ac_csi where  ac_idseq = v_idseq;
+
+-- Reference documents
+
+delete from sbr.reference_blobs where rd_idseq = (select rd_idseq from sbr.reference_documents d  where d.ac_idseq = v_idseq);
+delete from sbr.reference_documents d  where d.ac_idseq = v_idseq;
+
+
+end;
+
+procedure DeleteModule (v_id in number, v_ver_nr in number, v_idseq in char)
+AS
+  i integer;
+BEGIN
+
+-- delete questions
+for cur in (select * from nci_admin_item_rel_alt_key where p_item_id  = v_id and p_item_ver_nr = v_ver_nr) loop
+DeleteQuest(cur.nci_pub_id, cur.nci_ver_nr, cur.nci_idseq);
+end loop;
+
+
+delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where p_mod_idseq =  v_idseq);
+delete from sbr.administered_components where ac_idseq =  v_idseq;
+delete from sbrext.qc_recs_ext where p_qc_idseq = v_idseq ;--and rl_name  = 'ELEMENT_INSTRUCTION';
+delete from sbrext.qc_recs_ext where c_qc_idseq = v_idseq ;--and rl_name  = 'ELEMENT_INSTRUCTION';
+delete from sbrext.quest_contents_ext where p_mod_idseq =  v_idseq;
+delete from sbrext.quest_contents_ext where qc_idseq =  v_idseq;
+delete from nci_admin_item_rel where c_item_id = v_id and c_item_ver_nr = v_ver_nr;
+DeleteCommonChildren(v_id, v_ver_nr, v_idseq);
+delete from nci_module where item_id = v_id and ver_nr = v_ver_nr;
+
+delete from admin_item where item_id = v_id and ver_nr = v_ver_nr;
+
+commit;
+
+end;
+
+end;
+/
+
