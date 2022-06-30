@@ -19,7 +19,7 @@ Protocol - + Protocol
 Question Repetition
 Standard Data Type Management
 Legacy Data Type Management
-
+CDE - VD Alternate Name (Browse CO) - 2.1 VD Alternate NAmes
 
 Roles
 Super Curator
@@ -27,6 +27,7 @@ Form Builder
 Admin Curator Role
 Training Curator Role
 Admin
+Browser
 
 
 
