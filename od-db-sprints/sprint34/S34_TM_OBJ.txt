@@ -21,6 +21,7 @@ Standard Data Type Management
 Legacy Data Type Management
 CDE - VD Alternate Name (Browse CO) - 2.1 VD Alternate NAmes
 Unclassify (Hook for Form Curator) - Select Classification
+PV VM Import
 
 Roles
 Super Curator
@@ -30,5 +31,6 @@ Training Curator Role
 Admin
 Browser
 
-
+Interchange Mapping
+PV-VM Import
 
