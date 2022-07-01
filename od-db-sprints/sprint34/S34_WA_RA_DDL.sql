@@ -16,3 +16,5 @@ commit;
        FROM  DE, ALT_NMS an where 
 	DE.VAL_DOM_ITEM_ID = an.ITEM_ID and
 	DE.VAL_DOM_VER_NR = an.VER_NR ;
+	
+	alter table NCI_STG_PV_VM_IMPORT add (VM_ALT_NM_CNTXT_ITEM_ID number, VM_ALT_NM_CNTXT_VER_NR number(4,2));
