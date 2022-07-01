@@ -245,6 +245,7 @@ BEGIN
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_AI_DENORM_INS DISABLE';
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_ALT_NMS_DENORM_INS DISABLE';
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_ALT_NMS_POST DISABLE';
+	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_ALT_DEF_POST DISABLE';
 
 INSERT INTO /*+ APPEND */ admin_item (--NCI_IDSEQ,
      ADMIN_ITEM_TYP_ID,
@@ -300,11 +301,12 @@ SELECT item_id,
 (select item_id, ver_nr from admin_item where admin_item_typ_id = 49 minus select item_id, ver_nr from cncpt);
 commit;
 dbms_output.put_line('loaded concepts to cncpt !!!'); 
--- Add IDSEQ generated for concepts in AI to flat table
+-- Add IDSEQ generated for concepts in AI, and ITEM_ID, VER_NR reference to EVS flat table
 MERGE INTO SAG_LOAD_CONCEPTS_EVS t1
 USING
 (
-SELECT * FROM ADMIN_ITEM where ADMIN_ITEM_TYP_ID = 49 and cntxt_item_id = 20000000024 -- and context restriction NCIP
+SELECT * FROM ADMIN_ITEM where ADMIN_ITEM_TYP_ID = 49 
+and cntxt_item_id = 20000000024 and CNTXT_VER_NR = 1-- and context restriction NCIP
 --and CREAT_USR_ID = 'ONEDATA' 
 )t2
 ON(t1.code = t2.item_long_nm)
@@ -341,7 +343,7 @@ LOOP
 END LOOP;
 dbms_output.put_line('loaded concepts synonyms to ALT_NMS !!!');
 
-	SAG_LOAD_CONCEPT_PREPARE_UPD; --tag changed
+	SAG_LOAD_CONCEPT_PREPARE_UPD; --tag changes
 	SAG_LOAD_CONCEPT_RETIRE(v_eff_date); --retire EVS-retired concepts
 	SAG_LOAD_CONCEPT_PRIOR_NAME(v_eff_date); -- create prioe alt names
 	SAG_LOAD_CONCEPT_PRIOR_DEF(v_eff_date); -- create prior definistions
@@ -349,6 +351,7 @@ dbms_output.put_line('loaded concepts synonyms to ALT_NMS !!!');
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_AI_DENORM_INS ENABLE';
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_ALT_NMS_DENORM_INS ENABLE';
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_ALT_NMS_POST ENABLE';-- this trigger updates AI audit info on designation updates
+	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_ALT_DEF_POST ENABLE';
 	EXECUTE IMMEDIATE 'DROP INDEX IDX_SAG_LOAD_CNCPT_ID_VER';
 END;
 /
