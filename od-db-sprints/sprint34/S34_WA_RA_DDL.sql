@@ -18,3 +18,6 @@ commit;
 	DE.VAL_DOM_VER_NR = an.VER_NR ;
 	
 	alter table NCI_STG_PV_VM_IMPORT add (VM_ALT_NM_CNTXT_ITEM_ID number, VM_ALT_NM_CNTXT_VER_NR number(4,2));
+
+insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (9,65);
+commit;
