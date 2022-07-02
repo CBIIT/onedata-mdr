@@ -49,6 +49,7 @@ END;
 create or replace procedure SAG_LOAD_CONCEPT_PREPARE_UPD
 AS
 BEGIN
+	--clean up 
 update SAG_LOAD_CONCEPTS_EVS
 set CHANGED_DEF = 0,
 CHANGED_NAME = 0,
@@ -67,7 +68,7 @@ ON(t1.item_id = t2.item_id
 and t1.ver_nr = t2.ver_nr)
 WHEN MATCHED THEN UPDATE SET
 t1.CHANGED_NAME = 1
-where t1.evs_pref_name <> t2.item_nm;
+where t1.evs_pref_name <> t2.item_nm and t1.CONCEPT_STATUS is NULL;
 --prepare CHANGED_DEF indicator
 MERGE INTO SAG_LOAD_CONCEPTS_EVS t1
 USING
@@ -82,7 +83,7 @@ and t1.ver_nr = t2.ver_nr)
 WHEN MATCHED THEN UPDATE SET
 t1.CHANGED_DEF = 1
 where t1.definition is not null
-and substr(NVL(t1.definition, 'No value exists.'), 1, 4000) <> t2.ITEM_DESC;
+and substr(NVL(t1.definition, 'No value exists.'), 1, 4000) <> t2.ITEM_DESC and t1.CONCEPT_STATUS is NULL;
 --
 UPDATE SAG_LOAD_CONCEPTS_EVS set CHANGED_BOTH = 1
 where CHANGED_DEF = 1 and CHANGED_NAME = 1;
@@ -93,10 +94,11 @@ exception
   rollback;
 END;
 /
-create or replace Procedure SAG_LOAD_CONCEPT_PRIOR_BANE (P_CREAT_DT IN DATE DEFAULT sysdate) AS
+--shall not include if name is there
+create or replace Procedure SAG_LOAD_CONCEPT_PRIOR_NAME (P_CREAT_DT IN DATE DEFAULT sysdate) AS
 v_date DATE := P_CREAT_DT; --parameter
 BEGIN
--- asuuming that sag_load_concepts_evs is preprocessed 
+-- assuming that sag_load_concepts_evs is preprocessed 
   FOR desig IN (SELECT item_id, ver_nr FROM sag_load_concepts_evs where CHANGED_NAME = 1)
   LOOP
   BEGIN
@@ -130,16 +132,18 @@ BEGIN
     commit;
     EXCEPTION
     WHEN OTHERS THEN
-    DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_BANE error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 128));
+    DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_NAME error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
         rollback;
+    RAISE_APPLICATION_ERROR (SQLCODE, 'SAG_LOAD_CONCEPT_PRIOR_NAME error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
     END;
   END LOOP;
 END;
 /
+--shall not include if def is there
 create or replace Procedure SAG_LOAD_CONCEPT_PRIOR_DEF (P_CREAT_DT IN DATE DEFAULT sysdate) AS
 v_date DATE := P_CREAT_DT; --parameter
 BEGIN
--- asuuming that sag_load_concepts_evs is preprocessed 
+-- assuming that sag_load_concepts_evs is preprocessed 
   FOR desig IN (SELECT item_id, ver_nr FROM sag_load_concepts_evs where CHANGED_DEF = 1)
   LOOP
   BEGIN
@@ -168,13 +172,13 @@ BEGIN
         AND item_id = desig.item_id
         AND ver_nr = desig.ver_nr
         AND admin_stus_id = 75
-        
     ;
     commit;
     EXCEPTION
     WHEN OTHERS THEN
-    DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_DEF error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 128));
+    DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_DEF error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
         rollback;
+    RAISE_APPLICATION_ERROR (SQLCODE, 'SAG_LOAD_CONCEPT_PRIOR_DEF error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
     END;
   END LOOP;
 END;
@@ -302,6 +306,7 @@ SELECT item_id,
 commit;
 dbms_output.put_line('loaded concepts to cncpt !!!'); 
 -- Add IDSEQ generated for concepts in AI, and ITEM_ID, VER_NR reference to EVS flat table
+
 MERGE INTO SAG_LOAD_CONCEPTS_EVS t1
 USING
 (
@@ -313,8 +318,10 @@ ON(t1.code = t2.item_long_nm)
 WHEN MATCHED THEN UPDATE SET
 t1.con_idseq = t2.nci_idseq,
 t1.item_id = t2.item_id,
-t1.ver_nr = t2.ver_nr;
+t1.ver_nr = t2.ver_nr
+where CONCEPT_STATUS is NULL; --we do not use in further steps EVS concepts which status is not null
 commit;
+
 dbms_output.put_line('updated SAG_LOAD_CONCEPTS_EVS with ID info!!!');
 
 -- add concept alt names type vsynonym load by ONEDATA, which have a record in the EVS table, only if these synonyms are not in DB
