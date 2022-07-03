@@ -220,8 +220,12 @@ v_updated_by_name varchar2(512);
 v_updated_by_def varchar2(512);
 v_updated_by_both varchar2(512);
 BEGIN
--- sag_load_concepts_evs shall have update tags set done by by SAG_LOAD_CONCEPT_PREPARE_UPD
-SAG_LOAD_CONCEPT_PREPARE_UPD;
+	-- sag_load_concepts_evs shall have update tags set done by by SAG_LOAD_CONCEPT_PREPARE_UPD
+	SAG_LOAD_CONCEPT_PREPARE_UPD; --tag changes
+	SAG_LOAD_CONCEPT_RETIRE(v_date); --retire EVS-retired concepts
+	SAG_LOAD_CONCEPT_PRIOR_NAME(v_date); -- create prioe alt names
+	SAG_LOAD_CONCEPT_PRIOR_DEF(v_date); -- create prior definistions
+
 --CHNG_DESC_TXT = substrb(v_updated_by || ' ' || CHNG_DESC_TXT, 1, 2000),
 v_updated_by_both := v_updated_by_both1 || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
 v_updated_by_name := v_updated_by_name || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
@@ -377,10 +381,6 @@ LOOP
 END LOOP;
 dbms_output.put_line('loaded concepts synonyms to ALT_NMS !!!');
 
-	SAG_LOAD_CONCEPT_PREPARE_UPD; --tag changes
-	SAG_LOAD_CONCEPT_RETIRE(v_eff_date); --retire EVS-retired concepts
-	SAG_LOAD_CONCEPT_PRIOR_NAME(v_eff_date); -- create prioe alt names
-	SAG_LOAD_CONCEPT_PRIOR_DEF(v_eff_date); -- create prior definistions
 	SAG_LOAD_CONCEPT_UPDATES(v_eff_date); -- update names and definitions
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_AI_DENORM_INS ENABLE';
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_ALT_NMS_DENORM_INS ENABLE';
