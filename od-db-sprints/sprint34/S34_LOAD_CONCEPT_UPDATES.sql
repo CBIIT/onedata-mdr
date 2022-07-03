@@ -94,14 +94,24 @@ exception
   rollback;
 END;
 /
---shall not include if name is there
 create or replace Procedure SAG_LOAD_CONCEPT_PRIOR_NAME (P_CREAT_DT IN DATE DEFAULT sysdate) AS
 v_date DATE := P_CREAT_DT; --parameter
+V_IDSEQ CHAR(36 BYTE);
 BEGIN
--- assuming that sag_load_concepts_evs is preprocessed 
+-- assuming that sag_load_concepts_evs is preprocessed and item_id, item_nr is a unique combination
   FOR desig IN (SELECT item_id, ver_nr FROM sag_load_concepts_evs where CHANGED_NAME = 1)
   LOOP
-  BEGIN
+   BEGIN
+	     --check that prior name like this does not exist
+   select NCI_IDSEQ into V_IDSEQ from ALT_NMS
+   where NM_TYP_ID = 1049
+   and CNTXT_ITEM_ID = 20000000024 and CNTXT_VER_NR = 1
+   and ITEM_ID = desig.ITEM_ID and VER_NR = desig.VER_NR
+   and NM_DESC = 
+   (select item_nm from admin_item where ITEM_ID = desig.ITEM_ID and VER_NR = desig.VER_NR);
+   EXCEPTION
+   --insert if not exist
+      WHEN no_data_found THEN
     INSERT INTO /*+ APPEND */ ALT_NMS (NM_DESC,
     nm_typ_id ,
     CNTXT_ITEM_ID , --trigger 20000000024 NCIP
@@ -129,24 +139,37 @@ BEGIN
         AND ver_nr = desig.ver_nr
         AND admin_stus_id = 75
     ;
-    commit;
-    EXCEPTION
+   WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_NAME error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
+        rollback;
+        RAISE_APPLICATION_ERROR (SQLCODE, 'SAG_LOAD_CONCEPT_PRIOR_NAME Loop error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
+   END;    
+  END LOOP;
+  commit;
+  EXCEPTION
     WHEN OTHERS THEN
     DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_NAME error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
         rollback;
     RAISE_APPLICATION_ERROR (SQLCODE, 'SAG_LOAD_CONCEPT_PRIOR_NAME error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
-    END;
-  END LOOP;
 END;
 /
---shall not include if def is there
 create or replace Procedure SAG_LOAD_CONCEPT_PRIOR_DEF (P_CREAT_DT IN DATE DEFAULT sysdate) AS
 v_date DATE := P_CREAT_DT; --parameter
+V_IDSEQ CHAR(36 BYTE);
 BEGIN
 -- assuming that sag_load_concepts_evs is preprocessed 
   FOR desig IN (SELECT item_id, ver_nr FROM sag_load_concepts_evs where CHANGED_DEF = 1)
-  LOOP
+  LOOP --shall check not include if def is there
   BEGIN
+   select NCI_IDSEQ into V_IDSEQ from ALT_DEF
+   where NCI_DEF_TYP_ID = 1357
+   and CNTXT_ITEM_ID = 20000000024 and CNTXT_VER_NR = 1
+   and ITEM_ID = desig.ITEM_ID and VER_NR = desig.VER_NR
+   and DEF_DESC = 
+   (select item_desc from admin_item where ITEM_ID = desig.ITEM_ID and VER_NR = desig.VER_NR);
+   EXCEPTION
+   --insert if not exist
+      WHEN no_data_found THEN
     INSERT INTO /*+ APPEND */ ALT_DEF (DEF_DESC,
     NCI_DEF_TYP_ID ,
     CNTXT_ITEM_ID , --trigger 20000000024 NCIP
@@ -173,14 +196,18 @@ BEGIN
         AND ver_nr = desig.ver_nr
         AND admin_stus_id = 75
     ;
-    commit;
-    EXCEPTION
+     WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_DEF error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
+        rollback;
+        RAISE_APPLICATION_ERROR (SQLCODE, 'SAG_LOAD_CONCEPT_PRIOR_DEF Loop error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
+   END;
+  END LOOP;
+  commit;
+  EXCEPTION
     WHEN OTHERS THEN
     DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_DEF error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
         rollback;
     RAISE_APPLICATION_ERROR (SQLCODE, 'SAG_LOAD_CONCEPT_PRIOR_DEF error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
-    END;
-  END LOOP;
 END;
 /
 create or replace Procedure SAG_LOAD_CONCEPT_UPDATES (P_CREAT_DT IN DATE DEFAULT sysdate) AS
