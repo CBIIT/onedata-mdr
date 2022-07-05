@@ -22,10 +22,16 @@ Legacy Data Type Management
 CDE - VD Alternate Name (Browse CO) - 2.1 VD Alternate NAmes
 Unclassify (Hook for Form Curator) - Select Classification
 PV VM Import
+VD - PV Report View - PV Downalod
+
+Conceptual Objects
+Value Domain Maintenance
+Classification Scheme Management
 
 Roles
 Super Curator
 Form Builder
+Browser
 Admin Curator Role
 Training Curator Role
 Admin
