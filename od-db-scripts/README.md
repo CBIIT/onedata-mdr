@@ -10,4 +10,3 @@ Example: S00_4_WA_Core_packages.sql
 
 Sprint zero script executed at #4 in WA schema. 
 
-Testing write access - Matt
