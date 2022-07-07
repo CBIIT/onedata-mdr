@@ -25,12 +25,6 @@ SELECT item_id,
 (select item_id, ver_nr from admin_item where admin_item_typ_id = 49 minus select item_id, ver_nr from cncpt);
 commit;
 --insert concepts synonyms and prior names to ONEDATA_RA
-insert into onedata_ra.alt_nms
-select * from onedata_wa.alt_nms where creat_usr_id = 'ONEDATA' and lst_upd_usr_id = 'ONEDATA' 
-and nm_typ_id in (1064, 1049)
-and (item_id, ver_nr) not in (select item_id, ver_nr from onedata_ra.alt_nms);
-commit;
-
 delete from onedata_ra.alt_nms where 
 NM_TYP_ID  in (1064, 1049);
 --insert alt names synonyms to ONEDATA_RA from ONEDATA_WA
@@ -40,12 +34,6 @@ commit;
 dbms_output.put_line('ONEDATA_RA load concepts alt_nms is completed');
 
 --insert concepts prior definitions to ONEDATA_RA
-insert into onedata_ra.ALT_DEF
-select * from onedata_wa.alt_def where creat_usr_id = 'ONEDATA' and lst_upd_usr_id = 'ONEDATA' 
-and NCI_DEF_TYP_ID = 1357
-and (item_id, ver_nr) not in (select item_id, ver_nr from onedata_ra.ALT_DEF
-);
-
 delete from onedata_ra.ALT_DEF where 
 NCI_DEF_TYP_ID = 1357;
 --insert alt names synonyms to ONEDATA_RA from ONEDATA_WA
