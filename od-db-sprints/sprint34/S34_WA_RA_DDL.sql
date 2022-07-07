@@ -11,7 +11,7 @@ commit;
 		DE.VER_NR DE_VER_NR, DE.VAL_DOM_ITEM_ID VAL_DOM_ITEM_ID,  
 	DE.VAL_DOM_VER_NR ,
 		AN.CREAT_DT, an.CREAT_USR_ID, an.LST_UPD_USR_ID, an.FLD_DELETE, an.LST_DEL_DT, an.S2P_TRN_DT, an.LST_UPD_DT,
-         an.NM_DESC,  an.nm_typ_id, an.CNTXT_NM_DN VM_CNTXT_NM_DN  ,
+         an.NM_DESC,  an.nm_typ_id, an.CNTXT_NM_DN CNTXT_NM_DN  , an.CNTXT_ITEM_ID ALT_NM_CNTXT_ITEM_ID, an.CNTXT_VER_NR ALT_NM_CNTXT_VER_NR,
          an.LANG_ID, an.nm_id
        FROM  DE, ALT_NMS an where 
 	DE.VAL_DOM_ITEM_ID = an.ITEM_ID and
