@@ -10,7 +10,7 @@ BEGIN
 update admin_item set admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
 	LST_UPD_USR_ID = 'ONEDATA', 
 	UNTL_DT = v_end_date,
-	CHNG_DESC_TXT = substrb(v_updated_by || ' ' || CHNG_DESC_TXT, 1, 2000),
+	CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
 	REGSTR_STUS_ID = 11 -- 'Retired'
 	where admin_item_typ_id = 49  -- Concept
 	and admin_stus_id <> 77 -- not retired
@@ -69,7 +69,7 @@ and t1.ver_nr = t2.ver_nr)
 WHEN MATCHED THEN UPDATE SET
 t1.CHANGED_NAME = 1
 where t1.evs_pref_name <> t2.item_nm and t1.CONCEPT_STATUS is NULL;
---prepare CHANGED_DEF indicator
+--prepare CHANGED_DEF indicator only not empty EVS definition values
 MERGE INTO SAG_LOAD_CONCEPTS_EVS t1
 USING
 (
@@ -83,7 +83,7 @@ and t1.ver_nr = t2.ver_nr)
 WHEN MATCHED THEN UPDATE SET
 t1.CHANGED_DEF = 1
 where t1.definition is not null
-and substr(NVL(t1.definition, 'No value exists.'), 1, 4000) <> t2.ITEM_DESC and t1.CONCEPT_STATUS is NULL;
+and substr(t1.definition, 1, 4000) <> t2.ITEM_DESC and t1.CONCEPT_STATUS is NULL;
 --
 UPDATE SAG_LOAD_CONCEPTS_EVS set CHANGED_BOTH = 1
 where CHANGED_DEF = 1 and CHANGED_NAME = 1;
@@ -223,10 +223,9 @@ BEGIN
 	-- sag_load_concepts_evs shall have update tags set done by by SAG_LOAD_CONCEPT_PREPARE_UPD
 	SAG_LOAD_CONCEPT_PREPARE_UPD; --tag changes
 	SAG_LOAD_CONCEPT_RETIRE(v_date); --retire EVS-retired concepts
-	SAG_LOAD_CONCEPT_PRIOR_NAME(v_date); -- create prioe alt names
+    SAG_LOAD_CONCEPT_PRIOR_NAME(v_date); -- create prioe alt names
 	SAG_LOAD_CONCEPT_PRIOR_DEF(v_date); -- create prior definistions
 
---CHNG_DESC_TXT = substrb(v_updated_by || ' ' || CHNG_DESC_TXT, 1, 2000),
 v_updated_by_both := v_updated_by_both1 || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
 v_updated_by_name := v_updated_by_name || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
 v_updated_by_def := v_updated_by_def || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
@@ -239,9 +238,11 @@ SELECT * FROM SAG_LOAD_CONCEPTS_EVS where CHANGED_NAME = 1 and CHANGED_BOTH = 0
 ON(t1.item_id = t2.item_id and t1.ver_nr = t2.ver_nr)
 WHEN MATCHED THEN UPDATE SET
 t1.ITEM_NM = t2.EVS_PREF_NAME,
-CHNG_DESC_TXT = substrb(v_updated_by_name || ' ' || CHNG_DESC_TXT, 1, 2000)
+CHNG_DESC_TXT = substrb(v_updated_by_name || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
+LST_UPD_DT = v_date,
+LST_UPD_USR_ID = 'ONEDATA'
 where t1.item_nm <> t2.evs_pref_name;
---update definitions
+--update definitions only for cases where SAG_LOAD_CONCEPTS_EVS definition not null
 MERGE INTO ADMIN_ITEM t1
 USING
 (
@@ -249,9 +250,11 @@ SELECT * FROM SAG_LOAD_CONCEPTS_EVS where CHANGED_DEF = 1 and CHANGED_BOTH = 0
 )t2
 ON(t1.item_id = t2.item_id and t1.ver_nr = t2.ver_nr)
 WHEN MATCHED THEN UPDATE SET
-t1.ITEM_DESC = substr(NVL(t2.definition, 'No value exists.'), 1, 4000),
-CHNG_DESC_TXT = substrb(v_updated_by_def || ' ' || CHNG_DESC_TXT, 1, 2000)
-where t1.ITEM_DESC <> substr(NVL(t2.definition, 'No value exists.'), 1, 4000);
+t1.ITEM_DESC = substr(t2.definition,1, 4000),
+CHNG_DESC_TXT = substrb(v_updated_by_def || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
+LST_UPD_DT = v_date,
+LST_UPD_USR_ID = 'ONEDATA'
+where t1.ITEM_DESC <> substr(t2.definition, 1, 4000);
 -- update change notes
 MERGE INTO ADMIN_ITEM t1
 USING
@@ -261,10 +264,12 @@ SELECT * FROM SAG_LOAD_CONCEPTS_EVS where CHANGED_BOTH = 1
 ON(t1.item_id = t2.item_id and t1.ver_nr = t2.ver_nr)
 WHEN MATCHED THEN UPDATE SET
 t1.ITEM_NM = t2.EVS_PREF_NAME,
-t1.ITEM_DESC = substr(NVL(t2.definition, 'No value exists.'), 1, 4000),
-CHNG_DESC_TXT = substrb(v_updated_by_both || ' ' || CHNG_DESC_TXT, 1, 2000)
+t1.ITEM_DESC = substr(t2.definition,1, 4000),
+CHNG_DESC_TXT = substrb(v_updated_by_both || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
+LST_UPD_DT = v_date,
+LST_UPD_USR_ID = 'ONEDATA'
 where t1.item_nm <> t2.evs_pref_name
-and t1.ITEM_DESC <> substr(NVL(t2.definition, 'No value exists.'), 1, 4000);
+and t1.ITEM_DESC <> substr(t2.definition,1, 4000);
 commit;
 EXCEPTION
     WHEN OTHERS THEN
