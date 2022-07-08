@@ -12,6 +12,8 @@ Delete Question
 Compare CDE (Under DEC)
 Compare CDE (DEC CO)
 Add Component Using NAme
+Set Preferred VM
+Run VM Match
 
 Object
 Form/Template/
