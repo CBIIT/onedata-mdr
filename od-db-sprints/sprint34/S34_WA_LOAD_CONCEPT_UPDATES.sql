@@ -8,10 +8,12 @@ BEGIN
 	v_end_date := p_END_DATE;
 	v_updated_by := v_updated_by1 || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
 update admin_item set admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
+	ADMIN_STUS_NM_DN = 'RETIRED ARCHIVED',
 	LST_UPD_USR_ID = 'ONEDATA', 
 	UNTL_DT = v_end_date,
 	CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
-	REGSTR_STUS_ID = 11 -- 'Retired'
+	REGSTR_STUS_ID = 11 -- 'Retired',
+	REGSTR_STUS_NM_DN = 'Retired',
 	where admin_item_typ_id = 49  -- Concept
 	and admin_stus_id <> 77 -- not retired
 	and CNTXT_ITEM_ID = 20000000024 --NCIP

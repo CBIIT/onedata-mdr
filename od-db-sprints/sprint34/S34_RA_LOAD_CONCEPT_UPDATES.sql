@@ -26,19 +26,23 @@ SELECT item_id,
 commit;
 --insert concepts synonyms and prior names to ONEDATA_RA
 delete from onedata_ra.alt_nms where 
-NM_TYP_ID  in (1064, 1049);
+NM_TYP_ID  in (1064, 1049)
+and CREAT_USR_ID = 'ONEDATA';
 --insert alt names synonyms to ONEDATA_RA from ONEDATA_WA
 insert into onedata_ra.alt_nms 
-select * from onedata_wa.alt_nms where nm_typ_id  in (1064, 1049);
+select * from onedata_wa.alt_nms where nm_typ_id  in (1064, 1049)
+and CREAT_USR_ID = 'ONEDATA';
 commit;
 dbms_output.put_line('ONEDATA_RA load concepts alt_nms is completed');
 
 --insert concepts prior definitions to ONEDATA_RA
 delete from onedata_ra.ALT_DEF where 
-NCI_DEF_TYP_ID = 1357;
+NCI_DEF_TYP_ID = 1357
+and CREAT_USR_ID = 'ONEDATA';
 --insert alt names synonyms to ONEDATA_RA from ONEDATA_WA
-insert into onedata_ra.ALT_DEF 
-select * from onedata_wa.alt_defs where NCI_DEF_TYP_ID = 1357;
+insert into onedata_ra.ALT_DEF
+select * from onedata_wa.alt_def where NCI_DEF_TYP_ID = 1357
+and CREAT_USR_ID = 'ONEDATA';
 commit;
 dbms_output.put_line('ONEDATA_RA load concepts alt_nms is completed');
 
@@ -78,6 +82,26 @@ where
 t1.admin_item_typ_id = 49
 and t1.item_desc <> t2.item_desc;
 dbms_output.put_line('ONEDATA_RA load concepts definitions update is completed');
+
+--update concepts where WFS is different forretired concepts
+MERGE INTO onedata_ra.admin_item t1
+USING
+(
+SELECT * FROM onedata_wa.admin_item where admin_item_typ_id = 49
+)t2
+ON(t1.item_id = t2.item_id and t1.ver_nr = t2.ver_nr)
+WHEN MATCHED THEN UPDATE SET
+t1.admin_item_typ_id = t2.admin_item_typ_id,
+t1.REGSTR_STUS_ID = t2.REGSTR_STUS_ID,
+t1.ADMIN_STUS_NM_DN = t2.ADMIN_STUS_NM_DN,
+t1.REGSTR_STUS_NM_DN = t2.REGSTR_STUS_NM_DN,
+t1.CHNG_DESC_TXT = t2.CHNG_DESC_TXT,
+t1.LST_UPD_DT = t2.LST_UPD_DT,
+t1.LST_UPD_USR_ID = t2.LST_UPD_USR_ID
+where 
+t1.admin_item_typ_id = 49
+and t1.admin_item_typ_id <> t2.admin_item_typ_id;
+dbms_output.put_line('ONEDATA_RA load concepts WFS update is completed');
 
 --update alt_def where different
 DBMS_MVIEW.REFRESH('VW_CNCPT');
