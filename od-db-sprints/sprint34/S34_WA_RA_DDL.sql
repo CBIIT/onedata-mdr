@@ -51,4 +51,6 @@ and aim.rel_typ_id = 65
 and csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr
 and aim.c_item_id = ai.item_id and aim.c_item_ver_nr = ai.ver_nr;
 
+alter table NCI_DS_HDR add MTCH_TYP_NM varchar2(50) default 'CDE';
+
 
