@@ -281,7 +281,7 @@ BEGIN
 	--Concept preferred name is the first synonym token, here is the code to populate it.
 	update SAG_LOAD_CONCEPTS_EVS
 	set EVS_PREF_NAME = substr(REGEXP_SUBSTR(SYNONYMS, '[^|]+'), 1, 255)
-	where EVS_PREF_NAME is null;
+	;
 	commit;
 	
 	--disable compaund triggers
