@@ -9,6 +9,9 @@ Hook Commands
 Delete Form
 Delete Module
 Delete Question
+Compare CDE (Under DEC)
+Compare CDE (DEC CO)
+Add Component Using NAme
 
 Object
 Form/Template/
@@ -23,6 +26,10 @@ CDE - VD Alternate Name (Browse CO) - 2.1 VD Alternate NAmes
 Unclassify (Hook for Form Curator) - Select Classification
 PV VM Import
 VD - PV Report View - PV Downalod
+Data Elements (Under DEC for DEC CO) - Data Elements
+Specify Name to Add Item to Collection (Hook)
+Download Header
+
 
 Conceptual Objects
 Value Domain Maintenance
