@@ -30,11 +30,15 @@ Data Elements (Under DEC for DEC CO) - Data Elements
 Specify Name to Add Item to Collection (Hook)
 Download Header
 SAG_LOAD_CONCEPTS_EVS - Monthly Load Concepts from EVS Full Raw --DSRMWS-45
+DS Entity To Match
+VM Match Header
+VM Match Results
 
 
 Conceptual Objects
 Value Domain Maintenance
 Classification Scheme Management
+VM Match
 
 Roles
 Super Curator
