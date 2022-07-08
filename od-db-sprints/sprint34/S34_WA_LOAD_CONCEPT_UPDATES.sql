@@ -12,8 +12,8 @@ update admin_item set admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
 	LST_UPD_USR_ID = 'ONEDATA', 
 	UNTL_DT = v_end_date,
 	CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
-	REGSTR_STUS_ID = 11 -- 'Retired',
-	REGSTR_STUS_NM_DN = 'Retired',
+	REGSTR_STUS_ID = 11, -- 'Retired'
+	REGSTR_STUS_NM_DN = 'Retired'
 	where admin_item_typ_id = 49  -- Concept
 	and admin_stus_id <> 77 -- not retired
 	and CNTXT_ITEM_ID = 20000000024 --NCIP
@@ -129,10 +129,10 @@ BEGIN
         'NCIP', --Context
         item_id, --concept to update name
         ver_nr,
+        'ONEDATA',
         v_date, --parameter
         'ONEDATA',
-        v_date,
-        'ONEDATA'
+        v_date
     FROM
         admin_item
     WHERE
@@ -142,7 +142,7 @@ BEGIN
         AND admin_stus_id = 75
     ;
    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_NAME error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
+        DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_NAME loop error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
         rollback;
         RAISE_APPLICATION_ERROR (SQLCODE, 'SAG_LOAD_CONCEPT_PRIOR_NAME Loop error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
    END;    
@@ -158,20 +158,19 @@ END;
 create or replace Procedure SAG_LOAD_CONCEPT_PRIOR_DEF (P_CREAT_DT IN DATE DEFAULT sysdate) AS
 v_date DATE := P_CREAT_DT; --parameter
 V_IDSEQ CHAR(36 BYTE);
+v_cnt NUMBER(3);
 BEGIN
 -- assuming that sag_load_concepts_evs is preprocessed 
   FOR desig IN (SELECT item_id, ver_nr FROM sag_load_concepts_evs where CHANGED_DEF = 1)
   LOOP --shall check not include if def is there
-  BEGIN
-   select NCI_IDSEQ into V_IDSEQ from ALT_DEF
+   select count(*) into v_cnt from ALT_DEF
    where NCI_DEF_TYP_ID = 1357
    and CNTXT_ITEM_ID = 20000000024 and CNTXT_VER_NR = 1
    and ITEM_ID = desig.ITEM_ID and VER_NR = desig.VER_NR
    and DEF_DESC = 
    (select item_desc from admin_item where ITEM_ID = desig.ITEM_ID and VER_NR = desig.VER_NR);
-   EXCEPTION
-   --insert if not exist
-      WHEN no_data_found THEN
+      --insert if not exist
+   IF (v_cnt  = 0) THEN
     INSERT INTO /*+ APPEND */ ALT_DEF (DEF_DESC,
     NCI_DEF_TYP_ID ,
     CNTXT_ITEM_ID , --trigger 20000000024 NCIP
@@ -186,10 +185,10 @@ BEGIN
         1,
         item_id, --concept to update name
         ver_nr,
+        'ONEDATA',
         v_date, --parameter
         'ONEDATA',
-        v_date,
-        'ONEDATA'
+        v_date
     FROM
         admin_item
     WHERE
@@ -198,11 +197,7 @@ BEGIN
         AND ver_nr = desig.ver_nr
         AND admin_stus_id = 75
     ;
-     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_PRIOR_DEF error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
-        rollback;
-        RAISE_APPLICATION_ERROR (SQLCODE, 'SAG_LOAD_CONCEPT_PRIOR_DEF Loop error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
-   END;
+   END IF;
   END LOOP;
   commit;
   EXCEPTION
@@ -283,6 +278,12 @@ create or replace Procedure SAG_LOAD_CONCEPT_ADMIN_ITEM_DESIG AS
 --DECLARE
 v_eff_date DATE := sysdate;
 BEGIN
+	--Concept preferred name is the first synonym token, here is the code to populate it.
+	update SAG_LOAD_CONCEPTS_EVS
+	set EVS_PREF_NAME = substr(REGEXP_SUBSTR(SYNONYMS, '[^|]+'), 1, 255)
+	where EVS_PREF_NAME is null;
+	commit;
+	
 	--disable compaund triggers
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_AI_DENORM_INS DISABLE';
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_ALT_NMS_DENORM_INS DISABLE';
@@ -389,6 +390,9 @@ END LOOP;
 dbms_output.put_line('loaded concepts synonyms to ALT_NMS !!!');
 
 	SAG_LOAD_CONCEPT_UPDATES(v_eff_date); -- update names and definitions
+	
+	DBMS_MVIEW.REFRESH('VW_CNCPT');
+
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_AI_DENORM_INS ENABLE';
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_ALT_NMS_DENORM_INS ENABLE';
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_ALT_NMS_POST ENABLE';-- this trigger updates AI audit info on designation updates

@@ -103,7 +103,6 @@ t1.admin_item_typ_id = 49
 and t1.admin_item_typ_id <> t2.admin_item_typ_id;
 dbms_output.put_line('ONEDATA_RA load concepts WFS update is completed');
 
---update alt_def where different
 DBMS_MVIEW.REFRESH('VW_CNCPT');
 
 END;
