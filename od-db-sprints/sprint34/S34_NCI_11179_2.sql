@@ -1061,11 +1061,14 @@ begin
 v_cart := false;
  row_ori := hookInput.originalRowset.rowset (1);
 -- saving all unique val_mean_ids from submitted admin items into v_tab_val_mean_id
-
+--raise_application_error(-20000, hookinput.originalrowset.tablename);
 if (upper(hookinput.originalrowset.tablename) like '%CART%') then
     v_item_typ_id := 4;
     v_cart := true;
-else
+elsif (upper(hookinput.originalrowset.tablename)= 'VW_DE') then
+    v_item_typ_id := 4;
+    v_cart := true;
+ else 
     v_item_typ_id := ihook.getColumnValue(row_ori,'ADMIN_ITEM_TYP_ID');
 end if;
 
