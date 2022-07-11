@@ -1,7 +1,9 @@
+ALTER TRIGGER TR_AI_AUD_TS DISABLE;
 update admin_item set origin_id_dn = 'NCI Thesaurus' 
 where admin_item_typ_id = 49 and 
 origin_id = 1466 and origin_id_dn is null;
 commit;
+ALTER TRIGGER TR_AI_AUD_TS ENABLE;
 create or replace Procedure SAG_LOAD_CONCEPT_RETIRE (p_END_DATE IN date default sysdate)
 AS
 v_end_date DATE;
