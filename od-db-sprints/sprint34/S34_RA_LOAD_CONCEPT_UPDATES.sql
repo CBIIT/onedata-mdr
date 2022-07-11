@@ -1,3 +1,7 @@
+update admin_item set origin_id_dn = 'NCI Thesaurus' 
+where admin_item_typ_id = 49 and 
+origin_id = 1466 and origin_id_dn is null;
+commit;
 create or replace PROCEDURE SAG_LOAD_CONCEPTS_SYN_RA AS
 BEGIN
 insert into onedata_ra.admin_item ra 
@@ -83,7 +87,7 @@ t1.admin_item_typ_id = 49
 and t1.item_desc <> t2.item_desc;
 dbms_output.put_line('ONEDATA_RA load concepts definitions update is completed');
 
---update concepts where WFS is different forretired concepts
+--update concepts where WFS is different for retired concepts
 MERGE INTO onedata_ra.admin_item t1
 USING
 (
@@ -91,16 +95,17 @@ SELECT * FROM onedata_wa.admin_item where admin_item_typ_id = 49
 )t2
 ON(t1.item_id = t2.item_id and t1.ver_nr = t2.ver_nr)
 WHEN MATCHED THEN UPDATE SET
-t1.admin_item_typ_id = t2.admin_item_typ_id,
+t1.admin_stus_id = t2.admin_stus_id,
 t1.REGSTR_STUS_ID = t2.REGSTR_STUS_ID,
 t1.ADMIN_STUS_NM_DN = t2.ADMIN_STUS_NM_DN,
 t1.REGSTR_STUS_NM_DN = t2.REGSTR_STUS_NM_DN,
 t1.CHNG_DESC_TXT = t2.CHNG_DESC_TXT,
 t1.LST_UPD_DT = t2.LST_UPD_DT,
-t1.LST_UPD_USR_ID = t2.LST_UPD_USR_ID
+t1.LST_UPD_USR_ID = t2.LST_UPD_USR_ID,
+t1.UNTL_DT = t2.UNTL_DT
 where 
 t1.admin_item_typ_id = 49
-and t1.admin_item_typ_id <> t2.admin_item_typ_id;
+and t1.admin_stus_id <> t2.admin_stus_id;
 dbms_output.put_line('ONEDATA_RA load concepts WFS update is completed');
 
 DBMS_MVIEW.REFRESH('VW_CNCPT');

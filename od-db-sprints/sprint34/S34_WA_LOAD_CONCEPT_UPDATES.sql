@@ -1,3 +1,7 @@
+update admin_item set origin_id_dn = 'NCI Thesaurus' 
+where admin_item_typ_id = 49 and 
+origin_id = 1466 and origin_id_dn is null;
+commit;
 create or replace Procedure SAG_LOAD_CONCEPT_RETIRE (p_END_DATE IN date default sysdate)
 AS
 v_end_date DATE;
@@ -10,6 +14,7 @@ BEGIN
 update admin_item set admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
 	ADMIN_STUS_NM_DN = 'RETIRED ARCHIVED',
 	LST_UPD_USR_ID = 'ONEDATA', 
+	LST_UPD_DT = v_end_date,
 	UNTL_DT = v_end_date,
 	CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
 	REGSTR_STUS_ID = 11, -- 'Retired'
@@ -302,7 +307,8 @@ INSERT INTO /*+ APPEND */ admin_item (--NCI_IDSEQ,
      -- UNTL_DT,
      -- CURRNT_VER_IND, default
      ITEM_LONG_NM,
-     -- ORIGIN, default trigger
+     ORIGIN_ID, -- default by trigger from obj_key 1466
+     ORIGIN_ID_DN, -- NCI Thesaurus
      ITEM_DESC, 
      --ITEM_ID,
      ITEM_NM,
@@ -316,6 +322,8 @@ select --'D12B8399-3EE0-0244-E053-5801D00A0E12', --for test
 49, 75, 'RELEASED', v_eff_date, 
 20000000024, 1, 'NCIP',
 code, -- ITEM_LONG_NM
+1466,
+'NCI Thesaurus',
 substr(NVL(definition, 'No value exists.'), 1, 4000), 
 EVS_PREF_NAME, 1, 
 'ONEDATA', v_eff_date, v_eff_date, 
