@@ -14,6 +14,7 @@ Compare CDE (DEC CO)
 Add Component Using NAme
 Set Preferred VM
 Run VM Match
+Refresh Counts
 
 Object
 Form/Template/
@@ -32,6 +33,7 @@ Data Elements (Under DEC for DEC CO) - Data Elements
 Specify Name to Add Item to Collection (Hook)
 Download Header
 SAG_LOAD_CONCEPTS_EVS - Monthly Load Concepts from EVS Full Raw --DSRMWS-45
+REVERSE_COUNT_RESULTS-Reverse validation counts, rerun "exec sp_test_all_NEW" , table OD_CADSR_TABLES_TEST_RESULTS-- DSRMWS-1565
 DS Entity To Match
 VM Match Header
 VM Match Results
