@@ -703,4 +703,8 @@ CASE
     COMMIT;
 END;
 /
-
+CREATE OR REPLACE procedure spLoadCounts AS 
+begin
+SP_TEST_ALL_NEW;
+end;
+/
