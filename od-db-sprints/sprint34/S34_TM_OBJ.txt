@@ -43,6 +43,7 @@ Conceptual Objects
 Value Domain Maintenance
 Classification Scheme Management
 VM Match
+NCI Standard CRFs
 
 Roles
 Super Curator
