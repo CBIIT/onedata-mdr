@@ -39,3 +39,6 @@ select obj_key_desc into v_item_typ_nm from obj_key where obj_key_id = :new.admi
 
 END;
 /
+
+drop trigger TR_DEL_QUEST_VV;
+
