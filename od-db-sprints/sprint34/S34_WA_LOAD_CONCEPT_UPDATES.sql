@@ -231,8 +231,8 @@ BEGIN
 	SAG_LOAD_CONCEPT_PRIOR_DEF(v_date); -- create prior definistions
 
 v_updated_by_both := v_updated_by_both1 || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
-v_updated_by_name := v_updated_by_name || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
-v_updated_by_def := v_updated_by_def || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
+v_updated_by_name := v_updated_by_name1 || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
+v_updated_by_def := v_updated_by_def1 || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
 -- update names
 MERGE INTO ADMIN_ITEM t1
 USING
