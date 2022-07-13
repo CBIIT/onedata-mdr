@@ -48,7 +48,6 @@ insert into onedata_ra.ALT_DEF
 select * from onedata_wa.alt_def where NCI_DEF_TYP_ID = 1357
 and CREAT_USR_ID = 'ONEDATA';
 commit;
-dbms_output.put_line('ONEDATA_RA load concepts alt_nms is completed');
 
 commit;
 dbms_output.put_line('ONEDATA_RA load concepts alt_def is completed');
@@ -64,7 +63,8 @@ WHEN MATCHED THEN UPDATE SET
 t1.ITEM_NM = t2.ITEM_NM,
 t1.CHNG_DESC_TXT = t2.CHNG_DESC_TXT,
 t1.LST_UPD_DT = t2.LST_UPD_DT,
-t1.LST_UPD_USR_ID = t2.LST_UPD_USR_ID
+t1.LST_UPD_USR_ID = t2.LST_UPD_USR_ID,
+t1.LST_UPD_USR_ID_X = t2.LST_UPD_USR_ID_X
 where 
 t1.admin_item_typ_id = 49
 and t1.item_nm <> t2.ITEM_NM;
@@ -81,7 +81,8 @@ WHEN MATCHED THEN UPDATE SET
 t1.ITEM_DESC = t2.ITEM_DESC,
 t1.CHNG_DESC_TXT = t2.CHNG_DESC_TXT,
 t1.LST_UPD_DT = t2.LST_UPD_DT,
-t1.LST_UPD_USR_ID = t2.LST_UPD_USR_ID
+t1.LST_UPD_USR_ID = t2.LST_UPD_USR_ID,
+t1.LST_UPD_USR_ID_X = t2.LST_UPD_USR_ID_X
 where 
 t1.admin_item_typ_id = 49
 and t1.item_desc <> t2.item_desc;
@@ -102,7 +103,8 @@ t1.REGSTR_STUS_NM_DN = t2.REGSTR_STUS_NM_DN,
 t1.CHNG_DESC_TXT = t2.CHNG_DESC_TXT,
 t1.LST_UPD_DT = t2.LST_UPD_DT,
 t1.LST_UPD_USR_ID = t2.LST_UPD_USR_ID,
-t1.UNTL_DT = t2.UNTL_DT
+t1.UNTL_DT = t2.UNTL_DT,
+t1.LST_UPD_USR_ID_X = t2.LST_UPD_USR_ID_X
 where 
 t1.admin_item_typ_id = 49
 and t1.admin_stus_id <> t2.admin_stus_id;
