@@ -12,7 +12,7 @@ v_updated_by1 varchar2(256) := 'Updated caDSR information to match EVS retiremen
 v_updated_by varchar2(512);
 BEGIN
 	v_end_date := p_END_DATE;
-	v_updated_by := v_updated_by1 || to_char(sysdate, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
+	v_updated_by := v_updated_by1 || to_char(v_end_date, 'MON DD, YYYY HH:MI AM') || v_updated_by2;
 update admin_item set admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
 	ADMIN_STUS_NM_DN = 'RETIRED ARCHIVED',
 	LST_UPD_USR_ID = 'ONEDATA', 
