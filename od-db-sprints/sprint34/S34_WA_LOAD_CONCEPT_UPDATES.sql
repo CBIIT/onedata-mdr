@@ -1,3 +1,4 @@
+-- DSRMWS-45 Monthly Concept Load Procedures
 ALTER TRIGGER TR_AI_AUD_TS DISABLE;
 update admin_item set origin_id_dn = 'NCI Thesaurus' 
 where admin_item_typ_id = 49 and 
