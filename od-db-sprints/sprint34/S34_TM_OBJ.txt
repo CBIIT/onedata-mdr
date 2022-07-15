@@ -4,6 +4,7 @@ spDeleteMod
 spDeleteForm
 spPostTypeDetails
 spProtolUpd
+spPostDesAINmDef
 
 Hook Commands
 Delete Form
@@ -59,5 +60,9 @@ Interchange Mapping
 PV-VM Import
 DS Import
 VM Match Import
+
+Packages
+nci_import
+nci_post_hook
 
 
