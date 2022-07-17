@@ -1,4 +1,4 @@
-
+-- Tracker 1704
 CREATE OR REPLACE TRIGGER TR_AI_AUD_TS
   BEFORE UPDATE ON ADMIN_ITEM
    FOR EACH ROW
@@ -40,5 +40,6 @@ select obj_key_desc into v_item_typ_nm from obj_key where obj_key_id = :new.admi
 END;
 /
 
+-- Tracker 1769
 drop trigger TR_DEL_QUEST_VV;
 
