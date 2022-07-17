@@ -1,3 +1,4 @@
+-- Tracker 1915 - Data Type Reverse
 alter table DATA_TYP add  (NCI_DTTYPE_MAP_ID integer);
 
 update data_TYP a set NCI_DTTYPE_MAP_ID = (select DTTYPE_ID from DATA_TYP where 	NCI_DTTYPE_TYP_ID = 2 and DTTYPE_NM = a.NCI_DTTYPE_MAP)
@@ -5,7 +6,7 @@ where NCI_DTTYPE_TYP_ID = 1 and NCI_DTTYPE_MAP is not null;
 
 commit;
 
-
+-- Tracker 1935 - VD Alternate Name Node
   CREATE OR REPLACE  VIEW VW_NCI_DE_VD_ALT_NMS As
   SELECT   DE.ITEM_ID  DE_ITEM_ID, 
 		DE.VER_NR DE_VER_NR, DE.VAL_DOM_ITEM_ID VAL_DOM_ITEM_ID,  
@@ -17,11 +18,14 @@ commit;
 	DE.VAL_DOM_ITEM_ID = an.ITEM_ID and
 	DE.VAL_DOM_VER_NR = an.VER_NR ;
 	
-	alter table NCI_STG_PV_VM_IMPORT add (VM_ALT_NM_CNTXT_ITEM_ID number, VM_ALT_NM_CNTXT_VER_NR number(4,2));
+-- Tracker 1672
+alter table NCI_STG_PV_VM_IMPORT add (VM_ALT_NM_CNTXT_ITEM_ID number, VM_ALT_NM_CNTXT_VER_NR number(4,2));
 
+-- Tracker 1485 
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (9,65);
 commit;
 
+-- Tracker 1602
 CREATE OR REPLACE  VIEW VW_NCI_VD_PV AS
   SELECT PV.PERM_VAL_BEG_DT, PERM_VAL_END_DT, PERM_VAL_NM, PERM_VAL_DESC_TXT,
               PV.VAL_DOM_ITEM_ID,
@@ -37,7 +41,8 @@ CREATE OR REPLACE  VIEW VW_NCI_VD_PV AS
         VM.ITEM_ID = e.ITEM_ID and
         VM.VER_NR = e.VER_NR;
 	
-	
+
+-- Tracker 1074
 	  CREATE OR REPLACE  VIEW VW_NCI_CSI_AI AS
   select  aim.c_item_id item_id, aim.c_item_ver_nr ver_nr, aim.p_item_id csi_item_id, aim.p_item_ver_nr csi_ver_nr,
   csi.item_nm csi_ITEM_NM, csi.cs_item_id CS_ITEM_ID, csi.CS_ITEM_VER_NR CS_VER_NR, aim.rel_typ_id,
@@ -52,9 +57,12 @@ and aim.rel_typ_id = 65
 and csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr
 and aim.c_item_id = ai.item_id and aim.c_item_ver_nr = ai.ver_nr;
 
+-- Tracker 1943
 alter table NCI_DS_HDR add MTCH_TYP_NM varchar2(50) default 'CDE';
 
 
+-- Tracker 1943
+-- VM Match add Context fo VW_CNCPT
 drop materialized view VW_CNCPT;
 
 create materialized view VW_CNCPT 
