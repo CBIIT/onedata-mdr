@@ -297,6 +297,7 @@ AS
     v_entty_nm_like varchar2(255);
     v_cntxt_str varchar2(255);
     v_cnt integer;
+    v_str varchar2(255);
 
 begin
     hookinput := ihook.gethookinput (v_data_in);
@@ -316,15 +317,32 @@ begin
     
      insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
                     select distinct  v_hdr_id , item_id, ver_nr, 'Long Name Exact Match' from 
-                    vw_cncpt where upper(item_nm) = upper(ihook.getColumnValue(row_ori,'ENTTY_NM'));
+                    vw_cncpt where upper(item_nm) = upper(ihook.getColumnValue(row_ori,'ENTTY_NM')) and CNTXT_NM_DN = 'NCIP';
                     commit;
-   
+   /*
      insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
                     select distinct  v_hdr_id , r.item_id, r.ver_nr, 'Synonym Exact Match' from 
                     vw_cncpt c, alt_nms r where upper(nm_desc) = upper(ihook.getColumnValue(row_ori,'ENTTY_NM'))
                     and c.item_id = r.item_id and c.ver_nr = r.ver_nr and 
                     (v_hdr_id, r.item_id, r.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
+                    commit; 
+    */
+    
+    v_str :=   upper(ihook.getColumnValue(row_ori,'ENTTY_NM')) || ' |';
+     insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , c.item_id, c.ver_nr, 'Synonym Exact Match' from 
+                    vw_cncpt c where v_str =substr(upper(syn),1,length(v_str)) and CNTXT_NM_DN = 'NCIP'
+                    and (v_hdr_id, c.item_id, c.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
                     commit;
+                    
+    v_str := '| ' ||  upper(ihook.getColumnValue(row_ori,'ENTTY_NM')) || ' |';
+     insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , c.item_id, c.ver_nr, 'Synonym Exact Match' from 
+                    vw_cncpt c where instr(upper(syn), v_Str,1,1) > 0 and CNTXT_NM_DN = 'NCIP'
+                    and (v_hdr_id, c.item_id, c.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
+                    commit;
+                    
+                    
   select count(*) into v_temp from nci_ds_rslt where hdr_id = v_hdr_id     ;
   if (v_temp = 1) then 
   update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR) = (select 1, item_id, ver_nr from nci_ds_rslt where hdr_id = v_hdr_id)
