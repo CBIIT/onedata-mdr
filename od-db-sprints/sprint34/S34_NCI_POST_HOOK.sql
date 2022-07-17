@@ -8,6 +8,7 @@ procedure spAICDEUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2
 procedure spAIVDUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spAIDel ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spAINmDef ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spPostDesAINmDef ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spAISTIns ( v_data_in in clob, v_data_out out clob);
 procedure spDervCompIns ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure spModRestore ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_mode in varchar2);
@@ -523,6 +524,65 @@ hookInput        t_hookInput;
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
+--Jira 1924
+procedure spPostDesAINmDef ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2)
+as
+hookInput        t_hookInput;
+    hookOutput       t_hookOutput := t_hookOutput ();
+    row_ori          t_row;
+    nw_cntxt varchar2(64);
+
+  BEGIN
+    hookinput := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber := hookinput.invocationnumber;
+    hookoutput.originalrowset := hookinput.originalrowset;
+
+    row_ori := hookInput.originalRowset.rowset (1);
+    --raise_application_error(-20000,'NM_TYP_ID: ' || ihook.getColumnValue(row_ori, 'NM_TYP_ID'));
+     if (nci_11179_2.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID') ,ihook.getColumnValue(row_ori, 'VER_NR'), v_usr_id) = false) then
+    -- raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ' || v_item_id || ' ' || v_user_id);
+    raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ' );
+        return;
+    end if;
+  if (ihook.getColumnValue(row_ori,'NM_TYP_ID') = 83 and hookinput.originalRowset.tablename like '%NMS%') then
+  for cur in (select * from alt_nms where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR') and nm_id <> ihook.getColumnValue(row_ori, 'NM_ID')
+  and nm_typ_id = 83) loop
+    raise_application_error(-20000,'Only one manually curated name can be specified.');
+    return;
+    end loop;
+ end if;
+  if (ihook.getColumnValue(row_ori,'NCI_DEF_TYP_ID') = 82 and hookinput.originalRowset.tablename  like '%DEF%') then
+  for cur in (select * from alt_def where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR') and def_id <> ihook.getColumnValue(row_ori, 'DEF_ID')
+  and nci_def_typ_id = 82) loop
+    raise_application_error(-20000,'Only one manually curated definition can be specified.');
+    return;
+    end loop;
+ end if;
+ 
+ if (ihook.getColumnValue(row_ori, 'NM_TYP_ID') = 1038) then
+ --for cur in (select * from alt_nms where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR') and nm_id <> ihook.getColumnValue(row_ori, 'NM_ID') and nm_typ_id = 1038) loop
+    ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'WARNING: Alternate Name will be set to Context Name for Used By.' || chr(13) );
+    --raise_application_error(-20000,'WARNING: Alternate Name will be set to Context Name for Used By.');
+    --return;
+    --end loop;
+ end if;
+ 
+ /*for i in 1..hookinput.originalRowset.rowset.count loop
+   row_ori := hookInput.originalRowset.rowset(i);
+  if (ihook.getColumnValue(row_ori, 'NM_TYP_ID')= 1038) then --1038 is internal id for USED_BY
+           ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') || 'WARNING: Alternate Name will be set to Context Name for Used By.' || chr(13) );
+          select item_nm into nw_cntxt from vw_cntxt where item_id = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID');
+           ihook.setColumnValue(row_ori, 'NM_DESC', nw_cntxt);
+      end if;
+      end loop;
+  ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') || 'This is to test the post hook.' || chr(13) );
+*/
+  
+ V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+end;
+
+--end Jira1924
+
 
 procedure spPVUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2)
 as
@@ -908,7 +968,7 @@ BEGIN
          DBMS_MVIEW.REFRESH('VW_CLSFCTN_SCHM_ITEM');
         
     end if;
-        for cur in (select ai.item_id item_id from admin_item ai
+        for cur in (select ai.item_id item_id , ai.ver_nr from admin_item ai
             where
             trim(ai.ITEM_LONG_NM)=trim(ihook.getColumnValue(row_ori,'ITEM_LONG_NM'))
         --    and  ai.ver_nr =  ihook.getColumnValue(rowai, 'VER_NR')
@@ -917,13 +977,14 @@ BEGIN
             and ai.item_id <>  nvl(ihook.getColumnValue(row_ori, 'ITEM_ID'),0)
             and ai.admin_item_typ_id = ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') )
             loop
-               raise_application_error(-20000, 'Duplicate found based on context/short name: ' || cur.item_id || chr(13));
+               raise_application_error(-20000, 'Duplicate found based on context/short name: ' || cur.item_id || 'v' || cur.ver_nr || ' for ' || nvl(ihook.getColumnValue(row_ori, 'ITEM_ID'),0)
+               || 'v' || nvl(ihook.getColumnValue(row_ori, 'VER_NR'),0) || chr(13));
                 return;
             end loop;
 
     if (ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') = 4) then -- Data Element
  --   raise_application_error (-20000, 'here');
-           for cur     IN (SELECT ai.item_id
+           for cur     IN (SELECT ai.item_id, ai.ver_nr
                   FROM admin_item ai, de de
                  WHERE     ai.item_id = de.item_id
                        AND ai.ver_nr = de.ver_nr
@@ -931,12 +992,13 @@ BEGIN
                        (select de_conc_item_id ,de_conc_ver_nr ,val_dom_item_id ,val_dom_ver_nr from de where item_id = v_item_id and ver_nr = v_ver_nr)
                        AND ai.item_id <> v_item_id
                        AND ai.cntxt_item_id =   ihook.getColumnValue (row_ori, 'CNTXT_ITEM_ID')
-                       and ai.cntxt_ver_nr =   ihook.getColumnValue (row_ori, 'CNTXT_VER_NR'))
+                       and ai.cntxt_ver_nr =   ihook.getColumnValue (row_ori, 'CNTXT_VER_NR')
+                       and ai.item_long_nm =  ihook.getColumnValue (row_ori, 'ITEM_LONG_NM'))
                     --    and     ai.item_id = v_item_id
                      --                  AND ai.ver_nr = v_ver_nr))
         LOOP
             raise_application_error (-20000,
-                                     'Duplicate DE found. ' || cur.item_id || ' for ' || v_item_id || 'v' || v_ver_nr);
+                                     'Duplicate DE found. ' || cur.item_id || 'v' || cur.ver_nr || ' for ' || v_item_id || 'v' || v_ver_nr);
             RETURN;
         END LOOP;
         
@@ -1156,7 +1218,7 @@ BEGIN
    end loop;
 
         FOR cur
-            IN (SELECT ai.item_id
+            IN (SELECT ai.item_id, ai.ver_nr
                   FROM admin_item ai, de de
                  WHERE     ai.item_id = de.item_id
                        AND ai.ver_nr = de.ver_nr
@@ -1168,15 +1230,16 @@ BEGIN
                            ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID')
                        AND de.val_dom_ver_nr =
                            ihook.getColumnValue (row_ori, 'VAL_DOM_VER_NR')
+                       --    and ai.item_long_nm = 
                        AND de.item_id <> v_item_id
-                       AND (ai.cntxt_item_id, ai.cntxt_ver_nr) IN
-                               (SELECT ai1.cntxt_item_id, ai1.cntxt_ver_nr
+                       AND (ai.cntxt_item_id, ai.cntxt_ver_nr, ai.item_long_nm) IN
+                               (SELECT ai1.cntxt_item_id, ai1.cntxt_ver_nr, ai.item_long_nm
                                   FROM admin_item ai1
                                  WHERE     item_id = v_item_id
                                        AND ver_nr = v_ver_nr))
         LOOP
             raise_application_error (-20000,
-                                     'Duplicate DE found. ' || cur.item_id || ' for ' || v_item_id || 'v' || v_ver_nr);
+                                     'Duplicate DE found. ' || cur.item_id || 'v' || cur.ver_nr || ' for ' || v_item_id || 'v' || v_ver_nr);
             RETURN;
         END LOOP;
 
