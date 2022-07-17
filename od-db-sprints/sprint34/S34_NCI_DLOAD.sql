@@ -1232,10 +1232,10 @@ v_item_typ_id := nci_11179_2.getDloadItemTyp (ihook.getColumnValue(row_ori,'DLOA
         forms              := hookInput.forms;
         form1              := forms(1);
         row_sel := form1.rowset.rowset(1);
-        v_str := trim(ihook.getColumnValue(row_sel, 'VM_DESC_TXT'));
+        v_str := upper(trim(ihook.getColumnValue(row_sel, 'VM_DESC_TXT')));
        rows := t_rows();
        
-       for cur in (Select * from admin_item where admin_item_typ_id = v_item_typ_id and item_nm like '%' || v_str || '%') loop
+       for cur in (Select * from admin_item where admin_item_typ_id = v_item_typ_id and upper(item_nm) like '%' || v_str || '%') loop
         row := t_row();
          ihook.setColumnValue(row, 'ITEM_ID', cur.item_id);
          ihook.setColumnValue(row, 'VER_NR', cur.ver_nr);
@@ -1530,4 +1530,5 @@ begin
 end;
 
 END;
-/
+      /
+      
