@@ -9,6 +9,7 @@ procedure spDeleteQuest (v_data_in in clob, v_data_out out clob, v_user_id in va
 procedure DeleteQuest (v_id in number, v_ver_nr in number, v_idseq in char);
 procedure DeleteModule (v_id in number, v_ver_nr in number, v_idseq in char);
 procedure DeleteCommonChildren (v_id in number, v_ver_nr in number, v_idseq in char);
+procedure DeleteVV (v_idseq in char);
 
 END;
 /
@@ -413,12 +414,14 @@ AS
   action_row		    t_row;
   rowset            t_rowset;
 
+i integer;
   rowform t_row;
 v_found boolean;
   v_module_id integer;
   v_disp_ord integer;
   v_frm_id number;
   v_frm_ver_nr number(4,2);
+  v_sql  varchar2(4000);
 
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -441,6 +444,23 @@ for i in 1..hookinput.originalrowset.rowset.count loop
  end loop;
 end loop;
 
+ i := 0;
+    for cur in (select * from NCI_ADMIN_ITEM_REL_ALT_KEY where nvl(fld_delete,0) = 0 and p_item_id =   ihook.getColumnValue(row_ori, 'P_ITEM_ID') and p_item_ver_nr =
+             ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR') and rel_typ_id = 63 order by disp_ord) loop
+                if (i <> cur.disp_ord) then
+                    row := t_row();
+                    v_sql := 'select * from NCI_ADMIN_ITEM_REL_ALT_KEY where  p_item_id = ' ||  cur.p_item_id || ' and p_item_ver_nr = ' || cur.p_item_ver_nr || ' and disp_ord = ' || cur.disp_ord ;
+                    nci_11179.ReturnRow(v_sql, 'NCI_ADMIN_ITEM_REL_ALT_KEY', row);
+                    ihook.setColumnValue(row, 'DISP_ORD', i);
+                    rows.extend;                    rows(rows.last) := row;
+                end if;
+                i := i+1;
+    end loop;
+
+    action := t_actionRowset(rows, 'Questions (Base Object)', 2, 1000, 'update');
+    actions.extend; actions(actions.last) := action;
+    hookoutput.actions:= actions;
+    
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
@@ -466,6 +486,8 @@ v_found boolean;
   v_disp_ord integer;
   v_frm_id number;
   v_frm_ver_nr number(4,2);
+  i integer;
+  v_sql varchar2(4000);
 
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -485,6 +507,24 @@ for i in 1..hookinput.originalrowset.rowset.count loop
  DeleteModule(cur1.item_id, cur1.ver_nr, cur1.nci_idseq);
  end loop;
 end loop;
+
+ i := 0;
+    for cur in (select * from NCI_ADMIN_ITEM_REL where nvl(fld_delete,0) = 0 and p_item_id =   ihook.getColumnValue(row_ori, 'P_ITEM_ID') and p_item_ver_nr =
+             ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR') and rel_typ_id = 61 order by disp_ord) loop
+                if (i <> cur.disp_ord) then
+                    row := t_row();
+                    v_sql := 'select * from NCI_ADMIN_ITEM_REL where  p_item_id = ' ||  cur.p_item_id || ' and p_item_ver_nr = ' || cur.p_item_ver_nr || ' and disp_ord = ' || cur.disp_ord ;
+                    nci_11179.ReturnRow(v_sql, 'NCI_ADMIN_ITEM_REL', row);
+                    ihook.setColumnValue(row, 'DISP_ORD', i);
+                    rows.extend;                    rows(rows.last) := row;
+                end if;
+                i := i+1;
+    end loop;
+
+    action := t_actionRowset(rows, 'Generic AI Relationship', 2, 1000, 'update');
+    actions.extend; actions(actions.last) := action;
+    hookoutput.actions:= actions;
+    
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
@@ -530,7 +570,12 @@ BEGIN
  DeleteModule(cur1.item_id, cur1.ver_nr, cur1.nci_idseq);
  end loop;
  
+ select nci_idseq into v_idseq from admin_item where item_id = v_id and ver_nr = v_ver_nr;
+ 
 DeleteCommonChildren(v_id, v_ver_nr, v_idseq);
+ commit;
+ 
+ --raise_application_error(-20000, v_idseq);
  
 delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where dn_crf_idseq =  v_idseq);
 delete from sbr.administered_components where ac_idseq =  v_idseq;
@@ -561,9 +606,14 @@ BEGIN
 
 -- delete from question vv-rep
 delete from nci_quest_vv_rep where quest_pub_id = v_id and quest_ver_nr = v_ver_nr;
+delete from onedata_ra.nci_quest_vv_rep where quest_pub_id = v_id and quest_ver_nr = v_ver_nr;
+
 --delete vv
 delete from nci_quest_valid_value where q_pub_id = v_id and q_ver_nr = v_ver_nr;
+delete from onedata_ra.nci_quest_valid_value where q_pub_id = v_id and q_ver_nr = v_ver_nr;
+
 delete from nci_admin_item_rel_alt_key where nci_pub_id = v_id and nci_ver_nr = v_ver_nr;
+delete from onedata_ra.nci_admin_item_rel_alt_key where nci_pub_id = v_id and nci_ver_nr = v_ver_nr;
 
 -- SBR repetitions
 
@@ -586,6 +636,30 @@ delete from sbrext.quest_contents_ext where p_qst_idseq =  v_idseq;
 delete from sbrext.quest_contents_ext where qc_idseq =  v_idseq;
 commit;
 -- delete vv
+
+end;
+
+
+
+procedure DeleteVV ( v_idseq in char)
+AS
+  v_frm_id number;
+  v_frm_ver_nr number(4,2);
+  i integer;
+BEGIN
+
+--raise_application_error(-20000,v_id || ' '|| v_ver_nr ||  ' ' || v_idseq);
+
+
+delete from sbrext.valid_values_att_ext where qc_idseq = v_idseq ;
+
+delete from sbrext.qc_recs_ext where p_qc_idseq = v_idseq or c_qc_idseq = v_idseq;
+delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where p_val_idseq =  v_idseq)
+or ac_idseq = v_idseq;
+delete from sbrext.quest_contents_ext where qc_idseq = v_idseq or p_val_idseq =  v_idseq;
+
+commit;
+
 
 end;
 
@@ -613,8 +687,12 @@ and TYP_NM = 'DEFINITION';
 
 
 delete from alt_nms where item_id = v_id and ver_nr = v_ver_nr;
+delete from onedata_ra.alt_nms where item_id = v_id and ver_nr = v_ver_nr;
+
 delete from sbr.designations where ac_idseq =  v_idseq;
 delete from alt_def where item_id = v_id and ver_nr = v_ver_nr;
+delete from onedata_ra.alt_def where item_id = v_id and ver_nr = v_ver_nr;
+
 delete from sbr.definitions where ac_idseq =  v_idseq;
 -- Classifications
 --delete from sbrext.AC_ATT_CSCSI_EXT e where 
@@ -625,9 +703,11 @@ delete from sbr.ac_csi where  ac_idseq = v_idseq;
 
 -- Reference documents
 
-delete from sbr.reference_blobs where rd_idseq = (select rd_idseq from sbr.reference_documents d  where d.ac_idseq = v_idseq);
+delete from sbr.reference_blobs where rd_idseq in (select rd_idseq from sbr.reference_documents d  where d.ac_idseq = v_idseq);
 delete from sbr.reference_documents d  where d.ac_idseq = v_idseq;
-
+delete from ref_doc where nci_ref_id in (Select ref_id from ref where item_id = v_id and ver_nr = v_ver_nr);
+delete from ref where item_id = v_id and ver_nr = v_ver_nr;
+delete from nci_admin_item_rel where rel_typ_id = 65 and c_item_id = v_id and c_item_ver_nr = v_ver_nr; 
 
 end;
 
@@ -660,4 +740,3 @@ end;
 
 end;
 /
-
