@@ -45,7 +45,6 @@ spCreateVerNCI - Create new version customized
 */
 END;
 /
-
 create or replace PACKAGE BODY NCI_11179 AS
 
 v_err_str      varchar2(1000) := '';
@@ -2381,6 +2380,7 @@ begin
             /* Copy CSI */
             
 /*   Classification Scheme  Item */
+if (nvl(ihook.getColumnValue (rowform,  'IND_TYP_1') ,0) = 1)  then -- copy CSI
         action_rows := t_rows();
         action_rows_csi := t_rows();
         action_rows_upd := t_rows();
@@ -2415,56 +2415,24 @@ begin
         actions.extend; actions(actions.last) := action;
         action := t_actionRowset(action_rows_csi, 'CSI For Version (Hook)',2, 27, 'insert');
         actions.extend; actions(actions.last) := action;
-        
-        if (nvl(ihook.getColumnValue (rowform, 'IND_TYP_4'),0) = 1) then
-        
+      
+          if (nvl(ihook.getColumnValue (rowform, 'IND_ALL_TYPES'),0) = 1) then
+      
         insert into nci_admin_item_rel (p_item_id, p_item_ver_nr, c_item_id, c_item_ver_nr, rel_typ_id, creat_usr_id, lst_upd_usr_id)
         select rel.p_item_id, v_version, c_item_id, c_item_ver_nr, rel_typ_id, v_user_id, v_user_id
-        from nci_admin_item_rel rel, nci_clsfctn_schm_item csi, admin_item ai where rel.rel_typ_id = 65 and
-        rel.p_item_id = csi.item_id and rel.p_item_ver_nr = csi.ver_nr and csi.cs_item_id = v_admin_item.item_id and csi.cs_item_ver_nr = v_admin_item.ver_nr
-        and ai.item_id = rel.c_item_id and ai.ver_nr = rel.c_item_ver_nr and ai.admin_item_typ_id = 4;
-        
+        from nci_admin_item_rel rel, nci_clsfctn_schm_item csi where rel.rel_typ_id = 65 and
+        rel.p_item_id = csi.item_id and rel.p_item_ver_nr = csi.ver_nr and csi.cs_item_id = v_admin_item.item_id and csi.cs_item_ver_nr = v_admin_item.ver_nr;
+    
         insert into onedata_ra.nci_admin_item_rel (p_item_id, p_item_ver_nr, c_item_id, c_item_ver_nr, rel_typ_id, creat_usr_id, lst_upd_usr_id)
         select rel.p_item_id, v_version, c_item_id, c_item_ver_nr, rel_typ_id, v_user_id, v_user_id
-        from onedata_ra.nci_admin_item_rel rel, onedata_ra.nci_clsfctn_schm_item csi, onedata_ra.admin_item ai where rel.rel_typ_id = 65 and
-        rel.p_item_id = csi.item_id and rel.p_item_ver_nr = csi.ver_nr and csi.cs_item_id = v_admin_item.item_id and csi.cs_item_ver_nr = v_admin_item.ver_nr
-        and ai.item_id = rel.c_item_id and ai.ver_nr = rel.c_item_ver_nr and ai.admin_item_typ_id = 4;
+        from onedata_ra.nci_admin_item_rel rel, onedata_ra.nci_clsfctn_schm_item csi where rel.rel_typ_id = 65 and
+        rel.p_item_id = csi.item_id and rel.p_item_ver_nr = csi.ver_nr and csi.cs_item_id = v_admin_item.item_id and csi.cs_item_ver_nr = v_admin_item.ver_nr;
+       
         --commit;
         end if;
         
-        
-        if (nvl(ihook.getColumnValue (rowform, 'IND_TYP_3'),0) = 1) then
-        insert into nci_admin_item_rel (p_item_id, p_item_ver_nr, c_item_id, c_item_ver_nr, rel_typ_id, creat_usr_id, lst_upd_usr_id)
-        select rel.p_item_id, v_version, c_item_id, c_item_ver_nr, rel_typ_id, v_user_id, v_user_id
-        from nci_admin_item_rel rel, nci_clsfctn_schm_item csi, admin_item ai where rel.rel_typ_id = 65 and
-        rel.p_item_id = csi.item_id and rel.p_item_ver_nr = csi.ver_nr and csi.cs_item_id = v_admin_item.item_id and csi.cs_item_ver_nr = v_admin_item.ver_nr
-        and ai.item_id = rel.c_item_id and ai.ver_nr = rel.c_item_ver_nr and ai.admin_item_typ_id = 3;
-        
-        insert into onedata_ra.nci_admin_item_rel (p_item_id, p_item_ver_nr, c_item_id, c_item_ver_nr, rel_typ_id, creat_usr_id, lst_upd_usr_id)
-        select rel.p_item_id, v_version, c_item_id, c_item_ver_nr, rel_typ_id, v_user_id, v_user_id
-        from onedata_ra.nci_admin_item_rel rel, onedata_ra.nci_clsfctn_schm_item csi, onedata_ra.admin_item ai where rel.rel_typ_id = 65 and
-        rel.p_item_id = csi.item_id and rel.p_item_ver_nr = csi.ver_nr and csi.cs_item_id = v_admin_item.item_id and csi.cs_item_ver_nr = v_admin_item.ver_nr
-        and ai.item_id = rel.c_item_id and ai.ver_nr = rel.c_item_ver_nr and ai.admin_item_typ_id = 3;
-      --  commit;
-        end if;
-        
-        
-        if (nvl(ihook.getColumnValue (rowform, 'IND_TYP_2'),0) = 1) then
-        insert into nci_admin_item_rel (p_item_id, p_item_ver_nr, c_item_id, c_item_ver_nr, rel_typ_id, creat_usr_id, lst_upd_usr_id)
-        select rel.p_item_id, v_version, c_item_id, c_item_ver_nr, rel_typ_id, v_user_id, v_user_id
-        from nci_admin_item_rel rel, nci_clsfctn_schm_item csi, admin_item ai where rel.rel_typ_id = 65 and
-        rel.p_item_id = csi.item_id and rel.p_item_ver_nr = csi.ver_nr and csi.cs_item_id = v_admin_item.item_id and csi.cs_item_ver_nr = v_admin_item.ver_nr
-        and ai.item_id = rel.c_item_id and ai.ver_nr = rel.c_item_ver_nr and ai.admin_item_typ_id = 2;
-        
-        insert into onedata_ra.nci_admin_item_rel (p_item_id, p_item_ver_nr, c_item_id, c_item_ver_nr, rel_typ_id, creat_usr_id, lst_upd_usr_id)
-        select rel.p_item_id, v_version, c_item_id, c_item_ver_nr, rel_typ_id, v_user_id, v_user_id
-        from onedata_ra.nci_admin_item_rel rel, onedata_ra.nci_clsfctn_schm_item csi, onedata_ra.admin_item ai where rel.rel_typ_id = 65 and
-        rel.p_item_id = csi.item_id and rel.p_item_ver_nr = csi.ver_nr and csi.cs_item_id = v_admin_item.item_id and csi.cs_item_ver_nr = v_admin_item.ver_nr
-        and ai.item_id = rel.c_item_id and ai.ver_nr = rel.c_item_ver_nr and ai.admin_item_typ_id = 2;
-       -- commit;
-        end if;
        commit; 
-         
+     end if;    
         
     end if;
 
@@ -2475,7 +2443,7 @@ begin
     
     v_data_out := ihook.getHookOutput(hookOutput);
 
-     nci_util.debugHook('GENERAL',v_data_out);
+    -- nci_util.debugHook('GENERAL',v_data_out);
 
 end;
 
