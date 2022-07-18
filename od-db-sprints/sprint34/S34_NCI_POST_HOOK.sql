@@ -495,7 +495,7 @@ as
 hookInput        t_hookInput;
     hookOutput       t_hookOutput := t_hookOutput ();
     row_ori          t_row;
-
+ 
   BEGIN
     hookinput := Ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber := hookinput.invocationnumber;
@@ -531,6 +531,9 @@ hookInput        t_hookInput;
     hookOutput       t_hookOutput := t_hookOutput ();
     row_ori          t_row;
     nw_cntxt varchar2(64);
+action t_actionRowset;
+   actions t_actions := t_actions();
+      rows      t_rows;
 
   BEGIN
     hookinput := Ihook.gethookinput (v_data_in);
@@ -539,27 +542,8 @@ hookInput        t_hookInput;
 
     row_ori := hookInput.originalRowset.rowset (1);
     --raise_application_error(-20000,'NM_TYP_ID: ' || ihook.getColumnValue(row_ori, 'NM_TYP_ID'));
-     if (nci_11179_2.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID') ,ihook.getColumnValue(row_ori, 'VER_NR'), v_usr_id) = false) then
-    -- raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ' || v_item_id || ' ' || v_user_id);
-    raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ' );
-        return;
-    end if;
-  if (ihook.getColumnValue(row_ori,'NM_TYP_ID') = 83 and hookinput.originalRowset.tablename like '%NMS%') then
-  for cur in (select * from alt_nms where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR') and nm_id <> ihook.getColumnValue(row_ori, 'NM_ID')
-  and nm_typ_id = 83) loop
-    raise_application_error(-20000,'Only one manually curated name can be specified.');
-    return;
-    end loop;
- end if;
-  if (ihook.getColumnValue(row_ori,'NCI_DEF_TYP_ID') = 82 and hookinput.originalRowset.tablename  like '%DEF%') then
-  for cur in (select * from alt_def where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR') and def_id <> ihook.getColumnValue(row_ori, 'DEF_ID')
-  and nci_def_typ_id = 82) loop
-    raise_application_error(-20000,'Only one manually curated definition can be specified.');
-    return;
-    end loop;
- end if;
- 
- if (ihook.getColumnValue(row_ori, 'NM_TYP_ID') = 1038) then
+   
+ if (nvl(ihook.getColumnValue(row_ori, 'NM_TYP_ID'),0) = 1038) then
  --for cur in (select * from alt_nms where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR') and nm_id <> ihook.getColumnValue(row_ori, 'NM_ID') and nm_typ_id = 1038) loop
     ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'WARNING: Alternate Name will be set to Context Name for Used By.' || chr(13) );
     --raise_application_error(-20000,'WARNING: Alternate Name will be set to Context Name for Used By.');
@@ -567,16 +551,24 @@ hookInput        t_hookInput;
     --end loop;
  end if;
  
- /*for i in 1..hookinput.originalRowset.rowset.count loop
-   row_ori := hookInput.originalRowset.rowset(i);
-  if (ihook.getColumnValue(row_ori, 'NM_TYP_ID')= 1038) then --1038 is internal id for USED_BY
-           ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') || 'WARNING: Alternate Name will be set to Context Name for Used By.' || chr(13) );
-          select item_nm into nw_cntxt from vw_cntxt where item_id = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID');
-           ihook.setColumnValue(row_ori, 'NM_DESC', nw_cntxt);
-      end if;
-      end loop;
-  ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') || 'This is to test the post hook.' || chr(13) );
-*/
+  rows := t_rows();
+  
+rows.EXTEND;
+            rows (rows.LAST) := row_ori;
+            action :=
+                t_actionrowset (rows,
+                                'Designation Import',
+                                2,
+                                0,
+                                'update');
+            actions.EXTEND;
+            actions (actions.LAST) := action;
+    
+ 
+    IF actions.COUNT > 0
+    THEN
+        hookoutput.actions := actions;
+    END IF;
   
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
