@@ -585,16 +585,20 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', '');
         --jira 1875
         -- Validate to see if the same row is not already selected
+        v_val_ind :=true;
    for k in 1..rows.count loop
     row_to_comp := rows(k);
-    if (ihook.getColumnValue(row_to_comp, 'VAL_DOM_ITEM_ID') = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and ihook.getColumnValue(row_to_comp, 'VAL_DOM_VER_NR') = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') and ihook.getColumnValue(row_to_comp, 'PERM_VAL_NM') = ihook.getColumnValue(row_ori, 'PERM_VAL_NM') and ihook.getColumnValue(row_to_comp, 'CNCPT_CONCAT_STR_1') = ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1') and ihook.getColumnValue(row_to_comp, 'VM_STR_TYP') = ihook.getColumnValue(row_ori, 'VM_STR_TYP')) then
+    if (ihook.getColumnValue(row_to_comp, 'VAL_DOM_ITEM_ID') = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and ihook.getColumnValue(row_to_comp, 'VAL_DOM_VER_NR') = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR')
+    and ihook.getColumnValue(row_to_comp, 'PERM_VAL_NM') = ihook.getColumnValue(row_ori, 'PERM_VAL_NM') and ihook.getColumnValue(row_to_comp, 'CNCPT_CONCAT_STR_1') = ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1') 
+    and ihook.getColumnValue(row_to_comp, 'VM_STR_TYP') = ihook.getColumnValue(row_ori, 'VM_STR_TYP') and ihook.getColumnValue(row_ori, 'BTCH_SEQ_NBR') <> ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR')) then
     v_val_ind := false;
     v_batch_nbr := ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR');
     end if;
    end loop;
        if (v_val_ind = false) then 
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
-              ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'Duplicate found in the same import file. Batch Number: ' || v_batch_nbr );                
+              ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'Duplicate found in the same import file. Batch Number: ' || v_batch_nbr ); 
+
         else 
          rows.extend; rows(rows.last) := row_ori;
          spPVVMValidate(row_ori);
@@ -742,7 +746,7 @@ if (upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP'))  = 'TEXT') then
     ----------------------------------------------------------
     end if;
 
-    -- check if value already exists for the VD
+    -- check if value already exists for the VD, Jira 1953- if pv exists, check if associated with same vm
     for cur in (select * from perm_val where val_dom_item_id= ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID')
     and val_dom_ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') and upper(perm_val_nm) = upper(ihook.getColumnValue(row_ori, 'PERM_VAL_NM'))) loop
        ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',       ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') ||  'PV already exists in the VD' || chr(13));                      
