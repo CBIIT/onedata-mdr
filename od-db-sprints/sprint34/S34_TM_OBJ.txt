@@ -6,6 +6,7 @@ spPostTypeDetails
 spProtolUpd
 spPostDesAINmDef
 setPrefVM
+spVMMatch
 spLoadCounts 
 
 Hook Commands
