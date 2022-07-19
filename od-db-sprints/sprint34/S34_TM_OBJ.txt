@@ -5,6 +5,7 @@ spDeleteForm
 spPostTypeDetails
 spProtolUpd
 spPostDesAINmDef
+setPrefVM
 spLoadCounts 
 
 Hook Commands
