@@ -81,3 +81,46 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
        WHERE ADMIN_ITEM_TYP_ID = 49 and ADMIN_ITEM.ITEM_ID = CNCPT.ITEM_ID and ADMIN_ITEM.VER_NR = CNCPT.VER_NR
 	and cncpt.EVS_SRC_ID = OBJ_KEY.OBJ_KEY_ID (+) and admin_item.admin_stus_nm_dn = 'RELEASED' and ADMIN_ITEM.ITEM_ID = a.ITEM_ID (+) and ADMIN_ITEM.VER_NR = a.VER_NR (+);
     
+
+
+drop materialized view vw_clsfctn_schm_item;
+
+
+  create materialized view VW_CLSFCTN_SCHM_ITEM 
+  BUILD IMMEDIATE
+  REFRESH FORCE
+  ON DEMAND AS
+  SELECT ADMIN_ITEM.ITEM_ID,
+               ADMIN_ITEM.VER_NR,
+               ADMIN_ITEM.ITEM_NM,
+               ADMIN_ITEM.ITEM_LONG_NM,
+               ADMIN_ITEM.ITEM_DESC,
+               ADMIN_ITEM.CNTXT_NM_DN,
+               ADMIN_ITEM.CURRNT_VER_IND,
+               ADMIN_ITEM.REGSTR_STUS_NM_DN,
+               ADMIN_ITEM.ADMIN_STUS_NM_DN,
+               ADMIN_ITEM.CREAT_DT,
+               ADMIN_ITEM.CREAT_USR_ID,
+               ADMIN_ITEM.LST_UPD_USR_ID,
+               ADMIN_ITEM.FLD_DELETE,
+               ADMIN_ITEM.LST_DEL_DT,
+               ADMIN_ITEM.S2P_TRN_DT,
+               ADMIN_ITEM.LST_UPD_DT,
+               ADMIN_ITEM.NCI_IDSEQ,
+               CSI.P_ITEM_ID,
+               CSI.P_ITEM_VER_NR,
+               CSI.CS_ITEM_ID,
+               CSI.CS_ITEM_VER_NR,
+               CAST (
+                      cs.item_nm
+                   || SYS_CONNECT_BY_PATH (REPLACE (admin_item.ITEM_NM, '|', ''),
+                                           ' | ')
+                       AS VARCHAR2 (4000))    FUL_PATH
+          FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
+         WHERE     ADMIN_ITEM_TYP_ID = 51
+               AND ADMIN_ITEM.ITEM_ID = CSI.ITEM_ID
+               AND ADMIN_ITEM.VER_NR = CSI.VER_NR
+               AND csi.cs_item_id = cs.item_id
+               AND csi.cs_item_ver_nr = cs.ver_nr
+    START WITH p_item_id IS NULL
+    CONNECT BY PRIOR csi.item_id || csi.ver_nr= csi.p_item_id || csi.ver_nr ;
