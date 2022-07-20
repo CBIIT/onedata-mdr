@@ -123,4 +123,5 @@ drop materialized view vw_clsfctn_schm_item;
                AND csi.cs_item_id = cs.item_id
                AND csi.cs_item_ver_nr = cs.ver_nr
     START WITH p_item_id IS NULL
-    CONNECT BY PRIOR csi.item_id || csi.ver_nr= csi.p_item_id || csi.p_item_ver_nr ;
+   CONNECT BY PRIOR  to_char(csi.item_id || to_char(csi.ver_nr,'99.99')) = to_char(csi.p_item_id || to_char(csi.P_item_ver_nr,'99.99')) ;
+-
