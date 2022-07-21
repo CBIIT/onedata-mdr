@@ -3,7 +3,7 @@ create or replace PACKAGE            nci_DEC_MGMT AS
 procedure valUsingStr (rowform in out t_row, k in integer, v_item_typ in integer) ;
 
 -- Common procedure for all AI with concept.
-
+-- DO NOT TOUCH the 2 below
 procedure createValAIWithConcept(rowform in out t_row, idx in integer,v_item_typ_id in integer, v_mode in varchar2,v_cncpt_src in varchar2,  actions in out t_actions);
 procedure createAIWithoutConcept(rowform in out t_row, idx in integer, v_item_typ_id in integer, v_long_nm in varchar2, v_desc in varchar2, v_mode in varchar2, actions in out t_actions);
 
@@ -711,7 +711,7 @@ begin
               de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr 
              ) loop
      --    raise_application_error(-20000, 'Here');
-                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'DUPLICATE DEC found:' || cur.item_id || 'v' || cur.ver_nr);
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'DUPLICATE DEC found: ' || cur.item_id || 'v' || cur.ver_nr);
                     ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
                     ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
                     
@@ -728,7 +728,8 @@ begin
                prop_item_id = prop_cur.item_id and prop_ver_nr =  prop_cur.ver_nr and             de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr 
              ) loop
      --    raise_application_error(-20000, 'Here');
-                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'Warning: DUPLICATE DEC found in other context:' || cur.item_id || 'v' || cur.ver_nr || chr(13));
+     --     Jira 1669.3
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'Warning: DUPLICATE DEC found in other Context: ' || cur.item_id || 'v' || cur.ver_nr || chr(13));
                                      -- v_val_ind:= false;
 
               end loop;
@@ -924,8 +925,12 @@ if (v_cncpt_src ='STRING') then
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, '');
                 end loop;
             end if;
-            if (v_invalid_concepts is not null or v_retired_concepts is not null) then
-            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') ||  'WARNING: Invalid Concepts: ' ||  nvl(v_invalid_concepts,'') || ' Retired Concepts: ' || nvl(v_retired_concepts,'') || chr(13));
+            -- Jira 1669.7 - separated out invalid and retired concepts; Jira 1669.5 - may need to set v_val_ind to false if there is an invalid or retired concept
+            if (v_invalid_concepts is not null) then
+            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') ||  'WARNING: Invalid Concepts: ' ||  nvl(v_invalid_concepts,'') || chr(13));
+            end if;
+            if (v_retired_concepts is not null) then
+            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'WARNING: Retired Concepts: ' || nvl(v_retired_concepts,'') || chr(13));
             end if;
 end if;
 
@@ -1147,10 +1152,10 @@ function getDECEditQuestion return t_question is
 begin
 --- If Edit DEC
     ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(2, 2, 'Validate');
+    ANSWER                     := T_ANSWER(5, 5, 'Validate');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
-    ANSWER                     := T_ANSWER(4, 4, 'Update');
+    ANSWER                     := T_ANSWER(6, 6, 'Update');
     ANSWERS.EXTEND;
     ANSWERS(ANSWERS.LAST) := ANSWER;
     QUESTION               := T_QUESTION('Edit DEC', ANSWERS);
@@ -1323,7 +1328,9 @@ begin
       action := t_actionrowset(rows, 'Data Element Concept', 2,8,'insert');
        actions.extend;
         actions(actions.last) := action;
- ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'DEC Created Successfully with ID ' || v_id||c_ver_suffix || chr(13)) ;
+        --Jira 1669.2
+ ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'DEC Created Successfully' || chr(13)) ;
+  --ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'DEC Created Successfully with ID ' || v_id||c_ver_suffix || chr(13)) ;
 ihook.setColumnValue(rowform, 'CTL_VAL_STUS', 'PROCESSED') ;
 
 --r
