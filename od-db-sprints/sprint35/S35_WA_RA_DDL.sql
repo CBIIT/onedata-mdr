@@ -1,0 +1,2 @@
+-- Tracker 1954
+alter table NCI_STG_AI_CNCPT_CREAT add (CNCPT_CONCAT_STR_1_ORI varchar2(4000), CNCPT_CONCAT_STR_2_ORI varchar2(4000));
