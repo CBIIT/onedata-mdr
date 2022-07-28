@@ -1,5 +1,6 @@
 -- Tracker 1954
 alter table NCI_STG_AI_CNCPT_CREAT add (CNCPT_CONCAT_STR_1_ORI varchar2(4000), CNCPT_CONCAT_STR_2_ORI varchar2(4000));
+alter table NCI_STG_AI_CNCPT_CREAT add (CURATED_NM varchar2(2000), CURATED_DEF varchar2(4000));
 
 -- Tracker 1967, 1968
   CREATE OR REPLACE  VIEW VW_NCI_AI AS
