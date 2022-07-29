@@ -5,7 +5,7 @@ alter table NCI_STG_AI_CNCPT_CREAT add (CURATED_NM varchar2(2000), CURATED_DEF v
 alter table NCI_USR_CART add (CART_NM varchar2(255));
 
 update NCI_USR_CART set CART_NM = 'Default';
-commi;t
+commit;
 
 -- Tracker 1967, 1968
   CREATE OR REPLACE  VIEW VW_NCI_AI AS
