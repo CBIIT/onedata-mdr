@@ -3,7 +3,13 @@ alter table NCI_STG_AI_CNCPT_CREAT add (CNCPT_CONCAT_STR_1_ORI varchar2(4000), C
 alter table NCI_STG_AI_CNCPT_CREAT add (CURATED_NM varchar2(2000), CURATED_DEF varchar2(4000));
 
 -- Tracker
-alter table NCI_USR_CART add (CART_NM varchar2(255));
+alter table NCI_USR_CART add (CART_NM varchar2(255) default 'Default');
+update NCI_USR_CART set CART_NM = 'Default';
+commit;
+alter table NCI_USR_CART drop primary key;
+
+alter table NCI_USR_CART add primary key (ITEM_ID, VER_NR, CNTCT_SECU_ID, GUEST_USR_NM, CART_NM);
+
 
  CREATE OR REPLACE  VIEW VW_LIST_USR_CART_NM  CREATE OR REPLACE  VIEW VW_LIST_USR_CART_NM AS
   SELECT distinct CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID,
@@ -16,8 +22,7 @@ alter table NCI_USR_CART add (CART_NM varchar2(255));
            sysdate CREAT_DT
            from NCI_USR_CART where nvl(fld_delete,0)  =0;
            
-update NCI_USR_CART set CART_NM = 'Default';
-commit;
+
 
 -- Tracker 1967, 1968
   CREATE OR REPLACE  VIEW VW_NCI_AI AS
