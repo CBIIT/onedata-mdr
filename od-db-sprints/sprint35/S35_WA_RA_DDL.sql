@@ -2,6 +2,11 @@
 alter table NCI_STG_AI_CNCPT_CREAT add (CNCPT_CONCAT_STR_1_ORI varchar2(4000), CNCPT_CONCAT_STR_2_ORI varchar2(4000));
 alter table NCI_STG_AI_CNCPT_CREAT add (CURATED_NM varchar2(2000), CURATED_DEF varchar2(4000));
 
+alter table NCI_USR_CART add (CART_NM varchar2(255));
+
+update NCI_USR_CART set CART_NM = 'Default';
+commi;t
+
 -- Tracker 1967, 1968
   CREATE OR REPLACE  VIEW VW_NCI_AI AS
   SELECT ADMIN_ITEM.ITEM_ID,
