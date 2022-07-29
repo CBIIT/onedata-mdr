@@ -2,8 +2,20 @@
 alter table NCI_STG_AI_CNCPT_CREAT add (CNCPT_CONCAT_STR_1_ORI varchar2(4000), CNCPT_CONCAT_STR_2_ORI varchar2(4000));
 alter table NCI_STG_AI_CNCPT_CREAT add (CURATED_NM varchar2(2000), CURATED_DEF varchar2(4000));
 
+-- Tracker
 alter table NCI_USR_CART add (CART_NM varchar2(255));
 
+ CREATE OR REPLACE  VIEW VW_LIST_USR_CART_NM AS
+  SELECT distinct CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID,
+           user CREAT_USR_ID,
+            user LST_UPD_USR_ID,
+            '0' FLD_DELETE,
+            null LST_DEL_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_UPD_DT,
+           sysdate CREAT_DT
+           from NCI_USR_CART where nvl(fld_delete,0)  =0;
+           
 update NCI_USR_CART set CART_NM = 'Default';
 commit;
 
