@@ -21,8 +21,8 @@ FROM NCI_USR_CART UC, ADMIN_ITEM AI WHERE AI.ITEM_ID = UC.ITEM_ID AND AI.VER_NR 
 and admin_item_typ_id in (4,52,54,2,3);
 
 
- CREATE OR REPLACE  VIEW VW_LIST_USR_CART_NM  CREATE OR REPLACE  VIEW VW_LIST_USR_CART_NM AS
-  SELECT distinct CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID,
+ CREATE OR REPLACE  VIEW VW_LIST_USR_CART_NM AS
+  SELECT distinct CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID, CART_NM + ' : ' + CNTCT_SECU_ID CART_USR_NM, 
            user CREAT_USR_ID,
             user LST_UPD_USR_ID,
             0 FLD_DELETE,
@@ -31,6 +31,7 @@ and admin_item_typ_id in (4,52,54,2,3);
            sysdate LST_UPD_DT,
            sysdate CREAT_DT
            from NCI_USR_CART where nvl(fld_delete,0)  =0;
+           
            
 
 
