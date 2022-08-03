@@ -1,4 +1,4 @@
-create or replace PACKAGE            nci_form_curator AS
+CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_form_curator AS
 procedure spAddRef (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spAddProt (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spClassify (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -11,9 +11,11 @@ procedure DeleteModule (v_id in number, v_ver_nr in number, v_idseq in char);
 procedure DeleteCommonChildren (v_id in number, v_ver_nr in number, v_idseq in char);
 procedure DeleteVV (v_idseq in char);
 
+PROCEDURE spCopyModuleUsingID  (    v_data_in IN CLOB,    v_data_out OUT CLOB,    v_user_id in varchar2) ;
 END;
 /
-create or replace PACKAGE BODY            nci_form_curator AS
+
+CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_form_curator AS
 c_ver_suffix varchar2(5) := 'v1.00';
 v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
 
@@ -650,13 +652,32 @@ BEGIN
 
 --raise_application_error(-20000,v_id || ' '|| v_ver_nr ||  ' ' || v_idseq);
 
+/***************Queries #2,3 and 4 were slit in order to improve the SP performance ***************/
+
+
+--1.select *from sbrext.valid_values_att_ext where qc_idseq = v_idseq ;
+----delete VV and INST relation records and VV/QUESTION relation records
+--2.delete from sbrext.qc_recs_ext where p_qc_idseq = v_idseq or c_qc_idseq = v_idseq;
+----delete VV and theyer INST  records
+--3.delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where p_val_idseq =  v_idseq)
+--or ac_idseq = v_idseq;
+----delete VV and theyer INST  records
+--4.delete from sbrext.quest_contents_ext where qc_idseq = v_idseq or p_val_idseq =  v_idseq;
+
 
 delete from sbrext.valid_values_att_ext where qc_idseq = v_idseq ;
-
-delete from sbrext.qc_recs_ext where p_qc_idseq = v_idseq or c_qc_idseq = v_idseq;
-delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where p_val_idseq =  v_idseq)
-or ac_idseq = v_idseq;
-delete from sbrext.quest_contents_ext where qc_idseq = v_idseq or p_val_idseq =  v_idseq;
+--delete VV and INST relation records 
+delete from sbrext.qc_recs_ext where p_qc_idseq = v_idseq ;
+--delete VV/QUESTION relation records
+delete from sbrext.qc_recs_ext where c_qc_idseq = v_idseq;
+--delete INST of VV relation records 
+delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where p_val_idseq =  v_idseq);
+--delete VV and INST relation records 
+delete from sbr.administered_components where ac_idseq = v_idseq;
+--delete INST of VV records 
+delete from sbrext.quest_contents_ext where p_val_idseq =  v_idseq;
+--delete VV  records 
+delete from sbrext.quest_contents_ext where qc_idseq = v_idseq ;
 
 commit;
 
@@ -737,6 +758,92 @@ delete from admin_item where item_id = v_id and ver_nr = v_ver_nr;
 commit;
 
 end;
+
+PROCEDURE spCopyModuleUsingID
+  (
+    v_data_in IN CLOB,
+    v_data_out OUT CLOB,
+    v_user_id in varchar2) ---D Default cart ; N - Named cart
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+    row_sel t_row;
+    v_id integer;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+forms     t_forms;
+formGroup    t_form;
+form1   t_form;
+v_itemid     integer;
+v_found boolean;
+  v_temp integer;
+  v_stg_ai_id number;
+  i integer := 0;
+  column  t_column;
+  msg varchar2(4000);
+  v_item_typ  integer;
+  v_mod_specified boolean;
+  v_cart_nm varchar2(255);
+  v_item_id number;
+  cnt integer;
+  v_str varchar2(4000);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+  row_ori :=  hookInput.originalRowset.rowset(1);
+
+    rows := t_rows();
+if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), v_user_id) = false) then
+ raise_application_error(-20000,'You are not authorized to add a module to this form.');
+ end if;
+
+
+ if (hookInput.invocationNumber = 0) then
+          forms                  := t_forms();
+        form1                  := t_form('Add Item to Collection (Hook)', 2,1);
+        forms.extend;    forms(forms.last) := form1;
+        hookoutput.forms := forms;
+        	 hookOutput.question := nci_dload.getCreateQuestionUsingID;
+       --	 hookOutput.question := nci_dload.getAddComponentCreateQuestion;
+  
+  end if; 
+   -- if (hookInput.invocationNumber = 2 or v_mod_specified = true) then -- copy module
+ if (hookInput.invocationNumber = 1) then
+
+ forms              := hookInput.forms;
+        form1              := forms(1);
+        row_sel := form1.rowset.rowset(1);
+        v_str := trim(ihook.getColumnValue(row_sel, 'VM_DESC_TXT'));
+             cnt := nci_11179.getwordcount(v_str);
+              for i in  1..cnt loop
+                        v_item_id := nci_11179.getWord(v_str, i, cnt);
+        for cur in (select * from admin_item where item_id = v_item_id and currnt_ver_ind = 1 and admin_item_typ_id =52 ) loop
+
+    nci_11179.spCopyModuleNCI (actions, ihook.getColumnValue(row_sel,'ITEM_ID'),ihook.getColumnValue(row_sel,'VER_NR'),
+    ihook.getColumnValue(row_sel,'P_ITEM_ID'), ihook.getColumnValue(row_sel,'P_ITEM_VER_NR'), ihook.getColumnValue(row_ori,'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), -1,'C',
+    ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID'),ihook.getColumnValue(row_ori, 'CNTXT_VER_NR'), v_user_id);
+    end loop;
+    end loop;
+
+    hookoutput.actions := actions;
+    hookoutput.message := 'Module copied successfully.';
+    --hookoutput.message := v_add || ' concepts added.';
+    end if;
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+--  nci_util.debugHook('GENERAL',v_data_out);
+
+END;
 
 end;
 /
