@@ -2,3 +2,4 @@
 
 -- Run as ONEDATA_WA DDL scripts
 
+S35_NCI_FORM_CURATOR.sql
