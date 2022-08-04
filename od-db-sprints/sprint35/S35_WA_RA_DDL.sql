@@ -1,7 +1,7 @@
 -- Tracker 1954
 alter table NCI_STG_AI_CNCPT_CREAT add (CNCPT_CONCAT_STR_1_ORI varchar2(4000), CNCPT_CONCAT_STR_2_ORI varchar2(4000));
 alter table NCI_STG_AI_CNCPT_CREAT add (CURATED_NM varchar2(2000), CURATED_DEF varchar2(4000));
-alter table NCI_DLOAD_HDR add (RETAIN_IND number(1));
+alter table NCI_DLOAD_HDR add (RETAIN_IND number(1) default 0);
 
 -- Tracker
 alter table NCI_USR_CART add (CART_NM varchar2(255) default 'Default');
