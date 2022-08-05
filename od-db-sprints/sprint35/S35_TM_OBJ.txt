@@ -8,6 +8,13 @@ Delete Valid Value --DSRMWS-1995
 Object
 Question Valid Values --DSRMWS-1995
 
+DEC Create Edit (Hook), "DEC Creation" 	--DSRMWS-2007 
+Rep Term (Hook Creation) "VD Creation With Concepts"--DSRMWS-2007
+Rep Term (Stand Alone), "Rep Term Concepts" --DSRMWS-2007
+VM Create Edit (Hook) "Change PV/VM Association" --DSRMWS-2007
+VM Edit (Hook), "VM Edit" --DSRMWS-2007
+VM (Stand Alone), "Value Meaning" --DSRMWS-2007
+
 Conceptual Objects
 
 
