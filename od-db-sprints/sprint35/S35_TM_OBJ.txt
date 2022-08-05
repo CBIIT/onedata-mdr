@@ -4,9 +4,11 @@ Hooks
 
 Hook Commands
 Delete Valid Value --DSRMWS-1995
+Delete Question --DSRMWS-1995
 
 Object
 Question Valid Values --DSRMWS-1995
+Questions (Edit), "Questions" --DSRMWS-1995
 
 DEC Create Edit (Hook), "DEC Creation" 	--DSRMWS-2007 
 Rep Term (Hook Creation) "VD Creation With Concepts"--DSRMWS-2007
