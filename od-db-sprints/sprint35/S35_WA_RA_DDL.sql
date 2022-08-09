@@ -156,5 +156,8 @@ AND AIR.C_ITEM_VER_NR = DE.VER_NR;
 
 
   CREATE OR REPLACE  VIEW VW_ADMIN_ITEM_VM_MATCH as
-  SELECT *, decode(admin_item_typ_id, 49, ITEM_LONG_NM, 53, ITEM_ID, ITEM_NM)  ID_OR_CODE, decode(admin_item_typ_id, 49, 'Concepts', 53 ,'ID', 'Other') MATCH_TYP
-       FROM ADMIN_ITEM;
+  SELECT CNTXT_ITEM_ID, ITEM_DESC, ITEM_LONG_NM, REGSTR_STUS_ID, ITEM_ID, VER_NR, ITEM_NM, CREAT_DT, CNTXT_VER_NR, ADMIN_STUS_ID,
+   CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT, NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN,
+  decode(admin_item_typ_id, 49, ITEM_LONG_NM, 53, ITEM_ID, ITEM_NM)  ID_OR_CODE, decode(admin_item_typ_id, 49, 'Concepts', 53 ,'ID', 'Other') MATCH_TYP
+       FROM ADMIN_ITEM where admin_item_typ_id in (49,53);
+       
