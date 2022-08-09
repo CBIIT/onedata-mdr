@@ -154,3 +154,7 @@ AND FRM.ADMIN_ITEM_TYP_ID IN ( 54,55)
 AND AIR.C_ITEM_ID = DE.ITEM_ID
 AND AIR.C_ITEM_VER_NR = DE.VER_NR;
 
+
+  CREATE OR REPLACE  VIEW VW_ADMIN_ITEM_VM_MATCH as
+  SELECT *, decode(admin_item_typ_id, 49, ITEM_LONG_NM, 53, ITEM_ID, ITEM_NM)  ID_OR_CODE, decode(admin_item_typ_id, 49, 'Concepts', 53 ,'ID', 'Other') MATCH_TYP
+       FROM ADMIN_ITEM;
