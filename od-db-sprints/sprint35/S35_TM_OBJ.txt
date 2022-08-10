@@ -17,6 +17,14 @@ VM Create Edit (Hook) "Change PV/VM Association" --DSRMWS-2007
 VM Edit (Hook), "VM Edit" --DSRMWS-2007
 VM (Stand Alone), "Value Meaning" --DSRMWS-2007
 
+Classification level Name/Definition 2, "Classification level Name/Definition 2" --DSRMWS-1990
+Download Detail, "Download Detail" --DSRMWS-1990
+
+CDE - Form - Modules (Edit), "Forms/Modules" --DSRMWS-1997
+CDE - Forms (Data Element CO), "8. Forms/Modules" --DSRMWS-1997
+Questions - DE, "7. Forms/Modules" --DSRMWS-1997
+
+
 Conceptual Objects
 
 
