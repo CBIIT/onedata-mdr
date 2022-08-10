@@ -3,6 +3,9 @@ alter table NCI_STG_AI_CNCPT_CREAT add (CNCPT_CONCAT_STR_1_ORI varchar2(4000), C
 alter table NCI_STG_AI_CNCPT_CREAT add (CURATED_NM varchar2(2000), CURATED_DEF varchar2(4000));
 alter table NCI_DLOAD_HDR add (RETAIN_IND number(1) default 0);
 alter table NCI_PROTCL modify (PROTCL_PHASE varchar2(3))
+-- Tracker 2008 - Add draft mod for Form
+insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID,STUS_ID) values (54,65);
+commit;
 
 -- Tracker
 alter table NCI_USR_CART add (CART_NM varchar2(255) default 'Default');
