@@ -16,6 +16,10 @@ Rep Term (Stand Alone), "Rep Term Concepts" --DSRMWS-2007
 VM Create Edit (Hook) "Change PV/VM Association" --DSRMWS-2007
 VM Edit (Hook), "VM Edit" --DSRMWS-2007
 VM (Stand Alone), "Value Meaning" --DSRMWS-2007
+PV VM Creation (Hook), "PV/VM Creation" --DSRMWS-2007	
+PV VM Creation 5 (Hook), "PV/VM Creation" --DSRMWS-2007
+VM-PV Creation, "VM-PV Creation" --DSRMWS-2007
+AI Creation With Concepts, "DEC Creation" --DSRMWS-2007
 
 Classification level Name/Definition 2, "Classification level Name/Definition 2" --DSRMWS-1990
 Download Detail, "Download Detail" --DSRMWS-1990
