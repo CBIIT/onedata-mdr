@@ -20,6 +20,10 @@ PV VM Creation (Hook), "PV/VM Creation" --DSRMWS-2007
 PV VM Creation 5 (Hook), "PV/VM Creation" --DSRMWS-2007
 VM-PV Creation, "VM-PV Creation" --DSRMWS-2007
 AI Creation With Concepts, "DEC Creation" --DSRMWS-2007
+PV VM Import --DSRMWS-1889
+CDE Import --DSRMWS-1888
+DEC Import --DSRMWS-2040
+VD Import  --DSRMWS-1670
 
 Classification level Name/Definition 2, "Classification level Name/Definition 2" --DSRMWS-1990
 Download Detail, "Download Detail" --DSRMWS-1990
@@ -36,7 +40,13 @@ Roles
 
 Interchange Mapping
 
+
 Packages
+nci_vd --DSRMWS-1670
+nci_import --DSRMWS-1689, 1670, 1953, 1962, 1981, 2027
+nci_chng_mgmt --DSRMWS-1870
+nci_pv_vm --DSRMWS-2070
+nci_dec_mgmt --DSRMWS-2040
 
 
 
