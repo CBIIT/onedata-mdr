@@ -2024,7 +2024,5 @@ ITEM_2_ID holds Item ID of VM and ITEM_2_VER_NR holds Version number
 
 end;
 
-
-
 END;
 /
