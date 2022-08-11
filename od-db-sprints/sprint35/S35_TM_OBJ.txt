@@ -24,6 +24,7 @@ PV VM Import --DSRMWS-1889
 CDE Import --DSRMWS-1888
 DEC Import --DSRMWS-2040
 VD Import  --DSRMWS-1670
+Designation Import --DSRMWS-1689
 
 Classification level Name/Definition 2, "Classification level Name/Definition 2" --DSRMWS-1990
 Download Detail, "Download Detail" --DSRMWS-1990
