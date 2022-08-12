@@ -10,6 +10,7 @@ create or replace PACKAGE nci_dload AS
    procedure spAddComponentToDloadName (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
    procedure spAddComponentToDloadIDGuest (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
    function getAddComponentCreateQuestion return t_question;
+   function getCreateQuestionUsingID return t_question;
 function getALSCreateQuestion ( v_initial in boolean) return t_question;
 function getValidCollectionName (v_coll_nm in varchar2) return varchar2;
 function getALSCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset, v_coll_typ in integer) return t_forms;
@@ -50,6 +51,21 @@ begin
 return question;
 end;
 
+function getCreateQuestionUsingID return t_question is
+  question t_question;
+  answer t_answer;
+  answers t_answers;
+begin
+
+ ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Add');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+
+    QUESTION               := T_QUESTION('Please specify Item ID with spaces in between to Add.' , ANSWERS);
+
+return question;
+end;
 
 -- Generic create question
 function getAddComponentCreateQuestionID return t_question is
@@ -1258,11 +1274,7 @@ v_item_typ_id := nci_11179_2.getDloadItemTyp (ihook.getColumnValue(row_ori,'DLOA
                             rows (rows.last) := row;
                             v_found := false;
                             -- Add to user cart as well as per curator.
-                            select count(*) into v_temp from nci_usr_cart where item_id  =cur.item_id and ver_nr = cur.ver_nr and cntct_secu_id = v_usr_id;
-                              if (v_temp = 0) then
-                                    rowscart.extend;
-                                    rowscart (rowscart.last) := row;
-                              end if;
+                        nci_11179_2.AddItemToCart(cur.item_id, cur.ver_nr, v_usr_id, v_deflt_cart_nm,  rowscart);
                         end loop;
                         if (v_found = true) then  --- Duplcicate
                         v_dup_str := substr(v_dup_str || ' ' || nci_11179.getWord(v_str, i, cnt),1,50);
@@ -1418,7 +1430,8 @@ v_item_typ_id := nci_11179_2.getDloadItemTyp (ihook.getColumnValue(row_ori,'DLOA
                             rows.extend;
                             rows (rows.last) := row;
                             -- Add to user cart as well as per curator.
-                            select count(*) into v_temp from nci_usr_cart where item_id  =cur.item_id and ver_nr = cur.ver_nr and cntct_secu_id = v_usr_id;
+                            select count(*) into v_temp from nci_usr_cart where item_id  =cur.item_id and ver_nr = cur.ver_nr and cntct_secu_id = v_usr_id
+                            and cart_nm = v_deflt_cart_nm;
                               if (v_temp = 0) then
                                     rowscart.extend;
                                     rowscart (rowscart.last) := row;
@@ -1671,4 +1684,5 @@ begin
 end;
 
 END;
-/
+      /
+      
