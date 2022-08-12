@@ -148,8 +148,9 @@ begin
     row := t_row();  
   --  raise_application_error(-20000, v_usr_id);
     ihook.setColumnValue(row,'CNTCT_SECU_ID', v_usr_id);
+    ihook.setColumnValue(row,'CART_USR_NM', 'Default');
     rows := t_rows();    rows.extend;    rows(rows.last) := row;
-    rowset := t_rowset(rows, 'User Cart Selection Form (Hook)', 1, 'NCI_USR_CART');
+    rowset := t_rowset(rows, 'User Cart Selection Form (Hook)', 1, 'VW_LIST_USR_CART_NM');
        form1.rowset :=rowset;
     
     forms.extend;    forms(forms.last) := form1;
@@ -726,15 +727,8 @@ v_cart_nm := nvl(GetSelectedCartName(hookinput), v_deflt_cart_nm);
         and cart_nm = v_cart_nm;
         /*  If not already in cart */
         if (v_temp = 0) then
-            row := t_row();
             v_add := v_add + 1;
-            ihook.setColumnValue(row,'ITEM_ID', v_item_id);
-            ihook.setColumnValue(row,'VER_NR', v_ver_nr);
-      --      ihook.setColumnValue(row,'CNTCT_SECU_ID', v_user_id);
-             ihook.setColumnValue(row,'CNTCT_SECU_ID', v_usr_id);
-              ihook.setColumnValue(row, 'CART_NM', v_cart_nm);
-            ihook.setColumnValue(row,'GUEST_USR_NM', 'NONE');
-            rows.extend;    rows(rows.last) := row;
+        nci_11179_2.AddItemToCart(v_item_id, v_ver_nr, v_usr_id, v_cart_nm, rows);
         else
             v_already := v_already + 1;
         end if;
@@ -2266,6 +2260,16 @@ begin
         forms.extend;
         forms(forms.last) := form1;
         hookOutput.forms := forms;
+        
+        --- Tracker 2010
+        if (v_admin_item.admin_item_typ_id = 54) then -- form
+          select count(*) into v_temp from vw_nci_MODULE_DE WHERE frm_item_id = v_admin_item.item_id and frm_ver_nr = v_admin_item.ver_nr and DE_ITEM_ID is not null
+             and (DE_ADMIN_STUS_NM_DN like '%RETIRED%'); --CDE_CURRNT_VER_IND = 0);
+             
+            if (v_temp >0) then
+                 hookoutput.message := nci_form_mgmt.getFormRetiredCount(v_admin_item.item_id,v_admin_item.ver_nr); 
+            end if;
+        end if;
 	elsif hookInput.invocationNumber = 1 then  -- Version number specified...
 		  if hookInput.answerId = 1 then
             forms              := hookInput.forms;
