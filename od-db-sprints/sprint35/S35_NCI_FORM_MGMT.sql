@@ -1,4 +1,5 @@
 create or replace PACKAGE            nci_form_mgmt AS
+function getFormRetiredCount(v_item_id in number, v_ver_nr in number) return varchar2;
 function getAddComponentCreateQuestion return t_question ;
 procedure spAddForm (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spAddFormFromExisting (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -49,6 +50,18 @@ select count(*) into v_temp from  onedata_md.vw_usr_row_filter  v, admin_item ai
         where ( ( v.CNTXT_ITEM_ID = ai.CNTXT_ITEM_ID and v.cntxt_VER_NR  = ai.CNTXT_VER_NR) or v.CNTXT_ITEM_ID = 100) and upper(v.USR_ID) = upper(v_user_id) and v.ACTION_TYP = 'I'
         and ai.item_id =v_frm_item_id and ai.ver_nr = v_frm_ver_nr;
 if (v_temp = 0) then return false; else return true; end if;
+end;
+
+function getFormRetiredCount(v_item_id in number, v_ver_nr in number) return varchar2 is
+v_retired_cdes varchar2(255);
+v_not_latest  varchar2(255);
+begin
+select nci_cadsr_push.getLongName(nvl(LISTAGG(DE_ITEM_ID || 'v' || DE_VER_NR, ','),'None')) into v_retired_cdes from VW_NCI_MODULE_DE WHERE frm_item_id = v_item_id and frm_ver_nr = v_ver_nr and DE_ITEM_ID is not null
+    and DE_ADMIN_STUS_NM_DN like '%RETIRED%';
+
+select nci_cadsr_push.getLongName(nvl(LISTAGG(DE_ITEM_ID || 'v' || DE_VER_NR, ','),'None')) into v_not_latest from VW_NCI_MODULE_DE WHERE frm_item_id = v_item_id and frm_ver_nr = v_ver_nr and DE_ITEM_ID is not null    
+    and DE_CURRNT_VER_IND = 0 and DE_ADMIN_STUS_NM_DN not like '%RETIRED%';
+    return 'WARNING: CDEs on Form Retired: ' || v_retired_cdes || '  Not Latest Version: ' || v_not_latest; 
 end;
 
 -- Generic create question
@@ -225,18 +238,14 @@ begin
                                             rows(rows.last) := row;
 
                                              -- Add to user cart as well as per curator.
-                                            select count(*) into v_temp from nci_usr_cart where item_id  =cur.item_id and ver_nr = cur.ver_nr and cntct_secu_id = v_usr_id;
-                                              if (v_temp = 0) then
-                                                    rowscart.extend;
-                                                    rowscart (rowscart.last) := row;
-                                              end if;
-
+                                             nci_11179_2.AddItemToCart(cur.item_id, cur.ver_nr, v_usr_id, v_deflt_cart_nm, rowscart);
+                                
                                             if nvl(rep,0) > 0 then
                                                 spAddQuestionRepNew (rep, v_id, rowsrep);
                                             end if;
                                             j := 0;
 
-                                            for cur1 in (select * from  VW_NCI_DE_PV where de_item_id = cur.item_id and de_ver_nr = cur.ver_nr order by PERM_VAL_NM) loop
+                                            for cur1 in (select * from  VW_NCI_DE_PV where de_item_id = cur.item_id and de_ver_nr = cur.ver_nr and nvl(fld_delete,0) = 0 order by PERM_VAL_NM) loop
                                                       row := t_row();
                                                     ihook.setColumnValue (row, 'Q_PUB_ID', v_id);
                                                     ihook.setColumnValue (row, 'Q_VER_NR', 1);
@@ -1165,6 +1174,8 @@ AS
     v_found boolean;
     v_form_id integer;
     i integer := 0;
+    v_retired_cde integer :=0;
+
 BEGIN
     hookinput                    := Ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -1182,6 +1193,11 @@ BEGIN
         QUESTION               := T_QUESTION('Create New Form', ANSWERS);
         HOOKOUTPUT.QUESTION    := QUESTION;
 
+    select count(*) into v_retired_cde from VW_NCI_MODULE_DE WHERE frm_item_id = v_from_item_id and frm_ver_nr = v_from_ver_nr and DE_ITEM_ID is not null
+    and (DE_ADMIN_STUS_NM_DN like '%RETIRED%' or DE_CURRNT_VER_IND = 0);
+    if (v_retired_cde >0) then
+      hookoutput.message := getFormRetiredCount(v_from_item_id, v_from_ver_nr);
+      end if;
         forms                  := t_forms();
         form1                  := t_form('Forms (Hook From Existing)', 2,1);  -- Forms (Hook) is a custom object for this purpose.
         action_row := row_ori;
@@ -1201,6 +1217,7 @@ BEGIN
         forms.extend;
         forms(forms.last) := form1;
         hookOutput.forms := forms;
+      
   ELSE -- Second invocation
         forms              := hookInput.forms;
         form1              := forms(1);
@@ -2925,7 +2942,7 @@ BEGIN
                             spAddQuestionRepNew (rep, v_id, rowsrep);
                         end if;
                         j := 0;
-                for cur1 in (select * from  VW_NCI_DE_PV where de_item_id = cur.item_id and de_ver_nr = cur.ver_nr order by PERM_VAL_NM) loop
+                for cur1 in (select * from  VW_NCI_DE_PV where de_item_id = cur.item_id and de_ver_nr = cur.ver_nr and nvl(fld_delete,0) = 0 order by PERM_VAL_NM) loop
                   row := t_row();
                 ihook.setColumnValue (row, 'Q_PUB_ID', v_id);
                 ihook.setColumnValue (row, 'Q_VER_NR', 1);
