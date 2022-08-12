@@ -24,6 +24,7 @@ procedure spAddAIToCartID (v_data_in in clob, v_data_out out clob, v_usr_id  IN 
 procedure spShowCharCount (v_data_in in clob, v_data_out out clob);
 procedure updCSIHier (row_ori in t_row ,actions in out t_actions);
 procedure spDeleteLog ( v_data_in in clob, v_data_out out clob);
+procedure AddItemToCart(v_item_id in number, v_ver_nr in number, v_usr_id in varchar2, v_cart_nm in varchar2,  rowscart in out t_rows) ;
 END;
 /
 create or replace PACKAGE BODY nci_11179_2 AS
@@ -41,6 +42,27 @@ select od_seq_DLOAD_HDR.nextval into v_out from dual;
 return v_out;
 end;
 
+procedure AddItemToCart(v_item_id in number, v_ver_nr in number, v_usr_id in varchar2, v_cart_nm in varchar2,  rowscart in out t_rows) as
+v_temp integer;
+row t_row := t_row();
+begin
+
+       select count(*) into v_temp from nci_usr_cart where item_id  =v_item_id and ver_nr = v_ver_nr and cntct_secu_id = v_usr_id
+      and cart_nm = v_cart_nm;
+                if (v_temp = 0) then
+                  ihook.setColumnvalue(row, 'ITEM_ID', v_item_id);
+                  ihook.setColumnvalue(row, 'VER_NR', v_ver_nr);
+                  ihook.setColumnvalue(row, 'CNTCT_SECU_ID', v_usr_id);
+                  ihook.setColumnvalue(row, 'CART_NM', v_cart_nm);
+                  if(v_usr_id <> 'GUEST') then
+                        ihook.setColumnValue(row,'GUEST_USR_NM', 'NONE');
+                    else
+                    ihook.setColumnValue(row,'GUEST_USR_NM', v_cart_nm);
+                    end if;
+                     rowscart.extend;
+                        rowscart (rowscart.last) := row;
+                                           end if;
+end;
 
 function getCncptStrFromCncpt (v_item_id in number, v_ver_nr in number, v_admin_item_typ_id in number) return varchar2 is
 v_str varchar2(4000) := '';
@@ -269,10 +291,10 @@ begin
         form1                  := t_form('Add Item to Collection (Hook)', 2,1);
         forms.extend;    forms(forms.last) := form1;
         hookoutput.forms := forms;
-       	 hookOutput.question := nci_dload.getAddComponentCreateQuestion;
+       	 hookOutput.question := nci_dload.getCreateQuestionUsingID;
 	end if;
 
-    if hookInput.invocationNumber = 1  then  -- Seconf invocation
+    if hookInput.invocationNumber = 1  then  -- Second invocation
 
         forms              := hookInput.forms;
         form1              := forms(1);
