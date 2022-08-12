@@ -442,7 +442,7 @@ v_found boolean;
   v_frm_id number;
   v_frm_ver_nr number(4,2);
   v_sql  varchar2(4000);
-
+  v_msg_str varchar2(255) := '';
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -458,7 +458,11 @@ nci_pub_id = ihook.getColumnValue(row_ori, 'NCI_PUB_ID') and nci_ver_nr = ihook.
  end if;
  
  if (hookinput.invocationNUmber = 0) then
- hookoutput.question := getProceedQuestion ('Permanently Delete Question: ' || ihook.getColumnValue(row_ori, 'NCI_PUB_ID') || 'v' || ihook.getColumnValue(row_ori, 'NCI_VER_NR'));
+ for i in 1..hookinput.originalrowset.rowset.count loop
+ row_ori :=  hookInput.originalRowset.rowset(i);
+   v_msg_str := substr(v_msg_str || ',' || ihook.getColumnValue(row_ori, 'NCI_PUB_ID') || 'v' || ihook.getColumnValue(row_ori, 'NCI_VER_NR'),1,255);
+   end loop;
+ hookoutput.question := getProceedQuestion ('Permanently Delete Question(s): ' ||substr(v_msg_str,2));
  else
 for i in 1..hookinput.originalrowset.rowset.count loop
  row_ori :=  hookInput.originalRowset.rowset(i);
@@ -512,7 +516,7 @@ v_found boolean;
   v_frm_ver_nr number(4,2);
   i integer;
   v_sql varchar2(4000);
-
+v_msg_str varchar2(255) := '';
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -525,7 +529,11 @@ BEGIN
  end if;
  
  if (hookinput.invocationNUmber = 0) then
- hookoutput.question := getProceedQuestion ('Permanently Delete Module: ' || ihook.getColumnValue(row_ori, 'P_ITEM_ID') || 'v' || ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR'));
+ for i in 1..hookinput.originalrowset.rowset.count loop
+ row_ori :=  hookInput.originalRowset.rowset(i);
+   v_msg_str := substr(v_msg_str || ',' || ihook.getColumnValue(row_ori, 'P_ITEM_ID') || 'v' || ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR'),1,255);
+   end loop;
+ hookoutput.question := getProceedQuestion ('Permanently Delete Module(s): ' || substr(v_msg_str,2));
  else
 for i in 1..hookinput.originalrowset.rowset.count loop
  row_ori :=  hookInput.originalRowset.rowset(i);
