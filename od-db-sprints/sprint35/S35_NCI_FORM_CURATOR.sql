@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE ONEDATA_WA.nci_form_curator AS
+create or replace PACKAGE            nci_form_curator AS
 procedure spAddRef (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spAddProt (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spClassify (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -10,14 +10,32 @@ procedure DeleteQuest (v_id in number, v_ver_nr in number, v_idseq in char);
 procedure DeleteModule (v_id in number, v_ver_nr in number, v_idseq in char);
 procedure DeleteCommonChildren (v_id in number, v_ver_nr in number, v_idseq in char);
 procedure DeleteVV (v_idseq in char);
-
+function getProceedQuestion (v_hdr in varchar2) return t_question;
 PROCEDURE spCopyModuleUsingID  (    v_data_in IN CLOB,    v_data_out OUT CLOB,    v_user_id in varchar2) ;
 END;
 /
-
-CREATE OR REPLACE PACKAGE BODY ONEDATA_WA.nci_form_curator AS
+create or replace PACKAGE BODY            nci_form_curator AS
 c_ver_suffix varchar2(5) := 'v1.00';
 v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
+v_deflt_cart_nm varchar2(255) := 'Default';
+
+
+
+function getProceedQuestion (v_hdr in varchar2) return t_question
+is
+  question t_question;
+  answer t_answer;
+  answers t_answers;
+begin
+
+ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Submit');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    QUESTION               := T_QUESTION(v_hdr, ANSWERS);
+
+return question;
+end;
 
 procedure spAddRef (v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
 AS
@@ -438,6 +456,10 @@ nci_pub_id = ihook.getColumnValue(row_ori, 'NCI_PUB_ID') and nci_ver_nr = ihook.
  if (nci_form_mgmt.isUserAuth(v_frm_id, v_frm_ver_nr, v_user_id) = false) then
  raise_application_error(-20000,'You are not authorized to delete questions on this form.');
  end if;
+ 
+ if (hookinput.invocationNUmber = 0) then
+ hookoutput.question := getProceedQuestion ('Permanently Delete Question: ' || ihook.getColumnValue(row_ori, 'NCI_PUB_ID') || 'v' || ihook.getColumnValue(row_ori, 'NCI_VER_NR'));
+ else
 for i in 1..hookinput.originalrowset.rowset.count loop
  row_ori :=  hookInput.originalRowset.rowset(i);
  for cur1 in (select * from nci_admin_item_rel_alt_key where nci_pub_id  = ihook.getCOlumnValue(row_ori,'NCI_PUB_ID') and 
@@ -462,7 +484,7 @@ end loop;
     action := t_actionRowset(rows, 'Questions (Base Object)', 2, 1000, 'update');
     actions.extend; actions(actions.last) := action;
     hookoutput.actions:= actions;
-    
+  end if;  
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
@@ -502,6 +524,9 @@ BEGIN
  raise_application_error(-20000,'You are not authorized to delete modules on this form.');
  end if;
  
+ if (hookinput.invocationNUmber = 0) then
+ hookoutput.question := getProceedQuestion ('Permanently Delete Module: ' || ihook.getColumnValue(row_ori, 'P_ITEM_ID') || 'v' || ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR'));
+ else
 for i in 1..hookinput.originalrowset.rowset.count loop
  row_ori :=  hookInput.originalRowset.rowset(i);
  for cur1 in (select * from admin_item where item_id  = ihook.getCOlumnValue(row_ori,'C_ITEM_ID') and 
@@ -526,7 +551,7 @@ end loop;
     action := t_actionRowset(rows, 'Generic AI Relationship', 2, 1000, 'update');
     actions.extend; actions(actions.last) := action;
     hookoutput.actions:= actions;
-    
+  end if;  
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
@@ -566,6 +591,9 @@ BEGIN
  raise_application_error(-20000,'You are not authorized to delete  this form.');
  end if;
  
+ if (hookinput.invocationNUmber = 0) then
+ hookoutput.question := getProceedQuestion ('Permanently Delete Form: ' || v_id || 'v' || v_ver_nr);
+ else
  for cur1 in (select ai.* from admin_item ai, nci_admin_item_rel r where ai.item_id  = r.c_item_id
  and ai.ver_nr = r.c_item_ver_nr and r.p_item_id = v_id and r.p_item_ver_nr = v_ver_nr and
  r.rel_typ_id = 61) loop
@@ -578,20 +606,21 @@ DeleteCommonChildren(v_id, v_ver_nr, v_idseq);
  commit;
  
  --raise_application_error(-20000, v_idseq);
- 
+delete from sbrext.protocol_qc_ext where qc_idseq = v_idseq; 
 delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where dn_crf_idseq =  v_idseq);
 delete from sbr.administered_components where ac_idseq =  v_idseq;
 delete from sbrext.qc_recs_ext where p_qc_idseq = v_idseq ;--and rl_name  = 'ELEMENT_INSTRUCTION';
 delete from sbrext.qc_recs_ext where c_qc_idseq = v_idseq ;--and rl_name  = 'ELEMENT_INSTRUCTION';
 delete from sbrext.quest_contents_ext where dn_crf_idseq =  v_idseq;
 delete from sbrext.quest_contents_ext where qc_idseq =  v_idseq;
+
 delete from nci_admin_item_rel where p_item_id = v_id and p_item_ver_nr = v_ver_nr;
 delete from nci_form where item_id = v_id and ver_nr = v_ver_nr;
 
 delete from admin_item where item_id = v_id and ver_nr = v_ver_nr;
 
 commit;
-
+end if;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
@@ -795,7 +824,9 @@ v_found boolean;
   v_mod_specified boolean;
   v_cart_nm varchar2(255);
   v_item_id number;
+  rowscart t_rows := t_rows();
   cnt integer;
+  v_added integer := 0;
   v_str varchar2(4000);
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -830,14 +861,33 @@ if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'ITEM_ID'), ihook.get
                         v_item_id := nci_11179.getWord(v_str, i, cnt);
         for cur in (select * from admin_item where item_id = v_item_id and currnt_ver_ind = 1 and admin_item_typ_id =52 ) loop
 
-    nci_11179.spCopyModuleNCI (actions, ihook.getColumnValue(row_sel,'ITEM_ID'),ihook.getColumnValue(row_sel,'VER_NR'),
-    ihook.getColumnValue(row_sel,'P_ITEM_ID'), ihook.getColumnValue(row_sel,'P_ITEM_VER_NR'), ihook.getColumnValue(row_ori,'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), -1,'C',
+    v_added := v_added + 1;
+--spCopyModuleNCI - 
+--procedure spCopyModuleNCI (actions in out t_actions, v_from_module_id in number,v_from_module_ver in number,
+--v_from_form_id in number, v_from_form_ver number, v_to_form_id number, v_to_form_ver number, v_disp_ord number, v_src in varchar2, v_cntxt_item_id in number, v_cntxt_ver_nr in number, v_user_id in varchar2) as
+
+for cur1 in (select p_item_id, p_item_ver_nr from nci_admin_item_rel where c_item_id = cur.item_id and c_item_ver_nr = cur.ver_nr and rel_typ_id = 61) loop
+    nci_11179.spCopyModuleNCI (actions, cur.item_id,cur.ver_nr,
+    cur1.p_item_id, cur1.p_item_ver_nr,
+    ihook.getColumnValue(row_ori,'ITEM_ID'), ihook.getColumnValue(row_ori,'VER_NR'), -1,'C',
     ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID'),ihook.getColumnValue(row_ori, 'CNTXT_VER_NR'), v_user_id);
+                               nci_11179_2.AddItemToCart(cur.item_id, cur.ver_nr, v_user_id, v_deflt_cart_nm, rowscart);
+
+    end loop;
     end loop;
     end loop;
 
-    hookoutput.actions := actions;
-    hookoutput.message := 'Module copied successfully.';
+     if (rowscart.count  > 0) then
+                action := t_actionrowset(rowscart, 'User Cart', 2,0,'insert');
+                actions.extend;
+                actions(actions.last) := action;
+            end if;
+            if actions.count > 0 then
+          hookoutput.actions := actions;
+        hookoutput.message := v_added || ' module(s) copied successfully.';
+ else
+    hookoutput.message := 'Please specify valid Module ID(s).';
+    end if;
     --hookoutput.message := v_add || ' concepts added.';
     end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
