@@ -25,6 +25,7 @@ CDE Import --DSRMWS-1888
 DEC Import --DSRMWS-2040
 VD Import  --DSRMWS-1670
 Designation Import --DSRMWS-1689
+Classification - AI Hierarchy, "Browse Forms by Classifications" --DSRMWS-2013
 
 Classification level Name/Definition 2, "Classification level Name/Definition 2" --DSRMWS-1990
 Download Detail, "Download Detail" --DSRMWS-1990
@@ -49,6 +50,6 @@ nci_import --DSRMWS-1689, 1670, 1953, 1962, 1981, 2027
 nci_chng_mgmt --DSRMWS-1870
 nci_pv_vm --DSRMWS-2070
 nci_dec_mgmt --DSRMWS-2040
-
+NCI_FORM_CURATOR --DSRMWS-2014
 
 
