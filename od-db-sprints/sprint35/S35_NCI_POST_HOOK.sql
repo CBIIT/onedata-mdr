@@ -451,7 +451,7 @@ select count(*) into v_temp from obj_key ok, ref r  where obj_key_id = r.REF_TYP
  end if;
 
 if (ihook.getColumnValue(row_ori,'FILE_NM') is null) then
-    raise_application_error(-20000,'An attached file is required. Select/Change to update the file. To deleted this Reference Document Blob, select item and use Delete.');
+    raise_application_error(-20000,'An attached file is required. Select/Change to update the file. To delete this Reference Document Blob, select item and use Delete.');
 end if;
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
