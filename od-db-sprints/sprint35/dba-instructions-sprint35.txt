@@ -3,6 +3,7 @@ S35_SBR.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S35_WA_RA_DDL.sql
+S35_RA.sql
 
 
 -- Run as ONEDATA_WA DDL scripts
