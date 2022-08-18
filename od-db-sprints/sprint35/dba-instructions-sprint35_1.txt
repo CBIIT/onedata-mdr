@@ -1,0 +1,3 @@
+-- Run as Onedata_wa
+S35_1_NCI_11179.sql
+S35_1_NCI_DLOAD.sql
