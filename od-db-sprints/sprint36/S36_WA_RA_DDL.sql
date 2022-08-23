@@ -25,4 +25,5 @@ ITEM_ID number not null,
 	"LST_UPD_DT" DATE DEFAULT sysdate);
   
   
+  create or replace view vw_NCI_DATA_AUDT as select * from NCI_DATA_AUDT;
   
