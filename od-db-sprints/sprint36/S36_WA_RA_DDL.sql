@@ -31,14 +31,13 @@ ITEM_ID number not null,
   "LVL","LVL_PK","ATTR_NM","FROM_VAL","TO_VAL","CREAT_USR_ID_AUDT",
   "LST_UPD_USR_ID_AUDT","CREAT_DT_AUDT","LST_UPD_DT_AUDT","CREAT_DT","CREAT_USR_ID","LST_UPD_USR_ID","FLD_DELETE","LST_DEL_DT","S2P_TRN_DT","LST_UPD_DT","AUDT_CMNTS" from NCI_DATA_AUDT;
 
-
 create or replace view VW_ADMIN_ITEM_WITH_EXT
 as
 select ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM, ai.ITEM_NM, ai.ADMIN_NOTES, ai.CHNG_DESC_TXT, 
 ai.EFF_DT, ai.ORIGIN, ai.UNRSLVD_ISSUE, ai.UNTL_DT, ai.ADMIN_ITEM_TYP_ID,ai. CURRNT_VER_IND, ai.ADMIN_STUS_ID, 
 ai.REGSTR_STUS_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT, 
 ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN,
-e.CNCPT_CONCAT, e.CNCPT_CONCAT_NM, e.CNCPT_CONCAT_DEF
+decode(e.CNCPT_CONCAT,e.cncpt_concat_nm, null, e.cncpt_concat)  cncpt_concat, e.CNCPT_CONCAT_NM, e.CNCPT_CONCAT_DEF
 from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr;
 
 
