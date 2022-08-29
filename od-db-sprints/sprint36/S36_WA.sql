@@ -31,3 +31,13 @@ CREATE TRIGGER NCI_TR_DATA_AUDT  BEFORE INSERT  on NCI_DATA_AUDT  for each row
         P_ITEM_VER_NR number(4,2),
         REL_TYP_ID integer);
 	
+
+insert into NCI_MDR_CNTRL (ID,PARAM_NM, PARAM_VAL)
+values (10, 'DOWNLOAD_HOST', 'http://ncias-d2289-c:5555');
+commit;
+
+alter table admin_item disable all trigggers;
+
+update ITEM_RPT_URL set = PARAM_VAL || '/invoke/FormDownload/printerFriendly?item_id=' || item_id || '&version=' || ver_nr || '\Click_To_Download'
+from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST';
+commit;
