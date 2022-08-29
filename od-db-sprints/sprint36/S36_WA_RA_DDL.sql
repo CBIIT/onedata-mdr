@@ -1,6 +1,9 @@
 -- New download collection Type
-insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Printer Friendly Download', 113, 'Printer Friendly Download', 
-											'Printer Friendly Download');
+
+
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Printer Friendly Form', 113, 'Printer Friendly Form', 
+											'Printer Friendly Form');
+commit;
 commit;
 
 
