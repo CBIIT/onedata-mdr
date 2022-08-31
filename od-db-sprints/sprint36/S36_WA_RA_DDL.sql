@@ -8,7 +8,10 @@ commit;
 -- Download URL
 alter table admin_item add ITEM_RPT_URL varchar2(255);
 
-commit;
+-- Tracker 2104
+
+alter table NCI_STG_PV_VM_IMPORT add VW_SPEC_DEF varchar2(6000);
+
 
 
 -- Data Audit table
