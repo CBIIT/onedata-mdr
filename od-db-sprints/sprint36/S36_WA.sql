@@ -7,6 +7,16 @@ CREATE TRIGGER NCI_TR_DATA_AUDT  BEFORE INSERT  on NCI_DATA_AUDT  for each row
     into :new.DA_ID  from  dual ;    END ;
     /
     
+    -- REverse update for wrong context in ref doc.
+update sbr.reference_documents d set ( CONTE_IDSEQ)=
+    (select  c.nci_idseq
+    from ref ad,  admin_item c
+    where
+     ad.nci_cntxt_item_id = c.item_id
+    and   ad.nci_cntxt_ver_nr = c.ver_nr
+    and   ad.nci_idseq = d.rd_idseq
+    and d.conte_idseq <> c.nci_idseq)
+    where date_created > sysdate - 180
 
   create table TMP_DATA_AUDT
   (	"OBJ_ID" NUMBER, 
