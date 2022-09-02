@@ -149,7 +149,7 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
            CAST('.' || ADMIN_ITEM.ITEM_ID || '.' AS VARCHAR2(4000))    ITEM_ID_STR,
            ADMIN_ITEM.CREAT_USR_ID,
            ADMIN_ITEM.LST_UPD_USR_ID,
-           ADMIN_ITEM.FLD_DELETE,
+          nvl(greatest(ADMIN_ITEM.FLD_DELETE,PROT.FLD_DELETE),0) FLD_DELETE,
            ADMIN_ITEM.LST_DEL_DT,
            ADMIN_ITEM.S2P_TRN_DT,
            ADMIN_ITEM.LST_UPD_DT,
@@ -168,6 +168,7 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
            AND ADMIN_ITEM.VER_NR = PROT.C_ITEM_VER_NR(+)
            and prot.rel_typ_id (+) = 60 
 	   and ADMIN_ITEM.ADMIN_ITEM_TYP_ID = 54;
+       
 
 
 
