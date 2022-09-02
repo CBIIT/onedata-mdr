@@ -141,3 +141,33 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
            AND ADMIN_ITEM.CNTXT_ITEM_ID = CNTXT.ITEM_ID
            AND ADMIN_ITEM.CNTXT_VER_NR = CNTXT.VER_NR;
 
+
+-- Tracker 1918
+  CREATE OR REPLACE VIEW VW_NCI_AI_FORM AS
+  SELECT ADMIN_ITEM.ITEM_ID,
+           ADMIN_ITEM.VER_NR,
+           CAST('.' || ADMIN_ITEM.ITEM_ID || '.' AS VARCHAR2(4000))    ITEM_ID_STR,
+           ADMIN_ITEM.CREAT_USR_ID,
+           ADMIN_ITEM.LST_UPD_USR_ID,
+           ADMIN_ITEM.FLD_DELETE,
+           ADMIN_ITEM.LST_DEL_DT,
+           ADMIN_ITEM.S2P_TRN_DT,
+           ADMIN_ITEM.LST_UPD_DT,
+           ADMIN_ITEM.CREAT_DT,
+           ADMIN_ITEM.ITEM_DESC,
+         trim(SUBSTR (
+                 trim(ADMIN_ITEM.ITEM_LONG_NM)
+              || '||'
+              || trim(ADMIN_ITEM.ITEM_NM)
+              || '||'
+              || trim(ADMIN_ITEM.ITEM_DESC),1,
+              4290))         SEARCH_STR,
+	      P_ITEM_ID PROT_ITEM_ID, P_ITEM_VER_NR PROT_ITEM_VER_NR
+      FROM ADMIN_ITEM  ADMIN_ITEM, NCI_ADMIN_ITEM_REL prot
+     WHERE     ADMIN_ITEM.ITEM_ID = PROT.c_ITEM_ID(+)
+           AND ADMIN_ITEM.VER_NR = PROT.C_ITEM_VER_NR(+)
+           and prot.rel_typ_id (+) = 60 
+	   and ADMIN_ITEM.ADMIN_ITEM_TYP_ID = 54;
+
+
+
