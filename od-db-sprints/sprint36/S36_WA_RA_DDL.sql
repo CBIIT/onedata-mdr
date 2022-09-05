@@ -179,7 +179,7 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
            and prot.rel_typ_id (+) = 60 
 	   and ADMIN_ITEM.ADMIN_ITEM_TYP_ID = 54;
        
-
+-- Tracker 2081
 
   CREATE OR REPLACE VIEW VW_ADMIN_ITEM_VM_MATCH AS
   SELECT CNTXT_ITEM_ID, admin_item_typ_id, ITEM_DESC, ITEM_LONG_NM, REGSTR_STUS_ID, ai.ITEM_ID, ai.VER_NR, ITEM_NM, ai.CREAT_DT, CNTXT_VER_NR, ADMIN_STUS_ID,
