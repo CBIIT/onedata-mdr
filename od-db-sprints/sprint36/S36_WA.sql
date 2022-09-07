@@ -53,13 +53,13 @@ insert into NCI_MDR_CNTRL (ID,PARAM_NM, PARAM_VAL)
 values (10, 'DOWNLOAD_HOST', 'http://ncias-d2289-c:5555');
 commit;
 
-alter table admin_item disable all trigggers;
+alter table admin_item disable all triggers;
 
 update ADMIN_ITEM set ITEM_RPT_URL = (select PARAM_VAL || '/invoke/FormDownload/printerFriendly?item_id=' || item_id ||  chr(38) || 'version=' || ver_nr || '\Click_to_View'
 from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST') where ADMIN_ITEM_TYP_ID = 54;
 commit;
 
-alter table admin_item enable all trigggers;
+alter table admin_item enable all triggers;
 
 CREATE OR REPLACE TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
 declare 
