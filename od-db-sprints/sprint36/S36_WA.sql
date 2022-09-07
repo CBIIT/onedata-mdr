@@ -55,7 +55,7 @@ commit;
 
 alter table admin_item disable all trigggers;
 
-update ADMIN_ITEM set ITEM_RPT_URL = (select PARAM_VAL || '/invoke/FormDownload/printerFriendly?item_id=' || item_id ||  chr(38) || 'version=' || ver_nr || '\Click_To_Download'
+update ADMIN_ITEM set ITEM_RPT_URL = (select PARAM_VAL || '/invoke/FormDownload/printerFriendly?item_id=' || item_id ||  chr(38) || 'version=' || ver_nr || '\Click_to_View'
 from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST') where ADMIN_ITEM_TYP_ID = 54;
 commit;
 
@@ -94,7 +94,7 @@ if (:new.admin_item_typ_id  in (49) and :new.ORIGIN_ID is null) then -- Set the 
 end if;
 if (:new.admin_item_typ_id = 54) then -- Set Download URL
 select param_val into v_param_val from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST';
-:new.ITEM_RPT_URL := v_param_val || '/invoke/FormDownload/printerFriendly?item_id=' || :new.item_id ||  chr(38) || 'version=' || :new.ver_nr || '\Click_To_Download';
+:new.ITEM_RPT_URL := v_param_val || '/invoke/FormDownload/printerFriendly?item_id=' || :new.item_id ||  chr(38) || 'version=' || :new.ver_nr || '\Click_to_View';
 
 end if;
 if (:new.admin_item_typ_id  in (5,6)) then -- Set the default context
