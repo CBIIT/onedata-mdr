@@ -196,54 +196,19 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
 alter table NCI_STG_CDE_CREAT add (DT_LAST_MODIFIED VARCHAR2(32) DEFAULT sysdate);
 commit;
 
-CREATE OR REPLACE TRIGGER OD_TR_CDE_UPD 
-BEFORE UPDATE ON NCI_STG_CDE_CREAT
-for each row
-BEGIN
-:new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
-END;
-
-create or replace TRIGGER OD_TR_CDE_CREAT
-BEFORE INSERT  on NCI_STG_CDE_CREAT
-for each row
-BEGIN
-IF (:NEW.STG_AI_ID = -1  or :NEW.STG_AI_ID is null)  THEN select od_seq_CDE_IMPORT.nextval
-into :new.STG_AI_ID  from  dual ;
-END IF;
-:new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
-END;
-
 alter table NCI_STG_ALT_NMS add (DT_LAST_MODIFIED VARCHAR2(32) DEFAULT sysdate);
 commit;
-
-CREATE OR REPLACE TRIGGER OD_TR_CDE_UPD 
-BEFORE UPDATE ON NCI_STG_ALT_NMS
-for each row
-BEGIN
-:new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
-END;
 
 --Tracker 2086
 alter table NCI_STG_PV_VM_IMPORT add (VM_ALT_NM_LANG VARCHAR2(16));
 commit;
 
-
 --Tracker 2126, 2117
 alter table NCI_DS_HDR add (DT_LAST_MODIFIED VARCHAR2(32) DEFAULT sysdate);
 commit;
 
-create or replace TRIGGER OD_TR_DS_HDR  BEFORE INSERT  on  NCI_DS_HDR for each row
-         BEGIN    IF (:NEW.HDR_ID<= 0  or :NEW.HDR_ID is null)  THEN 
-         select od_seq_DS_HDR.nextval
-    into :new.HDR_ID  from  dual ;   END IF; 
-      :new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
-      END ;
 
-CREATE OR REPLACE TRIGGER OD_TR_DS_UPD 
-BEFORE UPDATE ON NCI_DS_HDR
-for each row
-BEGIN
-  :new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
-END;
+
+
 
 
