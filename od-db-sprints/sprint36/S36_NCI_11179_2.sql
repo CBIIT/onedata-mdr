@@ -16,6 +16,7 @@ procedure stdCncptRowValidation(rowcncpt in t_row, v_idx in number, v_valid in o
 function getStdShortName (v_item_id in number, v_ver_nr in number) return varchar2;
 function getStdDataType (v_data_typ_id in number) return number;
 function getCncptStrFromCncpt (v_item_id in number, v_ver_nr in number, v_admin_item_typ_id in number) return varchar2;
+function getCncptStrFromForm (rowform in t_row, v_admin_item_typ_id in number, idx in integer) return varchar2;
 procedure copyDDEComponents (v_src_item_id in number, v_src_ver_nr in number, v_tgt_item_id in number, v_tgt_ver_nr in number, actions in out t_actions);
 function getCollectionId return integer;
 function getDloadItemTyp (v_fmt_id in integer) return integer;
@@ -76,6 +77,30 @@ if (v_admin_item_typ_id <> 7) then -- representation term
                         order by cai.nci_ord ) loop
                                         v_Str := trim(cur.item_long_nm) || ' ' || trim(v_str);
 
+                         end loop;
+end if;
+return v_str;
+end;
+
+
+function getCncptStrFromForm (rowform in t_row, v_admin_item_typ_id in number, idx in integer) return varchar2 is
+v_str varchar2(4000) := '';
+i integer;
+begin
+  --    raise_application_error(-20000,'HErer;' || ihook.getColumnValue(rowform,'CNCPT_' || idx || '_ITEM_ID_1'));
+
+if (v_admin_item_typ_id <> 7) then -- representation term
+for i in 1..10 loop
+if (ihook.getColumnValue(rowform,'CNCPT_' || idx || '_ITEM_ID_' || i) is not null) then
+             
+  for cur in (select item_id, item_nm , item_long_nm , item_desc from admin_item c
+                        where c.item_id = ihook.getColumnValue(rowform,'CNCPT_' || idx || '_ITEM_ID_' || i) 
+                        and c.ver_nr = ihook.getColumnValue(rowform,'CNCPT_' || idx || '_VER_NR_' || i)
+                         ) loop
+                                        v_Str := trim(v_str) || ' '|| trim(cur.item_long_nm) ;
+                     
+                         end loop;
+        end if;
                          end loop;
 end if;
 return v_str;
@@ -821,6 +846,7 @@ as
     v_perm_val_nm    perm_val.perm_val_nm%type;
     v_item_id		 number;
     v_ver_nr		 number;
+    v_item_typ integer;
 begin
 
     hookInput := ihook.getHookInput(v_data_in);
@@ -835,8 +861,13 @@ begin
         ihook.setColumnValue(row,'ITEM_ID', ihook.getColumnValue(row_cur,'ITEM_ID'));
         ihook.setColumnValue(row,'VER_NR', ihook.getColumnValue(row_cur,'VER_NR'));
         rows.extend; rows(rows.last) := row;
-   
+   select admin_item_typ_id into v_item_typ from admin_item where item_id =  ihook.getColumnValue(row_cur,'ITEM_ID') and ver_nr = ihook.getColumnValue(row_cur,'VER_NR');
+   if (v_item_typ = 54) then
+    showRowset := t_showableRowset(rows, 'Form Data Audit',2, 'unselectable');
+   else
     showRowset := t_showableRowset(rows, 'Data Audit',2, 'unselectable');
+   end if;
+   
     hookOutput.showRowset := showRowset;
 
     hookOutput.message := 'Data Audit';
