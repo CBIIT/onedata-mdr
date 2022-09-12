@@ -29,7 +29,6 @@ procedure spDeleteCSI ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_id  IN var
 function get_AI_id(P_ID NUMBER,P_VER in number) RETURN VARCHAR2;
 END;
 /
-
 create or replace PACKAGE BODY nci_CHNG_MGMT AS
 v_temp_rep_ver_nr varchar2(10):='0';
 v_temp_rep_id VARCHAR2(10):='0';
@@ -845,42 +844,43 @@ BEGIN
 
     --    v_dec_item_id := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID');
     --    v_dec_ver_nr := ihook.getColumnValue(rowform, 'DE_CONC_VER_NR');
-       v_dec_item_id := nvl(ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID'), ihook.getColumnValue(rowform, 'ITEM_1_ID'));
-       v_dec_ver_nr := nvl(ihook.getColumnValue(rowform, 'DE_CONC_VER_NR'),ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'));
+       v_dec_item_id := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID');
+       v_dec_ver_nr := ihook.getColumnValue(rowform, 'DE_CONC_VER_NR');
         v_val_ind := true;
     
     
 -- if DEC specified or found, if VD specified
    if (v_dec_item_id is not null) then
+  -- raise_application_error(-20000,'Gers');
    for cur in (select * from admin_item where admin_item_typ_id = 2 and item_id = v_dec_item_id
     and ver_nr =  v_dec_ver_nr  and nvl(fld_delete,0) = 0) loop
 --  raise_application_error(-20000, cur.admin_stus_nm_dn);
     if (upper(cur.admin_stus_nm_dn) like '%RETIRED%') then
         v_val_ind := false;
-         v_err_str :=  'Error: DEC is Retired.' || chr(13);
+         v_err_str :=  'ERROR: DEC is Retired.' || chr(13);
     else
         ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID',cur.item_id);
         ihook.setColumnValue(rowform, 'DE_CONC_VER_NR', cur.ver_nr);
         v_dec_item_id := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID');
         v_dec_ver_nr := ihook.getColumnValue(rowform, 'DE_CONC_VER_NR');
          if (upper(cur.admin_stus_nm_dn) not like '%RELEASED%') then
-        v_err_str :=  v_err_str || 'Warning: DEC is not Released.' || chr(13);
+        v_err_str :=  v_err_str || 'WARNING: DEC is not Released.' || chr(13);
         -- Jira 2121: show WFS instead of just saying 'not Released' 
        -- v_err_str :=  v_err_str || 'Warning: DEC is ' || cur.admin_stus_nm_dn || chr(13);
          end if;
     end if;
     end loop;
-    
-     if (v_dec_item_id is null and v_val_ind = true) then
+    end if;
+     if (v_dec_item_id is null or v_dec_ver_nr is null) then
         v_val_ind := false;
         v_err_str := v_err_str  || 'ERROR: DEC not found.'|| chr(13);
         end if;
-    end if;
+   
     
      -- v_vd_item_id := ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') ;
       --  v_vd_ver_nr := ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR') ;
-       v_vd_item_id := nvl( ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID'),ihook.getColumnValue(rowform, 'ITEM_2_ID')) ;
-        v_vd_ver_nr := nvl( ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR'),ihook.getColumnValue(rowform, 'ITEM_2_VER_NR') );
+       v_vd_item_id :=  ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') ;
+        v_vd_ver_nr :=  ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR');
      
         v_retired := false;
          if (v_vd_item_id is not null) then
@@ -2484,5 +2484,4 @@ end if ;
 RETURN V_DN;
 END;
 END;
-
 /
