@@ -844,8 +844,8 @@ BEGIN
 
     --    v_dec_item_id := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID');
     --    v_dec_ver_nr := ihook.getColumnValue(rowform, 'DE_CONC_VER_NR');
-       v_dec_item_id := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID');
-       v_dec_ver_nr := ihook.getColumnValue(rowform, 'DE_CONC_VER_NR');
+       v_dec_item_id := nvl(ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID'),ihook.getColumnValue(rowform,'ITEM_1_ID'));
+       v_dec_ver_nr := nvl(ihook.getColumnValue(rowform, 'DE_CONC_VER_NR'),ihook.getColumnValue(rowform,'ITEM_1_VER_NR'));
         v_val_ind := true;
     
     
@@ -879,8 +879,8 @@ BEGIN
     
      -- v_vd_item_id := ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') ;
       --  v_vd_ver_nr := ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR') ;
-       v_vd_item_id :=  ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') ;
-        v_vd_ver_nr :=  ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR');
+       v_vd_item_id :=  nvl(ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID'),ihook.getColumnValue(rowform,'ITEM_2_ID')) ;
+        v_vd_ver_nr :=  nvl(ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR'),ihook.getColumnValue(rowform,'ITEM_2_VER_NR'));
      
         v_retired := false;
          if (v_vd_item_id is not null) then
