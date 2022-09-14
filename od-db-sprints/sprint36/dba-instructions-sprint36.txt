@@ -5,8 +5,8 @@ S36_MD.sql
 S36_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
-S36_WA_RA_DDL.sql--first order switched from original
-S36_WA.sql--second order switched  order switched from original reference object found in S36_WA_RA_DDL.sql
+S36_WA_RA_DDL.sql--first order, switched from original
+S36_WA.sql--second order switched,  order switched from original reference object found in S36_WA_RA_DDL.sql
 S36_NCI_DATA_AUDIT.sql
 S36_NCI_11179.sql
 S36_NCI_11179_2.sql
