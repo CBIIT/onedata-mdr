@@ -28,7 +28,7 @@ insert into nci_data_audt (item_id, ver_nr, --ADMIN_ITEM_TYP_ID,
 ACTION_TYP, LVL, LVL_PK, ATTR_NM, FROM_VAL, TO_VAL, CREAT_USR_ID_AUDT,
 LST_UPD_USR_ID_AUDT, CREAT_DT_AUDT, LST_UPD_DT_AUDT, obj_id, tbl_nm)
 select substr(PK_REF,9, instr(pk_ref,'OD_AUDIT_COLUMN_DELIMITER_OD')-10), substr(substr(pk_ref,instr(pk_ref,'OD_AUDIT_COLUMN_DELIMITER_OD')+36),1,
-instr(substr(pk_ref,instr(pk_ref,'OD_AUDIT_COLUMN_DELIMITER_OD')+36),'#')-1), TRNS_TYP, 'Adminisered Item', PK_REF, UPD_COL_NM, UPD_COL_OLD_VAL, UPD_COL_NEW_VAL,  
+instr(substr(pk_ref,instr(pk_ref,'OD_AUDIT_COLUMN_DELIMITER_OD')+36),'#')-1), TRNS_TYP, 'Administered Item', PK_REF, UPD_COL_NM, UPD_COL_OLD_VAL, UPD_COL_NEW_VAL,  
 CREAT_USR_ID, CREAT_USR_ID, CREAT_DT , CREAT_DT, obj_id, tbl_nm
 from onedata_md.OD_MD_DATA_AUDT where 
 TBL_NM in ('ADMIN_ITEM', 'DE', 'DE_CONC', 'NCI_FORM,''OBJ_CLS', 'PROP','VALUE_DOM', 'REP_CLS', 'NCI_PROTCL','CLSFCTN_SCHM','CONC_DOM','NCI_VAL_MEAN','CNTXT','CNCPT',
