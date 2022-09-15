@@ -990,7 +990,7 @@ begin
               de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr 
              ) loop
      --    raise_application_error(-20000, 'Here');
-                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'ERROR: DUPLICATE DEC found in same context: ' || cur.item_id || 'v' || cur.ver_nr ||  ' '||  cur.cntxt_nm_dn || chr(13));
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'ERROR: Duplicate DEC found in same context: ' || cur.item_id || 'v' || cur.ver_nr ||  ' '||  cur.cntxt_nm_dn || chr(13));
                     ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
                     ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
                     
@@ -1008,7 +1008,7 @@ begin
              ) loop
      --    raise_application_error(-20000, 'Here');
      --     Jira 1669.3
-                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'WARNING: DUPLICATE DEC found in other Context: ' || cur.item_id || 'v' || cur.ver_nr || ' '||  cur.cntxt_nm_dn || chr(13));
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'WARNING: Duplicate DEC found in other Context: ' || cur.item_id || 'v' || cur.ver_nr || ' '||  cur.cntxt_nm_dn || chr(13));
                     ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
                     ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
                                      -- v_val_ind:= false;
