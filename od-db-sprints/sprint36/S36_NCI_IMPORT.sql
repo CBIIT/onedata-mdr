@@ -136,10 +136,14 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') <> 'PROCESSED') then
     
         if (ihook.getColumnValue(row_ori, 'NM_TYP_ID')  is null) then
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Designation Type is missing or invalid.' || chr(13) );                      
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: ALt Name Type is missing or invalid.' || chr(13) );                      
                 v_val_ind := false;   
         end if;
 
+   if (ihook.getColumnValue(row_ori, 'SPEC_LONG_NM')  is null) then
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: AI Long Name is missing.' || chr(13) );                      
+                v_val_ind := false;   
+        end if;
 
         for cur in (select * from admin_item where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')
         and Item_nm <> ihook.getColumnValue(row_ori, 'SPEC_LONG_NM')) loop
@@ -318,8 +322,7 @@ begin
 for i in 1..hookinput.originalRowset.rowset.count loop
 
     row_ori := hookInput.originalRowset.rowset(i);
-
-    if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null  and v_mode='V')    then
+     if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null  and v_mode='V')    then
         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', '');
         v_val_ind := true;
         nci_dec_mgmt.createValAIWithConcept(row_ori, 1,5,'V', 'DROP-DOWN', actions) ;
@@ -339,7 +342,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     end if;
     --    if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null and ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID') is null and  ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_FND') is null
    --     and v_mode = 'C') then
-        if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null and  ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_FND') is null        and v_mode = 'C') then
+        if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null       and v_mode = 'C') then
 
         --and v_val_ind = true)    then
         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', '');
