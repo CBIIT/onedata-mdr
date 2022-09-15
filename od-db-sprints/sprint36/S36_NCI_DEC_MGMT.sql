@@ -1033,7 +1033,8 @@ begin
          rows := t_rows();
 
     IF v_val_ind = true and v_op = 'C'  THEN  -- Create
- --   raise_application_error(-20000, 'here 1');
+    
+ --  raise_application_error(-20000, 'here 1');
         createValAIWithConcept(rowform , 1,5,'C','DROP-DOWN',actions); -- OC
         createValAIWithConcept(rowform , 2,6,'C','DROP-DOWN',actions); -- Property
         createDECImport(rowform, actions);
