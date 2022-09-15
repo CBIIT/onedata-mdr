@@ -385,26 +385,39 @@ AS
 
  if (ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') is null and ihook.getColumNValue(rowform, 'CTL_VAL_STUS')<> 'PROCESSED') then --- only if Value Domain not specified
         if (   ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is null and ihook.getColumnValue(rowform, 'REP_CLS_ITEM_ID') is null ) then
-                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'Rep Term primary concept missing.' || chr(13));
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Rep Term missing.' || chr(13));
                   v_val_ind  := false;
         end if;
 
         if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') is null ) then
-                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'Value Domain Type is missing.' || chr(13));
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: VD Type is missing or invalid.' || chr(13));
                   v_val_ind  := false;
         end if;
 
         if (   ihook.getColumnValue(rowform, 'DTTYPE_ID') is null ) then
-                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'Legacy Data Type is missing.' || chr(13));
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: caDSR Data Type is missing or invalid.' || chr(13));
+                  v_val_ind  := false;
+        end if; 
+          if (   ihook.getColumnValue(rowform, 'VD_CNTXT_ITEM_ID') is null ) then
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Context is missing or invalid.' || chr(13));
                   v_val_ind  := false;
         end if; 
 
           if (   ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') is null and ihook.getColumnValue(rowform, 'VD_CONC_DOM_ITEM_ID') is null) then
-                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'VD Conceptual Domain is missing.' || chr(13));
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: VD CD is missing or invalid.' || chr(13));
                   v_val_ind  := false;
         end if;
 
+  /*    if (   ihook.getColumnValue(rowform, 'UOM_ID') is null ) then
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'UOM is missing or invalid.' || chr(13));
+                  v_val_ind  := false;
+        end if; 
+ if (   ihook.getColumnValue(rowform, 'VAL_DOM_FMT_ID') is null ) then
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'Format is missing or invalid.' || chr(13));
+                  v_val_ind  := false;
+        end if; 
 
+*/
       if (ihook.getColumnValue(rowform, 'DTTYPE_ID') is not null ) then
       ihook.setColumnValue(rowform, 'NCI_STD_DTTYPE_ID', nci_11179_2.getStdDataType(ihook.getColumnValue(rowform, 'DTTYPE_ID')));
 
