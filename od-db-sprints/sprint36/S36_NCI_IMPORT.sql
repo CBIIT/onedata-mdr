@@ -143,7 +143,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
 
         for cur in (select * from admin_item where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')
         and Item_nm <> ihook.getColumnValue(row_ori, 'SPEC_LONG_NM')) loop
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: AI Public ID Does not match Imported Name: ' || cur.item_nm || chr(13) );                      
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: AI Public ID Does not match Imported Name: ' || ihook.getColumnValue(row_ori, 'SPEC_LONG_NM') || chr(13) );                      
                 v_val_ind := false;   
         end loop;
               if (ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')  is null) then
