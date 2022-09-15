@@ -136,7 +136,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') <> 'PROCESSED') then
     
         if (ihook.getColumnValue(row_ori, 'NM_TYP_ID')  is null) then
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Designation Type is null.' || chr(13) );                      
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Designation Type is missing or invalid.' || chr(13) );                      
                 v_val_ind := false;   
         end if;
 
@@ -147,10 +147,14 @@ for i in 1..hookinput.originalRowset.rowset.count loop
                 v_val_ind := false;   
         end loop;
               if (ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')  is null) then
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Context is null.' || chr(13) );                      
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Context is missing or invalid.' || chr(13) );                      
                 v_val_ind := false;   
         end if;
-        
+             if (ihook.getColumnValue(row_ori, 'LANG_ID')  is null) then
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'WARNING: Alt Name Lang missing or invalid. English will be used.' || chr(13) );                      
+         ihook.setColumnValue(row_ori, 'LANG_ID',1000);
+          --      v_val_ind := false;   
+        end if;
                 -- Jira 1924
         if (ihook.getColumnValue(row_ori, 'NM_TYP_ID')= 1038) then --1038 is internal id for USED_BY
             ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') || 'WARNING: Alternate Name will be set to Context Name for Used By.' || chr(13) );
@@ -166,6 +170,15 @@ for i in 1..hookinput.originalRowset.rowset.count loop
                 v_val_ind := false;   
         end if;
 
+	
+
+/*
+      select count(*) into v_temp from admin_item where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')  
+      and item_nm = ihook.getColumnValue(row_ori, 'SPEC_LONG_NM') ;
+      if (v_temp = 0) then
+           ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Item ID/Name do not match.' || chr(13) );                      
+                v_val_ind := false;   
+        end if;*/
 -- duplicate in the database     
   if (v_val_ind = true) then
           select count(*) into v_temp from alt_nms where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr =      ihook.getColumnValue(row_ori, 'VER_NR')  
@@ -180,7 +193,14 @@ for i in 1..hookinput.originalRowset.rowset.count loop
  if (v_val_ind = true) then
       for k in i+1..hookinput.originalrowset.rowset.count loop
              row_to_comp := hookinput.originalrowset.rowset(k);
-      if (ihook.getColumnValue(row_to_comp, 'ITEM_ID') = ihook.getColumnValue(row_ori, 'ITEM_ID') and ihook.getColumnValue(row_to_comp, 'VER_NR') = ihook.getColumnValue(row_ori, 'VER_NR') and ihook.getColumnValue(row_to_comp, 'NM_TYP_ID') = ihook.getColumnValue(row_ori, 'NM_TYP_ID') and ihook.getColumnValue(row_to_comp, 'CNTXT_ITEM_ID') = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID') and ihook.getColumnValue(row_to_comp, 'CNTXT_VER_NR') = ihook.getColumnValue(row_ori, 'CNTXT_VER_NR') and ihook.getColumnValue(row_to_comp, 'ADMIN_ITEM_TYP_ID') = ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') and ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR') != ihook.getColumnValue(row_ori, 'BTCH_SEQ_NBR')) then
+      if (ihook.getColumnValue(row_to_comp, 'ITEM_ID') = ihook.getColumnValue(row_ori, 'ITEM_ID')
+      and ihook.getColumnValue(row_to_comp, 'VER_NR') = ihook.getColumnValue(row_ori, 'VER_NR') 
+      and ihook.getColumnValue(row_to_comp, 'NM_TYP_ID') = ihook.getColumnValue(row_ori, 'NM_TYP_ID') 
+      and ihook.getColumnValue(row_to_comp, 'NM_DESC') = ihook.getColumnValue(row_ori, 'NM_DESC') 
+      and ihook.getColumnValue(row_to_comp, 'CNTXT_ITEM_ID') = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID') 
+      and ihook.getColumnValue(row_to_comp, 'CNTXT_VER_NR') = ihook.getColumnValue(row_ori, 'CNTXT_VER_NR') 
+     -- and ihook.getColumnValue(row_to_comp, 'ADMIN_ITEM_TYP_ID') = ihook.getColumnValue(row_ori, 'ADMIN_ITEM_TYP_ID') 
+      and ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR') != ihook.getColumnValue(row_ori, 'BTCH_SEQ_NBR')) then
     v_val_ind := false;
     v_batch_nbr := ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR');
    ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
