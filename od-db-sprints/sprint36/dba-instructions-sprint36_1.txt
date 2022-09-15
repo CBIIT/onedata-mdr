@@ -1,0 +1,10 @@
+-- Run as ONEDATA_RA
+S36_1_WA_RA.ddl
+
+-- Run as ONEDATA_WA
+S36_1_WA_RA.ddl
+S36_1_WA.ddl
+S36_NCI_DEC_MGMT.sql
+S36_NCI_DATA_AUDIT.sql
+S36_NCI_VD.sql
+S36_NCI_IMPORT.sql
