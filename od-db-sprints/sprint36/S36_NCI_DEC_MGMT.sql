@@ -990,7 +990,7 @@ begin
               de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr 
              ) loop
      --    raise_application_error(-20000, 'Here');
-                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'DUPLICATE DEC found in same context: ' || cur.item_id || 'v' || cur.ver_nr ||  ' '||  cur.cntxt_nm_dn || chr(13));
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'ERROR: DUPLICATE DEC found in same context: ' || cur.item_id || 'v' || cur.ver_nr ||  ' '||  cur.cntxt_nm_dn || chr(13));
                     ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
                     ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
                     
@@ -1008,7 +1008,7 @@ begin
              ) loop
      --    raise_application_error(-20000, 'Here');
      --     Jira 1669.3
-                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'Warning: DUPLICATE DEC found in other Context: ' || cur.item_id || 'v' || cur.ver_nr || ' '||  cur.cntxt_nm_dn || chr(13));
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'WARNING: DUPLICATE DEC found in other Context: ' || cur.item_id || 'v' || cur.ver_nr || ' '||  cur.cntxt_nm_dn || chr(13));
                     ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
                     ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
                                      -- v_val_ind:= false;
@@ -1021,12 +1021,12 @@ begin
         
      
         if (   ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is null or ihook.getColumnValue(rowform, 'CNCPT_2_ITEM_ID_1') is null) then
-                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'OC or PROP missing.' || chr(13));
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: OC or PROP missing.' || chr(13));
                   v_val_ind:= false;
         end if;
 
             if (   ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') is null ) then
-                ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'DEC Conceptual Domain is missing.' || chr(13));
+                ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: DEC CD is missing.' || chr(13));
                   v_val_ind:= false;
         end if;
 
