@@ -1,9 +1,9 @@
 -- Run as ONEDATA_RA
-S36_1_WA_RA.ddl
+S36_1_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA
-S36_1_WA_RA.ddl
-S36_1_WA.ddl
+S36_1_WA_RA_DDL.sql
+S36_1_WA.sql
 S36_NCI_DEC_MGMT.sql
 S36_NCI_DATA_AUDIT.sql
 S36_NCI_VD.sql
