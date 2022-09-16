@@ -136,7 +136,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') <> 'PROCESSED') then
     
         if (ihook.getColumnValue(row_ori, 'NM_TYP_ID')  is null) then
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: ALt Name Type is missing or invalid.' || chr(13) );                      
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Alt Name Type is missing or invalid.' || chr(13) );                      
                 v_val_ind := false;   
         end if;
 
