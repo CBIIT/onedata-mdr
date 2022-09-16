@@ -2354,7 +2354,7 @@ begin
             action := t_actionRowset(ai_insert_action_rows, 'Administered Item (No Sequence)',2, 0, 'insert');
             actions.extend; actions(actions.last) := action;
 
-            action := t_actionRowset(ai_update_action_rows, 'ADMIN_ITEM', 0, 'update','Administered Items');
+            action := t_actionRowset(ai_update_action_rows, 'ADMIN_ITEM', 0, 'update');
             actions.extend; actions(actions.last) := action;
 
             hookOutput.actions := actions;
