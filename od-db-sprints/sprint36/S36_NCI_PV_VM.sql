@@ -33,6 +33,7 @@ procedure VMCreateEditCore ( v_init in t_rowset,  hookInput in t_hookInput, hook
 procedure createVMConcept (rowform in out t_row, v_cncpt_src in varchar2, v_mode in varchar2,  actions in out t_actions);
 
 END;
+
 /
 create or replace PACKAGE BODY            nci_PV_VM AS
 
@@ -1205,7 +1206,8 @@ begin
         ihook.setColumnValue(row,'NM_DESC', ihook.getColumnValue(row_ori, 'VM_ALT_NM'));
         ihook.setColumnValue(row,'CNTXT_ITEM_ID',nvl(ihook.getColumnValue(row_ori, 'VM_ALT_NM_CNTXT_ITEM_ID'), ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID') ));
         ihook.setColumnValue(row,'CNTXT_VER_NR',nvl(ihook.getColumnValue(row_ori, 'VM_ALT_NM_CNTXT_VER_NR'),ihook.getColumnValue(row_ori, 'CNTXT_VER_NR')) );
-        
+        ihook.setColumnValue(row,'LANG_ID', nci_11179_2.getLangID(ihook.getColumnValue(row_ori, 'VM_ALT_NM_LANG')));
+      
         ihook.setColumnValue(row,'NM_ID',-1);
             rows.extend;
             rows(rows.last) := row;
