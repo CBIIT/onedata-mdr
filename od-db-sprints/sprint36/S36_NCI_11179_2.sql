@@ -15,6 +15,7 @@ procedure stdAIValidation(rowai in t_row,  v_item_typ_id in number, v_valid in o
 procedure stdCncptRowValidation(rowcncpt in t_row, v_idx in number, v_valid in out boolean, v_err_str in out varchar2);
 function getStdShortName (v_item_id in number, v_ver_nr in number) return varchar2;
 function getStdDataType (v_data_typ_id in number) return number;
+function getLangId (v_lang_nm in varchar2) return number;
 function getCncptStrFromCncpt (v_item_id in number, v_ver_nr in number, v_admin_item_typ_id in number) return varchar2;
 function getCncptStrFromForm (rowform in t_row, v_admin_item_typ_id in number, idx in integer) return varchar2;
 procedure copyDDEComponents (v_src_item_id in number, v_src_ver_nr in number, v_tgt_item_id in number, v_tgt_ver_nr in number, actions in out t_actions);
@@ -615,6 +616,20 @@ upper(dttype_nm) in ( select upper(nci_dttype_map) from data_typ where nci_dttyp
 
 select nvl(dttype_id,0) into v_temp from data_typ where nci_dttype_typ_id = 2 and
 dttype_id in ( select nci_dttype_map_id from data_typ where nci_dttype_typ_id = 1 and dttype_id = v_data_typ_id);
+
+return v_temp;
+end;
+
+
+function getLangId (v_lang_nm in varchar2) return number
+is
+v_temp number;
+begin
+
+v_temp := 1000;
+for cur in (Select * from LANG where upper(LANG_NM) = upper(v_lang_nm)) loop
+v_temp := cur.lang_id;
+end loop;
 
 return v_temp;
 end;
