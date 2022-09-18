@@ -14,6 +14,8 @@ procedure spCreateValDECImport (v_data_in in clob, v_data_out out clob, v_usr_id
 procedure spCreateValVDImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode in varchar2);
 procedure spCreateValDesigImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure ConceptParse(v_str in varchar2, idx in integer, row_ori in out t_row);
+function ParseGaps (row_ori in t_row, idx in number) return integer;
+
 END;
 /
 create or replace PACKAGE BODY            nci_import AS
@@ -672,7 +674,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
             ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Duplicate found in the same import file. Batch Number: ' || v_batch_nbr ); 
         else
     -- jira 1962
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'WARNING: PV shares VM with Batch Number: ' || v_batch_nbr || chr(13) || 'Run Create PV/VM for Seq ' || ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR') || ', then Validate again.'  );       
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: PV shares VM with Batch Number: ' || v_batch_nbr || chr(13) || 'Run Create PV/VM for Seq ' || ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR') || ', then Validate again.'  );       
         end if;
     end if;
     end loop;
@@ -785,7 +787,7 @@ begin
     actions(actions.last) := action;
     hookoutput.actions := actions;
     end if;
-    if (upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP')) <> 'CONCEPTS' and nvl(ihook.getColumnValue(row_ori,'CTL_VAL_STUS'),'XX') ='I') then
+    if (upper(nvl(ihook.getColumnValue(row_ori, 'VM_STR_TYP'),'XX')) <> 'CONCEPTS' and nvl(ihook.getColumnValue(row_ori,'CTL_VAL_STUS'),'XX') ='I') then
              ihook.setColumnValue(row_ori,'CTL_VAL_STUS','IMPORTED');
           rows := t_rows();
     rows.extend; rows(rows.last) := row_ori;
@@ -803,6 +805,23 @@ begin
 
 end;
 
+function ParseGaps (row_ori in t_row, idx in number) return integer
+is
+v_temp integer :=0;
+i integer;
+j integer;
+begin
+--raise_application_error(-20000,'TEt');
+for i in 1..10 loop
+j := i+1;
+ if (ihook.getColumnValue(row_ori, 'CNCPT_' || idx  ||'_ITEM_ID_' || j) is not null and
+ ihook.getColumnValue(row_ori, 'CNCPT_' || idx  ||'_ITEM_ID_' || i) is null) then
+ return i;
+ end if;
+                   
+end loop;
+return 0;
+end;
 
 procedure spPVVMValidate (row_ori in out t_row)
 as
@@ -846,7 +865,12 @@ as
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
             v_val_ind := false;
       end if;
-      
+    
+    if (ihook.getColumnValue(row_ori, 'VM_STR_TYP') is null) then
+            ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: VM Type missing or invalid.' || chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG'));
+            ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
+            v_val_ind := false;
+      end if;
       if (v_val_ind = true) then
             for cur_cd in (select vd.conc_dom_item_id, vd.conc_dom_ver_nr, admin_stus_nm_dn from admin_item ai, Value_dom vd where ai.admin_item_typ_id = 1 and ai.item_id = vd.conc_dom_item_id
             and ai.ver_nr = vd.conc_dom_ver_nr and vd.item_id =  ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and vd.ver_nr =  ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR')) loop
@@ -865,10 +889,16 @@ as
         end if; 
 
 if (v_val_ind = true) then
-
+--raise_application_error(-20000,'HErer');
    if (upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP')) = 'CONCEPTS') then
        nci_dec_mgmt.createValAIWithConcept(row_ori, 1,53,'V', 'DROP-DOWN', actions) ;
-       if (ihook.getColumnValue(row_ori, 'CNCPT_1_ITEM_ID_1') is null) then
+       if (ParseGaps (row_ori , 1) > 0) then
+         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',   'ERROR: Gaps in concept drop-downs.' || chr(13));                      
+        v_val_ind := false;
+       end if;
+       
+
+       if (ihook.getColumnValue(row_ori, 'CNCPT_1_ITEM_ID_1') is null and v_val_ind = true) then
              ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',   'ERROR: No valid concepts specified for Value Meaning.' || chr(13));                      
         v_val_ind := false;
        end if;
@@ -905,8 +935,14 @@ end if;
        ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Alt Name Context missing.' || chr(13));                      
             v_val_ind := false;
     end if;
-    
-     end if;  
+    end if;  
+       if ((ihook.getColumnValue(row_ori,'VM_ALT_NM') is  null) and
+      (ihook.getColumnValue(row_ori,'VM_ALT_NM_TYP_ID') is not  null or ihook.getColumnValue(row_ori,'VM_ALT_NM_CNTXT_ITEM_ID') is  not null 
+      or ihook.getColumnValue(row_ori,'VM_ALT_NM_LANG') is  not null)) then
+       ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'WARNING: Missing Alt Name, Alt Name will not be created.' || chr(13));                      
+      --      v_val_ind := false;
+    end if;
+     
      /*
    if (v_val_ind = false) then 
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
@@ -930,7 +966,7 @@ end if;
    
          if (ihook.getcolumnValue(row_ori, 'ITEM_1_ID') is not null) then
               -- Jira 1889 Do not remove values from ITEM_1_ID and ITEM_1_VER_NR - always have VM ID in that column  
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'INFO: Existing VM Found. No Alt Name update.' || chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') );
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'INFO: Existing VM Found.' || chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') );
           end if;
           --jira 1964 - We don't even know if it is an existing VM. Need to check for existing VM
     
