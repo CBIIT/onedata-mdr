@@ -33,7 +33,6 @@ procedure VMCreateEditCore ( v_init in t_rowset,  hookInput in t_hookInput, hook
 procedure createVMConcept (rowform in out t_row, v_cncpt_src in varchar2, v_mode in varchar2,  actions in out t_actions);
 
 END;
-
 /
 create or replace PACKAGE BODY            nci_PV_VM AS
 
@@ -1219,6 +1218,8 @@ begin
         end if;
         
         ihook.setColumnValue(row_ori,'CTL_VAL_STUS',  'PROCESSED');
+         ihook.setColumnValue(row_ori,'CTL_VAL_MSG',  'PV/VM created successfully.');
+       
        -- Jira 1889 Remove VM ID from Validation message
        -- ihook.setColumnValue(row_ori,'CTL_VAL_MSG', 'Value Meaning ID: ' || v_item_id );
 
