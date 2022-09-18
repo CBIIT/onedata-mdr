@@ -20,35 +20,7 @@ procedure spCreateVerNCI (v_data_in in clob, v_data_out out clob, v_user_id varc
 procedure spCreateCSVerNCI (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure getConcatNmDef(v_item_id in number, v_ver_nr in number, v_nm out varchar2, v_long_nm out varchar2,v_def out varchar2);
 procedure spCopyModuleNCI (actions in out t_actions, v_from_module_id in number,v_from_module_ver in number,  v_from_form_id in number, v_from_form_ver number, v_to_form_id number,
-v_to_form_ver number, v_disp_ord number, v_src in varchar2, v_cntxt_item_id in number, v_cntxt_ver_nr in number, v_user_id in varchar2);
-procedure spReturnSubtypeRow (v_item_id in number, v_ver_nr in number, v_type in number, row in out t_row);
-procedure spReturnAIRow (v_item_id in number, v_ver_nr in number,  row in out t_row);
-procedure spRefreshViews (v_data_in in clob, v_data_out out clob);
-procedure getCartNameSelectionForm  ( hookOutput in out t_hookoutput, v_usr_id in varchar2) ;
-
-procedure spReturnAIExtRow (v_item_id in number, v_ver_nr in number,  row in out t_row);
-procedure spReturnRow (v_item_id in number, v_ver_nr in number,  v_table_name in varchar2, row in out t_row);
-procedure spReturnConceptRow (v_item_id in number, v_ver_nr in number, v_item_typ_id in integer, v_idx in integer, row in out t_row);
-procedure spReturnRTConceptRow (v_item_id in number, v_ver_nr in number, v_item_typ_id in integer, v_idx in integer, row in out t_row);
-function getItemId return integer;
-procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm in out varchar2, v_def in out varchar2);
-function replaceChar(v_str in varchar2) return varchar2;
-procedure CopyPermVal (actions in out t_actions, v_from_id in number, v_from_ver_nr in number, v_to_id in number, v_to_ver_nr in number);
-procedure ReturnRow (v_sql varchar2,  v_table_name in varchar2, row in out t_row);
-/*  This package includes generic functions as well as versioning related procedures for NCI
-
-geWordCOunt - gets the word count of a string separated by spaces. Used to parse the string the user provides in DEC creation
-getWord - get the specific word in v_idx position from a string
-cmr_guid - generatest he NCI_IDSEQ
-spAddToCart , spRemoveFromCart - add selected administered Items to user cart - called from command hook
-spAddToCartGuest - Add to cart for Guest user.
-spNCIChangeLatestVer - Change latest version for a selected AI
-spCreateVerNCI - Create new version customized
-
-*/
-END;
-/
-create or replace PACKAGE BODY NCI_11179 AS
+v_to_form_ver number, v_disp_ord number, v_src in varchar2, v_cntxt_item_id in number, v_cntxt_ver_nr in number, v_user_id in varchar2);create or replace PACKAGE BODY NCI_11179 AS
 
 v_err_str      varchar2(1000) := '';
 DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
@@ -2579,5 +2551,33 @@ if (nvl(ihook.getColumnValue (rowform,  'IND_TYP_1') ,0) = 1)  then -- copy CSI
 
 end;
 
+END;
+/
+
+procedure spReturnSubtypeRow (v_item_id in number, v_ver_nr in number, v_type in number, row in out t_row);
+procedure spReturnAIRow (v_item_id in number, v_ver_nr in number,  row in out t_row);
+procedure spRefreshViews (v_data_in in clob, v_data_out out clob);
+procedure getCartNameSelectionForm  ( hookOutput in out t_hookoutput, v_usr_id in varchar2) ;
+
+procedure spReturnAIExtRow (v_item_id in number, v_ver_nr in number,  row in out t_row);
+procedure spReturnRow (v_item_id in number, v_ver_nr in number,  v_table_name in varchar2, row in out t_row);
+procedure spReturnConceptRow (v_item_id in number, v_ver_nr in number, v_item_typ_id in integer, v_idx in integer, row in out t_row);
+procedure spReturnRTConceptRow (v_item_id in number, v_ver_nr in number, v_item_typ_id in integer, v_idx in integer, row in out t_row);
+function getItemId return integer;
+procedure CncptCombExists (v_nm in varchar2, v_item_typ in integer, v_item_id out number, v_item_ver_nr out number, v_long_nm in out varchar2, v_def in out varchar2);
+function replaceChar(v_str in varchar2) return varchar2;
+procedure CopyPermVal (actions in out t_actions, v_from_id in number, v_from_ver_nr in number, v_to_id in number, v_to_ver_nr in number);
+procedure ReturnRow (v_sql varchar2,  v_table_name in varchar2, row in out t_row);
+/*  This package includes generic functions as well as versioning related procedures for NCI
+
+geWordCOunt - gets the word count of a string separated by spaces. Used to parse the string the user provides in DEC creation
+getWord - get the specific word in v_idx position from a string
+cmr_guid - generatest he NCI_IDSEQ
+spAddToCart , spRemoveFromCart - add selected administered Items to user cart - called from command hook
+spAddToCartGuest - Add to cart for Guest user.
+spNCIChangeLatestVer - Change latest version for a selected AI
+spCreateVerNCI - Create new version customized
+
+*/
 END;
 /
