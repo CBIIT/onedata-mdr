@@ -906,6 +906,11 @@ if (v_val_ind = true) then
 
     -- If string type is ID, make sure ID is valid.
     if (upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP')) = 'ID') then
+    -- check if it is really a number.
+    if VALIDATE_CONVERSION(ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1') as number)!=1 then
+              ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Specified VM ID is not a number.' || chr(13));                      
+            v_val_ind := false;
+   else
         select count(*) into v_temp from admin_item where item_id = ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1') and currnt_ver_ind = 1 and admin_item_typ_id = 53;
         if (v_temp = 0) then
             ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Specified VM ID is not found.' || chr(13));                      
@@ -914,6 +919,7 @@ if (v_val_ind = true) then
             ihook.setColumnValue(row_ori, 'ITEM_1_ID', ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'));
             ihook.setColumnValue(row_ori, 'ITEM_1_VER_NR', 1);
         end if;
+    end if;
     end if;
     if (upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP'))  = 'TEXT') then
         nci_dec_mgmt.createAIWithoutConcept(row_ori , 1, 53, ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'),nvl(ihook.getColumnValue(row_ori, 'ITEM_1_DEF'), ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1')),'V',
