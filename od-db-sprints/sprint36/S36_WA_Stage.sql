@@ -48,7 +48,7 @@ CREATE OR REPLACE TRIGGER NCI_TR_DATA_AUDT  BEFORE INSERT  on NCI_DATA_AUDT  for
 	
 
 insert into NCI_MDR_CNTRL (ID,PARAM_NM, PARAM_VAL)
-values (10, 'DOWNLOAD_HOST', 'http://cadsrapi-stage.cancer.gov');
+values (10, 'DOWNLOAD_HOST', 'https://cadsrapi-stage.cancer.gov');
 commit;
 
 alter table admin_item disable all triggers;
