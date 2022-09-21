@@ -385,7 +385,7 @@ AS
 
  if (ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') is null and ihook.getColumNValue(rowform, 'CTL_VAL_STUS')<> 'PROCESSED') then --- only if Value Domain not specified
         if (   ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is null and ihook.getColumnValue(rowform, 'REP_CLS_ITEM_ID') is null ) then
-                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Rep Term missing.' || chr(13));
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Primary Rep Term missing.' || chr(13));
                   v_val_ind  := false;
         end if;
 
@@ -403,11 +403,15 @@ AS
                   v_val_ind  := false;
         end if; 
 
-          if (   ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') is null and ihook.getColumnValue(rowform, 'VD_CONC_DOM_ITEM_ID') is null) then
+          if (   ihook.getColumnValue(rowform, 'VD_CONC_DOM_ITEM_ID') is null) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: VD CD is missing or invalid.' || chr(13));
                   v_val_ind  := false;
         end if;
-
+        if (nci_import.ParseGaps (rowform , 3) > 0 and ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is not null ) then
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Gaps in concept drop-downs.' || chr(13));                      
+                    v_val_ind := false;
+        end if;
+       
   /*    if (   ihook.getColumnValue(rowform, 'UOM_ID') is null ) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'UOM is missing or invalid.' || chr(13));
                   v_val_ind  := false;
@@ -1836,23 +1840,30 @@ rows t_rows;
 i integer;
 cnt integer;
 v_str varchar2(255);
+v_str1 varchar2(255);
 v_obj_nm  varchar2(100);
 v_temp varchar2(4000);
 v_cncpt_nm varchar2(255);
 v_interim boolean;
 v_invalid_concepts  varchar2(4000);
+v_count integer;
 begin
 
 if (v_cncpt_src ='STRING') then
       if (ihook.getColumnValue(rowform, 'CNCPT_CONCAT_STR_' || idx) is not null) then
                 v_str := trim(ihook.getColumnValue(rowform, 'CNCPT_CONCAT_STR_'|| idx));
-                cnt := nci_11179.getwordcount(v_str);
+                v_str1 := replace(v_str,chr(9),'');
+                cnt := nci_11179.getwordcount(v_str1);
                 v_nm := '';
                 v_long_nm := '';
                 v_long_nm_suf := '';
                 v_long_nm_suf_int := '';
                 v_def := '';
-                
+                 for i in 1..10 loop
+                           ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
+                            ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, ''); 
+                   
+  end loop;
                 for i in  1..cnt loop
           --      if (v_item_typ_id = 7) then
            --             j := i+1;
@@ -1861,6 +1872,30 @@ if (v_cncpt_src ='STRING') then
                       j :=1;
                     else j := i+1;
                 end if;
+                
+ 
+                       v_cncpt_nm := trim(nci_11179.getWord(v_str1, i, cnt));
+                        -- jira 1939- make sure the query returns something- if not, return the invalid concept in the validation message
+                        select count(*) into v_count from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm));
+                          -- and admin_stus_nm_dn = 'RELEASED';
+                        if (v_count = 0) then
+                            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Invalid or No Concepts: ' || v_cncpt_nm || chr(13));
+                        end if; 
+                           for cur in(select item_id, ver_nr, item_nm , item_long_nm, item_desc, admin_stus_nm_dn 
+                           from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
+                      --     and admin_stus_nm_dn = 'RELEASED') loop
+                    -- raise_application_error(-20000, cur.item_id);
+                            if (cur.admin_stus_nm_dn = 'RELEASED') then
+                            ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || j,cur.item_id);
+                            ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || j, cur.ver_nr); 
+                            end if;
+                            if (cur.admin_stus_nm_dn like '%RETIRED%') then
+                                          ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Retired Concept: ' || v_cncpt_nm 
+                                          || ' ' || cur.item_nm  || chr(13));
+                            end if;
+                 end loop;
+      
+                /*
                         v_interim := false;
                         v_cncpt_nm := nci_11179.getWord(v_str, i, cnt);
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || j,'');
@@ -1898,17 +1933,17 @@ if (v_cncpt_src ='STRING') then
                    if (v_item_typ_id = 7) then
                 for i in  cnt+2..10 loop
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
-                        ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, '');
+                        ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, '');*/
                 end loop;
                 end if;
                 
     --            ihook.setColumnValue(rowform, 'ITEM_' || idx || '_NM', v_nm);
   --
-            end if;
-  if (v_invalid_concepts is not null) then
+       --     end if;
+  /*if (v_invalid_concepts is not null) then
   -- jira 1670.1 change warning to error and specify Primary Rep term concept
-            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'Error: Invalid Primary Rep Term Concept code: ' ||  v_invalid_concepts);
-            end if;
+            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'Error: Invalid Rep Term Concept code: ' ||  v_invalid_concepts);
+            end if;*/
 end if;
 end;
 END;
