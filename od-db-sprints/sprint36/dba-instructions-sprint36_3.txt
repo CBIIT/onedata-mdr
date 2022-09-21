@@ -1,0 +1,3 @@
+--Run as Onedata_wa
+
+S36_NCI_VD.sql
