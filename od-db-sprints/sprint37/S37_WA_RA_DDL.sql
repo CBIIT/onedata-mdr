@@ -15,3 +15,9 @@ ADMIN_ITEM.LST_UPD_DT
 FROM ADMIN_ITEM
        WHERE ADMIN_ITEM_TYP_ID = 1 and upper(CNTXT_NM_DN) not in ('TEST','TRAINING', 'CACORE') and nvl(CURRNT_VER_IND,0) = 1 and 
        ADMIN_STUS_NM_DN = 'RELEASED';
+
+
+
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Printer Friendly Form', 114, 'Legacy Prior CDE Excel', 
+											'Legacy Prior CDE Excel');
+commit;
