@@ -21,3 +21,10 @@ FROM ADMIN_ITEM
 insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Printer Friendly Form', 114, 'Legacy Prior CDE Excel', 
 											'Legacy Prior CDE Excel');
 commit;
+
+-- Tracker 2147
+alter table NCI_STG_CDE_CREAT add PROCESS_DT_CHAR varchar2(20);
+
+update NCI_STG_CDE_CREAT set PROCESS_DT_CHAR = TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS') where PROCESS_DT is not null;
+commit;
+
