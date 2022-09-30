@@ -114,14 +114,16 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     row_ori := hookInput.originalRowset.rowset(i);
     if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') <> 'PROCESSED') then
         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', '');
+              nci_chng_mgmt.spDEValCreateImport(row_ori, v_op, actions, v_val_ind);
+  
         for k in i+1..hookinput.originalrowset.rowset.count loop
              row_to_comp := hookinput.originalrowset.rowset(k);
     
-            
-    if ((ihook.getColumnValue(row_to_comp, 'DE_CONC_ITEM_ID') = ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') 
-    and ihook.getColumnValue(row_to_comp, 'DE_CONC_VER_NR') = ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR')
-    and ihook.getColumnValue(row_to_comp, 'VAL_DOM_ITEM_ID') = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') 
-    and ihook.getColumnValue(row_to_comp, 'VAL_DOM_VER_NR') = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR')
+           
+    if ((nvl(ihook.getColumnValue(row_to_comp, 'DE_CONC_ITEM_ID'),ihook.getColumnValue(row_to_comp,'ITEM_1_ID')) = ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') 
+    and nvl(ihook.getColumnValue(row_to_comp, 'DE_CONC_VER_NR'),ihook.getColumnValue(row_to_comp,'ITEM_1_VER_NR')) = ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR')
+    and nvl(ihook.getColumnValue(row_to_comp, 'VAL_DOM_ITEM_ID'),ihook.getColumnValue(row_to_comp,'ITEM_2_ID')) = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') 
+    and nvl(ihook.getColumnValue(row_to_comp, 'VAL_DOM_VER_NR'),ihook.getColumnValue(row_to_comp,'ITEM_2_VER_NR')) = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR')
     and ihook.getColumnValue(row_to_comp, 'CNTXT_ITEM_ID') = ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID') 
     and ihook.getColumnValue(row_to_comp, 'CNTXT_VER_NR') = ihook.getColumnValue(row_ori, 'CNTXT_VER_NR') ) or
     (ihook.getColumnValue(row_to_comp, 'CDE_ITEM_LONG_NM') = ihook.getColumnValue(row_ori, 'CDE_ITEM_LONG_NM') 
@@ -135,9 +137,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     if (v_val_ind = false) then 
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
               ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Duplicate found in the same import file. Batch Number: ' || v_batch_nbr );  
-    else
---raise_application_error(-20000,'ddd');
-        nci_chng_mgmt.spDEValCreateImport(row_ori, v_op, actions, v_val_ind);
+ 
    end if;
    --   raise_application_error(-20000, 'Import');
         if (v_val_ind = false) then 
