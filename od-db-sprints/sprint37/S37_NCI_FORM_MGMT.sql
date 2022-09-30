@@ -1277,7 +1277,7 @@ BEGIN
             ihook.setColumnValue(row, 'C_ITEM_ID', v_form_id);
             ihook.setColumnValue(row, 'C_ITEM_VER_NR', 1);
             ihook.setColumnValue(row, 'REL_TYP_ID', 65);
-               ihook.setColumnValue(rowrel, 'REP_NO', 0);
+               ihook.setColumnValue(row, 'REP_NO', 0);
          
   rows.extend;
             rows(rows.last) := row;
