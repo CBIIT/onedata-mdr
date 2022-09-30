@@ -1,4 +1,14 @@
+-- Run as SBR
+S37_SBR.sql
+
 -- Run as ONEDATA_RA DDL scripts
+S37_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S37_WA_RA_DDL.sql
+S37_NCI_DS.sql
+S37_NCI_DEC_MGMT.sql
+S37_NCI_CHNG_MGMT.sql
+S37_NCI_IMPORT.sql
+S37_NCI_FORM_MGMT.sql
 
