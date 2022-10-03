@@ -5,6 +5,9 @@ alter table NCI_ADMIN_ITEM_REL_ALT_KEY modify (EDIT_IND default 0, REQ_IND defau
                                     
 alter table NCI_QUEST_VV_REP modify (EDIT_IND default 0 );
 
+--Tracker 2166
+alter table NCI_PROTCL modify PROTCL_PHASE varchar2(20);
+
 -- Tracker 2114
 CREATE OR REPLACE VIEW VW_CONC_DOM_FOR_IMPORT
    AS
