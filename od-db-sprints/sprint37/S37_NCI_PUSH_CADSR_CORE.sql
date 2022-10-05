@@ -811,7 +811,8 @@ v_id := nci_11179.getItemid;
 v_hdridseq := nci_11179.cmr_guid;
 for curfrm in (select  ai.NCI_IDSEQ,
  ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq cntxt_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND ,
-            ai.ITEM_NM, nvl(ai.ORIGIN_ID_DN, ai.ORIGIN) ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC) ITEM_DESC,ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR, frm.ftr_instr, frm.hdr_instr,
+            ai.ITEM_NM, nvl(ai.ORIGIN_ID_DN, ai.ORIGIN) ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC) ITEM_DESC,ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR, 
+            nci_cadsr_push.getShortDef(frm.ftr_instr) ftr_instr, nci_cadsr_push.getShortDef(frm.hdr_instr) hdr_instr,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes') FLD_DELETE, 'Yes',1
         from admin_item ai, admin_item c, nci_form frm
         where ai.cntxt_item_id = c.item_id and ai.cntxt_ver_nr = c.ver_nr
@@ -851,7 +852,7 @@ else
     
             update sbrext.quest_contents_ext set ( preferred_definition,
             date_modified, modified_by) =
-(select  nvl(frm.hdr_instr, ' ' ), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
+(select  nci_cadsr_push.getShortDef(frm.hdr_instr), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
         from admin_item ai,  nci_form frm
         where ai.item_id = frm.item_id and ai.ver_nr = frm.ver_nr
             and ai.nci_idseq= vIdseq)
@@ -860,7 +861,7 @@ else
                   --      and frm.hdr_instr is not null;
  update sbr.administered_components set (long_name, preferred_definition,
             date_modified, modified_by) =
-(select  ai.item_nm, nvl(frm.hdr_instr, ' ' ), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
+(select  ai.item_nm, nci_cadsr_push.getShortDef(frm.hdr_instr), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
         from admin_item ai,  nci_form frm
         where ai.item_id = frm.item_id and ai.ver_nr = frm.ver_nr
             and ai.nci_idseq= vIdseq)
@@ -874,7 +875,8 @@ v_id := nci_11179.getItemid;
 v_ftridseq := nci_11179.cmr_guid;
 for curfrm in (select  ai.NCI_IDSEQ,
  ai.ADMIN_STUS_NM_DN, ai.EFF_DT, ai.chng_desc_txt, c.nci_idseq cntxt_idseq,ai.UNTL_DT, decode(ai.CURRNT_VER_IND,1,'Yes',0,'No') CURRNT_VER_IND ,
-            ai.ITEM_NM, nvl(ai.ORIGIN_ID_DN, ai.ORIGIN) ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC) ITEM_DESC,ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR, frm.ftr_instr, frm.hdr_instr,
+            ai.ITEM_NM, nvl(ai.ORIGIN_ID_DN, ai.ORIGIN) ORIGIN,nci_cadsr_push.getShortDef(ai.ITEM_DESC) ITEM_DESC,ai.ITEM_LONG_Nm,ai.ITEM_ID, ai.VER_NR, 
+            nci_cadsr_push.getShortDef(frm.ftr_instr) ftr_instr, nci_cadsr_push.getShortDef(frm.hdr_instr) hdr_instr,
             ai.CREAT_USR_ID, ai.CREAT_DT, ai.LST_UPD_DT,ai.LST_UPD_USR_ID ,decode(nvl(ai.fld_delete,0),0,'No',1,'Yes') FLD_DELETE, 'Yes',1
         from admin_item ai, admin_item c, nci_form frm
         where ai.cntxt_item_id = c.item_id and ai.cntxt_ver_nr = c.ver_nr
