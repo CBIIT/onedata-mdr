@@ -17,7 +17,7 @@ create or replace PACKAGE body nci_caDSR_push AS
  is
  begin
     if lengthb(v_def) >= 2000 then
-        return substr(v_def,1,1900) || ' ...';
+        return substrb(v_def,1,1990) || ' ...';
     else
         return nvl(v_def,' ');
     end if;
