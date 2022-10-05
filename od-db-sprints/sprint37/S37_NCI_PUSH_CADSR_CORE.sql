@@ -849,7 +849,6 @@ else
   
   
   for curtemp in (select qc_idseq  from sbrext.quest_contents_ext where dn_crf_idseq = vIdseq and qtl_name ='FORM_INSTR') loop
-    
             update sbrext.quest_contents_ext set ( preferred_definition,
             date_modified, modified_by) =
 (select  nci_cadsr_push.getShortDef(frm.hdr_instr), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
@@ -918,7 +917,7 @@ select nci_11179.cmr_guid,curfrm.nci_idseq, v_ftridseq, 2 ,'FORM_INSTRUCTION',cu
       select qc_idseq into v_ftridseq from sbrext.quest_contents_ext where dn_crf_idseq = vIdseq and qtl_name ='FOOTER';
                update sbrext.quest_contents_ext set ( long_name,preferred_definition,
             date_modified, modified_by) =
-(select  ai.item_nm, nvl(frm.ftr_instr, ' ' ), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
+(select  ai.item_nm, nci_cadsr_push.getShortDef(frm.ftr_instr), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
         from admin_item ai,  nci_form frm
         where ai.item_id = frm.item_id and ai.ver_nr = frm.ver_nr
             and ai.nci_idseq= vIdseq)
@@ -926,7 +925,7 @@ select nci_11179.cmr_guid,curfrm.nci_idseq, v_ftridseq, 2 ,'FORM_INSTRUCTION',cu
             
              update sbr.administered_components set (long_name, preferred_definition,
             date_modified, modified_by) =
-(select  ai.item_nm, nvl(frm.ftr_instr, ' ' ), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
+(select  ai.item_nm, nci_cadsr_push.getShortDef(frm.ftr_instr), frm.LST_UPD_DT,frm.LST_UPD_USR_ID
         from admin_item ai,  nci_form frm
         where ai.item_id = frm.item_id and ai.ver_nr = frm.ver_nr
             and ai.nci_idseq= vIdseq)
