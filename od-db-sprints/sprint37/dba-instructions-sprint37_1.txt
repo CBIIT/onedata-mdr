@@ -4,3 +4,8 @@ S37_1_WA_RA.sql
 -- Execute as WA
 S37_1_WA_RA.sql
 S37_!_WA.sql
+S37_NCI_CADSR_PUSh.sql
+S37_NCI_CADSR_PUSH_CORE.sql
+S37_NCI_CADSR_PUSH_FORM.sql
+S37_NCI_IMPORT.sql
+
