@@ -1,0 +1,6 @@
+--Execute as RA
+S37_1_WA_RA.sql
+
+-- Execute as WA
+S37_1_WA_RA.sql
+S37_!_WA.sql
