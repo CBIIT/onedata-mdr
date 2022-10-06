@@ -57,28 +57,16 @@ air.CPY_MOD_VER_NR
 from admin_item ai, nci_admin_item_rel air where ai.item_id = air.c_item_id and ai.ver_nr = air.c_item_ver_nr and air.rel_typ_id in (61,62);
 
 
-  GRANT SELECT ON "ONEDATA_WA"."VW_NCI_FORM_MODULE" TO "ONEDATA_RO";
-
-
 -- New Form upload
 
 create table NCI_STG_FORM_IMPORT 
-(STG_ID	    NUMBER       not null PRIMARY KEY,
-SRC_QUESTION_ID	varchar2(255)	,
+(FORM_IMP_ID	    NUMBER       not null PRIMARY KEY,
  SRC_FORM_NM varchar2(255),
  CTL_VAL_STUS varchar2(50),
  CTL_VAL_MSG  varchar2(4000),
 FORM_NM	varchar2(255)	,
-SRC_MOD_NM	varchar2(255)	,
-MOD_NM	varchar2(255)	,
-SRC_QUEST_TYP	varchar2(255)	,
-SRC_QUEST_LBL	varchar2(255)	,
-SRC_VV	varchar2(4000)	,
-SRC_CDE_NM	varchar2(255)	,
-QUEST_TXT	varchar2(255)	,
-CDE_ITEM_ID	number	,
-CDE_VER_NR	number(4,2)	,
-SRC_FMT	varchar2(255),
+CNTXT_ITEM_ID number,
+CNTXT_VER_NR number(4,2),
  PROCESS_DT varchar2(20),
  	"CREAT_DT" DATE DEFAULT sysdate, 
 	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
@@ -87,10 +75,39 @@ SRC_FMT	varchar2(255),
 	"LST_DEL_DT" DATE DEFAULT sysdate, 
 	"S2P_TRN_DT" DATE DEFAULT sysdate, 
 	"LST_UPD_DT" DATE DEFAULT sysdate);
+
+
+create table NCI_STG_FORM_QUEST_IMPORT 
+(QUEST_IMP_ID	    NUMBER       not null PRIMARY KEY,
+ FORM_IMP_ID number not null,
+SRC_QUESTION_ID	varchar2(255)	,
+ CTL_VAL_STUS varchar2(50),
+ CTL_VAL_MSG  varchar2(4000),
+SRC_MOD_NM	varchar2(255)	,
+MOD_NM	varchar2(255)	,
+SRC_QUEST_TYP	varchar2(255)	,
+SRC_QUEST_LBL	varchar2(255)	,
+SRC_VV	varchar2(4000)	,
+SRC_CDE_NM	varchar2(255)	,
+QUEST_TXT	varchar2(255)	,
+SRC_QUEST_INSTR  varchar2(6000),
+CDE_ITEM_ID	number	,
+CDE_VER_NR	number(4,2)	,
+SRC_FMT	varchar2(255),
+ 	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate);
  
+
 create table NCI_STG_FORM_VV_IMPORT (		
-STG_VAL_ID	number	 not null PRIMARY KEY,
-STG_ID	Number	not null,
+VAL_IMP_ID	number	 not null PRIMARY KEY,
+QUEST_IMP_ID	Number	not null,
+ CTL_VAL_STUS varchar2(50),
+ CTL_VAL_MSG  varchar2(4000),
 PERM_VAL_ID	number	,
 VV_ALT_NM	varchar2(255),	
 VV_ALT_DEF	varchar2(4000),
@@ -100,5 +117,4 @@ VV_ALT_DEF	varchar2(4000),
 	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
 	"LST_DEL_DT" DATE DEFAULT sysdate, 
 	"S2P_TRN_DT" DATE DEFAULT sysdate, 
-	"LST_UPD_DT" DATE DEFAULT sysdate,
- PROCESS_DT varchar2(20));
+	"LST_UPD_DT" DATE DEFAULT sysdate);
