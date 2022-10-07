@@ -1,4 +1,6 @@
--- Run as ONEDATA_RA DDL scripts
 
 -- Run as ONEDATA_WA DDL scripts
+S38_WA_RA_FIX_QUOTE.sql
 
+-- Run as ONEDATA_RA DDL scripts
+S38_WA_RA_FIX_QUOTE.sql
