@@ -19,3 +19,9 @@ create or replace TRIGGER OD_TR_FORM_VV_IMPORT  BEFORE INSERT  on NCI_STG_FORM_V
  into :new.VAL_IMP_ID  from  dual ;   END IF;
 END;
 /
+
+
+
+-- Form Match
+alter table NCI_DS_RSLT_DTL add user_id varchar2(255);
+alter table nci_ds_rslt add mtch_typ  varchar2(50);
