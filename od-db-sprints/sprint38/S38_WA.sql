@@ -9,7 +9,7 @@ create or replace TRIGGER OD_TR_FORM_IMPORT  BEFORE INSERT  on NCI_STG_FORM_IMPO
 
 
 create or replace TRIGGER TR_FORM_QUEST_IMPORT  BEFORE INSERT  on NCI_STG_FORM_QUEST_IMPORT  for each row
-     BEGIN    IF (:NEW.QUEST_IMP_ID = -1  or :NEW.QUEST_IMP_ID is null)  THEN select od_seq_FORM_IMPORT.nextval
+     BEGIN    IF (:NEW.QUEST_IMP_ID = -1  or :NEW.QUEST_IMP_ID is null)  THEN select od_seq_DS_HDR.nextval
  into :new.QUEST_IMP_ID  from  dual ;   END IF;
  END;
 /
