@@ -129,4 +129,5 @@ VV_ALT_DEF	varchar2(4000),
 -- Form Match
 alter table NCI_DS_RSLT_DTL add user_id varchar2(255);
 alter table nci_ds_rslt add mtch_typ  varchar2(50);
+alter table nci_ds_rslt_DTL add mtch_typ  varchar2(50);
 
