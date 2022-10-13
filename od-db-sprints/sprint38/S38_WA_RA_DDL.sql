@@ -137,6 +137,7 @@ alter table NCI_STG_ALT_NMS add  (SRC_ITEM_ID  number, SRC_VER_NR number(4,2),  
 
 
 alter table NCI_STG_ALT_NMS modify (nm_desc null, ITEM_ID null, VER_NR null, ADMIN_ITEM_TYP_ID null);
-
-create or replace view vw_nci_mod_copy as select * from nci_admin_item_rel where rel_typ_id = 61 and CPY_MOD_ITEM_ID is not null;
-
+create or replace view vw_nci_mod_copy as select 
+C_ITEM_ID, C_ITEM_VER_NR, CNTXT_ITEM_ID, CNTXT_VER_NR, REL_TYP_ID,
+CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT,  CPY_MOD_ITEM_ID, CPY_MOD_VER_NR
+from nci_admin_item_rel where rel_typ_id = 61 and CPY_MOD_ITEM_ID is not null;
