@@ -132,3 +132,6 @@ alter table NCI_DS_RSLT_DTL add user_id varchar2(255);
 alter table nci_ds_rslt add mtch_typ  varchar2(50);
 alter table nci_ds_rslt_DTL add mtch_typ  varchar2(50);
 
+-- Designation Alt Naes
+alter table NCI_STG_ALT_NMS add  (SRC_ITEM_ID  number, SRC_VER_NR number(4,2), SRC_ALT_NM varchar2(2000), SRC_AI_TYP varchar2(255));
+
