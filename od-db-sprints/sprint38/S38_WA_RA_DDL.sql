@@ -157,4 +157,6 @@ alter table nci_data_audt modify ver_nr number(4,2);
 
 alter table nci_data_audt modify (LVL_1_ITEM_NM varchar2(4000), LVL_2_ITEM_NM varchar2(4000), LVL_3_ITEM_NM varchar2(4000));
 
+alter view vw_nci_data_audt compile;
+alter view vw_nci_data_audt_form compile;
 
