@@ -160,3 +160,5 @@ alter table nci_data_audt modify (LVL_1_ITEM_NM varchar2(4000), LVL_2_ITEM_NM va
 alter view vw_nci_data_audt compile;
 alter view vw_nci_data_audt_form compile;
 
+
+alter table admin_item add (ITEM_DEEP_LINK  varchar2(500));
