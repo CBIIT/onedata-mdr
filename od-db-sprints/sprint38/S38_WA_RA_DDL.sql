@@ -151,3 +151,10 @@ LVL_1_DISP_ORD ,LVL_2_DISP_ORD,LVL_3_DISP_ORD ,
   "LST_UPD_USR_ID_AUDT","CREAT_DT_AUDT","LST_UPD_DT_AUDT","CREAT_DT","CREAT_USR_ID","LST_UPD_USR_ID","FLD_DELETE","LST_DEL_DT","S2P_TRN_DT","LST_UPD_DT","AUDT_CMNTS"
   from NCI_DATA_AUDT where (item_id, ver_nr) in (Select item_id, ver_nr from nci_form);
 
+truncate table nci_data_audt;
+
+alter table nci_data_audt modify ver_nr number(4,2);
+
+alter table nci_data_audt modify (LVL_1_ITEM_NM varchar2(4000), LVL_2_ITEM_NM varchar2(4000), LVL_3_ITEM_NM varchar2(4000));
+
+
