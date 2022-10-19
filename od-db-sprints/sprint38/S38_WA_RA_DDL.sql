@@ -1,3 +1,9 @@
+
+
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (31, 'Form Review - Excel', 115, 'Form Review - Excel', 
+											'Form Review - Excel');
+commit;
+
 -- Standalone module
 
 
