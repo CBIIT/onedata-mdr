@@ -179,6 +179,10 @@ from NCI_MDR_CNTRL where PARAM_NM = 'DEEP_LINK')
 where admin_item_typ_id = 4 ;
 commit;
 
+update ADMIN_ITEM set ITEM_DEEP_LINK = (Select param_val || '/CO/Forms%20Deep%20Link?filter=Forms%20Deep%20Link.ITEM_ID=' || item_id 
+from NCI_MDR_CNTRL where PARAM_NM = 'DEEP_LINK')
+where admin_item_typ_id = 54 ;
+commit;
 
 alter table admin_item enable all triggers;
 
