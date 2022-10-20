@@ -268,4 +268,6 @@ alter table admin_item enable all triggers;
            AND ADMIN_ITEM.CNTXT_ITEM_ID = CNTXT.ITEM_ID
            AND ADMIN_ITEM.CNTXT_VER_NR = CNTXT.VER_NR;
 
+alter table ADMIN_ITEM add (RVWR_CMNTS  varchar2(4000));
+
 
