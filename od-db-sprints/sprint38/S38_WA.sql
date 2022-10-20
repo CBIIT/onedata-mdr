@@ -57,7 +57,7 @@ if (:new.admin_item_typ_id = 54) then -- Set Download URL
 select param_val into v_param_val from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST';
 :new.ITEM_RPT_URL := v_param_val || '/invoke/FormDownload/printerFriendly?item_id=' || :new.item_id ||  chr(38) || 'version=' || :new.ver_nr || '\Click_to_View';
 select param_val into v_param_val from NCI_MDR_CNTRL where PARAM_NM = 'DEEP_LINK';
-:new.ITEM_DEEP_LINK := v_param_val ||  '/CO/Forms%20Deep%20Link?filter=Forms%20Deep%20Link.ITEM_ID='  || :new.item_id ;
+:new.ITEM_DEEP_LINK := v_param_val ||  '/CO/Forms%20Deep%20Link?filter=Forms%20Deep%20Link.ITEM_ID='  || :new.item_id ||  ' and ver_nr=' || :new.ver_nr;
 
 end if;
 if (:new.admin_item_typ_id = 4) then -- Set Deep Link
