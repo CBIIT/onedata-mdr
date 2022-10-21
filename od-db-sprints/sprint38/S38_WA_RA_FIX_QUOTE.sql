@@ -1,3 +1,4 @@
+-- DSRMWS-2196 System O&M: Fix special character issue in Reference Document Text
 -- ’ replace in AI long names
 update admin_item set item_nm = replace (item_nm, '’', '''')
 where item_nm like '%’%';
