@@ -174,12 +174,12 @@ commit;
 
 alter table admin_item disable all triggers;
 
-update ADMIN_ITEM set ITEM_DEEP_LINK = (Select param_val || '/CO/CDE%20View%20Browse%20Deep%20Link?filter=CDE%20View%20Browse%20Deep%20Link.ITEM_ID=' || item_id ||  ' and ver_nr=' || ver_nr
+update ADMIN_ITEM set ITEM_DEEP_LINK = (Select param_val || '/CO/CDE%20View%20Browse%20Deep%20Link?filter=CDE%20View%20Browse%20Deep%20Link.ITEM_ID=' || item_id ||  '%20and%20ver_nr=' || ver_nr
 from NCI_MDR_CNTRL where PARAM_NM = 'DEEP_LINK')
 where admin_item_typ_id = 4 ;
 commit;
 
-update ADMIN_ITEM set ITEM_DEEP_LINK = (Select param_val || '/CO/Forms%20Deep%20Link?filter=Forms%20Deep%20Link.ITEM_ID=' || item_id  '||  and ver_nr=' || ver_nr
+update ADMIN_ITEM set ITEM_DEEP_LINK = (Select param_val || '/CO/Forms%20Deep%20Link?filter=Forms%20Deep%20Link.ITEM_ID=' || item_id || '%20and%20ver_nr=' || ver_nr
 from NCI_MDR_CNTRL where PARAM_NM = 'DEEP_LINK')
 where admin_item_typ_id = 54 ;
 commit;
