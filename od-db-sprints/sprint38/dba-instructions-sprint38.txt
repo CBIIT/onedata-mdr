@@ -4,3 +4,6 @@ S38_WA_RA_FIX_QUOTE.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S38_WA_RA_FIX_QUOTE.sql
+
+-- Run as ONEDATA_WA DDL scripts
+S38_DE_CDE1_XML_1974.sql
