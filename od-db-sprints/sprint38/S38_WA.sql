@@ -57,12 +57,12 @@ if (:new.admin_item_typ_id = 54) then -- Set Download URL
 select param_val into v_param_val from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST';
 :new.ITEM_RPT_URL := v_param_val || '/invoke/FormDownload/printerFriendly?item_id=' || :new.item_id ||  chr(38) || 'version=' || :new.ver_nr || '\Click_to_View';
 select param_val into v_param_val from NCI_MDR_CNTRL where PARAM_NM = 'DEEP_LINK';
-:new.ITEM_DEEP_LINK := v_param_val ||  '/CO/Forms%20Deep%20Link?filter=Forms%20Deep%20Link.ITEM_ID='  || :new.item_id ||  '%20and%20ver_nr=' || :new.ver_nr;
+:new.ITEM_DEEP_LINK := v_param_val ||  '/CO/FRMDD?filter=FRMDD.ITEM_ID='  || :new.item_id ||  '%20and%20ver_nr=' || :new.ver_nr;
 
 end if;
 if (:new.admin_item_typ_id = 4) then -- Set Deep Link
 select param_val into v_param_val from NCI_MDR_CNTRL where PARAM_NM = 'DEEP_LINK';
-:new.ITEM_DEEP_LINK := v_param_val ||  '/CO/CDE%20View%20Browse%20Deep%20Link?filter=CDE%20View%20Browse%20Deep%20Link.ITEM_ID=' || :new.item_id ||  '%20and%20ver_nr=' || :new.ver_nr;
+:new.ITEM_DEEP_LINK := v_param_val ||  '/CO/CDEDD?filter=CDEDD.ITEM_ID=' || :new.item_id ||  '%20and%20ver_nr=' || :new.ver_nr;
 
 end if;
 
