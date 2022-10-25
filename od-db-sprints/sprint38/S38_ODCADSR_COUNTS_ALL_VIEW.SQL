@@ -233,8 +233,8 @@ select 'Form',
 from dual
 UNION
 select 'Module', 
-(select count(*) from NCI_ADMIN_ITEM_REL  where REL_TYP_ID=61 and nvl(fld_delete,0)=0) WA_CNT,
-((select count(*) from NCI_ADMIN_ITEM_REL where REL_TYP_ID=61 and nvl(fld_delete,0)=0)-(select count(*) from sbrext.quest_contents_ext 
+(select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL  where REL_TYP_ID=61 and nvl(fld_delete,0)=0) WA_CNT,
+((select count(*) from onedata_wa.NCI_ADMIN_ITEM_REL where REL_TYP_ID=61 and nvl(fld_delete,0)=0)-(select count(*) from sbrext.quest_contents_ext 
 where qtl_name = 'MODULE' and nvl(deleted_ind,'No') ='No' and DN_CRF_IDSEQ is not null)) DIFF_CNT,
 (select count(*) from sbrext.quest_contents_ext m where qtl_name = 'MODULE' and nvl(deleted_ind,'No') ='No'
 and m.DN_CRF_IDSEQ is not null) caDSR_CNT
