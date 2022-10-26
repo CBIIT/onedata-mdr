@@ -22,6 +22,6 @@ S38_ODCADSR_COUNTS_ALL_VIEW.SQL
 -- Manual steps
 -- Project name - Tracker 2223
 -- There is one change to be made in S38_WA_RA_DDL.sql for each environment. Insert into NCI_MDR_CNTRL
--- Delete Guest User filter
--- Schedule the report "Retired AI Notification"
+-- Delete Guest User filter - Tracker 2206
+
 
