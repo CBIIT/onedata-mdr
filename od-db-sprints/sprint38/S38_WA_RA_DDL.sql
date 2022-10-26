@@ -168,8 +168,8 @@ alter view vw_nci_data_audt_form compile;
 
 
 alter table admin_item add (ITEM_DEEP_LINK  varchar2(500));
-
-insert into NCI_MDR_CNTRL( ID, PARAM_NM, PARAM_VAL) values (11, 'DEEP_LINK', 'https://cadsr-dev.cancer.gov/onedata/dmdirect/NIH/NCI');
+--DeepLink changed per environment
+insert into NCI_MDR_CNTRL( ID, PARAM_NM, PARAM_VAL) values (11, 'DEEP_LINK', 'https://cadsr-qa.cancer.gov/onedata/dmdirect/NIH/NCI');
 commit;
 
 
