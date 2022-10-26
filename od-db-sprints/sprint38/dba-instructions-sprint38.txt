@@ -9,6 +9,7 @@ S38_NCI_IMPORT.sql
 S38_NCI_FORM_MGMT.sql
 S38_NCI_FORM_IMPORT.sql
 S38_NCI_DATA_AUDIT.sql
+exec NCI_DATA_AUDIT.spLoadDataAudit(sysdate - 30, sysdate);
 
 -- Run as ONEDATA_RA DDL scripts
 S38_WA_RA_FIX_QUOTE.sql
@@ -17,3 +18,9 @@ S38_WA_RA_DDL.sql
 -- Run as ONEDATA_WA DDL scripts
 S38_DE_CDE1_XML_1974.sql
 S38_ODCADSR_COUNTS_ALL_VIEW.SQL
+
+-- Manual steps
+-- Project name
+-- There is one change to be made in S38_WA_RA_DDL.sql for each environment. Insert into NCI_MDR_CNTRL
+-- Delete Guest User filter
+
