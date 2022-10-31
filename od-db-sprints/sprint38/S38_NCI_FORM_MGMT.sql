@@ -597,7 +597,7 @@ BEGIN
  row_ori :=  hookInput.originalRowset.rowset(1);
 
  if (nci_form_mgmt.isUserAuth(ihook.getColumnValue(row_ori, 'C_ITEM_ID'), ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR'), v_usr_id) = false) then
- raise_application_error(-20000,'You are not authorized to edit any valid value on this form.');
+ raise_application_error(-20000,'You are not authorized to delete any Protocol from this form.');
  end if;
 
 --nci_form_curator.DeleteVV(ihook.getColumnValue(row_ori,'NCI_IDSEQ'));
