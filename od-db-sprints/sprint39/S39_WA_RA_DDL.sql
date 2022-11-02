@@ -1,4 +1,4 @@
-alter table CNCPT add (PRNT_ITEM_ID number, PRNT_ITEM_VER_NR number);
+--alter table CNCPT add (PRNT_ITEM_ID number, PRNT_ITEM_VER_NR number);
 
 alter table NCI_USR_CART add RETAIN_IND number(1);
 
@@ -13,3 +13,19 @@ alter table NCI_USR_CART add RETAIN_IND number(1);
            sysdate LST_UPD_DT,
            sysdate CREAT_DT
            from NCI_USR_CART where nvl(fld_delete,0)  =0;
+create table CNCPT_REL
+   (	"PRNT_CNCPT_VER_NR" NUMBER(4,2), 
+	"PRNT_CNCPT_ITEM_ID" NUMBER, 
+	"CHLD_CNCPT_VER_NR" NUMBER(4,2), 
+	"CHLD_CNCPT_ITEM_ID" NUMBER, 
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	"REL_TYP_ID" INTEGER,
+	"DISP_ORD" INTEGER,
+    primary key( PRNT_CNCPT_ITEM_ID, PRNT_CNCPT_VER_NR,CHLD_CNCPT_ITEM_ID, CHLD_cNCPT_VER_NR));
+   
