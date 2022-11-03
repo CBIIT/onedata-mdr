@@ -1,6 +1,6 @@
 --alter table CNCPT add (PRNT_ITEM_ID number, PRNT_ITEM_VER_NR number);
 
-alter table NCI_USR_CART add RETAIN_IND number(1);
+--alter table NCI_USR_CART add RETAIN_IND number(1);
 
 
 update admin_item set Item_desc = replace(item_desc,'alert','axxxt') where upper(item_desc) like '%JAVASCRIPT:ALERT%' and cntxt_nm_dn = 'TEST';
