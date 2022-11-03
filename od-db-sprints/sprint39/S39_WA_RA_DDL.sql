@@ -3,6 +3,11 @@
 alter table NCI_USR_CART add RETAIN_IND number(1);
 
 
+update admin_item set Item_desc = replace(item_desc,'alert','axxxt') where upper(item_desc) like '%JAVASCRIPT:ALERT%' and cntxt_nm_dn = 'TEST';
+update admin_item set Item_nm = replace(item_desc,'alert','axxxt') where upper(item_nm) like '%JAVASCRIPT:ALERT%' and cntxt_nm_dn = 'TEST';
+
+commit;
+
   CREATE OR REPLACE VIEW VW_LIST_USR_CART_NM AS
   SELECT distinct CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID, CART_NM || ' : ' || CNTCT_SECU_ID CART_USR_NM, 0 RETAIN_IND, 
            user CREAT_USR_ID,
