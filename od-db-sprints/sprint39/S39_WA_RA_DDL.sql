@@ -3,6 +3,11 @@
 --alter table NCI_USR_CART add RETAIN_IND number(1);
 
 
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (17, 'NCIT Concept Relationship', 68, 'NCIT Concept Relationship', 
+											'NCIT Concept Relationship');
+commit;
+
+
 update admin_item set Item_desc = replace(item_desc,'alert','axxxt') where upper(item_desc) like '%JAVASCRIPT:ALERT%' and cntxt_nm_dn = 'TEST';
 update admin_item set Item_nm = replace(item_desc,'alert','axxxt') where upper(item_nm) like '%JAVASCRIPT:ALERT%' and cntxt_nm_dn = 'TEST';
 
