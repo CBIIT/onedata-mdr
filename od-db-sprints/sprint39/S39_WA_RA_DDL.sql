@@ -50,4 +50,6 @@ LVL_1_DISP_ORD ,LVL_2_DISP_ORD,LVL_3_DISP_ORD ,
   from NCI_DATA_AUDT where (((item_id, ver_nr) in (Select item_id, ver_nr from nci_form)) or action_typ ='M');
   
   
+alter table nci_stg_form_quest_import modify SRC_QUESTION_ID varchar2(4000);
+alter table nci_stg_form_quest_import modify SRC_QUEST_LBL varchar2(4000);
 
