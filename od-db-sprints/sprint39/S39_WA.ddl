@@ -44,3 +44,27 @@ RAISE_APPLICATION_ERROR( -20001,
 
 END TR_AI_WFS;
 /
+
+
+CREATE OR REPLACE TRIGGER TR_ALT_NMS_BEFORE
+  BEFORE INSERT OR UPDATE
+  on ALT_NMS
+  for each row
+BEGIN
+   
+:new.MTCH_TERM := regexp_replace(upper(:new.nm_desc),'\(|\)|\;|\-|\_|\|','');
+:new.MTCH_TERM_ADV := regexp_replace(upper(:new.nm_desc),'\(|\)|\;|\-|\_|\|','');  
+END;
+/
+
+CREATE OR REPLACE TRIGGER TR_REF_BEFORE
+  BEFORE INSERT OR UPDATE
+  on REF
+  for each row
+BEGIN
+
+:new.MTCH_TERM := regexp_replace(upper(:new.ref_desc),'\(|\)|\;|\-|\_|\|','');
+:new.MTCH_TERM_ADV := regexp_replace(upper(:new.ref_desc),'\(|\)|\;|\-|\_|\|','');  
+END;
+/
+
