@@ -544,7 +544,8 @@ and deflt_val_id = ihook.getColumnValue(row_ori, 'NCI_PUB_ID')) loop
  raise_application_error(-20000,'This is used as a default on the question repetition. Please change question default and then delete.');
 end loop;
 
-nci_form_curator.DeleteVV(ihook.getColumnValue(row_ori,'NCI_IDSEQ'));
+--raise_application_Error(-20000, ihook.getColumnValue(row_ori,'NCI_IDSEQ'));
+nci_form_curator.DeleteVV(ihook.getColumnValue(row_ori,'NCI_IDSEQ'),v_usr_id);
             rows.extend;
             rows(rows.last) := row_ori;
     end loop;
@@ -1323,7 +1324,7 @@ BEGIN
         --Copy all modules
         for cur2 in (select c_item_id, c_item_ver_nr, disp_ord from nci_admin_item_rel where p_item_id = v_from_item_id and p_item_ver_nr = v_from_ver_nr
      and nvl(fld_delete,0) = 0) loop
-     nci_11179.spCopyModuleNCI (actions, cur2.c_item_id,cur2.c_item_ver_nr,    v_from_item_id, v_from_ver_nr,v_form_id, 1, cur2.disp_ord,'V', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'),
+     nci_11179.spCopyModuleNCI (actions, cur2.c_item_id,cur2.c_item_ver_nr,    v_from_item_id, v_from_ver_nr,v_form_id, 1, cur2.disp_ord,'C', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'),
      ihook.getColumnValue(rowform,'CNTXT_VER_NR'), v_user_id);
     end loop;
  --           nci_11179.spCreateCommonChildrenNCI(actions, v_from_item_id,v_from_ver_nr, v_form_id, 1);
