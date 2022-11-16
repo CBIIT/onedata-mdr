@@ -1,4 +1,17 @@
 -- Run as ONEDATA_RA DDL scripts
+S39_WA_RA_DDL.sql
+
+--Run as SBR
+S39_SBR.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S39_WA_RA_DDL.sql
+S39_WA.sql
+S39_NCI_11179.sql
+S39_NCI_FORM_CURATOR.sql
+S39_NCI_FORM_IMPORT.sql
+S39_NCI_FORM_MGMT.sql
+S39_NCI_IMPORT.sql
+S39_NCI_PV_VM.sql
+S39_NCI_DS.sql
 
