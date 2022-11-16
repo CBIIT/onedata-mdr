@@ -15,9 +15,6 @@ procedure spCreateValVDImport (v_data_in in clob, v_data_out out clob, v_usr_id 
 procedure spCreateValDesigImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure ConceptParse(v_str in varchar2, idx in integer, row_ori in out t_row);
 function ParseGaps (row_ori in t_row, idx in number) return integer;
-procedure spParseForm (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
-procedure spValidateForm (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
-procedure spCreateImportedForm (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure spLoadConceptRel;
 END;
 /
@@ -59,66 +56,6 @@ end loop;
 end loop;
 end loop;
 
-end;
-
-procedure spParseForm (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2)
-as
-   hookInput           t_hookInput;
-    hookOutput           t_hookOutput := t_hookOutput();
-    showRowset     t_showableRowset;
-
-    rows      t_rows;
-    row          t_row;
-    row_ori t_row;
-    row_cur t_row;
-    v_item_id number;
-begin
-   hookInput := ihook.getHookInput(v_data_in);
-    hookOutput.invocationNumber := hookInput.invocationNumber;
-    hookOutput.originalRowset := hookInput.originalRowset;
-  rows := t_rows();
-  raise_application_error(-20000,'Work in Progress');
-  
-end;
-
-procedure spValidateForm (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2)
-as
-   hookInput           t_hookInput;
-    hookOutput           t_hookOutput := t_hookOutput();
-    showRowset     t_showableRowset;
-
-    rows      t_rows;
-    row          t_row;
-    row_ori t_row;
-    row_cur t_row;
-    v_item_id number;
-begin
-   hookInput := ihook.getHookInput(v_data_in);
-    hookOutput.invocationNumber := hookInput.invocationNumber;
-    hookOutput.originalRowset := hookInput.originalRowset;
-  rows := t_rows();
-  raise_application_error(-20000,'Work in Progress');
-  
-end;
-
-procedure spCreateImportedForm (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2)
-as
-   hookInput           t_hookInput;
-    hookOutput           t_hookOutput := t_hookOutput();
-    showRowset     t_showableRowset;
-
-    rows      t_rows;
-    row          t_row;
-    row_ori t_row;
-    row_cur t_row;
-    v_item_id number;
-begin
-   hookInput := ihook.getHookInput(v_data_in);
-    hookOutput.invocationNumber := hookInput.invocationNumber;
-    hookOutput.originalRowset := hookInput.originalRowset;
-  rows := t_rows();
-  raise_application_error(-20000,'Work in Progress');
-  
 end;
 
 
