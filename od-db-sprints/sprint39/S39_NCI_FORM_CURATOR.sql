@@ -740,6 +740,36 @@ BEGIN
 DeleteCommonChildren(v_id, v_ver_nr, v_idseq);
  commit;
  
+ -- Form PRotocol audit
+ 
+insert into nci_data_audt (item_id, ver_nr, --ADMIN_ITEM_TYP_ID, 
+ACTION_TYP, LVL, LVL_PK, ATTR_NM,  CREAT_USR_ID_AUDT,
+LST_UPD_USR_ID_AUDT, CREAT_DT_AUDT, LST_UPD_DT_AUDT,
+LVL_1_ITEM_ID,LVL_1_VER_NR,LVL_1_ITEM_NM)
+select an.c_item_id,an.c_item_ver_nr, 'M', 'Form-Protocol', an.p_item_id, 
+'FORM-PROTOCOL',
+--decode(TRNS_TYP, 'U', UPD_COL_NM, 'REF_NM'), 
+--decode(TRNS_TYP, 'U', UPD_COL_NEW_VAL,REF_NM), 
+v_user_id,v_user_id, sysdate , sysdate,
+ai.item_id, ai.ver_nr,  ai.item_nm
+from NCI_ADMIN_ITEM_REL an, ADMIN_ITEM ai where 
+an.REL_TYP_ID = 60 and an.c_item_id = v_id and an.c_item_ver_nr = v_ver_Nr  and ai.item_id=an.p_item_id and  ai.ver_nr=an.p_item_Ver_nr;
+commit;
+
+
+insert into nci_data_audt (item_id, ver_nr, --ADMIN_ITEM_TYP_ID, 
+ACTION_TYP, LVL, LVL_PK, ATTR_NM,  CREAT_USR_ID_AUDT,
+LST_UPD_USR_ID_AUDT, CREAT_DT_AUDT, LST_UPD_DT_AUDT)
+select v_id,v_ver_nr, 'M', 'Form', v_id, 
+'FORM',
+--decode(TRNS_TYP, 'U', UPD_COL_NM, 'REF_NM'), 
+--decode(TRNS_TYP, 'U', UPD_COL_NEW_VAL,REF_NM), 
+v_user_id,v_user_id, sysdate , sysdate
+from  ADMIN_ITEM ai where 
+ ai.item_id=v_id and  ai.ver_nr=v_ver_nr;
+commit;
+
+ 
  --raise_application_error(-20000, v_idseq);
 delete from sbrext.protocol_qc_ext where qc_idseq = v_idseq; 
 delete from sbr.administered_components where ac_idseq in (select qc_idseq from sbrext.quest_contents_ext where dn_crf_idseq =  v_idseq);
