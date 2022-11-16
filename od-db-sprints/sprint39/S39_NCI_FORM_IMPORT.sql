@@ -148,6 +148,7 @@ begin
   raise_application_Error(-20000,'Please parse the form first.');
   return;
   end if;
+  
   -- validate form - Missing Context or duplicate form name.
   ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', '' || chr(13));
   ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'VALIDATED' || chr(13));
@@ -195,8 +196,8 @@ if (v_temp = 0) then
         else -- Error
        
         
-     v_ctl_val_stus := 'ERROR';
-        v_ctl_val_msg := 'ERROR: No CDE attached.';
+     v_ctl_val_stus := 'WARNING';
+        v_ctl_val_msg := 'WARNING: No CDE attached.';
        
         end if;
          update NCI_STG_FORM_QUEST_IMPORT  set CTL_VAL_STUS  = v_ctl_val_stus, CTL_VAL_MSG = v_ctl_val_msg where
@@ -382,9 +383,10 @@ begin
         actions(actions.last) := action;
        v_disp_ord := 1;
        v_quest_disp_ord := 1;
-       v_prev_mod_nm := '';
+       v_prev_mod_nm := 'XXXXX';
        for cur in (select * from NCI_STG_FORM_QUEST_IMPORT where FORM_IMP_ID = ihook.getColumnValue(row_ori,'FORM_IMP_ID') order by mod_nm) loop 
-       if (cur.mod_nm != v_prev_mod_nm) then -- create new module
+        raise_application_error(-20000,cur.mod_nm);
+       if (cur.mod_nm <> v_prev_mod_nm) then -- create new module
         v_mod_id :=  nci_11179.getItemId;
         ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 52);
         ihook.setColumnValue(row, 'ITEM_LONG_NM', v_mod_id || c_ver_suffix);
@@ -398,7 +400,7 @@ begin
         ihook.setColumnValue(row, 'P_ITEM_ID', v_form_id);
         ihook.setColumnValue(row, 'P_ITEM_VER_NR', 1);
        ihook.setColumnValue(row, 'DISP_ORD', v_disp_ord);
-          --  ihook.setColumnValue(rowrel, 'REP_NO', nvl(ihook.getColumnValue(rowform,'REP_NO'),0));
+          ihook.setColumnValue(row, 'REP_NO', nvl(ihook.getColumnValue(rowform,'REP_NO'),0));
         --    ihook.setColumnValue(rowrel, 'INSTR', ihook.getColumnValue(rowform,'INSTR'));
 
      
@@ -432,7 +434,7 @@ v_prev_mod_nm := cur.mod_nm;
   INSTR,  creat_dt, creat_usr_id, lst_upd_dt, lst_upd_usr_id)
   values (v_id, 1, v_mod_id,1, cur.cde_item_id, cur.cde_ver_nr, ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID'), ihook.getColumnValue(row_ori,'CNTXT_VER_NR'), 
   cur.SRC_QUEST_LBL,
-  cur.SRC_QUEST_LBL, 63, v_quest_disp_ord, 
+  substr(cur.SRC_QUEST_LBL,1,30), 63, v_quest_disp_ord, 
   --cur.req_ind, 
   cur.SRC_QUEST_INSTR,  sysdate, v_usr_id, sysdate, v_usr_id );
   commit;
@@ -466,6 +468,8 @@ commit;
 
      
     hookoutput.actions    := actions;
+      V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+nci_util.debugHook('GENERAL',v_data_out);
 
 end;
 
