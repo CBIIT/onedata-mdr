@@ -2076,11 +2076,11 @@ insert into perm_val (val_id, val_dom_item_id, val_dom_Ver_nr, perm_val_beg_dt, 
 prnt_cncpt_item_id, prnt_cncpt_ver_nr, nci_origin_id, nci_origin, creat_usr_id, lst_upd_usr_id)
 select -1, v_to_id,v_to_ver_nr, perm_val_beg_dt, perm_val_end_Dt, perm_val_nm, perm_val_desc_txt, nci_val_mean_item_id, nci_val_mean_ver_nr,
 prnt_cncpt_item_id, prnt_cncpt_ver_nr, nci_origin_id, nci_origin, creat_usr_id, lst_upd_usr_id
-from perm_val where val_dom_item_id = v_from_id and val_dom_ver_nr = v_from_ver_nr;
+from perm_val where val_dom_item_id = v_from_id and val_dom_ver_nr = v_from_ver_nr and nvl(fld_delete,0) = 0;
 commit;
 insert into onedata_ra.perm_val 
 select *
-from perm_val where val_dom_item_id = v_to_id and val_dom_ver_nr = v_to_ver_nr;
+from perm_val where val_dom_item_id = v_to_id and val_dom_ver_nr = v_to_ver_nr and nvl(fld_delete,0) = 0;
 commit;
 
 end;
