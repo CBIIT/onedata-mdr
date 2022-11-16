@@ -12,6 +12,7 @@ procedure spAddToCart ( v_data_in in clob, v_data_out out clob, v_usr_id varchar
 procedure spAddToCartOld ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2, v_src varchar2);
 procedure spAddToCartGuest ( v_data_in in clob, v_data_out out clob);
 procedure spRemoveFromCart (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spDeleteNamedCart (v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure spNCIChangeLatestVer (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 procedure spNCIChangeLatestVerAll (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 procedure spCreateCommonChildrenNCI (actions in out t_actions, v_from_item_id in number, v_from_ver_nr in number, v_to_item_id in number, v_to_ver_nr in number);
@@ -169,7 +170,6 @@ question t_question;
   answer t_answer;
   answers t_answers;
 begin
-
         rows := t_rows();
         v_found := false;
 for cur in (select * from VW_LIST_USR_CART_NM where CNTCT_SECU_ID = v_usr_id and cart_nm <> v_Deflt_cart_nm) loop
@@ -195,6 +195,44 @@ for cur in (select * from VW_LIST_USR_CART_NM where CNTCT_SECU_ID = v_usr_id and
      --   hookOutput.message := 'Please select cart. ';
      else
         hookoutput.message := 'Please add items to your cart.';
+     end if;
+end;
+
+
+procedure getCartNameSelectionFormDelete  ( hookOutput in out t_hookoutput, v_usr_id in varchar2) 
+as
+rows t_rows;
+row t_row;
+v_found boolean;   showrowset	t_showablerowset;
+question t_question;
+  answer t_answer;
+  answers t_answers;
+begin
+        rows := t_rows();
+        v_found := false;
+for cur in (select * from VW_LIST_USR_CART_NM where CNTCT_SECU_ID = v_usr_id and cart_nm <> v_Deflt_cart_nm) loop
+		   row := t_row();
+	   	   iHook.setcolumnvalue (ROW, 'CART_NM', cur.CART_NM);
+		   iHook.setcolumnvalue (ROW, 'CNTCT_SECU_ID', v_usr_id);
+		   rows.extend;
+		   rows (rows.last) := row;
+		   v_found := true;
+	    end loop;
+  if (v_found) then
+       	 showrowset := t_showablerowset (rows, 'User Cart List', 2, 'multi');
+       	 hookoutput.showrowset := showrowset;
+          
+ ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Next');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+
+    QUESTION               := T_QUESTION('Please select cart.' , ANSWERS);
+
+        hookOutput.question := Question;
+     --   hookOutput.message := 'Please select cart. ';
+     else
+        hookoutput.message := 'No named carts found.';
      end if;
 end;
 
@@ -923,6 +961,65 @@ begin
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
+
+PROCEDURE spDeleteNamedCart
+  (
+    v_data_in IN CLOB,
+    v_data_out OUT CLOB,
+    v_user_id in varchar2)
+AS
+  hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+    row_sel t_row;
+    v_id integer;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
+showrowset	t_showablerowset;
+forms     t_forms;
+formGroup    t_form;
+v_itemid     integer;
+v_found boolean;
+  v_temp integer;
+  v_stg_ai_id number;
+  i integer := 0;
+  v_cart_nm varchar2(255);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+--  row_ori :=  hookInput.originalRowset.rowset(1);
+
+    rows := t_rows();
+--raise_application_error(-20000, v_user_id);
+
+   if (hookinput.invocationNumber = 0 ) then 
+      nci_11179.getCartNameSelectionFormDelete(hookOutput, v_user_id);
+	end if; -- First invocation
+
+    if (hookinput.invocationnumber = 1 ) then
+
+        for i in 1..hookInput.selectedRowset.rowset.count loop
+        row_sel := hookInput.selectedRowset.rowset(i);
+          v_cart_nm := ihook.getColumnValue(row_sel, 'CART_NM');
+          delete from nci_usr_cart where cart_nm = v_cart_nm;
+          delete from onedata_ra.nci_usr_cart where cart_nm = v_cart_nm;
+          commit;
+          end loop;
+    end if;
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+END;
+
 PROCEDURE spRemoveFromCart  (
     v_data_in IN CLOB,
     v_data_out OUT CLOB,
@@ -1351,8 +1448,14 @@ begin
 v_table_name := 'ADMIN_ITEM';
 
  v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
+ if (v_src = 'C') then 
  v_to_module_id := nci_11179.getItemId;
+end if;
+--reuse module id
+ if (v_src = 'V') then 
 
+ v_to_module_id := v_from_module_id;
+end if;
     v_sql := TEMPLATE_11179.getSelectSql(v_table_name) || ' where item_id=:item_id and ver_nr=:ver_nr';
 
  v_cur := dbms_sql.open_cursor;
@@ -1403,9 +1506,17 @@ v_table_name := 'ADMIN_ITEM';
     ihook.setColumnValue(row, 'P_ITEM_ID',v_to_form_id);
     ihook.setColumnValue(row, 'C_ITEM_ID',v_to_module_id);
     ihook.setColumnValue(row, 'C_ITEM_VER_NR',v_to_form_ver);
+    if (v_src = 'C') then
       ihook.setColumnValue(row, 'CPY_MOD_ITEM_ID',v_from_module_id);
       ihook.setColumnValue(row, 'CPY_MOD_VER_NR',v_from_module_ver);
-  
+    end if;
+    if (v_src = 'V') then  -- version then copy same as original
+    for curx in (select * from nci_admin_item_rel where c_item_id = v_from_module_id and c_item_ver_nr = v_from_module_ver and rel_typ_id = 61) loop
+      ihook.setColumnValue(row, 'CPY_MOD_ITEM_ID',curx.cpy_mod_item_id);
+      ihook.setColumnValue(row, 'CPY_MOD_VER_NR',curx.cpy_mod_ver_nr);
+      end loop;
+    end if;
+    
     ihook.setColumnValue(row, 'REL_TYP_ID',61);
    --ihook.setColumnValue(row, 'REP_NO',61);
    --ihook.setColumnValue(row, 'INSTR',61);
