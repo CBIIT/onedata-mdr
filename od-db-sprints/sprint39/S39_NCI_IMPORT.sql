@@ -14,6 +14,7 @@ procedure spCreateValDECImport (v_data_in in clob, v_data_out out clob, v_usr_id
 procedure spCreateValVDImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode in varchar2);
 procedure spCreateValDesigImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure ConceptParse(v_str in varchar2, idx in integer, row_ori in out t_row);
+procedure ConceptParseDEC(v_str in varchar2, idx in integer, row_ori in out t_row);
 function ParseGaps (row_ori in t_row, idx in number) return integer;
 procedure spLoadConceptRel;
 END;
@@ -567,12 +568,12 @@ begin
 
     end if;
     if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1') is not null and ihook.getColumnValue(row_ori, 'MOD_NM') = 'I') then
-          ConceptParse(ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'),1, row_ori);
+          ConceptParseDEC(ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'),1, row_ori);
           
      -- nci_dec_mgmt.createValAIWithConcept(row_ori, 1,5,'V', 'STRING', actions) ;
     end if;
     if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_2') is not null and ihook.getColumnValue(row_ori, 'MOD_NM') = 'I') then  
-          ConceptParse(ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_2'),2, row_ori);
+          ConceptParseDEC(ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_2'),2, row_ori);
  
  --   nci_dec_mgmt.createValAIWithConcept(row_ori, 2,6,'V', 'STRING', actions) ;
     end if;
@@ -830,6 +831,51 @@ begin
                             end if;
                             if (cur.admin_stus_nm_dn like '%RETIRED%') then
                                           ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Retired Concept: ' || v_cncpt_nm 
+                                          || ' ' || cur.item_nm  || chr(13));
+                            end if;
+                            end loop;
+                end loop;
+                for i in  cnt+1..10 loop
+                        ihook.setColumnValue(row_ori, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
+                        ihook.setColumnValue(row_ori, 'CNCPT_' || idx || '_VER_NR_' || i, '');
+                end loop;
+end ;
+
+procedure ConceptParseDEC(v_str in varchar2, idx in integer, row_ori in out t_row)
+as
+i integer;
+cnt integer;
+v_cncpt_nm varchar2(255);
+v_count integer;
+v_str1 varchar2(4000);
+begin
+
+   cnt := nci_11179.getwordcount(v_str);
+  -- raise_application_error(-20000, v_str);
+  for i in 1..10 loop
+                           ihook.setColumnValue(row_ori, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
+                            ihook.setColumnValue(row_ori, 'CNCPT_' || idx || '_VER_NR_' || i, ''); 
+                   
+  end loop;
+   v_str1 := replace(v_str,chr(9),'');
+                for i in  1..cnt loop
+                        v_cncpt_nm := trim(nci_11179.getWord(v_str1, i, cnt));
+                        -- jira 1939- make sure the query returns something- if not, return the invalid concept in the validation message
+                        select count(*) into v_count from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm));
+                          -- and admin_stus_nm_dn = 'RELEASED';
+                        if (v_count = 0) then
+                            ihook.setColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG') || 'ERROR: Invalid or No Concepts: ' || v_cncpt_nm || chr(13));
+                        end if; 
+                           for cur in(select item_id, ver_nr, item_nm , item_long_nm, item_desc, admin_stus_nm_dn 
+                           from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
+                      --     and admin_stus_nm_dn = 'RELEASED') loop
+                    -- raise_application_error(-20000, cur.item_id);
+                            if (cur.admin_stus_nm_dn = 'RELEASED') then
+                            ihook.setColumnValue(row_ori, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,cur.item_id);
+                            ihook.setColumnValue(row_ori, 'CNCPT_' || idx || '_VER_NR_' || i, cur.ver_nr); 
+                            end if;
+                            if (cur.admin_stus_nm_dn like '%RETIRED%') then
+                                          ihook.setColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG') || 'ERROR: Retired Concept: ' || v_cncpt_nm 
                                           || ' ' || cur.item_nm  || chr(13));
                             end if;
                             end loop;
