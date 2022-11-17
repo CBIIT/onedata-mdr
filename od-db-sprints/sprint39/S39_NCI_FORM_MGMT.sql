@@ -389,21 +389,24 @@ BEGIN
  end if;
 
  if hookInput.invocationNumber = 0 then
-
-
-    rows := t_rows();
-    for cur in (select upper(PERM_VAL_NM) PERM_VAL_NM from vw_nci_de_pv where de_item_id = ihook.getColumnValue(row_ori, 'C_ITEM_ID') and de_ver_nr = ihook.getColumnValue(row_ori, 'C_ITEM_VER_NR') minus
-                select upper(VALUE) from nci_quest_valid_value where Q_PUB_ID = ihook.getColumnValue(row_ori, 'NCI_PUB_ID') and Q_VER_NR =ihook.getColumnValue(row_ori, 'NCI_VER_NR')) loop
-                for cur1 in (select * from vw_nci_de_pv where upper(PERM_VAL_NM) = cur.PERM_VAL_NM and de_item_id = ihook.getColumnValue(row_ori, 'C_ITEM_ID') and de_ver_nr = ihook.getColumnValue(row_ori, 'C_ITEM_VER_NR')) loop
+   rows := t_rows();
+    for cur in (select upper(PERM_VAL_NM) PERM_VAL_NM, NCI_VAL_MEAN_ITEM_ID VAL_MEAN_ITEM_ID, NCI_VAL_MEAN_VER_NR VAL_MEAN_VER_NR from vw_nci_de_pv where de_item_id = ihook.getColumnValue(row_ori, 'C_ITEM_ID') and de_ver_nr = ihook.getColumnValue(row_ori, 'C_ITEM_VER_NR') minus
+                select upper(VALUE), VAL_MEAN_ITEM_ID, VAL_MEAN_VER_NR from nci_quest_valid_value where Q_PUB_ID = ihook.getColumnValue(row_ori, 'NCI_PUB_ID') and Q_VER_NR =ihook.getColumnValue(row_ori, 'NCI_VER_NR')) loop
+                 for cur1 in (select * from vw_nci_de_pv where upper(PERM_VAL_NM) = cur.PERM_VAL_NM  
+                and nci_val_mean_item_id = cur.val_mean_item_id and nci_val_mean_Ver_nr = cur.val_mean_ver_nr and de_item_id = ihook.getColumnValue(row_ori, 'C_ITEM_ID') and de_ver_nr = ihook.getColumnValue(row_ori, 'C_ITEM_VER_NR')) loop
                      row := t_row();
                     iHook.setcolumnvalue (row, 'DE_ITEM_ID', cur1.DE_ITEM_ID);
                     iHook.setcolumnvalue (row, 'DE_VER_NR', cur1.DE_VER_NR);
                     iHook.setcolumnvalue (row, 'PERM_VAL_NM', cur1.PERM_VAL_NM);
+                    iHook.setcolumnvalue (row, 'NCI_VAL_MEAN_ITEM_ID', cur1.NCI_VAL_MEAN_ITEM_ID);
+                    iHook.setcolumnvalue (row, 'NCI_VAL_MEAN_VER_NR', cur1.NCI_VAL_MEAN_VER_NR);
+                    
                     rows.extend;
                     rows (rows.last) := row;
 
                 end loop;
     end loop;
+
 
 
 	--    end loop;
@@ -3468,11 +3471,16 @@ nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.ge
  end if;
 
  if hookInput.invocationNumber = 0 then
-
+/*
 select NCI_VAL_MEAN_ITEM_ID, NCI_VAL_MEAN_VER_NR, CNCPT_CONCAT into v_vm_id, v_vm_ver_nr , v_vm_cncpts from VW_NCI_DE_PV pv,
         NCI_ADMIN_ITEM_REL_ALT_KEY q where pv.DE_ITEM_ID = q.C_ITEM_id and pv.DE_VER_NR = q.c_ITEM_VER_NR and q.NCI_PUB_ID = ihook.getColumnValue(row_ori,'Q_PUB_ID')
         and q.NCI_VER_NR= ihook.getColumnValue(row_ori, 'Q_VER_NR') and pv.PERM_VAL_NM = ihook.getColumnValue(row_ori, 'VALUE');
-        
+      */
+     
+     v_vm_id := ihook.getColumnValue(row_ori,'VAL_MEAN_ITEM_ID');
+     v_vm_ver_nr := ihook.getColumnValue(row_ori,'VAL_MEAN_VER_NR');
+     
+     --   raise_application_error(-20000,v_vm_id);
 	    for cur in (select r.*, ok.obj_key_desc from alt_nms r, obj_key ok where r.fld_delete= 0 and ok.obj_key_id = r.nm_typ_id and
         item_id = v_vm_id and ver_nr = v_vm_ver_nr) loop
 		   row := t_row();
