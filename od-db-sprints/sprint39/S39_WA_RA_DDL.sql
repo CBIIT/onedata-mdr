@@ -53,7 +53,7 @@ LVL_1_DISP_ORD ,LVL_2_DISP_ORD,LVL_3_DISP_ORD ,
 alter table nci_stg_form_quest_import modify SRC_QUESTION_ID varchar2(4000);
 alter table nci_stg_form_quest_import modify SRC_QUEST_LBL varchar2(4000);
 alter table nci_stg_form_quest_import add USER_TIPS varchar2(4000);
-alter table nci_stg_cde_creat add (PRMRY_REP_TERM varchar2(32), REP_TERM_QUAL_CONC varchar2(256), CTL_IMPORT_VAL_MSG varchar2(256));
+alter table nci_stg_cde_creat add (PRMRY_REP_TERM varchar2(32), REP_TERM_QUAL_CONC varchar2(256), CTL_IMPORT_VAL_MSG varchar2(256), PRMRY_REP_TERM_NM varchar2(255));
 
 alter table admin_item add (MTCH_TERM varchar2(255), MTCH_TERM_ADV varchar(255));
 alter table ALT_NMS add (MTCH_TERM varchar2(4000), MTCH_TERM_ADV varchar(4000));
