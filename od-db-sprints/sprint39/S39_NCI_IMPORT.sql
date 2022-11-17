@@ -233,7 +233,9 @@ for i in 1..hookinput.originalRowset.rowset.count loop
 
         for cur in (select * from admin_item where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')
         and Item_nm <> ihook.getColumnValue(row_ori, 'SPEC_LONG_NM')) loop
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: AI Public ID Does not match Imported Name: ' || ihook.getColumnValue(row_ori, 'SPEC_LONG_NM') || chr(13) );                      
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: AI Public ID Does not match Imported Name: ' || ihook.getColumnValue(row_ori, 'SPEC_LONG_NM') || chr(13) );             
+
+         
                 v_val_ind := false;   
         end loop;
               if (ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')  is null) then
@@ -655,8 +657,11 @@ begin
   --  ihook.setColumnValue(row_ori, 'CNCPT_CONCat_STR_3', ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_3' || ihook.getColumnValue(row_ori, 'REP_TERM_QUAL_CONC') || ' ' || ihook.getColumnValue(row_ori, 'PRMRY_REP_TERM');
     if (ihook.getColumnValue(row_ori, 'REP_TERM_QUAL_CONC') is not null and ihook.getColumnValue(row_ori, 'PRMRY_REP_TERM') is not null and ihook.getColumnValue(row_ori, 'MOD_NM') = 'I') then
         ihook.setColumnValue(row_ori, 'CNCPT_CONCAT_STR_3', ihook.getColumnValue(row_ori, 'REP_TERM_QUAL_CONC') || ' ' || ihook.getColumnValue(row_ori, 'PRMRY_REP_TERM'));
-      nci_vd.VDImportPost(row_ori, 3,7,'V', 'STRING', actions) ;
-      end if;
+        nci_vd.VDImportPost(row_ori, 3,7,'V', 'STRING', actions);
+    elsif (ihook.getColumnValue(row_ori, 'PRMRY_REP_TERM') is not null and ihook.getColumnValue(row_ori, 'MOD_NM') = 'I') then
+        ihook.setColumnValue(row_ori, 'CNCPT_CONCAT_STR_3', ihook.getColumnValue(row_ori, 'PRMRY_REP_TERM'));
+        nci_vd.VDImportPost(row_ori, 3,7,'V', 'STRING', actions);
+    end if;
       -- below is original if statement before 2190
   --  if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_3') is not null and ihook.getColumnValue(row_ori, 'MOD_NM') = 'I') then
    --   nci_vd.VDImportPost(row_ori, 3,7,'V', 'STRING', actions) ;
@@ -772,7 +777,9 @@ for i in 1..hookinput.originalRowset.rowset.count loop
             ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Duplicate found in the same import file. Batch Number: ' || v_batch_nbr ); 
         else
     -- jira 1962
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: PV shares VM with Batch Number: ' || v_batch_nbr || chr(13) || 'Run Create PV/VM for Seq ' || ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR') || ', then Validate again.'  );       
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: PV shares VM with Batch Number: ' || v_batch_nbr || chr(13) || 'Run Create PV/VM for Seq ' || ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR') || ', then Validate 
+
+again.'  );       
         end if;
     end if;
     end loop;
