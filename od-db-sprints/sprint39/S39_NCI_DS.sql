@@ -311,7 +311,7 @@ begin
                     where ((instr( r.MTCH_TERM, ' || v_entty_nm || ',1) > 0) or (instr( ' || v_entty_nm || ', r.MTCH_TERM, 1) > 0))
                     and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1 and de.val_dom_typ_id = 18 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
                     and (' || v_hdr_id || ') not  in (select hdr_id from nci_ds_rslt) and ' || v_flt_str;
---                     execute immediate v_sql;
+                     execute immediate v_sql;
                     commit;
      
 
