@@ -434,6 +434,7 @@ end if;
 
         row_sel := hookinput.selectedRowset.rowset(i);
         row := t_row();
+  --      raise_application_error(-20000,ihook.getColumnValue(row_sel, 'NCI_VAL_MEAN_ITEM_ID'));
             ihook.setColumnValue (row, 'Q_PUB_ID',ihook.getColumnValue(row_ori, 'NCI_PUB_ID') );
                 ihook.setColumnValue (row, 'Q_VER_NR', ihook.getColumnValue(row_ori, 'NCI_VER_NR'));
                 ihook.setColumnValue (row, 'VM_NM', ihook.getColumnValue(row_sel, 'ITEM_NM'));
@@ -3615,10 +3616,14 @@ nci_pub_id = ihook.getColumnValue(row_ori, 'Q_PUB_ID') and nci_ver_nr = ihook.ge
  if hookInput.invocationNumber = 0 then
 
 
-	    for cur in (select def_id from alt_def r where r.fld_delete= 0 and
+	 /*   for cur in (select def_id from alt_def r where r.fld_delete= 0 and
         (item_id, ver_nr) in (select NCI_VAL_MEAN_ITEM_ID, NCI_VAL_MEAN_VER_NR from VW_NCI_DE_PV pv,
         NCI_ADMIN_ITEM_REL_ALT_KEY q where pv.DE_ITEM_ID = q.C_ITEM_id and pv.DE_VER_NR = q.c_ITEM_VER_NR and q.NCI_PUB_ID = ihook.getColumnValue(row_ori,'Q_PUB_ID')
-        and q.NCI_VER_NR= ihook.getColumnValue(row_ori, 'Q_VER_NR') and pv.PERM_VAL_NM = ihook.getColumnValue(row_ori, 'VALUE'))) loop
+        and q.NCI_VER_NR= ihook.getColumnValue(row_ori, 'Q_VER_NR') and pv.PERM_VAL_NM = ihook.getColumnValue(row_ori, 'VALUE'))) loop */
+        
+	   for cur in (select def_id from alt_def r where r.fld_delete= 0 and
+        item_id = ihook.getColumnValue(row_ori, 'VAL_MEAN_ITEM_ID') and  ver_nr = ihook.getColumnValue(row_ori, 'VAL_MEAN_VER_NR') ) loop 
+        
 		   row := t_row();
 	   	   iHook.setcolumnvalue (ROW, 'DEF_ID', cur.DEF_id);
 		   rows.extend;
