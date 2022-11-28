@@ -311,6 +311,7 @@ begin
                     where ((instr( r.MTCH_TERM, ' || v_entty_nm || ',1) > 0) or (instr( ' || v_entty_nm || ', r.MTCH_TERM, 1) > 0))
                     and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1 and de.val_dom_typ_id = 18 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
                     and (' || v_hdr_id || ') not  in (select hdr_id from nci_ds_rslt) and ' || v_flt_str;
+--raise_application_error(-20000,v_sql);
                      execute immediate v_sql;
                     commit;
      
@@ -399,50 +400,48 @@ begin
 -- if called from CDE math
 if (v_mtch_typ = 'CDE_MATCH') then
 for cur in (select hdr_id,count(*) cnt from nci_ds_dtl d where hdr_id = v_hdr_id  group by hdr_id) loop
-insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH)
-select cur.hdr_id, de_item_id item_id, de_ver_nr ver_nr, cur.cnt, count(*)  from vw_nci_de_pv_lean v, admin_item ai
+insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC)
+select cur.hdr_id, de_item_id item_id, de_ver_nr ver_nr, cur.cnt, count(*), dtl.rule_Desc  from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl
 where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and v.de_ver_NR = ai.VER_NR
-and (cur.hdr_id, de_item_id, de_ver_nr) in (Select hdr_id, item_id, ver_nr from nci_ds_rslt_dtl where hdr_id = cur.hdr_id)
+and dtl.hdr_id = cur.hdr_id and dtl.item_id =  de_item_id and dtl.ver_nr = de_ver_nr 
 and upper(v.perm_val_nm) in (select upper(perm_val_nm) from nci_ds_dtl where hdr_id =cur.hdr_id)
-group by de_item_id,  de_ver_nr having count(*) = cur.cnt;
+group by de_item_id,  de_ver_nr ,dtl.rule_Desc having count(*) = cur.cnt;
 --commit;
 
 if  (sql%rowcount = 0) then
-insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH )
-select cur.hdr_id, de_item_id item_id, de_ver_nr ver_nr,cur.cnt, count(*)  from vw_nci_de_pv_lean v, admin_item ai
+insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC )
+select cur.hdr_id, de_item_id item_id, de_ver_nr ver_nr,cur.cnt, count(*) , dtl.rule_Desc from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl
 where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and
 v.de_ver_NR = ai.VER_NR and upper(V.ITEM_nm) in (select upper(perm_val_nm) from nci_ds_dtl where hdr_id =cur.hdr_id)
-and (cur.hdr_id, de_item_id, de_ver_nr) in (Select hdr_id, item_id, ver_nr from nci_ds_rslt_dtl where hdr_id = cur.hdr_id)
-group by de_item_id,
-de_ver_nr having count(*) = cur.cnt;
+and dtl.hdr_id = cur.hdr_id and dtl.item_id =  de_item_id and dtl.ver_nr = de_ver_nr group by de_item_id,
+de_ver_nr ,dtl.rule_Desc having count(*) = cur.cnt;
 --AND CUR.HDR_ID NOT IN (SELECT HDR_ID FROM NCI_DS_RSLT);
 --commit;
 end if;
 
 if  (sql%rowcount = 0) then
-insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH)
-select cur.hdr_id, de_item_id item_id, de_ver_nr ver_nr,cur.cnt, count(*)  from vw_nci_de_pv_lean v, admin_item ai
+insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC)
+select cur.hdr_id, de_item_id item_id, de_ver_nr ver_nr,cur.cnt, count(*), dtl.rule_Desc  from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl
 where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and
 v.de_ver_NR = ai.VER_NR and upper(v.perm_val_nm) in (select upper(perm_val_nm) from nci_ds_dtl where hdr_id =cur.hdr_id)
-and (cur.hdr_id, de_item_id, de_ver_nr) in (Select hdr_id, item_id, ver_nr from nci_ds_rslt_dtl where hdr_id = cur.hdr_id)
-group by de_item_id, de_ver_nr having count(*) >= cur.cnt*0.5;
+and dtl.hdr_id = cur.hdr_id and dtl.item_id =  de_item_id and dtl.ver_nr = de_ver_nr group by de_item_id, de_ver_nr,dtl.rule_Desc  having count(*) >= cur.cnt*0.5;
 --AND CUR.HDR_ID NOT IN (SELECT HDR_ID FROM NCI_DS_RSLT);
 --commit;
 end if;
 
 if  (sql%rowcount = 0) then
-insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH)
-select distinct cur.hdr_id, de_item_id item_id, de_ver_nr ver_nr, cur.cnt, count(*)
-from vw_nci_de_pv_lean v, admin_item ai where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and
+insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC)
+select distinct cur.hdr_id, de_item_id item_id, de_ver_nr ver_nr, cur.cnt, count(*), dtl.rule_Desc
+from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and
 v.de_ver_NR = ai.VER_NR and upper(V.ITEM_nm) in (select upper(perm_val_nm) from nci_ds_dtl where hdr_id =cur.hdr_id)
-and (cur.hdr_id, de_item_id, de_ver_nr) in (Select hdr_id, item_id, ver_nr from nci_ds_rslt_dtl where hdr_id = cur.hdr_id)
-group by de_item_id, de_ver_nr having count(*) > cur.cnt*0.5;
+and dtl.hdr_id = cur.hdr_id and dtl.item_id =  de_item_id and dtl.ver_nr = de_ver_nr
+group by de_item_id, de_ver_nr,dtl.rule_Desc having count(*) > cur.cnt*0.5;
 --AND CUR.HDR_ID NOT IN (SELECT HDR_ID FROM NCI_DS_RSLT);
 --commit;
 end if;
+commit;
 end loop;
 
-commit;
 end if;
 if (v_mtch_typ = 'QUESTION_MATCH') then
 for cur in (select quest_imp_id,count(*) cnt from nci_STG_FORM_VV_IMPORT d where quest_imp_id = v_hdr_id  group by quest_imp_id) loop
