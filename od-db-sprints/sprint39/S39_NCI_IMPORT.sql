@@ -18,6 +18,7 @@ procedure ConceptParseDEC(v_str in varchar2, idx in integer, row_ori in out t_ro
 function ParseGaps (row_ori in t_row, idx in number) return integer;
 procedure spLoadConceptRel;
 END;
+
 /
 create or replace PACKAGE BODY            nci_import AS
 
@@ -233,9 +234,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
 
         for cur in (select * from admin_item where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')
         and Item_nm <> ihook.getColumnValue(row_ori, 'SPEC_LONG_NM')) loop
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: AI Public ID Does not match Imported Name: ' || ihook.getColumnValue(row_ori, 'SPEC_LONG_NM') || chr(13) );             
-
-         
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: AI Public ID Does not match Imported Name: ' || ihook.getColumnValue(row_ori, 'SPEC_LONG_NM') || chr(13) );                      
                 v_val_ind := false;   
         end loop;
               if (ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID')  is null) then
@@ -397,6 +396,8 @@ as
     v_ver_nr number(4,2);
  action t_actionRowset;
  v_val_ind  boolean;
+ v_dup_ind boolean;
+ v_gap_ind boolean;
  v_batch_nbr number;
    actions t_actions := t_actions();
    row_to_comp t_row;
@@ -417,7 +418,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         nci_dec_mgmt.createValAIWithConcept(row_ori, 1,5,'V', 'DROP-DOWN', actions) ;
         nci_dec_mgmt.createValAIWithConcept(row_ori, 2,6,'V', 'DROP-DOWN', actions) ;
 
-        nci_dec_mgmt.spDECValCreateImport(row_ori, 'V', actions, v_val_ind);
+        --nci_dec_mgmt.spDECValCreateImport(row_ori, 'V', actions, v_val_ind);
         if (ParseGaps (row_ori , 1) > 0) then
          ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') ||  'ERROR: Gaps in OC concept drop-downs.' || chr(13));                      
         v_val_ind := false;
@@ -426,6 +427,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
          ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') ||  'ERROR: Gaps in Prop concept drop-downs.' || chr(13));                      
         v_val_ind := false;
        end if;
+               nci_dec_mgmt.spDECValCreateImport(row_ori, 'V', actions, v_val_ind);
        ihook.setColumnValue(row_ori, 'CNCPT_CONCAT_STR_1', nci_11179_2.getCncptStrFromForm (row_ori, 5,1));
            ihook.setColumnValue(row_ori, 'CNCPT_CONCAT_STR_2', nci_11179_2.getCncptStrFromForm (row_ori, 6,2));
      
@@ -438,7 +440,8 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     end if;
     --    if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null and ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID') is null and  ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_FND') is null
    --     and v_mode = 'C') then
-        if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null       and v_mode = 'C') then
+   -- jira 2183 - only run Create if DEC has been validated
+        if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null and v_mode = 'C') then
 
         --and v_val_ind = true)    then
         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', '');
@@ -452,12 +455,25 @@ for i in 1..hookinput.originalRowset.rowset.count loop
              row_to_comp := hookinput.originalrowset.rowset(k);
         if (ihook.getColumnValue(row_to_comp, 'ITEM_1_NM') = ihook.getColumnValue(row_ori, 'ITEM_1_NM') and ihook.getColumnValue(row_to_comp, 'ITEM_2_NM') = ihook.getColumnValue(row_ori, 'ITEM_2_NM')) then
     v_val_ind := false;
+    v_dup_ind := true;
     v_batch_nbr := ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR');
    end if;
    end loop;
+        if (ParseGaps (row_ori , 1) > 0) then
+            ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') ||  'ERROR: Gaps in OC concept drop-downs.' || chr(13));                      
+            v_val_ind := false;
+            v_gap_ind := true;
+       end if;
+        if (ParseGaps (row_ori , 2) > 0) then
+            ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') ||  'ERROR: Gaps in Prop concept drop-downs.' || chr(13));                      
+            v_val_ind := false;
+            v_gap_ind := true;
+    end if;
        if (v_val_ind = false) then 
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
-              ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Duplicate found in the same import file. Batch Number: ' || v_batch_nbr );                
+            if (v_dup_ind = true) then
+              ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Duplicate found in the same import file. Batch Number: ' || v_batch_nbr );           
+            end if;
         else
         nci_dec_mgmt.spDECValCreateImport(row_ori, 'C', actions, v_val_ind);
         end if;
@@ -576,15 +592,19 @@ begin
     end if;
     if (ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_2') is not null and ihook.getColumnValue(row_ori, 'MOD_NM') = 'I') then  
           ConceptParseDEC(ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_2'),2, row_ori);
+          if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') = 'ERRORS') then
+            v_val_ind:= false;
+          end if;
+
  
  --   nci_dec_mgmt.createValAIWithConcept(row_ori, 2,6,'V', 'STRING', actions) ;
     end if;
-    --jira 2183 - created new import validation message column. report post import errors there and do not remove
+    --jira 2183 - created new import validation message column. report post import errors there and do not remove. do not allow validate/create
       if (   ihook.getColumnValue(row_ori, 'CNCPT_1_ITEM_ID_1') is null or ihook.getColumnValue(row_ori, 'CNCPT_2_ITEM_ID_1') is null) then
                   ihook.setColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG') || 'ERROR: OC or PROP missing.' || chr(13));
                       ihook.setColumnValue(row_ori,'CTL_VAL_STUS','ERRORS');
 
-               --   v_val_ind:= false;
+                  v_val_ind:= false;
         end if;
 
             if (   ihook.getColumnValue(row_ori, 'CONC_DOM_ITEM_ID') is null ) then
@@ -592,7 +612,7 @@ begin
                                   ihook.setColumnValue(row_ori,'CTL_VAL_STUS','ERRORS');
 
     
-            --      v_val_ind:= false;
+                 v_val_ind:= false;
         end if;
      ihook.setColumnValue(row_ori, 'MOD_NM', 'F') ;
  --   nci_dec_mgmt.spDECValCreateImport(row_ori, 'V', actions, v_val_ind);
@@ -777,9 +797,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
             ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Duplicate found in the same import file. Batch Number: ' || v_batch_nbr ); 
         else
     -- jira 1962
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: PV shares VM with Batch Number: ' || v_batch_nbr || chr(13) || 'Run Create PV/VM for Seq ' || ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR') || ', then Validate 
-
-again.'  );       
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: PV shares VM with Batch Number: ' || v_batch_nbr || chr(13) || 'Run Create PV/VM for Seq ' || ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR') || ', then Validate again.'  );       
         end if;
     end if;
     end loop;
@@ -827,6 +845,7 @@ begin
                           -- and admin_stus_nm_dn = 'RELEASED';
                         if (v_count = 0) then
                             ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Invalid or No Concepts: ' || v_cncpt_nm || chr(13));
+
                         end if; 
                            for cur in(select item_id, ver_nr, item_nm , item_long_nm, item_desc, admin_stus_nm_dn 
                            from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
@@ -872,6 +891,7 @@ begin
                           -- and admin_stus_nm_dn = 'RELEASED';
                         if (v_count = 0) then
                             ihook.setColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG') || 'ERROR: Invalid or No Concepts: ' || v_cncpt_nm || chr(13));
+                            ihook.setColumnValue(row_ori,'CTL_VAL_STUS','ERRORS');
                         end if; 
                            for cur in(select item_id, ver_nr, item_nm , item_long_nm, item_desc, admin_stus_nm_dn 
                            from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
@@ -884,6 +904,7 @@ begin
                             if (cur.admin_stus_nm_dn like '%RETIRED%') then
                                           ihook.setColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG') || 'ERROR: Retired Concept: ' || v_cncpt_nm 
                                           || ' ' || cur.item_nm  || chr(13));
+                                        ihook.setColumnValue(row_ori,'CTL_VAL_STUS','ERRORS');
                             end if;
                             end loop;
                 end loop;
