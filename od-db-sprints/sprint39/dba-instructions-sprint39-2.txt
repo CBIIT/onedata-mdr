@@ -1,0 +1,4 @@
+-- Run as ONEDATA_WA
+NCI_DS.sql
+NCI_FORM_MGMT.sql
+S39_WA.sql
