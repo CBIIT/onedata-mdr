@@ -50,7 +50,8 @@ CREATE OR REPLACE TRIGGER TR_AI_WFS
 RAISE_APPLICATION_ERROR( -20001,
 '!!!! The item is not saved. "RETIRED" Workflow Status requires "End Date" value to be set !!!!');
 
-END TR_AI_WFS;
+END;
+/
 
 CREATE OR REPLACE TRIGGER TR_ALT_NMS_BEFORE
   BEFORE INSERT OR UPDATE
