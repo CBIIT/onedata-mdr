@@ -1,7 +1,7 @@
 -- Run as ONEDATA_RA DDL scripts
 S39_WA_RA_DDL.sql
 
---Run as SBR
+--Run as SBR to cleanup orphad valid values
 S39_SBR.sql
 
 -- Run as ONEDATA_WA DDL scripts
