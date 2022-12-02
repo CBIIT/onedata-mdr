@@ -8,3 +8,7 @@ add (BTCH_USR_NM varchar2(100) not null, BTCH_NM varchar2(100) not null, CREATED
 alter table NCI_STG_FORM_QUEST_IMPORT
 add (BTCH_SEQ_NBR number not null);
 
+
+alter table NCI_STG_FORM_QUEST_IMPORT
+add (SRC_REQ_IND varchar2(10));
+
