@@ -24,3 +24,5 @@ UC.CNTCT_SECU_ID, UC.CREAT_DT, UC.CREAT_USR_ID, UC.LST_UPD_USR_ID,
 UC.FLD_DELETE, UC.LST_DEL_DT, UC.S2P_TRN_DT, UC.LST_UPD_DT, UC.GUEST_USR_NM, UC.CART_NM
 FROM NCI_USR_CART UC, ADMIN_ITEM AI , OBJ_KEY ok WHERE AI.ITEM_ID = UC.ITEM_ID AND AI.VER_NR = UC.VER_NR and ai.admin_item_typ_id = ok.obj_key_id and ok.obj_typ_id = 4
 and admin_item_typ_id in (4,52,54,2,3);
+
+alter table NCI_DLOAD_HDR ass CREAT_USR_ID_X varchar2(100);
