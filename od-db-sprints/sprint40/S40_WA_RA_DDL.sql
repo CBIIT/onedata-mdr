@@ -55,3 +55,6 @@ alter table NCI_CNCPT_REL drop primary key;
 
 alter table NCI_CNCPT_REL add Primary KEY  (P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, REL_TYP_ID, REL_CATGRY_NM);
 
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (17, 'Subset Relationship', 69, 'Subset Relationship', 
+											'Subset Relationship');
+commit;
