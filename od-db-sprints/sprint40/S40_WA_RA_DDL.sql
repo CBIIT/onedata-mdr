@@ -12,6 +12,7 @@ add (LST_UPD_DT_CHAR varchar2(20));
 alter table NCI_STG_FORM_QUEST_IMPORT
 add (BTCH_SEQ_NBR number not null);
 
+alter table nci_data_audt add audt_desc varchar2(4000);
 
 alter table NCI_STG_FORM_QUEST_IMPORT
 add (SRC_REQ_IND varchar2(10));
