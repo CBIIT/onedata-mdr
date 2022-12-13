@@ -1,0 +1,3 @@
+ALTER TABLE SAG_LOAD_CONCEPTS_EVS ADD (
+subset_terminologies VARCHAR2(4000 BYTE)
+);
