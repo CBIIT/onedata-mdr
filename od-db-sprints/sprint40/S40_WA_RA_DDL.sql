@@ -87,7 +87,7 @@ create table NCI_STG_MEDDRA
  L3_NM varchar2(255) not null,
  L4_CD  varchar2(50) not null,
  L4_NM varchar2(255) not null,
- L5_CD  varchar2(50) not null primary key,
+ L5_CD  varchar2(50) not null,
  L5_NM varchar2(255) not null ,
 "CREAT_DT" DATE DEFAULT sysdate, 
 	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
@@ -95,7 +95,8 @@ create table NCI_STG_MEDDRA
 	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
 	"LST_DEL_DT" DATE DEFAULT sysdate, 
 	"S2P_TRN_DT" DATE DEFAULT sysdate, 
-	"LST_UPD_DT" DATE DEFAULT sysdate);
+	"LST_UPD_DT" DATE DEFAULT sysdate,
+primary key (L2_cd, L3_cd, l4_cd, l5_cd);
  
  
  
