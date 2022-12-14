@@ -78,4 +78,24 @@ LVL_1_DISP_ORD ,LVL_2_DISP_ORD,LVL_3_DISP_ORD ,
   AUDT_DESC from NCI_DATA_AUDT;
 
 
-
+create table NCI_STG_MEDDRA 
+( L1_CD  varchar2(50) not null,
+ L1_NM varchar2(255) not null,
+ L2_CD  varchar2(50) not null,
+ L2_NM varchar2(255) not null,
+ L3_CD  varchar2(50) not null,
+ L3_NM varchar2(255) not null,
+ L4_CD  varchar2(50) not null,
+ L4_NM varchar2(255) not null,
+ L5_CD  varchar2(50) not null primary key,
+ L5_NM varchar2(255) not null ,
+"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate);
+ 
+ 
+ 
