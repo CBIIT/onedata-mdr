@@ -100,3 +100,6 @@ primary key (L2_cd, L3_cd, l4_cd, l5_cd);
  
  
  
+alter table NCI_STG_FORM_QUEST_IMPORT add CMNTS_DESC_TXT varchar2(4000);
+ 
+ 
