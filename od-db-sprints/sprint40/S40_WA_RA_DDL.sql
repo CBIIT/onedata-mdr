@@ -60,6 +60,10 @@ insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) 
 											'Subset Relationship');
 commit;
 
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (17, 'External Terminology', 74, 'External Terminology', 
+											'External Terminology');
+commit;
+
 -- Add audt_desc column
   CREATE OR REPLACE  VIEW VW_NCI_DATA_AUDT_FORM AS
   select "DA_ID","ITEM_ID","VER_NR","ADMIN_ITEM_TYP_ID", ACTION_TYP,
