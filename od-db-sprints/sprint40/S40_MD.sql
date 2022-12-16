@@ -6,3 +6,5 @@ od_md_objsecurel r
 where r.obj_depn_id = s.obj_id and r.obj_secu_id = 100;
 
 grant select on vw_usr_admin to onedata_wa;
+
+grant all on vw_so_user to onedata_Wa
