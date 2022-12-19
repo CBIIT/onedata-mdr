@@ -2,6 +2,9 @@ truncate table NCI_STG_FORM_IMPORT;
 truncate table NCI_STG_FORM_QUEST_IMPORT;
 truncate table NCI_STG_FORM_VV_IMPORT;
 
+alter table NCI_STG_PV_VM_IMPORT
+add (CTL_IMPORT_VAL_MSG varchar2(4000));
+
 alter table NCI_STG_FORM_IMPORT
 add (BTCH_USR_NM varchar2(100) not null, BTCH_NM varchar2(100) not null, CREATED_FORM_ITEM_ID number);
 
