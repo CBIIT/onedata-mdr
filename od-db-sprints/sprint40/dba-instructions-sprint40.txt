@@ -1,4 +1,22 @@
+-- Run as ONEDATA_MD
+S40_MD.sql
+
 -- Run as ONEDATA_RA DDL scripts
+S40_RA.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S40_WA_RA_DDL.sql
+S40_WA.sql
+S40_NCI_DS.sql
+S40_NCI_FORM_MGMT.sql
+S40_NCI_EXT_IMPORT.sql
+S40_NCI_FORM_IMPORT.sql
+S40_NCI_DATA_AUDIT.sql
+S40_NCI_PV_VM.sql
+S40_NCI_DLOAD.sql
+S40_NCI_CADSR_PUSH.sql
+S40_NCI_11179.sql
+S40_NCI_11179_2.sql
+
+-- Run as ONEDATA_RA DDL scripts
+S40_RA_2.sql
