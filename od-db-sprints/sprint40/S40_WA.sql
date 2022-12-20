@@ -107,3 +107,4 @@ insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_C
 
 commit;
 
+grant execute on nci_ext_import to onedata_Ro;
