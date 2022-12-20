@@ -86,11 +86,11 @@ LVL_1_DISP_ORD ,LVL_2_DISP_ORD,LVL_3_DISP_ORD ,
 
 
 create table NCI_STG_MEDDRA 
-( L1_CD  varchar2(50) null,
+( L1_CD  varchar2(50) not null,
  L1_NM varchar2(255)  null,
- L2_CD  varchar2(50)  null,
+ L2_CD  varchar2(50)  not null,
  L2_NM varchar2(255)  null,
- L3_CD  varchar2(50)  null,
+ L3_CD  varchar2(50)  not null,
  L3_NM varchar2(255) null,
  L4_CD  varchar2(50) not null,
  L4_NM varchar2(255) not null,
@@ -101,7 +101,7 @@ create table NCI_STG_MEDDRA
 	"LST_DEL_DT" DATE DEFAULT sysdate, 
 	"S2P_TRN_DT" DATE DEFAULT sysdate, 
 	"LST_UPD_DT" DATE DEFAULT sysdate,
-primary key (l4_cd));
+primary key (l1_cd, l2_cd, l3_cd,l4_cd));
 
  
 alter table NCI_STG_FORM_QUEST_IMPORT add CMNTS_DESC_TXT varchar2(4000);
