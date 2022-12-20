@@ -24,3 +24,4 @@ S40_NCI_VD.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S40_RA_2.sql
+S40_WA_RA_DDL.sql
