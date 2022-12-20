@@ -428,8 +428,8 @@ begin
      raise_application_error(-20000,'Form already processed');
      end if;
      
-     if (ihook.getColumnValue(row_ori,'CTL_VAL_STUS') <> 'VALIDATED') then
-     raise_application_error(-20000,'Please validate form first');
+     if (ihook.getColumnValue(row_ori,'CTL_VAL_STUS') <> 'VALIDATED' and ihook.getColumnValue(row_ori,'CTL_VAL_STUS') <> 'WARNING') then
+     raise_application_error(-20000,'Please validate Form first');
      end if;
      
    rows := t_rows();
