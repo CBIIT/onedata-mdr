@@ -108,12 +108,8 @@ begin
 --	   	 answer := t_answer(2, 2, 'Add All');
  -- 	   	 answers.extend; answers(answers.last) := answer;
 
- --   QUESTION               := T_QUESTION('Please select Items to Add.' || chr(13) || '*Add All* from 
-
-Cart can take a several seconds per item to load. Please try not to click *Add All* twice
- --   or you may get a unique constraint violation. Items will have been added only once. Check Details 
-
-to see if they look correct.' , ANSWERS);
+ --   QUESTION               := T_QUESTION('Please select Items to Add.' || chr(13) || '*Add All* from Cart can take a several seconds per item to load. Please try not to click *Add All* twice
+ --   or you may get a unique constraint violation. Items will have been added only once. Check Details to see if they look correct.' , ANSWERS);
    QUESTION               := T_QUESTION('Please select Items to Add.'  , ANSWERS);
 
 return question;
@@ -924,7 +920,7 @@ begin
     -- Depending on the type of collection, show either Forms or CDE's
 
 --jira 2321 add authorization check
- if (nci_dload_mn.isUserAuth(ihook.getColumnValue(row_ori, 'HDR_ID'), v_usr_id) = false) then
+ if (nci_dload.isUserAuth(ihook.getColumnValue(row_ori, 'HDR_ID'), v_usr_id) = false) then
  raise_application_error(-20000,'You are not authorized to add a component to this collection.');
  end if;
  -- end 2321
@@ -1029,9 +1025,7 @@ loop
         elsif hookinput.answerid = 2 then
              v_already := v_cart_ttl - rows.count;
         end if;
-         --   hookoutput.message := rows.count || ' item(s) added successfully to collection. ' || 
-
-v_already || ' item(s) selected already in your collection.';
+         --   hookoutput.message := rows.count || ' item(s) added successfully to collection. ' || v_already || ' item(s) selected already in your collection.';
            hookoutput.message := rows.count || ' item(s) added successfully to collection. Duplicates: ' 
 
 || nvl(substr(v_dup_str,2), 'None');
@@ -1079,7 +1073,7 @@ begin
     -- 92 - FOrm, 93 - CDE
     -- Depending on the type of collection, show either Forms or CDE's
     --jira 2321 add authorization check
- if (nci_dload_mn.isUserAuth(ihook.getColumnValue(row_ori, 'HDR_ID'), v_usr_id) = false) then
+ if (nci_dload.isUserAuth(ihook.getColumnValue(row_ori, 'HDR_ID'), v_usr_id) = false) then
  raise_application_error(-20000,'You are not authorized to add a component to this collection.');
  end if;
  -- end 2321
@@ -1188,9 +1182,7 @@ and cntct_secu_id = v_usr_id and ai.item_id = c.item_id and ai.ver_nr = c.ver_nr
         elsif hookinput.answerid = 2 then
              v_already := v_cart_ttl - rows.count;
         end if;
-         --   hookoutput.message := rows.count || ' item(s) added successfully to collection. ' || 
-
-v_already || ' item(s) selected already in your collection.';
+         --   hookoutput.message := rows.count || ' item(s) added successfully to collection. ' || v_already || ' item(s) selected already in your collection.';
            hookoutput.message := rows.count || ' item(s) added successfully to collection. Duplicates: ' 
 
 || nvl(substr(v_dup_str,2), 'None');
@@ -1364,7 +1356,7 @@ begin
         -- 92 - FOrm, 93 - CDE
       -- Depending on the type of collection, show either Forms or CDE's
       --jira 2321 add authorization check
- if (nci_dload_mn.isUserAuth(ihook.getColumnValue(row_ori, 'HDR_ID'), v_usr_id) = false) then
+ if (nci_dload.isUserAuth(ihook.getColumnValue(row_ori, 'HDR_ID'), v_usr_id) = false) then
  raise_application_error(-20000,'You are not authorized to add a component to this collection.');
  end if;
  -- end 2321
@@ -1532,7 +1524,7 @@ begin
         -- 92 - FOrm, 93 - CDE
       -- Depending on the type of collection, show either Forms or CDE's
       --jira 2321 add authorization check
- if (nci_dload_mn.isUserAuth(ihook.getColumnValue(row_ori, 'HDR_ID'), v_usr_id) = false) then
+ if (nci_dload.isUserAuth(ihook.getColumnValue(row_ori, 'HDR_ID'), v_usr_id) = false) then
  raise_application_error(-20000,'You are not authorized to add a component to this collection.');
  end if;
  -- end 2321
@@ -1678,7 +1670,7 @@ begin
 
         row_ori := hookInput.originalRowset.rowset(1);
               --jira 2321 add authorization check
- if (nci_dload_mn.isUserAuth(ihook.getColumnValue(row_ori, 'HDR_ID'), v_usr_id) = false) then
+ if (nci_dload.isUserAuth(ihook.getColumnValue(row_ori, 'HDR_ID'), v_usr_id) = false) then
  raise_application_error(-20000,'You are not authorized to add a component to this collection.');
  end if;
  -- end 2321
