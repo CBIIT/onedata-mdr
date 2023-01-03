@@ -1098,10 +1098,10 @@ for cur in (select * from perm_val where  lst_upd_dt >= sysdate - vHours/24 and 
 --and ai.nci_idseq = pv.vm_idseq and pv.value = cur.perm_val_nm ) loop
 select nci_idseq into v_vd_idseq from admin_item where item_id = cur.val_dom_item_id and ver_nr = cur.val_dom_ver_nr;
 
-/*
+
 delete from sbrext.VD_PVS_SOURCES_EXT where vp_idseq = cur.nci_idseq;
 commit;
-*/
+
 
 delete from sbr.vd_pvs where vp_idseq = cur.nci_idseq;
 commit;
