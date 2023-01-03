@@ -14,3 +14,4 @@ commit;
 
 alter table perm_val enable all triggers;
 
+alter table NCI_STG_FORM_QUEST_IMPORT add SRC_LOGIC_INSTR varchar2(4000);
