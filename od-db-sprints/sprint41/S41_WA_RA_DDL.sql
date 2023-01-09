@@ -15,3 +15,7 @@ commit;
 alter table perm_val enable all triggers;
 
 alter table NCI_STG_FORM_QUEST_IMPORT add SRC_LOGIC_INSTR varchar2(4000);
+
+-- Tracker 2306
+
+alter table NCI_ADMIN_ITEM_REL add (CPY_MIG_UPD_DT date, CPY_MIG_TYP varchar2(50));
