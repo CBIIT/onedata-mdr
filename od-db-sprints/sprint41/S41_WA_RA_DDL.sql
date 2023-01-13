@@ -20,6 +20,9 @@ alter table NCI_STG_FORM_QUEST_IMPORT add SRC_LOGIC_INSTR varchar2(4000);
 
 alter table NCI_ADMIN_ITEM_REL add (CPY_MIG_UPD_DT date, CPY_MIG_TYP varchar2(50));
 
+insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (39, 'Concept Relationships');
+commit;
+
 /*
   CREATE OR REPLACE  VIEW VW_NCI_DE
   AS
