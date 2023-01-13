@@ -23,6 +23,9 @@ alter table NCI_ADMIN_ITEM_REL add (CPY_MIG_UPD_DT date, CPY_MIG_TYP varchar2(50
 insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (39, 'Concept Relationships');
 commit;
 
+update obj_key set obj_typ_id = 39 where obj_key_id in (68,69,74);
+commit;
+
 /*
   CREATE OR REPLACE  VIEW VW_NCI_DE
   AS
