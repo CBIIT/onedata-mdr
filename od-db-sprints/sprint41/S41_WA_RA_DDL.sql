@@ -26,6 +26,11 @@ commit;
 update obj_key set obj_typ_id = 39 where obj_key_id in (68,69,74);
 commit;
 
+
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (39, 'Item Components',75 , 'Item Components', 
+											'Item Components');
+commit;
+
 /*
   CREATE OR REPLACE  VIEW VW_NCI_DE
   AS
@@ -114,7 +119,7 @@ commit;
 */
 
 
-  CREATE OR REPLACE VIEW VW_NCI_AI_CNCPT_TEST as
+  CREATE OR REPLACE VIEW VW_NCI_AI_CNCPT as
   SELECT  '5. Object Class' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
 		DE.VER_NR VER_NR,
 		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
@@ -122,7 +127,7 @@ commit;
 		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,0 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE, DE_CONC where
 	a.ITEM_ID = DE_CONC.OBJ_CLS_ITEM_ID and
 	a.VER_NR = DE_CONC.OBJ_CLS_VER_NR and
@@ -136,7 +141,7 @@ commit;
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND,  NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,0 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE, DE_CONC where
 	a.ITEM_ID = DE_CONC.PROP_ITEM_ID and
 	a.VER_NR = DE_CONC.PROP_VER_NR and
@@ -150,7 +155,7 @@ commit;
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,0 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE, VALUE_DOM VD where
 	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
 	a.VER_NR = VD.REP_CLS_VER_NR and
@@ -164,7 +169,7 @@ commit;
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,0 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE, PERM_VAL PV where
 	a.ITEM_ID = PV.NCI_VAL_MEAN_ITEM_ID and
 	a.VER_NR = PV.NCI_VAL_MEAN_VER_NR and
@@ -178,7 +183,7 @@ commit;
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,0 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE where
 	DE.VAL_DOM_ITEM_ID = a.ITEM_ID and
 	DE.VAL_DOM_VER_NR = a.VER_NR
@@ -202,7 +207,7 @@ commit;
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,0 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE_CONC DEC where
 	a.ITEM_ID = DEC.PROP_ITEM_ID and
 	a.VER_NR = DEC.PROP_VER_NR
@@ -213,7 +218,7 @@ commit;
 		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,0 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a
    union
       SELECT 'Representation Term' ALT_NMS_LVL, VD.ITEM_ID  ITEM_ID,
@@ -223,7 +228,7 @@ commit;
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,0 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, VALUE_DOM VD where
 	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
 	a.VER_NR = VD.REP_CLS_VER_NR
