@@ -31,7 +31,7 @@ insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) 
 											'Item Components');
 commit;
 
-/*
+
   CREATE OR REPLACE  VIEW VW_NCI_DE
   AS
   SELECT ADMIN_ITEM.ITEM_ID,
@@ -72,10 +72,10 @@ commit;
            CNTXT.NCI_PRG_AREA_ID,
            ADMIN_ITEM_TYP_ID,
 	   ADMIN_ITEM.ITEM_DEEP_LINK,
-     vd.VAL_DOM_TYP_ID,
-	   replace (ADMIN_ITEM.ITEM_NM_ID_VER,'|Data Element','') ITEM_NM_ID_VER,
+       replace (ADMIN_ITEM.ITEM_NM_ID_VER,'|Data Element','') ITEM_NM_ID_VER,
            ext.USED_BY                         CNTXT_AGG,
            REF.ref_desc                        PREF_QUEST_TXT,
+	   vd.VAL_DOM_TYP_ID	,
         trim(SUBSTR (
                  trim(ADMIN_ITEM.ITEM_LONG_NM)
               || '||'
@@ -90,6 +90,7 @@ commit;
            VW_CNTXT            CNTXT,
        --    VALUE_DOM vd,
            NCI_ADMIN_ITEM_EXT  ext,
+	   de, VALUE_DOM vd,
            (SELECT item_id, ver_nr, ref_desc
               FROM REF
              WHERE ref_typ_id = 80) REF,
@@ -103,11 +104,12 @@ commit;
            VW_REGSTR_STUS      rs,
            VW_ADMIN_STUS       ws
      WHERE     ADMIN_ITEM_TYP_ID = 4
-           --and ADMIN_ITEM.ITEM_Id = de.item_id
-           --and ADMIN_ITEM.VER_NR = DE.VER_NR
-           AND ADMIN_ITEM.ITEM_ID = EXT.ITEM_ID
+           and ADMIN_ITEM.ITEM_Id = de.item_id
+           and ADMIN_ITEM.VER_NR = DE.VER_NR
+           and de.VAL_DOM_ITEM_ID = vd.ITEM_ID
+	   and de.VAL_DOM_VER_NR = vd.VER_NR
+	   AND ADMIN_ITEM.ITEM_ID = EXT.ITEM_ID
            AND ADMIN_ITEM.VER_NR = EXT.VER_NR
-           and ADMIN_ITEM
            AND ADMIN_ITEM.ITEM_ID = REF.ITEM_ID(+)
            AND ADMIN_ITEM.VER_NR = REF.VER_NR(+)
            AND ADMIN_ITEM.ITEM_ID = ref_desc.ITEM_ID(+)
@@ -116,7 +118,7 @@ commit;
            AND ADMIN_ITEM.ADMIN_STUS_ID = ws.STUS_ID(+)
            AND ADMIN_ITEM.CNTXT_ITEM_ID = CNTXT.ITEM_ID
            AND ADMIN_ITEM.CNTXT_VER_NR = CNTXT.VER_NR;
-*/
+
 
 
   CREATE OR REPLACE VIEW VW_NCI_AI_CNCPT as
