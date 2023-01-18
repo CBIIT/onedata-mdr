@@ -2,4 +2,3 @@
 
 -- Run as ONEDATA_WA DDL scripts
 
-S42_VIEW_ODCADSR_COUNTS_ALL.sql
