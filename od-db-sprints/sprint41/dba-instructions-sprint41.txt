@@ -1,4 +1,5 @@
 -- Run as ONEDATA_RA DDL scripts
 
 -- Run as ONEDATA_WA DDL scripts
-
+S41_VIEW_ODCADSR_COUNTS_ALL.sql
+S41_SP_TEST_ALL_NEW.sql
