@@ -69,6 +69,7 @@ commit;
            ADMIN_ITEM.LST_UPD_DT,
            ADMIN_ITEM.CREAT_DT,
            ADMIN_ITEM.NCI_IDSEQ,
+	   ext.csi_concat,
            CNTXT.NCI_PRG_AREA_ID,
            ADMIN_ITEM_TYP_ID,
 	   ADMIN_ITEM.ITEM_DEEP_LINK,
