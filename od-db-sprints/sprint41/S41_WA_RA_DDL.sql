@@ -245,3 +245,6 @@ commit;
 		'1' NCI_PRMRY_IND_TXT, REL_TYP_ID
        FROM NCI_CNCPT_REL a;
        
+
+alter table NCI_STG_FORM_VV_IMPORT add (VAL_MEAN_ITEM_ID number, val_mean_ver_nr number(4,2));
+
