@@ -3,6 +3,6 @@ ALTER TABLE
 MODIFY
    (
    parents VARCHAR2(512),
-   subset_terminologies  varchar2(6000)
+   subset_terminologies  varchar2(12000)
    )
 ;
