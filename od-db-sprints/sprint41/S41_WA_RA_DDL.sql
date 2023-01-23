@@ -281,3 +281,5 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
        FROM admin_item a, DE_CONC DEC where
 	a.ITEM_ID = DEC.ITEM_ID and
 	a.VER_NR = DEC.VER_NR ;
+
+
