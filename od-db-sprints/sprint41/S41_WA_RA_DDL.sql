@@ -251,7 +251,6 @@ alter table NCI_STG_FORM_VV_IMPORT add (VAL_MEAN_ITEM_ID number, val_mean_ver_nr
 
 alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar2(4000));
 
-
   CREATE OR REPLACE VIEW VW_NCI_DEC_OC_PROP as
   SELECT  'OC' LVL, DEC.ITEM_ID  ITEM_ID,
 		DEC.VER_NR VER_NR,
@@ -263,12 +262,12 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
 		a.ITEM_NM,
 		a.CNTXT_NM_DN,
 		a.REGSTR_STUS_NM_DN,
-		a.ADMIN_STUS_NM_DB
-       FROM admin_item a, DE_CONC where
+		a.ADMIN_STUS_NM_DN
+       FROM admin_item a, DE_CONC DEC where
 	a.ITEM_ID = DEC.ITEM_ID and
 	a.VER_NR = DEC.VER_NR 
 	union
-  SELECT  PROP' LVL, DEC.ITEM_ID  ITEM_ID,
+  SELECT  'PROP' LVL, DEC.ITEM_ID  ITEM_ID,
 		DEC.VER_NR VER_NR,
 		DEC.OBJ_CLS_ITEM_ID, DEC.OBJ_CLS_VER_NR,
 		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
@@ -278,7 +277,7 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
 		a.ITEM_NM,
 		a.CNTXT_NM_DN,
 		a.REGSTR_STUS_NM_DN,
-		a.ADMIN_STUS_NM_DB
-       FROM admin_item a, DE_CONC where
+		a.ADMIN_STUS_NM_DN
+       FROM admin_item a, DE_CONC DEC where
 	a.ITEM_ID = DEC.ITEM_ID and
 	a.VER_NR = DEC.VER_NR ;
