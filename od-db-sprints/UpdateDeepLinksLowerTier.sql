@@ -1,4 +1,4 @@
--- DSRMWS-2343 After data refresh from Pro to lower tier, update Deep Links and Printer Friendly Links
+-- DSRMWS-2343 DSRMWS-2425 After data refresh from Pro to lower tier, update Deep Links and Printer Friendly Links
 alter table admin_item disable all triggers;
 
 update ADMIN_ITEM set ITEM_DEEP_LINK = (Select param_val || '/CO/CDEDD?filter=CDEDD.ITEM_ID=' || item_id ||  '%20and%20ver_nr=' || ver_nr
