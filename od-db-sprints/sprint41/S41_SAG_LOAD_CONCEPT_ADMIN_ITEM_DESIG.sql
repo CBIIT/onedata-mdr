@@ -2,6 +2,7 @@ create or replace Procedure SAG_LOAD_CONCEPT_ADMIN_ITEM_DESIG AS
 --DECLARE
 v_eff_date DATE := sysdate;
 BEGIN
+  BEGIN -- Load EVS concept data
 	--Concept preferred name is the first synonym token, here is the code to populate it.
 	update SAG_LOAD_CONCEPTS_EVS
 	set EVS_PREF_NAME = substr(REGEXP_SUBSTR(SYNONYMS, '[^|]+'), 1, 255)
@@ -117,7 +118,7 @@ END LOOP;
 dbms_output.put_line('loaded concepts synonyms to ALT_NMS !!!');
 
 	SAG_LOAD_CONCEPT_UPDATES(v_eff_date); -- update names and definitions
-
+dbms_output.put_line('concept load updates done !!!');
 	DBMS_MVIEW.REFRESH('VW_CNCPT');
 
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_AI_DENORM_INS ENABLE';
@@ -126,7 +127,6 @@ dbms_output.put_line('loaded concepts synonyms to ALT_NMS !!!');
 	EXECUTE IMMEDIATE 'ALTER TRIGGER TR_ALT_DEF_POST ENABLE';
 	EXECUTE IMMEDIATE 'DROP INDEX IDX_SAG_LOAD_CNCPT_ID_VER';
 
-     nci_import.spLoadConceptRel;
 EXCEPTION
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('SAG_LOAD_CONCEPT_ADMIN_ITEM_DESIG error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
@@ -137,4 +137,13 @@ EXCEPTION
         EXECUTE IMMEDIATE 'ALTER TRIGGER TR_ALT_NMS_POST ENABLE';-- this trigger updates AI audit info on designation updates
         EXECUTE IMMEDIATE 'ALTER TRIGGER TR_ALT_DEF_POST ENABLE';
         RAISE_APPLICATION_ERROR (SQLCODE, 'SAG_LOAD_CONCEPT_ADMIN_ITEM_DESIG error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
+  END;-- of EVS concepts data load
+  
+  -- subset terminologies and concept parents related load
+  BEGIN
+    nci_import.spLoadConceptRel;
+  EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('nci_import.spLoadConceptRel error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
+  END;
 END;
