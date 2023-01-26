@@ -136,7 +136,7 @@ EXCEPTION
         EXECUTE IMMEDIATE 'ALTER TRIGGER TR_NCI_ALT_NMS_DENORM_INS ENABLE';
         EXECUTE IMMEDIATE 'ALTER TRIGGER TR_ALT_NMS_POST ENABLE';-- this trigger updates AI audit info on designation updates
         EXECUTE IMMEDIATE 'ALTER TRIGGER TR_ALT_DEF_POST ENABLE';
-        RAISE_APPLICATION_ERROR (SQLCODE, 'SAG_LOAD_CONCEPT_ADMIN_ITEM_DESIG error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
+        RAISE_APPLICATION_ERROR (-20002, 'SAG_LOAD_CONCEPT_ADMIN_ITEM_DESIG error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , 512));
   END;-- of EVS concepts data load
   
   -- subset terminologies and concept parents related load
