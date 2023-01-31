@@ -3,6 +3,19 @@
 values (12, 'MEDDRA', 'V 25.1');
 commit;
 
+-- Tracker 2288
+alter table nci_stg_alt_nms disable all triggers;
+begin
+for cur in (select * from nci_stg_alt_nms) loop
+    if (cur.dt_last_modified != null) then
+        update nci_stg_alt_nms 
+        set dt_sort = to_date(dt_last_modified);
+    end if;
+end loop;
+end;
+/
+alter table nci_stg_alt_nms enable all triggers;
+
 
 
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values ('X',36,'Manual Insert','Manual Insert','X' );
@@ -33,3 +46,19 @@ BEGIN
 END;
 
 /
+create or replace TRIGGER OD_TR_ALT_NMS_UPD 
+BEFORE UPDATE ON NCI_STG_ALT_NMS 
+for each row
+BEGIN
+:new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
+:new.DT_SORT := systimestamp();
+END;
+/
+create or replace TRIGGER OD_TR_STG_ALT_NMS  BEFORE INSERT  on NCI_STG_ALT_NMS  for each row
+     BEGIN    IF (:NEW.STG_AI_ID = -1  or :NEW.STG_AI_ID is null)  THEN select od_seq_CDE_IMPORT.nextval
+ into :new.STG_AI_ID  from  dual ; 
+ END IF;
+ :new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
+ :new.DT_SORT := systimestamp();
+ END;
+ /
