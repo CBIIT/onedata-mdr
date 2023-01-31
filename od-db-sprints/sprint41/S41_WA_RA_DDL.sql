@@ -16,6 +16,23 @@ alter table perm_val enable all triggers;
 
 alter table NCI_STG_FORM_QUEST_IMPORT add SRC_LOGIC_INSTR varchar2(4000);
 
+-- Tracker 2288
+alter table nci_stg_cde_creat disable all triggers;
+
+alter table nci_stg_cde_creat add (
+IMP_DISP_FMT varchar2(32),
+IMP_UOM varchar2(32),
+IMP_DTTYPE varchar2(32),
+IMP_VD_TYP varchar2(32);
+);
+
+alter table nci_stg_cde_creat enable all triggers;
+
+
+alter table nci_stg_alt_nms disable all triggers;
+alter table nci_stg_alt_nms add DT_SORT timestamp(9) default sysdate;
+alter table nci_stg_alt_nms enable trigger;
+
 -- Tracker 2306
 
 alter table NCI_ADMIN_ITEM_REL add (CPY_MIG_UPD_DT date, CPY_MIG_TYP varchar2(50));
