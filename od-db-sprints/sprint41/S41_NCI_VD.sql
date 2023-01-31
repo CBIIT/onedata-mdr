@@ -1903,6 +1903,8 @@ v_found boolean;
 v_prmry_rep_term_cncpt varchar2(32);
 v_count integer;
 v_match_ct integer;
+
+
 begin
 
 if (v_cncpt_src ='STRING') then
@@ -1998,6 +2000,7 @@ if (v_cncpt_src ='STRING') then
                 -- jira 2288
                 v_match_ct := 0;
                 v_found := false;
+                
                 for cur in (select ITEM_NM, ITEM_LONG_NM from VW_CNCPT_RT_PRMRY) loop
                     if (cur.ITEM_LONG_NM = ihook.getColumnValue(rowform, 'PRMRY_REP_TERM')) then
                         v_found := true;
@@ -2006,18 +2009,28 @@ if (v_cncpt_src ='STRING') then
                         end if;
                     end if;
                 end loop;
-                if (ihook.getColumnValue(rowform, 'VAL_DOM_FMT_ID') is null or ihook.getColumnValue(rowform, 'VAL_DOM_FMT_ID') = '') then
-                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') || chr(13) || 'Error: Invalid Display Format');
-                end if;
-                if (ihook.getColumnValue(rowform, 'UOM_ID') is null or ihook.getColumnValue(rowform, 'UOM_ID') = '') then
-                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG' ) || chr(13) || 'Error: Invalid Unit of Measure');
-                end if;
                 if (v_found = false) then
-                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') || chr(13) || 'Error: Invalid Primary Rep Term Concept: ' || ihook.getColumnValue(rowform, 'PRMRY_REP_TERM'));
+                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') || chr(13) || 'ERROR: Invalid Primary Rep Term Concept: ' || ihook.getColumnValue(rowform, 'PRMRY_REP_TERM'));
                 end if;
                 if (v_match_ct < 1) then
-                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') || chr(13) || 'Error: Primary Rep Term Code and Name do not match.');
+                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') || chr(13) || 'ERROR: Primary Rep Term Code and Name do not match.');
                 end if;
+ 
+                -- jira 2288
+                if (ihook.getColumnValue(rowform, 'UOM_ID') is null and ihook.getColumnValue(rowform, 'IMP_UOM') is not null) then
+                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG' ) || chr(13) || 'ERROR: Invalid Unit of Measure: ' || ihook.getColumnValue(rowform, 'IMP_UOM'));
+                end if;
+                if (ihook.getColumnValue(rowform, 'VAL_DOM_FMT_ID') is null and ihook.getColumnValue(rowform, 'IMP_DISP_FMT') is not null) then
+                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG' ) || chr(13) || 'ERROR: Invalid Display Format: ' || ihook.getColumnValue(rowform, 'IMP_DISP_FMT'));
+                end if;
+                if (ihook.getColumnValue(rowform, 'DTTYPE_ID') is null and ihook.getColumnValue(rowform, 'IMP_DTTYPE' ) is not null) then
+                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG' ) || chr(13) || 'ERROR: Invalid caDSR Data Type: ' || ihook.getColumnValue(rowform, 'IMP_DTTYPE'));
+                end if;
+                if (ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') is null and ihook.getColumnValue(rowform, 'IMP_VD_TYP') is not null) then
+                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG' ) || chr(13) || 'ERROR: Invalid VD Type: ' || ihook.getColumnValue(rowform, 'IMP_VD_TYP'));
+                end if;
+                
+                
             end if;
                 
     --            ihook.setColumnValue(rowform, 'ITEM_' || idx || '_NM', v_nm);
