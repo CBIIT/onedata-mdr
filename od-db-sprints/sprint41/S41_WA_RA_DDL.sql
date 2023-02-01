@@ -49,6 +49,8 @@ insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) 
 commit;
 
 
+alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar2(4000));
+
   CREATE OR REPLACE  VIEW VW_NCI_DE
   AS
   SELECT ADMIN_ITEM.ITEM_ID,
@@ -266,7 +268,6 @@ commit;
 
 alter table NCI_STG_FORM_VV_IMPORT add (VAL_MEAN_ITEM_ID number, val_mean_ver_nr number(4,2));
 
-alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar2(4000));
 
   CREATE OR REPLACE VIEW VW_NCI_DEC_OC_PROP as
   SELECT  'OC' LVL, DEC.ITEM_ID  DEC_ITEM_ID,
