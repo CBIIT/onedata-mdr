@@ -3,11 +3,15 @@
 
 alter table perm_val disable all triggers;
 
-update perm_val pv set nci_origin = (select max(SRC_NAME) from  sbrext.vd_pvs_sources_ext e where e.vp_idseq =  pv.nci_idseq and date_created < sysdate - 365 group by vp_idseq
+update perm_val pv set nci_origin = (select max(SRC_NAME) from  sbrext.vd_pvs_sources_ext e 
+
+where e.vp_idseq =  pv.nci_idseq and date_created < sysdate - 365 group by vp_idseq
 )
 where nci_idseq in (Select vp_idseq from  sbrext.vd_pvs_sources_ext);
 commit;
-update perm_val pv set nci_origin_id = (select obj_key_id from obj_key where nci_cd = pv.nci_origin and obj_typ_id = 18)
+update perm_val pv set nci_origin_id = (select obj_key_id from obj_key where nci_cd = 
+
+pv.nci_origin and obj_typ_id = 18)
 where nci_origin is not null and nci_origin_id is null;
 commit;
 
@@ -23,15 +27,14 @@ alter table nci_stg_cde_creat add (
 IMP_DISP_FMT varchar2(32),
 IMP_UOM varchar2(32),
 IMP_DTTYPE varchar2(32),
-IMP_VD_TYP varchar2(32);
-);
+IMP_VD_TYP varchar2(32));
 
 alter table nci_stg_cde_creat enable all triggers;
 
 
 alter table nci_stg_alt_nms disable all triggers;
 alter table nci_stg_alt_nms add DT_SORT timestamp(9) default sysdate;
-alter table nci_stg_alt_nms enable trigger;
+alter table nci_stg_alt_nms enable all triggers;
 
 -- Tracker 2306
 
@@ -44,10 +47,13 @@ update obj_key set obj_typ_id = 39 where obj_key_id in (68,69,74);
 commit;
 
 
-insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (39, 'Item Components',75 , 'Item Components', 
-											'Item Components');
-commit;
+insert into obj_key (obj_typ_id, obj_key_Desc, obj_key_id, obj_key_def, NCI_CD) values (39, 
 
+'Item Components',75 , 'Item Components', 
+											'Item 
+
+Components');
+commit;
 
 alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar2(4000));
 
@@ -116,7 +122,9 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
              WHERE ref_typ_id = 80) REF,
            (  SELECT item_id,
                      ver_nr,
-                     LISTAGG (ref_desc, '||' ON OVERFLOW TRUNCATE ) WITHIN GROUP (ORDER BY OBJ_KEY_DESC desc)    ref_desc
+                     LISTAGG (ref_desc, '||' ON OVERFLOW TRUNCATE ) WITHIN GROUP (ORDER BY 
+
+OBJ_KEY_DESC desc)    ref_desc
                 FROM REF, OBJ_KEY
                WHERE     REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID
                      AND LOWER (OBJ_KEY_DESC) LIKE '%question%'
@@ -149,7 +157,9 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
 		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 
+
+REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE, DE_CONC where
 	a.ITEM_ID = DE_CONC.OBJ_CLS_ITEM_ID and
 	a.VER_NR = DE_CONC.OBJ_CLS_VER_NR and
@@ -163,7 +173,9 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND,  NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 
+
+REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE, DE_CONC where
 	a.ITEM_ID = DE_CONC.PROP_ITEM_ID and
 	a.VER_NR = DE_CONC.PROP_VER_NR and
@@ -177,7 +189,9 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 
+
+REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE, VALUE_DOM VD where
 	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
 	a.VER_NR = VD.REP_CLS_VER_NR and
@@ -191,7 +205,9 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 
+
+REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE, PERM_VAL PV where
 	a.ITEM_ID = PV.NCI_VAL_MEAN_ITEM_ID and
 	a.VER_NR = PV.NCI_VAL_MEAN_VER_NR and
@@ -205,7 +221,9 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 
+
+REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE where
 	DE.VAL_DOM_ITEM_ID = a.ITEM_ID and
 	DE.VAL_DOM_VER_NR = a.VER_NR
@@ -229,7 +247,9 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 
+
+REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, DE_CONC DEC where
 	a.ITEM_ID = DEC.PROP_ITEM_ID and
 	a.VER_NR = DEC.PROP_VER_NR
@@ -240,7 +260,9 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
 		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 
+
+REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a
    union
       SELECT 'Representation Term' ALT_NMS_LVL, VD.ITEM_ID  ITEM_ID,
@@ -250,7 +272,9 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
         	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
 		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
 		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 
+
+REL_TYP_ID
        FROM CNCPT_ADMIN_ITEM a, VALUE_DOM VD where
 	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
 	a.VER_NR = VD.REP_CLS_VER_NR
@@ -266,8 +290,9 @@ alter table NCI_ADMIN_ITEM_EXT add (CS_CONCAT varchar2(4000), CSI_CONCAT varchar
        FROM NCI_CNCPT_REL a;
        
 
-alter table NCI_STG_FORM_VV_IMPORT add (VAL_MEAN_ITEM_ID number, val_mean_ver_nr number(4,2));
+alter table NCI_STG_FORM_VV_IMPORT add (VAL_MEAN_ITEM_ID number, val_mean_ver_nr number
 
+(4,2));
 
   CREATE OR REPLACE VIEW VW_NCI_DEC_OC_PROP as
   SELECT  'OC' LVL, DEC.ITEM_ID  DEC_ITEM_ID,
@@ -320,26 +345,44 @@ alter table NCI_STG_FORM_VV_IMPORT add (VAL_MEAN_ITEM_ID number, val_mean_ver_nr
 	 
 
   CREATE OR REPLACE VIEW VW_NCI_FORM_FLAT AS
-  select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, frm.ver_nr frm_ver_nr, frm.item_desc  frm_item_def,
+  select frm.item_long_nm frm_item_long_nm, frm.item_nm frm_item_nm, frm.item_id frm_item_id, 
+
+frm.ver_nr frm_ver_nr, frm.item_desc  frm_item_def,
   frmst.hdr_instr, frmst.ftr_instr,
 air.p_item_id mod_item_id, air.p_item_ver_nr mod_ver_nr, frm_mod.instr MOD_INSTR,
- air.c_item_id de_item_id, air.c_item_ver_nr de_ver_nr, air.disp_ord quest_disp_ord,frm_mod.disp_ord mod_disp_ord, frm_mod.rep_no  mod_rep_no,
-aim.item_nm MOD_ITEM_NM, air.instr QUEST_INSTR, air.REQ_IND  QUEST_REQ_IND, air.DEFLT_VAL QUEST_DEFLT_VAL, 
+ air.c_item_id de_item_id, air.c_item_ver_nr de_ver_nr, air.disp_ord 
+
+quest_disp_ord,frm_mod.disp_ord mod_disp_ord, frm_mod.rep_no  mod_rep_no,
+aim.item_nm MOD_ITEM_NM, air.instr QUEST_INSTR, air.REQ_IND  QUEST_REQ_IND, air.DEFLT_VAL 
+
+QUEST_DEFLT_VAL, 
 decode(DEFLT_VAL_ID, nvl(vv.nci_pub_id, 1), vv.value) QUEST_DEFLT_VAL_ENUM, 
        air.EDIT_IND QUEST_EDIT_IND,
  aim.item_long_nm  mod_item_long_nm, aim.item_desc mod_item_desc,
 air.nci_pub_id QUEST_ITEM_ID,air.nci_ver_nr QUEST_VER_NR,
-de.CNTXT_NM_DN CDE_CNTXT_NM, de.item_nm CDE_ITEM_NM, de.cntxt_item_id CDE_CNTXT_ITEM_ID, de.cntxt_VER_NR CDE_CNTXT_VER_NR, de.REGSTR_STUS_NM_DN CDE_REGSTR_STUS_NM,
+de.CNTXT_NM_DN CDE_CNTXT_NM, de.item_nm CDE_ITEM_NM, de.cntxt_item_id CDE_CNTXT_ITEM_ID, 
+
+de.cntxt_VER_NR CDE_CNTXT_VER_NR, de.REGSTR_STUS_NM_DN CDE_REGSTR_STUS_NM,
 de.ADMIN_STUS_NM_DN CDE_ADMIN_STUS_NM, nvl(de.CURRNT_VER_IND,0) CDE_CURRNT_VER_IND,
-air.CREAT_DT, air.CREAT_USR_ID, air.LST_UPD_USR_ID, air.FLD_DELETE, air.LST_DEL_DT, air.S2P_TRN_DT, air.LST_UPD_DT, air.item_long_nm QUEST_LONG_TXT, air.item_nm QUEST_TXT,
-vv.VM_NM, vv.VM_LNM, vv.VM_DEF, vv.VALUE VV_VALUE, vv.EDIT_IND VV_EDIT_IND, vv.SEQ_NBR VV_SEQ_NR, vv.MEAN_TXT VV_MEAN_TXT, vv.DESC_TXT VV_DESC_TXT, nvl(vv.nci_pub_id, 1) VV_ITEM_ID,
+air.CREAT_DT, air.CREAT_USR_ID, air.LST_UPD_USR_ID, air.FLD_DELETE, air.LST_DEL_DT, 
+
+air.S2P_TRN_DT, air.LST_UPD_DT, air.item_long_nm QUEST_LONG_TXT, air.item_nm QUEST_TXT,
+vv.VM_NM, vv.VM_LNM, vv.VM_DEF, vv.VALUE VV_VALUE, vv.EDIT_IND VV_EDIT_IND, vv.SEQ_NBR 
+
+VV_SEQ_NR, vv.MEAN_TXT VV_MEAN_TXT, vv.DESC_TXT VV_DESC_TXT, nvl(vv.nci_pub_id, 1) 
+
+VV_ITEM_ID,
 nvl(vv.nci_ver_nr, 1) VV_VER_NR, vv.INSTR VV_INSTR, vv.DISP_ORD VV_DISP_ORD,
 VV.VAL_MEAN_ITEM_ID, vv.VAL_MEAN_VER_NR
 from  nci_admin_item_rel_alt_key air, admin_item aim,
-admin_item frm, nci_admin_item_rel frm_mod , admin_item de, nci_quest_valid_value vv, nci_form frmst
+admin_item frm, nci_admin_item_rel frm_mod , admin_item de, nci_quest_valid_value vv, 
+
+nci_form frmst
 where  air.rel_typ_id = 63
 and aim.item_id = air.p_item_id and aim.ver_nr = air.p_item_ver_nr
-and frm.item_id = frm_mod.p_item_id and frm.ver_nr = frm_mod.p_item_ver_nr and aim.item_id = frm_mod.c_item_id and aim.ver_nr = frm_mod.c_item_ver_nr
+and frm.item_id = frm_mod.p_item_id and frm.ver_nr = frm_mod.p_item_ver_nr and aim.item_id = 
+
+frm_mod.c_item_id and aim.ver_nr = frm_mod.c_item_ver_nr
 and frm.item_id = frmst.item_id and frm.ver_nr = frmst.ver_nr
 and frm_mod.rel_typ_id in (61,62)
 and frm.admin_item_typ_id in ( 54,55)
@@ -353,20 +396,35 @@ and nvl(vv.fld_delete,0) = 0;
 
 
   CREATE OR REPLACE  VIEW VW_DE_CONC_RELEASED As
-  SELECT ADMIN_ITEM.LST_UPD_DT, DE_CONC.S2P_TRN_DT, DE_CONC.LST_DEL_DT, DE_CONC.FLD_DELETE, ADMIN_ITEM.LST_UPD_USR_ID, ADMIN_ITEM.CREAT_USR_ID, ADMIN_ITEM.CREAT_DT, 
-DE_CONC.OBJ_CLS_VER_NR, DE_CONC.OBJ_CLS_ITEM_ID, DE_CONC.PROP_ITEM_ID, DE_CONC.PROP_VER_NR, DE_CONC.CONC_DOM_ITEM_ID, DE_CONC.CONC_DOM_VER_NR, 
+  SELECT ADMIN_ITEM.LST_UPD_DT, DE_CONC.S2P_TRN_DT, DE_CONC.LST_DEL_DT, DE_CONC.FLD_DELETE, 
+
+ADMIN_ITEM.LST_UPD_USR_ID, ADMIN_ITEM.CREAT_USR_ID, ADMIN_ITEM.CREAT_DT, 
+DE_CONC.OBJ_CLS_VER_NR, DE_CONC.OBJ_CLS_ITEM_ID, DE_CONC.PROP_ITEM_ID, DE_CONC.PROP_VER_NR, 
+
+DE_CONC.CONC_DOM_ITEM_ID, DE_CONC.CONC_DOM_VER_NR, 
 ADMIN_ITEM.ITEM_ID, 
 ADMIN_ITEM.VER_NR, ADMIN_ITEM.ITEM_NM, ADMIN_ITEM.ITEM_LONG_NM, 
-ADMIN_ITEM.ITEM_DESC, ADMIN_ITEM.CNTXT_ITEM_ID, ADMIN_ITEM.CNTXT_VER_NR, ADMIN_ITEM.ADMIN_NOTES,
- ADMIN_ITEM.CHNG_DESC_TXT, ADMIN_ITEM.CREATION_DT, ADMIN_ITEM.EFF_DT, ADMIN_ITEM.DATA_ID_STR, ADMIN_ITEM.ADMIN_ITEM_TYP_ID, 
-ADMIN_ITEM.CURRNT_VER_IND, ADMIN_ITEM.REGSTR_STUS_ID, ADMIN_ITEM.ADMIN_STUS_ID, ADMIN_STUS_NM_DN, REGSTR_STUS_NM_DN, CDE.CNT_CDE,
-ORIGIN, UNRSLVD_ISSUE, UNTL_DT,  REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID, STEWRD_CNTCT_ID, SUBMT_ORG_ID,
-STEWRD_ORG_ID, CNTXT_NM_DN,ORIGIN_ID_DN, REGSTR_AUTH_ID, ADMIN_ITEM.LST_UPD_USR_ID LST_UPD_USR_ID_X, ADMIN_ITEM.CREAT_USR_ID CREAT_USR_ID_X
+ADMIN_ITEM.ITEM_DESC, ADMIN_ITEM.CNTXT_ITEM_ID, ADMIN_ITEM.CNTXT_VER_NR, 
+
+ADMIN_ITEM.ADMIN_NOTES,
+ ADMIN_ITEM.CHNG_DESC_TXT, ADMIN_ITEM.CREATION_DT, ADMIN_ITEM.EFF_DT, ADMIN_ITEM.DATA_ID_STR, 
+
+ADMIN_ITEM.ADMIN_ITEM_TYP_ID, 
+ADMIN_ITEM.CURRNT_VER_IND, ADMIN_ITEM.REGSTR_STUS_ID, ADMIN_ITEM.ADMIN_STUS_ID, 
+
+ADMIN_STUS_NM_DN, REGSTR_STUS_NM_DN, CDE.CNT_CDE,
+ORIGIN, UNRSLVD_ISSUE, UNTL_DT,  REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID, STEWRD_CNTCT_ID, 
+
+SUBMT_ORG_ID,
+STEWRD_ORG_ID, CNTXT_NM_DN,ORIGIN_ID_DN, REGSTR_AUTH_ID, ADMIN_ITEM.LST_UPD_USR_ID 
+
+LST_UPD_USR_ID_X, ADMIN_ITEM.CREAT_USR_ID CREAT_USR_ID_X
 FROM ADMIN_ITEM, DE_CONC, 
-(select de_conc_item_id , de_conc_ver_nr, count(*) CNT_CDE from de group by de_conc_item_id , de_conc_ver_nr) cde 
+(select de_conc_item_id , de_conc_ver_nr, count(*) CNT_CDE from de group by de_conc_item_id , 
+
+de_conc_ver_nr) cde 
        WHERE ADMIN_ITEM.ADMIN_ITEM_TYP_ID=2 
 AND ADMIN_ITEM.ITEM_ID = DE_CONC.ITEM_ID
 AND ADMIN_ITEM.VER_NR = DE_CONC.VER_NR
 and ADMIN_ITEM.ADMIN_STUS_ID <> 77
 and DE_CONC.ITEM_ID = cde.DE_CONC_ITEM_ID and DE_CONC.VER_NR = CDE.DE_CONC_VER_NR;
-
