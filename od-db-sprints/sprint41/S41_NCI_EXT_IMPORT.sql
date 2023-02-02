@@ -101,18 +101,19 @@ and L1_cd = 'LLT';
 commit;
 
 insert into onedata_Ra.admin_item select * from admin_item ai where 
-admin_item_typ_id = 49 and ai.creat_dt >= sysdate -1 and ai.creat_usr_id = 'ONEDATA_WA';
+admin_item_typ_id = 49 and item_id not in (select item_id from onedata_Ra.admin_item where admin_item_typ_id = 49) and ai.creat_dt >= sysdate -1 and ai.creat_usr_id = 'ONEDATA_WA';
 commit;
 
 insert into cncpt (item_id, ver_nr, evs_src_id)
 select item_id, ver_nr, v_meddra from admin_item ai where
- admin_item_typ_id = 49 and ai.creat_dt >= sysdate -1 and ai.creat_usr_id = 'ONEDATA_WA';
+ admin_item_typ_id = 49 and (item_id, ver_nr) not in (select item_id, Ver_nr from cncpt)
+ and ai.creat_dt >= sysdate -1 and ai.creat_usr_id = 'ONEDATA_WA';
 commit;
 
 
 insert into onedata_Ra.cncpt (item_id, ver_nr, evs_src_id)
 select item_id, ver_nr, v_meddra  from admin_item ai where
-admin_item_typ_id = 49 and ai.creat_dt >= sysdate -1 and ai.creat_usr_id = 'ONEDATA_WA';
+admin_item_typ_id = 49 and (item_id, ver_nr) not in (select item_id, ver_nr from onedata_Ra.cncpt) and ai.creat_dt >= sysdate -1 and ai.creat_usr_id = 'ONEDATA_WA';
 commit;
 
 DBMS_MVIEW.REFRESH('VW_CNCPT');
