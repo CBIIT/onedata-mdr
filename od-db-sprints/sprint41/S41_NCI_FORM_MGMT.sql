@@ -195,6 +195,7 @@ i int;
    rowpv t_row;
    rows t_rows;
     action t_actionRowset;
+    v_prnt_lnm ADMIN_ITEM.ITEM_LONG_NM%TyPE;
   
 begin
     
@@ -231,6 +232,8 @@ begin
         if (v_temp = 0) then
         rows := t_rows();
         rowq := t_row();
+        
+        select cncpt_concat into v_prnt_lnm from nci_admin_item_ext where item_id = ihook.getcolumnvalue(row_ori,'VAL_MEAN_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'VAL_MEAN_VER_NR');
          for curpv in (select * from admin_item where item_id =  ihook.getColumnValue(row,'C_ITEM_ID') and ver_nr = ihook.getColumnValue(row,'C_ITEM_VER_NR')) loop
   
                 ihook.setColumnValue (rowq, 'Q_PUB_ID',ihook.getColumnValue(row_ori, 'Q_PUB_ID') );
@@ -238,7 +241,8 @@ begin
                 ihook.setColumnValue (rowq, 'VM_NM', curpv.ITEM_NM);
                 ihook.setColumnValue (rowq, 'VM_LNM', curpv.ITEM_LONG_NM);
                 ihook.setColumnValue (rowq, 'VM_DEF', curpv.ITEM_DESC);
-                ihook.setColumnValue (rowq, 'CMNTS', curpv.ITEM_LONG_NM);
+            --    ihook.setColumnValue (rowq, 'CMNTS', curpv.ITEM_LONG_NM);
+                ihook.setColumnValue (rowq, 'CMNTS', v_prnt_lnm);
                 ihook.setColumnValue (rowq, 'VALUE', v_pv);
                 ihook.setColumnValue (rowq, 'MEAN_TXT', curpv.ITEM_NM);
                 ihook.setColumnValue (rowq, 'DESC_TXT', curpv.ITEM_DESC);
@@ -3691,7 +3695,7 @@ v_found boolean;
   v_disp_ord integer;
   v_frm_id number;
   v_frm_ver_nr number(4,2);
-  v_ref varchar2(255);
+ v_ref varchar2(2000);
   v_add integer;
   i integer := 0;
   column  t_column;
