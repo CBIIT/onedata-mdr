@@ -543,7 +543,7 @@ end if;
                createValAIWithConcept(rowform , k,4+k,'V','DROP-DOWN',actions);
             end loop;
         end if;
-raise_application_error(-20000, ihook.getColumnValue(rowform,'ITEM_1_ID') || ' - ' || ihook.getColumnValue(rowform,'ITEM_2_ID'));
+--raise_application_error(-20000, ihook.getColumnValue(rowform,'ITEM_1_ID') || ' - ' || ihook.getColumnValue(rowform,'ITEM_2_ID'));
     -- Show generated name
        ihook.setColumnValue(rowform, 'GEN_STR',replace(ihook.getColumnValue(rowform,'ITEM_1_NM') ||  ' ' || ihook.getColumnValue(rowform,'ITEM_2_NM'),'Integer::','') ) ;
        ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'VALIDATED');
