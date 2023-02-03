@@ -777,7 +777,7 @@ nci_form_curator.DeleteVV(ihook.getColumnValue(row_ori,'NCI_IDSEQ'),v_usr_id);
             actions.extend;
             actions(actions.last) := action;
 
-  --          hookoutput.actions    := actions;
+           hookoutput.actions    := actions;
  updFormModuleQuestion (ihook.getColumnValue(row_ori, 'Q_PUB_ID'), ihook.getColumnValue(row_ori, 'Q_VER_NR'), v_usr_id);
 
 
