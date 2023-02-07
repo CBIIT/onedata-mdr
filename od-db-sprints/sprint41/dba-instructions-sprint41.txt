@@ -27,6 +27,7 @@ S41_NCI_UTIL.sql
 S41_NCI_CADSR_PUSH_FORM.sql
 S41_NCI_FORM_CURATOR.sql
 S41_NCI_DLOAD.sql
+S41_NCI_POST_HOOK.sql
 
 
 exec nci_cadsr_push.spDeleteVVRemnant;
