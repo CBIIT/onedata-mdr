@@ -28,9 +28,9 @@ end if;
 
 
 if (upper(:new.ITEM_NM) = 'SYSGEN' and :new.ADMIN_ITEM_TYP_ID =3) then
-for cur in (select ITEM_NM, ITEM_DESC from ADMIN_ITEM. VALUE_DOM vd where item_id = vd.rep_cls_item_id and ver_nr = vd.rep_cls_ver_nr and vd.item_id = :new.ITEM_ID and vd.ver_nr = :new.ver_nr) loop
+for cur in (select ITEM_NM, ITEM_DESC from ADMIN_ITEM ai ,  VALUE_DOM vd where ai.item_id = vd.rep_cls_item_id and ai.ver_nr = vd.rep_cls_ver_nr and vd.item_id = :new.ITEM_ID and vd.ver_nr = :new.ver_nr) loop
 :new.ITEM_NM := cur.ITEM_NM;
-:new.ITEM_DESC = cur.ITEM_DESC;
+:new.ITEM_DESC := cur.ITEM_DESC;
 end loop;
 end if;
 
