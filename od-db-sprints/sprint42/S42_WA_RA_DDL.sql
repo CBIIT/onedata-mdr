@@ -42,10 +42,10 @@
 	   vd.VAL_DOM_TYP_ID	  FROM ADMIN_ITEM,
            NCI_ADMIN_ITEM_EXT  ext,
 	      de, VALUE_DOM vd,
-           (  SELECT item_id, ver_nr, ref_desc  FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='EXAMPLE')  EXMPL,
-           (  SELECT item_id, ver_nr, ref_desc  FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CODING INSTRUCTIONS' )  CODE_INSTR,
-           (  SELECT item_id,ver_nr, nm_desc  FROM ALT_NMS, OBJ_KEY WHERE NM_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC ALT NAME')  CRDC_NM,
-           (  SELECT item_id, ver_nr, def_desc  FROM ALT_DEF, OBJ_KEY WHERE NCI_DEF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC DEFINITION')  CRDC_DEF        
+           (  SELECT item_id, ver_nr, max(ref_desc)  FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='EXAMPLE' group by item_id, ver_nr)  EXMPL,
+           (  SELECT item_id, ver_nr, max(ref_desc)  FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CODING INSTRUCTIONS' group by item_id ,ver_nr)  CODE_INSTR,
+           (  SELECT item_id,ver_nr, max(nm_desc)  FROM ALT_NMS, OBJ_KEY WHERE NM_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC ALT NAME' group by item_id, ver_nr)  CRDC_NM,
+           (  SELECT item_id, ver_nr, max(def_desc)  FROM ALT_DEF, OBJ_KEY WHERE NCI_DEF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC DEFINITION' group by item_id, ver_nr)  CRDC_DEF        
      WHERE     ADMIN_ITEM_TYP_ID = 4
            and ADMIN_ITEM.ITEM_Id = de.item_id
            and ADMIN_ITEM.VER_NR = DE.VER_NR
