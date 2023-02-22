@@ -1,4 +1,5 @@
 -- Run as ONEDATA_RA DDL scripts
 
 -- Run as ONEDATA_WA DDL scripts
+S42_DE_CDE1_XML_GENERATOR_749VW.sql
 
