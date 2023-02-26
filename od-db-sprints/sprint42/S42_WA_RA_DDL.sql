@@ -35,17 +35,17 @@
            ADMIN_ITEM.ADMIN_ITEM_TYP_ID,
 	   ADMIN_ITEM.ITEM_DEEP_LINK,
            ext.USED_BY                         CNTXT_AGG,
-           CRDC_NM.NM_DESC                        CRDC_NM,
-           CRDC_DEF.DEF_DESC                        CRDC_DEF,
+           nvl(CRDC_NM.NM_DESC,admin_item.item_nm)                        CRDC_NM,
+           nvl(CRDC_DEF.DEF_DESC , admin_item.item_desc)                       CRDC_DEF,
            CODE_INSTR.REF_DESC                        CRDC_CODE_INSTR,
             EXMPL.REF_DESC                        CRDC_EXMPL,
 	   vd.VAL_DOM_TYP_ID	  FROM ADMIN_ITEM,
            NCI_ADMIN_ITEM_EXT  ext,
 	      de, VALUE_DOM vd,
-           (  SELECT item_id, ver_nr, max(ref_desc)  FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='EXAMPLE' group by item_id, ver_nr)  EXMPL,
-           (  SELECT item_id, ver_nr, max(ref_desc)  FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CODING INSTRUCTIONS' group by item_id ,ver_nr)  CODE_INSTR,
-           (  SELECT item_id,ver_nr, max(nm_desc)  FROM ALT_NMS, OBJ_KEY WHERE NM_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC ALT NAME' group by item_id, ver_nr)  CRDC_NM,
-           (  SELECT item_id, ver_nr, max(def_desc)  FROM ALT_DEF, OBJ_KEY WHERE NCI_DEF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC DEFINITION' group by item_id, ver_nr)  CRDC_DEF        
+           (  SELECT item_id, ver_nr, max(ref_desc) ref_desc  FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='EXAMPLE' group by item_id, ver_nr)  EXMPL,
+           (  SELECT item_id, ver_nr, max(ref_desc) ref_desc FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CODING INSTRUCTIONS' group by item_id ,ver_nr)  CODE_INSTR,
+           (  SELECT item_id,ver_nr, max(nm_desc) nm_desc FROM ALT_NMS, OBJ_KEY WHERE NM_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC ALT NAME' group by item_id, ver_nr)  CRDC_NM,
+           (  SELECT item_id, ver_nr, max(def_desc) def_desc FROM ALT_DEF, OBJ_KEY WHERE NCI_DEF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC DEFINITION' group by item_id, ver_nr)  CRDC_DEF        
      WHERE     ADMIN_ITEM_TYP_ID = 4
            and ADMIN_ITEM.ITEM_Id = de.item_id
            and ADMIN_ITEM.VER_NR = DE.VER_NR
@@ -61,7 +61,8 @@
            AND ADMIN_ITEM.VER_NR = CRDC_DEF.VER_NR(+)
  AND ADMIN_ITEM.ITEM_ID = CODE_INSTR.ITEM_ID(+)
            AND ADMIN_ITEM.VER_NR = CODE_INSTR.VER_NR(+)
-and ADMIN_ITEM.CNTXT_NM_DN = 'CRDC';
+and ADMIN_ITEM.CNTXT_NM_DN = 'CRDC'
+and admin_item.regstr_stus_id = 2;
 
 
 
