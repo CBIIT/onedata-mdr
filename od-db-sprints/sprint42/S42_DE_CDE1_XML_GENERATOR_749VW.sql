@@ -272,7 +272,7 @@ SELECT ai.NCI_IDSEQ                                   DE_IDSEQ,
            AND ai.item_id = ccd.item_id(+)
            AND ai.ver_nr = ccd.ver_nr(+);
 
-
+/
 CREATE OR REPLACE FORCE VIEW ONEDATA_WA.CDEBROWSER_COMPLEX_DE_VIEW_N
 (ITEM_ID, VER_NR, CRTL_NAME, DESCRIPTION, METHODS, 
  RULE, CONCAT_CHAR, "DataElementsList")
@@ -305,7 +305,7 @@ SELECT cde.ITEM_ID,
                    AS ONEDATA_WA.data_element_derivation_list_t)    "DataElementsList"
       FROM DE cde, OBJ_KEY ctl
      WHERE cde.DERV_TYP_ID = ctl.OBJ_KEY_ID AND ctl.OBJ_TYP_ID = 21;
-
+/
 CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW
 (RAI, PUBLICID, LONGNAME, PREFERREDNAME, PREFERREDDEFINITION, 
  VERSION, WORKFLOWSTATUS, CONTEXTNAME, CONTEXTVERSION, ORIGIN, 
