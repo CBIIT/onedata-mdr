@@ -44,12 +44,12 @@
            NCI_ADMIN_ITEM_EXT  ext,
 	      de, VALUE_DOM vd,
        (  SELECT item_id, ver_nr,  
-       max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS', decode (NCI_CNTXT_ITEM_ID , 20000000047, ref_desc)) ) CODE_INSTR_REF_DESC,
+       max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS', ref_desc) ) CODE_INSTR_REF_DESC,
  --      max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS',ref_desc) ) CODE_INSTR_REF_DESC,
        max(decode(upper(obj_key_Desc),'INSTRUCTIONS', ref_desc) ) INSTR_REF_DESC,
        max(decode(upper(obj_key_Desc),'EXAMPLE', ref_desc) ) EXAMPL
        FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   and obj_key.obj_typ_id = 1
-           AND UPPER(OBJ_KEY_DESC) in ('INSTRUCTIONS', 'CODING INSTRUCTIONS','EXAMPLE') 
+           AND UPPER(OBJ_KEY_DESC) in ('INSTRUCTIONS', 'CODING INSTRUCTIONS','EXAMPLE')  and NCI_CNTXT_ITEM_ID = 20000000047
            group by item_id ,ver_nr)  CODE_INSTR,
              (  SELECT item_id,ver_nr, max(nm_desc) nm_desc FROM ALT_NMS, OBJ_KEY WHERE NM_TYP_ID = OBJ_KEY.OBJ_KEY_ID   and obj_key.obj_typ_id =  11 
              AND UPPER(OBJ_KEY_DESC)='CRDC ALT NAME' group by item_id, ver_nr)  CRDC_NM,
