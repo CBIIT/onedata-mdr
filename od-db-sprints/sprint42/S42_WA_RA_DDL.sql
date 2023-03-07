@@ -396,7 +396,6 @@ x.p_item_ver_nr) y
  ai.item_id = y.p_item_id and ai.ver_nr = y.p_item_ver_nr;
  --and ai.admin_stus_nm_dn not like '%RETIRED%'
 
-
   CREATE MATERIALIZED VIEW MVW_CSI_TREE_CDE   AS 
   select 98 LVL, null P_ITEM_ID, null P_ITEM_VER_NR, ITEM_ID, VER_NR, ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ITEM_LONG_NM,  ITEM_NM || ':' 
 || ITEM_DESC  || ' (' || y.cnt || ')' ITEM_NM , ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
@@ -439,3 +438,17 @@ x.p_item_ver_nr) y
  where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null and csi.CS_ITEM_ID is not null and
  ai.item_id = y.p_item_id and ai.ver_nr = y.p_item_ver_nr;
  --and ai.admin_stus_nm_dn not like '%RETIRED%'
+ 
+ 
+ 
+  CREATE OR REPLACE VIEW VW_LIST_USR_CART_NM AS
+  SELECT CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID, CART_NM || ' : ' || CNTCT_SECU_ID CART_USR_NM, max(nvl(retain_ind,0)) RETAIN_IND, 
+           user CREAT_USR_ID,
+            user LST_UPD_USR_ID,
+            0 FLD_DELETE,
+           sysdate LST_DEL_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_UPD_DT,
+           sysdate CREAT_DT
+           from NCI_USR_CART where nvl(fld_delete,0)  =0 group by CART_NM, CNTCT_SECU_ID;
+
