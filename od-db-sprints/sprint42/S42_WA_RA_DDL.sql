@@ -37,17 +37,20 @@
            ext.USED_BY                         CNTXT_AGG,
            nvl(CRDC_NM.NM_DESC,admin_item.item_nm)                        CRDC_NM,
            nvl(CRDC_DEF.DEF_DESC , admin_item.item_desc)                       CRDC_DEF,
-           CODE_INSTR.CODE_INSTR_REF_DESC                        CRDC_CODE_INSTR,
-           CODE_INSTR.INSTR_REF_DESC                        CRDC_INSTR,
-            EXMPL.REF_DESC                        CRDC_EXMPL,
-	   vd.VAL_DOM_TYP_ID	  FROM ADMIN_ITEM,
+               CODE_INSTR_REF_DESC,
+            INSTR_REF_DESC                            CRDC_INSTR,
+          EXAMPL                           CRDC_EXMPL,
+            vd.VAL_DOM_TYP_ID	  FROM ADMIN_ITEM,
            NCI_ADMIN_ITEM_EXT  ext,
 	      de, VALUE_DOM vd,
-           (  SELECT item_id, ver_nr, max(ref_desc) ref_desc  FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='EXAMPLE' group by item_id, ver_nr)  EXMPL,
-           (  SELECT item_id, ver_nr, max(decode(upper(OBJ_KEY_DESC),'INSTRUCTIONS', ref_desc, null) ) INSTR_REF_DESC , 
-           max(decode(upper(OBJ_KEY_DESC),'CODING INSTRUCTIONS', ref_desc, null) ) CODE_INSTR_REF_DESC FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID  
-           AND UPPER(OBJ_KEY_DESC) in ('INSTRUCTIONS', 'CODING INSTRUCTIONS') and NCI_CNTXT_ITEM_ID = 20000000047 group by item_id ,ver_nr)  CODE_INSTR,
-           (  SELECT item_id,ver_nr, max(nm_desc) nm_desc FROM ALT_NMS, OBJ_KEY WHERE NM_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC ALT NAME' group by item_id, ver_nr)  CRDC_NM,
+       (  SELECT item_id, ver_nr,  max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS', ref_desc) ) CODE_INSTR_REF_DESC,
+       max(decode(upper(obj_key_Desc),'INSTRUCTIONS', ref_desc) ) INSTR_REF_DESC,
+       max(decode(upper(obj_key_Desc),'EXAMPLE', ref_desc) ) EXAMPL
+       FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID  
+           AND UPPER(OBJ_KEY_DESC) in ('INSTRUCTIONS', 'CODING INSTRUCTIONS','EXAMPLE') and NCI_CNTXT_ITEM_ID = 20000000047
+           group by item_id ,ver_nr)  CODE_INSTR,
+             (  SELECT item_id,ver_nr, max(nm_desc) nm_desc FROM ALT_NMS, OBJ_KEY WHERE NM_TYP_ID = OBJ_KEY.OBJ_KEY_ID  
+             AND UPPER(OBJ_KEY_DESC)='CRDC ALT NAME' group by item_id, ver_nr)  CRDC_NM,
            (  SELECT item_id, ver_nr, max(def_desc) def_desc FROM ALT_DEF, OBJ_KEY WHERE NCI_DEF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC DEFINITION' group by item_id, ver_nr)  CRDC_DEF        
      WHERE     ADMIN_ITEM_TYP_ID = 4
            and ADMIN_ITEM.ITEM_Id = de.item_id
@@ -56,8 +59,6 @@
 	   and de.VAL_DOM_VER_NR = vd.VER_NR
 	   AND ADMIN_ITEM.ITEM_ID = EXT.ITEM_ID
            AND ADMIN_ITEM.VER_NR = EXT.VER_NR
-           AND ADMIN_ITEM.ITEM_ID = EXMPL.ITEM_ID(+)
-           AND ADMIN_ITEM.VER_NR = EXMPL.VER_NR(+)
            AND ADMIN_ITEM.ITEM_ID = CRDC_NM.ITEM_ID(+)
            AND ADMIN_ITEM.VER_NR = CRDC_NM.VER_NR(+)
  AND ADMIN_ITEM.ITEM_ID = CRDC_DEF.ITEM_ID(+)
@@ -66,6 +67,7 @@
            AND ADMIN_ITEM.VER_NR = CODE_INSTR.VER_NR(+)
 and ADMIN_ITEM.CNTXT_NM_DN = 'CRDC'
 and admin_item.regstr_stus_id = 2;
+
 
 
 
