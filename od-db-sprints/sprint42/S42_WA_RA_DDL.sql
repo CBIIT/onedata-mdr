@@ -1,5 +1,5 @@
 
-  CREATE OR REPLACE  VIEW VW_NCI_CRDC_DE AS
+  CREATE or replace VIEW VW_NCI_CRDC_DE AS
   SELECT ADMIN_ITEM.ITEM_ID,
            ADMIN_ITEM.VER_NR,
           CAST('.' || ADMIN_ITEM.ITEM_ID || '.' AS VARCHAR2(4000))    ITEM_ID_STR,
@@ -43,15 +43,18 @@
             vd.VAL_DOM_TYP_ID	  FROM ADMIN_ITEM,
            NCI_ADMIN_ITEM_EXT  ext,
 	      de, VALUE_DOM vd,
-       (  SELECT item_id, ver_nr,  max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS', ref_desc) ) CODE_INSTR_REF_DESC,
+       (  SELECT item_id, ver_nr,  
+       max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS', decode (NCI_CNTXT_ITEM_ID , 20000000047, ref_desc)) ) CODE_INSTR_REF_DESC,
+ --      max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS',ref_desc) ) CODE_INSTR_REF_DESC,
        max(decode(upper(obj_key_Desc),'INSTRUCTIONS', ref_desc) ) INSTR_REF_DESC,
        max(decode(upper(obj_key_Desc),'EXAMPLE', ref_desc) ) EXAMPL
-       FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID  
-           AND UPPER(OBJ_KEY_DESC) in ('INSTRUCTIONS', 'CODING INSTRUCTIONS','EXAMPLE') and NCI_CNTXT_ITEM_ID = 20000000047
+       FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   and obj_key.obj_typ_id = 1
+           AND UPPER(OBJ_KEY_DESC) in ('INSTRUCTIONS', 'CODING INSTRUCTIONS','EXAMPLE') 
            group by item_id ,ver_nr)  CODE_INSTR,
-             (  SELECT item_id,ver_nr, max(nm_desc) nm_desc FROM ALT_NMS, OBJ_KEY WHERE NM_TYP_ID = OBJ_KEY.OBJ_KEY_ID  
+             (  SELECT item_id,ver_nr, max(nm_desc) nm_desc FROM ALT_NMS, OBJ_KEY WHERE NM_TYP_ID = OBJ_KEY.OBJ_KEY_ID   and obj_key.obj_typ_id =  11 
              AND UPPER(OBJ_KEY_DESC)='CRDC ALT NAME' group by item_id, ver_nr)  CRDC_NM,
-           (  SELECT item_id, ver_nr, max(def_desc) def_desc FROM ALT_DEF, OBJ_KEY WHERE NCI_DEF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC DEFINITION' group by item_id, ver_nr)  CRDC_DEF        
+           (  SELECT item_id, ver_nr, max(def_desc) def_desc FROM ALT_DEF, OBJ_KEY 
+           WHERE NCI_DEF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC DEFINITION'  and obj_key.obj_typ_id =  15 group by item_id, ver_nr)  CRDC_DEF        
      WHERE     ADMIN_ITEM_TYP_ID = 4
            and ADMIN_ITEM.ITEM_Id = de.item_id
            and ADMIN_ITEM.VER_NR = DE.VER_NR
@@ -67,7 +70,6 @@
            AND ADMIN_ITEM.VER_NR = CODE_INSTR.VER_NR(+)
 and ADMIN_ITEM.CNTXT_NM_DN = 'CRDC'
 and admin_item.regstr_stus_id = 2;
-
 
 
 
