@@ -37,7 +37,7 @@
            ext.USED_BY                         CNTXT_AGG,
            nvl(CRDC_NM.NM_DESC,admin_item.item_nm)                        CRDC_NM,
            nvl(CRDC_DEF.DEF_DESC , admin_item.item_desc)                       CRDC_DEF,
-               CODE_INSTR_REF_DESC,
+               CODE_INSTR_REF_DESC CRDC_CODE_INSTR,
             INSTR_REF_DESC                            CRDC_INSTR,
           EXAMPL                           CRDC_EXMPL,
             vd.VAL_DOM_TYP_ID	  FROM ADMIN_ITEM,
