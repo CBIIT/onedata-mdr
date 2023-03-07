@@ -255,9 +255,6 @@ UC.CNTCT_SECU_ID, UC.CREAT_DT, UC.CREAT_USR_ID, UC.LST_UPD_USR_ID,
 UC.FLD_DELETE, UC.LST_DEL_DT, UC.S2P_TRN_DT, UC.LST_UPD_DT, UC.GUEST_USR_NM, UC.CART_NM, UC.RETAIN_IND
 FROM NCI_USR_CART UC, ADMIN_ITEM AI , OBJ_KEY ok WHERE AI.ITEM_ID = UC.ITEM_ID AND AI.VER_NR = UC.VER_NR and ai.admin_item_typ_id = ok.obj_key_id and ok.obj_typ_id = 4
 and admin_item_typ_id in (4,52,54,2,3);
-
-
-
   CREATE MATERIALIZED VIEW MVW_CSI_NODE_DE_REL AS 
   SELECT  ak.CREAT_DT,
            ak.CREAT_USR_ID,
@@ -281,11 +278,14 @@ and admin_item_typ_id in (4,52,54,2,3);
            ai.ADMIN_STUS_ID,
            ai.REGSTR_STUS_ID,
            de.PREF_QUEST_TXT, 
-	   e.USED_BY
+	   e.USED_BY,
+	   'CSI' LVL
            FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, de , nci_admin_item_ext e
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+and nvl(ai.CURRNT_VER_IND,0) = 1 and nvl(ak.fld_delete,0) = 0
     UNION
     SELECT distinct ai.CREAT_DT,
            ai.CREAT_USR_ID,
@@ -309,13 +309,15 @@ and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr
            ai.ADMIN_STUS_ID,
            ai.REGSTR_STUS_ID,
        de.PREF_QUEST_TXT,
-e.USED_BY
+e.USED_BY, 'CS' LVL
       FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi, de, nci_admin_item_Ext e
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR
            AND ak.P_ITEM_ID = csi.ITEM_ID
            AND ak.P_ITEM_VER_NR = csi.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+and nvl(ai.CURRNT_VER_IND,0) = 1 
 union
 SELECT distinct ai.CREAT_DT,
            ai.CREAT_USR_ID,
@@ -339,14 +341,16 @@ SELECT distinct ai.CREAT_DT,
            ai.ADMIN_STUS_ID,
            ai.REGSTR_STUS_ID,
             de.PREF_QUEST_TXT,
-e.USED_BY
+e.USED_BY, 'Context' LVL
       FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi, VW_CLSFCTN_SCHM cs, de, nci_admin_item_ext e
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR
            AND ak.P_ITEM_ID = csi.ITEM_ID
            AND ak.P_ITEM_VER_NR = csi.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65
 and csi.CS_ITEM_ID = cs.ITEM_ID and csi.CS_ITEM_VER_NR = cs.VER_NR and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+and nvl(ai.CURRNT_VER_IND,0) = 1 
 ;
 
 
