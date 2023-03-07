@@ -396,3 +396,46 @@ x.p_item_ver_nr) y
  ai.item_id = y.p_item_id and ai.ver_nr = y.p_item_ver_nr;
  --and ai.admin_stus_nm_dn not like '%RETIRED%'
 
+
+  CREATE MATERIALIZED VIEW MVW_CSI_TREE_CDE   AS 
+  select 98 LVL, null P_ITEM_ID, null P_ITEM_VER_NR, ITEM_ID, VER_NR, ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ITEM_LONG_NM,  ITEM_NM || ':' 
+|| ITEM_DESC  || ' (' || y.cnt || ')' ITEM_NM , ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
+STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT,
+ REGSTR_AUTH_ID,  NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  CREAT_USR_ID_X, LST_UPD_USR_ID_X ,
+'https://cadsrapi-dev.cancer.gov/invoke/csiDownload/printerFriendly?item_id=' || item_id || 'version=' || ver_nr || '\Click_to_View' ITEM_RPT_URL from 
+ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='Context' group by x.p_item_id , 
+x.p_item_ver_nr) y 
+ where ADMIN_ITEM_TYP_ID = 8 and item_id = y.p_item_id and ver_nr = y.p_item_ver_nr
+ union
+select 99 LVL, CNTXT_ITEM_ID P_ITEM_ID, CNTXT_VER_NR P_ITEM_VER_NR, ITEM_ID, VER_NR, ITEM_DESC, CNTXT_ITEM_ID, CNTXT_VER_NR, ITEM_LONG_NM, 'CS - ' || 
+ITEM_NM || ':' || ITEM_DESC  || ' (' || y.cnt || ')', ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
+STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT,
+ REGSTR_AUTH_ID,  NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  CREAT_USR_ID_X, LST_UPD_USR_ID_X ,
+'https://cadsrapi-dev.cancer.gov/invoke/csiDownload/printerFriendly?item_id=' || item_id || 'version=' || ver_nr || '\Click_to_View' ITEM_RPT_URL from 
+ADMIN_ITEM, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CS' group by x.p_item_id , 
+x.p_item_ver_nr) y
+ where ADMIN_ITEM_TYP_ID = 9 and item_id = y.p_item_id and ver_nr = y.p_item_ver_nr and admin_stus_nm_dn ='RELEASED'
+ union
+  select 100 LVL, csi.CS_ITEM_ID P_ITEM_ID, csi.CS_ITEM_VER_NR P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM, 
+  'CSI - ' || ai.ITEM_NM || ' (' || y.cnt || ')' , 
+ai.ADMIN_STUS_ID, ai.REGSTR_STUS_ID, ai.REGISTRR_CNTCT_ID, ai.SUBMT_CNTCT_ID,
+ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
+ ai.REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X ,
+ 'https://cadsrapi-dev.cancer.gov/invoke/csiDownload/printerFriendly?item_id=' || ai.item_id || 'version=' || ai.ver_nr || '\Click_to_View' ITEM_RPT_URL from ADMIN_ITEM 
+ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' group by x.p_item_id , 
+x.p_item_ver_nr) y
+ where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is null and csi.CS_ITEM_ID is not null and
+ ai.item_id = y.p_item_id and ai.ver_nr = y.p_item_ver_nr
+ --and ai.admin_stus_nm_dn not like '%RETIRED%'
+ union
+ select 100 LVL, csi.P_ITEM_ID P_ITEM_ID, csi.P_ITEM_VER_NR P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM, 
+  'CSI - ' || ai.ITEM_NM || ' (' || y.cnt || ')' , 
+ai.ADMIN_STUS_ID, ai.REGSTR_STUS_ID, ai.REGISTRR_CNTCT_ID, ai.SUBMT_CNTCT_ID,
+ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
+ ai.REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X ,
+ 'https://cadsrapi-dev.cancer.gov/invoke/csiDownload/printerFriendly?item_id=' || ai.item_id || 'version=' || ai.ver_nr || '\Click_to_View' ITEM_RPT_URL from ADMIN_ITEM 
+ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' group by x.p_item_id , 
+x.p_item_ver_nr) y
+ where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null and csi.CS_ITEM_ID is not null and
+ ai.item_id = y.p_item_id and ai.ver_nr = y.p_item_ver_nr;
+ --and ai.admin_stus_nm_dn not like '%RETIRED%'
