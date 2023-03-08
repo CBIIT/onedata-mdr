@@ -259,9 +259,9 @@ begin
        	 hookoutput.showrowset := showrowset;
           
  ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Click Link to DownLoad');
-    ANSWERS.EXTEND;
-    ANSWERS(ANSWERS.LAST) := ANSWER;
+   ANSWER                     := T_ANSWER(1, 1, 'Click Link Below');
+   ANSWERS.EXTEND;
+   ANSWERS(ANSWERS.LAST) := ANSWER;
 
     QUESTION               := T_QUESTION('Click Link to Download' , ANSWERS);
 
