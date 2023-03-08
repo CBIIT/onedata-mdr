@@ -252,11 +252,14 @@ alter table NCI_USR_CART add RETAIN_IND number(1);
   AI.ADMIN_ITEM_TYP_ID,
   ok.OBJ_KEY_DESC ADMIN_ITEM_TYP_NM,
 UC.CNTCT_SECU_ID, UC.CREAT_DT, UC.CREAT_USR_ID, UC.LST_UPD_USR_ID,
-UC.FLD_DELETE, UC.LST_DEL_DT, UC.S2P_TRN_DT, UC.LST_UPD_DT, UC.GUEST_USR_NM, UC.CART_NM, UC.RETAIN_IND
-FROM NCI_USR_CART UC, ADMIN_ITEM AI , OBJ_KEY ok WHERE AI.ITEM_ID = UC.ITEM_ID AND AI.VER_NR = UC.VER_NR and ai.admin_item_typ_id = ok.obj_key_id and ok.obj_typ_id = 4
-and admin_item_typ_id in (4,52,54,2,3);
+UC.FLD_DELETE, UC.LST_DEL_DT, UC.S2P_TRN_DT, UC.LST_UPD_DT, UC.GUEST_USR_NM, UC.CART_NM, UC.RETAIN_IND,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || UC.CNTCT_SECU_ID || '\&p_guest_usr_nm=' || UC.GUEST_USR_NM ||'\&p_cart_nm=' || UC.CART_NM || '\&formatid=104\&type=csi\\Download_ALL_CDE_In_Cart_Legacy_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || UC.CNTCT_SECU_ID || '\&p_guest_usr_nm=' || UC.GUEST_USR_NM ||'\&p_cart_nm=' || UC.CART_NM || '\&formatid=103\&type=csi\\Download_ALL_CDE_In_Cart_Legacy_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || UC.CNTCT_SECU_ID || '\&p_guest_usr_nm=' || UC.GUEST_USR_NM ||'\&p_cart_nm=' || UC.CART_NM || '\&formatid=114\&type=csi\\Download_ALL_CDE_In_Cart_Prior_Legacy_XML' ITEM_RPT_PRIOR_EXCEL
+FROM NCI_USR_CART UC, ADMIN_ITEM AI , OBJ_KEY ok, NCI_MDR_CNTRL c WHERE AI.ITEM_ID = UC.ITEM_ID AND AI.VER_NR = UC.VER_NR and ai.admin_item_typ_id = ok.obj_key_id and ok.obj_typ_id = 4
+and admin_item_typ_id in (4,52,54,2,3) and c.param_nm='DOWNLOAD_HOST';
 
-
+p_cntct_secu_id=2184681&p_guest_usr_nm=1&P-cart_nm=blahblah&formatid=104&type=csi
   CREATE MATERIALIZED VIEW MVW_CSI_NODE_DE_REL AS 
   SELECT  ak.CREAT_DT,
            ak.CREAT_USR_ID,
