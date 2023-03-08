@@ -425,9 +425,12 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
 
 	   
 	   
+	   
   CREATE OR REPLACE  VIEW VW_LIST_USR_CART_NM AS
   SELECT CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID, GUEST_USR_NM, CART_NM || ' : ' || CNTCT_SECU_ID CART_USR_NM, max(nvl(retain_ind,0)) RETAIN_IND, 
-  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(CNTCT_SECU_ID) || '\&p_guest_usr_nm=' || trim(GUEST_USR_NM) ||'\&p_cart_nm=' || trim(CART_NM) || '\&formatid=104\&type=usr\\Download_ALL_CDE_In_Cart_Legacy_XML' ITEM_RPT_URL ,
+  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(CNTCT_SECU_ID) || '\&p_guest_usr_nm=' || trim(GUEST_USR_NM) ||'\&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '\&formatid=104\&type=usr\\Legacy_XML' ITEM_RPT_URL ,
+  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(CNTCT_SECU_ID) || '\&p_guest_usr_nm=' || trim(GUEST_USR_NM) ||'\&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '\&formatid=103\&type=usr\\Legacy_Excel' ITEM_RPT_EXCEL ,
+  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(CNTCT_SECU_ID) || '\&p_guest_usr_nm=' || trim(GUEST_USR_NM) ||'\&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '\&formatid=114\&type=usr\\Legacy_Prior_Excel' ITEM_RPT_PRIOR_EXCEL ,
            user CREAT_USR_ID,
             user LST_UPD_USR_ID,
             0 FLD_DELETE,
@@ -435,6 +438,4 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
            sysdate S2P_TRN_DT,
            sysdate LST_UPD_DT,
            sysdate CREAT_DT
-           from NCI_USR_CART , NCI_MDR_CNTRL c where nvl(fld_delete,0)  =0  and  c.param_nm='DOWNLOAD_HOST' group by CART_NM, CNTCT_SECU_ID, GUEST_USR_NM ;
-
-
+           from NCI_USR_CART , NCI_MDR_CNTRL c where nvl(fld_delete,0)  =0  and  c.param_nm='DOWNLOAD_HOST' group by CART_NM, CNTCT_SECU_ID, GUEST_USR_NM , c.param_val;
