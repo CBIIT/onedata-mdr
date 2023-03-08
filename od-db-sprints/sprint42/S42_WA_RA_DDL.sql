@@ -253,9 +253,9 @@ alter table NCI_USR_CART add RETAIN_IND number(1);
   ok.OBJ_KEY_DESC ADMIN_ITEM_TYP_NM,
 UC.CNTCT_SECU_ID, UC.CREAT_DT, UC.CREAT_USR_ID, UC.LST_UPD_USR_ID,
 UC.FLD_DELETE, UC.LST_DEL_DT, UC.S2P_TRN_DT, UC.LST_UPD_DT, UC.GUEST_USR_NM, UC.CART_NM, UC.RETAIN_IND,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || UC.CNTCT_SECU_ID || '\&p_guest_usr_nm=' || UC.GUEST_USR_NM ||'\&p_cart_nm=' || UC.CART_NM || '\&formatid=104\&type=csi\\Download_ALL_CDE_In_Cart_Legacy_XML' ITEM_RPT_URL ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || UC.CNTCT_SECU_ID || '\&p_guest_usr_nm=' || UC.GUEST_USR_NM ||'\&p_cart_nm=' || UC.CART_NM || '\&formatid=103\&type=csi\\Download_ALL_CDE_In_Cart_Legacy_Excel' ITEM_RPT_EXCEL ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || UC.CNTCT_SECU_ID || '\&p_guest_usr_nm=' || UC.GUEST_USR_NM ||'\&p_cart_nm=' || UC.CART_NM || '\&formatid=114\&type=csi\\Download_ALL_CDE_In_Cart_Prior_Legacy_XML' ITEM_RPT_PRIOR_EXCEL
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || UC.CNTCT_SECU_ID || '\&p_guest_usr_nm=' || UC.GUEST_USR_NM ||'\&p_cart_nm=' || UC.CART_NM || '\&formatid=104\&type=usr\\Download_ALL_CDE_In_Cart_Legacy_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || UC.CNTCT_SECU_ID || '\&p_guest_usr_nm=' || UC.GUEST_USR_NM ||'\&p_cart_nm=' || UC.CART_NM || '\&formatid=103\&type=usr\\Download_ALL_CDE_In_Cart_Legacy_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || UC.CNTCT_SECU_ID || '\&p_guest_usr_nm=' || UC.GUEST_USR_NM ||'\&p_cart_nm=' || UC.CART_NM || '\&formatid=114\&type=usr\\Download_ALL_CDE_In_Cart_Prior_Legacy_XML' ITEM_RPT_PRIOR_EXCEL
 FROM NCI_USR_CART UC, ADMIN_ITEM AI , OBJ_KEY ok, NCI_MDR_CNTRL c WHERE AI.ITEM_ID = UC.ITEM_ID AND AI.VER_NR = UC.VER_NR and ai.admin_item_typ_id = ok.obj_key_id and ok.obj_typ_id = 4
 and admin_item_typ_id in (4,52,54,2,3) and c.param_nm='DOWNLOAD_HOST';
 
@@ -371,7 +371,7 @@ STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, CREAT_DT, CREAT_USR_ID, LST_UPD_US
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ver_nr || '\&formatid=104\&type=csi\\Click_For_Legacy_XML' ITEM_RPT_URL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ver_nr || '\&formatid=103\&type=csi\\Click_For_Legacy_Excel' ITEM_RPT_EXCEL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ver_nr || '\&formatid=114\&type=csi\\Click_For_Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
-'Switch the Associated CDE to see the list of CDEs attached to this node.' CHNG_NOTES
+'SWITCH TO "ASSOCIATED CDE" TO SEE THE LIST OF CDEs ATTACHED TO THIS NODE.' CHNG_NOTES
 from 
 ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='Context' group by x.p_item_id , 
 x.p_item_ver_nr) y , nci_mdr_cntrl c
@@ -398,7 +398,7 @@ ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR
  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=104\&type=csi\\Click_For_Legacy_XML' ITEM_RPT_URL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=103\&type=csi\\Click_For_Legacy_Excel' ITEM_RPT_EXCEL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=114\&type=csi\\Click_For_Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
-'Switch the Associated CDE to see the list of CDEs attached to this node.' CHNG_NOTES
+'SWITCH TO "ASSOCIATED CDE" TO SEE THE LIST OF CDEs ATTACHED TO THIS NODE.'  CHNG_NOTES
 from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c
  where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is null and csi.CS_ITEM_ID is not null and
@@ -413,7 +413,7 @@ ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=104\&type=csi\\Click_For_Legacy_XML' ITEM_RPT_URL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=103\&type=csi\\Click_For_Legacy_Excel' ITEM_RPT_EXCEL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=114\&type=csi\\Click_For_Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
-'Switch the Associated CDE to see the list of CDEs attached to this node.' CHNG_NOTES
+'SWITCH TO "ASSOCIATED CDE" TO SEE THE LIST OF CDEs ATTACHED TO THIS NODE.' CHNG_NOTES
  from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c
  where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null and csi.CS_ITEM_ID is not null and
@@ -423,8 +423,11 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
  
  
 
-  CREATE OR REPLACE VIEW VW_LIST_USR_CART_NM AS
-  SELECT CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID, CART_NM || ' : ' || CNTCT_SECU_ID CART_USR_NM, max(nvl(retain_ind,0)) RETAIN_IND, 
+	   
+	   
+  CREATE OR REPLACE  VIEW VW_LIST_USR_CART_NM AS
+  SELECT CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID, GUEST_USR_NM, CART_NM || ' : ' || CNTCT_SECU_ID CART_USR_NM, max(nvl(retain_ind,0)) RETAIN_IND, 
+  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(CNTCT_SECU_ID) || '\&p_guest_usr_nm=' || trim(GUEST_USR_NM) ||'\&p_cart_nm=' || trim(CART_NM) || '\&formatid=104\&type=usr\\Download_ALL_CDE_In_Cart_Legacy_XML' ITEM_RPT_URL ,
            user CREAT_USR_ID,
             user LST_UPD_USR_ID,
             0 FLD_DELETE,
@@ -432,5 +435,6 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
            sysdate S2P_TRN_DT,
            sysdate LST_UPD_DT,
            sysdate CREAT_DT
-           from NCI_USR_CART where nvl(fld_delete,0)  =0 group by CART_NM, CNTCT_SECU_ID;
+           from NCI_USR_CART , NCI_MDR_CNTRL c where nvl(fld_delete,0)  =0  and  c.param_nm='DOWNLOAD_HOST' group by CART_NM, CNTCT_SECU_ID, GUEST_USR_NM ;
+
 
