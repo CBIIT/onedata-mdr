@@ -1,4 +1,346 @@
---Related to JIRA851 and JIRA859 -- The modified: ONEDATA_WA.DE_EXCEL_GENERATOR_VIEW, ONEDATA_WA.CDEBROWSER_COMPLEX_DE_VIEW_N and ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW  --
+--Related to JIRA851 and JIRA859 -- The modified: ONEDATA_WA.CDEBROWSER_DE_DEC_VIEW,ONEDATA_WA.DE_EXCEL_GENERATOR_VIEW, ONEDATA_WA.CDEBROWSER_COMPLEX_DE_VIEW_N and ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW  --
+CREATE OR REPLACE FORCE VIEW ONEDATA_WA.CDEBROWSER_DE_DEC_VIEW
+(DE_ID, DE_VERSION, DEC_PREFERRED_NAME, DEC_LONG_NAME, PREFERRED_DEFINITION, 
+ DEC_VERSION, ASL_NAME, DEC_CONTEXT_NAME, DEC_CONTEXT_VERSION, OC_PREFERRED_NAME, 
+ OC_VERSION, OC_LONG_NAME, OC_CONTEXT_NAME, OC_CONTEXT_VERSION, PT_PREFERRED_NAME, 
+ PT_VERSION, PT_LONG_NAME, PT_CONTEXT_NAME, PT_CONTEXT_VERSION, CD_PREFERRED_NAME, 
+ CD_VERSION, CD_LONG_NAME, CD_CONTEXT_NAME, CD_CONTEXT_VERSION, OBJ_CLASS_QUALIFIER, 
+ PROPERTY_QUALIFIER, OC_ID, PROP_ID, CD_ID, DEC_ID, 
+ DEC_ORIGIN, OC_IDSEQ, PROP_IDSEQ, OC_CONDR_IDSEQ, PROP_CONDR_IDSEQ)
+BEQUEATH DEFINER
+AS 
+SELECT de.item_id                             de_id,
+           de.ver_nr                              de_version,
+           dec.ITEM_LONG_NM                       dec_preferred_name,
+           dec.ITEM_NM                            dec_long_name,           
+           dec.ITEM_DESC                          PREFERRED_DEFINITION,
+           dec.ver_nr                             dec_version,
+           dec.admin_stus_nm_dn                   ASL_NAME,
+           dec.CNTXT_NM_DN                        dec_context_name,
+           dec.CNTXT_ver_NR                       dec_context_version,
+           oc.ITEM_LONG_NM                        oc_preferred_name,
+           oc.VER_NR                              oc_version,
+           oc.ITEM_NM                             oc_long_name,
+           oc.CNTXT_NM_DN                         oc_context_name,
+           oc.ver_NR                              oc_context_version,
+           pt.item_long_nm                        pt_preferred_name,
+           pt.ver_NR                              pt_version,
+           pt.ITEM_NM                             pt_long_name,
+           pt.CNTXT_NM_DN                         pt_context_name,
+           pt.cntxt_VER_NR                        pt_context_version,
+           cd.ITEM_LONG_NM                              cd_preferred_name,
+           cd.ver_NR                              cd_version,
+           cd.ITEM_NM                        cd_long_name,
+           cd.CNTXT_NM_DN                         cd_context_name,
+           cd.cntxt_ver_NR                        cd_context_version,
+           de_conc.obj_cls_qual                   obj_class_qualifier,
+           de_conc.prop_qual                      property_qualifier,
+           oc.item_id                             oc_id,
+           pt.item_id                             prop_id,
+           cd.item_id                             cd_id,
+           dec.item_id                            dec_id,
+           NVL (dec.origin, dec.ORIGIN_ID_DN)     dec_origin,
+           oc.nci_idseq                           oc_idseq,
+           pt.nci_idseq                           prop_idseq,
+           oc.nci_idseq                           oc_condr_idseq,
+           pt.nci_idseq                           prop_condr_idseq
+      FROM DE          de,
+           ADMIN_ITEM  dec,
+           DE_CONC     de_conc,
+           ADMIN_ITEM  oc,
+           ADMIN_ITEM  pt,
+           ADMIN_ITEM  cd
+     WHERE     de.de_conc_item_id = dec.item_id
+           AND dec.item_id = de_conc.item_id
+           AND dec.ver_nr = de_conc.ver_nr
+           AND de_conc.obj_cls_item_id = oc.item_id
+           AND de_conc.prop_item_id = pt.item_id
+           AND de_conc.conc_dom_item_id = cd.item_id
+           AND de.de_conc_ver_nr = dec.ver_nr
+           AND de_conc.obj_cls_ver_nr = oc.ver_nr
+           AND de_conc.prop_ver_nr = pt.ver_nr
+           AND de_conc.conc_dom_ver_nr = cd.ver_nr
+           AND dec.admin_item_typ_id = 2
+           AND oc.admin_item_typ_id = 5
+           AND pt.admin_item_typ_id = 6
+           AND cd.admin_item_typ_id = 1;
+
+GRANT SELECT ON ONEDATA_WA.CDEBROWSER_DE_DEC_VIEW TO ONEDATA_RO;
+
+CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DE_EXCEL_GENERATOR_VIEW
+(DE_IDSEQ, CDE_ID, LONG_NAME, PREFERRED_NAME, 
+ PREFERRED_DEFINITION, DOC_TEXT, VERSION, ORIGIN, BEGIN_DATE, DE_CONTE_NAME, 
+ DE_CONTE_ITEM_ID, DE_CONTE_VERSION, DEC_ID, DEC_PREFERRED_NAME, DEC_VERSION, 
+ DEC_CONTE_NAME, DEC_CONTE_VERSION, VD_ID, VD_PREFERRED_NAME, VD_VERSION, 
+ VD_CONTE_NAME, VD_CONTE_VERSION, VD_TYPE, DTL_NAME, MAX_LENGTH_NUM, 
+ MIN_LENGTH_NUM, HIGH_VALUE_NUM, LOW_VALUE_NUM, DECIMAL_PLACE, FORML_NAME, 
+ VD_LONG_NAME, CD_ID, CD_PREFERRED_NAME, CD_VERSION, CD_CONTE_NAME, 
+ OC_ID, OC_PREFERRED_NAME, OC_LONG_NAME, OC_VERSION, OC_CONTE_NAME, 
+ PROP_ID, PROP_PREFERRED_NAME, PROP_LONG_NAME, PROP_VERSION, PROP_CONTE_NAME, 
+ DEC_LONG_NAME, DE_WK_FLOW_STATUS, REGISTRATION_STATUS, VALID_VALUES, REFERENCE_DOCS, 
+ CLASSIFICATIONS, DESIGNATIONS, DE_DERIVATION, VD_CONCEPTS, OC_CONCEPTS, 
+ PROP_CONCEPTS, REP_ID, REP_PREFERRED_NAME, REP_LONG_NAME, REP_VERSION, 
+ REP_CONTE_NAME, REP_CONCEPTS)
+BEQUEATH DEFINER
+AS 
+SELECT ai.NCI_IDSEQ                                   DE_IDSEQ,
+           ai.ITEM_ID                                     CDE_ID,
+           ai.ITEM_NM                                     LONG_NAME, 
+           ai.ITEM_LONG_NM                                PREFERRED_NAME, 
+           ai.ITEM_DESC                                   PREFERRED_DEFINITION,
+           de.PREF_QUEST_TXT                              DOC_TEXT,
+           ai.VER_NR                                      Version,
+           NVL (AI.ORIGIN, AI.ORIGIN_ID_DN)               ORIGIN,
+           AI.EFF_DT                                      BEGIN_DATE,
+           AI.CNTXT_NM_DN                                 DE_CONTE_NAME,
+           AI.CNTXT_ITEM_ID                               DE_CONTE_ITEM_ID,
+           AI.CNTXT_VER_NR                                DE_CONTE_VER_NR,
+           DEC_ID,
+           DEC_PREFERRED_NAME,
+           DEC_VERSION,
+           DEC_CONTEXT_NAME                               DEC_CONTE_NAME,
+           DEC_CONTEXT_VERSION                            DEC_CONTE_VERSION,
+           VAL_DOM_ITEM_ID                                VD_ID,
+           vdai.ITEM_LONG_NM                              VD_PREFERRED_NAME,
+           VAL_DOM_VER_NR                                 VD_VERSION,
+           vdai.CNTXT_NM_DN                               VD_CONTE_NAME,
+           vdai.CNTXT_VER_NR                              VD_CONTE_VERSION,
+           DECODE(VAL_DOM_TYP_ID,17,'Enumerated',18,'Non Enumerated')  VD_TYPE,--fixed
+           dt.NCI_CD                                      DTL_NAME,
+           VAL_DOM_HIGH_VAL_NUM                           HIGH_VALUE_NUM,--fixed
+           VAL_DOM_LOW_VAL_NUM                            LOW_VALUE_NUM,--fixed
+           VAL_DOM_MAX_CHAR                               MAX_LENGTH_NUM,--fixed
+           VAL_DOM_MIN_CHAR                               MIN_LENGTH_NUM,--fixed
+           NCI_DEC_PREC                                   DECIMAL_PLACE,
+           fmt.nci_cd                                     FORML_NAME,
+           vdai.ITEM_NM                                   VD_LONG_NAME,
+           CD_ID,
+           CD_PREFERRED_NAME,
+           CD_VERSION,
+           CD_CONTEXT_NAME                                CD_CONTE_NAME,
+           OC_ID,
+           OC_PREFERRED_NAME, 
+		   OC_LONG_NAME,          
+           OC_VERSION,
+           OC_CONTEXT_NAME                                OC_CONTE_NAME,
+           PROP_ID                                        PROP_ID,
+           PT_PREFERRED_NAME                              PROP_PREFERRED_NAME,           
+           PT_LONG_NAME                                   PROP_LONG_NAME,
+           PT_VERSION                                     PROP_VERSION,
+           PT_CONTEXT_NAME                                PROP_CONTE_NAME,
+           DEC_LONG_NAME,
+           ai.ADMIN_STUS_NM_DN                            DE_WK_FLOW_STATUS,
+           ai.REGSTR_STUS_NM_DN                           REGISTRATION_STATUS,
+           CAST (
+               MULTISET (
+                   SELECT pv.PERM_VAL_NM,
+                          pv.PERM_VAL_DESC_TXT,
+                          vm.item_desc,
+                          nci_11179.get_concepts (vm.item_id, vm.ver_nr)
+                          MeaningConcepts,
+                          pv.PERM_VAL_BEG_DT,--fixed
+                          pv.PERM_VAL_END_DT,--fixed
+                          vm.item_id,
+                          vm.ver_nr,
+                          DEF_DESC
+                     FROM PERM_VAL pv, ADMIN_ITEM vm, ALT_DEF def
+                    WHERE     pv.val_dom_item_id = vd.item_id
+                          AND pv.Val_dom_ver_nr = vd.ver_nr
+                          AND pv.NCI_VAL_MEAN_ITEM_ID = vm.ITEM_ID
+                          AND pv.NCI_VAL_MEAN_VER_NR = vm.VER_NR
+                          AND vm.NCI_IDSEQ = def.NCI_IDSEQ(+)
+                          AND vm.ADMIN_ITEM_TYP_ID = 53       --GF32647 JR1047
+                                                       )
+                   AS ONEDATA_WA.VALID_VALUE_LIST_T_245)             valid_values,
+           CAST (
+               MULTISET (
+                   SELECT rd.ref_nm,
+                          org.org_nm,
+                          --  ok.OBJ_KEY_DESC,
+                          ok.obj_key_desc,
+                          rd.ref_desc,
+                          rd.URL,
+                          TO_CHAR (rd.lang_id),
+                          rd.disp_ord
+                     FROM REF rd, obj_key ok, NCI_ORG org
+                    WHERE     rd.REF_TYP_ID = ok.obj_key_id(+)
+                          AND rd.ORG_ID = org.ENTTY_ID(+)
+                          --, sbr.organizations org
+                          AND de.item_id = rd.item_id
+                          AND de.ver_nr = rd.ver_nr)
+                   AS ONEDATA_WA.cdebrowser_rd_list_t)               "ReferenceDocumentsList",
+           CAST (
+               MULTISET (
+                   SELECT ONEDATA_WA.admin_component_with_id_t (csv.cs_item_id,
+                                                     csv.cs_cntxt_nm,
+                                                     csv.cs_cntxt_ver_nr,
+                                                     csv.cs_item_long_nm,
+                                                     csv.cs_ver_nr),
+                          csv.csi_item_nm,
+                          csv.csitl_nm,
+                          csv.csi_item_id,
+                          csv.csi_ver_nr
+                     FROM ONEDATA_WA.cdebrowser_cs_view_n csv
+                    WHERE     de.item_id = csv.de_item_id
+                          AND de.ver_nr = csv.de_ver_nr)
+                   AS ONEDATA_WA.cdebrowser_csi_list_t)              ClassificationsList,
+           CAST (
+               MULTISET (
+                   SELECT des.cntxt_nm_dn,
+                          TO_CHAR (des.cntxt_ver_nr),
+                          des.NM_DESC,
+                          ok.obj_key_desc,
+                          TO_CHAR (des.lang_id)
+                     FROM alt_nms des, obj_key ok
+                    WHERE     de.item_id = des.item_id
+                          AND de.ver_nr = des.ver_nr
+                          AND des.nm_typ_id = ok.obj_key_id(+))
+                   AS ONEDATA_WA.cdebrowser_altname_list_t)          designations,
+           ONEDATA_WA.derived_data_element_t (ccd.CRTL_NAME,
+                                   ccd.DESCRIPTION,
+                                   ccd.METHODS,
+                                   ccd.RULE,
+                                   ccd.CONCAT_CHAR,
+                                   "DataElementsList")    DE_DERIVATION,
+           CAST (
+               MULTISET (
+                     SELECT con.item_long_nm,
+                            con.item_nm,
+                            con.item_id,
+                            con.DEF_SRC,
+                            NVL (con.origin, con.ORIGIN_ID_DN),
+                            ok.OBJ_KEY_DESC,
+                            com.NCI_PRMRY_IND,
+                            com.NCI_ORD
+                       FROM cncpt_admin_item com,
+                            admin_item      con,
+                            obj_key         ok,
+                            CNCPT           cn
+                      WHERE     con.item_id = com.cncpt_item_id
+                            AND con.ver_nr = cn.ver_nr
+                            AND con.item_id = cn.item_id
+                            AND con.ver_nr = com.cncpt_ver_nr
+                            AND cn.EVS_SRC_ID = ok.OBJ_KEY_ID
+                            AND com.item_id = VDAI.ITEM_ID
+                            AND com.ver_nr = VDAI.VER_NR
+                   ORDER BY NCI_ORD DESC)
+                   AS ONEDATA_WA.Concepts_list_t)                    vd_concepts,
+           CAST (
+               MULTISET (
+                     SELECT con.item_long_nm,
+                            con.item_nm,
+                            con.item_id,
+                            con.DEF_SRC,
+                            NVL (con.origin, con.ORIGIN_ID_DN),
+                            ok.OBJ_KEY_DESC,
+                            DECODE(com.NCI_PRMRY_IND,1,'Yes',0,'No'),
+                            com.NCI_ORD
+                       FROM cncpt_admin_item com,
+                            admin_item      con,
+                            obj_key         ok,
+                            CNCPT           cn
+                      WHERE     con.item_id = com.cncpt_item_id
+                            AND con.ver_nr = cn.ver_nr
+                            AND con.item_id = cn.item_id
+                            AND con.ver_nr = com.cncpt_ver_nr
+                            AND cn.EVS_SRC_ID = ok.OBJ_KEY_ID
+                            AND com.item_id = OC_id
+                            AND com.ver_nr = OC_VERSION
+                   ORDER BY NCI_ORD DESC)
+                   AS ONEDATA_WA.Concepts_list_t)                    oc_concepts,
+           CAST (
+               MULTISET (
+                     SELECT con.item_long_nm,
+                            con.item_nm,
+                            con.item_id,
+                            con.DEF_SRC,
+                            NVL (con.origin, con.ORIGIN_ID_DN),
+                            ok.OBJ_KEY_DESC,
+                            DECODE(com.NCI_PRMRY_IND,1,'Yes',0,'No'),
+                            com.NCI_ORD
+                       FROM cncpt_admin_item com,
+                            admin_item      con,
+                            obj_key         ok,
+                            CNCPT           cn
+                      WHERE     con.item_id = com.cncpt_item_id
+                            AND con.ver_nr = cn.ver_nr
+                            AND con.item_id = cn.item_id
+                            AND con.ver_nr = com.cncpt_ver_nr
+                            AND cn.EVS_SRC_ID = ok.OBJ_KEY_ID
+                            AND com.item_id = PROP_ID
+                            AND com.ver_nr = PT_VERSION
+                   ORDER BY NCI_ORD DESC)
+                   AS ONEDATA_WA.Concepts_list_t)                    prop_concepts,
+           rep.item_id                                    rep_id,
+           rep.item_long_nm                               rep_preferred_name,
+           rep.item_nm                                    rep_long_name,
+           rep.ver_nr                                     rep_version,
+           rep.CNTXT_NM_DN                                rep_conte_name,
+           CAST (
+               MULTISET (
+                     SELECT con.item_long_nm,
+                            con.item_nm,
+                            con.item_id,
+                            con.DEF_SRC,
+                            NVL (con.origin, con.ORIGIN_ID_DN),
+                            ok.OBJ_KEY_DESC,
+                            com.NCI_PRMRY_IND,
+                            com.NCI_ORD
+                       FROM cncpt_admin_item com,
+                            admin_item      con,
+                            obj_key         ok,
+                            CNCPT           cn
+                      WHERE     con.item_id = com.cncpt_item_id
+                            AND con.ver_nr = cn.ver_nr
+                            AND con.item_id = cn.item_id
+                            AND con.ver_nr = com.cncpt_ver_nr
+                            AND cn.EVS_SRC_ID = ok.OBJ_KEY_ID
+                            AND com.item_id = rep.item_id
+                            AND com.ver_nr = rep.ver_nr
+                   ORDER BY NCI_ORD DESC)
+                   AS ONEDATA_WA.Concepts_list_t)                    rep_concepts
+      FROM ADMIN_ITEM                    ai,
+           ONEDATA_WA.cdebrowser_de_dec_view        dec,
+           admin_item                    vdai,
+           ADMIN_ITEM                    cd,
+           ADMIN_ITEM                    rep,
+           value_dom                     vd,
+           de                            de,
+           data_typ                      dt,
+           fmt,
+           ONEDATA_WA.CDEBROWSER_COMPLEX_DE_VIEW_N  ccd,
+           (SELECT rd.item_id,
+                   rd.ver_nr,
+                   rd.NCI_IDSEQ,
+                   ok.obj_key_desc,
+                   rd.disp_ord
+              FROM REF rd, obj_key ok
+             WHERE     rd.REF_TYP_ID = ok.obj_key_id
+                   AND ok.obj_key_desc = 'Preferred Question Text') rfd
+     WHERE     ai.item_id = dec.de_id
+           AND ai.ver_nr = dec.de_version
+           AND ai.nci_idseq = rfd.nci_idseq(+)
+           AND ai.item_id = de.item_id
+           AND ai.ver_nr = de.ver_nr
+           AND ai.admin_item_typ_id = 4
+           AND cd.admin_item_typ_id = 1
+           AND cd.item_id = vd.CONC_DOM_ITEM_ID
+           AND cd.ver_nr = vd.CONC_DOM_VER_NR
+           AND rep.ADMIN_ITEM_TYP_ID = 7
+           AND rep.item_id = vd.REP_CLS_ITEM_ID(+)
+           AND rep.ver_nr = vd.REP_CLS_VER_NR(+)
+           AND de.val_dom_item_id = vdai.item_id
+           AND de.val_dom_ver_nr = vdai.ver_nr
+           AND vdai.admin_item_typ_id = 3
+           AND vd.DTTYPE_ID = dt.DTTYPE_ID
+           AND fmt.fmt_id(+) = vd.VAL_DOM_FMT_ID
+           AND de.val_dom_item_id = vd.item_id
+           AND de.val_dom_ver_nr = vd.ver_nr
+           AND ai.item_id = ccd.item_id(+)
+           AND ai.ver_nr = ccd.ver_nr(+);
+
+GRANT SELECT ON ONEDATA_WA.DE_EXCEL_GENERATOR_VIEW TO ONEDATA_RO;
+
 CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DE_EXCEL_GENERATOR_VIEW
 (DE_IDSEQ, CDE_ID, LONG_NAME, PREFERRED_NAME, DOC_TEXT, 
  PREFERRED_DEFINITION, VERSION, ORIGIN, BEGIN_DATE, DE_CONTE_NAME, 
@@ -328,9 +670,9 @@ SELECT                                                   ---de.de_idseq,
              NVL (AI.LST_UPD_DT, AI.CREATION_DT)            "dateModified",
                ONEDATA_WA.CDEBROWSER_DEC_T (
                  DEC.DEC_ID,
-                 DEC.DEC_LONG_NAME,
-                 DEC.PREFERRED_DEFINITION,
                  DEC.DEC_PREFERRED_NAME,
+                 DEC.PREFERRED_DEFINITION,
+                 DEC.DEC_LONG_NAME,
                  DEC.DEC_VERSION,
                  DEC.ASL_NAME,
                  DEC.DEC_CONTEXT_NAME,
@@ -339,16 +681,16 @@ SELECT                                                   ---de.de_idseq,
                      DEC.CD_ID,
                      DEC.CD_CONTEXT_NAME,
                      DEC.CD_CONTEXT_VERSION,
-                     DEC.CD_LONG_NAME,
+                    DEC.CD_PREFERRED_NAME,
                      DEC.CD_VERSION,
-                     DEC.CD_PREFERRED_NAME),
+                     DEC.CD_LONG_NAME ),
               ONEDATA_WA.ADMIN_COMPONENT_WITH_CON_T (
                      DEC.OC_ID,
                      DEC.OC_CONTEXT_NAME,
                      DEC.OC_CONTEXT_VERSION,
-                     DEC.OC_LONG_NAME,
-                     DEC.OC_VERSION,
                      DEC.OC_PREFERRED_NAME,
+                     DEC.OC_VERSION,
+                     DEC.OC_LONG_NAME,
                      CAST (
                          MULTISET (
                                SELECT CON.ITEM_LONG_NM
@@ -383,9 +725,9 @@ SELECT                                                   ---de.de_idseq,
                      DEC.PROP_ID,
                      DEC.PT_CONTEXT_NAME,
                      DEC.PT_CONTEXT_VERSION,
-                     DEC.PT_LONG_NAME,
+                     DEC.PT_PREFERRED_NAME, 
                      DEC.PT_VERSION,
-                     DEC.PT_PREFERRED_NAME,
+                     DEC.PT_LONG_NAME,
                      CAST (
                          MULTISET (
                                SELECT CON.ITEM_LONG_NM
@@ -439,7 +781,7 @@ SELECT                                                   ---de.de_idseq,
                  DATA_TYP.DTTYPE_NM,
                  DECODE (VD.VAL_DOM_TYP_ID,
                          17, 'Enumerated',
-                         18, 'Non-enumerated'),
+                         18, 'Non Enumerated'),
                   UOM.UOM_NM,
                   FMT.FMT_NM,
                  VD.VAL_DOM_MAX_CHAR,
@@ -532,7 +874,7 @@ SELECT                                                   ---de.de_idseq,
                                   AND PV.NCI_VAL_MEAN_ITEM_ID = VM.ITEM_ID
                                   AND PV.NCI_VAL_MEAN_VER_NR = VM.VER_NR
                                   AND VM.ADMIN_ITEM_TYP_ID = 53
-                         ORDER BY PV.PERM_VAL_NM,VM.ITEM_ID 
+                         ORDER BY PV.PERM_VAL_NM,VM.ITEM_ID
                          )
                          AS ONEDATA_WA.MDSR_749_PV_VD_LIST_T)
                          ,
@@ -566,7 +908,7 @@ SELECT                                                   ---de.de_idseq,
                                   AND COM.CNCPT_VER_NR = CNCPT.VER_NR(+)
                          ORDER BY NCI_ORD DESC, CON.ITEM_ID, CNCPT.EVS_SRC)
                          AS ONEDATA_WA.CONCEPTS_LIST_T))               "ValueDomain" ,
---     --select     
+--     --select
        CAST (
                  MULTISET (
                        SELECT RD.REF_NM,
@@ -666,6 +1008,9 @@ WHERE        AI.ITEM_ID = DEC.DE_ID
              AND VD.VAL_DOM_FMT_ID = FMT.FMT_ID(+)
              AND VD.UOM_ID=UOM.UOM_ID(+)
     ORDER BY  AI.CNTXT_NM_DN ,AI.ITEM_ID, AI.VER_NR;
+
+
+GRANT SELECT ON ONEDATA_WA.DE_CDE1_XML_GENERATOR_749VW TO ONEDATA_RO;
 
 GRANT SELECT on DE_EXCEL_GENERATOR_VIEW to ONEDATA_RO;
 GRANT EXECUTE,DEBUG on VALID_VALUE_T_245 to ONEDATA_RO; 
