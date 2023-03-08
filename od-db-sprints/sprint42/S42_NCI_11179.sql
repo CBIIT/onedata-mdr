@@ -10,6 +10,7 @@ function getSelectedCartName (hookinput in t_hookinput) return varchar2;
 FUNCTION getPrimaryConceptName(v_nm in varchar2) return varchar2;
 procedure spAddToCart ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2, v_src varchar2);
 procedure spRetainCart ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spDownloadCart ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spRetainDefaultCart ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spAddToCartOld ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2, v_src varchar2);
 procedure spAddToCartGuest ( v_data_in in clob, v_data_out out clob);
@@ -238,6 +239,36 @@ for cur in (select * from VW_LIST_USR_CART_NM where CNTCT_SECU_ID = v_usr_id ) l
      end if;
 end;
 
+
+procedure getGuestCartDownload  (hookOutput in out t_hookoutput, row_ori in t_row, v_usr_id in varchar2) 
+as
+rows t_rows;
+row t_row;
+v_found boolean;   showrowset	t_showablerowset;
+question t_question;
+  answer t_answer;
+  answers t_answers;
+begin
+        rows := t_rows();
+        v_found := false;
+
+		   rows.extend;
+		   rows (rows.last) := row_ori;
+	
+       	 showrowset := t_showablerowset (rows, 'User Cart List (for Download)', 2, 'single');
+       	 hookoutput.showrowset := showrowset;
+          
+ ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Click Link to DownLoad');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+
+    QUESTION               := T_QUESTION('Click Link to Download' , ANSWERS);
+
+        hookOutput.question := Question;
+     --   hookOutput.message := 'Please select cart. ';
+    
+end;
 procedure getCartNameSelectionFormDelete  ( hookOutput in out t_hookoutput, v_usr_id in varchar2) 
 as
 rows t_rows;
@@ -851,6 +882,45 @@ end if;
 END;
 
 
+PROCEDURE spDownloadCart (
+    v_data_in IN CLOB,
+    v_data_out OUT CLOB,
+    v_usr_id  varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    rows  t_rows;
+    row_ori t_row;
+    v_item_id  number;
+    v_ver_nr number(4,2);
+    v_temp integer;
+    v_add integer :=0;
+    v_already integer :=0;
+    i integer := 0;
+    v_item_typ integer;
+ --   v_src varchar2(50);
+   v_cart_nm varchar2(255);
+begin
+    hookinput := ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber  := hookinput.invocationnumber;
+    hookoutput.originalrowset    := hookinput.originalrowset;
+   -- raise_application_error(-20000,v_user_id);
+               row_ori := hookInput.originalRowset.rowset(1);
+    
+
+
+
+nci_11179.getGuestCartDownload(hookOutput,row_ori, v_usr_id);
+
+    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+ --      nci_util.debugHook('GENERAL',v_data_out);
+
+END;
+
 PROCEDURE spRetainDefaultCart (
     v_data_in IN CLOB,
     v_data_out OUT CLOB,
@@ -927,7 +997,7 @@ begin
             ANSWER                     := T_ANSWER(1, 1, 'Add to Guest User Cart' );
             ANSWERS.EXTEND;
             ANSWERS(ANSWERS.LAST):= ANSWER;
-            QUESTION             := T_QUESTION('Specify a name that is easily remembered to store selections in your user cart. Please use the same cart name each time you want to add items to the same cart during your daily use. Guest user carts and their contents are deleted at 11:00 PM ET each day.' , ANSWERS);            HOOKOUTPUT.QUESTION    := QUESTION;
+            QUESTION             := T_QUESTION('Specify a name that is easily remembered to store selections in your user cart. Please use the same cart name each time you want to add items to the same cart during your daily use. Cart items will be deleted after 7 days.' , ANSWERS);            HOOKOUTPUT.QUESTION    := QUESTION;
             forms                := t_forms();
             form1                := t_form('User Cart (Hook)', 2,1);
             forms.extend;
