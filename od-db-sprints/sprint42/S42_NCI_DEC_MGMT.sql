@@ -1635,14 +1635,18 @@ v_out integer;
 v_long_nm  varchar2(30);
 v_nm varchar2(255);
 v_def varchar2(4000);
-
 begin
 
             ihook.setColumnValue(rowform, 'ITEM_' || v_idx  ||'_ID','');
                 ihook.setColumnValue(rowform, 'ITEM_' || v_idx || '_VER_NR', '');
 
-    for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
-    where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int = v_item_nm and a.admin_item_typ_id = v_item_typ) loop
+
+    
+    for cur in (select ext.* from nci_admin_item_ext ext,admin_item a, stus_mstr m
+    where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int = v_item_nm and a.admin_item_typ_id = v_item_typ
+    and a.admin_stus_id = m.stus_id
+    order by nci_disp_ordr asc, a.item_id desc) loop
+              
                  ihook.setColumnValue(rowform, 'ITEM_' || v_idx  ||'_ID',cur.item_id);
                  v_item_id := cur.item_id;
                  v_item_ver_nr := cur.ver_nr;
@@ -1650,6 +1654,7 @@ begin
                 ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_LONG_NM', cur.cncpt_concat);
                 ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_DEF',  cur.CNCPT_CONCAT_DEF);
                 ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_NM', cur.CNCPT_CONCAT_NM);
+                exit;
 
     end loop;
  --   if (v_item_typ = 6) then
