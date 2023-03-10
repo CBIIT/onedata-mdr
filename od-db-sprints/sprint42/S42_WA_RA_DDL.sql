@@ -370,7 +370,7 @@ STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, CREAT_DT, CREAT_USR_ID, LST_UPD_US
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ver_nr || '\&formatid=104\&type=csi\\Legacy_XML' ITEM_RPT_URL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ver_nr || '\&formatid=103\&type=csi\\Legacy_Excel' ITEM_RPT_EXCEL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ver_nr || '\&formatid=114\&type=csi\\Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
-'TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”.' CHNG_NOTES
+'******** TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”. ********' CHNG_NOTES
 from 
 ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='Context' group by x.p_item_id , 
 x.p_item_ver_nr) y , nci_mdr_cntrl c
@@ -383,7 +383,7 @@ STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, CREAT_DT, CREAT_USR_ID, LST_UPD_US
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=104\&type=csi\\Legacy_XML' ITEM_RPT_URL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=103\&type=csi\\Legacy_Excel' ITEM_RPT_EXCEL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=114\&type=csi\\Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
-'TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”.' CHNG_NOTES
+'******** TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”. ********' CHNG_NOTES
  from 
 ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CS' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c
@@ -397,7 +397,7 @@ ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR
  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=104\&type=csi\\Legacy_XML' ITEM_RPT_URL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=103\&type=csi\\Legacy_Excel' ITEM_RPT_EXCEL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=114\&type=csi\\Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
-'TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”.'  CHNG_NOTES
+'******** TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”. ********'  CHNG_NOTES
 from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c
  where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is null and csi.CS_ITEM_ID is not null and
@@ -412,7 +412,7 @@ ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=104\&type=csi\\Legacy_XML' ITEM_RPT_URL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=103\&type=csi\\Legacy_Excel' ITEM_RPT_EXCEL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=114\&type=csi\\Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
-'TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”.' CHNG_NOTES
+'******** TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”. ********' CHNG_NOTES
  from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c
  where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null and csi.CS_ITEM_ID is not null and
@@ -426,9 +426,9 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
 	   
   CREATE OR REPLACE  VIEW VW_LIST_USR_CART_NM AS
   SELECT CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID, GUEST_USR_NM, CART_NM || ' : ' || CNTCT_SECU_ID CART_USR_NM, max(nvl(retain_ind,0)) RETAIN_IND, 
-  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '\&p_guest_usr_nm=' || trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'\&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '\&formatid=104\&type=usr\\Legacy_XML' ITEM_RPT_URL ,
-  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '\&p_guest_usr_nm=' ||  trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'\&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '\&formatid=103\&type=usr\\Legacy_Excel' ITEM_RPT_EXCEL ,
-  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '\&p_guest_usr_nm=' ||  trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'\&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '\&formatid=114\&type=usr\\Legacy_Prior_Excel' ITEM_RPT_PRIOR_EXCEL ,
+  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '\&p_guest_usr_nm=' || trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'\&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '\&formatid=104\&type=usr\\Legacy_CDE_XML' ITEM_RPT_URL ,
+  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '\&p_guest_usr_nm=' ||  trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'\&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '\&formatid=103\&type=usr\\Legacy_CDE_Excel' ITEM_RPT_EXCEL ,
+  c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '\&p_guest_usr_nm=' ||  trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'\&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '\&formatid=114\&type=usr\\Legacy_Prior_CDE_Excel' ITEM_RPT_PRIOR_EXCEL ,
            user CREAT_USR_ID,
             user LST_UPD_USR_ID,
             0 FLD_DELETE,
