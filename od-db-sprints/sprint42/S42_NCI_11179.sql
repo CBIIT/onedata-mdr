@@ -2295,7 +2295,7 @@ procedure spCreateSubtypeVerNCI (actions in out t_actions, v_admin_item admin_it
     v_cur        number;
     v_temp        number;
     v_col_val       varchar2(4000);
-
+    row_upd t_row;
     v_meta_col_cnt      integer;
     v_meta_desc_tab      dbms_sql.desc_tab;
 begin
@@ -2453,12 +2453,22 @@ begin
 /*  If Form  */
     if v_admin_item.admin_item_typ_id = 54 then
     -- Add Modules
+        action_rows := t_rows();
      for cur2 in (select c_item_id, c_item_ver_nr, disp_ord from nci_admin_item_rel where p_item_id = v_admin_item.item_id and p_item_ver_nr = v_admin_item.ver_nr
      and nvl(fld_delete,0) = 0) loop
         nci_11179.spCopyModuleNCI(actions, cur2.c_item_id, cur2.c_item_ver_nr, v_admin_item.item_id, v_admin_item.item_id, v_admin_item.item_id, v_version, cur2.disp_ord, 'V', null, null, v_user_id);
+        row_upd := t_row();
+        ihook.setcolumnValue(row_upd,'ITEM_ID', cur2.c_item_id);
+        ihook.setcolumnValue(row_upd,'VER_NR', cur2.c_item_ver_nr);
+        ihook.setcolumnValue(row_upd,'CURRNT_VER_IND', 0);
+            action_rows.extend; action_rows(action_rows.last) := row_upd;
+        
      end loop;
      -- Add protocols
-
+-- Current version ind of the current modules to be set to 0
+    action := t_actionRowset(action_rows, 'Generic AI Relationship',2, 22, 'update');
+        actions.extend; actions(actions.last) := action;
+    
         action_rows := t_rows();
         v_table_name := 'NCI_ADMIN_ITEM_REL';
         v_meta_col_cnt := TEMPLATE_11179.getColumnCount(v_table_name);
