@@ -1,6 +1,6 @@
 
   CREATE or replace VIEW VW_NCI_CRDC_DE AS
-  SELECT ADMIN_ITEM.ITEM_ID,
+  SELECT distinct ADMIN_ITEM.ITEM_ID,
            ADMIN_ITEM.VER_NR,
           CAST('.' || ADMIN_ITEM.ITEM_ID || '.' AS VARCHAR2(4000))    ITEM_ID_STR,
            ADMIN_ITEM.ITEM_NM,
@@ -72,8 +72,6 @@
 	   and csi.cs_item_id = 10466051 and r.rel_typ_id = 65
 --and ADMIN_ITEM.CNTXT_NM_DN = 'CRDC'
 and admin_item.regstr_stus_id = 2;
-
-
 
   CREATE OR REPLACE VIEW VW_NCI_DE_VM_ALT_NMS AS
   SELECT   DE.ITEM_ID  DE_ITEM_ID, 
