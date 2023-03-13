@@ -471,13 +471,13 @@ drop materialized view vw_cntxt;
 drop materialized view MVW_FORM_NODE_DE_REL;
 
   CREATE MATERIALIZED VIEW MVW_FORM_NODE_DE_REL AS 
-  SELECT  ak.CREAT_DT, 
-           ak.CREAT_USR_ID,
-           ak.LST_UPD_USR_ID,
-           ak.LST_UPD_DT,
-           ak.S2P_TRN_DT,
-           ak.LST_DEL_DT,
-           ak.FLD_DELETE,
+  SELECT  distinct sysdate CREAT_DT, 
+           'ONEDATA' CREAT_USR_ID,
+           'ONEDATA' LST_UPD_USR_ID,
+           sysdate LST_UPD_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_DEL_DT,
+           0 FLD_DELETE,
            ai.ITEM_NM,
            ai.ITEM_LONG_NM,
            ai.ITEM_ID,
@@ -499,17 +499,16 @@ drop materialized view MVW_FORM_NODE_DE_REL;
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
 	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
-and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
-and nvl(ai.CURRNT_VER_IND,0) = 1 and nvl(ak.fld_delete,0) = 0
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr 
+and nvl(ak.fld_delete,0) = 0
     UNION
-  SELECT  ak.CREAT_DT, 
-           ak.CREAT_USR_ID,
-           ak.LST_UPD_USR_ID,
-           ak.LST_UPD_DT,
-           ak.S2P_TRN_DT,
-           ak.LST_DEL_DT,
-           ak.FLD_DELETE,
+  SELECT  distinct sysdate CREAT_DT, 
+           'ONEDATA' CREAT_USR_ID,
+           'ONEDATA' LST_UPD_USR_ID,
+           sysdate LST_UPD_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_DEL_DT,
+           0 FLD_DELETE,
            ai.ITEM_NM,
            ai.ITEM_LONG_NM,
            ai.ITEM_ID,
@@ -532,12 +531,13 @@ and nvl(ai.CURRNT_VER_IND,0) = 1 and nvl(ak.fld_delete,0) = 0
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
 	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 	   and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
-and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
-and nvl(ai.CURRNT_VER_IND,0) = 1 and nvl(ak.fld_delete,0) = 0;
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0;
   
 
 set escape on;
+
+drop MATERIALIZED VIEW VW_FORM_TREE_CDE;
+
 
 
   CREATE MATERIALIZED VIEW VW_FORM_TREE_CDE
@@ -553,7 +553,9 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_v
 from 
 ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Protocol' group by x.p_item_id , 
 x.p_item_ver_nr) y , nci_mdr_cntrl c
- where ADMIN_ITEM_TYP_ID = 50 and item_id = y.p_item_id and ver_nr = y.p_item_ver_nr and cntxt_nm_dn not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
+ where ADMIN_ITEM_TYP_ID = 50 and item_id = y.p_item_id and ver_nr = y.p_item_ver_nr 
+ --and cntxt_nm_dn not in ('TEST', 'TRAINING') 
+ and c.param_nm='DOWNLOAD_HOST'
  union
 select  r.P_ITEM_ID, r.P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM, 'Form - ' || 
 ITEM_NM || ' (' || y.cnt || ')', ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
@@ -567,18 +569,21 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_v
  from 
 ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Form' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c, nci_admin_item_rel r
- where ADMIN_ITEM_TYP_ID = 54 and item_id = y.p_item_id and ver_nr = y.p_item_ver_nr and admin_stus_nm_dn ='RELEASED' and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
+ where ADMIN_ITEM_TYP_ID = 54 and item_id = y.p_item_id and ver_nr = y.p_item_ver_nr
+ --and admin_stus_nm_dn ='RELEASED' 
+ --and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') 
+ and c.param_nm='DOWNLOAD_HOST'
  and ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr and r.rel_typ_id = 60;
  
  
   CREATE or replace VIEW VW_NCI_PROT_DE_REL AS 
-  SELECT  ak.CREAT_DT, 
-           ak.CREAT_USR_ID,
-           ak.LST_UPD_USR_ID,
-           ak.LST_UPD_DT,
-           ak.S2P_TRN_DT,
+  SELECT  distinct sysdate CREAT_DT, 
+           'ONEDATA' CREAT_USR_ID,
+           'ONEDATA' LST_UPD_USR_ID,
+           sysdate LST_UPD_DT,
+            sysdate S2P_TRN_DT,
            ak.LST_DEL_DT,
-           ak.FLD_DELETE,
+           0 FLD_DELETE,
            prot.P_ITEM_ID PROT_ITEM_ID,
            prot.P_ITEM_VER_NR PROT_VER_NR,
            ak.c_item_id item_id,
@@ -586,5 +591,6 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c, nci_admin_item_rel r
            FROM NCI_ADMIN_ITEM_REL r, NCI_ADMIN_ITEM_REL_ALT_KEY ak , nci_admin_item_rel prot
      WHERE  ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
 	   r.rel_typ_id = 61 
-  and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60;
+  and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
+  and nvl(ak.fld_delete,0) = 0 ;
 
