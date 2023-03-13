@@ -42,7 +42,7 @@
           EXAMPL                           CRDC_EXMPL,
             vd.VAL_DOM_TYP_ID	  FROM ADMIN_ITEM,
            NCI_ADMIN_ITEM_EXT  ext,
-	      de, VALUE_DOM vd,
+	      de, VALUE_DOM vd, nci_admin_item_rel r, vw_clsfctn_schm_item csi,
        (  SELECT item_id, ver_nr,  
        max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS', ref_desc) ) CODE_INSTR_REF_DESC,
  --      max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS',ref_desc) ) CODE_INSTR_REF_DESC,
@@ -68,7 +68,9 @@
            AND ADMIN_ITEM.VER_NR = CRDC_DEF.VER_NR(+)
  AND ADMIN_ITEM.ITEM_ID = CODE_INSTR.ITEM_ID(+)
            AND ADMIN_ITEM.VER_NR = CODE_INSTR.VER_NR(+)
-and ADMIN_ITEM.CNTXT_NM_DN = 'CRDC'
+	   and admin_item.item_id = r.c_item_id and admin_item.ver_nr = r.c_item_ver_nr and r.p_item_id = csi.item_id and r.p_item_ver_nr = csi.ver_nr 
+	   and csi.cs_item_id = 10466051 and r.rel_typ_id = 65
+--and ADMIN_ITEM.CNTXT_NM_DN = 'CRDC'
 and admin_item.regstr_stus_id = 2;
 
 
