@@ -497,7 +497,7 @@ drop materialized view vw_cntxt;
            FROM NCI_ADMIN_ITEM_REL r, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
-	   r.rel_typ_id = 6i and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
 and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
 and nvl(ai.CURRNT_VER_IND,0) = 1 and nvl(ak.fld_delete,0) = 0
@@ -529,37 +529,42 @@ and nvl(ai.CURRNT_VER_IND,0) = 1 and nvl(ak.fld_delete,0) = 0
            FROM NCI_ADMIN_ITEM_REL r, nci_admin_item_rel prot, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
-	   r.rel_typ_id = 6i and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 	   and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
 and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
-and nvl(ai.CURRNT_VER_IND,0) = 1 and nvl(ak.fld_delete,0) = 0
+and nvl(ai.CURRNT_VER_IND,0) = 1 and nvl(ak.fld_delete,0) = 0;
   
 
-  CREATE  VIEW VW_FORM_TREE_CDE
+set escape on;
+
+
+  CREATE or replace VIEW VW_FORM_TREE_CDE
   AS select null P_ITEM_ID, null P_ITEM_VER_NR, ITEM_ID, VER_NR, ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ITEM_LONG_NM,  ITEM_NM || ': ' 
 || ITEM_DESC  || ' (' || y.cnt || ')' ITEM_NM , ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
 STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT,
- REGSTR_AUTH_ID,  NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  CREAT_USR_ID_X, LST_UPD_USR_ID_X ,
+ REGSTR_AUTH_ID,  NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  CREAT_USR_ID_X, LST_UPD_USR_ID_X 
+ /*,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ver_nr || '&formatid=104&type=form\Legacy_XML' ITEM_RPT_URL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ver_nr || '&formatid=103&type=form\Legacy_Excel' ITEM_RPT_EXCEL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ver_nr || '&formatid=114&type=form\Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
-'******** TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”. ********' CHNG_NOTES
+'******** TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”. ********' CHNG_NOTES */
 from 
-ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Context' group by x.p_item_id , 
+ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Form' group by x.p_item_id , 
 x.p_item_ver_nr) y , nci_mdr_cntrl c
  where ADMIN_ITEM_TYP_ID = 50 and item_id = y.p_item_id (+) and ver_nr = y.p_item_ver_nr (+) and cntxt_nm_dn not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
  union
-select  r.P_ITEM_ID, r.P_ITEM_VER_NR, ITEM_ID, VER_NR, ITEM_DESC, CNTXT_ITEM_ID, CNTXT_VER_NR, ITEM_LONG_NM, 'Form - ' || 
+select  r.P_ITEM_ID, r.P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM, 'Form - ' || 
 ITEM_NM || ' (' || y.cnt || ')', ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
-STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT,
- REGSTR_AUTH_ID,  NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  CREAT_USR_ID_X, LST_UPD_USR_ID_X ,
+STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
+ REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN,ai. REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X
+ /*,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=104&type=form\Legacy_XML' ITEM_RPT_URL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=103&type=form\Legacy_Excel' ITEM_RPT_EXCEL ,
 c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=114&type=form\Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
-'******** TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”. ********' CHNG_NOTES
+'******** TO SEE THIS NODE’s CDEs SWITCH “Details” TO  "View Associated CDEs”. ********' CHNG_NOTES */
  from 
-ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='CS' group by x.p_item_id , 
+ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Protocol' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c, nci_admin_item_rel r
  where ADMIN_ITEM_TYP_ID = 54 and item_id = y.p_item_id and ver_nr = y.p_item_ver_nr and admin_stus_nm_dn ='RELEASED' and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
  and ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr and r.rel_typ_id = 60;
