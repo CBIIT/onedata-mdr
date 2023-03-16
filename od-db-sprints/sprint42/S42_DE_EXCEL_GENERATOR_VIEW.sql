@@ -175,7 +175,7 @@ SELECT ai.NCI_IDSEQ                                   DE_IDSEQ,
                             con.DEF_SRC,
                             NVL (con.origin, con.ORIGIN_ID_DN),
                             ok.OBJ_KEY_DESC,
-                            com.NCI_PRMRY_IND,
+                            decode(com.NCI_PRMRY_IND,'1','Yes','0','No'),
                             com.NCI_ORD
                        FROM cncpt_admin_item com,
                             admin_item      con,
