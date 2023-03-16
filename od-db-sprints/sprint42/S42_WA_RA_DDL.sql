@@ -422,6 +422,7 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
  
  
 
+set escape on;
 	   
 	   
   CREATE OR REPLACE  VIEW VW_LIST_USR_CART_NM AS
