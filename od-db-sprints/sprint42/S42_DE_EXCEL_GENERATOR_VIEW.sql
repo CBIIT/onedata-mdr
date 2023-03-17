@@ -1,4 +1,36 @@
 --Related to JIRA859 -- 
+create or replace function get_concepts859(v_item_id in number, v_ver_nr in number) return varchar2 is
+cursor con is
+select c.item_long_nm, cai.NCI_CNCPT_VAL
+from cncpt_admin_item cai, admin_item c
+where cai.item_id = v_item_id and cai.ver_nr = v_ver_nr
+and cai.cncpt_item_id = c.item_id and cai.cncpt_ver_nr = c.ver_nr and c.admin_item_typ_id = 49
+order by  nci_ord desc;
+
+v_name varchar2(255);
+
+begin
+    for c_rec in con loop
+        if v_name is null then
+            v_name := c_rec.item_long_nm;
+
+            /* Check if Integer Concept */
+            if c_rec.item_long_nm = 'C45255' then
+                v_name := v_name||'::'||c_rec.nci_cncpt_val;
+            end if;
+        else
+            v_name := v_name||','||c_rec.item_long_nm;
+
+            /* Check if Integer Concept */
+            if c_rec.item_long_nm = 'C45255' then
+                v_name := v_name||'::'||c_rec.nci_cncpt_val;
+            end if;
+        end if;
+
+    end loop;
+return v_name;
+end;
+GRANT DEBUG, EXECUTE on get_concepts859 to ONEDATA_RO;
 CREATE OR REPLACE FORCE VIEW ONEDATA_WA.CDEBROWSER_COMPLEX_DE_VIEW_N
 (ITEM_ID, VER_NR, CRTL_NAME, DESCRIPTION, METHODS, 
  RULE, CONCAT_CHAR, "DataElementsList")
@@ -33,8 +65,8 @@ SELECT cde.ITEM_ID,
      WHERE cde.DERV_TYP_ID = ctl.OBJ_KEY_ID AND ctl.OBJ_TYP_ID = 21;
 
 CREATE OR REPLACE FORCE VIEW ONEDATA_WA.DE_EXCEL_GENERATOR_VIEW
-(DE_IDSEQ, CDE_ID, LONG_NAME, PREFERRED_NAME, 
- PREFERRED_DEFINITION, DOC_TEXT, VERSION, ORIGIN, BEGIN_DATE, DE_CONTE_NAME, 
+(DE_IDSEQ, CDE_ID, LONG_NAME, PREFERRED_NAME, PREFERRED_DEFINITION, 
+ DOC_TEXT, VERSION, ORIGIN, BEGIN_DATE, DE_CONTE_NAME, 
  DE_CONTE_ITEM_ID, DE_CONTE_VERSION, DEC_ID, DEC_PREFERRED_NAME, DEC_VERSION, 
  DEC_CONTE_NAME, DEC_CONTE_VERSION, VD_ID, VD_PREFERRED_NAME, VD_VERSION, 
  VD_CONTE_NAME, VD_CONTE_VERSION, VD_TYPE, DTL_NAME, MAX_LENGTH_NUM, 
@@ -72,10 +104,10 @@ SELECT ai.NCI_IDSEQ                                   DE_IDSEQ,
            vdai.CNTXT_VER_NR                              VD_CONTE_VERSION,
            DECODE(VAL_DOM_TYP_ID,17,'Enumerated',18,'Non Enumerated')  VD_TYPE,--fixed
            dt.NCI_CD                                      DTL_NAME,
-           VAL_DOM_HIGH_VAL_NUM                           HIGH_VALUE_NUM,--fixed
-           VAL_DOM_LOW_VAL_NUM                            LOW_VALUE_NUM,--fixed
-           VAL_DOM_MAX_CHAR                               MAX_LENGTH_NUM,--fixed
-           VAL_DOM_MIN_CHAR                               MIN_LENGTH_NUM,--fixed
+           VAL_DOM_MAX_CHAR                            MAX_LENGTH_NUM , --fixed
+           VAL_DOM_MIN_CHAR                           MIN_LENGTH_NUM,
+           VAL_DOM_HIGH_VAL_NUM                               HIGH_VALUE_NUM,--fixed
+           VAL_DOM_LOW_VAL_NUM                              LOW_VALUE_NUM,                
            NCI_DEC_PREC                                   DECIMAL_PLACE,
            fmt.nci_cd                                     FORML_NAME,
            vdai.ITEM_NM                                   VD_LONG_NAME,
@@ -101,7 +133,7 @@ SELECT ai.NCI_IDSEQ                                   DE_IDSEQ,
                    SELECT pv.PERM_VAL_NM,
                           pv.PERM_VAL_DESC_TXT,
                           vm.item_desc,
-                          nci_11179.get_concepts (vm.item_id, vm.ver_nr)
+                          get_concepts859 (vm.item_id, vm.ver_nr)
                           MeaningConcepts,
                           pv.PERM_VAL_BEG_DT,--fixed
                           pv.PERM_VAL_END_DT,--fixed
@@ -249,7 +281,7 @@ SELECT ai.NCI_IDSEQ                                   DE_IDSEQ,
                             con.DEF_SRC,
                             NVL (con.origin, con.ORIGIN_ID_DN),
                             ok.OBJ_KEY_DESC,
-                            com.NCI_PRMRY_IND,
+                             DECODE(com.NCI_PRMRY_IND,1,'Yes',0,'No'),
                             com.NCI_ORD
                        FROM cncpt_admin_item com,
                             admin_item      con,
@@ -303,6 +335,7 @@ SELECT ai.NCI_IDSEQ                                   DE_IDSEQ,
            AND de.val_dom_ver_nr = vd.ver_nr
            AND ai.item_id = ccd.item_id(+)
            AND ai.ver_nr = ccd.ver_nr(+);
+
 
 GRANT SELECT on CDEBROWSER_COMPLEX_DE_VIEW_N to ONEDATA_RO;
 GRANT SELECT on DE_EXCEL_GENERATOR_VIEW to ONEDATA_RO;
