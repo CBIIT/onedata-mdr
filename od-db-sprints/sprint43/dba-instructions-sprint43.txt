@@ -2,3 +2,4 @@
 
 -- Run as ONEDATA_WA DDL scripts
 
+S43_PROC_SAG_LOAD_CONCEPT_SYNONYMS.sql
