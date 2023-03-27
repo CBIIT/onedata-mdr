@@ -111,4 +111,5 @@ and t1.NM_TYP_ID = 1064 --Synonym
 and t1.CNTXT_ITEM_ID = 20000000024
 and t1.CNTXT_VER_NR = 1
 ;
+commit;
 alter table ALT_NMS enable all triggers;
