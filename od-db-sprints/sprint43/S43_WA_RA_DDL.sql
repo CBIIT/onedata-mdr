@@ -204,8 +204,8 @@ c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
 ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Form' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c, nci_admin_item_rel r
  where ADMIN_ITEM_TYP_ID = 54 and item_id = y.p_item_id and ver_nr = y.p_item_ver_nr
- --and admin_stus_nm_dn ='RELEASED' 
- --and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') 
+and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+ and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') 
  and c.param_nm='DOWNLOAD_HOST'
  and ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr and r.rel_typ_id = 60
  union
