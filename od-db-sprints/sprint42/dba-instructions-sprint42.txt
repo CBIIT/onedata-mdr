@@ -2,8 +2,9 @@
 S42_MD.sql
 
 -- Run as ONEDATA_RA DDL scripts
-S42_WA_RA_DDL.sql
 S42_RA.sql
+S42_WA_RA_DDL.sql
+
 
 -- Run as ONEDATA_WA DDL scripts
 S42_WA_RA_DDL.sql
