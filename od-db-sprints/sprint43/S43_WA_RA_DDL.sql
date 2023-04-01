@@ -1,3 +1,104 @@
+drop MATERIALIZED VIEW MVW_FORM_NODE_DE_REL;
+  
+  CREATE MATERIALIZED VIEW MVW_FORM_NODE_DE_REL
+  AS SELECT  distinct sysdate CREAT_DT, 
+           'ONEDATA' CREAT_USR_ID,
+           'ONEDATA' LST_UPD_USR_ID,
+           sysdate LST_UPD_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_DEL_DT,
+           0 FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           r.P_ITEM_ID,  -- Form
+           r.P_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           de.PREF_QUEST_TXT, 
+	   e.USED_BY,
+	   'Form' LVL
+           FROM NCI_ADMIN_ITEM_REL r, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
+	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr 
+and nvl(ak.fld_delete,0) = 0 and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+    UNION
+  SELECT  distinct sysdate CREAT_DT, 
+           'ONEDATA' CREAT_USR_ID,
+           'ONEDATA' LST_UPD_USR_ID,
+           sysdate LST_UPD_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_DEL_DT,
+           0 FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           prot.P_ITEM_ID,  -- Protocol
+           prot.P_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           de.PREF_QUEST_TXT, 
+	   e.USED_BY,
+	   'Protocol' LVL
+           FROM NCI_ADMIN_ITEM_REL r, nci_admin_item_rel prot, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
+	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+	   and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0 and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+union
+  SELECT  distinct sysdate CREAT_DT, 
+           'ONEDATA' CREAT_USR_ID,
+           'ONEDATA' LST_UPD_USR_ID,
+           sysdate LST_UPD_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_DEL_DT,
+           0 FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           protai.CNTXT_ITEM_ID,  -- Context
+           protai.CNTXT_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           de.PREF_QUEST_TXT, 
+	   e.USED_BY,
+	   'Context' LVL
+           FROM NCI_ADMIN_ITEM_REL r, nci_admin_item_rel prot, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e,
+	   admin_item protai
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
+	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+	   and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
+	   and prot.p_item_id = protai.item_id and prot.P_item_ver_nr = protai.ver_nr and protai.admin_item_typ_id = 50
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0 and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING');
+
 
 drop materialized view MVW_CSI_NODE_DE_REL;
 
