@@ -30,8 +30,9 @@ drop MATERIALIZED VIEW MVW_FORM_NODE_DE_REL;
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
 	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr 
-and nvl(ak.fld_delete,0) = 0 and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
-and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+and nvl(ak.fld_delete,0) = 0 
+--and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+--and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
     UNION
   SELECT  distinct sysdate CREAT_DT, 
            'ONEDATA' CREAT_USR_ID,
@@ -62,8 +63,9 @@ and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
 	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 	   and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0 and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
-and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0
+--and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+--and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
 union
   SELECT  distinct sysdate CREAT_DT, 
            'ONEDATA' CREAT_USR_ID,
@@ -96,8 +98,10 @@ union
 	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 	   and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
 	   and prot.p_item_id = protai.item_id and prot.P_item_ver_nr = protai.ver_nr and protai.admin_item_typ_id = 50
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0 and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
-and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING');
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0 ;
+--and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+--and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' 
+--and ai.CNTXT_NM_DN not in ('TEST','TRAINING');
 
 
 drop materialized view MVW_CSI_NODE_DE_REL;
