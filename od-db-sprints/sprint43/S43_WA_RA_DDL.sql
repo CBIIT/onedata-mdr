@@ -418,6 +418,6 @@ FROM ADMIN_ITEM, VW_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
        WHERE ADMIN_ITEM_TYP_ID = 51 and ADMIN_ITEM.ITEM_ID = CSI.ITEM_ID and ADMIN_ITEM.VER_NR = CSI.VER_NR and csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr;
 
 
-
+--alter table NCI_STG_FORM_VV_IMPORT add PV_VM_T
 
  
