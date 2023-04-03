@@ -290,7 +290,7 @@ from
 ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Protocol' group by x.p_item_id , 
 x.p_item_ver_nr) y , nci_mdr_cntrl c
  where ADMIN_ITEM_TYP_ID = 50 and item_id = y.p_item_id and ver_nr = y.p_item_ver_nr 
- --and cntxt_nm_dn not in ('TEST', 'TRAINING') 
+ and upper(cntxt_nm_dn) not in ('TEST', 'TRAINING') 
  and c.param_nm='DOWNLOAD_HOST'
  union
 select  r.P_ITEM_ID, r.P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM, 
@@ -310,7 +310,7 @@ ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_
 x.p_item_ver_nr) y, nci_mdr_cntrl c, nci_admin_item_rel r
  where ADMIN_ITEM_TYP_ID = 54 and item_id = y.p_item_id and ver_nr = y.p_item_ver_nr
 and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
- and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') 
+ and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') 
  and c.param_nm='DOWNLOAD_HOST'
  and ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr and r.rel_typ_id = 60
  union
@@ -331,7 +331,7 @@ ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_
 x.p_item_ver_nr) y, nci_mdr_cntrl c
  where ADMIN_ITEM_TYP_ID = 8 and item_id = y.p_item_id (+)  and ver_nr = y.p_item_ver_nr (+)
  --and admin_stus_nm_dn ='RELEASED' 
- and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') 
+ and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') 
  and c.param_nm='DOWNLOAD_HOST';
  
  
@@ -433,5 +433,25 @@ from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST') where ADMIN_ITEM_TYP_ID = 5
 commit;
 
 alter table admin_item enable all triggers;
+
+
+drop materialized view vw_cncpt;
+
+  CREATE MATERIALIZED VIEW VW_CNCPT
+  AS SELECT ADMIN_ITEM.ITEM_ID, ADMIN_ITEM.VER_NR, ADMIN_ITEM.ITEM_NM,  ADMIN_ITEM.ITEM_LONG_NM, ADMIN_ITEM.ITEM_DESC, ADMIN_ITEM.CREATION_DT, 
+ADMIN_ITEM.EFF_DT, ADMIN_ITEM.ORIGIN,  ADMIN_ITEM.UNTL_DT,  ADMIN_ITEM.CURRNT_VER_IND, ADMIN_ITEM.REGSTR_STUS_NM_DN, ADMIN_ITEM.ADMIN_STUS_NM_DN, ADMIN_ITEM.CNTXT_ITEM_ID,
+ADMIN_ITEM.CNTXT_VER_NR, ADMIN_ITEM.CNTXT_NM_DN,
+ ADMIN_ITEM.CREAT_DT, ADMIN_ITEM.CREAT_USR_ID, ADMIN_ITEM.LST_UPD_USR_ID, ADMIN_ITEM.FLD_DELETE, ADMIN_ITEM.LST_DEL_DT, ADMIN_ITEM.S2P_TRN_DT, ADMIN_ITEM.LST_UPD_DT, CNCPT.PRMRY_CNCPT_IND,
+nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No Def Source') DEF_SRC, e.CNCPT_CONCAT_WITH_INT,
+		      decode(trim(OBJ_KEY.OBJ_KEY_DESC), 'NCI_CONCEPT_CODE', '1-NCC', 'NCI_META_CUI', '2-NMC', OBJ_KEY.OBJ_KEY_DESC) EVS_SRC,
+		      nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No Def Source') || '|' ||
+		      nvl(decode(trim(OBJ_KEY.OBJ_KEY_DESC), 'NCI_CONCEPT_CODE', '1-NCC', 'NCI_META_CUI', '2-NMC', OBJ_KEY.OBJ_KEY_DESC), 'No EVS Source') DEF_EVS_SRC,
+        substr(ADMIN_ITEM.ITEM_NM || ' | ' || a.SYN, 1, 4000) SYN
+              FROM ADMIN_ITEM,  CNCPT, nci_admin_item_ext e, OBJ_KEY, (select item_id, ver_nr,   LISTAGG(nm_desc, ' | ') WITHIN GROUP (ORDER by ITEM_ID) AS SYN from ALT_NMS a group by item_id, ver_nr) a
+       WHERE ADMIN_ITEM_TYP_ID = 49 and ADMIN_ITEM.ITEM_ID = CNCPT.ITEM_ID and ADMIN_ITEM.VER_NR = CNCPT.VER_NR
+       and admin_item.item_id = e.item_id and admin_item.ver_nr = e.ver_nr
+	and cncpt.EVS_SRC_ID = OBJ_KEY.OBJ_KEY_ID (+) and admin_item.admin_stus_nm_dn = 'RELEASED' 
+	and ADMIN_ITEM.ITEM_ID = a.ITEM_ID (+) and ADMIN_ITEM.VER_NR = a.VER_NR (+);
+
 
  
