@@ -331,7 +331,7 @@ ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_
 x.p_item_ver_nr) y, nci_mdr_cntrl c
  where ADMIN_ITEM_TYP_ID = 8 and item_id = y.p_item_id (+)  and ver_nr = y.p_item_ver_nr (+)
  --and admin_stus_nm_dn ='RELEASED' 
- --and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') 
+ and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') 
  and c.param_nm='DOWNLOAD_HOST';
  
  
