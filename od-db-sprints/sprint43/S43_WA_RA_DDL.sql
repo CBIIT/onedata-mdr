@@ -490,7 +490,7 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
 
   CREATE TABLE STG_FOUND_ITEM
    (	STG_AI_ID number not null,
-        LVL varchar2(100 not null,
+        LVL varchar2(100) not null,
 	ITEM_ID number not null,
 	VER_NR number(4,2) not null,	    
 	"CREAT_DT" DATE DEFAULT sysdate, 
