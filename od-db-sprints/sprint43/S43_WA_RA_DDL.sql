@@ -462,7 +462,8 @@ ADMIN_ITEM.CREAT_USR_ID, ADMIN_ITEM.LST_UPD_USR_ID, ADMIN_ITEM.FLD_DELETE, ADMIN
 ADMIN_ITEM.LST_UPD_DT,
 decode(ext.cncpt_concat, ext.cncpt_concat_nm, null, admin_item.item_long_nm, null, admin_item.item_id, null, ext.cncpt_concat)  cncpt_concat,
 ext.cncpt_concat_nm, nvl(admin_item.origin_id_dn, origin) ORIGIN_NM,
-ext.cncpt_concat_src_typ, ext.cncpt_concat_with_int
+ext.cncpt_concat_src_typ, 
+decode(ext.cncpt_concat_with_int, ext.cncpt_concat_nm, null, admin_item.item_long_nm, null, admin_item.item_id, null, ext.cncpt_concat_with_int)  cncpt_concat_with_int
 FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
        WHERE ADMIN_ITEM_TYP_ID = 53 and admin_item.item_id = ext.item_id and admin_item.ver_nr = ext.ver_nr;
 
