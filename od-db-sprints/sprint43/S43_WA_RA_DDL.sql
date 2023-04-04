@@ -467,5 +467,3 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
        WHERE ADMIN_ITEM_TYP_ID = 53 and admin_item.item_id = ext.item_id and admin_item.ver_nr = ext.ver_nr;
 
 
-
- 
