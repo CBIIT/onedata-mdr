@@ -96,3 +96,11 @@ end if;
 
 END ;
 /
+
+CREATE OR REPLACE TRIGGER OD_TR_CDE_CREAT  BEFORE INSERT  on NCI_STG_CDE_CREAT  for each row
+     BEGIN    IF (:NEW.STG_AI_ID = -1  or :NEW.STG_AI_ID is null)  THEN select od_seq_CDE_IMPORT.nextval
+ into :new.STG_AI_ID  from  dual ;   END IF;
+  :new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
+  :new.STG_AI_ID_X = :new.STG_AI_ID;
+ END;
+ /
