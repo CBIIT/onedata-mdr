@@ -502,3 +502,6 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
 	"LST_UPD_DT" DATE DEFAULT sysdate,
 		     primary key (STG_AI_ID, ITEM_ID, VER_NR));
 		     
+alter table NCI_STG_CDE_CREAT add STG_AI_ID_X number;
+
+
