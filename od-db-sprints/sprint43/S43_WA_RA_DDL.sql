@@ -488,20 +488,3 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
 
 
 
-  CREATE TABLE STG_FOUND_ITEM
-   (	STG_AI_ID number not null,
-        LVL varchar2(100) not null,
-	ITEM_ID number not null,
-	VER_NR number(4,2) not null,	    
-	"CREAT_DT" DATE DEFAULT sysdate, 
-	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
-	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
-	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
-	"LST_DEL_DT" DATE DEFAULT sysdate, 
-	"S2P_TRN_DT" DATE DEFAULT sysdate, 
-	"LST_UPD_DT" DATE DEFAULT sysdate,
-		     primary key (STG_AI_ID, ITEM_ID, VER_NR));
-		     
-alter table NCI_STG_CDE_CREAT add STG_AI_ID_X number;
-
-
