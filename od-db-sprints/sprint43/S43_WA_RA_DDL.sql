@@ -58,14 +58,17 @@ and nvl(ak.fld_delete,0) = 0
            de.PREF_QUEST_TXT, 
 	   e.USED_BY,
 	   'Protocol' LVL
-           FROM NCI_ADMIN_ITEM_REL r, nci_admin_item_rel prot, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e
+           FROM NCI_ADMIN_ITEM_REL r, nci_admin_item_rel prot, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e,
+	   admin_item frm
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
 	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 	   and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0
+and r.p_item_id = frm.item_id and r.p_item_ver_nr = frm.ver_nr 
 --and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
---and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+--and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' 
+and upper(frm.CNTXT_NM_DN) not in ('TEST','TRAINING')
 union
   SELECT  distinct sysdate CREAT_DT, 
            'ONEDATA' CREAT_USR_ID,
@@ -92,16 +95,17 @@ union
 	   e.USED_BY,
 	   'Context' LVL
            FROM NCI_ADMIN_ITEM_REL r, nci_admin_item_rel prot, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e,
-	   admin_item protai
+	   admin_item protai, admin_item frm
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
 	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 	   and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
 	   and prot.p_item_id = protai.item_id and prot.P_item_ver_nr = protai.ver_nr and protai.admin_item_typ_id = 50
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0 ;
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0
+and r.p_item_id = frm.item_id and r.p_item_ver_nr = frm.ver_nr and upper(frm.CNTXT_NM_DN) not in ('TEST','TRAINING');
 --and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
 --and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' 
---and ai.CNTXT_NM_DN not in ('TEST','TRAINING');
+
 
 
 drop materialized view MVW_CSI_NODE_DE_REL;
@@ -135,7 +139,7 @@ drop materialized view MVW_CSI_NODE_DE_REL;
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
-and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
 --and nvl(ai.CURRNT_VER_IND,0) = 1 
 and nvl(ak.fld_delete,0) = 0
     UNION
@@ -168,7 +172,7 @@ e.USED_BY, 'CS' LVL
            AND ak.P_ITEM_ID = csi.ITEM_ID
            AND ak.P_ITEM_VER_NR = csi.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
-and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
 --and nvl(ai.CURRNT_VER_IND,0) = 1 
 union
 SELECT distinct ai.CREAT_DT,
@@ -201,7 +205,7 @@ e.USED_BY, 'Context' LVL
            AND ak.P_ITEM_VER_NR = csi.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65
 and csi.CS_ITEM_ID = cs.ITEM_ID and csi.CS_ITEM_VER_NR = cs.VER_NR and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
-and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')  and cs.admin_stus_nm_dn ='RELEASED';
+and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')  and cs.admin_stus_nm_dn ='RELEASED';
 --and nvl(ai.CURRNT_VER_IND,0) = 1;
 
 
