@@ -32,7 +32,7 @@ drop MATERIALIZED VIEW MVW_FORM_NODE_DE_REL;
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr 
 and nvl(ak.fld_delete,0) = 0 
 --and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
---and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and ai.CNTXT_NM_DN not in ('TEST','TRAINING')
+--and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
     UNION
   SELECT  distinct sysdate CREAT_DT, 
            'ONEDATA' CREAT_USR_ID,
@@ -225,7 +225,7 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
 from 
 ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='Context' group by x.p_item_id , 
 x.p_item_ver_nr) y , nci_mdr_cntrl c
- where ADMIN_ITEM_TYP_ID = 8 and item_id = y.p_item_id (+) and ver_nr = y.p_item_ver_nr (+) and cntxt_nm_dn not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
+ where ADMIN_ITEM_TYP_ID = 8 and item_id = y.p_item_id (+) and ver_nr = y.p_item_ver_nr (+) and upper(cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
  union
 select 99 LVL, CNTXT_ITEM_ID P_ITEM_ID, CNTXT_VER_NR P_ITEM_VER_NR, ITEM_ID, VER_NR, ITEM_DESC, CNTXT_ITEM_ID, CNTXT_VER_NR, ITEM_LONG_NM, 
 ITEM_NM || ' (' || nvl(y.cnt,'0') || ')', ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
@@ -238,7 +238,7 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
  from 
 ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CS' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c
- where ADMIN_ITEM_TYP_ID = 9 and item_id = y.p_item_id (+) and ver_nr = y.p_item_ver_nr (+) and admin_stus_nm_dn ='RELEASED' and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
+ where ADMIN_ITEM_TYP_ID = 9 and item_id = y.p_item_id (+) and ver_nr = y.p_item_ver_nr (+) and admin_stus_nm_dn ='RELEASED' and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
  union
   select 100 LVL, csi.CS_ITEM_ID P_ITEM_ID, csi.CS_ITEM_VER_NR P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM, 
    ai.ITEM_NM ||  ' (' || nvl(y.cnt,'0') || ')' , 
@@ -252,7 +252,7 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
 from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c
  where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is null and csi.CS_ITEM_ID is not null and
- ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
+ ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
  --and ai.admin_stus_nm_dn not like '%RETIRED%'
  union
  select 100 LVL, csi.P_ITEM_ID P_ITEM_ID, csi.P_ITEM_VER_NR P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM, 
@@ -267,7 +267,7 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
  from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c
  where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null and csi.CS_ITEM_ID is not null and
- ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and ai.cntxt_nm_dn not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST';
+ ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST';
  --and ai.admin_stus_nm_dn not like '%RETIRED%';
  
  
