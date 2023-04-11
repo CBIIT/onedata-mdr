@@ -704,7 +704,7 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
 /
 
 
-  CREATE OR REPLACE  VIEW VW_NCI_OMOP_DE
+  CREATE OR REPLACE  VIEW VW_NCI_OMOP_DE as
   SELECT distinct ADMIN_ITEM.ITEM_ID,
            ADMIN_ITEM.VER_NR,
           CAST('.' || ADMIN_ITEM.ITEM_ID || '.' AS VARCHAR2(4000))    ITEM_ID_STR,
@@ -739,23 +739,22 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
 	     ADMIN_ITEM.ADMIN_ITEM_TYP_ID,
 	   ADMIN_ITEM.ITEM_DEEP_LINK,
            ext.USED_BY                         CNTXT_AGG,
-             vd.VAL_DOM_TYP_ID	 
-	   --  ,an.nm_desc
+             vd.VAL_DOM_TYP_ID	 ,
+	     an.OMOP_TABLE, an.OMOP_NAME
 	     FROM ADMIN_ITEM,
            NCI_ADMIN_ITEM_EXT  ext,
-	      de, VALUE_DOM vd, nci_admin_item_rel r, vw_clsfctn_schm_item csi
-	     
-     WHERE     ADMIN_ITEM_TYP_ID = 4
+	      de, VALUE_DOM vd, MVW_CSI_NODE_DE_REL r,
+	     (SELECT an.item_id, an.ver_nr, LISTAGG(decode(obj_key_desc, 'OMOP Table', nm_desc,''), ', ') WITHIN GROUP (ORDER by nm_desc) as OMOP_TABLE,
+ LISTAGG(decode(obj_key_desc, 'OMOP Name', nm_desc,''), ', ') WITHIN GROUP (ORDER by nm_desc) as OMOP_NAME
+	      from alt_nms an, obj_key ok where an.nm_typ_id = ok.obj_key_id and ok.obj_key_desc in ('OMOP Table', 'OMOP Name')
+          group by an.item_id, an.ver_nr) an
+        WHERE     ADMIN_ITEM_TYP_ID = 4
            and ADMIN_ITEM.ITEM_Id = de.item_id
            and ADMIN_ITEM.VER_NR = DE.VER_NR
            and de.VAL_DOM_ITEM_ID = vd.ITEM_ID
 	   and de.VAL_DOM_VER_NR = vd.VER_NR
 	   AND ADMIN_ITEM.ITEM_ID = EXT.ITEM_ID
            AND ADMIN_ITEM.VER_NR = EXT.VER_NR
-	   and admin_item.item_id = r.c_item_id and admin_item.ver_nr = r.c_item_ver_nr and r.p_item_id = csi.item_id and r.p_item_ver_nr = csi.ver_nr 
-	   and csi.cs_item_id = 5279492 and csi.cs_item_ver_nr = 5.31 and r.rel_typ_id = 65
---and admin_item.regstr_stus_id = 2
-and admin_item.item_id = an.item_ID (+) and
-admin_item.ver_nr = an.ver_nr (+)
-and an.nm_typ_id (+) = 1239;
-
+	   and admin_item.item_id = r.item_id and admin_item.ver_nr = r.ver_nr and r.p_item_id = 5279492 and r.p_item_ver_nr = 5.31
+	   and admin_item.item_id = an.item_id (+)
+	   and admin_item.ver_nr = an.ver_nr (+);
