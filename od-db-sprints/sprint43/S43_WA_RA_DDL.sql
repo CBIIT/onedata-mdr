@@ -780,4 +780,4 @@ update alt_nms set
 MTCH_TERM_ADV = regexp_replace(upper(nm_desc),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s','');
 commit;
 
-alter table alt_nms disable all triggers;
+alter table alt_nms enable all triggers;
