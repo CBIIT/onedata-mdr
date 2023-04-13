@@ -133,3 +133,36 @@ and t1.NCI_DEF_TYP_ID = 1357 -- Prior Preferred Definition
 ;
 commit;
 alter table ALT_DEF enable all triggers;
+--on SBR schema DESIGNATIONS table to reflect ENGLISH related changes
+--SBR.DESIGNATIONS all triggers have been disabled on cloud schema
+MERGE INTO SBR.DESIGNATIONS t1
+USING
+(
+SELECT NCI_IDSEQ FROM ONEDATA_WA.ALT_NMS where
+cntxt_item_id = 20000000024 -- context NCIP
+and cntxt_ver_nr = 1
+and LANG_ID = 1000
+and NM_TYP_ID in (1064, 1049) --Synonym or Prior Preferred Name
+)t2
+ON (t1.DESIG_IDSEQ = t2.NCI_IDSEQ)
+WHEN MATCHED THEN UPDATE SET
+t1.LAE_NAME = 'ENGLISH'
+where t1.LAE_NAME is null;
+commit;
+--on SBR schema DEFINITIONS table to reflect ENGLISH related changes
+--SBR.DEFINITIONS all triggers have been disabled on cloud schema
+MERGE INTO SBR.DEFINITIONS t1
+USING
+(
+SELECT NCI_IDSEQ FROM ONEDATA_WA.ALT_DEF where
+cntxt_item_id = 20000000024 -- context NCIP
+and cntxt_ver_nr = 1
+and LANG_ID = 1000
+and NCI_DEF_TYP_ID = 1357
+)t2
+ON (t1.DEFIN_IDSEQ = t2.NCI_IDSEQ)
+WHEN MATCHED THEN UPDATE SET
+t1.LAE_NAME = 'ENGLISH'
+where t1.LAE_NAME is null
+;
+commit;
