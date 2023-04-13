@@ -765,3 +765,19 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
 	   and admin_item.ver_nr = an.ver_nr (+)
 	   and admin_item.item_id = csi.c_item_id (+)
 	   and admin_item.ver_nr = csi.c_item_ver_nr (+);
+
+alter table admin_item disable all triggers;
+
+update admin_item set 
+MTCH_TERM_ADV = regexp_replace(upper(item_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s','');
+commit;
+
+alter table admin_item enable all triggers;
+
+alter table alt_nms disable all triggers;
+
+update alt_nms set 
+MTCH_TERM_ADV = regexp_replace(upper(nm_desc),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s','');
+commit;
+
+alter table alt Names disable all triggers;
