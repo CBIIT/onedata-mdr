@@ -96,3 +96,28 @@ end if;
 
 END ;
 /
+
+create or replace TRIGGER TR_AI_MTCH
+  BEFORE UPDATE or INSERT ON ADMIN_ITEM
+  FOR EACH ROW
+  BEGIN
+
+:new.MTCH_TERM := regexp_replace(upper(:new.item_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');
+:new.MTCH_TERM_ADV := regexp_replace(upper(:new.item_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s','');
+
+
+END;
+ /
+
+create or replace TRIGGER TR_ALT_NMS_BEFORE
+  BEFORE INSERT OR UPDATE
+  on ALT_NMS
+  for each row
+BEGIN
+
+:new.MTCH_TERM := regexp_replace(upper(:new.nm_desc),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');
+:new.MTCH_TERM_ADV := regexp_replace(upper(:new.nm_desc),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s','');  
+END;
+/
+				 
+				 
