@@ -627,13 +627,16 @@ if (ihook.getColumnValue(row_ori, 'LANG_ID') is null OR (ihook.getColumnValue(ro
     ihook.setColumnValue(row_ori, 'LANG_ID',1000);
 end if;
 
---jira 2440 -autopopulate AI long name if not imported
---if (ihook.getColumnValue(row_ori, 'SPEC_LONG_NM') is null OR ihook.getColumnValue(row_ori, 'SPEC_LONG_NM') = '') then
---    select ITEM_LONG_NM into v_long_nm from admin_item ai where ai.item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ai.ver_nr = ihook.getColumnValue(row_ori, 'VER_NR');
---    ihook.setColumnValue(row_ori, 'SPEC_LONG_NM', v_long_nm);
---end if;
+  --jira 2440 -autopopulate AI long name if not imported
+if (ihook.getColumnValue(row_ori, 'SRC_ITEM_ID') is not null and ihook.getColumnValue(row_ori, 'SRC_VER_NR') is not null) then
 
- 
+    if (ihook.getColumnValue(row_ori, 'SPEC_LONG_NM') is null OR ihook.getColumnValue(row_ori, 'SPEC_LONG_NM') = '') then
+    -- raise_application_error(-20000,'Ai Long name');
+        select ITEM_NM into v_long_nm from admin_item ai where ai.item_id = ihook.getColumnValue(row_ori, 'SRC_ITEM_ID') and ai.ver_nr = ihook.getColumnValue(row_ori, 'SRC_VER_NR');
+        ihook.setColumnValue(row_ori, 'SPEC_LONG_NM', v_long_nm);
+    end if;
+end if;
+
   rows := t_rows();
   
 rows.EXTEND;
