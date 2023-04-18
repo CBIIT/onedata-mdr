@@ -214,6 +214,7 @@ begin
                     v_ctl_val_stus := 'WARNING';
                     v_ctl_val_msg := 'Question label does not match.';
                 end if;
+             
         --if enumerated -- then validate valid values
         -- for each VV, make sure PV exists. If it does, then VM Name is either the VM name or alternate name
                 for curvv in (Select * from  NCI_STG_FORM_VV_IMPORT where quest_imp_id = curq.quest_imp_id) loop
@@ -445,6 +446,8 @@ as
     v_vv_id number;
 v_req_ind integer;
 v_instr varchar2(4000);
+v_long_nm  varchar2(30);
+v_temp integer;
 begin
    hookInput := ihook.getHookInput(v_data_in);
     hookOutput.invocationNumber := hookInput.invocationNumber;
@@ -556,7 +559,17 @@ if (cur.CTL_VAL_STUS= 'WARNING') and cur.cde_item_id is not null then
 v_instr :=  v_instr  || 'CDE ' || cur.cde_item_id || ' v' || cur.cde_ver_nr || ' was not attached due to: ' || substr(cur.CTL_VAL_MSG,23);
 end if;
 
-
+   -- Question short name
+                select sum(cnt) into v_temp from 
+                (select count(*) cnt from admin_item where item_id = cur.CDE_ITEM_ID and ver_nr = cur.CDE_VER_NR and upper(item_long_nm) = upper(cur.SRC_QUESTION_ID) 
+                union
+                select count(*) cnt from alt_nms where item_id = cur.CDE_ITEM_ID and ver_nr = cur.CDE_VER_NR and upper(nm_desc) = upper(cur.SRC_QUESTION_ID) );
+        
+              if (v_temp = 0) then
+                   v_instr :=  v_instr  || 'Invalid Question Short Name - used CDE Short Name.';
+                   select item_long_nm into v_long_nm from admin_item  where item_id = cur.CDE_ITEM_ID and ver_nr = cur.CDE_VER_NR;
+                end if;
+          
   insert into nci_admin_item_rel_alt_key (NCI_PUB_ID, NCI_VER_NR, P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, CNTXT_CS_ITEM_ID, CNTXT_CS_VER_NR,
   ITEM_LONG_NM, ITEM_NM, REL_TYP_ID, DISP_ORD,req_ind, 	
   --REQ_IND, 
@@ -564,7 +577,7 @@ end if;
   values (v_id, 1, v_mod_id,1, 
   decode(cur.CTL_VAL_STUS, 'WARNING', null, cur.cde_item_id), 
    decode(cur.CTL_VAL_STUS, 'WARNING', null,cur.cde_ver_nr), ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID'), ihook.getColumnValue(row_ori,'CNTXT_VER_NR'), 
-  cur.SRC_QUEST_LBL,substr(cur.SRC_QUESTION_ID,1,30),
+  cur.SRC_QUEST_LBL,nvl(v_long_nm,substr(cur.SRC_QUESTION_ID,1,30)),
    63, v_quest_disp_ord, v_req_ind, 
   --cur.req_ind, 
   trim(v_instr), 
@@ -596,7 +609,7 @@ v_vv_disp_ord := 1;
    DISP_ORD, creat_dt, creat_usr_id, lst_upd_dt, lst_upd_usr_id, VAL_MEAN_ITEM_ID, VAL_MEAN_VER_NR)
   values (v_id, 1, 
   --cur1.vm_nm, cur1.vm_lnm, cur1.vm_def, cur1.desc_txt, 
-  cur1.SRC_PERM_VAL, cur1.vm_long_nm,nvl(cur1.VV_ALT_DEF, cur1.SRC_VM_NM),nvl(cur1.VV_ALT_DEF, cur1.SRC_VM_NM),
+  cur1.SRC_PERM_VAL,  cur1.src_vm_nm,nvl(cur1.VV_ALT_DEF, cur1.SRC_VM_NM),nvl(cur1.VV_ALT_DEF, cur1.SRC_VM_NM),
   --cur1.VAL_MEAN_ITEM_ID, cur1.VAL_MEAN_VER_NR,
   v_vv_id, 1, v_vv_disp_ord, 
   --cur1.disp_ord,
