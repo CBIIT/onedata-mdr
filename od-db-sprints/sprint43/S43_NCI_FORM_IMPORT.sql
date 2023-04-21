@@ -557,9 +557,10 @@ end if;
 if (cur.CTL_VAL_STUS= 'WARNING') and cur.cde_item_id is not null then
 
 v_instr :=  v_instr  || 'CDE ' || cur.cde_item_id || ' v' || cur.cde_ver_nr || ' was not attached due to: ' || substr(cur.CTL_VAL_MSG,23);
-end if;
+else
 
    -- Question short name
+             if (cur.cde_item_id is not null) then
                 select sum(cnt) into v_temp from 
                 (select count(*) cnt from admin_item where item_id = cur.CDE_ITEM_ID and ver_nr = cur.CDE_VER_NR and upper(item_long_nm) = upper(cur.SRC_QUESTION_ID) 
                 union
@@ -569,7 +570,8 @@ end if;
                    v_instr :=  v_instr  || 'Invalid Question Short Name - used CDE Short Name.';
                    select item_long_nm into v_long_nm from admin_item  where item_id = cur.CDE_ITEM_ID and ver_nr = cur.CDE_VER_NR;
                 end if;
-          
+                end if;
+  end if;        
   insert into nci_admin_item_rel_alt_key (NCI_PUB_ID, NCI_VER_NR, P_ITEM_ID, P_ITEM_VER_NR, C_ITEM_ID, C_ITEM_VER_NR, CNTXT_CS_ITEM_ID, CNTXT_CS_VER_NR,
   ITEM_LONG_NM, ITEM_NM, REL_TYP_ID, DISP_ORD,req_ind, 	
   --REQ_IND, 
