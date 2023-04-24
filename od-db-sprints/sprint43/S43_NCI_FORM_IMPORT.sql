@@ -559,6 +559,7 @@ if (cur.CTL_VAL_STUS= 'WARNING') and cur.cde_item_id is not null then
 v_instr :=  v_instr  || 'CDE ' || cur.cde_item_id || ' v' || cur.cde_ver_nr || ' was not attached due to: ' || substr(cur.CTL_VAL_MSG,23);
 else
 
+v_long_nm := null;
    -- Question short name
              if (cur.cde_item_id is not null) then
                 select sum(cnt) into v_temp from 
