@@ -88,6 +88,7 @@ procedure VMMatchSub ( v_hdr_id in number,  v_entty_nm in varchar2, v_entty_nm_w
 v_minlen integer;
 
 begin
+       --  raise_application_error(-20000, v_entty_nm);
          
   v_minlen := nci_11179.getMinWordLen(v_entty_nm_with_space);
    insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
@@ -111,7 +112,7 @@ begin
     end if;
         insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
                     select distinct  v_hdr_id , c.item_id, c.ver_nr, 'Synonym Exact Match' from 
-                    vw_cncpt c where SYN_MTCH_TERM like '%' ||  v_entty_nm || '%';
+                    vw_cncpt c where SYN_MTCH_TERM =  v_entty_nm ;
          --           commit; 
     if (SQL%ROWCOUNT > 0) then
     commit;
@@ -141,6 +142,18 @@ begin
                     select distinct  v_hdr_id , item_id, ver_nr, 'Concept Like Match' from 
                     vw_cncpt where 
                      v_entty_nm like '%' || MTCH_TERM_ADV || '%' and length(item_nm) >= v_minlen and CNTXT_NM_DN = 'NCIP';
+         
+         
+         
+         
+    if (SQL%ROWCOUNT > 0) then
+    commit;
+    return;
+    end if;
+        insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , c.item_id, c.ver_nr, 'Synonym Like Match' from 
+                    vw_cncpt c where SYN_MTCH_TERM like '%' ||  v_entty_nm || '%';
+                    commit; 
           --          commit;
   
     /*
