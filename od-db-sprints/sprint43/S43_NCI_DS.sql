@@ -1,7 +1,7 @@
 create or replace PACKAGE            nci_ds AS
   procedure spDSRun ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
-  procedure spVMMatch ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
- procedure VMMatchSub ( v_hdr_id in number,  v_entty_nm in varchar2, v_entty_nm_with_space  in varchar2);
+  procedure spVMMatch ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_typ in varchar2); -- v_typ - R - Restricted, U - Unrestricted, F - Fuzzzzy
+ procedure VMMatchSub ( v_hdr_id in number,  v_entty_nm in varchar2, v_entty_nm_with_space  in varchar2, v_typ in varchar2);
   procedure setPrefCDE ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
     procedure setPrefCDEQuest ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure setPrefVM ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -20,7 +20,7 @@ v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
   v_reg_str varchar2(255) := '\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}';
   v_reg_str_adv varchar2(255) := '\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s';
   
-procedure spVMMatch ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+procedure spVMMatch ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_typ in varchar2)
 
 AS
     hookInput t_hookInput;
@@ -67,7 +67,7 @@ begin
      delete from nci_ds_rslt where hdr_id =v_hdr_id ;
     commit;
 
-      VMMatchSub(v_hdr_id, v_entty_nm,v_entty_nm_with_space);
+      VMMatchSub(v_hdr_id, v_entty_nm,v_entty_nm_with_space,v_typ);
    select count(*) into v_temp from nci_ds_rslt where hdr_id = v_hdr_id     ;
   if (v_temp = 1) then 
   update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID) = (select 1, item_id, ver_nr , v_user_id from nci_ds_rslt where hdr_id = v_hdr_id)
@@ -84,75 +84,64 @@ end loop;
   
 end;
 
-procedure VMMatchSub ( v_hdr_id in number,  v_entty_nm in varchar2, v_entty_nm_with_space  in varchar2) AS
+procedure VMMatchSub ( v_hdr_id in number,  v_entty_nm in varchar2, v_entty_nm_with_space  in varchar2, v_typ in varchar2) AS
 v_minlen integer;
-
+v_cnt integer := 0;
 begin
        --  raise_application_error(-20000, v_entty_nm);
          
   v_minlen := nci_11179.getMinWordLen(v_entty_nm_with_space);
    insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
-                    select distinct  v_hdr_id , item_id, ver_nr, 'VM Exact Match' from 
+                    select distinct  v_hdr_id , item_id, ver_nr, '1. VM Exact Match' from 
                     MVW_VAL_MEAN where MTCH_TERM_ADV = v_entty_nm ;
+                    
                     --and admin_item_typ_id = 53;
           --          commit;
     --
     -- Vm Alt Name Exact Match
-    if (SQL%ROWCOUNT > 0) then
+    v_cnt := SQL%ROWCOUNT;
     commit;
-    return;
-    end if;
         insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
-                    select distinct  v_hdr_id , item_id, ver_nr, 'Concept Exact Match' from 
-                    vw_cncpt where MTCH_TERM_ADV = v_entty_nm and CNTXT_NM_DN = 'NCIP';
+                    select distinct  v_hdr_id , item_id, ver_nr, '2. Concept Exact Match' from 
+                    vw_cncpt where MTCH_TERM_ADV = v_entty_nm and CNTXT_NM_DN = 'NCIP'
+                    and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
          --           commit;
-    if (SQL%ROWCOUNT > 0) then
+    v_cnt := v_cnt + SQL%ROWCOUNT;
     commit;
-    return;
-    end if;
         insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
-                    select distinct  v_hdr_id , c.item_id, c.ver_nr, 'Synonym Exact Match' from 
-                    vw_cncpt c where SYN_MTCH_TERM =  v_entty_nm ;
+                    select distinct  v_hdr_id , c.item_id, c.ver_nr, '3. Synonym Exact Match' from 
+                    vw_cncpt c where (SYN_MTCH_TERM like '%' ||  v_entty_nm || ' |%'
+                    or SYN_MTCH_TERM like '%| ' ||  v_entty_nm || ' %')  and (v_hdr_id, c.item_id, c.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
          --           commit; 
-    if (SQL%ROWCOUNT > 0) then
-    commit;
+    v_cnt := v_cnt + SQL%ROWCOUNT;
+  commit;
+    if (v_cnt > 0 and v_typ = 'R') then
     return;
     end if;
      
      insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
-                    select distinct  v_hdr_id , item_id, ver_nr, 'VM Like Match' from 
+                    select distinct  v_hdr_id , item_id, ver_nr, '4. VM Like Match' from 
                     MVW_VAL_MEAN where ((MTCH_TERM_ADV like '%' || v_entty_nm || '%' )  or
-                    (v_entty_nm like '%' || MTCH_TERM_ADV || '%' and length(mtch_term) >= v_minlen)) ;
-          --          commit;
-   if (SQL%ROWCOUNT > 0) then
-    commit;
-    return;
-    end if;
+                    (v_entty_nm like '%' || MTCH_TERM_ADV || '%' and length(mtch_term) >= v_minlen)) and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt); 
+                   commit;
                       insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
-                    select distinct  v_hdr_id , item_id, ver_nr, 'Concept Like Match' from 
+                    select distinct  v_hdr_id , item_id, ver_nr, '5. Concept Like Match' from 
                     vw_cncpt where MTCH_TERM_ADV  like '%' ||  v_entty_nm || '%' 
-                     and CNTXT_NM_DN = 'NCIP';
-          --          commit;
-    if (SQL%ROWCOUNT > 0) then
-    commit;
-    return;
-    end if;
+                     and CNTXT_NM_DN = 'NCIP'  and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
+                    commit;
     
                        insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
-                    select distinct  v_hdr_id , item_id, ver_nr, 'Concept Like Match' from 
+                    select distinct  v_hdr_id , item_id, ver_nr, '5. Concept Like Match' from 
                     vw_cncpt where 
-                     v_entty_nm like '%' || MTCH_TERM_ADV || '%' and length(item_nm) >= v_minlen and CNTXT_NM_DN = 'NCIP';
+                     v_entty_nm like '%' || MTCH_TERM_ADV || '%' and length(item_nm) >= v_minlen and CNTXT_NM_DN = 'NCIP' 
+                      and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
+         
+         commit;
          
          
-         
-         
-    if (SQL%ROWCOUNT > 0) then
-    commit;
-    return;
-    end if;
         insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
-                    select distinct  v_hdr_id , c.item_id, c.ver_nr, 'Synonym Like Match' from 
-                    vw_cncpt c where SYN_MTCH_TERM like '%' ||  v_entty_nm || '%';
+                    select distinct  v_hdr_id , c.item_id, c.ver_nr, '6. Synonym Like Match' from 
+                    vw_cncpt c where SYN_MTCH_TERM like '%' ||  v_entty_nm || '%'   and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
                     commit; 
           --          commit;
   
