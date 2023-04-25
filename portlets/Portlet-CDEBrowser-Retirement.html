@@ -1,0 +1,27 @@
+<style>
+    a.underline {
+        color:#1c5e86;
+        text-decoration:underline;
+    }
+    
+    ul.multi {
+        list-style:disc;
+        margin-left:10px;
+    }
+    
+    ul.multi ul{
+        list-style:disc;
+        margin-left:30px;
+        margin-top:10px;
+    }
+    </style>
+    <div class="news">
+<P><font color="red"><B>When the CDE Browser is retired the CDE links using the legacy formatted URL will temporarily redirect here, to the caDSR II Landing Page. End users will need to select <i>Data Element - View/Browse</i> favorite, re-enter the CDE Public ID into the search filter and select the “View” icon next to the CDE to display details.</b></font></p>
+<p>In October 2022 caDSR II enabled a <i><b>Deep Link</b></i> to replace the legacy URL. This link is visible when viewing CDEs in caDSR II. When implement in customer systems, the <i><b>Deep Link</b></i> opens a search result to the specified CDE, skipping the need to re-enter the Public ID.</p> 
+<UL class=multi>
+<li><p><b>The legacy URL format:</b></p><p>https://cdebrowser.nci.nih.gov/cdebrowserClient/cdeBrowser.html#/search?publicId=62&version=6.0</p></li>
+<li><b>The new <i><b>Deep Link</b></i> URL format:</b>
+<p>https://cadsr.cancer.gov/onedata/dmdirect/NIH/NCI/CO/CDEDD?filter=CDEDD.ITEM_ID=<font color="red" >62</font>%20and%20ver_nr=<font color="red">6.0</font></p>
+<p>The Public ID and Version number in <font color="red">red</font> above are the values that need to be changed when linking to different CDEs or Versions. Version can be entered as <i>n, n.n, or n.nn</i>. If no version number is specified all versions will be returned. Users click the "View" icon next to the desired CDE for the details.</p>
+<p>Example: <a href="https://cadsr.cancer.gov/onedata/dmdirect/NIH/NCI/CO/CDEDD?filter=CDEDD.ITEM_ID=62%20and%20ver_nr=6.0" target="_blank" rel="noopener noreferrer"><u style=color:#1c5e86>CDE 62v6.0</u></a></p> 
+<p>Please contact the caDSR RA with questions at caDSR.RA@mail.nih.gov.</p>
