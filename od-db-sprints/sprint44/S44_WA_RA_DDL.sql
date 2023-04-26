@@ -1,3 +1,48 @@
+drop materialized view VW_CLSFCTN_SCHM_ITEM;
+
+
+  CREATE MATERIALIZED VIEW VW_CLSFCTN_SCHM_ITEM
+  AS SELECT ADMIN_ITEM.ITEM_ID,
+               ADMIN_ITEM.VER_NR,
+               ADMIN_ITEM.ITEM_NM,
+               ADMIN_ITEM.ITEM_LONG_NM,
+               ADMIN_ITEM.ITEM_DESC,
+               ADMIN_ITEM.CNTXT_NM_DN,
+               ADMIN_ITEM.CURRNT_VER_IND,
+               ADMIN_ITEM.REGSTR_STUS_NM_DN,
+               ADMIN_ITEM.ADMIN_STUS_NM_DN,
+               ADMIN_ITEM.CREAT_DT,
+               ADMIN_ITEM.CREAT_USR_ID,
+               ADMIN_ITEM.LST_UPD_USR_ID,
+               ADMIN_ITEM.FLD_DELETE,
+               ADMIN_ITEM.LST_DEL_DT,
+               ADMIN_ITEM.S2P_TRN_DT,
+               ADMIN_ITEM.LST_UPD_DT,
+               ADMIN_ITEM.NCI_IDSEQ,
+               CSI.P_ITEM_ID,
+               CSI.P_ITEM_VER_NR,
+               CSI.CS_ITEM_ID,
+               CSI.CS_ITEM_VER_NR,
+	       CSI.CSI_TYP_ID,
+               CAST (
+                      cs.item_nm
+                   || SYS_CONNECT_BY_PATH (REPLACE (admin_item.ITEM_NM, '|', ''),
+                                           ' | ')
+                       AS VARCHAR2 (4000))    FUL_PATH,
+		            CAST (
+                      cs.item_nm
+                   || SYS_CONNECT_BY_PATH (REPLACE (admin_item.ITEM_ID || 'v' || to_char(admin_item.ver_nr,'99.99'), '|', ''),
+                                           ' | ')
+                       AS VARCHAR2 (4000))    FUL_PATH_ID
+          FROM ADMIN_ITEM, NCI_CLSFCTN_SCHM_ITEM csi, vw_clsfctn_schm cs
+         WHERE     ADMIN_ITEM_TYP_ID = 51
+               AND ADMIN_ITEM.ITEM_ID = CSI.ITEM_ID
+               AND ADMIN_ITEM.VER_NR = CSI.VER_NR
+               AND csi.cs_item_id = cs.item_id
+               AND csi.cs_item_ver_nr = cs.ver_nr
+    START WITH p_item_id IS NULL
+  CONNECT BY PRIOR  to_char(csi.item_id || to_char(csi.ver_nr,'99.99')) = to_char(csi.p_item_id || to_char(csi.P_item_ver_nr,'99.99'));
+
 
 drop materialized view MVW_CSI_NODE_DE_REL;
 
@@ -26,11 +71,12 @@ drop materialized view MVW_CSI_NODE_DE_REL;
            de.PREF_QUEST_TXT, 
 	   e.USED_BY,
 	   'CSI' LVL
-           FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, de , nci_admin_item_ext e
+           FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, de , nci_admin_item_ext e--, vw_clsfctn_schm_item csi
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
 and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
+--ak.p_item_id = csi.item_id
 --and nvl(ai.CURRNT_VER_IND,0) = 1 
 and nvl(ak.fld_delete,0) = 0
     UNION
