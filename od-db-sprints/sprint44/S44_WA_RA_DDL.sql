@@ -76,7 +76,7 @@ drop materialized view MVW_CSI_NODE_DE_REL;
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
 and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
---ak.p_item_id = csi.item_id
+--and csi.ful_path_id like '%' || ak.p_item_id ||'v'|| to_char(ak.p_item_ver_nr,'99.99') || '%' 
 --and nvl(ai.CURRNT_VER_IND,0) = 1 
 and nvl(ak.fld_delete,0) = 0
     UNION
