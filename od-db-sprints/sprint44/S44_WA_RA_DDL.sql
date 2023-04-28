@@ -208,3 +208,7 @@ and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and upper(ai.CNTXT_NM_DN) not in
 	   and admin_item.item_id = adef.item_id (+)
 	   and admin_item.ver_nr = adef.ver_nr (+);
 /
+
+alter table NCI_STG_FORM_IMPORT add (PRTCL_ITEM_ID number, PRTCL_VER_NR number(4,2));
+
+alter table NCI_STG_FORM_IMPORT add (IMP_PRTCL_NM varchar2(30));
