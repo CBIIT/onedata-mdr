@@ -301,6 +301,14 @@ end if;
    ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Duplicate found in the same import file. Batch Number: ' || v_batch_nbr );                
    end if;
    end loop;
+    ihook.setColumnValue(row_ori,'REF_TYP_ID', ihook.getColumnValue(row_ori,'NM_TYP_ID'));
+    ihook.setColumnValue(row_ori,'NCI_CNTXT_ITEM_ID', ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID'));
+    ihook.setColumnValue(row_ori,'NCI_CNTXT_VER_NR', ihook.getColumnValue(row_ori,'CNTXT_VER_NR'));
+    ihook.setColumnValue(row_ori,'REF_NM', ihook.getColumnValue(row_ori,'NM_DESC'));
+    ihook.setColumnValue(row_ori,'REF_DESC', ihook.getColumnValue(row_ori,'NM_DESC'));
+    ihook.setColumnValue(row_ori,'DISP_ORD', ihook.getColumnValue(row_ori,'RD_DO'));
+    ihook.setColumnValue(row_ori,'URL', ihook.getColumnValue(row_ori,'RD_URL'));
+
  end if;
  
    --   raise_application_error(-20000, 'Import');
