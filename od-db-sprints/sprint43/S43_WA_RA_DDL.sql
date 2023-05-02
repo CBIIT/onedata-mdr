@@ -769,7 +769,7 @@ FROM ADMIN_ITEM, NCI_ADMIN_ITEM_EXT ext
 alter table admin_item disable all triggers;
 
 update admin_item set 
-MTCH_TERM_ADV = regexp_replace(upper(item_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s','');
+MTCH_TERM_ADV = regexp_replace(upper(item_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}| ','');
 commit;
 
 alter table admin_item enable all triggers;
@@ -777,7 +777,7 @@ alter table admin_item enable all triggers;
 alter table alt_nms disable all triggers;
 
 update alt_nms set 
-MTCH_TERM_ADV = regexp_replace(upper(nm_desc),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s','');
+MTCH_TERM_ADV = regexp_replace(upper(nm_desc),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}| ','');
 commit;
 
 alter table alt_nms enable all triggers;
