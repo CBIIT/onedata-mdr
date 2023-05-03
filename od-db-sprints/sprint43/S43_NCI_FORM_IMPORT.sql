@@ -41,7 +41,19 @@ begin
   raise_application_Error(-20000,'Form already processed.');
   return;
   end if;
+  if (substr(ihook.getColumnValue(row_ori, 'SRC_FORM_NM'),1,2) = 'PX') then -- For PhenX forms, do not change PX to Px
+        ihook.setColumnValue(row_ori, 'FORM_NM', 'PX' || initcap(replace(substr(ihook.getColumnValue(row_ori, 'SRC_FORM_NM'),3),'_',' ')));
+  else
         ihook.setColumnValue(row_ori, 'FORM_NM', initcap(replace(ihook.getColumnValue(row_ori, 'SRC_FORM_NM'),'_',' ')));
+  end if;
+  -- Protocol
+  if (ihook.getColumnValue(row_ori,'IMP_PRTCL_NM') is not null) then
+  for curprot in (Select * from admin_item where admin_item_typ_id = 50 and upper(item_long_nm) = upper(ihook.getColumnValue(row_ori,'IMP_PRTCL_NM'))) loop
+        ihook.setColumnValue(row_ori, 'PRTCL_ITEM_ID', curprot.item_id);
+        ihook.setColumnValue(row_ori, 'PRTCL_VER_NR', curprot.ver_nr);
+        
+  end loop;
+  end if;
         ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'PARSED');
         rows.extend;    rows(rows.last) := row_ori;
         ParseModuleQuestion(row_ori, actions);
@@ -55,7 +67,7 @@ begin
                hookoutput.message := 'Form Parsed';
           
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);    
-  nci_util.debugHook('GENERAL', v_data_out);
+ -- nci_util.debugHook('GENERAL', v_data_out);
        
  -- raise_application_error(-20000,'Work in Progress');
   
@@ -126,7 +138,7 @@ end;
 FUNCTION getVVCount (v_nm IN varchar2) RETURN integer IS
     V_OUT   Integer;
   BEGIN
-  v_out := REGEXP_COUNT( v_nm, '\|');
+  v_out := REGEXP_COUNT( v_nm, '[|]');
 
     RETURN V_OUT+1;
   END;
@@ -191,7 +203,14 @@ begin
   if (ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID') is null) then
     ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Context missing.' || chr(13));
     ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERROR');
+  else -- protocol check
+  if ( ihook.getColumnValue(row_ori, 'PRTCL_ITEM_ID') is null and ihook.getColumnValue(row_ori, 'IMP_PRTCL_NM') is not null) then
+    ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'WARNING: Protocol is not found.' || chr(13));
+    ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'WARNING');
   end if;
+       
+  end if;
+  
 
   -- Validate Questions Validate if CDE ITEM ID exists. Match if not
   for curq in (select * from NCI_STG_FORM_QUEST_IMPORT where form_imp_id = ihook.getColumnValue(row_ori, 'FORM_IMP_ID')) loop
@@ -492,6 +511,24 @@ begin
         action             := t_actionrowset(rows, 'Form AI', 2, 1,'insert');
         actions.extend;
         actions(actions.last) := action;
+        
+        if (ihook.getColumnValue(row_ori, 'PRTCL_ITEM_ID') is not null) then --- insert Protocol-Form Rel
+        ihook.setColumnValue(row, 'C_ITEM_ID', v_form_id);
+       ihook.setColumnValue(row, 'P_ITEM_ID', ihook.getColumnValue(row_ori, 'PRTCL_ITEM_ID'));
+        ihook.setColumnValue(row, 'P_ITEM_VER_NR', ihook.getColumnValue(row_ori, 'PRTCL_VER_NR'));
+        ihook.setColumnValue(row, 'C_ITEM_VER_NR', 1);
+       ihook.setColumnValue(row, 'REL_TYP_ID', 60);
+       rows:= t_rows();
+        rows.extend;
+        rows(rows.last) := row;
+
+        -- Insert super-type
+        action             := t_actionrowset(rows, 'Protocol-Form Relationship (Form View)', 2, 5,'insert');
+        actions.extend;
+        actions(actions.last) := action;
+      end if;    
+        
+        
        v_disp_ord := 0;
        v_quest_disp_ord := 1;
        v_prev_mod_nm := 'XXXXX';
@@ -552,6 +589,19 @@ end if;
 
 if (cur.SRC_LOGIC_INSTR is not null) then 
 v_instr :=  v_instr || 'Branching Logic=' || cur.SRC_LOGIC_INSTR || '; ';
+end if;
+
+
+if (cur.SRC_VAL_TYP is not null) then 
+v_instr :=  v_instr || 'Text Validation Type=' || cur.SRC_VAL_TYP || '; ';
+end if;
+
+if (cur.SRC_VAL_MIN_VAL is not null) then 
+v_instr :=  v_instr || 'Text Validation Min=' || cur.SRC_VAL_MIN_VAL || '; ';
+end if;
+
+if (cur.SRC_VAL_MAX_VAL is not null) then 
+v_instr :=  v_instr || 'Text Validation Max=' || cur.SRC_VAL_MAX_VAL || '; ';
 end if;
 
 
