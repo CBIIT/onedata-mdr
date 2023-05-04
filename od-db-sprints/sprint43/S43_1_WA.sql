@@ -12,6 +12,6 @@ RAISE_APPLICATION_ERROR( -20001,
 '!!!! The item is not saved. "RETIRED" Workflow Status requires "End Date" value to be set !!!!');
 
 :new.MTCH_TERM := regexp_replace(upper(:new.item_nm),'\(|\)|\;|\-|\_|\|','');
-:new.MTCH_TERM_ADV := regexp_replace(upper(:new.item_nm),'\(|\)|\;|\-|\_|\|','');
+:new.MTCH_TERM_ADV := regexp_replace(upper(:new.item_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}| ','');
 
 END TR_AI_WFS;
