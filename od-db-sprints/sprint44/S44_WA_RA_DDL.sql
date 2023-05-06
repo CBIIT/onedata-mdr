@@ -320,9 +320,8 @@ alter table NCI_STG_FORM_IMPORT add (IMP_PRTCL_NM varchar2(30));
                BEGIN_DATE,
            NVL (ADMIN_ITEM.ORIGIN, ADMIN_ITEM.ORIGIN_ID_DN)
                ORIGIN,
-           ADMIN_ITEM.UNRSLVD_ISSUE
-               UNRESOLVED_ISSUE,
-           ADMIN_ITEM.UNTL_DT
+           translate(ADMIN_ITEM.UNRSLVD_ISSUE,chr(10)||chr(11)||chr(13),' ')          UNRESOLVED_ISSUE,
+             ADMIN_ITEM.UNTL_DT
                END_DATE,
            DECODE (ADMIN_ITEM.CURRNT_VER_IND,  1, 'Yes',  0, 'No')
                LATEST_VERSION_IND,
@@ -391,4 +390,192 @@ CREATE OR REPLACE  VIEW ADMIN_ITEM_VIEW AS
   "NCI_IDSEQ","ADMIN_STUS_NM_DN","CNTXT_NM_DN","REGSTR_STUS_NM_DN","ORIGIN_ID","ORIGIN_ID_DN",
   "DEF_SRC","CREAT_USR_ID_X","LST_UPD_USR_ID_X","ITEM_NM_CURATED","ITEM_NM_ID_VER","ITEM_RPT_URL","ITEM_DEEP_LINK",
   "RVWR_CMNTS","MTCH_TERM_ADV","MTCH_TERM" from admin_item;
+
+
+
+  CREATE OR REPLACE VIEW DATA_ELEMENT_CONCEPTS_VIEW AS
+  SELECT ai.nci_idseq
+               DEC_IDSEQ,
+           ai.ver_nr
+               DEC_VERSION,
+           ai.ITEM_ID
+               DEC_ID,
+           ai.ITEM_LONG_NM
+               PREFERRED_NAME,
+           ai.ITEM_NM
+               LONG_NAME,
+            translate(ai.ITEM_DESC,chr(10)||chr(11)||chr(13),' ')  PREFERRED_DEFINITION,
+           ai.ADMIN_STUS_NM_DN
+               ASL_NAME,
+	   ai.REGSTR_STUS_NM_DN
+               REGISTRATION_STATUS,
+	   ai.CNTXT_NM_DN     CONTE_NAME,
+           DECODE (AI.CURRNT_VER_IND,  1, 'YES',  0, 'NO')
+               LATEST_VERSION_IND,
+           AI.FLD_DELETE
+               DELETED_IND,
+           ai.CREAT_DT
+               DATE_CREATED,
+           ai.EFF_DT
+               BEGIN_DATE,
+           ai.CREAT_USR_ID
+               CREATED_BY,
+           ai.UNTL_DT
+               END_DATE,
+           ai.LST_UPD_DT
+               DATE_MODIFIED,
+           ai.LST_UPD_USR_ID
+               MODIFIED_BY,
+	       translate(ai.ADMIN_NOTES,chr(10)||chr(11)||chr(13),' ') ADMIN_NOTES,
+       translate(ai.CHNG_DESC_TXT,chr(10)||chr(11)||chr(13),' ')          CHANGE_NOTE,
+           NVL (AI.ORIGIN, AI.ORIGIN_ID_DN)
+               ORIGIN,
+           CD.NCI_IDSEQ
+               CD_IDSEQ,
+           CONTE.NCI_IDSEQ
+               CONTE_IDSEQ,
+               ai.CNTXT_NM_DN,
+           PROP.ITEM_NM
+               PROPL_NAME,
+           OC.ITEM_NM
+               OCL_NAME,
+           OBJ_CLS_QUAL
+               OBJ_CLASS_QUALIFIER,
+           PROP_QUAL
+               PROPERTY_QUALIFIER,
+           PROP.NCI_IDSEQ
+               PROP_IDSEQ,
+           OC.NCI_IDSEQ
+               OC_IDSEQ,
+           oe.cncpt_concat || ':' || pe.cncpt_concat      CDR_NAME,
+         dec.PROP_ITEM_ID,
+           dec.PROP_VER_NR,
+           dec.OBJ_CLS_ITEM_ID,
+           dec.OBJ_CLS_VER_NR
+          FROM ADMIN_ITEM  ai,
+           DE_CONC     dec,
+           ADMIN_ITEM  CONTE,
+           ADMIN_ITEM  cd,
+           ADMIN_ITEM  oc,
+           ADMIN_ITEM  prop,
+	        nci_admin_item_ext oe,
+           nci_admin_item_Ext pe
+     WHERE     ai.ADMIN_ITEM_TYP_ID = 2
+           AND ai.item_id = dec.ITEM_ID
+           AND ai.ver_nr = dec.VER_NR
+           AND CD.ADMIN_ITEM_TYP_ID = 1
+           AND oc.ADMIN_ITEM_TYP_ID = 5
+           AND prop.ADMIN_ITEM_TYP_ID = 6
+           AND dec.OBJ_CLS_ITEM_ID = oc.ITEM_ID
+           AND dec.OBJ_CLS_VER_NR = oc.VER_NR
+           AND dec.PROP_ITEM_ID = prop.ITEM_ID
+           AND dec.PROP_VER_NR = prop.VER_NR
+           AND DEC.CONC_DOM_ITEM_ID = CD.ITEM_ID
+           AND DEC.CONC_DOM_VER_NR = CD.VER_NR
+           AND AI.CNTXT_ITEM_ID = CONTE.ITEM_ID
+           AND AI.CNTXT_VER_NR = CONTE.VER_NR
+           AND CONTE.ADMIN_ITEM_TYP_ID = 8
+	       and oc.item_id = oe.item_id
+           and oc.ver_nr = oe.ver_nr
+           and prop.item_id = pe.item_id
+           and prop.ver_nr = pe.ver_nr;
+
+
+
+  CREATE OR REPLACE  VIEW VALUE_DOMAINS_VIEW AS
+  SELECT ai.NCI_IDSEQ
+               VD_IDSEQ,
+           ai.ver_nr
+               VERSION,
+           ai.ITEM_LONG_NM
+               PREFERRED_NAME,
+           con.nci_idseq
+               CONTE_IDSEQ,
+           translate(ai.ITEM_DESC,chr(10)||chr(11)||chr(13),' ')  PREFERRED_DEFINITION,
+            AI.EFF_DT
+               BEGIN_DATE,
+           AI.CNTXT_NM_DN
+               CONTE_NAME,
+	   ai.REGSTR_STUS_NM_DN
+               REGISTRATION_STATUS,
+           AI.CNTXT_ITEM_ID
+               CONTE_ITEM_ID,
+           AI.CNTXT_VER_NR
+               CONTE_VER_NR,
+           data_typ.nci_cd
+               DTL_NAME,
+           cd.nci_idseq
+               CD_IDSEQ,
+           CONC_DOM_ITEM_ID,
+           CONC_DOM_VER_NR,
+           ai.UNTL_DT
+               END_DATE,
+           VAL_DOM_TYP_ID
+               VD_TYPE,
+           ai.ADMIN_STUS_NM_DN
+               ASL_NAME,
+	       translate(ai.ADMIN_NOTES,chr(10)||chr(11)||chr(13),' ') ADMIN_NOTES,
+       translate(ai.CHNG_DESC_TXT,chr(10)||chr(11)||chr(13),' ')          CHANGE_NOTE,
+           uom.nci_cd
+               UOML_NAME,
+           ai.ITEM_NM
+               LONG_NAME,
+           fmt.nci_cd
+               FORML_NAME,
+           VAL_DOM_HIGH_VAL_NUM
+               MAX_LENGTH_NUM,
+           VAL_DOM_LOW_VAL_NUM
+               MIN_LENGTH_NUM,
+           VAL_DOM_MAX_CHAR
+               HIGH_VALUE_NUM,
+           VAL_DOM_MIN_CHAR
+               LOW_VALUE_NUM,
+           NCI_DEC_PREC
+               DECIMAL_PLACE,
+           DECODE (ai.CURRNT_VER_IND,  1, 'Yes',  0, 'No')
+               LATEST_VERSION_IND,
+           DECODE (ai.FLD_DELETE,  1, 'Yes',  0, 'No')
+               DELETED_IND,
+           ai.CREAT_USR_ID
+               CREATED_BY,
+           ai.LST_UPD_USR_ID
+               MODIFIED_BY,
+           ai.LST_UPD_DT
+               DATE_MODIFIED,
+           ai.CREAT_DT
+               DATE_CREATED,
+           --ai.LST_DEL_DT                                 END_DATE,
+           CHAR_SET_ID
+               CHAR_SET_NAME,
+           rep.NCI_IDSEQ
+               REP_IDSEQ,
+           --QUALIFIER_NAME,
+           NVL (AI.ORIGIN, AI.ORIGIN_ID_DN)
+               ORIGIN,
+           ai.item_id
+               VD_ID,
+           DECODE (vd.VAL_DOM_TYP_ID,  17, 'E',  18, 'N')
+               VD_TYPE_FLAG
+      FROM ONEDATA_WA.VALUE_DOM   vd,
+           ONEDATA_WA.admin_item  ai,
+           ONEDATA_WA.admin_item  cd,
+           ONEDATA_WA.fmt,
+           ONEDATA_WA.admin_item  con,
+           ONEDATA_WA.admin_item  rep,
+           ONEDATA_WA.uom,
+           ONEDATA_WA.data_typ
+     WHERE     vd.item_id = ai.item_id
+           AND vd.ver_nr = ai.ver_nr
+           AND ai.ADMIN_ITEM_TYP_ID = 3
+           AND ai.CNTXT_ITEM_ID = con.ITEM_ID
+           AND AI.CNTXT_VER_NR = con.VER_NR
+           AND REP_CLS_ITEM_ID = rep.item_id(+)
+           AND vd.REP_CLS_VER_NR = rep.ver_nr(+)
+           AND fmt.fmt_id(+) = vd.VAL_DOM_FMT_ID
+           AND vd.uom_id = uom.uom_id(+)
+           AND vd.DTTYPE_ID = data_typ.DTTYPE_ID
+           AND cd.item_id = vd.CONC_DOM_ITEM_ID
+           AND cd.ver_nr = vd.CONC_DOM_VER_NR;
+
+
 
