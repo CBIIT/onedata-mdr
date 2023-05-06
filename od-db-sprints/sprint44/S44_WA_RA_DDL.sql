@@ -280,3 +280,115 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
 alter table NCI_STG_FORM_IMPORT add (PRTCL_ITEM_ID number, PRTCL_VER_NR number(4,2));
 
 alter table NCI_STG_FORM_IMPORT add (IMP_PRTCL_NM varchar2(30));
+
+
+
+
+  CREATE OR REPLACE FORCE  VIEW DATA_ELEMENTS_VIEW
+  ("DE_IDSEQ", "CDE_ID", "VERSION", "LONG_NAME", "PREFERRED_NAME", "VD_IDSEQ", "DEC_IDSEQ", "CONTE_IDSEQ", "DEC_ID", "DEC_VERSION", "VD_ID", "VD_VERSION", "PREFERRED_DEFINITION", "ADMIN_NOTES", "CHANGE_NOTE", "BEGIN_DATE", "ORIGIN", "UNRESOLVED_ISSUE", "UNTL_DT", "LATEST_VERSION_IND", "REGISTRATION_STATUS", "ASL_NAME", "WORKFLOW_STATUS_DESC", "CONTEXTS_NAME", "CNTXT_ITEM_ID", "CNTXT_VER_NR", "CREATED_BY", "MODIFIED_BY", "DELETED_IND", "DATE_MODIFIED", "DATE_CREATED", "END_DATE", "ADMIN_ITEM_TYP_ID", "QUESTION") DEFAULT COLLATION "USING_NLS_COMP"  AS 
+  SELECT ADMIN_ITEM.NCI_IDSEQ
+               DE_IDSEQ,
+           ADMIN_ITEM.ITEM_ID
+               CDE_ID,
+           ADMIN_ITEM.VER_NR
+               VERSION,
+           ADMIN_ITEM.ITEM_NM
+               LONG_NAME,
+           ADMIN_ITEM.ITEM_LONG_NM
+               PREFERRED_NAME,
+           VD.NCI_IDSEQ
+               VD_IDSEQ,
+           DE_CONC.NCI_IDSEQ
+               DEC_IDSEQ,
+           CONTE.NCI_IDSEQ
+               CONTE_IDSEQ,
+           DE_CONC_ITEM_ID
+               DEC_ID,
+           DE_CONC_VER_NR
+               DEC_VERSION,
+           VAL_DOM_ITEM_ID
+               VD_ID,
+           VAL_DOM_VER_NR
+               VD_VERSION,
+           translate(ADMIN_ITEM.ITEM_DESC,chr(10)||chr(11)||chr(13),' ')
+               PREFERRED_DEFINITION,
+           translate(ADMIN_ITEM.ADMIN_NOTES,chr(10)||chr(11)||chr(13),' ') ADMIN_NOTES,
+            translate(ADMIN_ITEM.CHNG_DESC_TXT, chr(10)||chr(11)||chr(13),' ')
+               CHANGE_NOTE,
+           --ADMIN_ITEM.CREATION_DT DATE_CREATED,
+           TRUNC (ADMIN_ITEM.EFF_DT)
+               BEGIN_DATE,
+           NVL (ADMIN_ITEM.ORIGIN, ADMIN_ITEM.ORIGIN_ID_DN)
+               ORIGIN,
+           ADMIN_ITEM.UNRSLVD_ISSUE
+               UNRESOLVED_ISSUE,
+           ADMIN_ITEM.UNTL_DT
+               END_DATE,
+           DECODE (ADMIN_ITEM.CURRNT_VER_IND,  1, 'Yes',  0, 'No')
+               LATEST_VERSION_IND,
+           --ADMIN_ITEM.REGSTR_STUS_ID,
+           --ADMIN_ITEM.ADMIN_STUS_ID,
+           ADMIN_ITEM.REGSTR_STUS_NM_DN
+               REGISTRATION_STATUS,
+           ADMIN_ITEM.ADMIN_STUS_NM_DN
+               ASL_NAME,
+           wf.STUS_DESC
+               WORKFLOW_STATUS_DESC,
+           ADMIN_ITEM.CNTXT_NM_DN
+               CONTEXTS_NAME,
+           ADMIN_ITEM.CNTXT_ITEM_ID,
+           ADMIN_ITEM.CNTXT_VER_NR,
+           ADMIN_ITEM.CREAT_USR_ID
+               CREATED_BY,
+           ADMIN_ITEM.LST_UPD_USR_ID
+               MODIFIED_BY,
+           DECODE (ADMIN_ITEM.FLD_DELETE,  1, 'Yes',  0, 'No')
+               DELETED_IND,
+           TRUNC (ADMIN_ITEM.LST_UPD_DT)
+               DATE_MODIFIED,
+           TRUNC (ADMIN_ITEM.CREAT_DT)
+               DATE_CREATED,
+           TRUNC (ADMIN_ITEM.UNTL_DT)
+               END_DATE,
+           --ADMIN_ITEM.S2P_TRN_DT BEGIN_DATE,
+           ADMIN_ITEM.ADMIN_ITEM_TYP_ID,
+           DE.PREF_QUEST_TXT
+               QUESTION
+      --SELECT*
+      FROM ADMIN_ITEM  ADMIN_ITEM,
+           DE,
+           ADMIN_ITEM  DE_CONC,
+           ADMIN_ITEM  VD,
+           ADMIN_ITEM  CONTE,
+           STUS_MSTR   wf
+     WHERE     ADMIN_ITEM.ADMIN_ITEM_TYP_ID = 4
+           AND ADMIN_ITEM.ITEM_ID = DE.ITEM_ID
+           AND ADMIN_ITEM.VER_NR = DE.VER_NR
+           AND ADMIN_ITEM.ADMIN_STUS_ID = wf.STUS_ID
+           AND wf.STUS_TYP_ID = 2
+           AND DE.VAL_DOM_ITEM_ID = VD.ITEM_ID
+           AND DE.VAL_DOM_VER_NR = VD.VER_NR
+           AND DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID
+           AND DE.DE_CONC_VER_NR = DE_CONC.VER_NR
+           AND VD.ADMIN_ITEM_TYP_ID = 3
+           AND DE_CONC.ADMIN_ITEM_TYP_ID = 2
+           AND ADMIN_ITEM.CNTXT_ITEM_ID = CONTE.ITEM_ID
+           AND ADMIN_ITEM.CNTXT_VER_NR = CONTE.VER_NR
+           AND CONTE.ADMIN_ITEM_TYP_ID = 8;
+
+CREATE OR REPLACE  VIEW ADMIN_ITEM_VIEW AS
+  select "ITEM_ID","VER_NR",
+    translate(ITEM_DESC,chr(10)||chr(11)||chr(13),' ') ITEM_DESC,
+    "CNTXT_ITEM_ID","CNTXT_VER_NR","ITEM_LONG_NM","ITEM_NM",
+    translate(ADMIN_NOTES,chr(10)||chr(11)||chr(13),' ') ADMIN_NOTES,
+    translate(CHNG_DESC_TXT,chr(10)||chr(11)||chr(13),' ') CHNG_DESC_TXT,
+  "CREATION_DT","EFF_DT","ORIGIN",
+    translate(UNRSLVD_ISSUE,chr(10)||chr(11)||chr(13),' ') UNRSLVD_ISSUE,
+  "UNTL_DT","ADMIN_ITEM_TYP_ID","CURRNT_VER_IND","ADMIN_STUS_ID","REGSTR_STUS_ID",
+  "REGISTRR_CNTCT_ID","SUBMT_CNTCT_ID","STEWRD_CNTCT_ID","SUBMT_ORG_ID","STEWRD_ORG_ID",
+  "CREAT_DT","CREAT_USR_ID","LST_UPD_USR_ID","FLD_DELETE","LST_DEL_DT","S2P_TRN_DT","LST_UPD_DT",
+  "REGSTR_AUTH_ID",
+  "NCI_IDSEQ","ADMIN_STUS_NM_DN","CNTXT_NM_DN","REGSTR_STUS_NM_DN","ORIGIN_ID","ORIGIN_ID_DN",
+  "DEF_SRC","CREAT_USR_ID_X","LST_UPD_USR_ID_X","ITEM_NM_CURATED","ITEM_NM_ID_VER","ITEM_RPT_URL","ITEM_DEEP_LINK",
+  "RVWR_CMNTS","MTCH_TERM_ADV","MTCH_TERM" from admin_item;
+
