@@ -43,17 +43,26 @@ drop materialized view VW_CLSFCTN_SCHM_ITEM;
     START WITH p_item_id IS NULL
   CONNECT BY PRIOR  to_char(csi.item_id || to_char(csi.ver_nr,'99.99')) = to_char(csi.p_item_id || to_char(csi.P_item_ver_nr,'99.99'));
 
+create materialized view MVW_CSI_REL as
+select connect_by_root p_item_id base_id, connect_by_root p_item_ver_nr base_ver_nr,  p_item_id, p_item_ver_nr, item_id, ver_nr
+from nci_clsfctn_schm_item
+connect by prior item_id = p_item_id and ver_nr = p_item_ver_nr
+union
+select item_id base_id, ver_nr base_ver_nr,  item_id, ver_nr, item_id, ver_nr
+from nci_clsfctn_schm_item;
+
+
 
 drop materialized view MVW_CSI_NODE_DE_REL;
 
   CREATE MATERIALIZED VIEW MVW_CSI_NODE_DE_REL
-  AS SELECT  ak.CREAT_DT,
-           ak.CREAT_USR_ID,
-           ak.LST_UPD_USR_ID,
-           ak.LST_UPD_DT,
-           ak.S2P_TRN_DT,
-           ak.LST_DEL_DT,
-           ak.FLD_DELETE,
+  AS SELECT  distinct ai.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
            ai.ITEM_NM,
            ai.ITEM_LONG_NM,
            ai.ITEM_ID,
@@ -62,8 +71,8 @@ drop materialized view MVW_CSI_NODE_DE_REL;
            ai.CNTXT_NM_DN,
            ai.ADMIN_STUS_NM_DN,
            ai.REGSTR_STUS_NM_DN,
-           ak.P_ITEM_ID,
-           ak.P_ITEM_VER_NR,
+           csi.BASE_ID,
+           csi.BASE_VER_NR,
            ai.CNTXT_ITEM_ID,
            ai.CNTXT_VER_NR,
            ai.ADMIN_STUS_ID,
@@ -71,12 +80,12 @@ drop materialized view MVW_CSI_NODE_DE_REL;
            de.PREF_QUEST_TXT, 
 	   e.USED_BY,
 	   'CSI' LVL
-           FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, de , nci_admin_item_ext e--, vw_clsfctn_schm_item csi
+           FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, de , nci_admin_item_ext e, MVW_CSI_REL csi
      WHERE     ak.C_ITEM_ID = ai.ITEM_ID
            AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
 and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
---and csi.ful_path_id like '%' || ak.p_item_id ||'v'|| to_char(ak.p_item_ver_nr,'99.99') || '%' 
+and csi.P_ITEM_ID= ak.P_ITEM_ID and csi.P_ITEM_VER_NR = ak.P_item_ver_nr  
 --and nvl(ai.CURRNT_VER_IND,0) = 1 
 and nvl(ak.fld_delete,0) = 0
     UNION
@@ -144,6 +153,7 @@ and csi.CS_ITEM_ID = cs.ITEM_ID and csi.CS_ITEM_VER_NR = cs.VER_NR and ai.item_i
 and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
 and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')  and cs.admin_stus_nm_dn ='RELEASED';
 --and nvl(ai.CURRNT_VER_IND,0) = 1;
+
 
 
   CREATE OR REPLACE  VIEW VW_NCI_GENERAL_DE as
