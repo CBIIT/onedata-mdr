@@ -1,4 +1,4 @@
 -- Run as ONEDATA_RA DDL scripts
 
 -- Run as ONEDATA_WA DDL scripts
-
+S44_REL_CLASS_SCHEME_ITEM_VW.sql
