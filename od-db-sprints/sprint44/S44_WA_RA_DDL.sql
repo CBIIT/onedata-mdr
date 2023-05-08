@@ -396,9 +396,7 @@ CREATE OR REPLACE  VIEW ADMIN_ITEM_VIEW AS
   CREATE OR REPLACE VIEW DATA_ELEMENT_CONCEPTS_VIEW AS
   SELECT ai.nci_idseq
                DEC_IDSEQ,
-           ai.ver_nr
-               DEC_VERSION,
-           ai.ver_nr
+          ai.ver_nr
                VERSION,
            ai.ITEM_ID
                DEC_ID,
