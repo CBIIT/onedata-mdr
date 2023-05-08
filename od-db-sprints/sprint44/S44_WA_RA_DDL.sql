@@ -398,6 +398,8 @@ CREATE OR REPLACE  VIEW ADMIN_ITEM_VIEW AS
                DEC_IDSEQ,
            ai.ver_nr
                DEC_VERSION,
+           ai.ver_nr
+               VERSION,
            ai.ITEM_ID
                DEC_ID,
            ai.ITEM_LONG_NM
