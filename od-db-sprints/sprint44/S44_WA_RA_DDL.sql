@@ -811,7 +811,7 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
 
 alter table admin_item disable all triggers;
 
-update ADMIN_ITEM set ITEM_RPT_URL = (select PARAM_VAL || '/invoke/downloads.form/printerFriendly?item_id=' || item_id ||  chr(38) || 'version=' || ver_nr || '\\click_to_view'
+update ADMIN_ITEM set ITEM_RPT_URL = (select PARAM_VAL || '/invoke/downloads.form/printerFriendly?item_id=' || item_id ||  chr(38) || 'version=' || ver_nr || '\Click_to_View'
 from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST') where ADMIN_ITEM_TYP_ID = 54;
 commit;
 
