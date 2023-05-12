@@ -808,3 +808,11 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
  ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST';
  --and ai.admin_stus_nm_dn not like '%RETIRED%';
 
+
+alter table admin_item disable all triggers;
+
+update ADMIN_ITEM set ITEM_RPT_URL = (select PARAM_VAL || '/invoke/downloads.form/printerFriendly?item_id=' || item_id ||  chr(38) || 'version=' || ver_nr || '\\click_to_view'
+from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST') where ADMIN_ITEM_TYP_ID = 54;
+commit;
+
+alter table admin_item enable all triggers;
