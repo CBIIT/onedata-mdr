@@ -816,3 +816,6 @@ from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST') where ADMIN_ITEM_TYP_ID = 5
 commit;
 
 alter table admin_item enable all triggers;
+
+alter table NCI_PROTCL modify (CHNG_TYP  varchar2(30));
+
