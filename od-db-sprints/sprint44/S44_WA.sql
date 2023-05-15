@@ -1,3 +1,5 @@
+drop trigger  TRG_NCI_QVV_POST  ;
+
 create or replace TRIGGER TR_AI_WFS
   BEFORE UPDATE or INSERT ON ADMIN_ITEM
   FOR EACH ROW
