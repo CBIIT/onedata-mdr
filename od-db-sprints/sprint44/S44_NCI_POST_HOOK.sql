@@ -26,6 +26,7 @@ procedure spOrgUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2)
 procedure spPostTypeDetails ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure spPostRefDoc ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spRefreshViews (v_data_in in clob, v_data_out out clob);
+procedure spUpdVV ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 
 END;
 /
@@ -145,6 +146,7 @@ BEGIN
         /*DSRMWS-455 PREF_QUEST_TXT IS NULL END 01/08/2021 AT*/
         END IF;
 END;
+
 
 procedure            sp_postprocess ( v_data_in in clob, v_data_out out clob)
 as
@@ -334,6 +336,42 @@ DBMS_MVIEW.REFRESH('VW_FORM_TREE_CDE');
 
 end;
 
+
+
+procedure spUpdVV ( v_data_in in clob, v_data_out out clob, v_user_id varchar2)
+as
+hookInput        t_hookInput;
+    hookOutput       t_hookOutput := t_hookOutput ();
+    row_ori          t_row;
+  v_quest_id number;
+  v_quest_ver number(4,2);
+ BEGIN
+    hookinput := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber := hookinput.invocationnumber;
+    hookoutput.originalrowset := hookinput.originalrowset;
+    row_ori := hookInput.originalRowset.rowset (1);
+    v_quest_id := ihook.getColumnValue(row_ori, 'Q_PUB_ID');
+    v_quest_ver := ihook.getColumnValue(row_ori, 'Q_VER_NR');
+    
+    update ADMIN_ITEM set LST_UPD_DT =sysdate, LST_UPD_USR_ID = v_user_id    
+    where (ITEM_ID, VER_NR) in (select ak.P_ITEM_ID, ak.P_ITEM_VER_NR from NCI_ADMIN_ITEM_REL ak, NCI_ADMIN_ITEM_REL_ALT_KEy q
+                                where q.NCI_PUB_ID=v_quest_id and q.NCI_VER_NR=v_quest_ver and q.P_ITEM_ID = ak.C_ITEM_ID
+                                and q.P_ITEM_VER_NR = ak.C_ITEM_VER_NR and ak.rel_typ_id = 61);
+
+
+
+    update NCI_ADMIN_ITEM_REL_ALT_KEY set LST_UPD_DT =sysdate, LST_UPD_USR_ID = v_user_id
+    where  NCI_PUB_ID = v_quest_id
+           AND NCI_VER_NR=v_quest_ver;
+
+    update NCI_ADMIN_ITEM_REL set LST_UPD_DT = sysdate ,LST_UPD_USR_ID = v_user_id 
+    where  (C_ITEM_ID, C_ITEM_VER_NR) in (select p_item_id, p_item_ver_nr from nci_admin_item_rel_alt_key where c_item_id = v_quest_id and 
+                                          c_item_ver_nr = v_quest_ver)
+    and rel_typ_id = 61;
+commit;
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+end;
 
 procedure spModRestore ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_mode in varchar2)
 as
