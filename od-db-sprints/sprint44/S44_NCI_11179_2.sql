@@ -1670,10 +1670,10 @@ end if;
             and a.val_dom_item_id=de.val_dom_item_id and de.item_id = ihook.getColumnValue(row_cur,'ITEM_ID')
             and a.val_dom_ver_nr=de.val_dom_ver_nr and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR') and a.fld_delete=0
             and a.perm_val_nm = v_tab_pv(i)) loop
-            ihook.setColumnValue(row, v_tab_admin_item_nm(k) || ' Concept Codes',rec.cncpt_concat);
-            ihook.setColumnValue(row, v_tab_admin_item_nm(k) || ' VM ID-Ver',rec.idver);
             ihook.setColumnValue(row, v_tab_admin_item_nm(k) || ' VM Name',rec.cncpt_concat_nm);
             ihook.setColumnValue(row, v_tab_admin_item_nm(k) || ' VM Def',rec.cncpt_concat_def);
+            ihook.setColumnValue(row, v_tab_admin_item_nm(k) || ' Concept Codes',rec.cncpt_concat);
+            ihook.setColumnValue(row, v_tab_admin_item_nm(k) || ' VM ID-Ver',rec.idver);
             k := k + 1;
             end loop;
             end if;
