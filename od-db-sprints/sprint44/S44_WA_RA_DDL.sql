@@ -818,3 +818,11 @@ alter table admin_item enable all triggers;
 
 alter table NCI_PROTCL modify (CHNG_TYP  varchar2(30));
 
+
+alter table admin_item disable all triggers;
+
+update ADMIN_ITEM set ITEM_RPT_URL = (select PARAM_VAL || '/invoke/downloads.form/printerFriendly?item_id=' || item_id ||  chr(38) || 'version=' || ver_nr || '\Click_To_View'
+from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST') where ADMIN_ITEM_TYP_ID = 54;
+commit;
+
+alter table admin_item enable all triggers;
