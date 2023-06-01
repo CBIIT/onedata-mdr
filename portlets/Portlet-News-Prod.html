@@ -16,23 +16,39 @@
     }
     </style>
     <div class="news">
-<P><font color="blue"><B>caDSR II</B> Release 1.44.3.0 will be deployed Thursday, June 1, 2023 from 9 AM - 1 PM ET</b></font>
-<UL class=multi><li><b>User accounts will be locked during this time. and a Maintenance Portal will be posted to prevent users from inadvertent issues while the deployment is in process.</b></li>
+<P><font color="blue"><B>caDSR II</B> Release 1.44.3.0 includes the following improvements:</b></font>
+<UL class=multi>
+<li><p><b>Compare PV Details</B> - New favorite "Compare PV Details" displays the details of Value Meanings including VM Name and Description.</p></li>
+<li><p><b>All Compare features</b> - Use alternating colors and wrap text for each row to improve readability.</p</li>
+<li><p><b>Form Import</b> - Enhanced mapping when importing REDCap forms/Data Dictionaries.</p></li>
+<li><p><b>VM Match</b> - Algorithm improvements to include "Exact" match on both existing VMs and concepts instead of stopping after an exact match. Additional new command, "Match Unrestricted", expands matching to include "Like" matches even when exact matches are found.</p></li>
+<li><p><b>CDE Match</b> - Add PV Compare. </p></li>
+<li><p><b>Download Collection: Value Domains</b> - Bug Fix so Permissible Values/Value Meanings are exported</p></li>
+<li><p><b>API Fixes</b> - Fix getConcept and getComponentConceptCollection.</p></li>
+<li><b>CDEs by Data Element Concept</b> - Add default Long Name sort order.</p</li>
 </ul>
-<p>As always, this release also has bug fixes and other improvements. For details, refer to the <a class="underline" href="https://wiki.nci.nih.gov/x/Zwd-Gw" target="_blank" rel="noopener noreferrer">caDSR II Release Notes</a>.</p>
+<p>As always, see the link to caDSR II Release Notes for complete details.</p>
  <p><B>caDSR II</B> provides access to NCI's metadata standards for: Common Data Elements (CDEs), Case Report Forms (CRFs), and Data Models. These metadata resources describe a common way of structuring and understanding data.
         </P>
         <P>The "Links to Favorites" section <B>Data Elements - View/Browse</b> provides access to NCI's CDEs and <b>Forms</b> provides access to our CRFs. It also includes links for browsing or searching specific collections of content using various "Child Filters".
+<P>Favorites also includes:
+ <UL class="multi">
+<LI><b>Browse CDEs by Data Element Concept: </b>
+The CDE's Data Element Concept (DEC) is essentially the "question" being asked, the CDE's Value Domain (VD) defines the permitted values for capturing the response to the question. CDEs can share the same DEC but have a different VD for example where either the number of permitted values is different, or the way the response to the question is recorded is represented differently. Browsing CDEs by DEC allows you to find the question you want to ask (DEC) and then view/compare existing CDEs, including comparing each CDEs permitted values to help determine if there is CDE you can reuse.  
+</li>
+<li><b>NCI Standard CRFs </B>This favorite displays the set of standardized Case Report Forms used across NCI Clinical Trials.</li>
+</ul>
 </p>
+        </P>
         <P>
             After finding content by searching, you have multiple export options:
         </P>
         <UL class="multi">
             <LI>
-                Export the displayed content using <i>Delivery Options</i>.
+                       Export the displayed content using <i>Delivery Options</i>.
             </LI>
-            <LI>
-                Add the displayed content to the User Cart, use Download Collection to build a collection (a custom set of content), and request a download of that collection in various formats:
+                     <LI>
+                       Add the displayed content to the User Cart, use Download Collection to build a collection (a custom set of content), and request a download of that collection in various formats:
                 <UL>
                      <LI>
                         Legacy caDSR Excel and XML formats
