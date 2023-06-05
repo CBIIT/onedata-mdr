@@ -11,7 +11,7 @@ from NCI_MDR_CNTRL where PARAM_NM = 'DEEP_LINK')
 where admin_item_typ_id = 54 ;
 commit;
 
-update ADMIN_ITEM set ITEM_RPT_URL = (select PARAM_VAL || '/invoke/FormDownload/printerFriendly?item_id=' || item_id ||  chr(38) || 'version=' || ver_nr || '\Click_to_View'    
+update ADMIN_ITEM set ITEM_RPT_URL = (select PARAM_VAL || '/invoke/downloads.form/printerFriendly?item_id=' || item_id ||  chr(38) || 'version=' || ver_nr || '\Click_to_View'    
 from NCI_MDR_CNTRL where PARAM_NM = 'DOWNLOAD_HOST') where ADMIN_ITEM_TYP_ID = 54;
 commit;
 
