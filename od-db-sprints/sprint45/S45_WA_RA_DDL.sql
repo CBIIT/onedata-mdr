@@ -1,0 +1,1 @@
+alter table nci_stg_alt_nms add DOC_TXT varchar2(4000);
