@@ -226,5 +226,18 @@ insert into cntct (cntct_nm, cntct_secu_id) values ('Load Job Administrator','ON
 commit;
 
 
+ CREATE OR REPLACE  VIEW VW_VALUE_DOM_COMP AS
+  select v."NON_ENUM_VAL_DOM_DESC",v."DTTYPE_ID",v."VAL_DOM_MAX_CHAR",v."VAL_DOM_TYP_ID",v."UOM_ID",v."CREAT_DT",v."CONC_DOM_VER_NR",v."CREAT_USR_ID",v."CONC_DOM_ITEM_ID",v."LST_UPD_USR_ID",v."REP_CLS_VER_NR",v."FLD_DELETE",v."REP_CLS_ITEM_ID",v."LST_DEL_DT",v."VER_NR",v."S2P_TRN_DT",v."ITEM_ID",v."LST_UPD_DT",v."VAL_DOM_MIN_CHAR",v."VAL_DOM_FMT_ID",v."CHAR_SET_ID",v."VAL_DOM_SYS_NM",v."VAL_DOM_HIGH_VAL_NUM",v."VAL_DOM_LOW_VAL_NUM",v."X_VAL_DOM_ITEM_ID",v."Y_VAL_DOM_ITEM_ID",v."Z_VAL_DOM_ITEM_ID",v."X_VAL_DOM_VER_NR",v."Y_VAL_DOM_VER_NR",v."Z_VAL_DOM_VER_NR",v."NCI_DEC_PREC",v."NCI_STD_DTTYPE_ID",
+pv.code_name
+from value_dom v,
+--(SELECT val_dom_item_id, val_dom_ver_nr, substr(LISTAGG(PERM_VAL_NM|| ':' || PERM_VAL_DESC_TXT || ':' || e.cncpt_concat_nm || ':' || e.cncpt_concat, '   ,  ') WITHIN GROUP (ORDER by PERM_VAL_DESC_TXT),1,8000) AS CODE_NAME
+--(SELECT val_dom_item_id, val_dom_ver_nr, substr(LISTAGG(PERM_VAL_NM|| ':' || PERM_VAL_DESC_TXT || ':' || e.cncpt_concat, '   ,  ') WITHIN GROUP (ORDER by PERM_VAL_DESC_TXT),1,8000) AS CODE_NAME
+(SELECT val_dom_item_id, val_dom_ver_nr, substr(LISTAGG(PERM_VAL_NM|| ':' ||  e.cncpt_concat_nm || ':' || e.cncpt_concat, '   ,  ') WITHIN GROUP (ORDER by PERM_VAL_DESC_TXT),1,8000) AS CODE_NAME
+FROM PERM_VAL, nci_admin_item_ext e
+ where perm_val.nci_val_mean_item_id = e.item_id
+ and perm_val.nci_val_mean_ver_nr = e.ver_nr
+GROUP BY val_dom_item_id, val_dom_ver_nr) pv
+where v.item_id = pv.val_dom_item_id (+) and v.ver_nr = pv.val_dom_ver_nr (+);
+
 
     
