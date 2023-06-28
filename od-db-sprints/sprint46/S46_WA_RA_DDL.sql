@@ -238,6 +238,16 @@ FROM PERM_VAL, nci_admin_item_ext e
  and perm_val.nci_val_mean_ver_nr = e.ver_nr
 GROUP BY val_dom_item_id, val_dom_ver_nr) pv
 where v.item_id = pv.val_dom_item_id (+) and v.ver_nr = pv.val_dom_ver_nr (+);
+/
+
+  CREATE OR REPLACE  VIEW VW_ADMIN_ITEM_VM_MATCH AS
+  SELECT CNTXT_ITEM_ID, admin_item_typ_id,decode(admin_item_typ_id, 49, 'Concepts', 53 ,'VM', 2 ,'DEC', 'Other') ADMIN_ITEM_TYP,  ITEM_DESC, ITEM_LONG_NM, REGSTR_STUS_ID, ai.ITEM_ID, ai.VER_NR, ITEM_NM, ai.CREAT_DT, CNTXT_VER_NR, ADMIN_STUS_ID,
+   ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT, NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN,
+  decode(admin_item_typ_id, 49, ITEM_LONG_NM, 53, ai.ITEM_ID, ITEM_NM)  ID_OR_CODE, 
+  decode(admin_item_typ_id, 53, decode(e.cncpt_concat, e.cncpt_concat_nm, '',e.cncpt_concat),'') VM_CONCEPTS, 
+  decode(admin_item_typ_id, 49, 'Concepts', 53 ,'ID', 2 ,'ID', 'Other') MATCH_TYP
+       FROM ADMIN_ITEM ai, NCI_ADMIN_ITEM_EXT e where admin_item_typ_id in (49,53,2)
+       and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr;
 
 
     
