@@ -249,5 +249,8 @@ where v.item_id = pv.val_dom_item_id (+) and v.ver_nr = pv.val_dom_ver_nr (+);
        FROM ADMIN_ITEM ai, NCI_ADMIN_ITEM_EXT e where admin_item_typ_id in (49,53,2)
        and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr;
 
+/
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values ('Superceded By',8,'Superceded By','Superceded By','Superceded By' );
+commit;
 
     
