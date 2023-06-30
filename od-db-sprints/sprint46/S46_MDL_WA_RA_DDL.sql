@@ -64,13 +64,6 @@ commit;
 	insert into obj_typ (obj_typ_id, obj_typ_desc) values (40,'Model Element Type');
        commit;
 
-insert into obj_key ( OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values ('Standard',40,'Standard','Standard','Standard' );
-
-insert into obj_key ( OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values ('Table',41,'Table','Table','Table' );
-
-insert into obj_key ( OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values ('Class',40,'Class','Class','Class' );
-commit;
-
 
 
 
