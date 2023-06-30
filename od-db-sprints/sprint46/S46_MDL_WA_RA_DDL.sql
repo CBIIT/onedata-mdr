@@ -25,6 +25,7 @@ create table NCI_MDL_ELMNT
 	LST_DEL_DT DATE DEFAULT sysdate, 
 	S2P_TRN_DT DATE DEFAULT sysdate, 
 	LST_UPD_DT DATE DEFAULT sysdate, 
+	ME_TYP_ID integer,
   primary key (ITEM_ID, VER_NR));
 
 create table NCI_MDL_ELMNT_REL
