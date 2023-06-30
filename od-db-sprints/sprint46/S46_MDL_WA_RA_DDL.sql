@@ -56,3 +56,9 @@ create table NCI_MDL_ELMNT_CHAR
 	LST_UPD_DT DATE DEFAULT sysdate)
   ;
 
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (57,'Model',4,'Model','Model','Model' );
+commit;
+
+
+
+
