@@ -64,6 +64,11 @@ commit;
 	insert into obj_typ (obj_typ_id, obj_typ_desc) values (40,'Model Element Type');
        commit;
 
+insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (57,66);
+insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (57,75);
+insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (57,77);
+commit;
+
 
 
 
