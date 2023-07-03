@@ -67,7 +67,7 @@ create table NCI_MDL_ELMNT_CHAR
 	DE_CONC_ITEM_ID number,
 	DE_CONC_VER_NR number(4,2),
 	VAL_DOM_ITEM_ID number,
-	VAL_DOM_VER_NR  number(4,2)
+	VAL_DOM_VER_NR  number(4,2),
 	NUM_PV integer);
 
 insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (57,'Model',4,'Model','Model','Model' );
