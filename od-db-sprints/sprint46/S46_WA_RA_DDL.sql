@@ -256,3 +256,9 @@ commit;
 alter table NCI_DS_HDR add (NUM_DEC_MTCH integer, DE_CONC_ITEM_ID number, DE_CONC_VER_NR number(4,2));
 
 alter table NCI_DS_RSLT add (MTCH_TYP varchar2(10));
+
+alter table NCI_DS_RSLT disable all triggers;
+update NCI_DS_RSLT set MTCH_TYP = 'CDE';
+commit;
+alter table NCI_DS_RSLT enable all triggers;
+
