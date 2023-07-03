@@ -54,8 +54,21 @@ create table NCI_MDL_ELMNT_CHAR
 	FLD_DELETE NUMBER(1,0) DEFAULT 0, 
 	LST_DEL_DT DATE DEFAULT sysdate, 
 	S2P_TRN_DT DATE DEFAULT sysdate, 
-	LST_UPD_DT DATE DEFAULT sysdate)
-  ;
+	LST_UPD_DT DATE DEFAULT sysdate,
+		SRC_DTTYPE varchar2(255), 
+	STD_DTTYPE_ID NUMBER, 
+       SRC_MAX_CHAR NUMBER(*,0), 
+	 SRC_MIN_CHAR NUMBER(*,0), 
+	VAL_DOM_TYP_ID NUMBER, 
+	SRC_UOM  varchar2(255),
+	UOM_ID NUMBER, 
+	SRC_DEFLT_VAL varchar2(4000), 
+  SRC_ENUM_SRC  varchar2(255),
+	DE_CONC_ITEM_ID number,
+	DE_CONC_VER_NR number(4,2),
+	VAL_DOM_ITEM_ID number,
+	VAL_DOM_VER_NR  number(4,2)
+	NUM_PV integer);
 
 insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (57,'Model',4,'Model','Model','Model' );
 commit;
