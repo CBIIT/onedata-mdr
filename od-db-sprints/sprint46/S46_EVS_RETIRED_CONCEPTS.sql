@@ -55,6 +55,8 @@ Values (2004, 'C83480', 'Retired Concept 2004');
 INSERT INTO SAG_CONCEPT_RETIRED_BY_YEAR(YEAR_ID, CODE_RETIRED, YEAR_DESC)
 Values (2003, 'C83479', 'Retired Concept 2003');
 commit;
+GRANT READ ON SAG_CONCEPT_RETIRED_BY_YEAR TO ONEDATA_RO; 
+GRANT READ ON SAG_LOAD_CONCEPTS_EVS TO ONEDATA_RO; 
 --retired concepts codes are taken from SAG_CONCEPT_RETIRED_BY_YEAR. 
 --The previous version had a hardcoded retired concepts parents list.
 create or replace Procedure SAG_LOAD_CONCEPT_RETIRE (p_END_DATE IN date default sysdate)
