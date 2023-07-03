@@ -48,7 +48,7 @@ create table NCI_MDL_ELMNT_CHAR
 ( MEC_ID number not null primary key,
   MDL_ELMNT_ITEM_ID number not null,
   MDL_ELMNT_VER_NR number (4,2) not null,
-  MEC_TYP_ID integer not null,
+  MEC_TYP_ID integer null,
    CREAT_DT DATE  DEFAULT sysdate, 
 	CREAT_USR_ID VARCHAR2(50) DEFAULT user, 
 	LST_UPD_USR_ID VARCHAR2(50) DEFAULT user, 
