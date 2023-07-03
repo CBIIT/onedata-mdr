@@ -77,6 +77,8 @@ insert into obj_key ( OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_
 insert into obj_key ( OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values ('Class',41,'Class','Class','Class' );
 
 insert into obj_key ( OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values ('Subclass',41,'Subclass','Subclass','Subclass' );
+
+insert into obj_key ( OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values ('Is Child of',42,'Is Child of','Is Child of','Is Child of' );
 commit;
 
 
