@@ -3,9 +3,10 @@ CREATE OR REPLACE TRIGGER TR_NCI_MDL_ELMNT_SEQ  BEFORE INSERT  on NCI_MDL_ELMNT
          BEGIN    IF (:NEW.ITEM_ID<= 0  or :NEW.ITEM_ID is null)  THEN
          select od_seq_ADMIN_ITEM.nextval
     into :new.ITEM_ID  from  dual ;
+end if;
+if (:new.ver_nr is null) then
 :new.ver_nr := 1;
-
-END IF;
+end if;
 
 END ;
 /
@@ -79,6 +80,8 @@ insert into obj_key ( OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_
 commit;
 
 
+
+create index idxAIMtchTermAdvType on ADMIN_ITEM (admin_item_typ_id, MTCH_TERM_ADV);
 
 
 
