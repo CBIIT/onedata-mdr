@@ -253,5 +253,5 @@ where v.item_id = pv.val_dom_item_id (+) and v.ver_nr = pv.val_dom_ver_nr (+);
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values ('Superceded By',8,'Superceded By','Superceded By','Superceded By' );
 commit;
 
-alter table NCI_DS_HDR add (NUM_DEC_MTCH integer, DE_CONC_ITEM_ID number, DE_CONC_VER_NR number(4,2);
+alter table NCI_DS_HDR add (NUM_DEC_MTCH integer, DE_CONC_ITEM_ID number, DE_CONC_VER_NR number(4,2));
 
