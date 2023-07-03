@@ -79,7 +79,10 @@ commit;
 
 
 	insert into obj_typ (obj_typ_id, obj_typ_desc) values (40,'Modelling Language');
-	insert into obj_typ (obj_typ_id, obj_typ_desc) values (40,'Model Element Type');
+	insert into obj_typ (obj_typ_id, obj_typ_desc) values (41,'Model Element Type');
+	insert into obj_typ (obj_typ_id, obj_typ_desc) values (42,'Model Element Relationship');
+        insert into obj_typ (obj_typ_id, obj_typ_desc) values (43,'Model Element Relationship Cardinality');
+
        commit;
 
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (57,66);
