@@ -18,6 +18,7 @@ create table NCI_MDL_ELMNT
   MDL_ITEM_VER_NR number(4,2) not null,
   ITEM_LONG_NM varchar2(255) not null,
   ITEM_PHY_OBJ_NM varchar2(255) null,
+	ITEM_DESC varchar2(4000) null,
   CREAT_DT DATE  DEFAULT sysdate, 
 	CREAT_USR_ID VARCHAR2(50) DEFAULT user, 
 	LST_UPD_USR_ID VARCHAR2(50) DEFAULT user, 
@@ -70,7 +71,8 @@ create table NCI_MDL_ELMNT_CHAR
 	VAL_DOM_VER_NR  number(4,2),
 	NUM_PV integer,
 	MEC_LONG_NM  varchar2(255),
-	MEC_PHY_NM  varchar2(255));
+	MEC_PHY_NM  varchar2(255),
+	MEC_DESC varchar2(4000));
 
 insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (57,'Model',4,'Model','Model','Model' );
 commit;
