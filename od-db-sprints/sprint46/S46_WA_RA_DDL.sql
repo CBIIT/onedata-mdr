@@ -255,3 +255,4 @@ commit;
 
 alter table NCI_DS_HDR add (NUM_DEC_MTCH integer, DE_CONC_ITEM_ID number, DE_CONC_VER_NR number(4,2));
 
+alter table NCI_DS_RSLT add (MTCH_TYP varchar2(10));
