@@ -348,3 +348,5 @@ alter table NCI_DS_RSLT enable all triggers;
 --and ADMIN_ITEM.CNTXT_NM_DN = 'CRDC'
 and admin_item.regstr_stus_id = 2;
 
+alter table NCI_DS_HDR add (	ENTTY_DEF  varchar2(6000));
+
