@@ -225,7 +225,7 @@ and DE_CONC.ITEM_ID = cde.DE_CONC_ITEM_ID and DE_CONC.VER_NR = CDE.DE_CONC_VER_N
 insert into cntct (cntct_nm, cntct_secu_id) values ('Load Job Administrator','ONEDATA_WA');
 commit;
 
-
+/*
  CREATE OR REPLACE  VIEW VW_VALUE_DOM_COMP AS
   select v."NON_ENUM_VAL_DOM_DESC",v."DTTYPE_ID",v."VAL_DOM_MAX_CHAR",v."VAL_DOM_TYP_ID",v."UOM_ID",v."CREAT_DT",v."CONC_DOM_VER_NR",v."CREAT_USR_ID",v."CONC_DOM_ITEM_ID",v."LST_UPD_USR_ID",v."REP_CLS_VER_NR",v."FLD_DELETE",v."REP_CLS_ITEM_ID",v."LST_DEL_DT",v."VER_NR",v."S2P_TRN_DT",v."ITEM_ID",v."LST_UPD_DT",v."VAL_DOM_MIN_CHAR",v."VAL_DOM_FMT_ID",v."CHAR_SET_ID",v."VAL_DOM_SYS_NM",v."VAL_DOM_HIGH_VAL_NUM",v."VAL_DOM_LOW_VAL_NUM",v."X_VAL_DOM_ITEM_ID",v."Y_VAL_DOM_ITEM_ID",v."Z_VAL_DOM_ITEM_ID",v."X_VAL_DOM_VER_NR",v."Y_VAL_DOM_VER_NR",v."Z_VAL_DOM_VER_NR",v."NCI_DEC_PREC",v."NCI_STD_DTTYPE_ID",
 pv.code_name
@@ -239,6 +239,17 @@ FROM PERM_VAL, nci_admin_item_ext e
 GROUP BY val_dom_item_id, val_dom_ver_nr) pv
 where v.item_id = pv.val_dom_item_id (+) and v.ver_nr = pv.val_dom_ver_nr (+);
 /
+*/
+
+CREATE OR REPLACE  VIEW VW_VALUE_DOM_COMP AS
+  select ai.item_nm, ai.item_long_nm, ai.admin_stus_nm_dn, ai.regstr_stus_nm_dn, ai.cntxt_nm_dn, v."NON_ENUM_VAL_DOM_DESC",v."DTTYPE_ID",v."VAL_DOM_MAX_CHAR",v."VAL_DOM_TYP_ID",v."UOM_ID",v."CREAT_DT",v."CONC_DOM_VER_NR",
+	v."CREAT_USR_ID",v."CONC_DOM_ITEM_ID",v."LST_UPD_USR_ID",v."REP_CLS_VER_NR",v."FLD_DELETE",v."REP_CLS_ITEM_ID",v."LST_DEL_DT",v."VER_NR",v."S2P_TRN_DT",
+	v."ITEM_ID",v."LST_UPD_DT",v."VAL_DOM_MIN_CHAR",v."VAL_DOM_FMT_ID",v."CHAR_SET_ID",v."VAL_DOM_SYS_NM",v."VAL_DOM_HIGH_VAL_NUM",v."VAL_DOM_LOW_VAL_NUM",
+	v."NCI_DEC_PREC",v."NCI_STD_DTTYPE_ID"
+from value_dom v, admin_item ai
+where v.item_id = ai.item_id and v.ver_nr = ai.ver_nr
+/
+	
 
   CREATE OR REPLACE  VIEW VW_ADMIN_ITEM_VM_MATCH AS
   SELECT CNTXT_ITEM_ID, admin_item_typ_id,decode(admin_item_typ_id, 49, 'Concepts', 53 ,'VM', 2 ,'DEC', 'Other') ADMIN_ITEM_TYP,  ITEM_DESC, ITEM_LONG_NM, REGSTR_STUS_ID, ai.ITEM_ID, ai.VER_NR, ITEM_NM, ai.CREAT_DT, CNTXT_VER_NR, ADMIN_STUS_ID,
