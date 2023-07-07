@@ -69,6 +69,8 @@ create table NCI_MDL_ELMNT_CHAR
 	DE_CONC_VER_NR number(4,2),
 	VAL_DOM_ITEM_ID number,
 	VAL_DOM_VER_NR  number(4,2),
+	CDE_ITEM_ID number,
+	CDE_VER_NR number(4,2),
 	NUM_PV integer,
 	MEC_LONG_NM  varchar2(255),
 	MEC_PHY_NM  varchar2(255),
