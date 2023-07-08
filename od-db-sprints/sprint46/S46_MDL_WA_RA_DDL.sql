@@ -92,6 +92,53 @@ insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (57,75);
 insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (57,77);
 commit;
 
+create table NCI_MDL_MAP
+(ITEM_ID number not null,
+  VER_NR number(4,2) not null,
+  SRC_MDL_ITEM_ID number not null,
+  SRC_MDL_VER_NR number(4,2) not null,
+  TGT_MDL_ITEM_ID number not null,
+  TGT_MDL_VER_NR number(4,2) not null,
+  CREAT_DT DATE  DEFAULT sysdate, 
+	CREAT_USR_ID VARCHAR2(50) DEFAULT user, 
+	LST_UPD_USR_ID VARCHAR2(50) DEFAULT user, 
+	FLD_DELETE NUMBER(1,0) DEFAULT 0, 
+	LST_DEL_DT DATE DEFAULT sysdate, 
+	S2P_TRN_DT DATE DEFAULT sysdate, 
+	LST_UPD_DT DATE DEFAULT sysdate, 
+primary key (ITEM_ID, ver_NR));
+
+create table NCI_MEC_MAP
+( MECM_ID number not null primary key,
+  SRC_MEC_ID number null,
+  TGT_MEC_ID numer null,
+  MDL_MAP_ITEM_ID number not null,
+  MDL_MAP_VER_NR number(4,2) not null,
+	TRNS_DESC_TXT varchar2(1000) null,
+   CREAT_DT DATE  DEFAULT sysdate, 
+	CREAT_USR_ID VARCHAR2(50) DEFAULT user, 
+	LST_UPD_USR_ID VARCHAR2(50) DEFAULT user, 
+	FLD_DELETE NUMBER(1,0) DEFAULT 0, 
+	LST_DEL_DT DATE DEFAULT sysdate, 
+	S2P_TRN_DT DATE DEFAULT sysdate, 
+	LST_UPD_DT DATE DEFAULT sysdate,
+);
+
+create table NCI_MEC_VAL_MAP
+( MECM_ID number not null primary key,
+  SRC_MEC_ID number null,
+  TGT_MEC_ID numer null,
+  MDL_MAP_ITEM_ID number not null,
+  MDL_MAP_VER_NR number(4,2) not null,
+	TRNS_DESC_TXT varchar2(1000) null,
+   CREAT_DT DATE  DEFAULT sysdate, 
+	CREAT_USR_ID VARCHAR2(50) DEFAULT user, 
+	LST_UPD_USR_ID VARCHAR2(50) DEFAULT user, 
+	FLD_DELETE NUMBER(1,0) DEFAULT 0, 
+	LST_DEL_DT DATE DEFAULT sysdate, 
+	S2P_TRN_DT DATE DEFAULT sysdate, 
+	LST_UPD_DT DATE DEFAULT sysdate,
+);
 
 
 
