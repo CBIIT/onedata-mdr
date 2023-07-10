@@ -111,7 +111,7 @@ primary key (ITEM_ID, ver_NR));
 create table NCI_MEC_MAP
 ( MECM_ID number not null primary key,
   SRC_MEC_ID number null,
-  TGT_MEC_ID numer null,
+  TGT_MEC_ID number null,
   MDL_MAP_ITEM_ID number not null,
   MDL_MAP_VER_NR number(4,2) not null,
 	TRNS_DESC_TXT varchar2(1000) null,
@@ -121,13 +121,13 @@ create table NCI_MEC_MAP
 	FLD_DELETE NUMBER(1,0) DEFAULT 0, 
 	LST_DEL_DT DATE DEFAULT sysdate, 
 	S2P_TRN_DT DATE DEFAULT sysdate, 
-	LST_UPD_DT DATE DEFAULT sysdate,
+	LST_UPD_DT DATE DEFAULT sysdate
 );
 
 create table NCI_MEC_VAL_MAP
 ( MECVM_ID number not null primary key,
   SRC_MEC_ID number not null,
-  TGT_MEC_ID numer not null,
+  TGT_MEC_ID number not null,
   MDL_MAP_ITEM_ID number not null,
   MDL_MAP_VER_NR number(4,2) not null,
 	SRC_PV  varchar2(255) null,
@@ -140,7 +140,7 @@ create table NCI_MEC_VAL_MAP
 	FLD_DELETE NUMBER(1,0) DEFAULT 0, 
 	LST_DEL_DT DATE DEFAULT sysdate, 
 	S2P_TRN_DT DATE DEFAULT sysdate, 
-	LST_UPD_DT DATE DEFAULT sysdate,
+	LST_UPD_DT DATE DEFAULT sysdate
 );
 
 
