@@ -125,12 +125,15 @@ create table NCI_MEC_MAP
 );
 
 create table NCI_MEC_VAL_MAP
-( MECM_ID number not null primary key,
-  SRC_MEC_ID number null,
-  TGT_MEC_ID numer null,
+( MECVM_ID number not null primary key,
+  SRC_MEC_ID number not null,
+  TGT_MEC_ID numer not null,
   MDL_MAP_ITEM_ID number not null,
   MDL_MAP_VER_NR number(4,2) not null,
-	TRNS_DESC_TXT varchar2(1000) null,
+	SRC_PV  varchar2(255) null,
+	TGT_PV  varchar2(255) null,
+	SRC_VM_CNCPTS  varchar2(4000) null,
+	TGT_VM_CNCPTS varchar2(4000) null,
    CREAT_DT DATE  DEFAULT sysdate, 
 	CREAT_USR_ID VARCHAR2(50) DEFAULT user, 
 	LST_UPD_USR_ID VARCHAR2(50) DEFAULT user, 
