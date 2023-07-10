@@ -80,6 +80,9 @@ insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_
 commit;
 
 
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (58,'Model Mapping',4,'Model Mapping','Model Mapping','Model Mapping' );
+commit;
+
 	insert into obj_typ (obj_typ_id, obj_typ_desc) values (40,'Modelling Language');
 	insert into obj_typ (obj_typ_id, obj_typ_desc) values (41,'Model Element Type');
 	insert into obj_typ (obj_typ_id, obj_typ_desc) values (42,'Model Element Relationship');
