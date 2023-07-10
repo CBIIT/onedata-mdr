@@ -9,7 +9,12 @@ create table NCI_MDL
 	LST_DEL_DT DATE DEFAULT sysdate, 
 	S2P_TRN_DT DATE DEFAULT sysdate, 
 	LST_UPD_DT DATE DEFAULT sysdate, 
+	CMNTS_DESC_TXT varchar2(4000)
 primary key (ITEM_ID, ver_NR));
+
+
+create or replace view vw_nci_mdl as select
+	ai.*, m.prmry_mdl_lang_id from admin_item ai, nci_mdl m where ai.item_id = m.item_id and ai.ver_nr = m.ver_nr and ai.admin_item_typ_id = 57;
 
 create table NCI_MDL_ELMNT
 ( ITEM_ID number not null,
