@@ -417,7 +417,7 @@ alter table NCI_DS_HDR add (	ENTTY_DEF  varchar2(6000));
              WHERE ref_typ_id = 80) REF,
            (  SELECT item_id,
                      ver_nr,
-                     LISTAGG (ref_desc, '||' ON OVERFLOW TRUNCATE ) WITHIN GROUP (ORDER BY OBJ_KEY_DESC desc)    ref_desc
+                     LISTAGG (ref_desc, '||' ON OVERFLOW TRUNCATE ) WITHIN GROUP (ORDER BY REF_DESC desc)    ref_desc
                 FROM REF, OBJ_KEY
                WHERE     REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID
                      AND LOWER (OBJ_KEY_DESC) LIKE '%question%'
