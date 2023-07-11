@@ -393,7 +393,7 @@ alter table NCI_DS_HDR add (	ENTTY_DEF  varchar2(6000));
 	   ADMIN_ITEM.ITEM_DEEP_LINK,
        replace (ADMIN_ITEM.ITEM_NM_ID_VER,'|Data Element','') ITEM_NM_ID_VER,
            ext.USED_BY                         CNTXT_AGG,
-           REF.ref_desc                        PREF_QUEST_TXT,
+           REF.PREF_QUEST_TXT                        PREF_QUEST_TXT,
 	   vd.VAL_DOM_TYP_ID	,
           trim(SUBSTR (
                  trim(ADMIN_ITEM.ITEM_LONG_NM)
@@ -412,7 +412,7 @@ alter table NCI_DS_HDR add (	ENTTY_DEF  varchar2(6000));
        --    VALUE_DOM vd,
            NCI_ADMIN_ITEM_EXT  ext,
 	   de, VALUE_DOM vd,
-           (SELECT item_id, ver_nr, ref_desc
+           (SELECT item_id, ver_nr, ref_desc PREF_QUEST_TXT
               FROM REF
              WHERE ref_typ_id = 80) REF,
            (  SELECT item_id,
