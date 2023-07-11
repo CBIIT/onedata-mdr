@@ -81,6 +81,15 @@ create table NCI_MDL_ELMNT_CHAR
 	MEC_PHY_NM  varchar2(255),
 	MEC_DESC varchar2(4000));
 
+
+create or replace view vw_NCI_MEC
+	as select m.item_id mdl_item_id, m.ver_nr mdl_ver_nr, m.item_nm mdl_item_nm, me.item_id ME_ITEM_ID, me.ver_nr me_VER_NR,
+	me.ITEM_LONG_NM me_item_nm, me.ITEM_PHY_OBJ_NM me_phy_nm, mec.*
+	from admin_item m, NCI_MDL_ELMNT me,NCI_MDL_ELMNT_CHAR mec
+	where m.item_id = me.mdl_item_id and m.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.MDL_ELMNT_ITEM_ID
+	and me.ver_nr = mec.MDL_ELMNT_VER_NR and m.admin_item_typ_id = 57;
+
+	
 insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (57,'Model',4,'Model','Model','Model' );
 commit;
 
