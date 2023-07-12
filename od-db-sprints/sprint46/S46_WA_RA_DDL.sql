@@ -441,4 +441,5 @@ alter table NCI_DS_HDR add (	ENTTY_DEF  varchar2(6000));
            AND ADMIN_ITEM.CNTXT_VER_NR = CNTXT.VER_NR;
 
 
+alter table NCI_DS_HDR add (PREF_CNCPT_CONCAT  varchar2(4000));
 
