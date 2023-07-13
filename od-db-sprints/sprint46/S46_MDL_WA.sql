@@ -58,7 +58,7 @@ END IF;
 
 END ;
 /
-create or replace TRIGGER TR_NCI_MEC_VAL_MAP
+create or replace TRIGGER TR_NCI_MEC_VAL_MAP_TS
   BEFORE  UPDATE
   on NCI_MEC_VAL_MAP
   for each row
