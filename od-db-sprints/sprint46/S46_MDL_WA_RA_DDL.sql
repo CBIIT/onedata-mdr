@@ -24,6 +24,8 @@ create table NCI_MDL_ELMNT
   ITEM_LONG_NM varchar2(255) not null,
   ITEM_PHY_OBJ_NM varchar2(255) null,
 	ITEM_DESC varchar2(4000) null,
+	CONC_DOM_ITEM_ID number,
+	CONC_DOM_VER_NR  number(4,2),
   CREAT_DT DATE  DEFAULT sysdate, 
 	CREAT_USR_ID VARCHAR2(50) DEFAULT user, 
 	LST_UPD_USR_ID VARCHAR2(50) DEFAULT user, 
