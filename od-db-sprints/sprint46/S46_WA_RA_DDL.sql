@@ -252,12 +252,12 @@ where v.item_id = ai.item_id and v.ver_nr = ai.ver_nr
 	
 
   CREATE OR REPLACE  VIEW VW_ADMIN_ITEM_VM_MATCH AS
-  SELECT CNTXT_ITEM_ID, admin_item_typ_id,decode(admin_item_typ_id, 49, 'Concepts', 53 ,'VM', 2 ,'DEC', 'Other') ADMIN_ITEM_TYP,  ITEM_DESC, ITEM_LONG_NM, REGSTR_STUS_ID, ai.ITEM_ID, ai.VER_NR, ITEM_NM, ai.CREAT_DT, CNTXT_VER_NR, ADMIN_STUS_ID,
+  SELECT CNTXT_ITEM_ID, admin_item_typ_id,decode(admin_item_typ_id, 49, 'Concepts', 53 ,'VM', 'Other') ADMIN_ITEM_TYP,  ITEM_DESC, ITEM_LONG_NM, REGSTR_STUS_ID, ai.ITEM_ID, ai.VER_NR, ITEM_NM, ai.CREAT_DT, CNTXT_VER_NR, ADMIN_STUS_ID,
    ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT, NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN,
   decode(admin_item_typ_id, 49, ITEM_LONG_NM, 53, ai.ITEM_ID, ITEM_NM)  ID_OR_CODE, 
   decode(admin_item_typ_id, 53, decode(e.cncpt_concat, e.cncpt_concat_nm, '',e.cncpt_concat),'') VM_CONCEPTS, 
   decode(admin_item_typ_id, 49, 'Concepts', 53 ,'ID', 2 ,'ID', 'Other') MATCH_TYP
-       FROM ADMIN_ITEM ai, NCI_ADMIN_ITEM_EXT e where admin_item_typ_id in (49,53,2)
+       FROM ADMIN_ITEM ai, NCI_ADMIN_ITEM_EXT e where admin_item_typ_id in (49,53)
        and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr;
 
 /
