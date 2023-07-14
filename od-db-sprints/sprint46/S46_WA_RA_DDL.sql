@@ -443,6 +443,7 @@ alter table NCI_DS_HDR add (	ENTTY_DEF  varchar2(6000));
 
 alter table NCI_DS_HDR add (PREF_CNCPT_CONCAT  varchar2(4000));
 
+alter table NCI_DS_HDR add (PREF_CNCPT_CONCAT_NM  varchar2(32000));
 
   CREATE OR REPLACE  VIEW VW_DE_DEC_MTCH
 	   AS
