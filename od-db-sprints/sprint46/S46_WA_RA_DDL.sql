@@ -546,21 +546,25 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
            ext.USED_BY                         CNTXT_AGG,
              vd.VAL_DOM_TYP_ID	 ,
 	     an.NM_DESC,
-	     an.nm_typ_id,
 	     adef.def_desc,
-	     adef.nci_def_typ_id,
-	    cntxt_item_id srch_cntxt_id ,
-	    cntxt_ver_nr srch_cntxt_ver_nr
+	    csi.cs_item_id,
+	  csi.cs_item_ver_nr,
+	    admin_item.cntxt_item_id srch_cntxt_id ,
+	    admin_item.cntxt_ver_nr srch_cntxt_ver_nr
 	     FROM ADMIN_ITEM,
            NCI_ADMIN_ITEM_EXT  ext,
+	    nci_admin_item_rel r,
+	    nci_clsfctn_schm_item csi,
 	      de, VALUE_DOM vd, 
-	     (SELECT an.item_id, an.ver_nr, nm_typ_id, max(nm_desc) as NM_DESC
-	      from alt_nms an
-          group by an.item_id, an.ver_nr, nm_typ_id) an,
-	     (SELECT an.item_id, an.ver_nr, nci_def_typ_id, max(def_desc) as def_DESC
-	      from alt_def an
-          group by an.item_id, an.ver_nr, nci_def_typ_id) adef
-        WHERE     ADMIN_ITEM_TYP_ID = 4
+	     (SELECT an.item_id, an.ver_nr,  csian.NCI_PUB_ID csi_item_id, csian.NCI_VER_NR  csi_ver_nr, max(nm_desc) as NM_DESC
+	      from alt_nms an,  NCI_CSI_ALT_DEFNMS csian
+	  where an.nm_id = csian.nmdef_id and csian.TYP_NM='DESIGNATION'
+          group by an.item_id, an.ver_nr, csian.NCI_PUB_ID,csian.NCI_VER_NR) an,
+	     (SELECT an.item_id, an.ver_nr,  csian.NCI_PUB_ID csi_item_id, csian.NCI_VER_NR  csi_ver_nr, max(def_desc) as def_DESC
+	      from alt_def an, NCI_CSI_ALT_DEFNMS csian
+	  where an.def_id = csian.nmdef_id and csian.TYP_NM='DEFINITION'
+          group by an.item_id, an.ver_nr, csian.NCI_PUB_ID,csian.NCI_VER_NR) adef
+        WHERE     admin_item.ADMIN_ITEM_TYP_ID = 4
            and ADMIN_ITEM.ITEM_Id = de.item_id
            and ADMIN_ITEM.VER_NR = DE.VER_NR
            and de.VAL_DOM_ITEM_ID = vd.ITEM_ID
@@ -570,5 +574,16 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
 	   and admin_item.item_id = an.item_id 
 	   and admin_item.ver_nr = an.ver_nr 
 	   and admin_item.item_id = adef.item_id (+)
-	   and admin_item.ver_nr = adef.ver_nr (+);
+	   and admin_item.ver_nr = adef.ver_nr (+)
+	   and admin_item.item_id = an.item_id (+)
+	   and admin_item.ver_nr = an.ver_nr (+)
+	  and csi.item_id = r.p_item_id 
+	  and csi.ver_nr = r.p_item_ver_nr
+	  and admin_item.item_id = r.c_item_id
+	  and admin_item.ver_nr = r.c_item_ver_nr
+	  and r.rel_typ_id = 65
+	  and csi.item_id = an.csi_item_id (+)
+	  and csi.ver_nr = an.csi_ver_nr (+)
+	  and csi.item_id = adef.csi_item_id (+)
+	  and csi.ver_Nr = adef.csi_ver_nr (+);
 
