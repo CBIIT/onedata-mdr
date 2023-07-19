@@ -58,7 +58,7 @@ begin
     for cur in (select  mec1.MEC_LONG_NM SRC_MEC_LONG_NM, mec1.mec_id SRC_MEC_ID, mec2.MEC_LONG_NM TGT_MEC_LONG_NM, mec2.mec_id TGT_MEC_ID
 from nci_mdl_elmnt me1, nci_mdl_elmnt me2, nci_mdl_elmnt_char mec1, nci_mdl_elmnt_char mec2, NCI_MDL_MAP mm
 where 
-me1.DOM_ITEM_ID = me2.DOM_ITEM_ID and me1.DOM_VER_NR = me2.DOM_VER_NR
+nvl(me1.DOM_ITEM_ID,1) = nvl(me2.DOM_ITEM_ID,1) and nvl(me1.DOM_VER_NR,1) = nvl(me2.DOM_VER_NR,1)
 and 
 me1.mdl_item_id =mm.SRC_MDL_ITEM_ID and me1.mdl_item_ver_nr = mm.SRC_MDL_VER_NR and me2.mdl_item_id = mm.TGT_MDL_ITEM_ID and me2.mdl_item_ver_nr = mm.TGT_MDL_VER_NR 
 and me1.ITEM_ID = mec1.MDL_ELMNT_ITEM_ID and me1.ver_nr = mec1.MDL_ELMNT_VER_NR
