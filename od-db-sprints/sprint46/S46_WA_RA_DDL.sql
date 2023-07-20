@@ -222,8 +222,7 @@ AND ADMIN_ITEM.VER_NR = DE_CONC.VER_NR
 and ADMIN_ITEM.ADMIN_STUS_ID <> 77
 and DE_CONC.ITEM_ID = cde.DE_CONC_ITEM_ID and DE_CONC.VER_NR = CDE.DE_CONC_VER_NR;
 /
-insert into cntct (cntct_nm, cntct_secu_id) values ('Load Job Administrator','ONEDATA_WA');
-commit;
+
 
 /*
  CREATE OR REPLACE  VIEW VW_VALUE_DOM_COMP AS
@@ -261,7 +260,11 @@ where v.item_id = ai.item_id and v.ver_nr = ai.ver_nr
        and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr;
 
 /
-insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values ('Superceded By',8,'Superceded By','Superceded By','Superceded By' );
+
+	delete from obj_key where obj_typ_id = 8 and obj_key_desc = 'Superceded By';
+commit;
+
+insert into obj_key (obj_key_id, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (76,'Superceded By',8,'Superceded By','Superceded By','Superceded By' );
 commit;
 
 alter table NCI_DS_HDR add (NUM_DEC_MTCH integer, DE_CONC_ITEM_ID number, DE_CONC_VER_NR number(4,2));
