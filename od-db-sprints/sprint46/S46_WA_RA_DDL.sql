@@ -547,6 +547,9 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
              vd.VAL_DOM_TYP_ID	 ,
 	     an.NM_DESC,
 	     adef.def_desc,
+         aref.CODE_INSTR_REF_DESC,
+         aref.INSTR_REF_DESC,
+         aref.EXAMPL,
 	    csi.cs_item_id,
 	  csi.cs_item_ver_nr,
 	    admin_item.cntxt_item_id srch_cntxt_id ,
@@ -596,4 +599,6 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
 	  and csi.ver_Nr = adef.csi_ver_nr (+)
 	    and csi.item_id = aref.csi_item_id (+)
 	  and csi.ver_Nr = aref.csi_ver_nr (+);
+
+
 
