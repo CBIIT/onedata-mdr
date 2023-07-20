@@ -563,7 +563,15 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
 	     (SELECT an.item_id, an.ver_nr,  csian.NCI_PUB_ID csi_item_id, csian.NCI_VER_NR  csi_ver_nr, max(def_desc) as def_DESC
 	      from alt_def an, NCI_CSI_ALT_DEFNMS csian
 	  where an.def_id = csian.nmdef_id and csian.TYP_NM='DEFINITION'
-          group by an.item_id, an.ver_nr, csian.NCI_PUB_ID,csian.NCI_VER_NR) adef
+          group by an.item_id, an.ver_nr, csian.NCI_PUB_ID,csian.NCI_VER_NR) adef,
+	    (SELECT an.item_id, an.ver_nr,  csian.NCI_PUB_ID csi_item_id, csian.NCI_VER_NR  csi_ver_nr,  
+	  max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS',ref_desc) ) CODE_INSTR_REF_DESC,
+       max(decode(upper(obj_key_Desc),'INSTRUCTIONS', ref_desc) ) INSTR_REF_DESC,
+       max(decode(upper(obj_key_Desc),'EXAMPLE', ref_desc) ) EXAMPL
+	      from ref an, NCI_CSI_ALT_DEFNMS csian, OBJ_KEY
+	  where an.ref_id = csian.nmdef_id and csian.TYP_NM='REFERENCE' and an.REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   and obj_key.obj_typ_id = 1 and nvl(an.fld_delete,0) = 0
+	  AND UPPER(OBJ_KEY_DESC) in ('INSTRUCTIONS', 'CODING INSTRUCTIONS','EXAMPLE') 
+          group by an.item_id, an.ver_nr, csian.NCI_PUB_ID,csian.NCI_VER_NR) aref
         WHERE     admin_item.ADMIN_ITEM_TYP_ID = 4
            and ADMIN_ITEM.ITEM_Id = de.item_id
            and ADMIN_ITEM.VER_NR = DE.VER_NR
@@ -575,6 +583,8 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
 	   and admin_item.ver_nr = adef.ver_nr (+)
 	   and admin_item.item_id = an.item_id (+)
 	   and admin_item.ver_nr = an.ver_nr (+)
+	     and admin_item.item_id = aref.item_id (+)
+	   and admin_item.ver_nr = aref.ver_nr (+)
 	  and csi.item_id = r.p_item_id 
 	  and csi.ver_nr = r.p_item_ver_nr
 	  and admin_item.item_id = r.c_item_id
@@ -583,5 +593,7 @@ from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver
 	  and csi.item_id = an.csi_item_id (+)
 	  and csi.ver_nr = an.csi_ver_nr (+)
 	  and csi.item_id = adef.csi_item_id (+)
-	  and csi.ver_Nr = adef.csi_ver_nr (+);
+	  and csi.ver_Nr = adef.csi_ver_nr (+)
+	    and csi.item_id = aref.csi_item_id (+)
+	  and csi.ver_Nr = aref.csi_ver_nr (+);
 
