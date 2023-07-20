@@ -1,3 +1,5 @@
+insert into cntct (cntct_nm, cntct_secu_id) values ('Load Job Administrator','ONEDATA_WA');
+commit;
 CREATE OR REPLACE TRIGGER TR_NCI_MDL_ELMNT_SEQ  BEFORE INSERT  on NCI_MDL_ELMNT
   for each row
          BEGIN    IF (:NEW.ITEM_ID<= 0  or :NEW.ITEM_ID is null)  THEN
