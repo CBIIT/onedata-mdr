@@ -79,7 +79,7 @@ begin
   update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID) = (select 1, item_id, ver_nr , v_user_id from nci_ds_rslt where hdr_id = v_hdr_id)
   where hdr_id = v_hdr_id;
   else
-  update nci_ds_hdr set NUM_CDE_MTCH = v_temp
+  update nci_ds_hdr set NUM_CDE_MTCH = v_temp, num_dec_mtch = v_temp
   where hdr_id = v_hdr_id;
   end if;
   commit;
@@ -858,4 +858,3 @@ END;
 
 END;
 /
-
