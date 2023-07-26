@@ -30,9 +30,9 @@ drop materialized view MVW_CSI_TREE_CDE;
   ITEM_NM || ' (' || ITEM_DESC  || ') (' || nvl(y.cnt,'0') || ')'  ITEM_NM , ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
 STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT,
  REGSTR_AUTH_ID,  NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  CREAT_USR_ID_X, LST_UPD_USR_ID_X ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ver_nr || '&formatid=104&type=csi\Legacy_CDE_XML' ITEM_RPT_URL ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ver_nr || '&formatid=103&type=csi\Legacy_CDE_Excel' ITEM_RPT_EXCEL ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ver_nr || '&formatid=114&type=csi\Prior_Legacy_CDE_Excel' ITEM_RPT_PRIOR_EXCEL,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ver_nr || '\&formatid=104\&type=csi\\Legacy_CDE_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ver_nr || '\&formatid=103\&type=csi\\Legacy_CDE_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ver_nr || '\&formatid=114\&type=csi\\Prior_Legacy_CDE_Excel' ITEM_RPT_PRIOR_EXCEL,
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES,
     0 TYP_ID
 from 
@@ -44,9 +44,9 @@ select 99 LVL, CNTXT_ITEM_ID P_ITEM_ID, CNTXT_VER_NR P_ITEM_VER_NR, ai.ITEM_ID,a
 ITEM_NM || ' (' || nvl(y.cnt,'0') || ')', ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
 STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
  REGSTR_AUTH_ID,  NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  CREAT_USR_ID_X, LST_UPD_USR_ID_X ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=104&type=csi\Legacy_CDE_XML' ITEM_RPT_URL ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=103&type=csi\Legacy_CDE_Excel' ITEM_RPT_EXCEL ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=114&type=csi\Prior_Legacy_CDE_Excel' ITEM_RPT_PRIOR_EXCEL,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=104\&type=csi\\Legacy_CDE_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=103\&type=csi\\Legacy_CDE_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=114\&type=csi\\Prior_Legacy_CDE_Excel' ITEM_RPT_PRIOR_EXCEL,
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES,
       cs.CLSFCTN_SCHM_TYP_ID
  from 
@@ -59,9 +59,9 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
 ai.ADMIN_STUS_ID, ai.REGSTR_STUS_ID, ai.REGISTRR_CNTCT_ID, ai.SUBMT_CNTCT_ID,
 ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
  ai.REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X ,
- c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=104&type=csi\Legacy_CDE_XML' ITEM_RPT_URL ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=103&type=csi\Legacy_CDE_Excel' ITEM_RPT_EXCEL ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=114&type=csi\Prior_Legacy_CDE_Excel' ITEM_RPT_PRIOR_EXCEL,
+ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=104\&type=csi\\Legacy_CDE_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=103\&type=csi\\Legacy_CDE_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=114\&type=csi\\Prior_Legacy_CDE_Excel' ITEM_RPT_PRIOR_EXCEL,
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********'  CHNG_NOTES,
     csi.csi_typ_id
 from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' group by x.p_item_id , 
@@ -75,9 +75,9 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
 ai.ADMIN_STUS_ID, ai.REGSTR_STUS_ID, ai.REGISTRR_CNTCT_ID, ai.SUBMT_CNTCT_ID,
 ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
  ai.REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=104&type=csi\Legacy_XML' ITEM_RPT_URL ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=103&type=csi\Legacy_Excel' ITEM_RPT_EXCEL ,
-c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=114&type=csi\Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=104\&type=csi\\Legacy_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=103\&type=csi\\Legacy_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=114\&type=csi\\Prior_Legacy_Excel' ITEM_RPT_PRIOR_EXCEL,
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES,
     csi.CSI_TYP_ID
  from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' group by x.p_item_id , 
