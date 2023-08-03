@@ -85,3 +85,4 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c
  where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null and csi.CS_ITEM_ID is not null and
  ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST';
 
+alter table NCI_STG_FORM_QUEST_IMPORT add SRC_MOD_INSTR varchar2(4000);
