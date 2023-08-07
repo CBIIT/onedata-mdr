@@ -128,3 +128,22 @@ alter table NCI_STG_FORM_QUEST_IMPORT add SRC_MOD_INSTR varchar2(4000);
 
 insert into obj_key ( OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (77, 'Is Referenced By',42,'Is Referenced By','Is Referenced By','Is Referenced By' );
 commit;
+
+
+  CREATE OR REPLACE  VIEW VW_DE_CONC_FOR_COMP  AS
+  SELECT DE_CONC.LST_UPD_DT, DE_CONC.S2P_TRN_DT, DE_CONC.LST_DEL_DT, DE_CONC.FLD_DELETE, DE_CONC.LST_UPD_USR_ID, DE_CONC.CREAT_USR_ID, DE_CONC.CREAT_DT, 
+DE_CONC.OBJ_CLS_VER_NR, DE_CONC.OBJ_CLS_ITEM_ID, DE_CONC.PROP_ITEM_ID, DE_CONC.PROP_VER_NR, DE_CONC.CONC_DOM_ITEM_ID, DE_CONC.CONC_DOM_VER_NR, 
+ADMIN_ITEM.ITEM_ID, CD.ITEM_NM  CONC_DOM_ITEM_NM,
+ADMIN_ITEM.VER_NR, ADMIN_ITEM.ITEM_NM, ADMIN_ITEM.ITEM_LONG_NM, 
+ADMIN_ITEM.ITEM_DESC, ADMIN_ITEM.CNTXT_ITEM_ID, ADMIN_ITEM.CNTXT_VER_NR, ADMIN_ITEM.ADMIN_NOTES,
+ ADMIN_ITEM.CHNG_DESC_TXT, ADMIN_ITEM.CREATION_DT, ADMIN_ITEM.EFF_DT, ADMIN_ITEM.DATA_ID_STR, ADMIN_ITEM.ADMIN_ITEM_TYP_ID, 
+ADMIN_ITEM.CURRNT_VER_IND, ADMIN_ITEM.REGSTR_STUS_ID, ADMIN_ITEM.ADMIN_STUS_ID, admin_item.ADMIN_STUS_NM_DN, admin_item.REGSTR_STUS_NM_DN, admin_item.CNTXT_NM_DN, de.CNT_DE
+FROM ADMIN_ITEM, DE_CONC, VW_CONC_DOM cd,
+	  (Select de_conc_item_id, de_conc_ver_nr, count(*) CNT_DE from admin_item ai, de where ai.admin_item_typ_id = 4 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr 
+	  and upper(ai.admin_stus_nm_dn) not like '%RETIRED%' group by de_conc_item_id, de_conc_ver_nr)  de
+       WHERE ADMIN_ITEM.ADMIN_ITEM_TYP_ID=2 
+AND ADMIN_ITEM.ITEM_ID = DE_CONC.ITEM_ID
+AND ADMIN_ITEM.VER_NR = DE_CONC.VER_NR
+	  and DE_CONC.CONC_DOM_ITEM_ID = CD.ITEM_ID and DE_CONC.CONC_DOM_VER_NR = cd.ver_nr
+	  and admin_item.item_id = de.de_conc_item_id and admin_item.ver_nr = de.de_Conc_ver_nr;
+
