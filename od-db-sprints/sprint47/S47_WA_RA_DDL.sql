@@ -125,3 +125,6 @@ alter table NCI_STG_FORM_QUEST_IMPORT add SRC_MOD_INSTR varchar2(4000);
 	"DT_SORT" TIMESTAMP (2) DEFAULT sysdate, 
 	 PRIMARY KEY ("MDL_IMP_ID", PRNT_MDL_ELMNT_LONG_NM,CHLD_MDL_ELMNT_LONG_NM));
 
+
+insert into obj_key ( OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (77, 'Is Referenced By',42,'Is Referenced By','Is Referenced By','Is Referenced By' );
+commit;
