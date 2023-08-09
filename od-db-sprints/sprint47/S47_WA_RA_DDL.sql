@@ -150,9 +150,8 @@ AND ADMIN_ITEM.VER_NR = DE_CONC.VER_NR
 
 alter table admin_item disable all triggers;
 
-update admin_item set regstr_stus_nm_dn = (select s.stus_nm from vw_regstr_stus s where admin_item.regstr_stus_id = s.stus_id and 
-admin_item.regstr_stus_nm_dn <> s.stus_nm);
-
+update admin_item set regstr_stus_nm_dn = (select s.stus_nm from vw_regstr_stus s where admin_item.regstr_stus_id = s.stus_id);
+	
 commit;
 
 alter table admin_item enable all triggers;
