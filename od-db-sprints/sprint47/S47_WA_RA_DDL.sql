@@ -147,3 +147,12 @@ AND ADMIN_ITEM.VER_NR = DE_CONC.VER_NR
 	  and DE_CONC.CONC_DOM_ITEM_ID = CD.ITEM_ID and DE_CONC.CONC_DOM_VER_NR = cd.ver_nr
 	  and admin_item.item_id = de.de_conc_item_id and admin_item.ver_nr = de.de_Conc_ver_nr;
 
+
+alter table admin_item disable all triggers;
+
+update admin_item set regstr_stus_nm_dn = (select s.stus_nm from vw_regstr_stus s where admin_item.regstr_stus_id = s.stus_id and 
+admin_item.regstr_stus_nm_dn <> s.stus_nm);
+
+commit;
+
+alter table admin_item enable all triggers;
