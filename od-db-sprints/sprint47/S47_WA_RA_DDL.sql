@@ -155,3 +155,4 @@ update admin_item set regstr_stus_nm_dn = (select s.stus_nm from vw_regstr_stus 
 commit;
 
 alter table admin_item enable all triggers;
+
