@@ -171,3 +171,5 @@ AND ADMIN_ITEM.ITEM_ID = VALUE_DOM.ITEM_ID
 AND ADMIN_ITEM.VER_NR=VALUE_DOM.VER_NR and
 VALUE_DOM.REP_CLS_ITEM_ID = RC.ITEM_ID (+) and 
 VALUE_DOM.REP_CLS_VER_NR = RC.VER_NR (+);
+
+alter table nci_ds_hdr add (stus_fltr_id integer, stus_fltr_nm varchar2(4000));
