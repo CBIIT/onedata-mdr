@@ -94,8 +94,10 @@ alter table NCI_STG_FORM_QUEST_IMPORT add SRC_MOD_INSTR varchar2(4000);
 	"SRC_MDL_VER" number(4,2) , 
 	"CTL_VAL_STUS" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP", 
 	"CTL_VAL_MSG" VARCHAR2(4000 BYTE) COLLATE "USING_NLS_COMP", 
-	"SRC_MDL_TYP_ID" integer, 
-	"SRC_MDL_LANG_ID" integer, 
+	"SRC_MDL_TYP" varchar2(255),
+	 SRC_PRMRY_LANG varchar2(255),
+	 MDL_TYP_ID  integer,
+	 PRMRY_MDL_LANG_ID  integer,
 		"CREAT_DT" DATE DEFAULT sysdate, 
 	"CREAT_USR_ID" VARCHAR2(50 BYTE)  DEFAULT user, 
 	"LST_UPD_USR_ID" VARCHAR2(50 BYTE)  DEFAULT user, 
@@ -190,6 +192,7 @@ alter table nci_ds_hdr add (stus_fltr_id integer, stus_fltr_nm varchar2(4000));
 	"LST_UPD_DT" DATE DEFAULT sysdate, 
 	"ME_TYP_NM" varchar2(255) not null, 
 	"ITEM_DESC" VARCHAR2(4000 BYTE) COLLATE "USING_NLS_COMP", 
+	  
 	"DT_SORT" TIMESTAMP (2) DEFAULT sysdate, 
 	 PRIMARY KEY ("MDL_IMP_ID", "ITEM_LONG_NM"));
 
