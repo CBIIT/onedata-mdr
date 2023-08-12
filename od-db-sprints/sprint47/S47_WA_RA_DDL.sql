@@ -230,4 +230,7 @@ alter table nci_ds_hdr add (stus_fltr_id integer, stus_fltr_nm varchar2(4000));
 	"DT_SORT" TIMESTAMP (2) DEFAULT sysdate, 
 	SEQ_NBR integer not null,
 	 PRIMARY KEY (MDL_IMP_ID, SEQ_NBR));
-	  
+
+insert into obj_typ (obj_typ_id, obj_typ_desc) values (44,'Model Type');
+commit;
+
