@@ -209,6 +209,7 @@ alter table nci_ds_hdr add (stus_fltr_id integer, stus_fltr_nm varchar2(4000));
 	"S2P_TRN_DT" DATE DEFAULT sysdate, 
 	"LST_UPD_DT" DATE DEFAULT sysdate, 
 	"SRC_DTTYPE" VARCHAR2(255 BYTE) COLLATE "USING_NLS_COMP", 
+	"SRC_MAND_IND" VARCHAR2(10) , 
 	"STD_DTTYPE_ID" NUMBER, 
 	"SRC_MAX_CHAR" NUMBER(*,0), 
 	"SRC_MIN_CHAR" NUMBER(*,0), 
@@ -239,3 +240,6 @@ commit;
 
 insert into obj_key (obj_key_id, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (78,'Physical Model',44,'Physical Model','Physical Model','Physical Model' );
 commit;
+
+
+alter table NCI_MDL add (MDL_TYP_ID integer);
