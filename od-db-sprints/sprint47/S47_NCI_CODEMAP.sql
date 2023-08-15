@@ -62,8 +62,8 @@ end if;
  
  end;
  
-  procedure getModelElementCharAction ( row_ori in out t_row, actions in out t_actions, v_mdl_elmnt_id in number)
-  as
+ procedure getModelElementCharAction ( row_ori in out t_row, rowschar in out t_rows, v_mdl_elmnt_id in number)
+ as
   action t_actionRowset;
   row t_row;
   rows  t_rows;
