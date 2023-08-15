@@ -1702,11 +1702,11 @@ BEGIN
     end if;
 
    -- if caDSR data type changed, change standard data type
-    if  (ihook.getColumnValue(row_ori, 'DTTYPE_ID') <>  ihook.getColumnOldValue(row_ori, 'DTTYPE_ID')) then
+    if  (ihook.getColumnValue(row_ori, 'NCI_STD_DTTYPE_ID') <>  ihook.getColumnOldValue(row_ori, 'NCI_STD_DTTYPE_ID')) then
       row := row_ori;
       rows := t_rows();
     --  raise_application_error(-20000, nci_11179_2.getStdDataType(ihook.getColumnValue(row_ori, 'DTTYPE_ID')));
-      ihook.setColumnValue(row, 'NCI_STD_DTTYPE_ID', nci_11179_2.getStdDataType(ihook.getColumnValue(row_ori, 'DTTYPE_ID')));
+      ihook.setColumnValue(row, 'DTTYPE_ID', nci_11179_2.getLegacyDataType(ihook.getColumnValue(row_ori, 'NCI_STD_DTTYPE_ID')));
             rows.extend;
             rows(rows.last) := row;
       action := t_actionrowset(rows, 'Value Domain', 2,0,'update');
@@ -1776,7 +1776,26 @@ end if;
 END;
 
 --Added by Surinder on 7/31/2023 for DSRMWS-2507
-PROCEDURE SP_REPLACE_RETIRED_CONCEPT   AS
+PROCEDURE SP_REPLACE_RETIRED_CONCEPT  AS
+    N INT := 0;
+    CURSOR CUR_REPLACE IS  SELECT   DISTINCT P.ITEM_ID AS P_ITEM_ID, 
+                                    P.VER_NR AS P_ITEM_VER_NR, 
+                                    C.ITEM_ID AS C_ITEM_ID, 
+                                    C.VER_NR AS C_ITEM_VER_NR,
+                                    M.RETIRED_DT AS RETIRED_DT
+                            FROM    SAG_CONCEPT_MERGE_BY_DATE M,
+                                    ADMIN_ITEM P,
+                                    ADMIN_ITEM C
+                            WHERE   M.CODE_RETIRED = P.ITEM_LONG_NM
+                            AND     P.CURRNT_VER_IND = 1
+                            AND     M.ACTIVE_CODE = C.ITEM_LONG_NM
+                            AND     C.CURRNT_VER_IND = 1
+                            AND     M.CODE_RETIRED <> M.ACTIVE_CODE 
+                            AND     P.ADMIN_ITEM_TYP_ID = 49
+                            AND     C.ADMIN_ITEM_TYP_ID = 49
+                            ORDER BY M.RETIRED_DT, P.ITEM_ID, C.ITEM_ID  ;
+    ROW_REPLACE CUR_REPLACE%ROWTYPE;
+    
 BEGIN
 /***    OBJECTIVE       :   DSRMWS-2507: Replace retired concepts
         PARAMETERS      :   NONE
@@ -1786,48 +1805,63 @@ BEGIN
         LAST UPDATED ON :
 ***/
 -- ASSUMING SAG_CONCEPT_MERGE_BY_DATE EXISTS AND LOADED.
-  INSERT INTO NCI_ADMIN_ITEM_REL
-            (
-            P_ITEM_ID,
-            P_ITEM_VER_NR,
-            C_ITEM_ID,
-            C_ITEM_VER_NR,
-            REL_TYP_ID
-            )
-    SELECT  DISTINCT P.ITEM_ID, 
-            P.VER_NR,
-            C.ITEM_ID, 
-            C.VER_NR,
-            79
-    FROM    SAG_CONCEPT_MERGE_BY_DATE M,
-            ADMIN_ITEM P,
-            (SELECT ITEM_ID, 
-                    MAX(VER_NR) VER_NR
-            FROM    ADMIN_ITEM
-            GROUP BY ITEM_ID) PVR,
-            ADMIN_ITEM C,
-            (SELECT ITEM_ID, 
-                    MAX(VER_NR) VER_NR
-            FROM    ADMIN_ITEM
-            GROUP BY ITEM_ID) CVR
-    WHERE   M.CODE_RETIRED = P.ITEM_LONG_NM
-    AND     P.ITEM_ID = PVR.ITEM_ID
-    AND     P.VER_NR = PVR.VER_NR
-    AND     M.ACTIVE_CODE = C.ITEM_LONG_NM
-    AND     C.ITEM_ID = CVR.ITEM_ID
-    AND     C.VER_NR = CVR.VER_NR
-    AND     C.ADMIN_STUS_NM_DN NOT LIKE '%RETIRE%'
-    AND     M.CODE_RETIRED <> M.ACTIVE_CODE 
-    AND     P.ADMIN_ITEM_TYP_ID = 49
-    AND     C.ADMIN_ITEM_TYP_ID = 49;
+    OPEN CUR_REPLACE;
+    LOOP
+            FETCH CUR_REPLACE INTO ROW_REPLACE;
+            
+            SELECT  COUNT(1) INTO N
+            FROM    NCI_ADMIN_ITEM_REL R
+            WHERE   R.P_ITEM_ID = ROW_REPLACE.P_ITEM_ID
+            AND     R.P_ITEM_VER_NR = ROW_REPLACE.P_ITEM_VER_NR
+            AND     R.REL_TYP_ID = 76;
+            
+            IF N = 0 THEN
+                INSERT INTO NCI_ADMIN_ITEM_REL  (   P_ITEM_ID,
+                                                    P_ITEM_VER_NR,
+                                                    C_ITEM_ID,
+                                                    C_ITEM_VER_NR,
+                                                    REL_TYP_ID  )
+                VALUES                          (   ROW_REPLACE.P_ITEM_ID, 
+                                                    ROW_REPLACE.P_ITEM_VER_NR,
+                                                    ROW_REPLACE.C_ITEM_ID, 
+                                                    ROW_REPLACE.C_ITEM_VER_NR,
+                                                    76  );
+            ELSE
+                SELECT  COUNT(1) INTO N
+                FROM    NCI_ADMIN_ITEM_REL R
+                WHERE   R.P_ITEM_ID = ROW_REPLACE.P_ITEM_ID
+                AND     R.P_ITEM_VER_NR = ROW_REPLACE.P_ITEM_VER_NR
+                AND     R.REL_TYP_ID = 76
+                AND NOT EXISTS (SELECT  NULL
+                                FROM    NCI_ADMIN_ITEM_REL I
+                                WHERE   R.P_ITEM_ID = I.P_ITEM_ID
+                                AND     R.P_ITEM_VER_NR = I.P_ITEM_VER_NR
+                                AND     I.REL_TYP_ID = 76
+                                AND     R.C_ITEM_ID = ROW_REPLACE.C_ITEM_ID
+                                AND     R.C_ITEM_VER_NR = ROW_REPLACE.C_ITEM_VER_NR);
+                
+                IF N > 0 THEN
+                                
+                    UPDATE  NCI_ADMIN_ITEM_REL R
+                    SET     R.C_ITEM_ID = ROW_REPLACE.C_ITEM_ID,
+                            R.C_ITEM_VER_NR = ROW_REPLACE.C_ITEM_VER_NR
+                    WHERE   R.P_ITEM_ID = ROW_REPLACE.P_ITEM_ID
+                    AND     R.P_ITEM_VER_NR = ROW_REPLACE.P_ITEM_VER_NR
+                    AND     R.REL_TYP_ID = 76;
+                
+                END IF;
+            
+            END IF;
 
-  commit;
-  EXCEPTION
+    EXIT WHEN CUR_REPLACE%NOTFOUND;
+        
+    END LOOP;
+    COMMIT;
+    EXCEPTION
     WHEN OTHERS THEN
     DBMS_OUTPUT.PUT_LINE('Error occured while executing SP_REPLACE_RETIRED_CONCEPT ');
-        rollback;
+        ROLLBACK;
     --RAISE_APPLICATION_ERROR (SQLCODE, 'SP_REPLACE_RETIRED_CONCEPT error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , -20100));
 END;
-
 END;
 /
