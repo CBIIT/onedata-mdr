@@ -1,3 +1,9 @@
 -- Run as ONEDATA_RA DDL scripts
+S47_WA_RA_DDL.sql
+S47_RA.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S47_WA_RA_DDL.sql
+S47_WA.sql
+S47_NCI_IMPORT.sql
+S47_NCI_POST_HOOK.sql
