@@ -1,6 +1,8 @@
 create or replace PACKAGE NCI_11179 AS
 function getWordCount(v_nm in varchar2) return integer;
 function getWord(v_nm in varchar2, v_idx in integer, v_max in integer) return varchar2;
+function getWordCountDelim(v_nm in varchar2, v_delim in varchar2) return integer;
+function getWordDelim(v_nm in varchar2, v_idx in integer, v_max in integer, v_delim in varchar2) return varchar2;
 function getMinWordLen(v_nm in varchar2) return integer;
 FUNCTION get_concepts(v_item_id in number, v_ver_nr in number) return varchar2;
 Function get_concept_order(v_item_id in number, v_ver_nr in number) return varchar2 ;
@@ -387,6 +389,14 @@ FUNCTION getWordCount (v_nm IN varchar2) RETURN integer IS
     RETURN V_OUT+1;
   END;
 
+FUNCTION getWordCountDelim (v_nm IN varchar2, v_delim in varchar2) RETURN integer IS
+    V_OUT   Integer;
+    v_nm_new varchar2(4000);
+  BEGIN
+  v_nm_new := REGEXP_REPLACE(v_nm, ' {2,}', ' ');
+  v_out := REGEXP_COUNT( v_nm_new, v_delim);
+    RETURN V_OUT+1;
+  END;
 
 /* Used when parsing user input during creation of concept-related AI entities like DEC, Rep Term, VM */
 FUNCTION getMinWordLen (v_nm IN varchar2) RETURN integer IS
@@ -448,6 +458,26 @@ begin
      v_word := substr(v_nm_new, instr(v_nm_new, ' ',1,v_idx-1)+1);
   else
      v_word := substr(v_nm_new, instr(v_nm_new, ' ',1,v_idx-1)+1,instr(v_nm_new, ' ',1,v_idx)-instr(v_nm_new, ' ',1,v_idx-1));
+  end if;
+  return trim(upper(v_word));
+end;
+
+
+/* Get the string in position v_idx within string v_nm */
+function getWordDelim(v_nm in varchar2, v_idx in integer, v_max in integer, v_delim in varchar2) return varchar2 is
+   v_word  varchar2(4000);
+   v_nm_new  varchar2(4000);
+begin
+v_nm_new := v_nm;
+--  v_nm_new := REGEXP_REPLACE(v_nm, ' {2,}', v_delim);
+  if (v_idx = 1 and v_idx = v_max)then
+    v_word := v_nm_new;
+  elsif  (v_idx = 1 and v_idx < v_max)then
+    v_word := substr(v_nm_new, 1, instr(v_nm_new, v_delim,1,1)-1);
+  elsif (v_idx = v_max) then
+     v_word := substr(v_nm_new, instr(v_nm_new, v_delim,1,v_idx-1)+1);
+  else
+     v_word := substr(v_nm_new, instr(v_nm_new, v_delim,1,v_idx-1)+1,instr(v_nm_new,v_delim,1,v_idx)-instr(v_nm_new, v_delim,1,v_idx-1)-1);
   end if;
   return trim(upper(v_word));
 end;
