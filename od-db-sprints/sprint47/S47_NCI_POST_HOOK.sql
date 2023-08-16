@@ -1702,7 +1702,7 @@ BEGIN
     end if;
 
    -- if caDSR data type changed, change standard data type
-    if  (ihook.getColumnValue(row_ori, 'NCI_STD_DTTYPE_ID') <>  ihook.getColumnOldValue(row_ori, 'NCI_STD_DTTYPE_ID')) then
+    if  (ihook.getColumnValue(row_ori, 'NCI_STD_DTTYPE_ID') <>  ihook.getColumnOldValue(row_ori, 'NCI_STD_DTTYPE_ID') or ihook.getColumnValue(row_ori, 'DTTYPE_ID') is null) then
       row := row_ori;
       rows := t_rows();
     --  raise_application_error(-20000, nci_11179_2.getStdDataType(ihook.getColumnValue(row_ori, 'DTTYPE_ID')));
