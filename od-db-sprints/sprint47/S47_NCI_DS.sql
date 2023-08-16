@@ -223,16 +223,20 @@ begin
     
      if (ihook.getColumnValue(row_ori, 'USR_CMNTS') is not null) then -- Context restriction
      v_cntxt_str := upper(trim(ihook.getColumnValue(row_ori, 'USR_CMNTS')));
-     v_cnt := nci_11179.getwordcount(v_cntxt_str);
+     v_cnt := nci_11179.getwordcountDelim(v_cntxt_str,',');
+ --    raise_application_Error(-20000,v_cnt);
      v_flt_str := ' cntxt_nm_dn in (';
      for i in 1..v_cnt loop
         if (i = v_cnt) then
-        v_flt_str := v_flt_str || '''' || nci_11179.getWord(v_cntxt_str, i, v_cnt) || ''')';
+        v_flt_str := v_flt_str || '''' || nci_11179.getWordDelim(v_cntxt_str, i, v_cnt,',') || ''')';
         else
-             v_flt_str := v_flt_str || '''' || nci_11179.getWord(v_cntxt_str, i, v_cnt) || ''',';
+             v_flt_str := v_flt_str || '''' || nci_11179.getWordDelim(v_cntxt_str, i, v_cnt,',') || ''',';
       end if;   
      end loop;
      end if;
+     
+    -- raise_application_error(-20000,v_flt_str);
+     
      if (ihook.getColumnValue(row_ori, 'STUS_FLTR_ID') is not null) then -- Registration Status restriction
        v_flt_str := v_flt_str  ||  ' and regstr_stus_id = ' || ihook.getColumnValue(row_ori, 'STUS_FLTR_ID');
      end if;
@@ -436,8 +440,18 @@ begin
     
   DECMatchSub(v_hdr_id, v_entty_nm,v_entty_nm_with_space,'X', row_ori);
 
-  update nci_ds_hdr set NUM_DEC_MTCH = (select count(*) from nci_ds_rslt where hdr_id = v_hdr_id and mtch_typ = 'DEC' )
-  where hdr_id = v_hdr_id ;
+    select count(*) into v_temp from nci_ds_rslt where hdr_id = v_hdr_id  and mtch_typ = 'DEC'    ;
+
+   if (v_temp = 1) then 
+  update nci_ds_hdr set (NUM_DEC_MTCH, DE_CONC_ITEM_ID, DE_CONC_VER_NR, LST_UPD_USR_ID) = (select 1, item_id, ver_nr , v_user_id from nci_ds_rslt where hdr_id = v_hdr_id and mtch_typ='DEC')
+  where hdr_id = v_hdr_id;
+  else
+  update nci_ds_hdr set NUM_DEC_MTCH = v_temp
+  where hdr_id = v_hdr_id;
+  end if;
+  commit;
+
+
   commit;
   end loop;
 
