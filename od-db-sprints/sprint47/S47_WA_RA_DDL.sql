@@ -369,3 +369,10 @@ alter table NCI_MDL add (MDL_TYP_ID integer);
 	    and csi.item_id = aref.csi_item_id (+)
 	  and csi.ver_Nr = aref.csi_ver_nr (+);
 
+
+
+	delete from obj_key where obj_typ_id = 8 and obj_key_desc = 'Superceded By';
+commit;
+
+insert into obj_key (obj_key_id, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (76,'Superceded By',8,'Superceded By','Superceded By','Superceded By' );
+commit;
