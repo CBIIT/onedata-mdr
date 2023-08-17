@@ -225,7 +225,7 @@ begin
      v_cntxt_str := upper(trim(ihook.getColumnValue(row_ori, 'USR_CMNTS')));
      v_cnt := nci_11179.getwordcountDelim(v_cntxt_str,',');
  --    raise_application_Error(-20000,v_cnt);
-     v_flt_str := ' cntxt_nm_dn in (';
+     v_flt_str := ' upper(cntxt_nm_dn) in (';
      for i in 1..v_cnt loop
         if (i = v_cnt) then
         v_flt_str := v_flt_str || '''' || nci_11179.getWordDelim(v_cntxt_str, i, v_cnt,',') || ''')';
@@ -351,7 +351,7 @@ begin
      if (ihook.getColumnValue(row_ori, 'USR_CMNTS') is not null) then -- Context restriction
      v_cntxt_str := upper(trim(ihook.getColumnValue(row_ori, 'USR_CMNTS')));
      v_cnt := nci_11179.getwordcount(v_cntxt_str);
-     v_flt_str := ' de.cntxt_nm_dn in (';
+     v_flt_str := ' upper(de.cntxt_nm_dn) in (';
      for i in 1..v_cnt loop
         if (i = v_cnt) then
         v_flt_str := v_flt_str || '''' || nci_11179.getWord(v_cntxt_str, i, v_cnt) || ''')';
