@@ -292,7 +292,7 @@ commit;
 */
 
 nci_import.spdeleteprocimports;
-nci_data_audit.spLoadDataAudit(sysdate -2/24, sysdate);
+nci_data_audit.spLoadDataAudit(sysdate -2, sysdate);
 
 /*
 delete from nci_dload_dtl where hdr_id in (select hdr_id from nci_dload_hdr where creat_dt < sysdate - 7 );
