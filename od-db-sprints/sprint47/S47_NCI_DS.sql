@@ -76,7 +76,7 @@ begin
     end if;
    select count(*) into v_temp from nci_ds_rslt where hdr_id = v_hdr_id     ;
   if (v_temp = 1) then 
-  update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID) = (select 1, item_id, ver_nr , v_user_id from nci_ds_rslt where hdr_id = v_hdr_id)
+  update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID, PREF_CNCPT_CONCAT) = (select 1, item_id, ver_nr , v_user_id, item_id from nci_ds_rslt where hdr_id = v_hdr_id)
   where hdr_id = v_hdr_id;
   else
   update nci_ds_hdr set NUM_CDE_MTCH = v_temp, num_dec_mtch = v_temp
@@ -845,10 +845,12 @@ BEGIN
  rows := t_rows();
 row := t_row();
  
- for cur in (Select * from admin_item where admin_item_typ_id in (53,49) and item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')) loop
+ for cur in (Select * from admin_item where admin_item_typ_id in (53) and item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')) loop
             ihook.setColumnValue(row, 'HDR_ID', ihook.getColumnValue(row_ori, 'HDR_ID'));
             ihook.setColumnValue(row, 'CDE_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
             ihook.setColumnValue(row, 'CDE_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
+            ihook.setColumnValue(row, 'PREF_CNCPT_CONCAT', ihook.getColumnValue(row_ori, 'ITEM_ID'));
+            ihook.setColumnValue(row, 'PREF_CNCPT_CONCAT_NM', '');
             rows:= t_rows();
             rows.extend;
             rows(rows.last) := row;
@@ -881,8 +883,8 @@ end loop;
 if (v_found = false) then
 
  for cur in (Select * from admin_item where admin_item_typ_id in (49) and item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')) loop
-            update nci_ds_hdr set pref_cncpt_concat = trim(nvl(pref_cncpt_concat,'') || ' '  || cur.item_long_nm),
-            pref_cncpt_concat_nm = trim(nvl( pref_cncpt_concat_nm ,'')|| ' '  || cur.item_nm)
+            update nci_ds_hdr set cde_item_id = null, cde_ver_nr = null, pref_cncpt_concat = trim(nvl(pref_cncpt_concat,'') || ' '  || cur.item_long_nm),
+            pref_cncpt_concat_nm = trim(nvl( decode(cde_item_id, null, pref_cncpt_concat_nm,'') ,'')|| ' '  || cur.item_nm)
             where hdr_id = ihook.getColumnValue(row_ori, 'HDR_ID');
             commit;
             hookoutput.message := 'Appended to preferred concept string.';
