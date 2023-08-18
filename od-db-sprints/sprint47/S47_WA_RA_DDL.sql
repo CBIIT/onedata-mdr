@@ -391,6 +391,7 @@ drop materialized view VW_CLSFCTN_SCHM_ITEM;
                CSI.CS_ITEM_VER_NR,
 	       CSI.CSI_TYP_ID,
 	       cs.item_nm CS_ITEM_NM,
+	       cs.CNTXT_NM_DN CS_CNTXT_NM_DN,
                CAST (
                       cs.item_nm
                    || SYS_CONNECT_BY_PATH (REPLACE (admin_item.ITEM_NM, '|', ''),
