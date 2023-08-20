@@ -19,6 +19,7 @@ procedure spQuestVVRestore ( v_data_in in clob, v_data_out out clob, v_user_id v
 procedure spAIIns ( v_data_in in clob, v_data_out out clob);
 procedure spCSFormIns ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spPVUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spVMMAtchHdrUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
 procedure spCSIUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
 procedure            sp_postprocess ( v_data_in in clob, v_data_out out clob);
 procedure spProtocolUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
@@ -774,6 +775,52 @@ rows.EXTEND;
 end;
 
 
+procedure spVMMAtchHdrUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2)
+as
+hookInput        t_hookInput;
+    hookOutput       t_hookOutput := t_hookOutput ();
+    row_ori          t_row;
+    nw_cntxt varchar2(64);
+action t_actionRowset;
+   actions t_actions := t_actions();
+      rows      t_rows;
+
+  BEGIN
+    hookinput := Ihook.gethookinput (v_data_in);
+    hookoutput.invocationnumber := hookinput.invocationnumber;
+    hookoutput.originalrowset := hookinput.originalrowset;
+
+    row_ori := hookInput.originalRowset.rowset (1);
+
+
+if (ihook.getColumnValue(row_ori, 'CDE_ITEM_ID') is not null and  ihook.getColumnValue(row_ori, 'CDE_ITEM_ID') <> nvl(ihook.getColumnOldValue(row_ori, 'CDE_ITEM_ID'),'XX') ) then
+       ihook.setColumnValue(row_ori, 'PREF_CNCPT_CONCAT', ihook.getColumnValue(row_ori, 'CDE_ITEM_ID'));
+            ihook.setColumnValue(row_ori, 'PREF_CNCPT_CONCAT_NM', '');
+            ihook.setColumnValue(row_ori, 'VM_MTCH_ITEM_TYP', 'ID');
+      end if;
+
+ 
+  rows := t_rows();
+  
+rows.EXTEND;
+            rows (rows.LAST) := row_ori;
+            action :=
+                t_actionrowset (rows,
+                                'VM Match Header',
+                                2,
+                                0,
+                                'update');
+            actions.EXTEND;
+            actions (actions.LAST) := action;
+    
+ 
+    IF actions.COUNT > 0
+    THEN
+        hookoutput.actions := actions;
+    END IF;
+  
+ V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+end;
 
 procedure spPVUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2)
 as
