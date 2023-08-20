@@ -851,6 +851,8 @@ row := t_row();
             ihook.setColumnValue(row, 'CDE_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
             ihook.setColumnValue(row, 'PREF_CNCPT_CONCAT', ihook.getColumnValue(row_ori, 'ITEM_ID'));
             ihook.setColumnValue(row, 'PREF_CNCPT_CONCAT_NM', '');
+            ihook.setColumnValue(row, 'VM_MTCH_ITEM_TYP', 'ID');
+            
             rows:= t_rows();
             rows.extend;
             rows(rows.last) := row;
@@ -883,8 +885,9 @@ end loop;
 if (v_found = false) then
 
  for cur in (Select * from admin_item where admin_item_typ_id in (49) and item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')) loop
-            update nci_ds_hdr set cde_item_id = null, cde_ver_nr = null, pref_cncpt_concat = trim(nvl(pref_cncpt_concat,'') || ' '  || cur.item_long_nm),
-            pref_cncpt_concat_nm = trim(nvl( decode(cde_item_id, null, pref_cncpt_concat_nm,'') ,'')|| ' '  || cur.item_nm)
+            update nci_ds_hdr set cde_item_id = null, cde_ver_nr = null, pref_cncpt_concat = trim(nvl(decode(VM_MTCH_ITEM_TYP, 'ID', '',pref_cncpt_concat) ,'')|| ' '  || cur.item_long_nm),
+            pref_cncpt_concat_nm = trim(nvl( decode(VM_MTCH_ITEM_TYP, 'ID', '',pref_cncpt_concat_nm) ,'')|| ' '  || cur.item_nm),
+            vm_mtch_item_typ = 'Concepts'
             where hdr_id = ihook.getColumnValue(row_ori, 'HDR_ID');
             commit;
             hookoutput.message := 'Appended to preferred concept string.';
