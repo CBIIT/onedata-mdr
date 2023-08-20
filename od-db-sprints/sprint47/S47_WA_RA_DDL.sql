@@ -411,3 +411,4 @@ drop materialized view VW_CLSFCTN_SCHM_ITEM;
     START WITH p_item_id IS NULL
   CONNECT BY PRIOR  to_char(csi.item_id || to_char(csi.ver_nr,'99.99')) = to_char(csi.p_item_id || to_char(csi.P_item_ver_nr,'99.99'));
 
+alter table nci_ds_hdr add (VM_MTCH_ITEM_TYP  varchar(20));
