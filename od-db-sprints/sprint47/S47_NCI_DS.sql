@@ -76,7 +76,8 @@ begin
     end if;
    select count(*) into v_temp from nci_ds_rslt where hdr_id = v_hdr_id     ;
   if (v_temp = 1) then 
-  update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID, PREF_CNCPT_CONCAT) = (select 1, item_id, ver_nr , v_user_id, item_id from nci_ds_rslt where hdr_id = v_hdr_id)
+  update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID, PREF_CNCPT_CONCAT, PREF_CNCPT_CONCAT_NM, 	VM_MTCH_ITEM_TYP) 
+  = (select 1, item_id, ver_nr , v_user_id, item_id,null, 'ID' from nci_ds_rslt where hdr_id = v_hdr_id)
   where hdr_id = v_hdr_id;
   else
   update nci_ds_hdr set NUM_CDE_MTCH = v_temp, num_dec_mtch = v_temp
