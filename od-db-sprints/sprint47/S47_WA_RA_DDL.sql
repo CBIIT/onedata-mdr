@@ -300,6 +300,7 @@ alter table NCI_MDL add (MDL_TYP_ID integer);
            ext.USED_BY                         CNTXT_AGG,
              vd.VAL_DOM_TYP_ID	 ,
 	     an.NM_DESC,
+	    an.nm_typ_id  nm_typ_id,
 	     adef.def_desc,
          aref.CODE_INSTR_REF_DESC,
          aref.INSTR_REF_DESC,
@@ -315,10 +316,10 @@ alter table NCI_MDL add (MDL_TYP_ID integer);
 	    nci_admin_item_rel r,
 	    nci_clsfctn_schm_item csi,
 	      de, VALUE_DOM vd, 
-	     (SELECT an.item_id, an.ver_nr,  csian.NCI_PUB_ID csi_item_id, csian.NCI_VER_NR  csi_ver_nr, max(nm_desc) as NM_DESC
+	     (SELECT an.item_id, an.ver_nr,  an.nm_typ_id, csian.NCI_PUB_ID csi_item_id, csian.NCI_VER_NR  csi_ver_nr, max(nm_desc) as NM_DESC
 	      from alt_nms an,  NCI_CSI_ALT_DEFNMS csian
 	  where an.nm_id = csian.nmdef_id and csian.TYP_NM='DESIGNATION'
-          group by an.item_id, an.ver_nr, csian.NCI_PUB_ID,csian.NCI_VER_NR) an,
+          group by an.item_id, an.ver_nr, an.nm_typ_id, csian.NCI_PUB_ID,csian.NCI_VER_NR) an,
 	     (SELECT an.item_id, an.ver_nr,  csian.NCI_PUB_ID csi_item_id, csian.NCI_VER_NR  csi_ver_nr, max(def_desc) as def_DESC
 	      from alt_def an, NCI_CSI_ALT_DEFNMS csian
 	  where an.def_id = csian.nmdef_id and csian.TYP_NM='DEFINITION'
