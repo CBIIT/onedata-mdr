@@ -17,13 +17,15 @@
     </style>
     <div class="news">
 <P></B></font></p>
-<P><font color="red"> </b></font>
-<P><font color="blue"><B>caDSR II Release 1.46.4.0 is an emergency fix to rollback the "Flattened Form" API to version 1.45.2.0. The 1.46.3.0 release supported retrieval of multiple forms which necessitated a syntax change to the JSON. We are rolling back the feature to allow customers time to prepare for the syntax change. Please see the release notes for details.</b></font>
+<P><font color="blue"><B>caDSR II</B> Release 1.47.3.0 includes the following improvements:</b></font>
 <UL class=multi>
-<li><p><b>DEC Match</B> - a new  feature curators can use to find matching DECs, which represent the meaning of the CDE without the permissible value list. Reusing the DEC is an important aspect of semantic interoperability.</p></li>
-<li><p><b>Retain Cart</b> - Forms Curators may now retain the contents of their carts.</p</li>
-<li><p><b>Download Collection</b> - Fixes to the ALS download for DraftFieldName and DataDictionaryName when CDE is in more than one Module.
-<li><p><b>Form Import</b> - Super Curators may import forms that are represented as REDCap Data Dictionary csv format.
+<li><p><b>API Searches - Case Insensitive</B> - Fields like long and short names, Context, Protocol ID and other commonly used fields for searching are mixed case. Case insensitive searching will make it easier.</p></li>
+<li><p><b>DEC Match</B> - Matches can be targeted to DECs in specific Context(s), helping align with existing models or other Context specific semantics.</p></li>
+<li><p><b>CDE/DEC Match</B> - Users can now run DEC Match on their imported CDE Match batch without having to reimport/reformat the file, streamlining finding reusable semantic content.</p></li>
+<li><p><b>VM Match Improvements</B> - User Tips can be imported making it easier to pre-set searching to optimize matches in bulk instead of having to enter user tips one at a time through the front end. 
+</p></li>
+<li><p><b>Batch Loading</b> - Batch User and Batch Name can be edited to help curators reassign content for review to other individuals and making it easy to find using the built in filters.</p></li>
+<li><p><b>Model Loading - Beta</b> - Loading models for registration prior to creating CDEs is coming! Contact caDSR RA to request more information!</p></li>
 </ul>
 <p>As always, this release also has a number of UI improvements and bug fixes. For details, refer to the <a class="underline" href="https://wiki.nci.nih.gov/x/Zwd-Gw" target="_blank" rel="noopener noreferrer">caDSR II Release Notes</a>.</p>
  <p><B>caDSR II</B> provides access to NCI's metadata standards for: Common Data Elements (CDEs), Case Report Forms (CRFs), and Data Models. These metadata resources describe a common way of structuring and understanding data.
@@ -56,6 +58,8 @@
             <B>Related CBIIT and SI Information:</B>
         </P>
         <UL class="multi">
+           <li><B>Ever wonder what the difference is between a CDE and a Concept?</B> Learn about it from Cancer Data Science Pulse Semantic Series blog <a class="underline" href"https://datascience.cancer.gov/news-events/blog/semantics-series-deep-dive-common-data-elements" target="_blank" rel="noopener noreferrer">Deep Dive into Common Data Elements</a>
+</li>
             <LI>
                 Learn about NCI CDEs and semantic metadata at <a class="underline" href="https://datascience.cancer.gov/resources/metadata" target="_blank" rel="noopener noreferrer">Metadata Services for Cancer Data</a>.
             </LI>
