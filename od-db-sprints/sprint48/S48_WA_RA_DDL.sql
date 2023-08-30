@@ -14,3 +14,4 @@ commit;
 
 alter table nci_mec_map enable all triggers;
 
+insert into 
