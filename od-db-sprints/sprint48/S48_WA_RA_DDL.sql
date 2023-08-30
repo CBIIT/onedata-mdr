@@ -14,4 +14,16 @@ commit;
 
 alter table nci_mec_map enable all triggers;
 
-insert into 
+insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (57,65);  -- draft mod for Model
+commit;
+
+insert into NCI_AI_TYP_VALID_STUS (ADMIN_ITEM_TYP_ID, STUS_ID) values (58,65);  -- draft mod for Model Map
+commit;
+
+insert into obj_key ( OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (84, 'Subset Created From',8,'Subset Created From','Subset Created From','Subset Created From' );
+commit;
+
+
+insert into obj_key (obj_key_id, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (85,'YAML',40,'YAML','YAML','YAML' );
+commit;
+
