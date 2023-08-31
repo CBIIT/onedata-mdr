@@ -35,4 +35,4 @@ transformationRuleNotation: Drop down: Text, Pseudo Code, SQL, R?, SAS?
 directionality:  Drop down: Directional, Bi-Directional, 1..*, *..1? 
 validatedPlatform: free text */
 
-alter table NCI_MEC_MAP add ( MEC_MAP_NM varchar2(4000), MAP_DEG  integer; MEC_MAP_DESC varchar2(4000), DIRECT_TYP integer; TRANS_RUL_NOT integer, VALID_PLTFORM  varchar2(4000), PROV_ORG_ID number);
+alter table NCI_MEC_MAP add ( MEC_MAP_NM varchar2(4000), MAP_DEG  integer, MEC_MAP_DESC varchar2(4000), DIRECT_TYP integer, TRANS_RUL_NOT integer, VALID_PLTFORM  varchar2(4000), PROV_ORG_ID number);
