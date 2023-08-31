@@ -27,3 +27,12 @@ commit;
 insert into obj_key (obj_key_id, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (85,'YAML',40,'YAML','YAML','YAML' );
 commit;
 
+/* Item_mapping name Free text or derive from Source and Target models 
+mappingDegree: Drop down: Semantically equivalent, Semantics similar, Has Derivation
+description:  free text 
+transformationRule: free text
+transformationRuleNotation: Drop down: Text, Pseudo Code, SQL, R?, SAS?
+directionality:  Drop down: Directional, Bi-Directional, 1..*, *..1? 
+validatedPlatform: free text */
+
+alter table NCI_MEC_MAP add ( MEC_MAP_NM varchar2(4000), MAP_DEG  integer; MEC_MAP_DESC varchar2(4000), DIRECT_TYP integer; TRANS_RUL_NOT integer, VALID_PLTFORM  varchar2(4000), PROV_ORG_ID number);
