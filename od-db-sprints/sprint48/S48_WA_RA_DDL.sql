@@ -37,3 +37,5 @@ validatedPlatform: free text */
 
 alter table NCI_MEC_MAP add ( MEC_MAP_NM varchar2(4000), MAP_DEG  integer, MEC_MAP_DESC varchar2(4000), DIRECT_TYP integer, TRANS_RUL_NOT integer, VALID_PLTFORM  varchar2(4000), PROV_ORG_ID number);
 alter table NCI_MEC_MAP add (MEC_GRP_RUL_NBR integer, MEC_GRP_RUL_DESC varchar2(4000));
+
+alter table NCI_STG_MDL_ELMNT add (DOM_ITEM_ID  number, DOM_VER_NR number(4,2));
