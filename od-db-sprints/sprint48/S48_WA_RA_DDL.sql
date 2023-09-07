@@ -101,5 +101,6 @@ union
 	   smec.MEC_ID = map.SRC_MEC_ID and tmec.mec_id = map.TGT_MEC_ID;
 
 
+alter table NCI_DS_HDR add (FLTR_MDL_ITEM_ID number, FLTR_MDL_VER_NR number(4,2));
 
 
