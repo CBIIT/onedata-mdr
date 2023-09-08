@@ -1,3 +1,11 @@
 -- Run as ONEDATA_RA DDL scripts
+S48_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S48_WA_RA_DDL.sql
+S48_NCI_11179.sql
+S48_NCI_11179_2.sql
+S48_NCI_CHNG_MGMT.sql
+S48_NCI_DS.sql
+S48_NCI_CODEMAP.sql
+S48_NCI_FORM_IMPORT.sql
