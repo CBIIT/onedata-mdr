@@ -103,4 +103,9 @@ union
 
 alter table NCI_DS_HDR add (FLTR_MDL_ITEM_ID number, FLTR_MDL_VER_NR number(4,2));
 
+--DSRMWS-2818. Added by Surinder on 9/8/23
+DELETE from obj_key  where OBJ_TYP_ID = 5;
+DELETE from obj_typ where OBJ_TYP_ID = 5;
+COMMIT ;
+
 
