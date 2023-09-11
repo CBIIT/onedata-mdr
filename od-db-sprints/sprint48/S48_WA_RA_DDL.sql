@@ -57,7 +57,8 @@ insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_
 commit;
 insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (119,'*..1',46,'*..1','*..1','*..1' );
 commit;
-
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (120,'Has Derivation',45,'Has Derivation','Has Derivation','Has Derivation' );
+commit;
 
 alter table NCI_STG_MDL_ELMNT add (DOM_ITEM_ID  number, DOM_VER_NR number(4,2));
 
