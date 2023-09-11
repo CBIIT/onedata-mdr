@@ -44,6 +44,8 @@ alter table NCI_MEC_MAP add (SRC_VAL varchar2(4000), TGT_VAL varchar2(4000));
 	
 	insert into obj_typ (obj_typ_id, obj_typ_desc) values (45,'Model Map Degree');
 	insert into obj_typ (obj_typ_id, obj_typ_desc) values (46,'Model Map Directionality');
+	insert into obj_typ (obj_typ_id, obj_typ_desc) values (47,'Model Map Cardinality');
+        insert into obj_typ (obj_typ_id, obj_typ_desc) values (48,'Model Map Transformation Notation');
 
 insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (86,'Semantic Equivalent',45,'Semantic Equivalent','Semantic Equivalent','Semantic Equivalent' );
 commit;
@@ -58,6 +60,22 @@ commit;
 insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (119,'*..1',46,'*..1','*..1','*..1' );
 commit;
 insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (120,'Has Derivation',45,'Has Derivation','Has Derivation','Has Derivation' );
+commit;
+
+delete from obj_key where obj_key_id in (118, 119,121);
+commit;
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (118,'One-To-Many',47,'One-To-Many','One-To-Many','One-To-Many' );
+commit;
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (119,'Many-To-One',47,'Many-To-One','Many-To-One','Many-To-One' );
+commit;
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (121,'One-To-One',47,'One-To-One','One-To-One','One-To-One' );
+commit;
+-- Transformation Notation
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (122,'Text',48,'Text','Text','Text' );
+commit;
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (123,'Pseudo Code',48,'Pseudo Code','Pseudo Code','Pseudo Code' );
+commit;
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (124,'SQL',48,'SQL','SQL','SQL' );
 commit;
 
 alter table NCI_STG_MDL_ELMNT add (DOM_ITEM_ID  number, DOM_VER_NR number(4,2));
@@ -108,5 +126,8 @@ alter table NCI_DS_HDR add (FLTR_MDL_ITEM_ID number, FLTR_MDL_VER_NR number(4,2)
 DELETE from obj_key  where OBJ_TYP_ID = 5;
 DELETE from obj_typ where OBJ_TYP_ID = 5;
 COMMIT ;
+
+alter table NCI_MEC_MAP add (CRDNLITY_ID integer);
+
 
 
