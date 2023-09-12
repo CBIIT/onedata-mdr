@@ -11,7 +11,6 @@ create or replace PACKAGE            nci_ds AS
 procedure spDSMatchNonEnum ( v_hdr_id in number, v_usr_id in varchar2,v_flt_str in varchar2, v_mtch_typ in varchar2, v_mtch_nm in varchar2, v_suffix in varchar2);
 procedure setPrefDEC ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spDSMatchEnum ( v_hdr_id in number, v_usr_id in varchar2,v_flt_str in varchar2, v_mtch_typ in varchar2, v_mtch_nm in varchar2, v_suffix in varchar2);
-procedure setMatchPref ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 END;
 /
 create or replace PACKAGE BODY            nci_ds AS
@@ -99,9 +98,100 @@ v_sel_word varchar2(4000);
 j integer;
 v_word_cnt integer;
 begin
+    
        --  raise_application_error(-20000, v_entty_nm);
          
   v_minlen := nci_11179.getMinWordLen(v_entty_nm_with_space);
+  -- sp48 jira 2550
+if (v_typ = 'V') then --vm match only, no concepts
+    insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , item_id, ver_nr, '1. VM Exact Match' from 
+                    MVW_VAL_MEAN where MTCH_TERM_ADV = v_entty_nm ;
+                    
+                    --and admin_item_typ_id = 53;
+          --          commit;
+    --
+    -- Vm Alt Name Exact Match
+    v_cnt := SQL%ROWCOUNT;
+    commit;
+    insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , item_id, ver_nr, '4. VM Like Match' from 
+                    MVW_VAL_MEAN where ((MTCH_TERM_ADV like '%' || v_entty_nm || '%' )  or
+                    (v_entty_nm like '%' || MTCH_TERM_ADV || '%' and length(mtch_term) >= v_minlen)) and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt); 
+    v_cnt := SQL%ROWCOUNT;
+    commit;
+
+    v_word_cnt := nci_11179.getwordcount(v_entty_nm_with_space);
+    v_sel_word := 'x';
+ 
+    for j in 1..v_word_cnt loop
+        v_cur_word:= nci_11179.getWord(v_entty_nm_with_space,j, v_word_cnt);
+        --raise_application_Error(-20000,length(v_sel_word));
+        if (length(v_cur_word) > length(v_sel_word)) then
+            v_Sel_word := v_cur_Word;
+        end if;
+    end loop;
+ 
+    v_sel_word := regexp_replace(upper(v_sel_word),v_reg_str_adv,'');
+ --raise_application_error(-20000, 'Hre' || v_sel_word);
+ 
+    insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , item_id, ver_nr, '7. VM Like Match Largest word' from 
+                    MVW_VAL_MEAN where ((MTCH_TERM_ADV like '%' || v_sel_word || '%' )  or
+                    (v_sel_word like '%' || MTCH_TERM_ADV || '%'))  and length(mtch_term_adv) >= length(v_sel_word) and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
+     commit;
+elsif (v_typ= 'C') then -- concept match only, no vms
+    insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , item_id, ver_nr, '2. Concept Exact Match' from 
+                    vw_cncpt where MTCH_TERM_ADV = v_entty_nm and CNTXT_NM_DN = 'NCIP'
+                    and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
+         --           commit;
+    v_cnt := v_cnt + SQL%ROWCOUNT;
+    
+                          insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , item_id, ver_nr, '5. Concept Like Match' from 
+                    vw_cncpt where MTCH_TERM_ADV  like '%' ||  v_entty_nm || '%' 
+                     and CNTXT_NM_DN = 'NCIP'  and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
+    v_cnt := v_cnt + SQL%ROWCOUNT;
+    commit;
+                       insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , item_id, ver_nr, '5. Concept Like Match' from 
+                    vw_cncpt where 
+                     v_entty_nm like '%' || MTCH_TERM_ADV || '%' and length(item_nm) >= v_minlen and CNTXT_NM_DN = 'NCIP' 
+                      and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
+         
+    v_cnt := v_cnt + SQL%ROWCOUNT;
+         commit;
+
+    v_word_cnt := nci_11179.getwordcount(v_entty_nm_with_space);
+ v_sel_word := 'x';
+ 
+ for j in 1..v_word_cnt loop
+ v_cur_word:= nci_11179.getWord(v_entty_nm_with_space,j, v_word_cnt);
+ --raise_application_Error(-20000,length(v_sel_word));
+ if (length(v_cur_word) > length(v_sel_word)) then
+    v_Sel_word := v_cur_Word;
+    end if;
+ end loop;
+ 
+ v_sel_word := regexp_replace(upper(v_sel_word),v_reg_str_adv,'');
+ --raise_application_error(-20000, 'Hre' || v_sel_word);
+ insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , item_id, ver_nr, '8. Concept Like Match Largest Word' from 
+                    vw_cncpt where MTCH_TERM_ADV  like '%' ||  v_sel_word || '%' 
+                     and CNTXT_NM_DN = 'NCIP'  and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
+                    commit;
+    v_cnt := v_cnt + SQL%ROWCOUNT;
+    
+                       insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
+                    select distinct  v_hdr_id , item_id, ver_nr, '8. Concept Like Match Largest Word' from 
+                    vw_cncpt where 
+                     v_sel_word like '%' || MTCH_TERM_ADV || '%' and length(item_nm) >= v_minlen and CNTXT_NM_DN = 'NCIP' 
+                      and (v_hdr_id, item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt);
+         
+         commit;
+else
+
    insert into nci_ds_rslt (hdr_id, item_id, ver_nr,  rule_desc)
                     select distinct  v_hdr_id , item_id, ver_nr, '1. VM Exact Match' from 
                     MVW_VAL_MEAN where MTCH_TERM_ADV = v_entty_nm ;
@@ -204,6 +294,7 @@ begin
     v_cnt := v_cnt + SQL%ROWCOUNT;
 
  
+    end if;
     end;
 
 
@@ -979,53 +1070,6 @@ end loop;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
-procedure setMatchPref ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
-AS
-hookInput t_hookInput;
-  hookOutput t_hookOutput := t_hookOutput();
-   actions t_actions := t_actions();
-  action t_actionRowset;
-  row t_row;
-  rows  t_rows;
-    row_ori t_row;
-  action_rows       t_rows := t_rows();
-  action_row		    t_row;
-  rowset            t_rowset;
-  v_found boolean := false;
 
-BEGIN
-  hookinput                    := Ihook.gethookinput (v_data_in);
-  hookoutput.invocationnumber  := hookinput.invocationnumber;
-  hookoutput.originalrowset    := hookinput.originalrowset;
-
- rows := t_rows();
-row := t_row();
- 
- for i in 1..hookinput.originalrowset.rowset.count loop  --- Iterate through all the selected rows
- 
-    row_ori := hookInput.originalRowset.rowset(i);
-        
-    if (ihook.getColumnValue(row_ori,'MTCH_TYP_NM') = 'VM') then
-        ihook.setColumnValue(row_ori, 'MTCH_TYP_NM', 'DEC');
-        hookoutput.message := 'Match preference set to DEC';
-    elsif (ihook.getColumnValue(row_ori,'MTCH_TYP_NM') = 'DEC') then
-        ihook.setColumnValue(row_ori, 'MTCH_TYP_NM', 'VM');
-        hookoutput.message := 'Match preference set to VM';
-    end if;
-    
-    action             := t_actionrowset(rows, 'VM Match Header', 2, 0,'update');
-    actions.extend;
-    actions(actions.last) := action;
-
-    hookoutput.actions := actions;
-        
-        
-end loop;
-
-
-  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-END;
- 
-
-END;
+end;
 /
