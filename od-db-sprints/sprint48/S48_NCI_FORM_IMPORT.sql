@@ -611,7 +611,7 @@ v_instr := substr(  v_instr || 'Text Validation Max=' || cur.SRC_VAL_MAX_VAL || 
 end if;
 -- Tracker 2867 - if question short name > 30, make it the first term.
 if (length(cur.SRC_QUESTION_ID) > 30) then
-v_instr := substr(cur.SRC_QUESTION_ID || ';' ||  v_instr,1,4000);
+v_instr := substr('Variable: ' || cur.SRC_QUESTION_ID || ';' ||  v_instr,1,4000);
 end if;
 
 v_long_nm := null;
