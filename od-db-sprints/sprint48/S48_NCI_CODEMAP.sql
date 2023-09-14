@@ -135,11 +135,14 @@ end loop;
   rowsme  t_rows;
  v_temp integer;
   rowschar  t_rows;
+  v_me_typ_id integer;
   begin
  
 
 rowschar := t_rows();
 rowsme := t_rows();
+
+select obj_key_id into v_me_typ_Id from obj_key where obj_typ_id = 41 and upper(obj_key_desc) ='TABLE';
 
 for cur in (select * from NCI_STG_MDL_ELMNT where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID') ) loop
 
@@ -157,7 +160,7 @@ ihook.setColumnValue(row,'DOM_ITEM_ID',cur.DOM_ITEM_ID);
 ihook.setColumnValue(row,'DOM_VER_NR',cur.DOM_VER_NR);
 ihook.setColumnValue(row,'ITEM_PHY_OBJ_NM',cur.ITEM_PHY_OBJ_NM);
 ihook.setColumnValue(row,'ITEM_DESC',cur.ITEM_DESC);
-ihook.setColumnValue(row,'ME_TYP_ID',2341); -- temporary
+ihook.setColumnValue(row,'ME_TYP_ID',v_me_typ_id); -- temporary
 
      rowsme.extend;
                                             rowsme(rowsme.last) := row;
@@ -545,13 +548,13 @@ row t_row;
   
   v_src_hdr_id := ihook.getColumnValue(row_ori,'MDL_IMP_ID');
   
-  v_tgt_item_id := 60006994;
+  v_tgt_item_id := 60008955;
   v_tgt_ver_nr := 5.31;
   
   for cur in (select ime.item_long_nm ME_ITEM_NM, ime.ITEM_PHY_OBJ_NM ME_ITEM_PHY_NM, imec.MEC_LONG_NM MEC_ITEM_NM, imec.MEC_PHY_NM  MEC_ITEM_PHY_NM from nci_stg_mdl_elmnt ime,
                    nci_stg_mdl_elmnt_char imec where ime.mdl_imp_id = imec.mdl_imp_id and ime.item_long_nm = imec.me_item_long_nm
                    and ime.mdl_imp_id = ihook.getColumnValue(row_ori,'MDL_IMP_ID') and
-                   (ime.item_long_nm,  imec.MEC_LONG_NM ) not in (select me.item_long_nm, mec.mec_long_nm from NCI_MDL_ELMNT me, NCI_MDL_ELMNT_CHAR mec 
+                   (upper(ime.ITEM_PHY_OBJ_NM),  upper(imec.MEC_PHY_NM) ) not in (select upper(me.ITEM_PHY_OBJ_NM), upper(mec.MEC_PHY_NM) from NCI_MDL_ELMNT me, NCI_MDL_ELMNT_CHAR mec 
                    where me.item_id = mec.MDL_ELMNT_ITEM_ID 
                    and me.ver_nr = mec.MDL_ELMNT_VER_NR and me.mdl_item_id = v_tgt_item_id  and me.mdl_item_ver_nr = v_tgt_ver_nr) ) loop
                    row := t_row();
@@ -569,7 +572,7 @@ row t_row;
   for cur in (select me.item_long_nm ME_ITEM_NM, me.ITEM_PHY_OBJ_NM ME_ITEM_PHY_NM, mec.MEC_LONG_NM MEC_ITEM_NM, mec.MEC_PHY_NM  MEC_ITEM_PHY_NM from NCI_MDL_ELMNT me, NCI_MDL_ELMNT_CHAR mec 
                    where me.item_id = mec.MDL_ELMNT_ITEM_ID 
                    and me.ver_nr = mec.MDL_ELMNT_VER_NR and me.mdl_item_id = v_tgt_item_id  and me.mdl_item_ver_nr = v_tgt_ver_nr
-                   and (me.item_long_nm, mec.mec_long_nm) not in (select ime.item_long_nm,  imec.MEC_LONG_NM
+                   and (upper(me.ITEM_PHY_OBJ_NM), upper(mec.MEC_PHY_NM)) not in (select upper(ime.ITEM_PHY_OBJ_NM),  upper(imec.MEC_PHY_NM)
                    from nci_stg_mdl_elmnt ime,
                    nci_stg_mdl_elmnt_char imec where ime.mdl_imp_id = imec.mdl_imp_id and ime.item_long_nm = imec.me_item_long_nm
                    and ime.mdl_imp_id = ihook.getColumnValue(row_ori,'MDL_IMP_ID') )) loop
@@ -580,7 +583,26 @@ row t_row;
                    ihook.setColumnValue(row, 'Target Characteristics Physical Name', cur.MEC_ITEM_PHY_NM);
                      rows.extend;   rows(rows.last) := row;
                    end loop;
-                   
+  for cur in (select ime.item_long_nm ME_ITEM_NM, ime.ITEM_PHY_OBJ_NM ME_ITEM_PHY_NM, imec.MEC_LONG_NM MEC_ITEM_NM, imec.MEC_PHY_NM  MEC_ITEM_PHY_NM 
+  from nci_stg_mdl_elmnt ime, 
+                   nci_stg_mdl_elmnt_char imec where ime.mdl_imp_id = imec.mdl_imp_id and ime.item_long_nm = imec.me_item_long_nm
+                   and ime.mdl_imp_id = ihook.getColumnValue(row_ori,'MDL_IMP_ID') and
+                   (upper(ime.ITEM_PHY_OBJ_NM),  upper(imec.MEC_PHY_NM) )  in (select upper(me.ITEM_PHY_OBJ_NM), upper(mec.MEC_PHY_NM) from NCI_MDL_ELMNT me, NCI_MDL_ELMNT_CHAR mec 
+                   where me.item_id = mec.MDL_ELMNT_ITEM_ID 
+                   and me.ver_nr = mec.MDL_ELMNT_VER_NR and me.mdl_item_id = v_tgt_item_id  and me.mdl_item_ver_nr = v_tgt_ver_nr) ) loop
+                   row := t_row();
+                   ihook.setColumnValue(row, 'Source Element', cur.ME_ITEM_NM);
+                   ihook.setColumnValue(row, 'Source Element Physical Name', cur.ME_ITEM_PHY_NM);
+                   ihook.setColumnValue(row, 'Source Characteristics', cur.MEC_ITEM_NM);
+                   ihook.setColumnValue(row, 'Source Characteristics Physical Name', cur.MEC_ITEM_PHY_NM);
+                   ihook.setColumnValue(row, 'Target Element', cur.ME_ITEM_NM);
+                   ihook.setColumnValue(row, 'Target Element Physical Name', cur.ME_ITEM_PHY_NM);
+                   ihook.setColumnValue(row, 'Target Characteristics', cur.MEC_ITEM_NM);
+                   ihook.setColumnValue(row, 'Target Characteristics Physical Name', cur.MEC_ITEM_PHY_NM);
+                     rows.extend;   rows(rows.last) := row;
+                   end loop;
+  
+           
 if (rows.count > 0) then
     showRowset := t_showableRowset(rows, 'Model Compare',4, 'unselectable');
     hookOutput.showRowset := showRowset;
