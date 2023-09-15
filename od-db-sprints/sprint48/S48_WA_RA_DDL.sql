@@ -129,5 +129,5 @@ COMMIT ;
 
 alter table NCI_MEC_MAP add (CRDNLITY_ID integer);
 
-
+alter table NCI_MEC_MAP add (MEC_MAP_NOTES varchar2(4000));
 
