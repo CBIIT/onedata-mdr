@@ -538,6 +538,9 @@ row t_row;
  v_src_hdr_id integer;
  v_tgt_item_id number;
  v_tgt_ver_nr number(4,2);
+ question    t_question;
+answer     t_answer;
+answers     t_answers;
  BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -550,7 +553,23 @@ row t_row;
   
   v_tgt_item_id := 60008955;
   v_tgt_ver_nr := 5.31;
-  
+  if (hookinput.invocationnumber = 0) then
+ 	 showrowset := t_showablerowset (rows, 'Models', 2, 'single');
+       	 hookoutput.showrowset := showrowset;
+
+       	 answers := t_answers();
+  	   	 answer := t_answer(1, 1, 'Select Model');
+  	   	 answers.extend; answers(answers.last) := answer;
+
+	   	 question := t_question('Select Model To Compare', answers);
+       	 hookOutput.question := question;
+
+ end if;
+  if (hookinput.invocationnumber = 1) then
+   row_sel := hookInput.selectedRowset.rowset(1);
+         
+  v_tgt_item_id := ihook.getColumnValue(row_sel,'ITEM_ID');
+  v_tgt_ver_nr := ihook.getColumnValue(row_sel,'VER_NR');
   for cur in (select ime.item_long_nm ME_ITEM_NM, ime.ITEM_PHY_OBJ_NM ME_ITEM_PHY_NM, imec.MEC_LONG_NM MEC_ITEM_NM, imec.MEC_PHY_NM  MEC_ITEM_PHY_NM from nci_stg_mdl_elmnt ime,
                    nci_stg_mdl_elmnt_char imec where ime.mdl_imp_id = imec.mdl_imp_id and ime.item_long_nm = imec.me_item_long_nm
                    and ime.mdl_imp_id = ihook.getColumnValue(row_ori,'MDL_IMP_ID') and
@@ -601,7 +620,6 @@ row t_row;
                    ihook.setColumnValue(row, 'Target Characteristics Physical Name', cur.MEC_ITEM_PHY_NM);
                      rows.extend;   rows(rows.last) := row;
                    end loop;
-  
            
 if (rows.count > 0) then
     showRowset := t_showableRowset(rows, 'Model Compare',4, 'unselectable');
@@ -609,7 +627,8 @@ if (rows.count > 0) then
 else
   hookoutput.message := 'No difference found';
 end if;
-
+ end if;
+ 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
@@ -873,7 +892,7 @@ begin
       row := t_row();
       ihook.setColumnValue (row, 'ITEM_ID', cur.val_dom_item_id);
       ihook.setColumnValue (row, 'VER_NR', cur.val_dom_ver_nr);
-      input_rows.extend;  input_rows(input_rows.last) := row;
+      output_rows.extend;  output_rows(output_rows.last) := row;
 
     end loop;
     
