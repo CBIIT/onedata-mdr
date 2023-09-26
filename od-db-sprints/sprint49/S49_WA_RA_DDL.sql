@@ -1,4 +1,5 @@
 --alter table NCI_MEC_MAP add ( MEC_SUB_GRP_NBR integer);
+alter table NCI_STG_MDL add (CNTXT_ITEM_ID number, CNTXT_VER_NR number(4,2));
 
 alter table NCI_STG_MDL_ELMNT add ( IMP_GRP_NM  varchar2(1000), ME_GRP_ID integer);
 
