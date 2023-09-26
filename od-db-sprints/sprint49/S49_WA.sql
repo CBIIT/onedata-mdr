@@ -13,4 +13,6 @@ insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Note',49,'N
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Visit',49,'Visit' );
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Test Results',49,'Test Results' );
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Vital Signs',49,'Vital Signs' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Enrollment',49,'Enrollment' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Death',49,'Death' );
 commit;
