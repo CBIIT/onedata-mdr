@@ -1,1 +1,10 @@
-alter table NCI_MEC_MAP add ( MEC_SUB_GRP_NBR integer);
+--alter table NCI_MEC_MAP add ( MEC_SUB_GRP_NBR integer);
+
+alter table NCI_STG_MDL_ELMNT add ( IMP_GRP_NM  varchar2(1000), ME_GRP_ID integer);
+
+alter table NCI_MDL_ELMNT add (  ME_GRP_ID integer);
+
+alter table NCI_STG_MDL_ELMNT_CHAR add (  CMNTS_DESC_TXT varchar2(4000));
+
+
+
