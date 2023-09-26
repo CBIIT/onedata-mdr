@@ -9,3 +9,6 @@ alter table NCI_STG_MDL_ELMNT_CHAR add (  CMNTS_DESC_TXT varchar2(4000));
 
 
 
+	
+	insert into obj_typ (obj_typ_id, obj_typ_desc) values (49,'Mapping Groups');
+	     commit;
