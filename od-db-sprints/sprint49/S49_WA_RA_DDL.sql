@@ -85,21 +85,21 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 */
 
 create or replace view vw_mdl_flat as
-select ai.item_id mdl_item_id "Model Public ID", 
-	ai.ver_nr mdl_ver_nr "Model Version", 
-	ai.item_long_nm mdl_long_nm "Model Name", 
-	ai.item_desc mdl_item_desc "Model Definition",
+select ai.item_id "Model Public ID", 
+	ai.ver_nr  "Model Version", 
+	ai.item_long_nm  "Model Name", 
+	ai.item_desc  "Model Definition",
 --	ai.cntxt_item_id mdl_cntxt_item_id, 
 --  	ai.cntxt_ver_nr  mdl_cntxt_ver_nr,
-        ai.cntxt_nm_dn mdl_cntxt_nm_dn "Model Context", 
+        ai.cntxt_nm_dn  "Model Context", 
 --	ai.admin_stus_id mdl_admin_stus_id, 
 --	ai.regstr_stus_id mdl_regstr_stus_id,
-	ai.admin_stus_nm_dn mdl_admin_stus_nm_dn "Model Workflow Status:, 
-	ai.regstr_stus_nm_dn mdl_regstr_stus_nm_dn "Model Registration Status:,
+	ai.admin_stus_nm_dn  "Model Workflow Status", 
+	ai.regstr_stus_nm_dn  "Model Registration Status",
 --	mdl.prmry_mdl_lang_id, 
-	mdl_lang.obj_key_desc "Primary Modelling Language" 
+	mdl_lang.obj_key_desc "Primary Modelling Language" ,
 --	mdl.mdl_typ_id, 
-	mdl_typ.obj_key_desc "Model Type"
+	mdl_typ.obj_key_desc "Model Type",
 	decode(ai.currnt_ver_ind,1,'Yes','No')  "Model Latest Version", 
 	me.item_long_nm "Element Long Name", 
 	me.item_phy_obj_nm "Element Physical Name" ,
@@ -109,7 +109,7 @@ select ai.item_id mdl_item_id "Model Public ID",
 --	me.me_grp_id mdl_elmnt_grp_id, 
 	me_grp.obj_key_desc "Element Mapping Group",
 	me.item_id "Element ID", 
-	me.ver_nr "Element Version, 
+	me.ver_nr "Element Version", 
 --	mec.creat_dt, 
 --	mec.creat_usr_id, 
 --	mec.lst_upd_dt, 
@@ -128,7 +128,7 @@ select ai.item_id mdl_item_id "Model Public ID",
 	dec.cntxt_nm_dn "DEC Context",
 --	mec.val_dom_item_id,
 --	mec.val_dom_ver_nr, 
-	mec.mec_long_nm ""Characteristics Name", 
+	mec.mec_long_nm "Characteristics Name", 
 	mec.mec_phy_nm "Characteristics Physical Name", 
 	mec.mec_desc "Characteristics Description", 
 	mec.cde_item_id "CDE Public ID", 
@@ -148,6 +148,7 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	and mdl.prmry_mdl_lang_id =mdl_lang.obj_key_id (+)
 	and me.me_typ_id = me_typ.obj_key_id (+)
 	and me.me_grp_id = me_grp.obj_key_id (+);
+
 
 
   CREATE OR REPLACE  VIEW VW_MDL_MAP_FLAT AS
