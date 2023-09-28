@@ -152,28 +152,76 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 
 
   CREATE OR REPLACE  VIEW VW_MDL_MAP_FLAT AS
-  select  s.item_id src_mdl_item_id, s.ver_nr src_mdl_ver_nr, s.item_nm src_mdl_item_nm, s.item_desc src_mdl_item_desc,
-  s.cntxt_nm_dn src_cntxt_nm_dn, sme.item_id SRC_ME_ITEM_ID, 
-  sme.ver_nr SRC_me_VER_NR,
-	sme.ITEM_LONG_NM SRC_me_item_nm, sme.ITEM_PHY_OBJ_NM SRC_me_phy_nm, smec."MEC_ID" SRC_MEC_ID, 
-	  smec."MEC_TYP_ID" SRC_MEC_TYP_ID,map."CREAT_DT",map."CREAT_USR_ID",map."LST_UPD_USR_ID",map."FLD_DELETE",map."LST_DEL_DT",map."S2P_TRN_DT",map."LST_UPD_DT",
-	  smec."DE_CONC_ITEM_ID" SRC_DE_CONC_ITEM_ID,smec."DE_CONC_VER_NR" SRC_DE_CONC_VER_NR,smec."VAL_DOM_ITEM_ID" SRC_VAL_DOM_ITEM_ID,smec."VAL_DOM_VER_NR" SRC_VAL_DOM_VER_NR,
-	  smec."MEC_LONG_NM" SRC_MEC_LONG_NM ,smec."MEC_PHY_NM" SRC_MEC_PHY_NM, smec."CDE_ITEM_ID" SRC_CDE_ITEM_ID,smec."CDE_VER_NR" SRC_CDE_VER_NR,
-	 t.item_id tgt_mdl_item_id, t.ver_nr tgt_mdl_ver_nr, t.item_nm tgt_mdl_item_nm,  t.item_desc tgt_mdl_item_desc,
-  t.cntxt_nm_dn tgt_cntxt_nm_dn,
-	tme.ITEM_LONG_NM tgt_me_item_nm, tme.ITEM_PHY_OBJ_NM tgt_me_phy_nm, tmec."MEC_ID" tgt_MEC_ID, tmec."MDL_ELMNT_ITEM_ID" tgt_ME_ITEM_ID,tmec."MDL_ELMNT_VER_NR" tgt_ME_VER_NR,
-	tmec."MEC_TYP_ID" tgt_MEC_TYP_ID,  tmec."DE_CONC_ITEM_ID" tgt_DE_CONC_ITEM_ID,tmec."DE_CONC_VER_NR" tgt_DE_CONC_VER_NR,tmec."VAL_DOM_ITEM_ID" tgt_VAL_DOM_ITEM_ID,
-	  tmec."VAL_DOM_VER_NR" tgt_VAL_DOM_VER_NR,
-	  tmec."MEC_LONG_NM" tgt_MEC_LONG_NM ,tmec."MEC_PHY_NM" tgt_MEC_PHY_NM, tmec."CDE_ITEM_ID" tgt_CDE_ITEM_ID,tmec."CDE_VER_NR" tgt_CDE_VER_NR ,
-      map.map_deg mec_map_deg, map.mec_map_nm, map.mec_map_desc, map.direct_typ mec_direct_typ, map.mec_grp_rul_nbr, map.mec_sub_grp_nbr, map.mec_map_notes, map.valid_pltform,
-      map.crdnlity_id mec_map_crdnlity_id,map.prov_org_id mec_map_prov_org_id, map.prov_cntct_id mec_map_prov_cntct_id, map.prov_rsn_txt mec_map_prov_rsn_txt,
-      map.prov_typ_rvw_txt mec_map_prov_typ_rvw_txt
-	from admin_item s, NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec, admin_item t, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT_CHAR tmec, nci_MEC_MAP map
+  select  s.item_id "Source Model Public ID",
+	s.ver_nr "Source Model Version", 
+	  s.item_nm "Source Model Name", 
+	  s.item_desc "Source Model Definition",
+  s.cntxt_nm_dn "Source Model Context", 
+	  sme.item_id "Source Element ID", 
+  sme.ver_nr "Source Element Version",
+	sme.ITEM_LONG_NM "Source Element Name", 
+	  sme.ITEM_PHY_OBJ_NM "Source Element Physical Name", 
+	--  smec."MEC_ID" SRC_MEC_ID, 
+	 -- smec."MEC_TYP_ID" SRC_MEC_TYP_ID,
+	  --map."CREAT_DT",
+	  --map."CREAT_USR_ID",
+	  --map."LST_UPD_USR_ID",
+	  --map."FLD_DELETE",
+	  --map."LST_DEL_DT",
+	  --map."S2P_TRN_DT",
+	  --map."LST_UPD_DT",
+	   smec."DE_CONC_ITEM_ID" "Source DEC Public ID",
+	  smec."DE_CONC_VER_NR" "Source DEC Version",
+	  --smec."VAL_DOM_ITEM_ID" SRC_VAL_DOM_ITEM_ID,smec."VAL_DOM_VER_NR" SRC_VAL_DOM_VER_NR,
+	  smec."MEC_LONG_NM" "Source Characteristic Name" ,
+	  smec."MEC_PHY_NM" "Source Characteristic Physical Name", 
+	  smec."CDE_ITEM_ID" "Source CDE Public ID",
+	  smec."CDE_VER_NR" "Source CDE Version",
+	   t.item_id "Target Model Public ID", 
+	  t.ver_nr "Target Model Version", 
+	  t.item_nm "Target Model Name",  
+	  t.item_desc "Target Model Definition",
+  	 t.cntxt_nm_dn "Target Model Context",
+	  tme.ITEM_LONG_NM "Target Element Name", 
+	  tme.ITEM_PHY_OBJ_NM "Target Element Physical Name", 
+	  --tmec."MEC_ID" tgt_MEC_ID, tmec."MDL_ELMNT_ITEM_ID" tgt_ME_ITEM_ID,tmec."MDL_ELMNT_VER_NR" tgt_ME_VER_NR,
+	--tmec."MEC_TYP_ID" tgt_MEC_TYP_ID,  
+	  tmec."DE_CONC_ITEM_ID" "Target DEC Public Id",
+	  tmec."DE_CONC_VER_NR" "Target DEC Version",
+	  --tmec."VAL_DOM_ITEM_ID" tgt_VAL_DOM_ITEM_ID,
+	  --tmec."VAL_DOM_VER_NR" tgt_VAL_DOM_VER_NR,
+	  tmec."MEC_LONG_NM" "Target Characteristic Name" ,
+	  tmec."MEC_PHY_NM" "Target Characteristic Physical Name", 
+	  tmec."CDE_ITEM_ID" "Target CDE ID",
+	  tmec."CDE_VER_NR" "Target CDE Version" ,
+           -- map.map_deg mec_map_deg, 
+	  map.mec_map_nm "Mapping Name", 
+	  map.mec_map_desc "Mapping Definition", 
+	  --map.direct_typ , 
+	  map.mec_grp_rul_nbr "Mapping Group #", 
+	  map.mec_sub_grp_nbr "Group Precedence/Sub Group", 
+	  map.mec_map_notes "Notes",
+	  --map.valid_pltform,
+      --map.crdnlity_id mec_map_crdnlity_id,
+	  --map.prov_org_id mec_map_prov_org_id, 
+	  --map.prov_cntct_id mec_map_prov_cntct_id, 
+	  map.prov_rsn_txt "Provenance Reason Text",
+      map.prov_typ_rvw_txt "Provenance Type of Review"
+	from admin_item s, NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec, admin_item t, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT_CHAR tmec, nci_MEC_MAP map,
+	  obj_key crd,
+	  obj_key direct,
+	  obj_key deg,
+	  obj_key plat,
+	  nci_org org
 	where s.item_id = sme.mdl_item_id and s.ver_nr = sme.mdl_item_ver_nr and sme.item_id = smec.MDL_ELMNT_ITEM_ID
 	and sme.ver_nr = smec.MDL_ELMNT_VER_NR and s.admin_item_typ_id = 57 and
 	  t.item_id = tme.mdl_item_id and t.ver_nr = tme.mdl_item_ver_nr and tme.item_id = tmec.MDL_ELMNT_ITEM_ID
 	and tme.ver_nr = tmec.MDL_ELMNT_VER_NR and t.admin_item_typ_id = 57 and
-	   smec.MEC_ID = map.SRC_MEC_ID and tmec.mec_id = map.TGT_MEC_ID;
+	   smec.MEC_ID = map.SRC_MEC_ID and tmec.mec_id = map.TGT_MEC_ID
+	  and map.map_deg = deg.obj_key_id (+)
+	  and map.direct_typ = direct.obj_key_id (+)
+	  and map.prov_org_id = org.entty_id (+)
+	  and map.crdnlity_id = crc.obj_key_id (+);
 
 
 
