@@ -150,7 +150,6 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	and me.me_grp_id = me_grp.obj_key_id (+);
 
 
-
   CREATE OR REPLACE  VIEW VW_MDL_MAP_FLAT AS
   select  s.item_id "Source Model Public ID",
 	s.ver_nr "Source Model Version", 
@@ -204,8 +203,7 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  map.mec_grp_rul_nbr "Mapping Group #", 
 	  map.mec_sub_grp_nbr "Group Precedence/Sub Group", 
 	  map.mec_map_notes "Notes",
-	  --map.valid_pltform,
-	  plat.obj_key_desc "Validation Platform",
+	  map.valid_pltform	   "Validation Platform",
       --map.crdnlity_id mec_map_crdnlity_id,
 	  --map.prov_org_id mec_map_prov_org_id, 
 	  org.org_nm "Provenance Org",
@@ -216,7 +214,6 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  obj_key crd,
 	  obj_key direct,
 	  obj_key deg,
-	  obj_key plat,
 	  nci_org org
 	where s.item_id = sme.mdl_item_id and s.ver_nr = sme.mdl_item_ver_nr and sme.item_id = smec.MDL_ELMNT_ITEM_ID
 	and sme.ver_nr = smec.MDL_ELMNT_VER_NR and s.admin_item_typ_id = 57 and
@@ -226,12 +223,8 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  and map.map_deg = deg.obj_key_id (+)
 	  and map.direct_typ = direct.obj_key_id (+)
 	  and map.prov_org_id = org.entty_id (+)
-	  and map.crdnlity_id = crd.obj_key_id (+)
-	  and map.valid_pltform  = plat.obj_key_id (+);
-
-
-
-
+	  and map.crdnlity_id = crd.obj_key_id (+);
+      
   CREATE OR REPLACE  VIEW VW_MDL_VAL_MAP_FLAT AS
   select  s.item_id src_mdl_item_id, s.ver_nr src_mdl_ver_nr, s.item_nm src_mdl_item_nm, s.item_desc src_mdl_item_desc,
   s.cntxt_nm_dn src_cntxt_nm_dn, sme.item_id SRC_ME_ITEM_ID, 
