@@ -195,15 +195,20 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  tmec."CDE_ITEM_ID" "Target CDE ID",
 	  tmec."CDE_VER_NR" "Target CDE Version" ,
            -- map.map_deg mec_map_deg, 
+	  crd.obj_key_desc "Mapping Cardinality",
+	  deg.obj_key_Desc "Mapping Degree",
 	  map.mec_map_nm "Mapping Name", 
 	  map.mec_map_desc "Mapping Definition", 
 	  --map.direct_typ , 
+	  direct.obj_key_Desc "Direction Type",
 	  map.mec_grp_rul_nbr "Mapping Group #", 
 	  map.mec_sub_grp_nbr "Group Precedence/Sub Group", 
 	  map.mec_map_notes "Notes",
 	  --map.valid_pltform,
+	  plat.obj_key_desc "Validation Platform",
       --map.crdnlity_id mec_map_crdnlity_id,
 	  --map.prov_org_id mec_map_prov_org_id, 
+	  org.org_nm "Provenance Org",
 	  --map.prov_cntct_id mec_map_prov_cntct_id, 
 	  map.prov_rsn_txt "Provenance Reason Text",
       map.prov_typ_rvw_txt "Provenance Type of Review"
@@ -221,7 +226,8 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  and map.map_deg = deg.obj_key_id (+)
 	  and map.direct_typ = direct.obj_key_id (+)
 	  and map.prov_org_id = org.entty_id (+)
-	  and map.crdnlity_id = crc.obj_key_id (+);
+	  and map.crdnlity_id = crd.obj_key_id (+)
+	  and map.valid_pltform  = plat.obj_key_id (+);
 
 
 
