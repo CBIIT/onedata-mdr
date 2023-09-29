@@ -7,6 +7,7 @@ alter table NCI_MDL_ELMNT add (  ME_GRP_ID integer);
 
 alter table NCI_STG_MDL_ELMNT_CHAR add (  CMNTS_DESC_TXT varchar2(4000));
 
+alter table NCI_ADMIN_ITEM_EXT NOLOGGING;
 
 
 	
