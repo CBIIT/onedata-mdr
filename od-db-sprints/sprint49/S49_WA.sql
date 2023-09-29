@@ -17,7 +17,6 @@ insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Enrollment'
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Death',49,'Death' );
 commit;
 
-alter table NCI_ADMIN_ITEM_EXT NOLOGGING;
 
 create or replace TRIGGER TR_AI_EXT_TAB_INS
   AFTER INSERT
@@ -41,3 +40,4 @@ select :new.ITEM_ID, :new.VER_NR from dual;
 end if;
 
 END;
+/
