@@ -16,3 +16,28 @@ insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Vital Signs
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Enrollment',49,'Enrollment' );
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Death',49,'Death' );
 commit;
+
+alter table NCI_ADMIN_ITEM_EXT NOLOGGING;
+
+create or replace TRIGGER TR_AI_EXT_TAB_INS
+  AFTER INSERT
+  on ADMIN_ITEM
+  for each row
+BEGIN
+
+if (:new.admin_item_typ_id not in (5,6,7,49, 53)) then
+insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR)
+select :new.ITEM_ID, :new.VER_NR from dual;
+end if;
+
+if (:new.admin_item_typ_id =49) then
+insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR,   CNCPT_CONCAT, CNCPT_CONCAT_NM, cncpt_concat_def)
+select :new.ITEM_ID, :new.VER_NR, :new.item_long_nm, :new.item_nm, :new.item_desc from dual;
+end if;
+
+if (:new.admin_item_typ_id =52) then
+insert into NCI_MODULE (ITEM_ID, VER_NR)
+select :new.ITEM_ID, :new.VER_NR from dual;
+end if;
+
+END;
