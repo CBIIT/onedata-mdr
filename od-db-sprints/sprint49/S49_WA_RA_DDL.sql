@@ -9,6 +9,26 @@ alter table NCI_STG_MDL_ELMNT_CHAR add (  CMNTS_DESC_TXT varchar2(4000));
 
 alter table NCI_ADMIN_ITEM_EXT NOLOGGING;
 
+alter table NCI_MEC_MAP add (PROV_CNTCT_ID integer, PROV_RSN_TXT  varchar2(4000), PROV_TYP_RVW_TXT varchar2(4000));
+
+alter table NCI_MEC_VAL_MAP add (PROV_ORG_ID integer, PROV_CNTCT_ID integer, PROV_RSN_TXT  varchar2(4000), PROV_TYP_RVW_TXT varchar2(4000));
+
+
+alter table NCI_MDL_MAP add (PROV_ORG_ID integer, PROV_CNTCT_ID integer, PROV_RSN_TXT  varchar2(4000), PROV_TYP_RVW_TXT varchar2(4000));
+
+
+alter table NCI_MDL add (ASSOC_NM_TYP_ID integer);
+
+alter table NCI_STG_MDL add (ASSOC_NM_TYP_ID integer);
+
+
+alter table NCI_MEC_MAP add (PROV_RVW_DT date);
+
+alter table NCI_MEC_VAL_MAP add (PROV_RVW_DT date);
+
+alter table NCI_MDL_MAP add (PROV_RVW_DT date);
+
+
 
 	
 	insert into obj_typ (obj_typ_id, obj_typ_desc) values (49,'Mapping Groups');
