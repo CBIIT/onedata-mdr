@@ -35,6 +35,8 @@ alter table NCI_MEC_VAL_MAP add (PROV_APRV_DT date);
 alter table NCI_MDL_MAP add (PROV_APRV_DT date);
 
 
+alter table NCI_MEC_VAL_MAP add (SRC_LBL varchar2(4000), TGT_LBL varchar2(4000));
+
 
 	
 	insert into obj_typ (obj_typ_id, obj_typ_desc) values (49,'Mapping Groups');
