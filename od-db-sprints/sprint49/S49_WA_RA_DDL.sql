@@ -301,3 +301,27 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	and tme.ver_nr = tmec.MDL_ELMNT_VER_NR and t.admin_item_typ_id = 57 and
 	   smec.MEC_ID = map.SRC_MEC_ID and tmec.mec_id = map.TGT_MEC_ID
 	  and map.prov_org_id = org.entty_id (+);
+
+
+
+  CREATE OR REPLACE  VIEW VW_NCI_MDL_MAP_FOR_VIEW AS
+  select distinct s.item_id MDL_ITEM_ID, s.ver_nr MDL_VER_NR, 'Source' LVL_TYP, s.item_id src_mdl_item_id, s.ver_nr src_mdl_ver_nr, s.item_nm 
+src_mdl_item_nm,  sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' 
+LST_UPD_USR_ID,map.FLD_DELETE,sysdate LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT,
+	 t.item_id tgt_mdl_item_id, t.ver_nr tgt_mdl_ver_nr, t.item_nm tgt_mdl_item_nm
+		from admin_item s, NCI_MDL_MAP map , admin_item t
+	where s.item_id = map.src_mdl_item_id and s.ver_nr = map.src_mdl_ver_nr 
+       and t.item_id = map.tgt_MDL_ITEM_ID
+	and t.ver_nr = map.tgt_MDL_VER_NR and s.admin_item_typ_id = 57 and
+t.admin_item_typ_id = 57 
+union
+  select distinct t.item_id MDL_ITEM_ID, t.ver_nr MDL_VER_NR, 'Target' LVL_TYP, s.item_id src_mdl_item_id, s.ver_nr src_mdl_ver_nr, s.item_nm 
+src_mdl_item_nm,  sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' 
+LST_UPD_USR_ID,map.FLD_DELETE,sysdate LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT,
+	 t.item_id tgt_mdl_item_id, t.ver_nr tgt_mdl_ver_nr, t.item_nm tgt_mdl_item_nm
+		from admin_item s, NCI_MDL_MAP map , admin_item t
+	where s.item_id = map.src_mdl_item_id and s.ver_nr = map.src_mdl_ver_nr 
+       and t.item_id = map.tgt_MDL_ITEM_ID
+	and t.ver_nr = map.tgt_MDL_VER_NR and s.admin_item_typ_id = 57 and
+t.admin_item_typ_id = 57;
+
