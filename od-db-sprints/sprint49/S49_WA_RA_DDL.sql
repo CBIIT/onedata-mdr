@@ -28,6 +28,12 @@ alter table NCI_MEC_VAL_MAP add (PROV_RVW_DT date);
 
 alter table NCI_MDL_MAP add (PROV_RVW_DT date);
 
+alter table NCI_MEC_MAP add (PROV_APRV_DT date);
+
+alter table NCI_MEC_VAL_MAP add (PROV_APRV_DT date);
+
+alter table NCI_MDL_MAP add (PROV_APRV_DT date);
+
 
 
 	
