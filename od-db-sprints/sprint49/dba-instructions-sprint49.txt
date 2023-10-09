@@ -2,5 +2,11 @@
 S49_MD.sql
 
 -- Run as ONEDATA_RA DDL scripts
+S49_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S49_WA_RA_DDL.sql
+S49_WA.sql
+S49_NCI_POST_HOOK.sql
+S49_NCI_DEC_MGMT.sql
+S49_NCI_CODEMAP.sql
