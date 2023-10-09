@@ -60,3 +60,28 @@ update ADMIN_ITEM set ITEM_NM_CURATED = (Select s.item_nm || 'v' || s.ver_nr || 
    and t.ver_nr = m.tgt_mdl_ver_nr and m.item_id = admin_item.item_id and m.ver_nr = admin_item.ver_nr)
    where admin_item_typ_id = 58
    commit;
+
+
+CREATE OR REPLACE TRIGGER NCI_TR_ENTTY_PRSN  BEFORE INSERT  on NCI_PRSN  for each row
+     BEGIN    IF (:NEW.ENTTY_ID = -1  or :NEW.ENTTY_ID is null)  THEN select nci_seq_ENTTY.nextval
+ into :new.ENTTY_ID  from  dual ;   END IF;
+insert into nci_entty(entty_id, entty_typ_id) values (:new.entty_id, 73);
+:new.PRSN_FULL_NM_DERV := :new.FIRST_NM || ' ' || :new.LAST_NM;
+end;
+/
+
+CREATE OR REPLACE TRIGGER TR_NCI_PRSN_AUD_TS
+  BEFORE  UPDATE
+  on NCI_PRSN
+  for each row
+BEGIN
+  :new.LST_UPD_DT := SYSDATE;
+:new.PRSN_FULL_NM_DERV := :new.FIRST_NM || ' ' || :new.LAST_NM;
+END;
+/
+
+alter table NCI_PRSN disable all triggers;
+update NCI_PRSN set PRSN_FULL_NM_DERV = FIRST_NM || ' ' || LAST_NM;
+commit;
+alter table NCI_PRSN enable all triggers;
+
