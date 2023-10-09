@@ -341,4 +341,5 @@ t.admin_item_typ_id = 57;
 	  and mec.val_dom_item_id = vd.item_id(+) and mec.val_dom_ver_nr = vd.ver_nr(+);
 
 
+alter table nci_prsn add (PRSN_FULL_NM_DERV varchar2(1000));
 
