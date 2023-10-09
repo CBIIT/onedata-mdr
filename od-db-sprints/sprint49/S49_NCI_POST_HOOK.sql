@@ -1,3 +1,38 @@
+create or replace PACKAGE nci_post_hook AS
+
+procedure spRefDocInsUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+
+procedure spRefDocBlobIns ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spAISTUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spAICDEUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spAIVDUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spAIDel ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spAINmDef ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spPostDesAINmDef ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spAISTIns ( v_data_in in clob, v_data_out out clob);
+procedure spDervCompIns ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spModRestore ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_mode in varchar2);
+procedure spQuestRestore ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_mode in varchar2);
+procedure spQuestUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spQuestRepUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spQuestVVRestore ( v_data_in in clob, v_data_out out clob, v_user_id varchar2, v_mode in varchar2);
+procedure spAIIns ( v_data_in in clob, v_data_out out clob);
+procedure spCSFormIns ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spPVUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spVMMAtchHdrUpd ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spCSIUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure            sp_postprocess ( v_data_in in clob, v_data_out out clob);
+procedure spProtocolUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spOrgUpd ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spPostTypeDetails ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+procedure spPostRefDoc ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spPostMeC ( v_data_in in clob, v_data_out out clob, v_usr_id varchar2);
+procedure spRefreshViews (v_data_in in clob, v_data_out out clob);
+procedure spUpdVV ( v_data_in in clob, v_data_out out clob, v_user_id varchar2);
+Procedure SP_REPLACE_RETIRED_CONCEPT;--Added by Surinder on 7/31/2023 for DSRMWS-2507
+
+END;
+/
 create or replace PACKAGE BODY NCI_POST_HOOK AS
 
 PROCEDURE            spDEPrefQuestPost (
@@ -322,6 +357,26 @@ DBMS_MVIEW.REFRESH('MVW_CSI_TREE_CDE');
 DBMS_MVIEW.REFRESH('MVW_FORM_NODE_DE_REL');
 DBMS_MVIEW.REFRESH('VW_FORM_TREE_CDE');
 
+--execute immediate 'alter table NCI_ADMIN_ITEM_EXT NOLOGGING';
+
+delete from nci_admin_item_ext where (item_id, ver_nr) in (select item_id, ver_nr from admin_item where admin_item_typ_id in (4));
+commit;
+
+insert into NCI_ADMIN_ITEM_EXT (ITEM_ID, VER_NR, USED_BY, CS_CONCAT, CSI_CONCAT)
+select ai.item_id, ai.ver_nr, a.used_by, b.CSI,b.CSI
+from  admin_item ai,
+(SELECT item_id, ver_nr, LISTAGG(item_nm, ',') WITHIN GROUP (ORDER by ITEM_ID) AS USED_BY
+FROM (select distinct ub.item_id,ub.ver_nr, c.item_nm from vw_nci_used_by ub, vw_cntxt c where ub.cntxt_item_id = c.item_id and ub.cntxt_ver_nr = c.ver_nr and ub.owned_by=0 )
+GROUP BY item_id, ver_nr) a,
+(SELECT item_id, ver_nr, LISTAGG(item_nm, ',') WITHIN GROUP (ORDER by ITEM_ID) AS CSI
+FROM (select distinct r.c_item_id item_id,r.c_item_ver_nr ver_nr, x.item_nm from vw_CLSFCTN_SCHM_ITEM x, NCI_ADMIN_ITEM_REL r
+where  x.item_id = r.p_item_id and x.ver_nr = r.p_item_ver_nr and r.rel_typ_id = 65 and x.CS_item_id = 10466051) group by item_id, ver_nr) b
+where ai.item_id = a.item_id (+) and ai.ver_nr = a.ver_nr(+)
+and  ai.item_id = b.item_id (+) and ai.ver_nr = b.ver_nr(+)
+and ai.admin_item_typ_id = 4;
+commit;
+
+
 --nci_data_audit.spLoadDataAudit(sysdate -2/24, sysdate);
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
@@ -341,6 +396,23 @@ hookInput        t_hookInput;
     hookoutput.invocationnumber := hookinput.invocationnumber;
     hookoutput.originalrowset := hookinput.originalrowset;
     row_ori := hookInput.originalRowset.rowset (1);
+    
+    for cur in (select * from nci_admin_item_rel_alt_key where nci_pub_id = ihook.getcolumnOldValue (row_ori,'Q_PUB_ID')  
+    and nci_ver_nr = ihook.getcolumnOldValue (row_ori,'Q_VER_NR') and c_item_id is not null) loop
+     if (ihook.getColumnValue(row_ori, 'MEAN_TXT') <> ihook.getcolumnOldValue (row_ori,'MEAN_TXT')) then
+      raise_application_error(-20000, 'Cannot manually change Value Meaning Text for question with CDE assigned. Please use hook.');
+   -- Check if valid values
+end if;
+ 
+     if (ihook.getColumnValue(row_ori, 'DESC_TXT') <> ihook.getcolumnOldValue (row_ori,'DESC_TXT')  ) then
+      raise_application_error(-20000, 'Cannot manually change Value Meaning Definition for question with CDE assigned. Please use hook.');
+   -- Check if valid values
+end if;
+   if (ihook.getColumnValue(row_ori, 'VALUE') <> ihook.getcolumnOldValue (row_ori,'VALUE') ) then
+      raise_application_error(-20000, 'Cannot manually change Valid Value for question with CDE assigned. Please use hook.');
+   -- Check if valid values
+end if;
+ end loop;
     v_quest_id := ihook.getColumnValue(row_ori, 'Q_PUB_ID');
     v_quest_ver := ihook.getColumnValue(row_ori, 'Q_VER_NR');
     
@@ -911,6 +983,14 @@ hookInput        t_hookInput;
     return;
 end loop;
 end if;
+  if (ihook.getColumnValue(row_ori, 'ITEM_NM') <> ihook.getcolumnOldValue (row_ori,'ITEM_NM') and ihook.getColumnValue(row_ori, 'C_ITEM_ID') is not null ) then
+      raise_application_error(-20000, 'Cannot manually change question short name for question with CDE assigned. Please use hook.');
+   -- Check if valid values
+end if;
+  if (ihook.getColumnValue(row_ori, 'ITEM_LONG_NM') <> ihook.getcolumnOldValue (row_ori,'ITEM_LONG_NM') and ihook.getColumnValue(row_ori, 'C_ITEM_ID') is not null ) then
+      raise_application_error(-20000, 'Cannot manually change question short name for question with CDE assigned. Please use hook.');
+   -- Check if valid values
+end if;
 
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
@@ -1343,7 +1423,7 @@ BEGIN
     and de.val_dom_Ver_nr = vd.ver_nr and  upper(vd.admin_stus_nm_dn) like '%RETIRED%' ) loop
     
             raise_application_error (-20000,
-                                     'Entry not saved. Cannot associated Retired DEC or VD with a Released CDE. ' );
+                                     'Entry not saved. Cannot associated Retired DEC or VD with a Released CDE. Public ID/Version: ' ||ihook.getColumnValue (row_ori, 'ITEM_ID') ||'v'|| ihook.getColumnValue (row_ori, 'VER_NR')  );
             RETURN;
         END LOOP;
            for curdec in (select de.item_id from admin_item dec , de where de.item_id =  ihook.getColumnValue (row_ori, 'ITEM_ID') and de.ver_nr =  ihook.getColumnValue (row_ori, 'VER_NR')
@@ -1522,7 +1602,7 @@ BEGIN
         select vd.item_id from admin_item vd where vd.item_id =  ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID') and vd.ver_nr =  ihook.getColumnValue (row_ori, 'VAL_DOM_VER_NR')
     and  upper(vd.admin_stus_nm_dn) like '%RETIRED%' ) loop
                 raise_application_error (-20000,
-                                     'CDE not saved. Cannot associated Retired DEC or VD with a Released CDE. ' );
+                                     'CDE not saved. Cannot associated Retired DEC or VD with a Released CDE. Public ID/Version: ' || ihook.getColumnValue(row_ori,'ITEM_ID') || 'v' ||ihook.getColumnValue(row_ori,'VER_NR')  );
             RETURN;
         END LOOP;
    end loop;
@@ -1957,3 +2037,4 @@ commit;
     --RAISE_APPLICATION_ERROR (SQLCODE, 'SP_REPLACE_RETIRED_CONCEPT error, code ' || SQLCODE || ': ' || SUBSTR(SQLERRM, 1 , -20100));
 END;
 END;
+/
