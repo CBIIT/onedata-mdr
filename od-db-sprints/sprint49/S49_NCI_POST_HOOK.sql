@@ -109,7 +109,7 @@ BEGIN
         actions (actions.LAST) := action;
         /*DSRMWS-455 PREF_QUEST_TXT IS NULL Start 01/08/2021 AT*/
         ELSE
-        
+
         SELECT SUBSTR(ITEM_NM,1,195)
           INTO LONG_NM
           FROM admin_item
@@ -119,12 +119,12 @@ BEGIN
         ihook.setColumnValue (row, 'ITEM_ID', v_item_id);
         ihook.setColumnValue (row, 'VER_NR', v_ver_nr);
         ihook.setColumnValue (row, 'REF_NM', 'PQT');
-        
+
         ihook.setColumnValue (
             row,
             'REF_DESC',
             'Data Element ' || LONG_NM || ' does not have Preferred Question Text');
-        
+
         FOR cur
             IN (SELECT REF_ID
                   FROM REF
@@ -396,14 +396,14 @@ hookInput        t_hookInput;
     hookoutput.invocationnumber := hookinput.invocationnumber;
     hookoutput.originalrowset := hookinput.originalrowset;
     row_ori := hookInput.originalRowset.rowset (1);
-    
+
     for cur in (select * from nci_admin_item_rel_alt_key where nci_pub_id = ihook.getcolumnOldValue (row_ori,'Q_PUB_ID')  
     and nci_ver_nr = ihook.getcolumnOldValue (row_ori,'Q_VER_NR') and c_item_id is not null) loop
      if (ihook.getColumnValue(row_ori, 'MEAN_TXT') <> ihook.getcolumnOldValue (row_ori,'MEAN_TXT')) then
       raise_application_error(-20000, 'Cannot manually change Value Meaning Text for question with CDE assigned. Please use hook.');
    -- Check if valid values
 end if;
- 
+
      if (ihook.getColumnValue(row_ori, 'DESC_TXT') <> ihook.getcolumnOldValue (row_ori,'DESC_TXT')  ) then
       raise_application_error(-20000, 'Cannot manually change Value Meaning Definition for question with CDE assigned. Please use hook.');
    -- Check if valid values
@@ -415,7 +415,7 @@ end if;
  end loop;
     v_quest_id := ihook.getColumnValue(row_ori, 'Q_PUB_ID');
     v_quest_ver := ihook.getColumnValue(row_ori, 'Q_VER_NR');
-    
+
     update ADMIN_ITEM set LST_UPD_DT =sysdate, LST_UPD_USR_ID = v_user_id    
     where (ITEM_ID, VER_NR) in (select ak.P_ITEM_ID, ak.P_ITEM_VER_NR from NCI_ADMIN_ITEM_REL ak, NCI_ADMIN_ITEM_REL_ALT_KEy q
                                 where q.NCI_PUB_ID=v_quest_id and q.NCI_VER_NR=v_quest_ver and q.P_ITEM_ID = ak.C_ITEM_ID
@@ -611,17 +611,17 @@ hookInput        t_hookInput;
     row_ori          t_row;
     v_csi_item_id number;
     v_csi_ver_nr number(4,2);
-  
+
   BEGIN
     hookinput := Ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber := hookinput.invocationnumber;
     hookoutput.originalrowset := hookinput.originalrowset;
 
     row_ori := hookInput.originalRowset.rowset (1);
-  
+
     v_csi_item_id := ihook.getColumnValue(row_ori ,'P_ITEM_ID');
     v_csi_ver_nr := ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR');
- 
+
 -- Insert DE-CSI relationship if Form-CSI is created. Tracker 1449
 
 --raise_application_error(-20000, v_csi_item_id);
@@ -633,7 +633,7 @@ hookInput        t_hookInput;
  nci_admin_item_rel where rel_typ_id = 65 and p_item_id = v_csi_item_id and p_item_ver_nr = v_csi_ver_nr);
 -- raise_application_error (-20000, v_user_id);
  commit;
- 
+
 
 
 /*
@@ -651,7 +651,7 @@ hookInput        t_hookInput;
  and ( v.de_item_id, v.de_ver_nr) not in (select  c_item_id, c_item_ver_nr from
  onedata_ra.nci_admin_item_rel where rel_typ_id = 65 and p_item_id = v_csi_item_id and p_item_ver_nr = v_csi_ver_nr);
  commit;
-  
+
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
@@ -660,7 +660,7 @@ as
 hookInput        t_hookInput;
     hookOutput       t_hookOutput := t_hookOutput ();
     row_ori          t_row;
- 
+
   BEGIN
     hookinput := Ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber := hookinput.invocationnumber;
@@ -708,7 +708,7 @@ action t_actionRowset;
 
     row_ori := hookInput.originalRowset.rowset (1);
     --raise_application_error(-20000,'NM_TYP_ID: ' || ihook.getColumnValue(row_ori, 'NM_TYP_ID'));
-   
+
  if (nvl(ihook.getColumnValue(row_ori, 'NM_TYP_ID'),0) = 1038) then
  --for cur in (select * from alt_nms where item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR') and nm_id <> ihook.getColumnValue(row_ori, 'NM_ID') and nm_typ_id = 1038) loop
     ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'WARNING: Alternate Name will be set to Context Name for Used By.' || chr(13) );
@@ -740,7 +740,7 @@ if (ihook.getColumnValue(row_ori, 'SRC_ITEM_ID') is not null and ihook.getColumn
 end if;
 
   rows := t_rows();
-  
+
 rows.EXTEND;
             rows (rows.LAST) := row_ori;
             action :=
@@ -751,13 +751,13 @@ rows.EXTEND;
                                 'update');
             actions.EXTEND;
             actions (actions.LAST) := action;
-    
- 
+
+
     IF actions.COUNT > 0
     THEN
         hookoutput.actions := actions;
     END IF;
-  
+
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
@@ -789,9 +789,9 @@ if (ihook.getColumnValue(row_ori, 'DOC_TXT') is null) then
     ihook.setColumnValue(row_ori, 'DOC_TXT', ihook.getColumnValue(row_ori, 'NM_DESC'));
 end if;
 
- 
+
   rows := t_rows();
-  
+
 rows.EXTEND;
             rows (rows.LAST) := row_ori;
             action :=
@@ -802,13 +802,13 @@ rows.EXTEND;
                                 'update');
             actions.EXTEND;
             actions (actions.LAST) := action;
-    
- 
+
+
     IF actions.COUNT > 0
     THEN
         hookoutput.actions := actions;
     END IF;
-  
+
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
@@ -834,13 +834,13 @@ action t_actionRowset;
 
 if (ihook.getColumnValue(row_ori, 'CDE_ITEM_ID') <> ihook.getColumnOldValue(row_ori, 'CDE_ITEM_ID')  or ihook.getColumnValue(row_ori, 'CDE_VER_NR') <> ihook.getColumnOldValue(row_ori, 'CDE_VER_NR')  ) then
   rows := t_rows();
-   
+
  for cur in (Select * from de where item_id = ihook.getColumnValue(row_ori, 'CDE_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'CDE_VER_NR')) loop
    ihook.setColumnValue(row_ori, 'DE_CONC_ITEM_ID', cur.DE_CONC_ITEM_ID);
    ihook.setColumnValue(row_ori, 'DE_CONC_VER_NR', cur.DE_CONC_VER_NR);
    ihook.setColumnValue(row_ori, 'VAL_DOM_ITEM_ID', cur.VAL_DOM_ITEM_ID);
    ihook.setColumnValue(row_ori, 'VAL_DOM_VER_NR', cur.VAL_DOM_VER_NR);
-   
+
  end loop; 
 rows.EXTEND;
             rows (rows.LAST) := row_ori;
@@ -853,9 +853,9 @@ rows.EXTEND;
             actions.EXTEND;
             actions (actions.LAST) := action;
         hookoutput.actions := actions;
-   
+
  end if;
- 
+
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
@@ -884,9 +884,9 @@ if (ihook.getColumnValue(row_ori, 'CDE_ITEM_ID') is not null and  ihook.getColum
             ihook.setColumnValue(row_ori, 'VM_MTCH_ITEM_TYP', 'ID');
       end if;
 
- 
+
   rows := t_rows();
-  
+
 rows.EXTEND;
             rows (rows.LAST) := row_ori;
             action :=
@@ -897,13 +897,13 @@ rows.EXTEND;
                                 'update');
             actions.EXTEND;
             actions (actions.LAST) := action;
-    
- 
+
+
     IF actions.COUNT > 0
     THEN
         hookoutput.actions := actions;
     END IF;
-  
+
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
@@ -1297,7 +1297,7 @@ BEGIN
         execute immediate 'ALTER TABLE ALT_NMS ENABLE ALL TRIGGERS';
          DBMS_MVIEW.REFRESH('VW_CNCPT');
          DBMS_MVIEW.REFRESH('VW_CLSFCTN_SCHM_ITEM');
-        
+
     end if;
         for cur in (select ai.item_id item_id , ai.ver_nr from admin_item ai
             where
@@ -1332,8 +1332,8 @@ BEGIN
                                      'Duplicate DE found. ' || cur.item_id || 'v' || cur.ver_nr || ' for ' || v_item_id || 'v' || v_ver_nr);
             RETURN;
         END LOOP;
-        
-     
+
+
 
     end if;
 
@@ -1390,10 +1390,10 @@ BEGIN
             actions (actions.LAST) := action;
         end loop;
     end if;
-    
-  
+
+
   end if;
-  
+
   -- Cannot release a DDE without components
       IF (hookinput.originalRowset.tablename = 'ADMIN_ITEM' and ihook.getColumnValue (row_ori, 'ADMIN_ITEM_TYP_ID')= 4
       and ihook.getColumnOldValue(row_ori, 'ADMIN_STUS_ID') <> ihook.getColumnValue (row_ori, 'ADMIN_STUS_ID') and ihook.getColumnValue (row_ori, 'ADMIN_STUS_ID')=75) then
@@ -1402,18 +1402,18 @@ BEGIN
             if (v_temp = 0) then
                 raise_application_error(-20000, 'Cannot release a DDE without Components.');
                 return;
-            
+
             end if;
         end loop;
-        
-  
+
+
   end if;
-  
+
 -- Released DE cannot have a  DEC and VD
 
-  
+
       IF (hookinput.originalRowset.tablename = 'ADMIN_ITEM' and ihook.getColumnValue (row_ori, 'ADMIN_ITEM_TYP_ID')= 4) then
-  
+
    if (ihook.getColumnValue (row_ori, 'ADMIN_STUS_ID') = 75) then
   --     raise_application_error(-20000,'Here');
      for curdec in (select de.item_id from admin_item dec , de where de.item_id =  ihook.getColumnValue (row_ori, 'ITEM_ID') and de.ver_nr =  ihook.getColumnValue (row_ori, 'VER_NR')
@@ -1421,7 +1421,7 @@ BEGIN
     and de.de_conc_ver_nr  = dec.ver_nr and upper(dec.admin_stus_nm_dn) like '%RETIRED%' union
     select vd.item_id from admin_item vd, de where de.val_dom_item_id = vd.item_id and de.item_id =  ihook.getColumnValue (row_ori, 'ITEM_ID') and de.ver_nr =  ihook.getColumnValue (row_ori, 'VER_NR')
     and de.val_dom_Ver_nr = vd.ver_nr and  upper(vd.admin_stus_nm_dn) like '%RETIRED%' ) loop
-    
+
             raise_application_error (-20000,
                                      'Entry not saved. Cannot associated Retired DEC or VD with a Released CDE. Public ID/Version: ' ||ihook.getColumnValue (row_ori, 'ITEM_ID') ||'v'|| ihook.getColumnValue (row_ori, 'VER_NR')  );
             RETURN;
@@ -1432,13 +1432,13 @@ BEGIN
     select vd.item_id from admin_item vd, de where de.val_dom_item_id = vd.item_id and de.item_id =  ihook.getColumnValue (row_ori, 'ITEM_ID') and de.ver_nr =  ihook.getColumnValue (row_ori, 'VER_NR')
     and de.val_dom_Ver_nr = vd.ver_nr and  upper(vd.admin_stus_nm_dn) like '%DRAFT NEW%' ) loop
          hookoutput.message :=  '  Associated DEC and VD should be Released, Released Non-Compliant, or Draft Mod.' ;
-           
+
         END LOOP;
    end if;
    end if;
-   
-   
- 
+
+
+
     IF (hookinput.originalRowset.tablename = 'DE_CONC')
     THEN
         FOR cur
@@ -1505,7 +1505,7 @@ BEGIN
             actions (actions.LAST) := action;
         END IF;
     END IF;
- 
+
  -- Tracker 1679
     if (ihook.getColumnValue (row_ori, 'ADMIN_ITEM_TYP_ID')= 54 and 
     (ihook.getColumnValue (row_ori, 'CNTXT_ITEM_ID') <>
@@ -1515,7 +1515,7 @@ BEGIN
                rows := t_rows();
                for curmod in (select c_item_id, c_item_ver_nr from nci_admin_item_rel where rel_typ_id = 61 and p_item_id= v_item_id
                and p_item_ver_nr = v_ver_nr and nvl(fld_delete,0) =0) loop
-               
+
        row := t_row ();
             ihook.setColumnValue (row, 'ITEM_ID', curmod.c_item_id);
             ihook.setColumnValue (row, 'VER_NR', curmod.c_item_ver_nr);
@@ -1535,7 +1535,7 @@ BEGIN
             actions (actions.LAST) := action;
             end if;
     end if;
-               
+
     IF actions.COUNT > 0
     THEN
         hookoutput.actions := actions;
@@ -1592,8 +1592,8 @@ BEGIN
         return;
     end if;
 
-   
-   
+
+
   for cur in (select * from admin_item where item_id = ihook.getColumnValue (row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue (row_ori, 'VER_NR')
   and admin_stus_id = 75) loop
   --     raise_application_error(-20000,'Here');
@@ -1606,7 +1606,7 @@ BEGIN
             RETURN;
         END LOOP;
    end loop;
-    
+
     for cur in (select * from admin_item where item_id = ihook.getColumnValue (row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue (row_ori, 'VER_NR')
   and admin_stus_id = 75) loop
   --     raise_application_error(-20000,'Here');
@@ -1614,9 +1614,9 @@ BEGIN
   and upper(dec.admin_stus_nm_dn) like '%DRAFT NEW%' union
     select vd.item_id from admin_item vd where vd.item_id =  ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID') and vd.ver_nr =  ihook.getColumnValue (row_ori, 'VAL_DOM_VER_NR')
    and  upper(vd.admin_stus_nm_dn) like '%DRAFT NEW%' ) loop
-    
+
            hookoutput.message :=   '   Associated DEC and VD should be Released, Released Non-Compliant, or Draft Mod.' ;
-                                     
+
         END LOOP;
    end loop;
 
@@ -1680,7 +1680,7 @@ BEGIN
          --   raise_application_Error(-20000, 'Here' || instr(v_long_nm,ihook.getColumnOldValue(row_ori, 'DE_CONC_ITEM_ID')));
             if (instr(v_long_nm,ihook.getColumnOldValue(row_ori, 'DE_CONC_ITEM_ID')) > 0 and
              instr(v_long_nm,ihook.getColumnOldValue(row_ori, 'VAL_DOM_ITEM_ID')) > 0) then
-        
+
             ihook.setColumnValue (row, 'ITEM_LONG_NM', ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') || 'v'
         || trim(to_char(ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR'), '9999.99')) || ':' || ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') || 'v' ||
         trim(to_char(ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'), '9999.99')));
@@ -1714,17 +1714,17 @@ BEGIN
     for cur in (Select * from admin_item where item_id = v_item_id and ver_nr = v_ver_nr and admin_stus_nm_dn like '%RELEASED%') loop
                 raise_application_error(-20000, 'Cannot change a Released CDE to a DDE.');
                 return;
-            
+
             end loop;
         end if;
-        
+
     if (ihook.getColumnValue (row_ori, 'DERV_TYP_ID') is  null and ihook.getColumnOldValue (row_ori, 'DERV_TYP_ID') is not null 
     and ihook.getColumnValue (row_ori, 'DERV_RUL') is null and ihook.getColumnOldValue (row_ori, 'DERV_TYP_ID') is not  null ) then
     for cur in (select * from nci_admin_item_rel where p_item_id = v_item_id and p_item_ver_nr = v_ver_nr and rel_typ_id = 66 and nvl(fld_delete,0) = 0) loop 
-    
+
                 raise_application_error(-20000, 'Cannot change a DDE to CDE as there are Components. Please delete components.');
                 return;
-            
+
             end loop;
         end if;
 
@@ -1964,7 +1964,23 @@ SET     admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
         LST_UPD_USR_ID = 'ONEDATA', 
         LST_UPD_DT = v_end_date,
         UNTL_DT = (SELECT to_date(REGEXP_SUBSTR(RETIRED_DT, '[^ ]+'),'mm/dd/yyyy') FROM SAG_CONCEPT_MERGE_BY_DATE R where R.ACTION = 'RETIRE' AND R.CODE_RETIRED = AI.ITEM_LONG_NM), --v_end_date,
-        CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
+        --CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
+        CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' ||
+        (SELECT   ' Please use concept ' ||C.ITEM_LONG_NM || ' instead.'
+                            FROM    SAG_CONCEPT_MERGE_BY_DATE M,
+                                    ADMIN_ITEM P,
+                                    ADMIN_ITEM C
+                            WHERE   M.CODE_RETIRED = P.ITEM_LONG_NM
+                            AND     P.CURRNT_VER_IND = 1
+                            AND     M.ACTIVE_CODE = C.ITEM_LONG_NM
+                            AND     C.CURRNT_VER_IND = 1
+                            AND     M.CODE_RETIRED <> M.ACTIVE_CODE 
+                            AND     P.ADMIN_ITEM_TYP_ID = 49
+                            AND     C.ADMIN_ITEM_TYP_ID = 49
+                            AND     M.ACTION = 'MERGE' 
+                            AND     AI.ITEM_ID = P.ITEM_ID 
+                            AND     AI.VER_NR = P.VER_NR)
+        || CHNG_DESC_TXT), 1, 2000),
         REGSTR_STUS_ID = 11, -- 'Retired'
         REGSTR_STUS_NM_DN = 'Retired'
 WHERE   admin_item_typ_id = 49  -- Concept
