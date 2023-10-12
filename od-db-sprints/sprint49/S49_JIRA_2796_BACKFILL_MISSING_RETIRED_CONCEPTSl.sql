@@ -1,4 +1,3 @@
-
 BEGIN
   
 --INSERT INTO ADMIN_ITEM
@@ -67,7 +66,7 @@ BEGIN
         AND     to_date(creat_dt,'dd-mon-yy') = to_date(SYSDATE,'dd-mon-yy')
         AND     to_date(UNTL_dt,'dd-mon-yy') = to_date(SYSDATE,'dd-mon-yy')
         AND     CREAT_USR_ID = 'ONEDATA'
-        AND     LST_UPD_USR_ID = 'ONEDATA'
+        AND     LST_UPD_USR_ID = 'ONEDATA';
         
 
     --Add concept table records based on AI table
@@ -89,4 +88,3 @@ BEGIN
     commit; 
    
 END;
-    
