@@ -6,7 +6,7 @@ BEGIN
          ADMIN_STUS_ID, --75 
          ADMIN_STUS_NM_DN, -- compound trigger RELEASED
          EFF_DT,
-         -- CHNG_DESC_TXT, N/A
+          CHNG_DESC_TXT,
          CNTXT_ITEM_ID, -- trigger 20000000024 
          CNTXT_VER_NR, --1
          CNTXT_NM_DN, --NCIP
@@ -28,7 +28,8 @@ BEGIN
         49, 
         77, 
         'RETIRED', 
-        sysdate, 
+        sysdate,
+        SYSDATE || ' OneData has added and retired this missing concept.',
         20000000024, 
         1, 
         'NCIP',
