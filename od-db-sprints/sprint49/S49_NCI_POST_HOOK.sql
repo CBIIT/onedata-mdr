@@ -1964,8 +1964,8 @@ SET     admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
         LST_UPD_USR_ID = 'ONEDATA', 
         LST_UPD_DT = v_end_date,
         UNTL_DT = (SELECT to_date(REGEXP_SUBSTR(RETIRED_DT, '[^ ]+'),'mm/dd/yyyy') FROM SAG_CONCEPT_MERGE_BY_DATE R where R.ACTION = 'RETIRE' AND R.CODE_RETIRED = AI.ITEM_LONG_NM), --v_end_date,
-        --CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
-        CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' ||
+        CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000),
+        /*CHNG_DESC_TXT = substrb(v_updated_by || DECODE(CHNG_DESC_TXT, NULL, '', ' ' ||
         (SELECT   ' Please use concept ' ||C.ITEM_LONG_NM || ' instead.'
                             FROM    SAG_CONCEPT_MERGE_BY_DATE M,
                                     ADMIN_ITEM P,
@@ -1980,7 +1980,7 @@ SET     admin_stus_id = 77, --WFS to 'RETIRED ARCHIVED'
                             AND     M.ACTION = 'MERGE' 
                             AND     AI.ITEM_ID = P.ITEM_ID 
                             AND     AI.VER_NR = P.VER_NR)
-        || CHNG_DESC_TXT), 1, 2000),
+        || CHNG_DESC_TXT), 1, 2000),*/
         REGSTR_STUS_ID = 11, -- 'Retired'
         REGSTR_STUS_NM_DN = 'Retired'
 WHERE   admin_item_typ_id = 49  -- Concept
@@ -2005,16 +2005,28 @@ commit;
             AND     R.REL_TYP_ID = 76;
 
             IF N = 0 THEN
-                INSERT INTO NCI_ADMIN_ITEM_REL  (   P_ITEM_ID,
-                                                    P_ITEM_VER_NR,
-                                                    C_ITEM_ID,
-                                                    C_ITEM_VER_NR,
-                                                    REL_TYP_ID  )
-                VALUES                          (   ROW_REPLACE.P_ITEM_ID, 
-                                                    ROW_REPLACE.P_ITEM_VER_NR,
-                                                    ROW_REPLACE.C_ITEM_ID, 
-                                                    ROW_REPLACE.C_ITEM_VER_NR,
-                                                    76  );
+                BEGIN 
+                    INSERT INTO NCI_ADMIN_ITEM_REL  (   P_ITEM_ID,
+                                                        P_ITEM_VER_NR,
+                                                        C_ITEM_ID,
+                                                        C_ITEM_VER_NR,
+                                                        REL_TYP_ID  )
+                    VALUES                          (   ROW_REPLACE.P_ITEM_ID, 
+                                                        ROW_REPLACE.P_ITEM_VER_NR,
+                                                        ROW_REPLACE.C_ITEM_ID, 
+                                                        ROW_REPLACE.C_ITEM_VER_NR,
+                                                        76  );
+                   --ADDED ON 10/15/23 TO SEGREGATE COMMENTS FOR RETIREMENTS AND REPLACEMENTS                                     
+                   UPDATE   ADMIN_ITEM
+                   SET      CHNG_DESC_TXT = substrb(' Please use concept ' || 
+                            (SELECT C.ITEM_LONG_NM || ' instead.' 
+                             FROM   ADMIN_ITEM C
+                             WHERE  C.ITEM_ID = ROW_REPLACE.C_ITEM_ID 
+                             AND    C.VER_NR = ROW_REPLACE.C_ITEM_VER_NR )
+                            || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000)
+                   WHERE    ITEM_ID = ROW_REPLACE.P_ITEM_ID
+                   AND      VER_NR = ROW_REPLACE.P_ITEM_VER_NR;
+               END ;                                
             ELSE
                 SELECT  COUNT(1) INTO N
                 FROM    NCI_ADMIN_ITEM_REL R
@@ -2030,14 +2042,25 @@ commit;
                                 AND     R.C_ITEM_VER_NR = ROW_REPLACE.C_ITEM_VER_NR);
 
                 IF N > 0 THEN
+                    BEGIN 
+                        UPDATE  NCI_ADMIN_ITEM_REL R
+                        SET     R.C_ITEM_ID = ROW_REPLACE.C_ITEM_ID,
+                                R.C_ITEM_VER_NR = ROW_REPLACE.C_ITEM_VER_NR
+                        WHERE   R.P_ITEM_ID = ROW_REPLACE.P_ITEM_ID
+                        AND     R.P_ITEM_VER_NR = ROW_REPLACE.P_ITEM_VER_NR
+                        AND     R.REL_TYP_ID = 76;
 
-                    UPDATE  NCI_ADMIN_ITEM_REL R
-                    SET     R.C_ITEM_ID = ROW_REPLACE.C_ITEM_ID,
-                            R.C_ITEM_VER_NR = ROW_REPLACE.C_ITEM_VER_NR
-                    WHERE   R.P_ITEM_ID = ROW_REPLACE.P_ITEM_ID
-                    AND     R.P_ITEM_VER_NR = ROW_REPLACE.P_ITEM_VER_NR
-                    AND     R.REL_TYP_ID = 76;
-
+                       --ADDED ON 10/15/23 TO SEGREGATE COMMENTS FOR RETIREMENTS AND REPLACEMENTS                                     
+                       UPDATE   ADMIN_ITEM
+                       SET      CHNG_DESC_TXT = substrb(' Please use concept ' || 
+                                (SELECT C.ITEM_LONG_NM || ' instead.' 
+                                 FROM   ADMIN_ITEM C
+                                 WHERE  C.ITEM_ID = ROW_REPLACE.C_ITEM_ID 
+                                 AND    C.VER_NR = ROW_REPLACE.C_ITEM_VER_NR )
+                                || DECODE(CHNG_DESC_TXT, NULL, '', ' ' || CHNG_DESC_TXT), 1, 2000)
+                       WHERE    ITEM_ID = ROW_REPLACE.P_ITEM_ID
+                       AND      VER_NR = ROW_REPLACE.P_ITEM_VER_NR;
+                    END;
                 END IF;
 
             END IF;
