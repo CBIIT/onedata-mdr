@@ -62,6 +62,7 @@ update admin_item set cntxt_nm_dn = v_tgt_nm where cntxt_item_id = v_item_id and
 commit;
 update alt_nms set cntxt_nm_dn = v_tgt_nm where cntxt_item_id = v_item_id and cntxt_ver_nr = v_ver_nr;
 commit;
+DBMS_MVIEW.REFRESH('VW_CNTXT');
 
 
 execute immediate 'alter table admin_item enable all triggers';
