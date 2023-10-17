@@ -85,3 +85,9 @@ update NCI_PRSN set PRSN_FULL_NM_DERV = FIRST_NM || ' ' || LAST_NM;
 commit;
 alter table NCI_PRSN enable all triggers;
 
+-- 49.1
+
+Insert into NCI_PROC_EXEC (LOG_ID,JOB_STEP_DESC,JOB_STEP_SP) values (5,'Rename Context','nci_util.renameContext(''CDMH Phase I'', ''CDMH'')');
+commit;
+
+  
