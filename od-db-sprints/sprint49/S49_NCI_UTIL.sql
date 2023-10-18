@@ -74,6 +74,10 @@ execute immediate 'alter table alt_nms enable all triggers';
 update admin_item set item_nm = v_tgt_nm, item_long_nm = v_tgt_nm where item_id = v_item_id and ver_nr = v_ver_nr;
 commit;
 end if;
+
+execute immediate 'alter table admin_item enable all triggers';
+
+execute immediate 'alter table alt_nms enable all triggers';
 end;
 
 end;
