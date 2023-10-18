@@ -373,3 +373,7 @@ drop materialized view VW_CNTXT;
 
 Insert into NCI_PROC_EXEC (LOG_ID,JOB_STEP_DESC,JOB_STEP_SP) values (5,'Rename Context','nci_util.renameContext(''CDMH Phase I'', ''CDMH'')');
 commit;
+
+
+Insert into NCI_PROC_EXEC (LOG_ID,JOB_STEP_DESC,JOB_STEP_SP) values (5,'Rename Context','nci_util.renameContext(''CDMH Phase I'', ''CDMH'')');
+commit;
