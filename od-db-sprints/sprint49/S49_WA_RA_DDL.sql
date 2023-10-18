@@ -370,3 +370,6 @@ drop materialized view VW_CNTXT;
        AND ADMIN_ITEM.ITEM_ID = C.ITEM_ID
        AND ADMIN_ITEM.VER_NR = C.VER_NR;
 
+
+Insert into NCI_PROC_EXEC (LOG_ID,JOB_STEP_DESC,JOB_STEP_SP) values (5,'Rename Context','nci_util.renameContext(''CDMH Phase I'', ''CDMH'')');
+commit;
