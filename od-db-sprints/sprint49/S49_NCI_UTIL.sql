@@ -49,12 +49,14 @@ AS
  v_ver_nr number(4,2);
 BEGIN
  
-execute immediate 'alter table admin_item disable all triggers';
 
-execute immediate 'alter table alt_nms  disable all triggers';
 
 select count(*) into v_temp from admin_item where  admin_item_typ_id = 8 and upper(item_nm) = upper(v_src_nm);
 if (v_temp= 1) then
+
+execute immediate 'alter table admin_item disable all triggers';
+
+execute immediate 'alter table alt_nms  disable all triggers';
 select item_id, ver_nr into v_item_id, v_ver_nr from admin_item where admin_item_typ_id = 8 and upper(item_nm) = upper(v_src_nm);
 
 
