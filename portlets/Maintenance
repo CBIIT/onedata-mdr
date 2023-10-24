@@ -1,0 +1,22 @@
+<style>
+    a.underline {
+        color:#1c5e86;
+        text-decoration:underline;
+    }
+    
+    ul.multi {
+        list-style:disc;
+        margin-left:10px;
+    }
+    
+    ul.multi ul{
+        list-style:disc;
+        margin-left:30px;
+        margin-top:10px;
+    }
+    </style>
+    <div class="news">
+<P><font color=white size=5pt>A New Release Is In Process!</font<p>
+<p><font color-white size=4pt>May 4th beginning at 9am Eastern for approximately 4 hours.</p>
+<p>The system will be locked until the release is fully deployed.</P>
+<p>Please come back later!</font></p>
