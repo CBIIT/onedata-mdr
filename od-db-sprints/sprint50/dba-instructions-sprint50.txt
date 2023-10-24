@@ -1,3 +1,6 @@
 -- Run as ONEDATA_RA DDL scripts
 
 -- Run as ONEDATA_WA DDL scripts
+
+--Run following script in WA
+S50_JIRA_2983_OBJ_DESC_UPDATE.sql
