@@ -40,3 +40,14 @@ create or replace TRIGGER TR_AI_MTCH
 
 END;
 /
+
+create or replace TRIGGER TR_ALT_NMS_BEFORE
+  BEFORE INSERT OR UPDATE
+  on ALT_NMS
+  for each row
+BEGIN
+
+:new.MTCH_TERM := regexp_replace(upper(:new.nm_desc),'[^A-Za-z0-9]','');
+:new.MTCH_TERM_ADV := regexp_replace(upper(:new.nm_desc),'[^A-Za-z0-9]','');  
+END;
+/
