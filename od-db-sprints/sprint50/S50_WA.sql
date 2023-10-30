@@ -13,6 +13,15 @@ END;
 alter table admin_item disable all triggers;
 alter table alt_nms disable all triggers;
 
+update admin_item set 
+MTCH_TERM_ADV = regexp_replace(upper(:new.item_nm),'\(|\,|\.|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s',''),
+ MTCH_TERM= regexp_replace(upper(:new.item_nm),'\(|\|\,|\.)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');
+commit;
+
+update alt_nms set 
+MTCH_TERM_ADV = regexp_replace(upper(:new.item_nm),'\(|\,|\.|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s',''),
+ MTCH_TERM= regexp_replace(upper(:new.item_nm),'\(|\|\,|\.)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');
+commit;
 alter table admin_item enable all triggers;
 alter table alt_nms enable all triggers;
 
