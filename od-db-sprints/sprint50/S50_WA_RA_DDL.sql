@@ -74,7 +74,6 @@ END IF;
 END ;
 /
 
-drop table SAG_LOAD_MT;
 
 create table SAG_LOAD_MT
 (NCI_Meta_CUI varchar2(100) not null,	
@@ -88,8 +87,6 @@ create table SAG_LOAD_MT
 creat_dt date default sysdate);
 
 
-Subset Code	Subset Name	Concept Code	NCIt Preferred Term	Relationship To Target	Target Code	Target Term	Target Term Type
-	Target Terminology	Target Terminology Version
 
 create table SAG_LOAD_ICDO
 (
@@ -103,17 +100,6 @@ create table SAG_LOAD_ICDO
  Target_Term_type	varchar2(100) null,
  Target_Terminology  	varchar2(100) null,
  Target_Terminology_Version  	varchar2(100) null);
-
-
-Source_Atom_Code varchar2(4000) not null,	
- Source_Atom_Name	varchar2(4000) null,
- Source	varchar2(255) not null,
- Version varchar2(20) not null,
-creat_dt date default sysdate);
-
-
-,
-  primary key (NCI_Meta_CUI ,Source_Atom_Code ,Source	,Version ));
 
 
 
