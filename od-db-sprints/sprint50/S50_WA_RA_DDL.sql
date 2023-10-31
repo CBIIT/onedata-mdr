@@ -153,4 +153,6 @@ map.mec_sub_grp_nbr	"DERIVATION_GROUP_ORDER",
 	  and map.prov_org_id = org.entty_id (+)
 	  and map.crdnlity_id = crd.obj_key_id (+);
 
+delete from obj_key where obj_typ_id = 49 and obj_key_desc in ('Provider','Visit', 'Specimen');
+commit;
 
