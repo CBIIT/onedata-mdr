@@ -103,7 +103,7 @@ create table SAG_LOAD_ICDO
 
 
 
-  CREATE OR REPLACE VIEW VW_MDL_MAP_IMP_TEMPLATE AS 
+  CREATE OR REPLACE VIEW VW_MDL_MAP_IMP_TEMPLATE AS
   select  ' ' "DO_NOT_USE",
        ' ' "BATCH_USER",
        ' ' "BATCH_NAME",
@@ -114,9 +114,12 @@ create table SAG_LOAD_ICDO
 	  smec."MEC_PHY_NM" "SRC_PHY_NAME", 
 	  tme.ITEM_PHY_OBJ_NM "TGT_ELMNT_PHY_NAME", 
 	  tmec."MEC_PHY_NM" "TGT_PHY_NAME", 
-	  deg.obj_key_Desc "MAPPING_DEGREE",
+          map.MEC_MAP_NM "MAPPING_GROUP_NAME",
+          map.MEC_MAP_DESC "MAPPING_GROUP_DESC",
+	  src_func.obj_key_Desc "SOURCE_FUNCTION",
+	  tgt_func.obj_key_Desc "TARGET_FUNCTION",
 	  crd.obj_key_desc "MAPPING_CARDINALITY",
-	  direct.obj_key_Desc "MAPPING_DIRECTION",
+	  deg.obj_key_Desc "MAPPING_DEGREE",
           ' ' "TRANS_RULE_NOTATION",
 map.mec_grp_rul_nbr "DERIVATION_GROUP_NBR",
 map.mec_sub_grp_nbr	"DERIVATION_GROUP_ORDER",
@@ -129,8 +132,11 @@ map.mec_sub_grp_nbr	"DERIVATION_GROUP_ORDER",
 ' '	"PROV_CONTACT",
 	map.prov_rsn_txt "PROV_REVIEW_REASON",
 	map.prov_typ_rvw_txt "PROV_TYPE_OF_REVIEW",
-	  --map.mec_map_nm "Mapping Name", 
-	  --map.mec_map_desc "Mapping Definition", 
+	map.PROV_RVW_DT "PROV_REVIEW_DATE",
+	map.prov_APRV_DT "PROV_APPROVAL_DATE",
+map.VAL_MAP_CREATE_IND "VALUE_MAP_GENERATED_IND",
+decode(svd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated')  "SOURCE_DOMAIN_TYPE",
+decode(tvd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated')  "TARGET_DOMAIN_TYPE",
 	   map."CREAT_DT",
 	  map."CREAT_USR_ID",
 	  map."LST_UPD_USR_ID",
@@ -140,19 +146,45 @@ map.mec_sub_grp_nbr	"DERIVATION_GROUP_ORDER",
 	  map."LST_UPD_DT"
 	from  NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT_CHAR tmec, nci_MEC_MAP map,
 	  obj_key crd,
-	  obj_key direct,
 	  obj_key deg,
-	  nci_org org
+	  obj_key src_func,
+	  obj_key tgt_func,
+	  nci_org org,
+  	  value_dom svd,
+	  value_dom tvd
 	where  sme.item_id (+)= smec.MDL_ELMNT_ITEM_ID
 	and sme.ver_nr (+)= smec.MDL_ELMNT_VER_NR and
 	 tme.item_id (+)= tmec.MDL_ELMNT_ITEM_ID
 	and tme.ver_nr (+)= tmec.MDL_ELMNT_VER_NR  and
 	   smec.MEC_ID (+)= map.SRC_MEC_ID and tmec.mec_id (+)= map.TGT_MEC_ID
 	  and map.map_deg = deg.obj_key_id (+)
-	  and map.direct_typ = direct.obj_key_id (+)
+	  and map.src_func_id= src_func.obj_key_id (+)
+	  and map.tgt_func_id= tgt_func.obj_key_id (+)
 	  and map.prov_org_id = org.entty_id (+)
-	  and map.crdnlity_id = crd.obj_key_id (+);
+	  and map.crdnlity_id = crd.obj_key_id (+)
+          and smec.val_dom_item_id = svd.item_id (+)
+	  and smec.val_dom_ver_nr = svd.ver_nr (+)
+	  and tmec.val_dom_item_id = tvd.item_id (+)
+ 	  and tmec.val_dom_ver_nr = tvd.ver_nr (+);
+
+
+
+	insert into obj_typ (obj_typ_id, obj_typ_desc) values (50,'Comparison Mapping Functions');
+	     commit;
+
+	insert into obj_typ (obj_typ_id, obj_typ_desc) values (51,'Assignment Mapping Functions');
+	     commit;
+
 
 delete from obj_key where obj_typ_id = 49 and obj_key_desc in ('Provider','Visit', 'Specimen');
 commit;
+
+
+alter table NCI_MEC_MAP add (SRC_FUNC_ID  integer, TGT_FUNC_ID integer);
+
+alter table NCI_STG_MEC_MAP add (SRC_FUNC_ID  integer, IMP_SRC_FUNC varchar2(255), TGT_FUNC_ID integer, IMP_TGT_FUNC varchar2(255));
+
+
+alter table NCI_STG_MEC_MAP add (SRC_VD_TYP varchar2(100), TGT_VD_TYP varchar2(100), VAL_MAP_CREATE_IND number(1));
+
 
