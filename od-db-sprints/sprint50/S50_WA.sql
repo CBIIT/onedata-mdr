@@ -40,3 +40,18 @@ BEGIN
 :new.MTCH_TERM_ADV := regexp_replace(upper(:new.nm_desc),'[^A-Za-z0-9]','');  
 END;
 /
+
+
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Equals',50,'Equals' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Greater Than',50,'Greater Than' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Greater Than Equal To',50,'Greater Than Equal To' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Less Than',50,'Greater Than' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Greater Than Equal To',50,'Greater Than Equal To' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Contains',50,'Contains' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Begins with',50,'Begins with' );
+commit;
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Concat',51,'Concat' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Equal',51,'Equal' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Lookup',51,'Lookup' );
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Coalese',51,'Coalese' );
+commit;
