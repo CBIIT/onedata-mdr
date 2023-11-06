@@ -1296,7 +1296,7 @@ begin
     
     -- semantically equivalent
     for cur in (select  mec1.MEC_LONG_NM SRC_MEC_LONG_NM, mec1.mec_id SRC_MEC_ID, mec2.MEC_LONG_NM TGT_MEC_LONG_NM, mec2.mec_id TGT_MEC_ID, me1.mdl_item_id src_mdl_item_id,
-    me1.mdl_item_ver_nr src_mdl_ver_nr ,me2.mdl_item_id tgt_mdl_item_id,
+    me1.mdl_item_ver_nr src_mdl_ver_nr ,me2.mdl_item_id tgt_mdl_item_id,me1.ITEM_LONG_NM SRC_ME_ITEM_LONG_NM,
     me2.mdl_item_ver_nr tgt_mdl_ver_nr , mec1.de_conc_item_id src_DE_CONC_ITEM_ID, mec2.DE_CONC_ITEM_ID tgt_DE_CONC_ITEM_ID
 from nci_mdl_elmnt me1, nci_mdl_elmnt me2, nci_mdl_elmnt_char mec1, nci_mdl_elmnt_char mec2, NCI_MDL_MAP mm
 where 
@@ -1322,7 +1322,9 @@ and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook
         ihook.setColumnValue(row,'MAP_DEG',86);
         end if;
         ihook.setColumnValue(row,'MECM_ID',-1);
-        
+       ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',0);
+        ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.SRC_MEC_LONG_NM);
+         
                                      rows.extend;
                                             rows(rows.last) := row;
 
@@ -1377,10 +1379,9 @@ begin
     commit;
     delete from onedata_ra.NCI_MEC_MAP where MDL_MAP_ITEM_ID = ihook.getColumnValue(row_ori, 'ITEM_ID') and MDL_MAP_VER_NR = ihook.getColumnValue(row_ori, 'VER_NR');
     commit;
-    
     rows := t_rows();
    for cur in (select  mec1.MEC_LONG_NM SRC_MEC_LONG_NM, mec1.mec_id SRC_MEC_ID, mec2.MEC_LONG_NM TGT_MEC_LONG_NM, mec2.mec_id TGT_MEC_ID, me1.mdl_item_id src_mdl_item_id,
-    me1.mdl_item_ver_nr src_mdl_ver_nr ,me2.mdl_item_id tgt_mdl_item_id,
+    me1.mdl_item_ver_nr src_mdl_ver_nr ,me2.mdl_item_id tgt_mdl_item_id, me1.ITEM_LONG_NM SRC_ME_ITEM_LONG_NM,
     me2.mdl_item_ver_nr tgt_mdl_ver_nr 
 from nci_mdl_elmnt me1, nci_mdl_elmnt me2, nci_mdl_elmnt_char mec1, nci_mdl_elmnt_char mec2, NCI_MDL_MAP mm
 where 
@@ -1401,6 +1402,10 @@ and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook
         ihook.setColumnValue(row,'MDL_MAP_ITEM_ID',ihook.getColumnValue(row_ori, 'ITEM_ID'));
         ihook.setColumnValue(row,'MDL_MAP_VER_NR',ihook.getColumnValue (row_ori,'VER_NR'));
         ihook.setColumnValue(row,'MAP_DEG',86);
+        ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',0);
+        ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.SRC_MEC_LONG_NM);
+        	
+            
         ihook.setColumnValue(row,'MECM_ID',-1);
         
                                      rows.extend;
@@ -1409,7 +1414,7 @@ and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook
     end loop;
  
     for cur in (select  mec1.MEC_LONG_NM SRC_MEC_LONG_NM, mec1.mec_id SRC_MEC_ID, mec2.MEC_LONG_NM TGT_MEC_LONG_NM, mec2.mec_id TGT_MEC_ID, me1.mdl_item_id src_mdl_item_id,
-    me1.mdl_item_ver_nr src_mdl_ver_nr ,me2.mdl_item_id tgt_mdl_item_id,
+    me1.mdl_item_ver_nr src_mdl_ver_nr ,me2.mdl_item_id tgt_mdl_item_id, me1.ITEM_LONG_NM SRC_ME_ITEM_LONG_NM,
     me2.mdl_item_ver_nr tgt_mdl_ver_nr 
 from nci_mdl_elmnt me1, nci_mdl_elmnt me2, nci_mdl_elmnt_char mec1, nci_mdl_elmnt_char mec2, NCI_MDL_MAP mm
 where 
@@ -1431,6 +1436,8 @@ and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook
         ihook.setColumnValue(row,'MDL_MAP_ITEM_ID',ihook.getColumnValue(row_ori, 'ITEM_ID'));
         ihook.setColumnValue(row,'MDL_MAP_VER_NR',ihook.getColumnValue (row_ori,'VER_NR'));
         ihook.setColumnValue(row,'MAP_DEG',87);
+        ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',0);
+        ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.SRC_MEC_LONG_NM);
         ihook.setColumnValue(row,'MECM_ID',-1);
         
                                      rows.extend;
@@ -1438,7 +1445,8 @@ and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook
 
     end loop;
   
-    for cur in (select  mec1.MEC_LONG_NM SRC_MEC_LONG_NM, mec1.mec_id SRC_MEC_ID, me1.mdl_item_id src_mdl_item_id,    me1.mdl_item_ver_nr src_mdl_ver_nr 
+    for cur in (select  mec1.MEC_LONG_NM SRC_MEC_LONG_NM, mec1.mec_id SRC_MEC_ID, me1.mdl_item_id src_mdl_item_id,  
+    me1.mdl_item_ver_nr src_mdl_ver_nr , me1.ITEM_LONG_NM SRC_ME_ITEM_LONG_NM
 from nci_mdl_elmnt me1,  nci_mdl_elmnt_char mec1,  NCI_MDL_MAP mm
 where 
 me1.mdl_item_id =mm.SRC_MDL_ITEM_ID and me1.mdl_item_ver_nr = mm.SRC_MDL_VER_NR 
@@ -1457,6 +1465,8 @@ and mm2.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm2.ver_nr = iho
         ihook.setColumnValue(row,'SRC_MDL_VER_NR',cur.src_MDL_VER_NR);
         ihook.setColumnValue(row,'MDL_MAP_ITEM_ID',ihook.getColumnValue(row_ori, 'ITEM_ID'));
         ihook.setColumnValue(row,'MDL_MAP_VER_NR',ihook.getColumnValue (row_ori,'VER_NR'));
+        ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',0);
+        ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.SRC_MEC_LONG_NM);
         ihook.setColumnValue(row,'MECM_ID',-1);
         
                                      rows.extend;
@@ -1464,13 +1474,15 @@ and mm2.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm2.ver_nr = iho
 
     end loop;
     
---    raise_application_error(-20000,rows.count);
+ --  raise_application_error(-20000,rows.count);
             action := t_actionrowset(rows, 'Model Map - Characteristics', 2,2,'insert');
         actions.extend;
         actions(actions.last) := action;
   hookoutput.actions := actions;
   hookoutput.message := 'Semantic mapping generated.';
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+      nci_util.debugHook('GENERAL', v_data_out);
+
 end;
 
 
@@ -1646,4 +1658,3 @@ END;
 
 END;
 /
-
