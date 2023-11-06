@@ -1,6 +1,7 @@
 
 
 alter table NCI_MEC_VAL_MAP add PROV_NOTES  varchar2(4000);
+alter table nci_ds_hdr add LST_RUN_TYP varchar2(128);
 
 
   CREATE TABLE NCI_STG_MEC_MAP
