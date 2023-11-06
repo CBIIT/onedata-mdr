@@ -1481,7 +1481,7 @@ and mm2.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm2.ver_nr = iho
   hookoutput.actions := actions;
   hookoutput.message := 'Semantic mapping generated.';
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-      nci_util.debugHook('GENERAL', v_data_out);
+   --   nci_util.debugHook('GENERAL', v_data_out);
 
 end;
 
@@ -1499,12 +1499,26 @@ AS
     row_ori t_row;
     input_rows t_rows;
     output_rows t_rows;
+    v_src_alt_nm_typ integer;
+    v_tgt_alt_nm_typ integer;
 begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
 
         row_ori := hookInput.originalRowset.rowset(1);
+    
+    for cur in (Select m.* from nci_mdl m, nci_mdl_map mm where mm.item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
+    and mm.ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') and mm.SRC_MDL_ITEM_ID = m.item_id and mm.SRC_MDL_VER_NR = m.VER_NR) loop
+    
+    v_src_alt_nm_typ := cur.ASSOC_NM_TYP_ID;
+    end loop;
+    for cur in (Select m.* from nci_mdl m, nci_mdl_map mm where mm.item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
+    and mm.ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') and mm.TGT_MDL_ITEM_ID = m.item_id and mm.TGT_MDL_VER_NR = m.VER_NR) loop
+    
+    v_tgt_alt_nm_typ := cur.ASSOC_NM_TYP_ID;
+    end loop;
+  --  raise_application_error(-20000, v_src_alt_nm_typ);
     
     input_rows := t_rows();
     output_rows := t_rows();
@@ -1534,7 +1548,7 @@ begin
        raise_application_error(-20000, 'Target element characteristic is not enumerated.');
    end if;*/
    
-    nci_11179_2.spCreateValueMap(input_rows, output_rows);
+    nci_11179_2.spCreateValueMap(input_rows, output_rows, v_src_alt_nm_typ, v_tgt_alt_nm_typ);
     
     delete from NCI_MEC_VAL_MAP where src_mec_id = ihook.getColumnValue(row_ori, 'SRC_MEC_ID') and tgt_mec_id = ihook.getColumnValue(row_ori, 'TGT_MEC_ID');
     commit;
@@ -1546,6 +1560,8 @@ begin
         row := row_ori;
         ihook.setColumnValue(row,'SRC_PV',ihook.getColumnValue(output_rows(i),'1'));
         ihook.setColumnValue(row,'TGT_PV',ihook.getColumnValue(output_rows(i),'2'));
+        ihook.setColumnValue(row,'SRC_LBL',ihook.getColumnValue(output_rows(i),'LBL_1'));
+        ihook.setColumnValue(row,'TGT_LBL',ihook.getColumnValue(output_rows(i),'LBL_2'));
         ihook.setColumnValue(row,'VM_CNCPT_CD',ihook.getColumnValue(output_rows(i),'VM Concept Codes'));
         ihook.setColumnValue(row,'VM_CNCPT_NM',ihook.getColumnValue(output_rows(i),'VM Name'));
         ihook.setColumnValue(row,'MECVM_ID',-1);
@@ -1554,13 +1570,16 @@ begin
                                             rows(rows.last) := row;
 
     end loop;
+   -- raise_application_Error(-20000,rows.count);
             action := t_actionrowset(rows, 'Model Map Characteristic Values', 2,2,'insert');
         actions.extend;
         actions(actions.last) := action;
         
-        ihook.setColumnValue(row_ori,'VAL_MAP_CREATE_IND',1);
+        row:= t_row();
+        ihook.setColumnValue(row, 'MECM_ID',ihook.getColumnValue(row_ori, 'MECM_ID'));
+        ihook.setColumnValue(row,'VAL_MAP_CREATE_IND',1);
         rows := t_rows();
-        rows.extend;     rows(rows.last) := row_ori;
+        rows.extend;     rows(rows.last) := row;
        
             action := t_actionrowset(rows, 'Model Map - Characteristics', 2,3,'update');
         actions.extend;
@@ -1569,6 +1588,7 @@ begin
   hookoutput.actions := actions;
   
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+ nci_util.debugHook('GENERAL', v_data_out);
   
 end;
 
