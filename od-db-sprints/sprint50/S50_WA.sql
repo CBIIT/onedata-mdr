@@ -55,3 +55,13 @@ insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Equal',51,'
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Lookup',51,'Lookup' );
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Coalese',51,'Coalese' );
 commit;
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Column',52,'Column');
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Property',52,'Property');
+insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values ('Attribute',52,'Attribute');
+commit;
+alter table nci_stg_mdl_elmnt_char disable all triggers;
+update nci_stg_mdl_elmnt_char set MEC_TYP_NM = (select obj_key_id from obj_key where obj_key_desc='Column') where mec_typ_nm = 'Column';
+update nci_stg_mdl_elmnt_char set MEC_TYP_NM = (select obj_key_id from obj_key where obj_key_desc='Property') where mec_typ_nm = 'Property';
+update nci_stg_mdl_elmnt_char set MEC_TYP_NM = (select obj_key_id from obj_key where obj_key_desc='Attribute') where mec_typ_nm = 'Attribute';
+commit;
+alter table nci_stg_mdl_elmnt_char enable all triggers;
