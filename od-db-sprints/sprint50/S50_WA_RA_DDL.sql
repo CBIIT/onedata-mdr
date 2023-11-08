@@ -59,28 +59,28 @@ alter table nci_stg_mdl_elmnt_char add MDL_ELMNT_CHAR_TYP_ID number;
 	 PRIMARY KEY (STG_MECM_ID));
 
 
-ONEDATA_WA only
-
-  CREATE OR REPLACE TRIGGER TR_NCI_STG_MEC_MAP 
-  BEFORE  UPDATE
-  on NCI_STG_MEC_MAP
-  for each row
-BEGIN
-   :new.LST_UPD_DT := SYSDATE;
-
-END;
-
-/
-
-CREATE OR REPLACE TRIGGER TR_NCI_STG_MEC_MAP_SEQ  BEFORE INSERT  on NCI_STG_MEC_MAP
-  for each row
-         BEGIN    IF (:NEW.STG_MECM_ID<= 0  or :NEW.STG_MECM_ID is null)  THEN
-         select NCI_SEQ_MECM.nextval
-    into :new.STG_MECM_ID  from  dual ;
-END IF;
-
-END ;
-/
+--ONEDATA_WA only
+--
+--  CREATE OR REPLACE TRIGGER TR_NCI_STG_MEC_MAP 
+--  BEFORE  UPDATE
+--  on NCI_STG_MEC_MAP
+--  for each row
+--BEGIN
+--   :new.LST_UPD_DT := SYSDATE;
+--
+--END;
+--
+--/
+--
+--CREATE OR REPLACE TRIGGER TR_NCI_STG_MEC_MAP_SEQ  BEFORE INSERT  on NCI_STG_MEC_MAP
+--  for each row
+--         BEGIN    IF (:NEW.STG_MECM_ID<= 0  or :NEW.STG_MECM_ID is null)  THEN
+--         select NCI_SEQ_MECM.nextval
+--    into :new.STG_MECM_ID  from  dual ;
+--END IF;
+--
+--END ;
+--/
 
 
 create table SAG_LOAD_MT
