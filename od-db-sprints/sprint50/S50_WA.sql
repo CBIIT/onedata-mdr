@@ -2,7 +2,7 @@
 alter table admin_item disable all triggers;
 alter table alt_nms disable all triggers;
 
-set escape on
+set escape on;
 
 update admin_item set 
 MTCH_TERM_ADV = regexp_replace(upper(item_nm),'[^A-Za-z0-9]', ''),
