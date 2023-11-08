@@ -85,3 +85,5 @@ update nci_stg_mdl_elmnt_char set MEC_TYP_NM = (select obj_key_id from obj_key w
 update nci_stg_mdl_elmnt_char set MEC_TYP_NM = (select obj_key_id from obj_key where obj_key_desc='Attribute') where mec_typ_nm = 'Attribute';
 commit;
 alter table nci_stg_mdl_elmnt_char enable all triggers;
+
+set escape off;
