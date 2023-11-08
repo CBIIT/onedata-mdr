@@ -110,6 +110,12 @@ create table SAG_LOAD_ICDO
  Target_Terminology_Version  	varchar2(100) null);
 
 
+alter table NCI_MEC_MAP add (SRC_FUNC_ID  integer, TGT_FUNC_ID integer);
+
+alter table NCI_STG_MEC_MAP add (SRC_FUNC_ID  integer, IMP_SRC_FUNC varchar2(255), TGT_FUNC_ID integer, IMP_TGT_FUNC varchar2(255));
+
+
+alter table NCI_STG_MEC_MAP add (SRC_VD_TYP varchar2(100), TGT_VD_TYP varchar2(100), VAL_MAP_CREATE_IND number(1));
 
   CREATE OR REPLACE VIEW VW_MDL_MAP_IMP_TEMPLATE AS
   select  ' ' "DO_NOT_USE",
@@ -186,13 +192,3 @@ decode(tvd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated')  "TARGET_DOMAIN
 
 delete from obj_key where obj_typ_id = 49 and obj_key_desc in ('Provider','Visit', 'Specimen');
 commit;
-
-
-alter table NCI_MEC_MAP add (SRC_FUNC_ID  integer, TGT_FUNC_ID integer);
-
-alter table NCI_STG_MEC_MAP add (SRC_FUNC_ID  integer, IMP_SRC_FUNC varchar2(255), TGT_FUNC_ID integer, IMP_TGT_FUNC varchar2(255));
-
-
-alter table NCI_STG_MEC_MAP add (SRC_VD_TYP varchar2(100), TGT_VD_TYP varchar2(100), VAL_MAP_CREATE_IND number(1));
-
-
