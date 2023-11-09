@@ -4102,7 +4102,8 @@ for cur in (select * from  NCI_QUEST_VV_rep where quest_pub_id = ihook.getcolumn
                      ihook.setColumnValue(row,'QUEST_VV_REP_ID', cur.QUEST_VV_REP_ID);
                      ihook.setColumnValue(row,'EDIT_IND', 1);
                       ihook.setColumnValue(row_ori,'DEFLT_VAL_ID','');
-
+ihook.setColumnValue(row_ori,'VAL','');
+ 
             rows.extend;
             rows(rows.last) := row;
     end loop;
