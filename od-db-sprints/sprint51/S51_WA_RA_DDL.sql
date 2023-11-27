@@ -354,5 +354,110 @@ commit;
 alter table nci_admin_item_rel enable all triggers;
 
 
+drop materialized view MVW_CSI_NODE_DE_REL;
+
+  CREATE MATERIALIZED VIEW MVW_CSI_NODE_DE_REL
+  AS SELECT  distinct ai.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           csi.BASE_ID P_ITEM_ID,
+           csi.BASE_VER_NR P_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           de.PREF_QUEST_TXT, 
+	   e.USED_BY,
+	   'CSI' LVL,
+       csi.BASE_ID || 'v' || csi.BASE_VER_NR P_ITEM_ID_VER
+           FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, de , nci_admin_item_ext e, MVW_CSI_REL csi, ADMIN_ITEM csix
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn = 'RELEASED'
+and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
+and csi.ITEM_ID= ak.P_ITEM_ID and csi.VER_NR = ak.P_item_ver_nr
+and csix.ITEM_ID=csi.ITEM_ID and csix.VER_NR=csi.VER_NR and csix.admin_stus_nm_dn = 'RELEASED'
+--and nvl(ai.CURRNT_VER_IND,0) = 1 
+and nvl(ak.fld_delete,0) = 0
+    UNION
+    SELECT distinct ai.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           csi.CS_ITEM_ID,
+           csi.CS_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+       de.PREF_QUEST_TXT,
+e.USED_BY, 'CS' LVL,
+  csi.CS_ITEM_ID || 'v' || csi.CS_ITEM_VER_NR P_ITEM_ID_VER
+      FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi, de, nci_admin_item_Ext e, ADMIN_ITEM csix
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR
+           AND ak.P_ITEM_ID = csi.ITEM_ID
+           AND ak.P_ITEM_VER_NR = csi.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn = 'RELEASED' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
+and csix.ITEM_ID=csi.ITEM_ID and csix.VER_NR =csi.VER_NR and csix.admin_stus_nm_dn = 'RELEASED'
+--and nvl(ai.CURRNT_VER_IND,0) = 1 
+union
+SELECT distinct ai.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           cs.CNTXT_ITEM_ID,
+           cs.CNTXT_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+            de.PREF_QUEST_TXT,
+e.USED_BY, 'Context' LVL,
+  cs.CNTXT_ITEM_ID || 'v' || cs.CNTXT_VER_NR P_ITEM_ID_VER
+      FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi, VW_CLSFCTN_SCHM cs, de, nci_admin_item_ext e, ADMIN_ITEM csix
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR
+           AND ak.P_ITEM_ID = csi.ITEM_ID
+           AND ak.P_ITEM_VER_NR = csi.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65
+and csi.CS_ITEM_ID = cs.ITEM_ID and csi.CS_ITEM_VER_NR = cs.VER_NR and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn ='RELEASED' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING') 
+and cs.admin_stus_nm_dn ='RELEASED'
+and csix.ITEM_ID=csi.ITEM_ID and csix.VER_NR =csi.VER_NR and csix.admin_stus_nm_dn = 'RELEASED';
+
 
 
