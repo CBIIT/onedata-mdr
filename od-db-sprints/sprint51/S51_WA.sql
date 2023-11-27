@@ -9,3 +9,7 @@ commit;
 insert into obj_key (OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) select 'ICD-O_CODE',23,'ICD-O_CODE'  from dual where ('ICD-O_CODE') not in 
 (Select  upper(obj_key_desc) from obj_key where obj_typ_id = 23) ;
 commit;
+
+
+ALTER TABLE OBJ_KEY
+ADD CONSTRAINT OBJ_KEY_DESC_TYP UNIQUE (OBJ_TYP_ID, OBJ_KEY_DESC);
