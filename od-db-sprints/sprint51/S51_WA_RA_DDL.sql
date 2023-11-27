@@ -344,14 +344,6 @@ x.p_item_ver_nr) y, nci_mdr_cntrl c,nci_mdr_cntrl c1
  and c1.param_nm='DEEP_LINK'
  and ai.admin_stus_nm_dn = 'RELEASED';
 
-alter table nci_admin_item_rel add (P_ITEM_ID_VER  varchar2(50), C_ITEM_ID_VER  varchar2(50));
-
-alter table nci_admin_item_rel disable all triggers;
-
-update nci_admin_item_rel set P_ITEM_ID_VER = P_ITEM_ID || 'v'|| P_ITEM_VER_NR, C_ITEM_ID_VER = C_ITEM_ID || 'v' || C_ITEM_VER_NR;
-commit;
-
-alter table nci_admin_item_rel enable all triggers;
 
 
 drop materialized view MVW_CSI_NODE_DE_REL;
