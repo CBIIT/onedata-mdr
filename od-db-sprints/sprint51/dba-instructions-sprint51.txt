@@ -1,3 +1,16 @@
--- Run as ONEDATA_RA DDL scripts
 
 -- Run as ONEDATA_WA DDL scripts
+S51_WA_RA_DDL.sql
+S51_WA.sql
+
+-- Run as ONEDATA_RA DDL scripts
+S51_WA_RA_DDL.sql
+S51_RA.sql
+
+-- Run as ONEDATA_WA DDL scripts
+S51_NCI_FORM_MGMT.sql
+S51_NCI_CODEMAP.sql
+S51_NCI_VD.sql
+S51_NCI_POST_HOOK.sql
+S51_NCI_DS.sql
+
