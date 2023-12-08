@@ -1,4 +1,4 @@
-CREATE OR REPLACE FORCE EDITIONABLE VIEW "ONEDATA_WA"."VW_MDL_MAP_FLAT" ("Source Model Public ID", "Source Model Version", "Source Model Name", "Characteristic Group Name", "Mapping Cardinality", "Source Element Physical Name", "Source Characteristic Physical Name", "Source CDE Public ID", "Source CDE Version", "Source Function", "Source Value", "Target Model Public ID", "Target Model Version", "Target Model Name", "Target Element Physical Name", "Target Characteristic Physical Name", "Target CDE ID", "Target CDE Version", "Target Function", "Target Function Parameter", "Target Value", "Group Order", "Transformation Notes", "Transformation Rule", "Transformation Rule Notation", "Mapping Type", "Validation Platform", "Provenance Organization", "Provenance Contact", "Provenance Reason", "Provenance Type of Review", "Provenance Review Date", "Provenance Approval Date") DEFAULT COLLATION "USING_NLS_COMP"  AS 
+CREATE OR REPLACE FORCE EDITIONABLE VIEW "ONEDATA_WA"."VW_MDL_MAP_FLAT" ("Source Model Public ID", "Source Model Version", "Source Model Name", "Characteristic Group Name", "Mapping Cardinality", "Source Element Physical Name", "Source Characteristic Physical Name", "Source CDE Public ID", "Source CDE Version", "Target Model Public ID", "Target Model Version", "Target Model Name", "Target Element Physical Name", "Target Characteristic Physical Name", "Target CDE ID", "Target CDE Version", "Source Function", "Source Value", "Target Function", "Target Function Parameter", "Target Value", "Group Order", "Transformation Notes", "Transformation Rule", "Transformation Rule Notation", "Mapping Type", "Validation Platform", "Provenance Organization", "Provenance Contact", "Provenance Reason", "Provenance Type of Review", "Provenance Review Date", "Provenance Approval Date") DEFAULT COLLATION "USING_NLS_COMP"  AS 
   select  s.item_id "Source Model Public ID",
         s.ver_nr "Source Model Version", 
         s.item_nm "Source Model Name", 
@@ -26,8 +26,7 @@ CREATE OR REPLACE FORCE EDITIONABLE VIEW "ONEDATA_WA"."VW_MDL_MAP_FLAT" ("Source
         smec."MEC_PHY_NM" "Source Characteristic Physical Name", 
         smec."CDE_ITEM_ID" "Source CDE Public ID",
         smec."CDE_VER_NR" "Source CDE Version",
-        map.SRC_FUNC_ID "Source Function",
-        map.SRC_VAL "Source Value",
+        
         t.item_id "Target Model Public ID", 
         t.ver_nr "Target Model Version", 
         t.item_nm "Target Model Name",  
@@ -45,6 +44,8 @@ CREATE OR REPLACE FORCE EDITIONABLE VIEW "ONEDATA_WA"."VW_MDL_MAP_FLAT" ("Source
         tmec."MEC_PHY_NM" "Target Characteristic Physical Name", 
         tmec."CDE_ITEM_ID" "Target CDE ID",
         tmec."CDE_VER_NR" "Target CDE Version" ,
+        map.SRC_FUNC_ID "Source Function",
+        map.SRC_VAL "Source Value",
         -- map.map_deg mec_map_deg, 
         map.TGT_FUNC_ID "Target Function",
         map.TGT_FUNC_PARAM "Target Function Parameter",
