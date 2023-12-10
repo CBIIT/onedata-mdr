@@ -279,6 +279,14 @@ commit;
 
 delete from onedata_ra.perm_val where  nvl(fld_delete,0) = 1;
 commit;
+
+-- Delete logically deleted classifications
+delete from NCI_ADMIN_ITEM_REL where  nvl(fld_delete,0) = 1 and rel_typ_id = 65;
+commit;
+
+delete from onedata_ra.NCI_ADMIN_ITEM_REL where  nvl(fld_delete,0) = 1 and rel_typ_id = 65;
+commit;
+
 --tracker 2761
 --nci_import.spDeleteProcImports;
 /*v_days := 7;
@@ -1174,23 +1182,25 @@ hookInput        t_hookInput;
       return;
   end if;
 
+
 rows := t_rows();
 
-/*
-if ihook.getColumnValue(row_ori, 'P_ITEM_ID') is not null then
-    select ful_path into v_ful_path from nci_clsfctn_schm_item where item_id = ihook.getColumnValue(row_ori, 'P_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR');
-end if;
+-- cannot assign Retired CSI as parent to non-retired child
 
 
-if (ihook.getColumnValue(row_ori, 'CS_ITEM_ID') <> ihook.getColumnOldValue(row_ori, 'CS_ITEM_ID')) then -- cs has changed, chnge cs for all children
 
-nci_11179_2.updCSIHier (row_ori,actions);
-if (actions.count > 0) then
-            hookoutput.actions := actions;
-    end if;
-end if;
+for cur in (select * from admin_item where item_id =  ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR') and
+upper(admin_stus_nm_dn) not like '%RETIRED%' and ihook.getColumnValue(row_ori, 'P_ITEM_ID') is not null) loop
+  -- raise_application_error (-20000,ihook.getColumnValue(row_ori, 'P_ITEM_ID') ||'v'||ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR') );
 
-*/
+for cur1 in (select * from admin_item where item_id =  ihook.getColumnValue(row_ori, 'P_ITEM_ID') and ver_nr =  ihook.getColumnValue(row_ori, 'P_ITEM_VER_NR')
+and upper(admin_stus_nm_dn) like '%RETIRED%') loop
+   raise_application_error(-20000, 'Parent CSI is Retired for a non-retired CSI.');
+      V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+      return;
+end loop;
+end loop;
+
 
 
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -1611,6 +1621,20 @@ BEGIN
             actions (actions.LAST) := action;
             end if;
     end if;
+
+-- Csi cannot be retired if it is a parent of non-retired csi
+    if (ihook.getColumnValue (row_ori, 'ADMIN_ITEM_TYP_ID')= 51 and ihook.getColumnValue (row_ori, 'ADMIN_STUS_ID')= 77 and
+   ihook.getColumnValue (row_ori, 'ADMIN_STUS_ID') <> ihook.getColumnOldValue (row_ori, 'ADMIN_STUS_ID')) then
+
+for cur in (select ai.* from admin_item ai , nci_clsfctn_schm_item csi where p_item_id =  ihook.getColumnValue(row_ori, 'ITEM_ID') and p_item_ver_nr = ihook.getColumnValue(row_ori, 'VER_NR') and
+upper(admin_stus_nm_dn) not like '%RETIRED%' and P_ITEM_ID is not null and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr) loop
+
+      raise_application_error(-20000, 'Cannot Retire a CSI with active children.');
+      V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+      return;
+end loop;
+
+end if;
 
     IF actions.COUNT > 0
     THEN
