@@ -656,3 +656,8 @@ t.admin_item_typ_id = 57;
 
 alter table NCI_STG_MEC_MAP add (DT_SORT timestamp default sysdate);
 
+insert into NCI_PROC_EXEC (log_id, job_step_desc, JOB_STEP_SP) values (6,'Load ICDO Concepts', 'nci_ext_import.load_icdo_concepts');
+insert into NCI_PROC_EXEC (log_id, job_step_desc, JOB_STEP_SP) values (7,'Load ICDO Concepts', 'nci_ext_import.load_icdo');
+commit;
+
+
