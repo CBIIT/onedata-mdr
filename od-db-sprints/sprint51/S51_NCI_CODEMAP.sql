@@ -416,7 +416,7 @@ end;
   v_mdl_elmnt_id number;
   v_add boolean;
   v_temp integer;
- i integer;
+  i integer;
  BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -431,20 +431,20 @@ end;
   
     if ( nvl(ihook.getColumnValue(row_ori, 'CTL_VAL_STUS'),'IMPORTED') = 'VALIDATED') then
   
-  ihook.setcolumnValue(row_ori, 'MECM_ID', nvl(ihook.getColumnValue(row_ori,'IMP_RULE_ID'),ihook.getColumnValue(row_ori,'STG_MECM_ID')));
-  Select count(*) into v_temp  from nci_mec_map where mecm_id = ihook.getcolumnValue(row_ori,'MECM_ID');
- -- raise_application_error(-20000, ihook.getcolumnValue(row_ori,'MECM_ID'));
-  if (v_temp= 0) then
-     rowsadd.extend;   rowsadd(rowsadd.last) := row_ori;
+        ihook.setcolumnValue(row_ori, 'MECM_ID', nvl(ihook.getColumnValue(row_ori,'IMP_RULE_ID'),ihook.getColumnValue(row_ori,'STG_MECM_ID')));
+        Select count(*) into v_temp  from nci_mec_map where mecm_id = ihook.getcolumnValue(row_ori,'MECM_ID');
+ 
+        if (v_temp= 0) then
+            rowsadd.extend;   rowsadd(rowsadd.last) := row_ori;
  --   raise_application_error(-20000,' Add');
- else
-     rowsupd.extend;   rowsupd(rowsupd.last) := row_ori;
---    raise_application_error(-20000,' update');
- end if;
- ihook.setColumnValue(row_ori,'CTL_VAL_STUS','UPDATED');
+        else
+        rowsupd.extend;   rowsupd(rowsupd.last) := row_ori;
+    end if;
+ 
+    ihook.setColumnValue(row_ori,'CTL_VAL_STUS','UPDATED');
      rows.extend;   rows(rows.last) := row_ori;
  
- end if; 
+    end if; 
  end loop;
  
   if (rowsadd.count>0) then
@@ -454,18 +454,18 @@ end;
     end if;
     
  if (rowsupd.count>0) then
-   action := t_actionrowset(rowsupd, 'Model Map - Characteristics (Hook)', 2,6,'update');
+   action := t_actionrowset(rowsupd, 'Model Map - Characteristics (Hook)', 2,1,'update');
         actions.extend;
         actions(actions.last) := action;
     end if;
   
-    
   if (rows.count>0) then
    action := t_actionrowset(rows, 'Model Map Import', 2,6,'update');
         actions.extend;
         actions(actions.last) := action;
+        hookoutput.actions := actions;
     end if;
-       hookoutput.actions := actions;
+    
  hookoutput.message:= 'New mapping inserted: ' || rowsadd.count || ' Mapping updated: ' || rowsupd.count;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
  nci_util.debugHook('GENERAL',v_data_out);
