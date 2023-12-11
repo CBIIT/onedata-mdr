@@ -662,3 +662,83 @@ commit;
 
 alter table DE add (PRNT_SUBSET_ITEM_ID number, PRNT_SUBSET_VER_NR number(4,2));
 
+alter table DE add (SUBSET_PRNT_IND number(1));
+
+
+  CREATE OR REPLACE VIEW VW_NCI_CRDC_DE AS
+  SELECT distinct ADMIN_ITEM.ITEM_ID,
+           ADMIN_ITEM.VER_NR,
+          CAST('.' || ADMIN_ITEM.ITEM_ID || '.' AS VARCHAR2(4000))    ITEM_ID_STR,
+           ADMIN_ITEM.ITEM_NM,
+           ADMIN_ITEM.ITEM_LONG_NM,
+           ADMIN_ITEM.ITEM_DESC,
+           ADMIN_ITEM.ADMIN_NOTES,
+           ADMIN_ITEM.CHNG_DESC_TXT,
+           ADMIN_ITEM.CREATION_DT,
+           ADMIN_ITEM.EFF_DT,
+           ADMIN_ITEM.ORIGIN,
+           ADMIN_ITEM.ORIGIN_ID,
+           ADMIN_ITEM.ORIGIN_ID_DN,
+           ADMIN_ITEM.UNRSLVD_ISSUE,
+           ADMIN_ITEM.UNTL_DT,
+           ADMIN_ITEM.CURRNT_VER_IND,
+           ADMIN_ITEM.REGSTR_STUS_ID,
+           ADMIN_ITEM.ADMIN_STUS_ID,
+           ADMIN_ITEM.CNTXT_NM_DN,
+           ADMIN_ITEM.CNTXT_ITEM_ID,
+           ADMIN_ITEM.CNTXT_VER_NR,
+           ADMIN_ITEM.CREAT_USR_ID,
+           ADMIN_ITEM.CREAT_USR_ID             CREAT_USR_ID_X,
+           ADMIN_ITEM.LST_UPD_USR_ID,
+           ADMIN_ITEM.LST_UPD_USR_ID           LST_UPD_USR_ID_X,
+           ADMIN_ITEM.FLD_DELETE,
+           ADMIN_ITEM.LST_DEL_DT,
+           ADMIN_ITEM.S2P_TRN_DT,
+           ADMIN_ITEM.LST_UPD_DT,
+           ADMIN_ITEM.CREAT_DT,
+           ADMIN_ITEM.NCI_IDSEQ,
+	   ext.csi_concat,
+           de.PRNT_SUBSET_ITEM_ID,
+	  de.PRNT_SUBSET_VER_NR,
+	  decode(de.PRNT_SUBSET_ITEM_ID, null, decode(nvl(SUBSET_PRNT_IND,0),0, '','Parent'), 'Subset')  SUBSET_DESC, 
+	  ADMIN_ITEM.ADMIN_ITEM_TYP_ID,
+	   ADMIN_ITEM.ITEM_DEEP_LINK,
+           ext.USED_BY                         CNTXT_AGG,
+           nvl(CRDC_NM.NM_DESC,admin_item.item_nm)                        CRDC_NM,
+           CRDC_DEF.DEF_DESC                 CRDC_DEF,
+               CODE_INSTR_REF_DESC CRDC_CODE_INSTR,
+            INSTR_REF_DESC                            CRDC_INSTR,
+          EXAMPL                           CRDC_EXMPL,
+            vd.VAL_DOM_TYP_ID	  FROM ADMIN_ITEM,
+           NCI_ADMIN_ITEM_EXT  ext,
+	      de, VALUE_DOM vd, nci_admin_item_rel r, vw_clsfctn_schm_item csi,
+       (  SELECT item_id, ver_nr,  
+       max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS', ref_desc) ) CODE_INSTR_REF_DESC,
+ --      max(decode(upper(obj_key_Desc),'CODING INSTRUCTIONS',ref_desc) ) CODE_INSTR_REF_DESC,
+       max(decode(upper(obj_key_Desc),'INSTRUCTIONS', ref_desc) ) INSTR_REF_DESC,
+       max(decode(upper(obj_key_Desc),'EXAMPLE', ref_desc) ) EXAMPL
+       FROM REF, OBJ_KEY WHERE REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   and obj_key.obj_typ_id = 1 and nvl(ref.fld_delete,0) = 0
+           AND UPPER(OBJ_KEY_DESC) in ('INSTRUCTIONS', 'CODING INSTRUCTIONS','EXAMPLE')  and NCI_CNTXT_ITEM_ID = 20000000047
+           group by item_id ,ver_nr)  CODE_INSTR,
+             (  SELECT item_id,ver_nr, max(nm_desc) nm_desc FROM ALT_NMS, OBJ_KEY WHERE NM_TYP_ID = OBJ_KEY.OBJ_KEY_ID   and obj_key.obj_typ_id =  11 
+             AND UPPER(OBJ_KEY_DESC)='CRDC ALT NAME' group by item_id, ver_nr)  CRDC_NM,
+           (  SELECT item_id, ver_nr, max(def_desc) def_desc FROM ALT_DEF, OBJ_KEY 
+           WHERE NCI_DEF_TYP_ID = OBJ_KEY.OBJ_KEY_ID   AND UPPER(OBJ_KEY_DESC)='CRDC DEFINITION'  and obj_key.obj_typ_id =  15 group by item_id, ver_nr)  CRDC_DEF        
+     WHERE     ADMIN_ITEM_TYP_ID = 4
+           and ADMIN_ITEM.ITEM_Id = de.item_id
+           and ADMIN_ITEM.VER_NR = DE.VER_NR
+           and de.VAL_DOM_ITEM_ID = vd.ITEM_ID
+	   and de.VAL_DOM_VER_NR = vd.VER_NR
+	   AND ADMIN_ITEM.ITEM_ID = EXT.ITEM_ID
+           AND ADMIN_ITEM.VER_NR = EXT.VER_NR
+           AND ADMIN_ITEM.ITEM_ID = CRDC_NM.ITEM_ID(+)
+           AND ADMIN_ITEM.VER_NR = CRDC_NM.VER_NR(+)
+ AND ADMIN_ITEM.ITEM_ID = CRDC_DEF.ITEM_ID(+)
+           AND ADMIN_ITEM.VER_NR = CRDC_DEF.VER_NR(+)
+ AND ADMIN_ITEM.ITEM_ID = CODE_INSTR.ITEM_ID(+)
+           AND ADMIN_ITEM.VER_NR = CODE_INSTR.VER_NR(+)
+	   and admin_item.item_id = r.c_item_id and admin_item.ver_nr = r.c_item_ver_nr and r.p_item_id = csi.item_id and r.p_item_ver_nr = csi.ver_nr 
+	   and csi.cs_item_id = 10466051 and r.rel_typ_id = 65
+--and ADMIN_ITEM.CNTXT_NM_DN = 'CRDC'
+and admin_item.regstr_stus_id = 2;
+
