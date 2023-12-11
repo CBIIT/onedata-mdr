@@ -660,4 +660,5 @@ insert into NCI_PROC_EXEC (log_id, job_step_desc, JOB_STEP_SP) values (6,'Load I
 insert into NCI_PROC_EXEC (log_id, job_step_desc, JOB_STEP_SP) values (7,'Load ICDO Concepts', 'nci_ext_import.load_icdo');
 commit;
 
+alter table DE add (PRNT_SUBSET_ITEM_ID number, PRNT_SUBSET_VER_NR number(4,2);
 
