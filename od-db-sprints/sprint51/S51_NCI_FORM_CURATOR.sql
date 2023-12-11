@@ -895,6 +895,13 @@ delete from sbrext.quest_contents_ext where qc_idseq =  v_idseq;
 delete from nci_admin_item_ext where item_id = v_id and ver_nr = v_ver_nr;
 delete from onedata_ra.nci_admin_item_ext where item_id = v_id and ver_nr = v_ver_nr;
 
+-- Form protocol
+delete from NCI_ADMIN_ITEM_REL an where
+an.REL_TYP_ID = 60 and an.c_item_id = v_id and an.c_item_ver_nr = v_ver_Nr ;
+delete from onedata_Ra.NCI_ADMIN_ITEM_REL an where
+an.REL_TYP_ID = 60 and an.c_item_id = v_id and an.c_item_ver_nr = v_ver_Nr ;
+commit;
+
 delete from nci_form where item_id = v_id and ver_nr = v_ver_nr;
 delete from onedata_ra.nci_form where item_id = v_id and ver_nr = v_ver_nr;
 
@@ -1055,10 +1062,13 @@ and atl_name = 'DEFINITION';*/
 
 delete from NCI_CSI_ALT_DEFNMS where NMDEF_ID in (select nm_id from alt_nms where item_id = v_id and ver_nr = v_ver_nr)
 and TYP_NM = 'DESIGNATION';
+delete from onedata_ra.NCI_CSI_ALT_DEFNMS where NMDEF_ID in (select nm_id from alt_nms where item_id = v_id and ver_nr = v_ver_nr)
+and TYP_NM = 'DESIGNATION';
 
 delete from NCI_CSI_ALT_DEFNMS where NMDEF_ID in (select def_id from alt_def where item_id = v_id and ver_nr = v_ver_nr)
 and TYP_NM = 'DEFINITION';
-
+delete from onedata_ra.NCI_CSI_ALT_DEFNMS where NMDEF_ID in (select def_id from alt_def where item_id = v_id and ver_nr = v_ver_nr)
+and TYP_NM = 'DEFINITION';
 
 delete from alt_nms where item_id = v_id and ver_nr = v_ver_nr;
 delete from onedata_ra.alt_nms where item_id = v_id and ver_nr = v_ver_nr;
