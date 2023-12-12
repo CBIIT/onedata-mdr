@@ -403,7 +403,7 @@ alter table NCI_STG_MEC_MAP add (TGT_FUNC_PARAM varchar2(1000));
   select  ' ' "DO_NOT_USE",
        ' ' "BATCH_USER",
        ' ' "BATCH_NAME",
-       ' ' "SEQ_ID",
+       rownum "SEQ_ID",
        map.mdl_map_item_id "MODEL_MAP_ID",
        map.mdl_map_ver_nr "MODEL_MAP_VERSION",
         map.mecm_id "MECM_ID", 
