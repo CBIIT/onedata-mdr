@@ -742,3 +742,116 @@ alter table DE add (SUBSET_desc VARCHAR2(20));
 --and ADMIN_ITEM.CNTXT_NM_DN = 'CRDC'
 and admin_item.regstr_stus_id = 2;
 
+
+alter table de disable all triggers;
+
+update de set Subset_desc = 'Parent' where (item_id, ver_nr) in 
+(Select p_item_id, p_item_ver_nr from nci_admin_item_rel where
+rel_typ_id = 84);
+commit;
+
+update de set (Subset_desc, prnt_subset_item_id, prnt_subset_ver_nr)  = (select 'Subset', p_item_id, p_item_ver_nr
+from nci_admin_item_rel where
+rel_typ_id = 84 and c_item_id = de.item_id and c_item_ver_nr = de.ver_nr)
+where (item_id, ver_nr) in (Select c_item_id, c_item_ver_nr from nci_admin_item_rel where
+rel_typ_id = 84);
+
+commit;
+
+alter table de enable all triggers;
+
+
+  CREATE OR REPLACE  VIEW VW_NCI_DE AS
+  SELECT ADMIN_ITEM.ITEM_ID,
+           ADMIN_ITEM.VER_NR,
+          CAST('.' || ADMIN_ITEM.ITEM_ID || '.' AS VARCHAR2(4000))    ITEM_ID_STR,
+           ADMIN_ITEM.ITEM_NM,
+           ADMIN_ITEM.ITEM_LONG_NM,
+           ADMIN_ITEM.ITEM_DESC,
+           ADMIN_ITEM.ADMIN_NOTES,
+           ADMIN_ITEM.CHNG_DESC_TXT,
+           ADMIN_ITEM.CREATION_DT,
+           ADMIN_ITEM.EFF_DT,
+           ADMIN_ITEM.ORIGIN,
+           ADMIN_ITEM.ORIGIN_ID,
+           ADMIN_ITEM.ORIGIN_ID_DN,
+           ADMIN_ITEM.UNRSLVD_ISSUE,
+           ADMIN_ITEM.UNTL_DT,
+           ADMIN_ITEM.CURRNT_VER_IND,
+           ADMIN_ITEM.REGSTR_STUS_ID,
+           ADMIN_ITEM.ADMIN_STUS_ID,
+           -- ADMIN_ITEM.REGSTR_STUS_NM_DN,
+           -- ADMIN_ITEM.ADMIN_STUS_NM_DN,
+           ADMIN_ITEM.CNTXT_NM_DN,
+           ADMIN_ITEM.CNTXT_ITEM_ID,
+           ADMIN_ITEM.CNTXT_VER_NR,
+           ADMIN_ITEM.CREAT_USR_ID,
+           ADMIN_ITEM.CREAT_USR_ID             CREAT_USR_ID_X,
+           ADMIN_ITEM.LST_UPD_USR_ID,
+           ADMIN_ITEM.LST_UPD_USR_ID           LST_UPD_USR_ID_X,
+           rs.NCI_DISP_ORDR                    REGSTR_STUS_DISP_ORD,
+           ws.NCI_DISP_ORDR                    ADMIN_STUS_DISP_ORD,
+           ADMIN_ITEM.FLD_DELETE,
+           ADMIN_ITEM.LST_DEL_DT,
+           ADMIN_ITEM.S2P_TRN_DT,
+           ADMIN_ITEM.LST_UPD_DT,
+           ADMIN_ITEM.CREAT_DT,
+           ADMIN_ITEM.NCI_IDSEQ,
+	   ext.csi_concat,
+	  de.subset_desc,
+	  de.prnt_subset_item_id,
+	  de.prnt_subset_ver_nr,
+           CNTXT.NCI_PRG_AREA_ID,
+           ADMIN_ITEM_TYP_ID,
+	   ADMIN_ITEM.ITEM_DEEP_LINK,
+       replace (ADMIN_ITEM.ITEM_NM_ID_VER,'|Data Element','') ITEM_NM_ID_VER,
+           ext.USED_BY                         CNTXT_AGG,
+           REF.PREF_QUEST_TXT                        PREF_QUEST_TXT,
+	   vd.VAL_DOM_TYP_ID	,
+          trim(SUBSTR (
+                 trim(ADMIN_ITEM.ITEM_LONG_NM)
+              || '||'
+              || trim(ADMIN_ITEM.ITEM_NM)
+              || '||'
+              || trim(ADMIN_ITEM.ITEM_DESC),1,
+              4290))
+              || '||'
+              ||
+              SUBSTR ( trim(REF_DESC.REF_DESC),
+             1,
+              30000)                            SEARCH_STR
+      FROM ADMIN_ITEM,
+           VW_CNTXT            CNTXT,
+       --    VALUE_DOM vd,
+           NCI_ADMIN_ITEM_EXT  ext,
+	   de, VALUE_DOM vd,
+           (SELECT item_id, ver_nr, ref_desc PREF_QUEST_TXT
+              FROM REF
+             WHERE ref_typ_id = 80) REF,
+           (  SELECT item_id,
+                     ver_nr,
+                     LISTAGG (ref_desc, '||' ON OVERFLOW TRUNCATE ) WITHIN GROUP (ORDER BY REF_DESC desc)    ref_desc
+                FROM REF, OBJ_KEY
+               WHERE     REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID
+                     AND LOWER (OBJ_KEY_DESC) LIKE '%question%'
+            GROUP BY item_id, ver_nr) ref_desc,
+           VW_REGSTR_STUS      rs,
+           VW_ADMIN_STUS       ws
+     WHERE     ADMIN_ITEM_TYP_ID = 4
+           and ADMIN_ITEM.ITEM_Id = de.item_id
+           and ADMIN_ITEM.VER_NR = DE.VER_NR
+           and de.VAL_DOM_ITEM_ID = vd.ITEM_ID
+	   and de.VAL_DOM_VER_NR = vd.VER_NR
+	   AND ADMIN_ITEM.ITEM_ID = EXT.ITEM_ID
+           AND ADMIN_ITEM.VER_NR = EXT.VER_NR
+           AND ADMIN_ITEM.ITEM_ID = REF.ITEM_ID(+)
+           AND ADMIN_ITEM.VER_NR = REF.VER_NR(+)
+           AND ADMIN_ITEM.ITEM_ID = ref_desc.ITEM_ID(+)
+           AND ADMIN_ITEM.VER_NR = ref_desc.VER_NR(+)
+           AND ADMIN_ITEM.REGSTR_STUS_ID = rs.STUS_ID(+)
+           AND ADMIN_ITEM.ADMIN_STUS_ID = ws.STUS_ID(+)
+           AND ADMIN_ITEM.CNTXT_ITEM_ID = CNTXT.ITEM_ID
+           AND ADMIN_ITEM.CNTXT_VER_NR = CNTXT.VER_NR;
+
+
+
