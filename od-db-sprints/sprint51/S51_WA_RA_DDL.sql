@@ -662,7 +662,7 @@ commit;
 
 alter table DE add (PRNT_SUBSET_ITEM_ID number, PRNT_SUBSET_VER_NR number(4,2));
 
-alter table DE add (SUBSET_PRNT_IND number(1));
+alter table DE add (SUBSET_desc VARCHAR2(20));
 
 
   CREATE OR REPLACE VIEW VW_NCI_CRDC_DE AS
@@ -700,7 +700,7 @@ alter table DE add (SUBSET_PRNT_IND number(1));
 	   ext.csi_concat,
            de.PRNT_SUBSET_ITEM_ID,
 	  de.PRNT_SUBSET_VER_NR,
-	  decode(de.PRNT_SUBSET_ITEM_ID, null, decode(nvl(SUBSET_PRNT_IND,0),0, '','Parent'), 'Subset')  SUBSET_DESC, 
+	DE.SUBSET_DESC, 
 	  ADMIN_ITEM.ADMIN_ITEM_TYP_ID,
 	   ADMIN_ITEM.ITEM_DEEP_LINK,
            ext.USED_BY                         CNTXT_AGG,
