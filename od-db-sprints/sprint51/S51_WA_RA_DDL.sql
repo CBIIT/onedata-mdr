@@ -1,167 +1,3 @@
-
-  CREATE OR REPLACE  VIEW VW_NCI_AI_CNCPT AS
-  SELECT  '5. Object Class' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
-		DE.VER_NR VER_NR,
-		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
-		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
-		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
-       FROM CNCPT_ADMIN_ITEM a, DE, DE_CONC where
-	a.ITEM_ID = DE_CONC.OBJ_CLS_ITEM_ID and
-	a.VER_NR = DE_CONC.OBJ_CLS_VER_NR and
-	DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID and
-	DE.DE_CONC_VER_NR = DE_CONC.VER_NR
-	union
-         SELECT '4. Property' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
-		DE.VER_NR VER_NR,
-		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
-		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
-        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND,  NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
-       FROM CNCPT_ADMIN_ITEM a, DE, DE_CONC where
-	a.ITEM_ID = DE_CONC.PROP_ITEM_ID and
-	a.VER_NR = DE_CONC.PROP_VER_NR and
-	DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID and
-	DE.DE_CONC_VER_NR = DE_CONC.VER_NR
-	union
-         SELECT '3. Representation Term' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
-		DE.VER_NR VER_NR,
-		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
-		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
-        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
-       FROM CNCPT_ADMIN_ITEM a, DE, VALUE_DOM VD where
-	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
-	a.VER_NR = VD.REP_CLS_VER_NR and
-	DE.VAL_DOM_ITEM_ID = VD.ITEM_ID and
-	DE.VAL_DOM_VER_NR = VD.VER_NR
-	union
-         SELECT '1. Value Meaning' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
-		DE.VER_NR VER_NR,
-		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
-		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
-        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
-       FROM CNCPT_ADMIN_ITEM a, DE, PERM_VAL PV where
-	a.ITEM_ID = PV.NCI_VAL_MEAN_ITEM_ID and
-	a.VER_NR = PV.NCI_VAL_MEAN_VER_NR and
-	DE.VAL_DOM_ITEM_ID = PV.VAL_DOM_ITEM_ID and
-	DE.VAL_DOM_VER_NR = PV.VAL_DOM_VER_NR and
-nvl(pv.fld_delete,0) = 0
-	union
-         SELECT '2. Value Domain' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
-		DE.VER_NR VER_NR,
-		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
-		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
-        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
-       FROM CNCPT_ADMIN_ITEM a, DE where
-	DE.VAL_DOM_ITEM_ID = a.ITEM_ID and
-	DE.VAL_DOM_VER_NR = a.VER_NR
-  union
-    SELECT  '2. Object Class' ALT_NMS_LVL, DEC.ITEM_ID  ITEM_ID,
-		DEC.VER_NR VER_NR,
-	a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
-		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
-		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
-       FROM CNCPT_ADMIN_ITEM a, DE_CONC DEC where
-	a.ITEM_ID = DEC.OBJ_CLS_ITEM_ID and
-	a.VER_NR = DEC.OBJ_CLS_VER_NR
-	union
-         SELECT '1. Property' ALT_NMS_LVL, DEC.ITEM_ID  ITEM_ID,
-		DEC.VER_NR VER_NR,
-	a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
-			a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
-        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
-       FROM CNCPT_ADMIN_ITEM a, DE_CONC DEC where
-	a.ITEM_ID = DEC.PROP_ITEM_ID and
-	a.VER_NR = DEC.PROP_VER_NR
-  union
-  SELECT  'Component Concept' ALT_NMS_LVL, a.ITEM_ID, a.VER_NR,
-	a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
-		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
-		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
-       FROM CNCPT_ADMIN_ITEM a
-   union
-      SELECT '2. Representation Term' ALT_NMS_LVL, VD.ITEM_ID  ITEM_ID,
-	VD.VER_NR VER_NR,
-		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
-		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
-        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
-       FROM CNCPT_ADMIN_ITEM a, VALUE_DOM VD where
-	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
-	a.VER_NR = VD.REP_CLS_VER_NR
-	union
-	SELECT '1. Value Meaning' ALT_NMS_LVL,  PV.VAL_DOM_ITEM_ID  ITEM_ID,
-		PV.VAL_DOM_VER_NR VER_NR,
-		PV.NCI_VAL_MEAN_ITEM_ID, PV.NCI_VAL_MEAN_VER_NR,
-		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
-        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
-		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
-       FROM CNCPT_ADMIN_ITEM a,  PERM_VAL PV where
-	a.ITEM_ID = PV.NCI_VAL_MEAN_ITEM_ID and
-	a.VER_NR = PV.NCI_VAL_MEAN_VER_NR
-and nvl(pv.fld_delete,0) = 0
-	union
-	SELECT  'Concept Relationship' ALT_NMS_LVL, 
-		a.P_ITEM_ID ITEM_ID, a.P_ITEM_VER_NR VER_NR,
-        a.P_ITEM_ID CORE_ITEM_ID, a.P_ITEM_VER_NR CORE_VER_NR,
-		a.C_ITEM_ID CNCPT_ITEM_ID, a.C_ITEM_VER_NR CNCPT_VER_NR,
-		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
-		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
-		a.LST_UPD_DT, 1 NCI_ORD, 1 NCI_PRMRY_IND , '1' NCI_CNCPT_VAL,
-		'1' NCI_PRMRY_IND_TXT, REL_TYP_ID
-       FROM NCI_CNCPT_REL a
-union
-	SELECT  'External Terminology Relationship' ALT_NMS_LVL, 
-		xmap.ITEM_ID ITEM_ID, xmap.VER_NR VER_NR,
-		xmap.ITEM_ID CORE_ITEM_ID, xmap.VER_NR CORE_VER_NR,
-		nonai.ITEM_ID CNCPT_ITEM_ID, nonai.VER_NR CNCPT_VER_NR,
-		xmap.CREAT_DT, xmap.CREAT_USR_ID, xmap.LST_UPD_USR_ID,
-		xmap.FLD_DELETE, xmap.LST_DEL_DT, xmap.S2P_TRN_DT,
-		xmap.LST_UPD_DT, 1 NCI_ORD, 1 NCI_PRMRY_IND , xmap.xmap_cd NCI_CNCPT_VAL,
-		'1' NCI_PRMRY_IND_TXT, 125
-       FROM admin_item nonai, cncpt noncncpt, NCI_ADMIN_ITEM_XMAP xmap
-where nonai.ITEM_LONG_NM = xmap.XMAP_CD and noncncpt.EVS_SRC_ID = xmap.EVS_SRC_ID
-and nonai.item_id = noncncpt.item_id and nonai.ver_nr = noncncpt.ver_nr
-union
-	SELECT  'External Terminology Relationship' ALT_NMS_LVL, 
-		nonai.ITEM_ID ITEM_ID, nonai.VER_NR VER_NR,
-		nonai.ITEM_ID CORE_ITEM_ID, nonai.VER_NR CORE_VER_NR,
-		xmap.ITEM_ID CNCPT_ITEM_ID, xmap.VER_NR CNCPT_VER_NR,
-		xmap.CREAT_DT, xmap.CREAT_USR_ID, xmap.LST_UPD_USR_ID,
-		xmap.FLD_DELETE, xmap.LST_DEL_DT, xmap.S2P_TRN_DT,
-		xmap.LST_UPD_DT, 1 NCI_ORD, 1 NCI_PRMRY_IND , xmap.xmap_cd NCI_CNCPT_VAL,
-		'1' NCI_PRMRY_IND_TXT, 125
-       FROM admin_item nonai, cncpt noncncpt, NCI_ADMIN_ITEM_XMAP xmap
-where nonai.ITEM_LONG_NM = xmap.XMAP_CD and noncncpt.EVS_SRC_ID = xmap.EVS_SRC_ID
-and nonai.item_id = noncncpt.item_id and nonai.ver_nr = noncncpt.ver_nr
-;
-
 drop materialized view vw_cncpt;
 
   CREATE MATERIALIZED VIEW VW_CNCPT 
@@ -314,6 +150,111 @@ create table SAG_LOAD_ICDO_RAW
 
 alter table NCI_MEC_MAP add TGT_FUNC_PARAM varchar2(1000);
 
+drop materialized view MVW_CSI_NODE_DE_REL;
+
+  CREATE MATERIALIZED VIEW MVW_CSI_NODE_DE_REL
+  AS SELECT  distinct ai.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           csi.BASE_ID P_ITEM_ID,
+           csi.BASE_VER_NR P_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           de.PREF_QUEST_TXT, 
+	   e.USED_BY,
+	   'CSI' LVL,
+       csi.BASE_ID || 'v' || csi.BASE_VER_NR P_ITEM_ID_VER
+           FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, de , nci_admin_item_ext e, MVW_CSI_REL csi, ADMIN_ITEM csix
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
+and csi.ITEM_ID= ak.P_ITEM_ID and csi.VER_NR = ak.P_item_ver_nr
+and csix.ITEM_ID=csi.ITEM_ID and csix.VER_NR=csi.VER_NR and csix.admin_stus_nm_dn ='RELEASED'
+--and nvl(ai.CURRNT_VER_IND,0) = 1 
+and nvl(ak.fld_delete,0) = 0
+    UNION
+    SELECT distinct ai.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           csi.CS_ITEM_ID,
+           csi.CS_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+       de.PREF_QUEST_TXT,
+e.USED_BY, 'CS' LVL,
+  csi.CS_ITEM_ID || 'v' || csi.CS_ITEM_VER_NR P_ITEM_ID_VER
+      FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi, de, nci_admin_item_Ext e, ADMIN_ITEM csix
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR
+           AND ak.P_ITEM_ID = csi.ITEM_ID
+           AND ak.P_ITEM_VER_NR = csi.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
+and csix.ITEM_ID=csi.ITEM_ID and csix.VER_NR =csi.VER_NR and csix.admin_stus_nm_dn ='RELEASED'
+--and nvl(ai.CURRNT_VER_IND,0) = 1 
+union
+SELECT distinct ai.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           cs.CNTXT_ITEM_ID,
+           cs.CNTXT_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+            de.PREF_QUEST_TXT,
+e.USED_BY, 'Context' LVL,
+  cs.CNTXT_ITEM_ID || 'v' || cs.CNTXT_VER_NR P_ITEM_ID_VER
+      FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi, VW_CLSFCTN_SCHM cs, de, nci_admin_item_ext e, ADMIN_ITEM csix
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR
+           AND ak.P_ITEM_ID = csi.ITEM_ID
+           AND ak.P_ITEM_VER_NR = csi.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65
+and csi.CS_ITEM_ID = cs.ITEM_ID and csi.CS_ITEM_VER_NR = cs.VER_NR and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING') 
+and cs.admin_stus_nm_dn ='RELEASED'
+and csix.ITEM_ID=csi.ITEM_ID and csix.VER_NR =csi.VER_NR and csix.admin_stus_nm_dn ='RELEASED';
+
 drop materialized view MVW_CSI_TREE_CDE;
 set escape on;
 
@@ -330,7 +271,7 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
     0 TYP_ID,
 null  P_ITEM_VER
 from 
-ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='Context' and x.ADMIN_STUS_NM_DN='RELEASED' group by x.p_item_id , 
+ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='Context' and x.ADMIN_STUS_NM_DN not like '%RETIRED%' group by x.p_item_id , 
 x.p_item_ver_nr) y , nci_mdr_cntrl c,nci_mdr_cntrl c1
  where ADMIN_ITEM_TYP_ID = 8 and item_id = y.p_item_id (+) and ver_nr = y.p_item_ver_nr (+) and upper(cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
  and c1.param_nm='DEEP_LINK'
@@ -347,7 +288,7 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
       cs.CLSFCTN_SCHM_TYP_ID,
 CNTXT_ITEM_ID || 'v'|| CNTXT_VER_NR P_ITEM_VER
  from 
-ADMIN_ITEM ai, clsfctn_schm cs,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CS' and x.ADMIN_STUS_NM_DN='RELEASED' group by x.p_item_id , 
+ADMIN_ITEM ai, clsfctn_schm cs,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CS' and x.ADMIN_STUS_NM_DN not like '%RETIRED%' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c,nci_mdr_cntrl c1
  where ADMIN_ITEM_TYP_ID = 9 and ai.item_id =cs.item_id and ai.ver_nr = cs.ver_nr and  ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and admin_stus_nm_dn ='RELEASED' and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
  and c1.param_nm='DEEP_LINK'
@@ -364,12 +305,12 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********'  CHNG_NOTES,
     csi.csi_typ_id,
 csi.CS_ITEM_ID || 'v'|| csi.CS_ITEM_VER_NR P_ITEM_VER 
-from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' and x.ADMIN_STUS_NM_DN='RELEASED' group by x.p_item_id , 
+from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' and x.ADMIN_STUS_NM_DN not like '%RETIRED%' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c,nci_mdr_cntrl c1
  where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is null and csi.CS_ITEM_ID is not null and
  ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
   and c1.param_nm='DEEP_LINK'
- and ai.admin_stus_nm_dn = 'RELEASED'
+ and ai.admin_stus_nm_dn ='RELEASED'
  union
  select 100 LVL, csi.P_ITEM_ID P_ITEM_ID, csi.P_ITEM_VER_NR P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM, 
    ai.ITEM_NM ||  ' (' || nvl(y.cnt,'0') || ')' , 
@@ -383,12 +324,12 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES,
     csi.CSI_TYP_ID,
 csi.P_ITEM_ID || 'v'|| csi.P_ITEM_VER_NR P_ITEM_VER 
- from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' and x.ADMIN_STUS_NM_DN='RELEASED' group by x.p_item_id , 
+ from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_DE_REL x where lvl='CSI' and x.ADMIN_STUS_NM_DN not like '%RETIRED%' group by x.p_item_id , 
 x.p_item_ver_nr) y, nci_mdr_cntrl c,nci_mdr_cntrl c1
  where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null and csi.CS_ITEM_ID is not null and
  ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
  and c1.param_nm='DEEP_LINK'
- and ai.admin_stus_nm_dn = 'RELEASED';
+ and ai.admin_stus_nm_dn ='RELEASED';
 
 alter table NCI_MDL_ELMNT_CHAR add PK_IND number(1) default 0;
 
@@ -499,114 +440,6 @@ insert into obj_key (obj_key_id, obj_key_desc, obj_typ_id) values (126,'Parent o
 commit;
 
 
-
-drop materialized view MVW_CSI_NODE_DE_REL;
-
-  CREATE MATERIALIZED VIEW MVW_CSI_NODE_DE_REL
-  AS SELECT  distinct ai.CREAT_DT,
-           ai.CREAT_USR_ID,
-           ai.LST_UPD_USR_ID,
-           ai.LST_UPD_DT,
-           ai.S2P_TRN_DT,
-           ai.LST_DEL_DT,
-           ai.FLD_DELETE,
-           ai.ITEM_NM,
-           ai.ITEM_LONG_NM,
-           ai.ITEM_ID,
-           ai.VER_NR,
-           ai.ITEM_DESC,
-           ai.CNTXT_NM_DN,
-           ai.ADMIN_STUS_NM_DN,
-           ai.REGSTR_STUS_NM_DN,
-           csi.BASE_ID P_ITEM_ID,
-           csi.BASE_VER_NR P_ITEM_VER_NR,
-           ai.CNTXT_ITEM_ID,
-           ai.CNTXT_VER_NR,
-           ai.ADMIN_STUS_ID,
-           ai.REGSTR_STUS_ID,
-           de.PREF_QUEST_TXT, 
-	   e.USED_BY,
-	   'CSI' LVL,
-       csi.BASE_ID || 'v' || csi.BASE_VER_NR P_ITEM_ID_VER
-           FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, de , nci_admin_item_ext e, MVW_CSI_REL csi, ADMIN_ITEM csix
-     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
-           AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn = 'RELEASED'
-and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
-and csi.ITEM_ID= ak.P_ITEM_ID and csi.VER_NR = ak.P_item_ver_nr
-and csix.ITEM_ID=csi.ITEM_ID and csix.VER_NR=csi.VER_NR and csix.admin_stus_nm_dn = 'RELEASED'
---and nvl(ai.CURRNT_VER_IND,0) = 1 
-and nvl(ak.fld_delete,0) = 0
-    UNION
-    SELECT distinct ai.CREAT_DT,
-           ai.CREAT_USR_ID,
-           ai.LST_UPD_USR_ID,
-           ai.LST_UPD_DT,
-           ai.S2P_TRN_DT,
-           ai.LST_DEL_DT,
-           ai.FLD_DELETE,
-           ai.ITEM_NM,
-           ai.ITEM_LONG_NM,
-           ai.ITEM_ID,
-           ai.VER_NR,
-           ai.ITEM_DESC,
-           ai.CNTXT_NM_DN,
-           ai.ADMIN_STUS_NM_DN,
-           ai.REGSTR_STUS_NM_DN,
-           csi.CS_ITEM_ID,
-           csi.CS_ITEM_VER_NR,
-           ai.CNTXT_ITEM_ID,
-           ai.CNTXT_VER_NR,
-           ai.ADMIN_STUS_ID,
-           ai.REGSTR_STUS_ID,
-       de.PREF_QUEST_TXT,
-e.USED_BY, 'CS' LVL,
-  csi.CS_ITEM_ID || 'v' || csi.CS_ITEM_VER_NR P_ITEM_ID_VER
-      FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi, de, nci_admin_item_Ext e, ADMIN_ITEM csix
-     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
-           AND ak.C_ITEM_VER_NR = ai.VER_NR
-           AND ak.P_ITEM_ID = csi.ITEM_ID
-           AND ak.P_ITEM_VER_NR = csi.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn = 'RELEASED' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
-and csix.ITEM_ID=csi.ITEM_ID and csix.VER_NR =csi.VER_NR and csix.admin_stus_nm_dn = 'RELEASED'
---and nvl(ai.CURRNT_VER_IND,0) = 1 
-union
-SELECT distinct ai.CREAT_DT,
-           ai.CREAT_USR_ID,
-           ai.LST_UPD_USR_ID,
-           ai.LST_UPD_DT,
-           ai.S2P_TRN_DT,
-           ai.LST_DEL_DT,
-           ai.FLD_DELETE,
-           ai.ITEM_NM,
-           ai.ITEM_LONG_NM,
-           ai.ITEM_ID,
-           ai.VER_NR,
-           ai.ITEM_DESC,
-           ai.CNTXT_NM_DN,
-           ai.ADMIN_STUS_NM_DN,
-           ai.REGSTR_STUS_NM_DN,
-           cs.CNTXT_ITEM_ID,
-           cs.CNTXT_VER_NR,
-           ai.CNTXT_ITEM_ID,
-           ai.CNTXT_VER_NR,
-           ai.ADMIN_STUS_ID,
-           ai.REGSTR_STUS_ID,
-            de.PREF_QUEST_TXT,
-e.USED_BY, 'Context' LVL,
-  cs.CNTXT_ITEM_ID || 'v' || cs.CNTXT_VER_NR P_ITEM_ID_VER
-      FROM NCI_ADMIN_ITEM_REL ak, ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi, VW_CLSFCTN_SCHM cs, de, nci_admin_item_ext e, ADMIN_ITEM csix
-     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
-           AND ak.C_ITEM_VER_NR = ai.VER_NR
-           AND ak.P_ITEM_ID = csi.ITEM_ID
-           AND ak.P_ITEM_VER_NR = csi.VER_NR and ai.admin_item_typ_id = 4 and ak.rel_typ_id = 65
-and csi.CS_ITEM_ID = cs.ITEM_ID and csi.CS_ITEM_VER_NR = cs.VER_NR and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
-and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn ='RELEASED' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING') 
-and cs.admin_stus_nm_dn ='RELEASED'
-and csix.ITEM_ID=csi.ITEM_ID and csix.VER_NR =csi.VER_NR and csix.admin_stus_nm_dn = 'RELEASED';
-
-
-
   CREATE OR REPLACE  VIEW VW_CNCPT_XMAP 
   as 
   SELECT XMAP.ITEM_ID, XMAP.VER_NR, 
@@ -629,7 +462,7 @@ and csix.ITEM_ID=csi.ITEM_ID and csix.VER_NR =csi.VER_NR and csix.admin_stus_nm_
 
 
 
-  CREATE OR REPLACE  VIEW VW_NCI_MDL_MAP_FOR_VIEW
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW VW_NCI_MDL_MAP_FOR_VIEW ("MDL_ITEM_ID", "MDL_VER_NR", "MDL_MAP_ITEM_ID", "MDL_MAP_VER_NR", "LVL_TYP", "SRC_MDL_ITEM_ID", "SRC_MDL_VER_NR", "SRC_MDL_ITEM_NM", "CREAT_DT", "CREAT_USR_ID", "LST_UPD_USR_ID", "FLD_DELETE", "LST_DEL_DT", "S2P_TRN_DT", "LST_UPD_DT", "TGT_MDL_ITEM_ID", "TGT_MDL_VER_NR", "TGT_MDL_ITEM_NM") DEFAULT COLLATION "USING_NLS_COMP"  AS 
   select distinct s.item_id MDL_ITEM_ID, s.ver_nr MDL_VER_NR, map.item_id MDL_MAP_ITEM_ID, map.ver_nr MDL_MAP_VER_NR,
 'Source' LVL_TYP, s.item_id src_mdl_item_id, s.ver_nr src_mdl_ver_nr, s.item_nm 
 src_mdl_item_nm,  sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' 
@@ -854,7 +687,7 @@ alter table de enable all triggers;
            AND ADMIN_ITEM.CNTXT_VER_NR = CNTXT.VER_NR;
 
 
-  CREATE OR REPLACE  VIEW VW_NCI_PCDC_DE AS
+   CREATE OR REPLACE FORCE EDITIONABLE VIEW VW_NCI_PCDC_DE ("ITEM_ID", "VER_NR", "ITEM_ID_STR", "ITEM_NM", "ITEM_LONG_NM", "ITEM_DESC", "ADMIN_NOTES", "CHNG_DESC_TXT", "CREATION_DT", "EFF_DT", "ORIGIN", "ORIGIN_ID", "ORIGIN_ID_DN", "UNRSLVD_ISSUE", "UNTL_DT", "CURRNT_VER_IND", "REGSTR_STUS_ID", "ADMIN_STUS_ID", "CNTXT_NM_DN", "CNTXT_ITEM_ID", "CNTXT_VER_NR", "CREAT_USR_ID", "CREAT_USR_ID_X", "LST_UPD_USR_ID", "LST_UPD_USR_ID_X", "FLD_DELETE", "LST_DEL_DT", "S2P_TRN_DT", "LST_UPD_DT", "CREAT_DT", "NCI_IDSEQ", "CSI_CONCAT", "SUBSET_DESC", "PRNT_SUBSET_ITEM_ID", "PRNT_SUBSET_VER_NR", "ADMIN_ITEM_TYP_ID", "ITEM_DEEP_LINK", "CNTXT_AGG", "PCDC_NM", "PCDC_DEF", "PCDC_CODE_INSTR", "PCDC_INSTR", "PCDC_EXMPL", "DEC_ID", "DEC_VER", "VAL_DOM_TYP_ID", "VD_ID", "VD_VER", "PREF_QUEST_TXT") DEFAULT COLLATION "USING_NLS_COMP"  AS 
   SELECT distinct ADMIN_ITEM.ITEM_ID,
            ADMIN_ITEM.VER_NR,
           CAST('.' || ADMIN_ITEM.ITEM_ID || '.' AS VARCHAR2(4000))    ITEM_ID_STR,
@@ -945,13 +778,176 @@ alter table de enable all triggers;
            AND ADMIN_ITEM.ITEM_ID = ref_desc.ITEM_ID(+)
            AND ADMIN_ITEM.VER_NR = ref_desc.VER_NR(+)
 	   and admin_item.item_id = r.c_item_id and admin_item.ver_nr = r.c_item_ver_nr and r.p_item_id = csi.item_id and r.p_item_ver_nr = csi.ver_nr 
-	   and csi.cs_item_id = 60052917 
+	   and csi.cs_item_id = 13954630 
        and r.rel_typ_id = 65
---and ADMIN_ITEM.CNTXT_NM_DN = 'Pediatric Cancer'
---and admin_item.regstr_stus_id != 9
---and admin_stus_nm_dn not like '%RETIRED%';
+    --   and admin_item.regstr_stus_id not in (9)
+       and admin_item.admin_stus_nm_dn not like '%RETIRED%';
+
+--relocating vw_nci_ai_cncpt to the bottom
+CREATE OR REPLACE  VIEW VW_NCI_AI_CNCPT AS
+  SELECT  '5. Object Class' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+       FROM CNCPT_ADMIN_ITEM a, DE, DE_CONC where
+	a.ITEM_ID = DE_CONC.OBJ_CLS_ITEM_ID and
+	a.VER_NR = DE_CONC.OBJ_CLS_VER_NR and
+	DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID and
+	DE.DE_CONC_VER_NR = DE_CONC.VER_NR
+	union
+         SELECT '4. Property' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND,  NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+       FROM CNCPT_ADMIN_ITEM a, DE, DE_CONC where
+	a.ITEM_ID = DE_CONC.PROP_ITEM_ID and
+	a.VER_NR = DE_CONC.PROP_VER_NR and
+	DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID and
+	DE.DE_CONC_VER_NR = DE_CONC.VER_NR
+	union
+         SELECT '3. Representation Term' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+       FROM CNCPT_ADMIN_ITEM a, DE, VALUE_DOM VD where
+	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
+	a.VER_NR = VD.REP_CLS_VER_NR and
+	DE.VAL_DOM_ITEM_ID = VD.ITEM_ID and
+	DE.VAL_DOM_VER_NR = VD.VER_NR
+	union
+         SELECT '1. Value Meaning' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+       FROM CNCPT_ADMIN_ITEM a, DE, PERM_VAL PV where
+	a.ITEM_ID = PV.NCI_VAL_MEAN_ITEM_ID and
+	a.VER_NR = PV.NCI_VAL_MEAN_VER_NR and
+	DE.VAL_DOM_ITEM_ID = PV.VAL_DOM_ITEM_ID and
+	DE.VAL_DOM_VER_NR = PV.VAL_DOM_VER_NR and
+nvl(pv.fld_delete,0) = 0
+	union
+         SELECT '2. Value Domain' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
+		DE.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+       FROM CNCPT_ADMIN_ITEM a, DE where
+	DE.VAL_DOM_ITEM_ID = a.ITEM_ID and
+	DE.VAL_DOM_VER_NR = a.VER_NR
+  union
+    SELECT  '2. Object Class' ALT_NMS_LVL, DEC.ITEM_ID  ITEM_ID,
+		DEC.VER_NR VER_NR,
+	a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+       FROM CNCPT_ADMIN_ITEM a, DE_CONC DEC where
+	a.ITEM_ID = DEC.OBJ_CLS_ITEM_ID and
+	a.VER_NR = DEC.OBJ_CLS_VER_NR
+	union
+         SELECT '1. Property' ALT_NMS_LVL, DEC.ITEM_ID  ITEM_ID,
+		DEC.VER_NR VER_NR,
+	a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+			a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+       FROM CNCPT_ADMIN_ITEM a, DE_CONC DEC where
+	a.ITEM_ID = DEC.PROP_ITEM_ID and
+	a.VER_NR = DEC.PROP_VER_NR
+  union
+  SELECT  'Component Concept' ALT_NMS_LVL, a.ITEM_ID, a.VER_NR,
+	a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+       FROM CNCPT_ADMIN_ITEM a
+   union
+      SELECT '2. Representation Term' ALT_NMS_LVL, VD.ITEM_ID  ITEM_ID,
+	VD.VER_NR VER_NR,
+		a.ITEM_ID CORE_ITEM_ID, a.VER_NR CORE_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+       FROM CNCPT_ADMIN_ITEM a, VALUE_DOM VD where
+	a.ITEM_ID = VD.REP_CLS_ITEM_ID and
+	a.VER_NR = VD.REP_CLS_VER_NR
+	union
+	SELECT '1. Value Meaning' ALT_NMS_LVL,  PV.VAL_DOM_ITEM_ID  ITEM_ID,
+		PV.VAL_DOM_VER_NR VER_NR,
+		PV.NCI_VAL_MEAN_ITEM_ID, PV.NCI_VAL_MEAN_VER_NR,
+		a.CNCPT_ITEM_ID, a.CNCPT_VER_NR,
+        	a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, a.NCI_ORD, a.NCI_PRMRY_IND, a.NCI_CNCPT_VAL,
+		decode(a.nci_prmry_ind, 1, 'Yes', 'Qualifier') NCI_PRMRY_IND_TXT,75 REL_TYP_ID
+       FROM CNCPT_ADMIN_ITEM a,  PERM_VAL PV where
+	a.ITEM_ID = PV.NCI_VAL_MEAN_ITEM_ID and
+	a.VER_NR = PV.NCI_VAL_MEAN_VER_NR
+and nvl(pv.fld_delete,0) = 0
+	union
+	SELECT  'Concept Relationship' ALT_NMS_LVL, 
+		a.P_ITEM_ID ITEM_ID, a.P_ITEM_VER_NR VER_NR,
+        a.P_ITEM_ID CORE_ITEM_ID, a.P_ITEM_VER_NR CORE_VER_NR,
+		a.C_ITEM_ID CNCPT_ITEM_ID, a.C_ITEM_VER_NR CNCPT_VER_NR,
+		a.CREAT_DT, a.CREAT_USR_ID, a.LST_UPD_USR_ID,
+		a.FLD_DELETE, a.LST_DEL_DT, a.S2P_TRN_DT,
+		a.LST_UPD_DT, 1 NCI_ORD, 1 NCI_PRMRY_IND , '1' NCI_CNCPT_VAL,
+		'1' NCI_PRMRY_IND_TXT, REL_TYP_ID
+       FROM NCI_CNCPT_REL a
+union
+	SELECT  'External Terminology Relationship' ALT_NMS_LVL, 
+		xmap.ITEM_ID ITEM_ID, xmap.VER_NR VER_NR,
+		xmap.ITEM_ID CORE_ITEM_ID, xmap.VER_NR CORE_VER_NR,
+		nonai.ITEM_ID CNCPT_ITEM_ID, nonai.VER_NR CNCPT_VER_NR,
+		xmap.CREAT_DT, xmap.CREAT_USR_ID, xmap.LST_UPD_USR_ID,
+		xmap.FLD_DELETE, xmap.LST_DEL_DT, xmap.S2P_TRN_DT,
+		xmap.LST_UPD_DT, 1 NCI_ORD, 1 NCI_PRMRY_IND , xmap.xmap_cd NCI_CNCPT_VAL,
+		'1' NCI_PRMRY_IND_TXT, 125
+       FROM admin_item nonai, cncpt noncncpt, NCI_ADMIN_ITEM_XMAP xmap
+where nonai.ITEM_LONG_NM = xmap.XMAP_CD and noncncpt.EVS_SRC_ID = xmap.EVS_SRC_ID
+and nonai.item_id = noncncpt.item_id and nonai.ver_nr = noncncpt.ver_nr
+union
+	SELECT  'External Terminology Relationship' ALT_NMS_LVL, 
+		nonai.ITEM_ID ITEM_ID, nonai.VER_NR VER_NR,
+		nonai.ITEM_ID CORE_ITEM_ID, nonai.VER_NR CORE_VER_NR,
+		xmap.ITEM_ID CNCPT_ITEM_ID, xmap.VER_NR CNCPT_VER_NR,
+		xmap.CREAT_DT, xmap.CREAT_USR_ID, xmap.LST_UPD_USR_ID,
+		xmap.FLD_DELETE, xmap.LST_DEL_DT, xmap.S2P_TRN_DT,
+		xmap.LST_UPD_DT, 1 NCI_ORD, 1 NCI_PRMRY_IND , xmap.xmap_cd NCI_CNCPT_VAL,
+		'1' NCI_PRMRY_IND_TXT, 125
+       FROM admin_item nonai, cncpt noncncpt, NCI_ADMIN_ITEM_XMAP xmap
+where nonai.ITEM_LONG_NM = xmap.XMAP_CD and noncncpt.EVS_SRC_ID = xmap.EVS_SRC_ID
+and nonai.item_id = noncncpt.item_id and nonai.ver_nr = noncncpt.ver_nr
 ;
 
+set escape off;
 
 
 
