@@ -761,7 +761,7 @@ alter table de enable all triggers;
             GROUP BY item_id, ver_nr) ref_desc  ,
       (SELECT item_id, ver_nr, LISTAGG(item_nm, ',') WITHIN GROUP (ORDER by ITEM_ID) AS CSI_concat
 FROM (select distinct r.c_item_id item_id,r.c_item_ver_nr ver_nr, x.item_nm from vw_CLSFCTN_SCHM_ITEM x, NCI_ADMIN_ITEM_REL r
-where  x.item_id = r.p_item_id and x.ver_nr = r.p_item_ver_nr and r.rel_typ_id = 65 and x.CS_item_id = 60052917) group by item_id, ver_nr) dom
+where  x.item_id = r.p_item_id and x.ver_nr = r.p_item_ver_nr and r.rel_typ_id = 65 and x.CS_item_id = 13954630) group by item_id, ver_nr) dom
      WHERE     ADMIN_ITEM_TYP_ID = 4
            and ADMIN_ITEM.ITEM_Id = de.item_id
            and ADMIN_ITEM.VER_NR = DE.VER_NR
@@ -782,7 +782,7 @@ where  x.item_id = r.p_item_id and x.ver_nr = r.p_item_ver_nr and r.rel_typ_id =
 	     AND ADMIN_ITEM.ITEM_ID = dom.ITEM_ID(+)
            AND ADMIN_ITEM.VER_NR = dom.VER_NR(+)
 	   and admin_item.item_id = r.c_item_id and admin_item.ver_nr = r.c_item_ver_nr and r.p_item_id = csi.item_id and r.p_item_ver_nr = csi.ver_nr 
-	   and csi.cs_item_id = 60052917 
+	   and csi.cs_item_id = 13954630 
        and r.rel_typ_id = 65
      --  and admin_item.regstr_stus_id not in (9)
        and admin_item.admin_stus_nm_dn not like '%RETIRED%';
