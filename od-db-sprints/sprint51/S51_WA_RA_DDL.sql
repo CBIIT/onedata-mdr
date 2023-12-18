@@ -686,8 +686,7 @@ alter table de enable all triggers;
            AND ADMIN_ITEM.CNTXT_ITEM_ID = CNTXT.ITEM_ID
            AND ADMIN_ITEM.CNTXT_VER_NR = CNTXT.VER_NR;
 
-
-   CREATE OR REPLACE FORCE EDITIONABLE VIEW VW_NCI_PCDC_DE ("ITEM_ID", "VER_NR", "ITEM_ID_STR", "ITEM_NM", "ITEM_LONG_NM", "ITEM_DESC", "ADMIN_NOTES", "CHNG_DESC_TXT", "CREATION_DT", "EFF_DT", "ORIGIN", "ORIGIN_ID", "ORIGIN_ID_DN", "UNRSLVD_ISSUE", "UNTL_DT", "CURRNT_VER_IND", "REGSTR_STUS_ID", "ADMIN_STUS_ID", "CNTXT_NM_DN", "CNTXT_ITEM_ID", "CNTXT_VER_NR", "CREAT_USR_ID", "CREAT_USR_ID_X", "LST_UPD_USR_ID", "LST_UPD_USR_ID_X", "FLD_DELETE", "LST_DEL_DT", "S2P_TRN_DT", "LST_UPD_DT", "CREAT_DT", "NCI_IDSEQ", "CSI_CONCAT", "SUBSET_DESC", "PRNT_SUBSET_ITEM_ID", "PRNT_SUBSET_VER_NR", "ADMIN_ITEM_TYP_ID", "ITEM_DEEP_LINK", "CNTXT_AGG", "PCDC_NM", "PCDC_DEF", "PCDC_CODE_INSTR", "PCDC_INSTR", "PCDC_EXMPL", "DEC_ID", "DEC_VER", "VAL_DOM_TYP_ID", "VD_ID", "VD_VER", "PREF_QUEST_TXT") DEFAULT COLLATION "USING_NLS_COMP"  AS 
+  CREATE OR REPLACE  VIEW VW_NCI_PCDC_DE AS
   SELECT distinct ADMIN_ITEM.ITEM_ID,
            ADMIN_ITEM.VER_NR,
           CAST('.' || ADMIN_ITEM.ITEM_ID || '.' AS VARCHAR2(4000))    ITEM_ID_STR,
@@ -719,7 +718,7 @@ alter table de enable all triggers;
            ADMIN_ITEM.LST_UPD_DT,
            ADMIN_ITEM.CREAT_DT,
            ADMIN_ITEM.NCI_IDSEQ,
-	   ext.csi_concat,
+	   dom.csi_concat,
            de.subset_desc,
 	  de.prnt_subset_item_id,
 	  de.prnt_subset_ver_nr,
@@ -759,7 +758,10 @@ alter table de enable all triggers;
                 FROM REF, OBJ_KEY
                WHERE     REF_TYP_ID = OBJ_KEY.OBJ_KEY_ID
                      AND LOWER (OBJ_KEY_DESC) LIKE '%question%'
-            GROUP BY item_id, ver_nr) ref_desc        
+            GROUP BY item_id, ver_nr) ref_desc  ,
+      (SELECT item_id, ver_nr, LISTAGG(item_nm, ',') WITHIN GROUP (ORDER by ITEM_ID) AS CSI_concat
+FROM (select distinct r.c_item_id item_id,r.c_item_ver_nr ver_nr, x.item_nm from vw_CLSFCTN_SCHM_ITEM x, NCI_ADMIN_ITEM_REL r
+where  x.item_id = r.p_item_id and x.ver_nr = r.p_item_ver_nr and r.rel_typ_id = 65 and x.CS_item_id = 60052917) group by item_id, ver_nr) dom
      WHERE     ADMIN_ITEM_TYP_ID = 4
            and ADMIN_ITEM.ITEM_Id = de.item_id
            and ADMIN_ITEM.VER_NR = DE.VER_NR
@@ -777,11 +779,14 @@ alter table de enable all triggers;
            AND ADMIN_ITEM.VER_NR = REF.VER_NR(+)
            AND ADMIN_ITEM.ITEM_ID = ref_desc.ITEM_ID(+)
            AND ADMIN_ITEM.VER_NR = ref_desc.VER_NR(+)
+	     AND ADMIN_ITEM.ITEM_ID = dom.ITEM_ID(+)
+           AND ADMIN_ITEM.VER_NR = dom.VER_NR(+)
 	   and admin_item.item_id = r.c_item_id and admin_item.ver_nr = r.c_item_ver_nr and r.p_item_id = csi.item_id and r.p_item_ver_nr = csi.ver_nr 
-	   and csi.cs_item_id = 13954630 
+	   and csi.cs_item_id = 60052917 
        and r.rel_typ_id = 65
-    --   and admin_item.regstr_stus_id not in (9)
+     --  and admin_item.regstr_stus_id not in (9)
        and admin_item.admin_stus_nm_dn not like '%RETIRED%';
+
 
 --relocating vw_nci_ai_cncpt to the bottom
 CREATE OR REPLACE  VIEW VW_NCI_AI_CNCPT AS
