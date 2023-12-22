@@ -20,3 +20,21 @@ update ADMIN_ITEM set ITEM_NM_CURATED =  item_nm || ' | ' || (Select s.item_nm |
 
 alter table admin_item enable all triggers;
 
+drop trigger TR_NCI_STG_MEC_MAP;
+
+create or replace TRIGGER OD_TR_NCI_STG_MEC_MAP_UPD 
+BEFORE INSERT or UPDATE ON NCI_STG_MEC_MAP
+for each row
+BEGIN
+  :new.DT_SORT := systimestamp();
+:new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
+  :new.lst_upd_dt := sysdate();
+END;
+/
+
+alter table NCI_STG_MEC_MAP disable all triggers;
+
+update nci_STG_MEC_MAP set DT_LAST_MODIFIED =TO_CHAR(DT_SORT, 'MM/DD/YY HH24:MI:SS');
+
+alter table NCI_STG_MEC_MAP enable all triggers;
+
