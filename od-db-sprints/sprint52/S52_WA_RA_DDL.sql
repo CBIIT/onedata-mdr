@@ -5,6 +5,13 @@ alter table NCI_MDL_ELMNT_CHAR add (CHAR_ORD integer);
 alter table NCI_STG_MDL_ELMNT_CHAR add (CHAR_ORD integer);
 alter table NCI_STG_MDL_ELMNT_CHAR add (PK_IND varchar(10));
 
+create or replace view vw_cncpt_with_NA
+as select ITEM_ID,VER_NR,ITEM_NM,ITEM_LONG_NM,ITEM_DESC,CURRNT_VER_IND,REGSTR_STUS_NM_DN,ADMIN_STUS_NM_DN,
+CNTXT_NM_DN,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT from admin_item where admin_item_typ_id = 49
+union
+select 0,1, 'No Concept Attached','NA', 'No Concept Attached',1,'Application','DRAFT-NEW','NA', sysdate, 'ONEDATA', 'ONEDATA', 0, sysdate, sysdate, sysdate
+from dual
+	
   CREATE OR REPLACE  VIEW VW_MDL_MAP_IMP_TEMPLATE AS
   select  ' ' "DO_NOT_USE",
        ' ' "BATCH_USER",
