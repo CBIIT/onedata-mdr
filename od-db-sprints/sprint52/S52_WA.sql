@@ -38,3 +38,7 @@ update nci_STG_MEC_MAP set DT_LAST_MODIFIED =TO_CHAR(DT_SORT, 'MM/DD/YY HH24:MI:
 
 alter table NCI_STG_MEC_MAP enable all triggers;
 
+
+exec nci_ext_import.load_MT;
+exec nci_ext_import.load_ICDO;
+exec nci_ext_import.load_ICDO_External_Codes (3.1);
