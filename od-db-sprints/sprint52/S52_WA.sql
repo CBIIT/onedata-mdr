@@ -38,6 +38,14 @@ update nci_STG_MEC_MAP set DT_LAST_MODIFIED =TO_CHAR(DT_SORT, 'MM/DD/YY HH24:MI:
 
 alter table NCI_STG_MEC_MAP enable all triggers;
 
+alter table SAG_LOAD_MT add (CREAT_DT DATE DEFAULT sysdate, 
+	CREAT_USR_ID VARCHAR2(50 BYTE)  DEFAULT user, 
+	LST_UPD_USR_ID VARCHAR2(50 BYTE) DEFAULT user, 
+	FLD_DELETE NUMBER(1,0) DEFAULT 0, 
+	LST_DEL_DT DATE DEFAULT sysdate, 
+	S2P_TRN_DT DATE DEFAULT sysdate, 
+	LST_UPD_DT DATE DEFAULT sysdate);
+
 
 exec nci_ext_import.load_MT;
 exec nci_ext_import.load_ICDO;
