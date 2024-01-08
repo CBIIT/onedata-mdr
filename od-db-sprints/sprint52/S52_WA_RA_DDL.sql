@@ -210,5 +210,5 @@ sysdate, 'ONEDATA', 'ONEDATA', 0,sysdate, sysdate ,sysdate,
  'DRAFT-NEW', 'NA', 'Application', 'NA',
 'NA'  , 'NA', 'NA' from dual;
 
-
+alter table NCI_DS_RSLT add (EVS_SRC_ID integer, XMAP_CD varchar2(1000), XMAP_DESC varchar2(1000));
 
