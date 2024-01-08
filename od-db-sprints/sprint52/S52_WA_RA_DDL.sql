@@ -180,3 +180,11 @@ t.admin_item_typ_id = 57;
 	and me.ver_nr = mec.MDL_ELMNT_VER_NR and m.admin_item_typ_id = 57
 	  and mec.val_dom_item_id = vd.item_id(+) and mec.val_dom_ver_nr = vd.ver_nr(+);
 
+
+CREATE OR REPLACE  VIEW VW_FOR_OD_VM_MTCH AS 
+  SELECT EVS_SRC_ID EVS_SRC_ID, EVS_SRC_ID MTCH_TYP_ID, EVS_SRC_ID MTCH_AI_TYP_ID,
+	CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT
+       FROM CNCPT;
+
+
+
