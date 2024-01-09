@@ -87,7 +87,9 @@ alter table SAG_LOAD_MT add (PREF_IND number(1) default 0);
 alter table SAG_LOAD_MT add (TERM_TYP varchar2(100));
 
 
-drop table nci_admin_item_xmap;
+alter table NCI_ADMIN_ITEM_XMAP add ( TERM_TYP varchar2(100));
+
+
 
   CREATE TABLE NCI_ADMIN_ITEM_XMAP
    (	"ITEM_ID" NUMBER NOT NULL ENABLE, 
