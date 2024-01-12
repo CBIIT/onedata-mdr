@@ -20,10 +20,12 @@ from dual
        map.mdl_map_item_id "MODEL_MAP_ID",
        map.mdl_map_ver_nr "MODEL_MAP_VERSION",
         map.mecm_id "MECM_ID", 
-    	  sme.ITEM_PHY_OBJ_NM "SRC_ELMNT_PHY_NAME", 
+        smec.char_ord SRC_CHAR_ORD,
+	sme.ITEM_PHY_OBJ_NM "SRC_ELMNT_PHY_NAME", 
 	  smec."MEC_PHY_NM" "SRC_PHY_NAME", 
 	  tme.ITEM_PHY_OBJ_NM "TGT_ELMNT_PHY_NAME", 
 	  tmec."MEC_PHY_NM" "TGT_PHY_NAME", 
+          tmec.char_ord SRC_CHAR_ORD,
           map.MEC_MAP_NM "MAPPING_GROUP_NAME",
           map.MEC_MAP_DESC "MAPPING_GROUP_DESC",
 	  src_func.obj_key_Desc "SOURCE_FUNCTION",
@@ -36,6 +38,7 @@ map.mec_sub_grp_nbr	"DERIVATION_GROUP_ORDER",
 	map.SRC_VAL "SOURCE_COMPARISON_VALUE",
 	map.TGT_VAL "SET_TARGET_DEFAULT"	,
 map.TGT_FUNC_PARAM "TARGET_FUNCTION_PARAM"	,
+	op.obj_key_desc "OPERATOR",
   map.valid_pltform	   "VALIDATION_PLATFORM",
 	map.mec_map_notes "TRANSFORMATION_NOTES",
 	map.TRNS_DESC_TXT "TRANSFORMATION_RULE",
@@ -64,6 +67,7 @@ smec.pk_ind SRC_PK_IND
 	  obj_key deg,
 	  obj_key src_func,
 	  obj_key tgt_func,
+	  obj_key op,
 	  nci_org org,
   	  value_dom svd,
 	  value_dom tvd
@@ -77,6 +81,7 @@ smec.pk_ind SRC_PK_IND
 	  and map.tgt_func_id= tgt_func.obj_key_id (+)
 	  and map.prov_org_id = org.entty_id (+)
 	  and map.crdnlity_id = crd.obj_key_id (+)
+	  and map.op_id = op.obj_key_id (+)
           and smec.val_dom_item_id = svd.item_id (+)
 	  and smec.val_dom_ver_nr = svd.ver_nr (+)
 	  and tmec.val_dom_item_id = tvd.item_id (+)
