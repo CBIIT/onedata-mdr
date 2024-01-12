@@ -25,7 +25,7 @@ from dual
 	  smec."MEC_PHY_NM" "SRC_PHY_NAME", 
 	  tme.ITEM_PHY_OBJ_NM "TGT_ELMNT_PHY_NAME", 
 	  tmec."MEC_PHY_NM" "TGT_PHY_NAME", 
-          tmec.char_ord SRC_CHAR_ORD,
+          tmec.char_ord TGT_CHAR_ORD,
           map.MEC_MAP_NM "MAPPING_GROUP_NAME",
           map.MEC_MAP_DESC "MAPPING_GROUP_DESC",
 	  src_func.obj_key_Desc "SOURCE_FUNCTION",
