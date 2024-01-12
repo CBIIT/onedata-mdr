@@ -50,3 +50,12 @@ alter table SAG_LOAD_MT add (
 exec nci_ext_import.load_MT;
 exec nci_ext_import.load_ICDO;
 exec nci_ext_import.load_ICDO_External_Codes (3.1);
+
+
+
+alter table nci_mdl_elmnt_char add (FK_IND number(1), FK_ELMNT_PHY_NM  varchar2(255), FK_ELMNT_CHAR_PHY_NM  varchar2(255));
+alter table nci_STG_mdl_elmnt_char add (FK_IND number(1), FK_ELMNT_PHY_NM  varchar2(255), FK_ELMNT_CHAR_PHY_NM  varchar2(255));
+
+alter table nci_stg_mec_map add (OP_ID integer, IMP_OP_NM varchar2(255));
+alter table nci_mec_map add (OP_ID integer, IMP_OP_NM varchar2(255));
+
