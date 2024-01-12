@@ -75,6 +75,6 @@ insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'OR');
 insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'IF');
 insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'END');
 insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'IGNORE');
-insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'DEFUALT');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'DEFAULT');
 
 commit;
