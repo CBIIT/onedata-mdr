@@ -68,3 +68,13 @@ alter table SAG_LOAD_ICDO_RAW add ( CREAT_DT date default sysdate,
 	LST_DEL_DT DATE DEFAULT sysdate, 
 	S2P_TRN_DT DATE DEFAULT sysdate, 
 	LST_UPD_DT DATE DEFAULT sysdate);
+
+
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'AND');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'OR');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'IF');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'END');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'IGNORE');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'DEFUALT');
+
+commit;
