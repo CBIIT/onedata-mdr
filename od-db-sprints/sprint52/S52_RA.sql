@@ -17,3 +17,7 @@
 	"S2P_TRN_DT" DATE DEFAULT sysdate, 
 	"LST_UPD_DT" DATE DEFAULT sysdate
    ) ;
+
+insert into obj_Key select * from onedata_wa.obj_key where obj_typ_id = 54;
+ commit;
+ 
