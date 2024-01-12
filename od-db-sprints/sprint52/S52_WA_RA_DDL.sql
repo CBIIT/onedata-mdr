@@ -214,3 +214,11 @@ sysdate, 'ONEDATA', 'ONEDATA', 0,sysdate, sysdate ,sysdate,
 
 alter table NCI_DS_RSLT add (EVS_SRC_ID integer, XMAP_CD varchar2(1000), XMAP_DESC varchar2(1000));
 
+
+alter table nci_mdl_elmnt_char add (FK_IND number(1), FK_ELMNT_PHY_NM  varchar2(255), FK_ELMNT_CHAR_PHY_NM  varchar2(255));
+alter table nci_STG_mdl_elmnt_char add (FK_IND number(1), FK_ELMNT_PHY_NM  varchar2(255), FK_ELMNT_CHAR_PHY_NM  varchar2(255));
+
+alter table nci_stg_mec_map add (OP_ID integer, IMP_OP_NM varchar2(255));
+alter table nci_mec_map add (OP_ID integer, IMP_OP_NM varchar2(255));
+
+
