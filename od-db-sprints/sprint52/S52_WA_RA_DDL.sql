@@ -222,3 +222,17 @@ alter table nci_stg_mec_map add (OP_ID integer, IMP_OP_NM varchar2(255));
 alter table nci_mec_map add (OP_ID integer, IMP_OP_NM varchar2(255));
 
 
+
+
+insert into obj_typ (obj_typ_id, obj_typ_desc) values
+(54, 'Mapping Operator');
+commit;
+
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'AND');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'OR');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'IF');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'END');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'IGNORE');
+insert into obj_key (obj_typ_Id, obj_key_desc) values (54, 'DEFUALT');
+
+commit;
