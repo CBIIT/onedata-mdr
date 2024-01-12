@@ -52,10 +52,19 @@ exec nci_ext_import.load_ICDO;
 exec nci_ext_import.load_ICDO_External_Codes (3.1);
 
 
+alter table SAG_LOAD_ICDO add ( CREAT_DT date default sysdate,
+	CREAT_USR_ID VARCHAR2(50 BYTE)  DEFAULT user, 
+	LST_UPD_USR_ID VARCHAR2(50 BYTE) DEFAULT user, 
+	FLD_DELETE NUMBER(1,0) DEFAULT 0, 
+	LST_DEL_DT DATE DEFAULT sysdate, 
+	S2P_TRN_DT DATE DEFAULT sysdate, 
+	LST_UPD_DT DATE DEFAULT sysdate);
 
-alter table nci_mdl_elmnt_char add (FK_IND number(1), FK_ELMNT_PHY_NM  varchar2(255), FK_ELMNT_CHAR_PHY_NM  varchar2(255));
-alter table nci_STG_mdl_elmnt_char add (FK_IND number(1), FK_ELMNT_PHY_NM  varchar2(255), FK_ELMNT_CHAR_PHY_NM  varchar2(255));
 
-alter table nci_stg_mec_map add (OP_ID integer, IMP_OP_NM varchar2(255));
-alter table nci_mec_map add (OP_ID integer, IMP_OP_NM varchar2(255));
-
+alter table SAG_LOAD_ICDO_RAW add ( CREAT_DT date default sysdate,
+	CREAT_USR_ID VARCHAR2(50 BYTE)  DEFAULT user, 
+	LST_UPD_USR_ID VARCHAR2(50 BYTE) DEFAULT user, 
+	FLD_DELETE NUMBER(1,0) DEFAULT 0, 
+	LST_DEL_DT DATE DEFAULT sysdate, 
+	S2P_TRN_DT DATE DEFAULT sysdate, 
+	LST_UPD_DT DATE DEFAULT sysdate);
