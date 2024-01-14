@@ -112,6 +112,8 @@ drop table NCI_ADMIN_ITEM_XMAP;
 	"DT_SRC" VARCHAR2(30 BYTE) COLLATE "USING_NLS_COMP" NOT NULL ENABLE, 
 	"PREF_IND" NUMBER(1,0) DEFAULT 0, 
 	  TERM_TYP varchar2(100) default '--',
+	  EFF_DT date,
+	  EXP_DT date,
 	 PRIMARY KEY ("ITEM_ID", "VER_NR", "XMAP_CD", XMAP_DESC,"EVS_SRC_ID", "EVS_SRC_VER_NR",TERM_TYP))
    ;
 
@@ -122,8 +124,8 @@ drop table NCI_ADMIN_ITEM_XMAP;
   SELECT XMAP.ITEM_ID, XMAP.VER_NR, 
   max(decode(o.obj_key_desc, 'ICD-O_CODE', XMAP_Cd,'')) ICD_O_CODE,
   max(decode(o.obj_key_desc, 'ICD-O_CODE', XMAP_desc,'')) ICD_O_DESC,
-  max(decode(o.obj_key_desc, 'SNOMED_CODE', XMAP_Cd,'')) SNOMED_CODE,
-  max(decode(o.obj_key_desc, 'SNOMED_CODE', XMAP_DESC,'')) SNOMED_DESC,
+  max(decode(o.obj_key_desc, 'SNOMED-CT_CODE', XMAP_Cd,'')) SNOMED_CODE,
+  max(decode(o.obj_key_desc, 'SNOMED-CT_CODE', XMAP_DESC,'')) SNOMED_DESC,
   max(decode(o.obj_key_desc, 'MEDDRA_CODE', XMAP_Cd,'')) MEDDRA_CODE,
   max(decode(o.obj_key_desc, 'MEDDRA_CODE', XMAP_DESC,'')) MEDDRA_DESC,
   max(decode(o.obj_key_desc, 'LOINC_CODE', XMAP_Cd,'')) LOINC_CODE,
@@ -132,6 +134,8 @@ drop table NCI_ADMIN_ITEM_XMAP;
   max(decode(o.obj_key_desc, 'HUGO_CODE', XMAP_desc,'')) HUGO_CODE_DESC,
   max(decode(o.obj_key_desc, 'ICD-10-CM_CODE', XMAP_Cd,'')) ICD_10_CM_CODE,
   max(decode(o.obj_key_desc, 'ICD-10-CM_CODE', XMAP_DESC,'')) ICD_10_CM_DESC,
+ max(decode(o.obj_key_desc, 'NCI_META_CUI', XMAP_Cd,'')) META_CUI_CODE,
+  max(decode(o.obj_key_desc, 'NCI_META_CUI', XMAP_DESC,'')) META_CUI_DESC,
   sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, 0 FLD_DELETE, sysdate LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT 
        FROM NCI_ADMIN_ITEM_XMAP xmap, obj_key o
        WHERE o.obj_typ_id = 23 and o.obj_key_id = xmap.evs_src_id and pref_ind = 1
