@@ -1,0 +1,2 @@
+Load evs source.csv using Type Details import in upper tiers.
+Delete hook command "Update Model" on Model import.
