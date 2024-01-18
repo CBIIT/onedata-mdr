@@ -1,5 +1,12 @@
 
 
+delete from onedata_ra.admin_item where (item_id , ver_nr) not in (Select item_id, ver_nr from admin_item where admin_item_typ_id in ( 54,52))
+and admin_item_typ_id in (52,54); 
+commit;
+delete from onedata_ra.nci_admin_item_rel where (p_item_id , p_item_ver_nr, c_item_id, c_item_ver_nr, rel_typ_id) not in 
+(Select p_item_id , p_item_ver_nr, c_item_id, c_item_ver_nr, rel_typ_id from nci_admin_item_rel);
+commit;
+
 delete from nci_form where (item_id , ver_nr) not in (Select item_id, ver_nr from admin_item where admin_item_typ_id = 54);
 delete from onedata_Ra.nci_form where (item_id , ver_nr) not in (Select item_id, ver_nr from admin_item where admin_item_typ_id = 54);
 commit;
