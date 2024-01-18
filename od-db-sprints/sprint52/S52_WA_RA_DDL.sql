@@ -208,7 +208,10 @@ commit;
 
 
 
-  CREATE OR REPLACE  VIEW VW_ADMIN_ITEM_WITH_EXT AS
+
+drop view VW_ADMIN_ITEM_WITH_EXT
+
+CREATE MATERIALIZED VIEW VW_ADMIN_ITEM_WITH_EXT AS
   select ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.ITEM_LONG_NM, ai.ITEM_NM, ai.CHNG_DESC_TXT, 
  decode(ai.ADMIN_ITEM_TYP_ID , 49, 'Concept', 53, 'Value Meaning') ADMIN_ITEM_TYP_ID ,ai.CURRNT_VER_IND,
  ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT, 
@@ -222,7 +225,6 @@ and ai.admin_item_typ_id in (49,53)
 sysdate, 'ONEDATA', 'ONEDATA', 0,sysdate, sysdate ,sysdate,
  'DRAFT-NEW', 'NA', 'Application', 'NA',
 'NA'  , 'NA', 'NA' from dual;
-
 
 alter table NCI_DS_RSLT add (EVS_SRC_ID integer, XMAP_CD varchar2(1000), XMAP_DESC varchar2(1000));
 
