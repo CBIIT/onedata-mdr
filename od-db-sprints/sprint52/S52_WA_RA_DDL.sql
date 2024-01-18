@@ -207,6 +207,7 @@ insert into obj_key (obj_typ_Id, obj_key_id, obj_key_desc) values (53, 128,'Unre
 commit;
 
 
+
   CREATE OR REPLACE  VIEW VW_ADMIN_ITEM_WITH_EXT AS
   select ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.ITEM_LONG_NM, ai.ITEM_NM, ai.CHNG_DESC_TXT, 
  decode(ai.ADMIN_ITEM_TYP_ID , 49, 'Concept', 53, 'Value Meaning') ADMIN_ITEM_TYP_ID ,ai.CURRNT_VER_IND,
@@ -214,12 +215,14 @@ commit;
  ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, e.cncpt_concat_src_typ evs_src_ori,
 decode(e.CNCPT_CONCAT,e.cncpt_concat_nm, null, e.cncpt_concat)  cncpt_concat, e.CNCPT_CONCAT_NM, e.CNCPT_CONCAT_DEF
 from admin_item ai, nci_admin_item_Ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr
+and ai.admin_item_typ_id in (49,53)
 	  union
-	    select 0,1, 'No Concept Associated',  'NA', 'No Concept Associated', '',
+	    select 0,1, 'No NCIt Concept Associated',  'NA', 'No NCIt Concept Associated', '',
 'Concept' ,1, 
 sysdate, 'ONEDATA', 'ONEDATA', 0,sysdate, sysdate ,sysdate,
  'DRAFT-NEW', 'NA', 'Application', 'NA',
 'NA'  , 'NA', 'NA' from dual;
+
 
 alter table NCI_DS_RSLT add (EVS_SRC_ID integer, XMAP_CD varchar2(1000), XMAP_DESC varchar2(1000));
 
