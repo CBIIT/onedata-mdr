@@ -21,3 +21,4 @@
 insert into obj_Key select * from onedata_wa.obj_key where obj_typ_id = 54;
  commit;
  
+grant all on obj_key to onedata_wa;
