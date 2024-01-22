@@ -29,6 +29,25 @@ BEGIN
 END;
 /
 
+create or replace TRIGGER TR_NCI_STG_FORM_QUEST_IMP_BEF_UPD
+  BEFORE  UPDATE
+  on NCI_STG_FORM_QUEST_IMPORT
+  for each row
+BEGIN
+  :new.LST_UPD_DT := SYSDATE;
+
+END;
+/
+   
+create or replace TRIGGER TR_NCI_STG_FORM_QVV_IMP_BEF_UPD
+  BEFORE  UPDATE
+  on NCI_STG_FORM_VV_IMPORT
+  for each row
+BEGIN
+  :new.LST_UPD_DT := SYSDATE;
+
+END;
+/
    
 create or replace TRIGGER TR_NCI_STG_MDL_ELMNT_CHAR_BEF_UPD
   BEFORE  UPDATE
