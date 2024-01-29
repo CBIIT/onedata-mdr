@@ -281,9 +281,17 @@ alter table nci_STG_mdl_elmnt_char add (FK_IND_TXT varchar(10), FK_ELMNT_PHY_NM 
 alter table nci_stg_mec_map add (OP_ID integer, IMP_OP_NM varchar2(255));
 alter table nci_mec_map add (OP_ID integer, IMP_OP_NM varchar2(255));
 
-
-
-
 insert into obj_typ (obj_typ_id, obj_typ_desc) values
 (54, 'Mapping Operator');
 commit;
+
+
+alter table NCI_STG_MDL_ELMNT modify (ITEM_LONG_NM null);
+alter table NCI_STG_MDL_ELMNT_CHAR modify (MEC_LONG_NM null);
+
+
+alter table NCI_STG_MDL_ELMNT drop primary key;
+
+alter table NCI_STG_MDL_ELMNT add primary key (MDL_IMP_ID, ITEM_PHY_OBJ_NM);
+alter table NCI_MDL_ELMNT modify (ITEM_LONG_NM null);
+alter table NCI_MDL_ELMNT_CHAR modify (MEC_LONG_NM null);
