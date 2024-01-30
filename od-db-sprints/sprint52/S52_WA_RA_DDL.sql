@@ -6,6 +6,8 @@ alter table NCI_MDL_ELMNT_CHAR add (REQ_IND number(1) default 0);
 alter table NCI_STG_MDL_ELMNT_CHAR add (CHAR_ORD integer);
 alter table NCI_STG_MDL_ELMNT_CHAR add (PK_IND varchar(10));
 
+alter table NCI_STG_MEC_MAP add (SRC_CHAR_ORD integer, TGT_CHAR_ORD integer, IMP_OP_NM  varchar2(255), OP_ID integer );
+
 create or replace view vw_cncpt_with_NA
 as select ITEM_ID,VER_NR,ITEM_NM,ITEM_LONG_NM,ITEM_DESC,CURRNT_VER_IND,REGSTR_STUS_NM_DN,ADMIN_STUS_NM_DN,
 CNTXT_NM_DN,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT from admin_item where admin_item_typ_id = 49
