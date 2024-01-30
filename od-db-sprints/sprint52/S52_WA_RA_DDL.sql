@@ -343,7 +343,8 @@ alter table NCI_STG_MDL modify (SRC_MDL_DESC null);
 	mec.cde_item_id , 
 	mec.cde_ver_nr ,
 	cde.Item_nm CDE_NM,
-	cde.cntxt_nm_dn CDE_CNTXT_NM
+	cde.cntxt_nm_dn CDE_CNTXT_NM,
+	  mec.mec_id
 from admin_item ai, nci_mdl mdl, nci_mdl_elmnt me, nci_mdl_elmnt_char mec,admin_item dec, admin_item cde, obj_key me_grp, obj_key mdl_typ, obj_key mdl_lang, obj_key me_typ
 where ai.item_id = mdl.item_id and ai.ver_nr = mdl.ver_nr and ai.admin_item_typ_id = 57 and mdl.item_id = me.mdl_item_id
 and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and me.ver_nr = mec.mdl_elmnt_ver_nr
