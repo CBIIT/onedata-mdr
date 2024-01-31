@@ -344,6 +344,9 @@ alter table NCI_STG_MDL modify (SRC_MDL_DESC null);
 	mec.cde_item_id , 
 	  mec.val_dom_item_id, 
 	  mec.val_dom_ver_nr,
+decode(vdst.VAL_DOM_TYP_ID,17, 'Enumerated',18, 'Non-enumerated'),
+	  vdst.VAL_DOM_MIN_CHAR, 
+	  vdst.VAL_DOM_MAX_CHAR, 
       mec_typ.obj_key_Desc MEC_TYP_DESC,
 	mec.cde_ver_nr ,
 	cde.Item_nm CDE_NM,
@@ -354,11 +357,16 @@ alter table NCI_STG_MDL modify (SRC_MDL_DESC null);
 	  mec.fk_ind,
 	  mec.FK_ELMNT_PHY_NM,
 	  mec.FK_ELMNT_CHAR_PHY_NM
-from admin_item ai, nci_mdl mdl, nci_mdl_elmnt me, nci_mdl_elmnt_char mec,admin_item dec, admin_item cde, obj_key me_grp, obj_key mdl_typ, obj_key mdl_lang, obj_key me_typ, obj_key mec_typ
+from admin_item ai, nci_mdl mdl, nci_mdl_elmnt me, nci_mdl_elmnt_char mec,admin_item dec, admin_item cde, obj_key me_grp, obj_key mdl_typ, obj_key mdl_lang, obj_key me_typ, obj_key mec_typ,
+	  admin_item vd, value_dom vdst
 where ai.item_id = mdl.item_id and ai.ver_nr = mdl.ver_nr and ai.admin_item_typ_id = 57 and mdl.item_id = me.mdl_item_id
 and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and me.ver_nr = mec.mdl_elmnt_ver_nr
 	and mec.cde_item_id = cde.item_id (+)
 	and mec.cde_ver_nr = cde.ver_nr (+)
+	and mec.val_dom_item_id = vd.item_id (+)
+	and mec.val_dom_ver_nr = vd.ver_nr (+)	  
+	and mec.val_dom_item_id = vdst.item_id (+)
+	and mec.val_dom_ver_nr = vdst.ver_nr (+)	  
 	and cde.admin_item_typ_id (+)= 4
 	and mec.de_conc_item_id = dec.item_id (+)
 	and mec.de_conc_ver_nr = dec.ver_nr (+)
