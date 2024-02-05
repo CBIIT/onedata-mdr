@@ -92,3 +92,9 @@ BEGIN
 END;
 /
 
+
+update ADMIN_ITEM set ITEM_NM_CURATED = (Select s.item_nm || 'v' || s.ver_nr || ' mapped to ' || t.item_nm || 'v' || t.ver_nr || '|' || m.item_id || '|' || m.ver_nr
+   from admin_item s, admin_item t, nci_mdl_map m where s.item_id = m.src_mdl_item_id and s.ver_nr = m.src_mdl_ver_nr and t.item_id = m.tgt_mdl_item_id 
+   and t.ver_nr = m.tgt_mdl_ver_nr and m.item_id = admin_item.item_id and m.ver_nr = admin_item.ver_nr)
+   where admin_item_typ_id = 58;
+   commit;
