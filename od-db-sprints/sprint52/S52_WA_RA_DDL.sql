@@ -272,7 +272,7 @@ and ai.admin_item_typ_id in (49,53)
 	    select 0,1, 'No NCIt Concept Associated',  'NA', 'No NCIt Concept Associated', '',
 'Concept' ,1, 
 sysdate, 'ONEDATA', 'ONEDATA', 0,sysdate, sysdate ,sysdate,
- 'DRAFT-NEW', 'NA', 'Application', 'NA',
+ 'NA', 'NA', 'Application', 'NA',
 'NA'  , 'NA', 'NA' from dual;
 
 alter table NCI_DS_RSLT add (EVS_SRC_ID integer, XMAP_CD varchar2(1000), XMAP_DESC varchar2(1000));
