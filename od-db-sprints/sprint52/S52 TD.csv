@@ -1,0 +1,49 @@
+﻿Description,Object Type Description,Definition,Comments,Display Order,Last Modified By,Date Last Modified,Date Created,Created By
+CUSTOM LOOKUP,Target Functions,"Returns the permissible value for the target characteristic that maps to the source characteristic permissible value. Used when a custom function must be developed to derive the mapping. Example 1: one of the source / target characteristics is enumerated by reference whereas the other has permissible values from an external terminology, such as ICD-O, stored in caDSR. Example 2: one of the source / target characteristics is enumerated by reference whereas the other has permissible values from a “locally” developed list stored in caDSR. Parameter: SOURCE (source characteristic permissible value).",,,CHARLESYDEV,02/05/2024 08:30,02/05/2024 08:30,CHARLESYDEV
+XLOOKUP,Target Functions,"Returns the permissible value for the target characteristic that maps to the source characteristic permissible value. Used when both the source and target characteristics are enumerated by reference, i.e., their permissible values mapping is NOT stored in caDSR, therefore, an external mapping reference must be consulted. Parameters: (source characteristic vocabulary name, source characteristic permissible value, target characteristic vocabulary name).",,,CHARLESYDEV,02/05/2024 08:29,02/02/2024 14:03,DWARZEL
+LOOKUP,Target Functions,"Returns the permissible value for the target characteristic that maps to the source characteristic permissible value. Used when both the source and target characteristics are enumerated, i.e., their permissible values mapping is stored in caDSR and found in the available value mappings file. Parameter: SOURCE (source characteristic permissible value).",,,CHARLESYDEV,02/02/2024 17:12,11/16/2023 15:14,ONEDATA_WA
+COALESCE,Target Functions,"Returns the first non-null value from an ordered list of values. Parameters: (value1, value2, …)",,,CHARLESYDEV,02/02/2024 15:31,12/29/2023 14:45,DMANATHARA
+NOT EQUAL,Source Functions,DELETE - replaced with NOT EQUALS,,,CHARLESYDEV,02/02/2024 15:28,12/29/2023 14:45,DMANATHARA
+CONTAINS,Source Functions,DELETE - could use EQUALS with wild cards.,,,CHARLESYDEV,02/02/2024 15:27,11/16/2023 15:14,ONEDATA_WA
+LESS THAN EQUAL TO,Source Functions,DELETE - replaced with LESS THAN OR EQUALS TO,,,CHARLESYDEV,02/02/2024 15:27,11/16/2023 15:14,ONEDATA_WA
+GREATER THAN EQUAL TO,Source Functions,DELETE - replaced with GREATER THAN OR EQUALS TO,,,CHARLESYDEV,02/02/2024 15:27,11/16/2023 15:14,ONEDATA_WA
+BEGINS WITH,Source Functions,DELETE - could use SUBSTRING instead,,,CHARLESYDEV,02/02/2024 15:27,11/16/2023 15:14,ONEDATA_WA
+GREATER THAN OR EQUAL TO,Source Functions,DELETE - replaced with GREATER THAN OR EQUALS TO,,,CHARLESYDEV,02/02/2024 15:27,12/29/2023 14:45,DMANATHARA
+LESS THAN OR EQUAL TO,Source Functions,DELETE - replaced with LESS THAN OR EQUALS TO,,,CHARLESYDEV,02/02/2024 15:27,12/29/2023 14:45,DMANATHARA
+GREATER THAN EQUALS TO,Source Functions,DELETE - replaced with GREATER THAN OR EQUALS TO,,,CHARLESYDEV,02/02/2024 15:27,01/24/2024 09:41,DMANATHARA
+MAX,Target Functions,"Returns the maximum or highest value of a set of values. Parameters: (value1, values2, …)",,,CHARLESYDEV,02/02/2024 15:22,11/28/2023 16:35,DWARZEL
+NOT EQUAL,Target Functions,DELETE - replaced with NOT EQUALS,,,CHARLESYDEV,02/02/2024 15:22,12/29/2023 14:45,DMANATHARA
+TARGET_IDENTIFIER,Target Functions,DELETE - replaced with CUSTOM XREF,,,CHARLESYDEV,02/02/2024 15:22,12/29/2023 14:45,DMANATHARA
+CONCAT,Target Functions,"Returns the concatenation of two or more strings or text values. Parameters: (string1. string2, ...)",,,CHARLESYDEV,02/02/2024 15:18,11/16/2023 15:14,ONEDATA_WA
+MIN,Target Functions,"Returns the minimum or lowest value of a set of values. Parameters: (value1, value2, …)",,,CHARLESYDEV,02/02/2024 15:16,11/28/2023 16:34,DWARZEL
+COALESE,Target Functions,DELETE - replace with COALESCE,,,DWARZEL,02/02/2024 14:06,11/16/2023 15:14,ONEDATA_WA
+EQUAL,Target Functions,DELETE - replaced with EQUALS,,,DWARZEL,02/02/2024 14:05,11/16/2023 15:14,ONEDATA_WA
+EQUALS,Source Functions,A comparison operator to evaluate whether the value on its left-hand side is equal to the value on its right-hand side. (=),,,DMANATHARA,01/24/2024 09:41,11/16/2023 15:14,ONEDATA_WA
+GREATER THAN,Source Functions,A comparison operator to evaluate whether the value on its left-hand side is greater than the value on its right-hand side. (>),,,DMANATHARA,01/24/2024 09:41,11/16/2023 15:14,ONEDATA_WA
+LESS THAN,Source Functions,A comparison operator to evaluate whether the value on its left-hand side is less than the value on its right-hand side. (<),,,DMANATHARA,01/24/2024 09:41,11/16/2023 15:14,ONEDATA_WA
+*..*,Model Map Cardinality,Many-To-Many,Many-To-Many,,DMANATHARA,01/24/2024 09:41,11/28/2023 16:28,DWARZEL
+MIN,Source Functions,"Returns the minimum or lowest value of a set of values. Parameters: (value1, value2, …)",,,DMANATHARA,01/24/2024 09:41,12/29/2023 14:45,DMANATHARA
+MAX,Source Functions,"Returns the maximum or highest value of a set of values. Parameters: (value1, values2, …)",,,DMANATHARA,01/24/2024 09:41,12/29/2023 14:45,DMANATHARA
+NOT EQUALS,Target Functions,A comparison operator to evaluate whether the value on its left-hand side is not equal to the value on its right-hand side. (!=),,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+TIME,Target Functions,Returns the time value from a datetime field. Parameter: (datetime).,,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+EQUALS,Target Functions,A comparison operator to evaluate whether the value on its left-hand side is equal to the value on its right-hand side. (=),,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+CUSTOM XREF,Target Functions,A custom cross-reference function defined by the user.,,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+CAST,Target Functions,"Converts or casts a field from one data type to another. Parameters: (field, target data type)",,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+NOT EQUALS,Source Functions,A comparison operator to evaluate whether the value on its left-hand side is not equal to the value on its right-hand side. (!=),,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+TIME,Source Functions,Returns the time value from a datetime field. Parameter: (datetime field).,,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+LESS THAN OR EQUALS TO,Source Functions,A comparison operator to evaluate whether the value on its left-hand side is less than or equal to the value on its right-hand side. (<=),,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+GREATER THAN OR EQUALS TO,Source Functions,A comparison operator to evaluate whether the value on its left-hand side is greater than or equal to the value on its right-hand side. (>=),,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+CAST,Source Functions,"Converts or casts a field from one data type to another. Parameters: (field, target data type)",,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+*..0,Model Map Cardinality,Many-to-zero,2024-01-02 Added by Charles Yaghmour,,DMANATHARA,01/24/2024 09:41,01/24/2024 09:41,DMANATHARA
+0..*,Model Map Cardinality,Zero-To-Many,2023-12-15 Added by Charles Yaghmour to cover defaulting multiple values in the target.,,DMANATHARA,12/29/2023 14:45,12/29/2023 14:45,DMANATHARA
+0..1,Model Map Cardinality,Zero-To-One. Used to show the default value of a target model characteristic.,2023-12-04 Added by Charles Yaghmour,,DMANATHARA,12/29/2023 14:45,12/29/2023 14:45,DMANATHARA
+1..0,Model Map Cardinality,"One-To-Zero. Used to indicate that the source characteristic has no mapping in the target model, or must be ignored.",2023-12-04 Added by Charles Yaghmour,,DMANATHARA,12/29/2023 14:45,12/29/2023 14:45,DMANATHARA
+DAY,Target Functions,Returns the day of the month for a given date as integer 1-31.,,,DMANATHARA,12/29/2023 14:45,11/28/2023 16:41,DWARZEL
+MONTH,Target Functions,Returns the month of a given date as integer 1-12.,,,DMANATHARA,12/29/2023 14:44,11/28/2023 16:42,DWARZEL
+SUBSTRING,Target Functions,"Extracts characters from a string. Parameters are (string, start, length).",,,DMANATHARA,12/29/2023 14:44,11/28/2023 16:42,DWARZEL
+YEAR,Target Functions,Returns the year of a given date as integer like 2023.,,,DMANATHARA,12/29/2023 14:44,11/28/2023 16:42,DWARZEL
+1..1,Model Map Cardinality,One-To-One,One-To-One,,DWARZEL,11/28/2023 16:29,09/25/2023 10:35,ONEDATA_WA
+*..1,Model Map Cardinality,Many-To-One,Many-To-One,,DWARZEL,11/28/2023 16:29,09/25/2023 10:35,ONEDATA_WA
+1..*,Model Map Cardinality,One-To-Many,One-To-Many,,DWARZEL,11/28/2023 16:29,09/25/2023 10:35,ONEDATA_WA
+Directional,Model Map Directionality,Directional,Directional,,ONEDATA_WA,09/25/2023 10:35,09/25/2023 10:35,ONEDATA_WA
+Bi-Directional,Model Map Directionality,Bi-Directional,Bi-Directional,,ONEDATA_WA,09/25/2023 10:35,09/25/2023 10:35,ONEDATA_WA
