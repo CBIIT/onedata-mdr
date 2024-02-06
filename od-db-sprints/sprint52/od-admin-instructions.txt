@@ -1,2 +1,3 @@
 Load evs source.csv using Type Details import in upper tiers.
+Load s52 tc.csv using Type Details import in upper tiers.
 Delete hook command "Update Model" on Model import.
