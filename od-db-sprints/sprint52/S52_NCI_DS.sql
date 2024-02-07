@@ -399,7 +399,9 @@ else
           v_evs_src := ihook.getColumnValue(row_sel,'OBJ_KEY_ID');
           
          insert into nci_ds_rslt (hdr_id, item_id, ver_nr, rule_desc, evs_src_id, xmap_cd, xmap_desc) 
-         select v_hdr_id, item_id, ver_nr, '9. Cross-map Code Match', v_evs_Src, max(xmap_cd), max(xmap_desc) from nci_admin_item_xmap x where evs_src_id = v_evs_src 
+         select v_hdr_id, item_id, ver_nr, '9. Cross-map Code Match', v_evs_Src, max(xmap_cd), max(xmap_desc) from nci_admin_item_xmap x 
+         where evs_src_id = v_evs_src and (item_id, ver_nr) not in 
+         (select item_id, ver_nr from nci_ds_rslt where hdr_id = v_hdr_id)
          and x.xmap_cd = v_entty_nm group by x.item_id,x.ver_nr, x.evs_src_id;
         commit;
    
@@ -408,7 +410,8 @@ else
          insert into nci_ds_rslt (hdr_id, item_id, ver_nr, rule_desc, evs_src_id, xmap_cd, xmap_desc) 
          select v_hdr_id, item_id, ver_nr, '10. Cross-map Name Match', v_evs_Src, max(xmap_cd), max(xmap_desc) from nci_admin_item_xmap x where evs_src_id = v_evs_src 
          and (nvl(regexp_replace(upper(x.xmap_desc),v_reg_str_adv),'AAAAAAAAAAAA') like '%' || v_entty_nm || '%' or 
-         v_entty_nm like '%' ||nvl(regexp_replace(upper(x.xmap_desc),v_reg_str_adv),'AAAAAAAAAA') || '%')
+         v_entty_nm like '%' ||nvl(regexp_replace(upper(x.xmap_desc),v_reg_str_adv),'AAAAAAAAAA') || '%') and (item_id, ver_nr) not in 
+         (select item_id, ver_nr from nci_ds_rslt where hdr_id = v_hdr_id) and length(nvl(regexp_replace(upper(x.xmap_desc),v_reg_str_adv),'AAAAAAAAAAAA')) > 2
          group by x.item_id,x.ver_nr, x.evs_src_id;
         commit;
    end loop;
@@ -1330,13 +1333,12 @@ begin
     elsif (ihook.getColumnValue(row_ori,'MTCH_TYP_NM') = 'DEC') then
       DECMatchSub(v_hdr_id, v_entty_nm,v_entty_nm_with_space,v_typ,row_ori);
     end if;
-   select count(*) into v_temp from nci_ds_rslt where hdr_id = v_hdr_id     ;
-   
+   select count(*) into v_temp from nci_ds_rslt where hdr_id = v_hdr_id;
   if (v_temp = 1) then
     select rule_desc into v_rule_desc from nci_ds_rslt where hdr_id=v_hdr_id;
-    select evs_src_ori into v_evs_src from vw_cncpt where item_id = (select item_id from nci_ds_rslt where hdr_id = v_hdr_id);
   --  raise_application_error(-20000,'Test ' || v_rule_desc);
     if (v_rule_desc like '%Concept%' or v_rule_desc like '%Synonym%') then
+        select evs_src_ori into v_evs_src from vw_cncpt where item_id = (select item_id from nci_ds_rslt where hdr_id = v_hdr_id);
         select item_long_nm, item_nm into v_code, v_cncpt_nm from vw_cncpt where item_id = (select item_id from nci_ds_rslt where hdr_id=v_hdr_id);
         update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID, PREF_CNCPT_CONCAT, PREF_CNCPT_CONCAT_NM, 	VM_MTCH_ITEM_TYP, EVS_SRC_ORI) 
         = (select 1, null, null, v_user_id, v_code,v_cncpt_nm, 'Concepts', v_evs_src from nci_ds_rslt where hdr_id = v_hdr_id)
