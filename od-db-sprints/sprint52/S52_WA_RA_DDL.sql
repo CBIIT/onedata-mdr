@@ -13,7 +13,7 @@ as select ITEM_ID,VER_NR,ITEM_NM,ITEM_LONG_NM,ITEM_DESC,CURRNT_VER_IND,REGSTR_ST
 CNTXT_NM_DN,CREAT_DT,CREAT_USR_ID,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT from admin_item where admin_item_typ_id = 49
 union
 select 0,1, 'No Concept Attached','NA', 'No Concept Attached',1,'Application','DRAFT-NEW','NA', sysdate, 'ONEDATA', 'ONEDATA', 0, sysdate, sysdate, sysdate
-from dual
+from dual;
 	
   CREATE OR REPLACE  VIEW VW_MDL_MAP_IMP_TEMPLATE AS
   select  ' ' "DO_NOT_USE",
@@ -207,7 +207,7 @@ commit;
 
 
 
-  CREATE OR REPLACE  VIEW VW_NCI_MDL_MAP_FOR_VIEW
+  CREATE OR REPLACE  VIEW VW_NCI_MDL_MAP_FOR_VIEW AS
   select distinct s.item_id MDL_ITEM_ID, s.ver_nr MDL_VER_NR, map.item_id MDL_MAP_ITEM_ID, map.ver_nr MDL_MAP_VER_NR,
 'Source' LVL_TYP, s.item_id src_mdl_item_id, s.ver_nr src_mdl_ver_nr, s.item_nm 
 src_mdl_item_nm,  sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' 
@@ -258,7 +258,7 @@ commit;
 
 
 
-drop view VW_ADMIN_ITEM_WITH_EXT
+drop view VW_ADMIN_ITEM_WITH_EXT;
 
 CREATE MATERIALIZED VIEW VW_ADMIN_ITEM_WITH_EXT AS
   select ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.ITEM_LONG_NM, ai.ITEM_NM, ai.CHNG_DESC_TXT, 
