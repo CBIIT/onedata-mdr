@@ -399,20 +399,20 @@ else
           v_evs_src := ihook.getColumnValue(row_sel,'OBJ_KEY_ID');
           
          insert into nci_ds_rslt (hdr_id, item_id, ver_nr, rule_desc, evs_src_id, xmap_cd, xmap_desc) 
-         select v_hdr_id, item_id, ver_nr, '9. Cross-map Code Match', v_evs_Src, max(xmap_cd), max(xmap_desc) from nci_admin_item_xmap x 
+         select v_hdr_id, item_id, ver_nr, '9. Cross-map Code Match', v_evs_Src, xmap_cd, max(xmap_desc) from nci_admin_item_xmap x 
          where evs_src_id = v_evs_src and (item_id, ver_nr) not in 
          (select item_id, ver_nr from nci_ds_rslt where hdr_id = v_hdr_id)
-         and x.xmap_cd = v_entty_nm group by x.item_id,x.ver_nr, x.evs_src_id;
+         and x.xmap_cd = v_entty_nm group by x.item_id,x.ver_nr, x.evs_src_id, xmap_cd;
         commit;
    
          v_entty_nm := nvl(regexp_replace(upper(nvl(ihook.getColumnValue(row_ori,'ENTTY_NM_USR') ,ihook.getColumnValue(row_ori,'ENTTY_NM'))),v_reg_str_adv,''),'BBBBBBBBB');
          
          insert into nci_ds_rslt (hdr_id, item_id, ver_nr, rule_desc, evs_src_id, xmap_cd, xmap_desc) 
-         select v_hdr_id, item_id, ver_nr, '10. Cross-map Name Match', v_evs_Src, max(xmap_cd), max(xmap_desc) from nci_admin_item_xmap x where evs_src_id = v_evs_src 
+         select v_hdr_id, item_id, ver_nr, '10. Cross-map Name Match', v_evs_Src, xmap_cd, max(xmap_desc) from nci_admin_item_xmap x where evs_src_id = v_evs_src 
          and (nvl(regexp_replace(upper(x.xmap_desc),v_reg_str_adv),'AAAAAAAAAAAA') like '%' || v_entty_nm || '%' or 
          v_entty_nm like '%' ||nvl(regexp_replace(upper(x.xmap_desc),v_reg_str_adv),'AAAAAAAAAA') || '%') and (item_id, ver_nr) not in 
          (select item_id, ver_nr from nci_ds_rslt where hdr_id = v_hdr_id) and length(nvl(regexp_replace(upper(x.xmap_desc),v_reg_str_adv),'AAAAAAAAAAAA')) > 2
-         group by x.item_id,x.ver_nr, x.evs_src_id;
+         group by x.item_id,x.ver_nr, x.evs_src_id, xmap_cd;
         commit;
    end loop;
         end if;
