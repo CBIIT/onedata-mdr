@@ -490,11 +490,11 @@ v_temp integer;
 BEGIN
 
 select obj_Key_id into v_evs_src_id from obj_key where obj_typ_id =23 and upper(obj_key_desc) like 'ICD-O%';
-/*
+
 
 delete from nci_admin_item_xmap where dt_src = 'ICDO_EXT_RAW';
 commit;
-*/
+
 insert into nci_admin_item_xmap (item_id, ver_nr, xmap_cd,xmap_desc, evs_src_id, evs_Src_ver_Nr, PREF_IND,DT_SRC)
 select distinct 0,1, code,LBL_TOPIC, v_evs_Src_id, 
 v_ver,1,'ICDO_EXT_RAW' from 
