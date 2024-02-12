@@ -79,20 +79,3 @@ update ADMIN_ITEM set ITEM_NM_CURATED = item_nm ||' | ' || (Select s.item_nm || 
    and t.ver_nr = m.tgt_mdl_ver_nr and m.item_id = admin_item.item_id and m.ver_nr = admin_item.ver_nr)
    where admin_item_typ_id = 58;
    commit;
-
-
-
-create or replace TRIGGER TR_AI_MDL_MAP_NM
-  AFTER  update
-  on ADMIN_ITEM
-  for each row
-BEGIN
-
-	if (:new.admin_item_typ_id = 58 and :new.item_NM <> :old.item_nm) then
-   update ADMIN_ITEM set ITEM_NM_CURATED = item_nm || ' | ' || (Select s.item_nm || 'v' || m.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || m.tgt_mdl_ver_nr || ' | ' || :new.item_id || '|' || :new.ver_nr
-   from admin_item s, admin_item t, nci_mdl_map m where s.item_id = m.src_mdl_item_id and s.ver_nr = m.src_mdl_ver_nr and t.item_id = m.tgt_mdl_item_id and t.ver_nr = m.tgt_mdl_ver_nr and m.item_id = :new.item_id and m.ver_nr = :new.ver_nr)
-   where item_id = :new.item_id and ver_nr = :new.ver_nr;
-end if;
-
-END;
-/
