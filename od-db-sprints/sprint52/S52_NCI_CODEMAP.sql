@@ -107,7 +107,7 @@ end if;
 
 for cur in (select * from NCI_STG_MDL_ELMNT_CHAR where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID') and upper(me_item_long_nm) = upper(v_mdl_elmnt_long_nm)) loop
 
-select count(*) into v_temp from NCI_MDL_ELMNT_CHAR where upper(mec_LONG_nm) = upper(cur.MEC_LONG_NM) and mdl_elmnt_item_id = v_mdl_elmnt_id and mdl_elmnt_ver_nr = ihook.getColumnValue(row_ori,'SRC_MDL_VER');
+select count(*) into v_temp from NCI_MDL_ELMNT_CHAR where upper(MEC_PHY_NM) = upper(cur.MEC_PHY_NM) and mdl_elmnt_item_id = v_mdl_elmnt_id and mdl_elmnt_ver_nr = ihook.getColumnValue(row_ori,'SRC_MDL_VER');
 --and ver_nr = ihook.getColumnvalue(row_ori, 'SRC_VER_NR') ;
 
 if (v_temp = 0) then -- insert
@@ -312,7 +312,7 @@ select obj_key_id into v_me_typ_Id from obj_key where obj_typ_id = 41 and upper(
 
 for cur in (select * from NCI_STG_MDL_ELMNT where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID') ) loop
 
-select count(*) into v_temp from NCI_MDL_ELMNT where upper(item_LONG_nm) = upper(cur.ITEM_LONG_NM) and mdl_item_id = v_mdl_hdr_id and mdl_item_ver_nr = ihook.getColumnValue(row_ori,'SRC_MDL_VER');
+select count(*) into v_temp from NCI_MDL_ELMNT where upper(ITEM_PHY_OBJ_NM) = upper(cur.ITEM_PHY_OBJ_NM) and mdl_item_id = v_mdl_hdr_id and mdl_item_ver_nr = ihook.getColumnValue(row_ori,'SRC_MDL_VER');
 --and ver_nr = ihook.getColumnvalue(row_ori, 'SRC_VER_NR') ;
 row := t_row();
 ihook.setColumnValue(row,'VER_NR',ihook.getColumnvalue(row_ori, 'SRC_MDL_VER'));
@@ -334,7 +334,7 @@ ihook.setColumnValue(row,'ITEM_ID', v_mdl_elmnt_id);
 
 
 else
-select item_id into v_mdl_elmnt_id from NCI_MDL_ELMNT where upper(item_LONG_nm) = upper(cur.ITEM_LONG_NM) and mdl_item_id = v_mdl_hdr_id and mdl_item_ver_nr = ihook.getColumnValue(row_ori,'SRC_MDL_VER');
+select item_id into v_mdl_elmnt_id from NCI_MDL_ELMNT where upper(item_PHY_OBJ_nm) = upper(cur.ITEM_PHY_OBJ_NM) and mdl_item_id = v_mdl_hdr_id and mdl_item_ver_nr = ihook.getColumnValue(row_ori,'SRC_MDL_VER');
 ihook.setColumnValue(row,'ITEM_ID', v_mdl_elmnt_id);
      rowsmeupd.extend;
                                             rowsmeupd(rowsmeupd.last) := row;
@@ -890,6 +890,7 @@ end;
   v_mdl_elmnt_id number;
   v_valid boolean;
   v_val_stus_msg varchar2(2000);
+  v_temp integer;
  i integer;
  v_typ integer;
  v_dflt_typ integer;
@@ -916,6 +917,15 @@ end;
     v_val_stus_msg := v_val_stus_msg || 'Model: Modeling Language is not valid.' || chr(13);
 end if;
 */
+
+
+select count(*) into v_temp  from admin_item where item_id = ihook.getColumnValue(row_ori,'CREATED_MDL_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'SRC_MDL_VER');
+if (v_temp = 0) then
+    v_valid := false;
+    v_val_stus_msg := v_val_stus_msg || 'Model: Specified Model ID/Version does not exist.' || chr(13);
+end if;
+
+
 for cur in (select * from admin_item where item_id = ihook.getColumnValue(row_ori,'CREATED_MDL_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'SRC_MDL_VER')) loop
  if (upper(cur.item_nm) <> upper(ihook.getColumnValue(row_ori, 'SRC_MDL_NM'))) then
     v_valid := false;
