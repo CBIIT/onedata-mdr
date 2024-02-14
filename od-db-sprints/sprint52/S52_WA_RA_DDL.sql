@@ -5,6 +5,7 @@ alter table NCI_MDL_ELMNT_CHAR add (CHAR_ORD integer);
 alter table NCI_MDL_ELMNT_CHAR add (REQ_IND number(1) default 0);
 alter table NCI_STG_MDL_ELMNT_CHAR add (CHAR_ORD integer);
 alter table NCI_STG_MDL_ELMNT_CHAR add (PK_IND varchar(10));
+alter table nci_stg_mdl_elmnt modify (ME_TYP_NM null);
 
 alter table NCI_STG_MEC_MAP add (SRC_CHAR_ORD integer, TGT_CHAR_ORD integer, IMP_OP_NM  varchar2(255), OP_ID integer );
 
