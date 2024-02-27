@@ -188,3 +188,6 @@ smec.pk_ind SRC_PK_IND
  	  and tmec.val_dom_ver_nr = tvd.ver_nr (+);
 
 alter table nci_stg_MEC_MAP add (SRC_ME_ITEM_NM varchar2(255), SRC_MEC_ITEM_NM varchar2(255), TGT_ME_ITEM_NM varchar2(255), TGT_MEC_ITEM_NM varchar2(255));
+
+alter table VALUE_DOM add (TERM_CNCPT_ITEM_ID number, TERM_CNCPT_VER_NR number(4,2));
+
