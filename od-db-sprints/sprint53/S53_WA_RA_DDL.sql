@@ -55,7 +55,7 @@ decode(tvd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated',16, 'Enumerated 
 	  map.creat_dt "Characteristic Map Create Date",
 	  map.creat_usr_id "Characteristic Map Create User",	  
 	  map.lst_upd_dt "Characteristic Map Last Update Date",
-	  map.lst_upd_usr_id "Characteristic Map Last Update User",	  
+	  map.lst_upd_usr_id "Characteristic Map Last Update User"  
         --map.prov_notes "Provenance Notes"
 	from admin_item s, NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec, admin_item t, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT_CHAR tmec, nci_MEC_MAP map,
 admin_item m,
