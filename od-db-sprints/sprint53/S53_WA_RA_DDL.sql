@@ -16,7 +16,7 @@
         map.mec_map_nm "Characteristic Group Name",
         map.MEC_GRP_RUL_NBR "Derivation Group Nbr",
        crd.obj_key_desc "Mapping Cardinality",
-   decode(nvl(map.VAL_MAP_CREATE_IND,0),1, 'Yes','No') "Values Mapped?",
+   decode(nvl(map.VAL_MAP_CREATE_IND,0),1, 'Yes','No') "Values Mapped Indicator",
         sme.ITEM_PHY_OBJ_NM "Source Element Physical Name", 
         smec."MEC_PHY_NM" "Source Characteristic Physical Name", 
 	smec.char_ord "Source Char Order",        
