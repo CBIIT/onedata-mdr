@@ -105,7 +105,11 @@ and map.prov_cntct_id  = c.entty_ID (+)
          t.ADMIN_STUS_NM_DN "Target Model Status",
 	t.cntxt_nm_dn "Target Model Context",
         org.org_nm "Provenance Organization",
-	p.PRSN_FULL_NM_DERV  "Provenance Contact"
+	p.PRSN_FULL_NM_DERV  "Provenance Contact",
+	   m.creat_dt "Model Map Create Date",
+	  m.creat_usr_id "Model Map Create User",	  
+	  m.lst_upd_dt "Model Map Last Update Date",
+	  m.lst_upd_usr_id "Model Map Last Update User"
      from admin_item s,  admin_item t, nci_mdl_map mm,
 admin_item m, nci_org org, nci_prsn p
 	where m.item_id = mm.item_id and m.ver_nr = mm.ver_nr and mm.SRC_MDL_ITEM_ID= s.item_id and mm.TGT_MDL_ITEM_ID= t.item_id 
