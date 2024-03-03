@@ -1,3 +1,9 @@
+alter table value_dom add (TERM_USE_TYP  integer);
+
+
+insert into obj_typ (obj_typ_id, obj_typ_desc) values
+(55, 'Terminology Reference VD Type');
+commit;
 
   CREATE OR REPLACE FORCE VIEW VW_MDL_MAP_FLAT AS
   select  map.MDL_MAP_ITEM_ID "Model Map ID",
