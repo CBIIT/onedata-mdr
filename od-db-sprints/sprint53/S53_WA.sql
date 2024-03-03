@@ -13,3 +13,9 @@ CREATE OR REPLACE TRIGGER TR_AI_WFS
 RAISE_APPLICATION_ERROR( -20001,'!!!! The item is not save "RETIRED" Workflow Status requires "End Date" value to be set !!!!');
 END TR_AI_WFS;
 /
+
+--WA
+insert into obj_key(obj_typ_id, obj_key_desc) values (55,'Term');
+insert into obj_key(obj_typ_id, obj_key_desc) values (55,'Code');
+commit;
+
