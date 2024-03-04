@@ -9,6 +9,7 @@ create or replace PACKAGE            nci_vd AS
     procedure createValAIWithConcept(rowform in out t_row,   idx in integer,v_item_typ_id in integer, v_mode in varchar2,v_cncpt_src in varchar2,  actions in out t_actions);
     procedure updateValAIWithConcept(rowform in out t_row,   idx in integer,v_ai_id number,v_ai_ver_nr number, v_mode varchar2, actions in out t_actions);
     procedure VDImportPost(rowform in out t_row,   idx in integer,v_item_typ_id in integer, v_mode in varchar2,v_cncpt_src in varchar2,  actions in out t_actions);
+   procedure RTImportPost(rowform in out t_row,   idx in integer,v_item_typ_id in integer, v_mode in varchar2,v_cncpt_src in varchar2,  actions in out t_actions);
   PROCEDURE spVDCreateFrom (v_data_in in clob, v_data_out out clob);
  PROCEDURE spVDEdit (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 ---  PROCEDURE spVDEdit (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
@@ -19,6 +20,8 @@ create or replace PACKAGE            nci_vd AS
   function getSACreateQuestionRT(v_first in Boolean,v_item_typ_id in integer) return t_question;
   function getSACreateForm (v_rowset1 in t_rowset,v_rowset2 in t_rowset,v_item_typ_id in integer) return t_forms;
  function getSACreateQuestionVM(v_first in Boolean,v_item_typ_id in integer) return t_question;
+
+procedure spRTValUpdImport ( rowform in out t_row , v_op  in varchar2, actions in out t_actions,  v_val_ind in out boolean);
 
 procedure spVDValCreateImport ( rowform in out t_row , v_op  in varchar2, actions in out t_actions,  v_val_ind in out boolean);
   procedure createVDImport(rowform in out t_row, actions in out t_actions);
@@ -482,6 +485,87 @@ end if;
         for cur in (select item_nm from admin_item where item_id = ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') and ver_nr = ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR')) loop
        ihook.setColumnValue(rowform, 'VAL_DOM_NM',cur.item_nm ) ;
         end loop; */
+end if;
+
+
+--V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+
+END;
+
+
+procedure spRTValUpdImport ( rowform in out t_row , v_op  in varchar2, actions in out t_actions,  v_val_ind in out boolean)
+AS
+
+    row t_row;
+    rows  t_rows;
+    v_id number;
+    v_ver_nr number(4,2);
+    v_nm  varchar2(255);
+    action t_actionRowset;
+    v_msg varchar2(1000);
+    i integer := 0;
+    v_item_nm varchar2(255);
+    v_item_id number;
+    v_rep_id number;
+    v_rep_ver number(4,2);
+    v_item_desc varchar2(4000);
+    v_count number;
+    v_valid boolean;
+    v_temp varchar2(100);
+    v_substr  varchar2(100);
+    v_temp_id number;
+    v_temp_ver number(4,2);
+    rowsetvd t_rowset;
+    rowsetai t_rowset;
+    rowsetrp t_rowset;
+    rowset            t_rowset;
+     v_rep_nm varchar2(255);
+    v_cncpt_nm varchar2(255);
+    v_long_nm varchar2(255);
+    v_def varchar2(4000);
+    v_dtype_id integer;
+ BEGIN
+
+        if (   ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is null  ) then
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Primary Rep Term missing.' || chr(13));
+                  v_val_ind  := false;
+        end if;
+
+      
+
+for currt in (Select item_nm from admin_item where item_id = ihook.getColumnValue(rowform, 'REP_CLS_ITEM_ID')
+and ver_nr = ihook.getColumnValue(rowform, 'REP_CLS_VER_NR')) loop
+if (upper(currt.item_nm) <> upper(ihook.getColumnValue(rowform,'ITEM_1_NM'))) then
+               ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Rep Term Name and ID/Ver do not match.' || chr(13));
+                  v_val_ind  := false;
+   
+end if;
+end loop;
+        if (nci_import.ParseGaps (rowform , 3) > 0 and ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is not null ) then
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Gaps in concept drop-downs.' || chr(13));                      
+                    v_val_ind := false;
+        end if;
+    if (v_val_ind = true  ) then
+    createValAIWithConcept(rowform , 3,7,'V','DROP-DOWN',actions); -- Rep
+    end if;
+
+if (ihook.getCOlumnValue(rowform,'ITEM_3_ID') is not null) then
+              ihook.setColumnValue(rowform,'CTL_VAL_STUS', 'ERROR');
+            ihook.setColumnValue(rowform,'CTL_VAL_MSG', 'Cannot Update. Duplicate Found: '|| ihook.getCOlumnValue(rowform,'ITEM_3_ID'));
+                    v_val_ind := false;
+   
+end if;
+   if (v_val_ind = false) then 
+    ihook.setColumnValue(rowform, 'CTL_VAL_STUS', 'ERRORS');
+    end if;
+ 
+
+    IF v_op  = 'U'  and v_val_ind = true THEN  -- Create
+updateValAIWithConcept(rowform ,  3,ihook.getColumnValue(rowform, 'REP_CLS_ITEM_ID'),ihook.getColumnValue(rowform, 'REP_CLS_VER_NR'),
+'U', actions);
+
+
 end if;
 
 
@@ -1979,21 +2063,7 @@ v_item_typ_id integer;
 begin
 
 
--- validate if name and id match.
-select upper(item_nm), admin_item_typ_id into v_item_nm, v_item_typ_id from admin_item where item_id = v_ai_id and ver_nr =v_ai_ver_nr;
-if (v_item_nm <> upper(ihook.getColumnValue(rowform,'ITEM_1_NM'))) then
-       ihook.setColumnValue(rowform,'CTL_VAL_STUS', 'ERROR');
-            ihook.setColumnValue(rowform,'CTL_VAL_MSG', 'Provided Item ID/Ver and Name do not match.' );
-            return;
-end if;
-if (v_item_typ_id  <> 7) then
-       ihook.setColumnValue(rowform,'CTL_VAL_STUS', 'ERROR');
-            ihook.setColumnValue(rowform,'CTL_VAL_MSG', 'Provided Item ID/Ver is not a RT.' );
-            return;
-end if;
--- check if Item Type is rep term
-
-
+/*
     v_nm := '';
         v_long_nm_suf :='';
         v_def := '';
@@ -2045,28 +2115,48 @@ end if;
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', v_nm);
                ihook.setColumnValue(rowform,'ITEM_' || idx || '_DEF', substr(v_def,2));
         ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM_INT', substr(v_long_nm_suf_int,2));
+*/
+v_nm := ihook.getCOlumnValue(rowform,'ITEM_3_NM');
+v_long_nm := ihook.getCOlumnValue(rowform,'ITEM_3_LONG_NM');
+v_def := ihook.getCOlumnValue(rowform,'ITEM_3_DEF');
+v_long_nm_suf := ihook.getCOlumnValue(rowform,'ITEM_3_LONG_NM');
+v_long_nm_suf_int := ihook.getCOlumnValue(rowform,'ITEM_3_LONG_NM_INT');
 
-            nci_DEC_MGMT.CncptCombExistsNew (rowform , substr(v_long_nm_suf_int,2), v_item_typ_id, idx , v_item_id, v_ver_nr);
-
-if (v_item_id is not null) then
-              ihook.setColumnValue(rowform,'CTL_VAL_STUS', 'ERROR');
-            ihook.setColumnValue(rowform,'CTL_VAL_MSG', 'Cannot Update. Duplicate Found: '|| v_item_id);
-            return;
-end if;
-
-if (v_mode = 'U') AND V_ITEM_ID  is null then --- Update
+if (v_mode = 'U')  then --- Update
 
 
         v_id := nci_11179.getItemId;
 
        rows := t_rows();
+       /*
+       delete from cncpt_admin_item where item_id = v_ai_id and ver_nr = v_ai_ver_nr;
+       commit;
+       delete from onedata_Ra.cncpt_admin_item where item_id = v_ai_id and ver_nr = v_ai_ver_nr;
+       commit;*/
+       
+       for cur in (Select cncpt_ai_id from cncpt_Admin_item where item_id = v_ai_id and ver_nr = v_ai_ver_nr) loop
+       row := t_row();
+        ihook.setcolumnValue(row,'CNCPT_AI_ID',cur.cncpt_ai_id);
+         rows.extend;
+            rows(rows.last) := row;
+   end loop;
+        action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,2,'delete');
+        actions.extend;
+        actions(actions.last) := action;
+
+    action := t_actionrowset(rows, 'Items under Concept (Hook)', 2,2,'purge');
+        actions.extend;
+        actions(actions.last) := action;
+
    --     raise_application_error(-20000,'OC');
           j := 1;
  --     v_nm := '';
        v_long_nm := '';
   --     v_def := '';
+        
+       rows := t_rows();
           for i in reverse 2..10 loop
-
+           row:= t_row();
           v_cncpt_id := ihook.getColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i);
              v_cncpt_ver_nr :=  ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i);
           if( v_cncpt_id is not null) then
@@ -2089,11 +2179,11 @@ if (v_mode = 'U') AND V_ITEM_ID  is null then --- Update
         end loop;
 
 
-          v_cncpt_id := ihook.getColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_1' );
-             v_cncpt_ver_nr :=  ihook.getColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_1' );
+          v_cncpt_id := ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1' );
+             v_cncpt_ver_nr :=  ihook.getColumnValue(rowform, 'CNCPT_3_VER_NR_1' );
             row := t_row();
-            ihook.setColumnValue(row,'ITEM_ID', v_id);
-            ihook.setColumnValue(row,'VER_NR', 1);
+            ihook.setColumnValue(row,'ITEM_ID', v_ai_id);
+            ihook.setColumnValue(row,'VER_NR', v_ai_Ver_nr);
             ihook.setColumnValue(row,'CNCPT_ITEM_ID',v_cncpt_id);
             ihook.setColumnValue(row,'CNCPT_VER_NR', v_cncpt_ver_nr);
             ihook.setColumnValue(row,'NCI_ORD', 0);
@@ -2125,12 +2215,13 @@ if (v_mode = 'U') AND V_ITEM_ID  is null then --- Update
         ihook.setColumnValue(row,'ITEM_ID', v_ai_id);
         ihook.setColumnValue(row,'VER_NR', v_ai_ver_nr);
         ihook.setColumnValue(row,'ITEM_LONG_NM', nci_11179_2.getStdShortName(v_id, 1));
-        ihook.setColumnValue(row,'ITEM_DESC', substr(v_def, 2));
+        ihook.setColumnValue(row,'ITEM_DESC', v_def);
+        ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 7);
         ihook.setColumnValue(row,'ITEM_NM', v_nm);
         ihook.setColumnValue(row,'CNCPT_CONCAT', v_long_nm_suf);
-        ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', substr(v_def,2));
+        ihook.setColumnValue(row,'CNCPT_CONCAT_DEF', v_def);
         ihook.setColumnValue(row,'CNCPT_CONCAT_NM', v_nm);
-        ihook.setColumnValue(row,'CNCPT_CONCAT_WITH_INT', substr(v_long_nm_suf_int,2));
+        ihook.setColumnValue(row,'CNCPT_CONCAT_WITH_INT', v_long_nm_suf_int);
 
         rows.extend;
         rows(rows.last) := row;
@@ -2334,5 +2425,105 @@ if (v_cncpt_src ='STRING') then
             end if;*/
 end if;
 end;
+
+-- v_mode : V - Validate, C - Validation and Create;  v_cncpt_src:  STRING: String; DROP-DOWN: Drop-downs
+procedure RTImportPost(rowform in out t_row,  idx in integer,v_item_typ_id in integer,v_mode in varchar2, v_cncpt_src in varchar2, actions in out t_actions) as
+v_nm  varchar2(255);
+v_long_nm varchar2(255);
+v_def  varchar2(4000);
+row t_row;
+rows t_rows;
+ action t_actionRowset;
+ v_cncpt_id  number;
+ v_cncpt_ver_nr number(4,2);
+ v_temp_id  number;
+ v_temp_ver number(4,2);
+ v_item_id  number;
+ v_ver_nr number(4,2);
+ v_id integer;
+ v_long_nm_suf  varchar2(255);
+ v_long_nm_suf_int varchar2(255);
+ j integer;
+i integer;
+cnt integer;
+v_str varchar2(255);
+v_str1 varchar2(255);
+v_obj_nm  varchar2(100);
+v_temp varchar2(4000);
+v_cncpt_nm varchar2(255);
+v_interim boolean;
+v_invalid_concepts  varchar2(4000);
+v_found boolean;
+v_prmry_rep_term_cncpt varchar2(32);
+v_count integer;
+v_match_ct integer;
+
+begin
+   if (ihook.getColumnValue(rowform, 'CNCPT_CONCAT_STR_' || idx) is not null) then
+                v_str := trim(ihook.getColumnValue(rowform, 'CNCPT_CONCAT_STR_'|| idx));
+                v_str1 := replace(v_str,chr(9),'');
+                cnt := nci_11179.getwordcount(v_str1);
+                v_nm := '';
+                v_long_nm := '';
+                v_long_nm_suf := '';
+                v_long_nm_suf_int := '';
+                v_def := '';
+                 for i in 1..10 loop
+                           ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || i,'');
+                            ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || i, ''); 
+
+  end loop;
+                for i in  1..cnt loop
+          --      if (v_item_typ_id = 7) then
+           --             j := i+1;
+            --    else
+            if (i = cnt) then
+                      j :=1;
+                    else j := i+1;
+                end if;
+
+
+                       v_cncpt_nm := trim(nci_11179.getWord(v_str1, i, cnt));
+                        -- jira 1939- make sure the query returns something- if not, return the invalid concept in the validation message
+                        select count(*) into v_count from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm));
+                          -- and admin_stus_nm_dn = 'RELEASED';
+                        if (v_count = 0) then
+                            ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') || 'ERROR: Invalid or No Concepts: ' || v_cncpt_nm || chr(13));
+                        end if; 
+                           for cur in(select item_id, ver_nr, item_nm , item_long_nm, item_desc, admin_stus_nm_dn 
+                           from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
+                      --     and admin_stus_nm_dn = 'RELEASED') loop
+                    -- raise_application_error(-20000, cur.item_id);
+                            if (cur.admin_stus_nm_dn = 'RELEASED') then
+                            ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || j,cur.item_id);
+                            ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || j, cur.ver_nr); 
+                            end if;
+                            if (cur.admin_stus_nm_dn like '%RETIRED%') then
+                                          ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') || 'ERROR: Retired Concept: ' || v_cncpt_nm 
+                                          || ' ' || cur.item_nm  || chr(13));
+                            end if;
+                 end loop;
+
+         
+                end loop;
+                -- jira 2288
+                v_match_ct := 0;
+                v_found := false;
+
+                for cur in (select ITEM_NM, ITEM_LONG_NM from VW_CNCPT_RT_PRMRY) loop
+                    if (cur.ITEM_LONG_NM = ihook.getColumnValue(rowform, 'PRMRY_REP_TERM')) then
+                        v_found := true;
+                        if (cur.ITEM_NM = ihook.getColumnValue(rowform, 'PRMRY_REP_TERM_NM')) then
+                            v_match_ct := v_match_ct + 1;
+                        end if;
+                    end if;
+                end loop;
+                if (v_found = false) then
+                    ihook.setColumnValue(rowform, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') || chr(13) || 'ERROR: Invalid Primary Rep Term Concept: ' || ihook.getColumnValue(rowform, 'PRMRY_REP_TERM'));
+                end if;
+              
+end if;
+end;
+
 END;
 /
