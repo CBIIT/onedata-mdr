@@ -7,7 +7,7 @@ S53_NCI_PV_VM.sql
 S53_NCI_VD.sql
 S53_NCI_POST_HOOK.sql
 S53_NCI_CODEMAP.sql
-
+S53_NCI_IMPORT.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S53_WA_RA_DDL.sql
