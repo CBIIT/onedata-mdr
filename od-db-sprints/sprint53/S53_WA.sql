@@ -155,3 +155,7 @@ END AFTER STATEMENT;
 
 END;
 /
+
+
+insert into obj_key (obj_typ_Id,  obj_key_desc, 	OBJ_KEY_DEF) values (23, 'OMOP_CODE', 'Observational Medical Outcomes Partnership');
+commit;
