@@ -211,3 +211,49 @@ alter table VALUE_DOM add (TERM_CNCPT_ITEM_ID number, TERM_CNCPT_VER_NR number(4
 insert into obj_key (obj_typ_Id, obj_key_id, obj_key_desc) values (7, 16,'Enumerated by Reference');
 commit;
 
+
+  CREATE OR REPLACE  VIEW VW_CNCPT_XMAP AS
+  SELECT XMAP.ITEM_ID, XMAP.VER_NR, 
+  max(decode(o.obj_key_desc, 'ICD-O_CODE', XMAP_Cd,'')) ICD_O_CODE,
+  max(decode(o.obj_key_desc, 'ICD-O_CODE', XMAP_desc,'')) ICD_O_DESC,
+  max(decode(o.obj_key_desc, 'SNOMED-CT_CODE', XMAP_Cd,'')) SNOMED_CODE,
+  max(decode(o.obj_key_desc, 'SNOMED-CT_CODE', XMAP_DESC,'')) SNOMED_DESC,
+  max(decode(o.obj_key_desc, 'MEDDRA_CODE', XMAP_Cd,'')) MEDDRA_CODE,
+  max(decode(o.obj_key_desc, 'MEDDRA_CODE', XMAP_DESC,'')) MEDDRA_DESC,
+  max(decode(o.obj_key_desc, 'LOINC_CODE', XMAP_Cd,'')) LOINC_CODE,
+  max(decode(o.obj_key_desc, 'LOINC_CODE', XMAP_DESC,'')) LOINC_DESC,
+  max(decode(o.obj_key_desc, 'HUGO_CODE', XMAP_Cd,'')) HUGO_CODE,
+  max(decode(o.obj_key_desc, 'HUGO_CODE', XMAP_desc,'')) HUGO_CODE_DESC,
+  max(decode(o.obj_key_desc, 'ICD-10-CM_CODE', XMAP_Cd,'')) ICD_10_CM_CODE,
+  max(decode(o.obj_key_desc, 'ICD-10-CM_CODE', XMAP_DESC,'')) ICD_10_CM_DESC,
+	    max(decode(o.obj_key_desc, 'OMOP_CODE', XMAP_Cd,'')) OMOP_CODE,
+  max(decode(o.obj_key_desc, 'OMOP_CODE', XMAP_DESC,'')) OMOP_DESC,
+ max(decode(o.obj_key_desc, 'NCI_META_CUI', XMAP_Cd,'')) META_CUI_CODE,
+  max(decode(o.obj_key_desc, 'NCI_META_CUI', XMAP_DESC,'')) META_CUI_DESC,
+	  max(decode(o.obj_key_desc, 'MED_RT_CODE', XMAP_Cd,'')) MED_RT_CODE,
+  max(decode(o.obj_key_desc, 'MED_RT_CODE', XMAP_DESC,'')) MED_RT_DESC,
+	  max(decode(o.obj_key_desc, 'ICD-10-PCS_CODE', XMAP_Cd,'')) ICD_10_PCS_CODE,
+  max(decode(o.obj_key_desc, 'ICD-10-PCS_CODE', XMAP_DESC,'')) ICD_10_PCS_DESC,
+	  max(decode(o.obj_key_desc, 'NCBI_CODE', XMAP_Cd,'')) NCBI_CODE,
+  max(decode(o.obj_key_desc, 'NCBI_CODE', XMAP_DESC,'')) NCBI_DESC,
+	  max(decode(o.obj_key_desc, 'HPO_CODE', XMAP_Cd,'')) HPO_CODE,
+  max(decode(o.obj_key_desc, 'HPO_CODE', XMAP_DESC,'')) HPO_DESC,
+	  max(decode(o.obj_key_desc, 'HCPCS_CODE', XMAP_Cd,'')) HCPCS_CODE,
+  max(decode(o.obj_key_desc, 'HCPCS_CODE', XMAP_DESC,'')) HCPCS_DESC,
+   max(decode(o.obj_key_desc, 'ICD-O_CODE', TERM_TYP,'')) ICD_O_TERM_TYP,
+  max(decode(o.obj_key_desc, 'SNOMED-CT_CODE', TERM_TYP,'')) SNOMED_TERM_TYP,
+  max(decode(o.obj_key_desc, 'MEDDRA_CODE', TERM_TYP,'')) MEDDRA_TERM_TYP,
+  max(decode(o.obj_key_desc, 'LOINC_CODE', TERM_TYP,'')) LOINC_TERM_TYP,
+  max(decode(o.obj_key_desc, 'HUGO_CODE', TERM_TYP,'')) HUGO_TERM_TYP,
+  max(decode(o.obj_key_desc, 'ICD-10-CM_CODE', TERM_TYP,'')) ICD_10_CM_TERM_TYP,
+ max(decode(o.obj_key_desc, 'NCI_META_CUI', TERM_TYP,'')) META_CUI_TERM_TYP,
+	  max(decode(o.obj_key_desc, 'MED_RT_CODE', TERM_TYP,'')) MED_RT_TERM_TYP,
+	  max(decode(o.obj_key_desc, 'ICD-10-PCS_CODE', TERM_TYP,'')) ICD_10_PCS_TERM_TYP,
+	  max(decode(o.obj_key_desc, 'NCBI_CODE', TERM_TYP,'')) NCBI_TERM_TYP,
+	  max(decode(o.obj_key_desc, 'HPO_CODE', TERM_TYP,'')) HPO_TERM_TYP,
+	  max(decode(o.obj_key_desc, 'HCPCS_CODE', TERM_TYP,'')) HCPCS_TERM_TYP,
+  sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, 0 FLD_DELETE, sysdate LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT 
+       FROM NCI_ADMIN_ITEM_XMAP xmap, obj_key o
+       WHERE o.obj_typ_id = 23 and o.obj_key_id = xmap.evs_src_id and pref_ind = 1
+       group by xmap.item_id, xmap.ver_nr;
+
