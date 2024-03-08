@@ -156,6 +156,31 @@ END AFTER STATEMENT;
 END;
 /
 
+  
+CREATE TABLE ATHENA_CONCEPT  (
+  concept_id INTEGER NOT NULL ,
+  concept_name VARCHAR(255) NOT NULL ,
+  domain_id VARCHAR(20) NOT NULL ,
+  vocabulary_id VARCHAR(20) NOT NULL ,
+  concept_class_id VARCHAR(20) NOT NULL ,
+  standard_concept VARCHAR(1) NULL ,
+  concept_code VARCHAR(50) NOT NULL ,
+  valid_start_date DATE NOT NULL ,
+  valid_end_date DATE NOT NULL ,
+  invalid_reason VARCHAR(1) NULL,
+  PRIMARY KEY (concept_id));
+
+CREATE TABLE ATHENA_CONCEPT_RELATIONSHIP (
+  concept_id_1 INTEGER NOT NULL,
+  concept_id_2 INTEGER NOT NULL,
+  relationship_id VARCHAR(20) NOT NULL,
+  valid_start_date DATE NOT NULL,
+  valid_end_date DATE NOT NULL,
+  invalid_reason VARCHAR(1) NULL,
+  PRIMARY KEY(concept_id_1, concept_id_2,relationship_id));
+
+
+
 
 insert into obj_key (obj_typ_Id,  obj_key_desc, 	OBJ_KEY_DEF) values (23, 'OMOP_CODE', 'Observational Medical Outcomes Partnership');
 commit;
