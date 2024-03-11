@@ -1,0 +1,3 @@
+run the following in each environment
+nci_ext_import.load_mt;
+nci_ext_import.load_athena;
