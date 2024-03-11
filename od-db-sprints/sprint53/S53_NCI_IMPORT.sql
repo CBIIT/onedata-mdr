@@ -775,7 +775,7 @@ begin
   rows := t_rows();
 
 --jira 3123 only execute if mode is Validation or if mode is create and row has been 
-if (v_mode = 'C') then
+if (v_mode in ('C','U')) then
     for i in 1..hookinput.originalRowset.rowset.count loop
         row_ori := hookInput.originalRowset.rowset(i);
         if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') <> 'VALIDATED') then
@@ -784,7 +784,6 @@ if (v_mode = 'C') then
         end if;
     end loop;
 end if;
-
 
 for i in 1..hookinput.originalRowset.rowset.count loop
 
@@ -852,7 +851,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
     --    if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null and ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID') is null and  ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_FND') is null
    --     and v_mode = 'C') then
    -- jira 2183 - only run Create if DEC has been validated
-        if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null and v_mode = 'C' and v_val_ind = true) then
+        if (ihook.getColumnValue(row_ori,'DE_CONC_ITEM_ID_CREAT') is null and v_mode in ('C', 'U') and v_val_ind = true) then
 
         --and v_val_ind = true)    then
         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', '');
@@ -882,6 +881,8 @@ for i in 1..hookinput.originalRowset.rowset.count loop
             if (v_dup_ind = true) then
               ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Duplicate found in the same import file. Batch Number: ' || v_batch_nbr );           
             end if;
+        elsif (v_mode = 'U') then
+        nci_dec_mgmt.spDECValCreateImport(row_ori, 'U', actions, v_val_ind);
         else
         nci_dec_mgmt.spDECValCreateImport(row_ori, 'C', actions, v_val_ind);
         end if;
