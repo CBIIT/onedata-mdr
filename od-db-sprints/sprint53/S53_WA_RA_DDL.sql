@@ -335,4 +335,12 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	and me.me_typ_id = me_typ.obj_key_id (+)
 	and me.me_grp_id = me_grp.obj_key_id (+);
 
+--jira 3177: add missing index on admin_item
+CREATE UNIQUE INDEX IDX_ADMIN_ITEM_NCI_UNI ON ADMIN_ITEM ("ADMIN_ITEM_TYP_ID", "ITEM_LONG_NM", "CNTXT_ITEM_ID", "CNTXT_VER_NR", "VER_NR") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+
 
