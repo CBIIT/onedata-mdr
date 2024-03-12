@@ -37,6 +37,7 @@ procedure createDEC (rowai in t_row, rowform in t_row, actions in out t_actions,
 
 -- FInal procedure to create DEC from Import after all the validations
 procedure createDECImport (rowform in out t_row, actions in out t_actions, v_upd_ind in boolean, v_item_id in number, v_ver_nr in number);
+procedure updateDECImport (rowform in out t_row, actions in out t_actions, v_upd_ind in boolean, v_item_id in number, v_ver_nr in number);
 procedure createDECImportOld (rowform in out t_row, actions in out t_actions);
 
 -- Get the form for DEC Create
@@ -1068,169 +1069,109 @@ v_upd_ind boolean;
 v_dec_fnd number;
 v_cntxt_nm varchar2(255);
 v_cntxt_ver number(4,2);
+v_stus varchar2(64);
 begin
-v_upd_ind := false; --jira 3149 update indicator
-    -- Show generated name
+ --jira 3149 update indicator
+    if (v_op = 'U') then
+        v_upd_ind := true;
+    else
+        v_upd_ind := false;
+    end if;
     
-    if (ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID') is not null) then --specifies intent to update
-    select count(*) into v_dec_fnd from de_conc where ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID') = de_conc.item_id and ihook.getColumnValue(rowform, 'DE_CONC_VER_NR') = de_conc.ver_nr;--jira 3149 execute update instead
+    ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND', '');
+        ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND', '' );
+
+        if (ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID') is not null) then --specifies intent to update
+        select count(*) into v_dec_fnd from de_conc where ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID') = de_conc.item_id and ihook.getColumnValue(rowform, 'DE_CONC_VER_NR') = de_conc.ver_nr;--jira 3149 execute update instead
         if (v_dec_fnd = 0) then
             ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'Invalid DEC ID/Ver: ' || ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID') || 'v' || ihook.getColumnValue(rowform, 'DE_CONC_VER_NR'));
             v_val_ind:= false;
         else
-        for cur in (select de_conc.* , ai.cntxt_nm_dn, ai.item_nm, ai.item_long_nm, ai.cntxt_item_id, ai.cntxt_ver_nr from de_conc, admin_item ai where
-           -- cntxt_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform, 'CNTXT_VER_NR') and
-            de_conc.item_id = ai.item_id and ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID') = de_conc.item_id and de_conc.ver_nr = ai.ver_nr 
-            and ihook.getColumnValue(rowform, 'DE_CONC_VER_NR') = de_conc.ver_nr) loop
-                if (ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') <> cur.cntxt_item_id and ihook.getColumnValue(rowform, 'CNTXT_VER_NR') <> cur.cntxt_ver_nr) then
-                    select cntxt_nm_dn, ver_nr into v_cntxt_nm, v_cntxt_ver from vw_cntxt where ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') = item_id and ihook.getColumnValue(rowform, 'CNTXT_VER_NR') = ver_nr;
-                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'WARNING: DEC found in another context: ' || cur.cntxt_nm_dn || 'v' || cur.cntxt_ver_nr || '. Context will change to ' || v_cntxt_nm || 'v' || v_cntxt_ver || '.' || chr(13));
-                else
-                  --  raise_application_error(-20000, ihook.getColumnValue(rowform, 'ITEM_2_ID'));
-                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'DEC found. Update will be performed.' || chr(13));
-                end if;
-                
-                ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
-                ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
-                
-                if (ihook.getColumnValue(rowform, 'DEC_ITEM_NM') is null) then
-                    ihook.setColumnValue(rowform, 'DEC_ITEM_NM', cur.item_nm);
-                end if;
-                if (ihook.getColumnValue(rowform, 'DEC_ITEM_LONG_NM') is null) then
-                    ihook.setColumnValue(rowform,'DEC_ITEM_LONG_NM', nci_11179_2.getStdShortName(ihook.getColumnValue(rowform,'ITEM_1_ID'), ihook.getColumnValue(rowform,'ITEM_1_VER_NR')) || ':' ||
-                    nci_11179_2.getStdShortName(ihook.getColumnValue(rowform,'ITEM_2_ID'), ihook.getColumnValue(rowform,'ITEM_2_VER_NR')))  ;
-                    --ihook.setcolumnValue(rowform, 'DEC_ITEM_LONG_NM', cur.item_long_nm);
-                end if;
-                v_item_id := cur.item_id;
-                v_ver_nr := cur.ver_nr;
-                v_upd_ind:= true; --jira 3149
-                v_val_ind:= true; -- false; jira 3149
-            end loop;
-            --check that OC/Prop combo does not exist in target context
-        
---raise_application_error(-20000, ihook.getColumnValue(rowform, 'ITEM_1_ID'));
-            if (v_upd_ind = true and ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null and ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then
-            select cncpt_concat into v_oc_str from nci_admin_item_ext where item_id = ihook.getColumnValue(rowform, 'ITEM_1_ID') and ver_nr= ihook.getColumnValue(rowform, 'ITEM_1_VER_NR');
-            select cncpt_concat into v_prop_str from nci_admin_item_ext where item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID') and ver_nr= ihook.getColumnValue(rowform, 'ITEM_2_VER_NR');
-         --       raise_application_error(-20000, v_prop_str);
-                for oc_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_oc_str and ai.admin_item_typ_id = 5) loop
-                    for prop_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_prop_str and ai.admin_item_typ_id = 6) loop
-                        for cur in (select de_conc.* , ai.cntxt_nm_dn from de_conc, admin_item ai where obj_cls_item_id =  oc_cur.item_id and obj_cls_ver_nr = oc_cur.ver_nr and
-                        prop_item_id = prop_cur.item_id and prop_ver_nr =  prop_cur.ver_nr and
-                        cntxt_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform, 'CNTXT_VER_NR')
-                        --and de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr 
-                        ) loop
-                       -- raise_application_error(-20000, 'Here');
-                            if (cur.item_id <> ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID')) then
-    --     raise_application_error(-20000, 'Here'); --jira 3149 change error to Warning, then update DEC instead
-                                ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'ERROR: OC/Prop combination used by another DEC: ' || cur.item_id || 'v' || cur.ver_nr || ' ' || cur.cntxt_nm_dn || '.' || chr(13));
-                                ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
-                                ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
-                                v_item_id := cur.item_id;
-                                v_ver_nr := cur.ver_nr;
-                                v_upd_ind:= false; --jira 3149
-                                v_val_ind:= false; -- false; jira 3149
-                            end if;
-                        end loop;
-                    end loop;
-                end loop;
-            end if;
+            v_item_id := (ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID'));
+            v_ver_nr := (ihook.getColumnValue(rowform, 'DE_CONC_VER_NR'));
+            select admin_stus_nm_dn into v_stus from admin_item where ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID') = item_id and ihook.getColumnValue(rowform, 'DE_CONC_VER_NR') = ver_nr;
+        end if;
         end if;
 
-    elsif (ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID') is null) then --- only execute if not specified, user attempting to create
-   -- raise_application_error(-20000, 'Here');
         ihook.setColumnValue(rowform, 'GEN_DE_CONC_NM',ihook.getColumnValue(rowform,'ITEM_1_NM') ||  ' ' || ihook.getColumnValue(rowform,'ITEM_2_NM') ) ;
         -- Check if DEC is a duplicate. Removed Context from the test as per Denise.
 
-        ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND', '');
-        ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND', '' );
-
-        if (ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null and ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then 
-
-  --jira 3149 change the check for duplicate to just DEC name id ver, context id and ver
---        for cur in (select de_conc.* , ai.cntxt_nm_dn from de_conc, admin_item ai where 
---            cntxt_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform, 'CNTXT_VER_NR') and
---            de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr and ai.item_nm = ihook.getColumnValue(rowform, 'DEC_ITEM_NM')
---        ) loop
---     --    raise_application_error(-20000, 'Here'); jira 3149 change error to Warning, then update DEC instead
---            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'Existing DEC found in same context: ' || cur.item_id || 'v' || cur.ver_nr ||  ' '||  cur.cntxt_nm_dn || '. Update will be performed.' || chr(13));
---            ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
---            ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
---            v_item_id := cur.item_id;
---            v_ver_nr := cur.ver_nr;
---            v_upd_ind:= true; --jira 3149
---            v_val_ind:= true; -- false; jira 3149 
---        end loop;
-  
-  --end change
-  -- code below checks for exact oc and props for duplicate DECs
-            select cncpt_concat into v_oc_str from nci_admin_item_ext where item_id = ihook.getColumnValue(rowform, 'ITEM_1_ID') and ver_nr= ihook.getColumnValue(rowform, 'ITEM_1_VER_NR');
+if (   ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null and ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then
+          
+      select cncpt_concat into v_oc_str from nci_admin_item_ext where item_id = ihook.getColumnValue(rowform, 'ITEM_1_ID') and ver_nr= ihook.getColumnValue(rowform, 'ITEM_1_VER_NR');
             select cncpt_concat into v_prop_str from nci_admin_item_ext where item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID') and ver_nr= ihook.getColumnValue(rowform, 'ITEM_2_VER_NR');
             for oc_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_oc_str and ai.admin_item_typ_id = 5) loop
             for prop_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_prop_str and ai.admin_item_typ_id = 6) loop
                for cur in (select de_conc.* , ai.cntxt_nm_dn from de_conc, admin_item ai where obj_cls_item_id =  oc_cur.item_id and obj_cls_ver_nr =  oc_cur.ver_nr and
                prop_item_id = prop_cur.item_id and prop_ver_nr =  prop_cur.ver_nr and
                cntxt_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(rowform, 'CNTXT_VER_NR') and
-              de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr 
+              de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr and ai.item_id <> nvl(ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID'),0)
              ) loop
-     --    raise_application_error(-20000, 'Here'); jira 3149 change error to Warning, then update DEC instead
-                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'ERROR: Duplicate DEC found in same context: ' || cur.item_id || 'v' || cur.ver_nr ||  ' '||  cur.cntxt_nm_dn || '.' || chr(13));
+     --    raise_application_error(-20000, 'Here');
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'ERROR: Duplicate DEC found in same context: ' || cur.item_id || 'v' || cur.ver_nr ||  ' '||  cur.cntxt_nm_dn || chr(13));
                     ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
                     ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
-                    v_item_id := cur.item_id;
-                    v_ver_nr := cur.ver_nr;
-                    v_upd_ind:= false; --jira 3149
-                    v_val_ind:= false; -- false; jira 3149
+                    
+                                      v_val_ind:= false;
 
               end loop;
               end loop;
               end loop;
               -- warning if in another context
-        if (v_val_ind = true and v_upd_ind = false) then
-        select cncpt_concat into v_oc_str from nci_admin_item_ext where item_id = ihook.getColumnValue(rowform, 'ITEM_1_ID') and ver_nr= ihook.getColumnValue(rowform, 'ITEM_1_VER_NR');
-        select cncpt_concat into v_prop_str from nci_admin_item_ext where item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID') and ver_nr= ihook.getColumnValue(rowform, 'ITEM_2_VER_NR');
-            for oc_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_oc_str and ai.admin_item_typ_id = 5) loop
-                for prop_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_prop_str and ai.admin_item_typ_id = 6) loop
-                    for cur in (select de_conc.*, ai.cntxt_nm_dn from de_conc, admin_item ai where obj_cls_item_id =  oc_cur.item_id and obj_cls_ver_nr =  oc_cur.ver_nr and
-                        prop_item_id = prop_cur.item_id and prop_ver_nr =  prop_cur.ver_nr and de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr 
-                    ) loop
+              if (v_val_ind = true) then
+                    for oc_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_oc_str and ai.admin_item_typ_id = 5) loop
+            for prop_cur in (select ai.item_id, ai.ver_nr from admin_item ai, nci_admin_item_ext e where ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and e.cncpt_concat = v_prop_str and ai.admin_item_typ_id = 6) loop
+               for cur in (select de_conc.*, ai.cntxt_nm_dn from de_conc, admin_item ai where obj_cls_item_id =  oc_cur.item_id and obj_cls_ver_nr =  oc_cur.ver_nr and
+               prop_item_id = prop_cur.item_id and prop_ver_nr =  prop_cur.ver_nr and             de_conc.item_id = ai.item_id and de_conc.ver_nr = ai.ver_nr 
+               and ai.item_id <> nvl(ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID'),0)
+             ) loop
+     --    raise_application_error(-20000, 'Here');
      --     Jira 1669.3
-                        ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'WARNING: Duplicate DEC found in other Context: ' || cur.item_id || 'v' || cur.ver_nr || ' '||  cur.cntxt_nm_dn || '. New DEC will be created.' || chr(13));
-                        ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
-                        ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
+                    ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'WARNING: Duplicate DEC found in other Context: ' || cur.item_id || 'v' || cur.ver_nr || ' '||  cur.cntxt_nm_dn || chr(13));
+                    ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID_FND',  cur.item_id );
+                    ihook.setColumnValue(rowform, 'DE_CONC_VER_NR_FND',  cur.ver_nr );
                                      -- v_val_ind:= false;
 
-                            end loop;
-                        end loop;
-                    end loop;
+              end loop;
+              end loop;
+              end loop;
                 end if;
-            end if;
         end if;
-
+    
   
         
      
-        if (ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is null or ihook.getColumnValue(rowform, 'CNCPT_2_ITEM_ID_1') is null) then
+     /*  ALREADY in NCI_IMPORT
+     if (ihook.getColumnValue(rowform, 'CNCPT_1_ITEM_ID_1') is null or ihook.getColumnValue(rowform, 'CNCPT_2_ITEM_ID_1') is null) then
             ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: OC or PROP missing.' || chr(13));
             v_val_ind:= false;
         end if;
 
-        if (ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') is null ) then
+        if (ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') is null and v_upd_ind = false) then
             ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: DEC CD is missing.' || chr(13));
             v_val_ind:= false;
+        end if;
+        */
+        if (v_stus like '%RETIRED%') then
+            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || chr(13) || 'WARNING: DEC is Retired.');
         end if;
 
         rows := t_rows();
 
         IF (v_val_ind = true and v_op = 'C')  THEN  
    
- --       raise_application_error(-20000, 'here 1');
-        createValAIWithConcept(rowform , 1,5,'C','DROP-DOWN',actions); -- OC
-        createValAIWithConcept(rowform , 2,6,'C','DROP-DOWN',actions); -- Property
-        --raise_application_error(-20000,'v_item_id: ' || v_item_id);
+  --   raise_application_error(-20000, 'here 1');
+            createValAIWithConcept(rowform , 1,5,'C','DROP-DOWN',actions); -- OC
+            createValAIWithConcept(rowform , 2,6,'C','DROP-DOWN',actions); -- Property
+  --      raise_application_error(-20000,'v_item_id: ' || v_item_id);
         --createDECImportOld(rowform, actions);
-        createDECImport(rowform, actions, v_upd_ind, v_item_id, v_ver_nr); --jira 3149
-
+            createDECImport(rowform, actions, v_upd_ind, v_item_id, v_ver_nr); --jira 3149
+        end if;
+        if (v_val_ind = true and v_op = 'U') THEN
+        
+            createValAIWithConcept(rowform , 1,5,'C','DROP-DOWN',actions); -- OC
+            createValAIWithConcept(rowform , 2,6,'C','DROP-DOWN',actions); -- Property
+            updateDECImport(rowform, actions, v_upd_ind, v_item_id, v_ver_nr); --jira 3149
         end if;
        --   raise_application_error(-20000,'Inside');
      -- raise_application_error(-20000,'Outside');
@@ -2009,17 +1950,26 @@ row t_row;
 rows t_rows;
  action t_actionRowset;
  v_id number;
+ v_de_conc_id number;
+ v_de_conc_ver_nr number;
 begin
    rows := t_rows();
    row := t_row();
-   if (v_upd_ind = true) then
-            ihook.setColumnValue(row,'ITEM_ID', v_item_id);
-        ihook.setColumnValue(rowform,'DE_CONC_ITEM_ID_CREAT', v_item_id);
-        ihook.setColumnValue(rowform,'DE_CONC_VER_NR_CREAT',v_ver_nr);
-                ihook.setColumnValue(row,'VER_NR', v_ver_nr);
-                        ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
-             --raise_application_error(-20000,'Inside');
-   else
+--   if (v_upd_ind = true) then
+--   raise_application_error(-20000,'Inside');
+--            ihook.setColumnValue(row,'ITEM_ID', v_item_id);
+--        ihook.setColumnValue(rowform,'DE_CONC_ITEM_ID_CREAT', v_item_id);
+--        ihook.setColumnValue(rowform,'DE_CONC_VER_NR_CREAT',v_ver_nr);
+--                ihook.setColumnValue(row,'VER_NR', v_ver_nr);
+--                        ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
+--             --raise_application_error(-20000,'Inside');
+--        if (ihook.getColumnValue(row,'CONC_DOM_ITEM_ID') is null) then
+--          --       raise_application_error(-20000,v_item_id);
+--            select conc_dom_item_id, conc_dom_ver_nr into v_de_conc_id, v_de_conc_ver_nr from de_conc where item_id = v_item_id and ver_nr = v_ver_nr;
+--            ihook.setColumnValue(rowform, 'CONC_DOM_ITEM_ID', v_de_conc_id);
+--            ihook.setColumnValue(rowform, 'CONC_DOM_VER_NR', v_de_conc_ver_nr);
+--        end if;
+--   else
      v_id := nci_11179.getItemId;
         ihook.setColumnValue(row,'ITEM_ID', v_id);
         ihook.setColumnValue(rowform,'DE_CONC_ITEM_ID_CREAT', v_id);
@@ -2029,7 +1979,7 @@ begin
         ihook.setColumnValue(row,'VER_NR', 1);
 
         ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
-    end if;
+
         ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 2);
             
             
@@ -2046,11 +1996,9 @@ begin
         ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
         ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
         ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
-        if (v_upd_ind = true) then
-            ihook.setColumnValue(row,'ADMIN_STUS_ID',65); --draft mod
-        else
+
             ihook.setColumnValue(row,'ADMIN_STUS_ID',66); --draft new
-        end if;
+
          ihook.setColumnValue(row,'REGSTR_STUS_ID',9);
        ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',nvl(ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID'),1) );
         ihook.setColumnValue(row,'CONC_DOM_VER_NR',nvl(ihook.getColumnValue(rowform,'CONC_DOM_VER_NR'),1) );
@@ -2063,7 +2011,97 @@ begin
         rows(rows.last) := row;
 --raise_application_error(-20000, 'Deep' || ihook.getColumnValue(row,'CNTXT_ITEM_ID') || 'ggg'|| ihook.getColumnValue(row,'ADMIN_STUS_ID') || 'GGGG' || ihook.getColumnValue(row,'ITEM_ID'));
 
-        if (v_upd_ind = true) then
+--        if (v_upd_ind = true) then
+--            action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,7,'update');
+--            actions.extend;
+--            actions(actions.last) := action;
+--            
+--            action := t_actionrowset(rows, 'Data Element Concept', 2,8,'update');
+--            actions.extend;
+--            actions(actions.last) := action;
+--            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'DEC Updated Successfully.' || chr(13)) ;
+--         --   raise_application_error(-20000, 'inside ' || actions.last);
+--        else
+            action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,7,'insert');
+            actions.extend;
+            actions(actions.last) := action;
+
+            action := t_actionrowset(rows, 'Data Element Concept', 2,8,'insert');
+            actions.extend;
+            actions(actions.last) := action;
+            ihook.setColumnValue(rowform, 'CTL_VAL_MSG','DEC Created Successfully with ID ' || v_id||c_ver_suffix || chr(13)) ;
+     --   end if;
+        --Jira 1669.2
+ --ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || chr(13) || 'DEC Created/Updated Successfully.' || chr(13)) ;
+  --ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'DEC Created Successfully with ID ' || v_id||c_ver_suffix || chr(13)) ;
+ihook.setColumnValue(rowform, 'CTL_VAL_STUS', 'PROCESSED') ;
+
+--r
+end;
+
+procedure updateDECImport (rowform in out t_row, actions in out t_actions, v_upd_ind in boolean, v_item_id in number, v_ver_nr in number) as
+v_nm  varchar2(255);
+v_long_nm varchar2(255);
+v_def  varchar2(4000);
+v_short_nm varchar2(30);
+row t_row;
+rows t_rows;
+ action t_actionRowset;
+ v_id number;
+ v_de_conc_id number;
+ v_de_conc_ver_nr number;
+begin
+   rows := t_rows();
+   row := t_row();
+        
+        ihook.setColumnValue(row,'ITEM_ID', v_item_id);
+        ihook.setColumnValue(rowform,'DE_CONC_ITEM_ID_CREAT', v_item_id);
+        ihook.setColumnValue(rowform,'DE_CONC_VER_NR_CREAT',v_ver_nr);
+                ihook.setColumnValue(row,'VER_NR', v_ver_nr);
+                        ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
+             --raise_application_error(-20000,'Inside');
+        if (ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID') is null) then
+             --    raise_application_error(-20000, 'here');
+            select conc_dom_item_id, conc_dom_ver_nr into v_de_conc_id, v_de_conc_ver_nr from de_conc where item_id = v_item_id and ver_nr = v_ver_nr;
+            ihook.setColumnValue(rowform, 'CONC_DOM_ITEM_ID', v_de_conc_id);
+            ihook.setColumnValue(rowform, 'CONC_DOM_VER_NR', v_de_conc_ver_nr);
+    
+        end if;
+        
+        ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 2);
+            
+            
+            --ihook.setColumnValue(row,'ITEM_LONG_NM', nvl(ihook.getColumnValue(rowform,'DEC_ITEM_LONG_NM'),v_id || c_ver_suffix));
+            if (trim(ihook.getColumnValue(rowform,'DEC_ITEM_LONG_NM')) is null or upper(ihook.getColumnValue(rowform,'DEC_ITEM_LONG_NM')) = 'SYSGEN') then
+             v_short_nm := nci_11179_2.getStdShortName(ihook.getColumnValue(rowform, 'ITEM_1_ID'), ihook.getColumnValue(rowform, 'ITEM_1_VER_NR')) || ':' ||
+             nci_11179_2.getStdShortName(ihook.getColumnValue(rowform, 'ITEM_2_ID'), ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'));
+            else
+                v_short_nm := ihook.getColumnValue(rowform,'DEC_ITEM_LONG_NM');
+            end if;
+         ihook.setColumnValue(row,'ITEM_LONG_NM', v_short_nm);
+
+        ihook.setColumnValue(row,'ITEM_NM',  nvl(ihook.getColumnValue(rowform,'DEC_ITEM_NM'), ihook.getColumnValue(rowform, 'GEN_DE_CONC_NM')));
+        ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_1_DEF')  || ':' || ihook.getColumnValue(rowform, 'ITEM_2_DEF'),1,4000));
+        ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
+        ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
+       -- if (v_upd_ind = true) then
+            ihook.setColumnValue(row,'ADMIN_STUS_ID',65); --draft mod
+        --else
+        --    ihook.setColumnValue(row,'ADMIN_STUS_ID',66); --draft new
+        --end if;
+         ihook.setColumnValue(row,'REGSTR_STUS_ID',9);
+       ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',nvl(ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID'),1) );
+        ihook.setColumnValue(row,'CONC_DOM_VER_NR',nvl(ihook.getColumnValue(rowform,'CONC_DOM_VER_NR'),1) );
+        ihook.setColumnValue(row,'OBJ_CLS_ITEM_ID',nvl(ihook.getColumnValue(rowform, 'ITEM_1_ID'),1) );
+        ihook.setColumnValue(row,'OBJ_CLS_VER_NR',nvl(ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'),1) );
+        ihook.setColumnValue(row,'PROP_ITEM_ID',nvl(ihook.getColumnValue(rowform, 'ITEM_2_ID'),1));
+        ihook.setColumnValue(row,'PROP_VER_NR',nvl(ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'),1));
+        ihook.setColumnValue(row,'LST_UPD_DT',sysdate );
+        rows.extend;
+        rows(rows.last) := row;
+--raise_application_error(-20000, 'Deep' || ihook.getColumnValue(row,'CNTXT_ITEM_ID') || 'ggg'|| ihook.getColumnValue(row,'ADMIN_STUS_ID') || 'GGGG' || ihook.getColumnValue(row,'ITEM_ID'));
+
+
             action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,7,'update');
             actions.extend;
             actions(actions.last) := action;
@@ -2073,16 +2111,7 @@ begin
             actions(actions.last) := action;
             ihook.setColumnValue(rowform, 'CTL_VAL_MSG', 'DEC Updated Successfully.' || chr(13)) ;
          --   raise_application_error(-20000, 'inside ' || actions.last);
-        else
-            action := t_actionrowset(rows, 'Administered Item (No Sequence)', 2,7,'insert');
-            actions.extend;
-            actions(actions.last) := action;
 
-            action := t_actionrowset(rows, 'Data Element Concept', 2,8,'insert');
-            actions.extend;
-            actions(actions.last) := action;
-            ihook.setColumnValue(rowform, 'CTL_VAL_MSG','DEC Created Successfully with ID ' || v_id||c_ver_suffix || chr(13)) ;
-        end if;
         --Jira 1669.2
  --ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || chr(13) || 'DEC Created/Updated Successfully.' || chr(13)) ;
   --ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'DEC Created Successfully with ID ' || v_id||c_ver_suffix || chr(13)) ;
