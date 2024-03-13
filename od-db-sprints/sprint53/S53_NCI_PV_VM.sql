@@ -301,7 +301,7 @@ begin
     end if;
 
     for cur in (select * from value_dom where item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'VER_NR')
-    and VAL_DOM_TYP_ID <> 17) loop
+    and VAL_DOM_TYP_ID = 18) loop
         raise_application_error(-20000, 'PV/VM cannot be added - Selected Value Domain is non-enumerated. ');
         return;
    end loop;
