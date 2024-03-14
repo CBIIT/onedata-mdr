@@ -2137,6 +2137,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
             nci_vd.spRTValUpdImport(row_ori, 'V', actions, v_val_ind);
   
         if (v_val_ind = true and v_mode = 'U') then -- only go thru creating new if not specified
+            ihook.setColumnValue(row_ori,'CTL_VAL_MSG', '');
             nci_vd.spRTValUpdImport(row_ori, 'U', actions, v_val_ind);
          if (v_val_ind = true) then
                 iHook.setColumnValue (row_ori, 'CTL_VAL_STUS', 'PROCESSED');
