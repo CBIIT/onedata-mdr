@@ -48,3 +48,5 @@ alter table nci_mec_map add (TGT_MEC_ID_DERV number);
        WHERE o.obj_typ_id = 23 and o.obj_key_id = xmap.evs_src_id and pref_ind = 1
        group by xmap.item_id, xmap.ver_nr;
 
+
+insert into obj_key (obj_typ_id, obj_key_desc, obj_key_Def) values (23,'UBERON_CODE','Uberon is an integrated cross-species ontology covering anatomical structures in animals.');commit;
