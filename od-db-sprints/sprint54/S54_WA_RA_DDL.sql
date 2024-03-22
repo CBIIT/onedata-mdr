@@ -50,3 +50,6 @@ alter table nci_mec_map add (TGT_MEC_ID_DERV number);
 
 
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_Def) values (23,'UBERON_CODE','Uberon is an integrated cross-species ontology covering anatomical structures in animals.');commit;
+
+alter table NCI_STG_CDE_CREAT add (ORIGIN_ID integer, IMP_ORIGIN varchar2(1000));
+
