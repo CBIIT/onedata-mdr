@@ -391,4 +391,13 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
            AND VALUE_DOM.REP_CLS_VER_NR = CONRT.VER_NR;
 
 
+  CREATE OR REPLACE  VIEW VW_VALUE_DOM_COMP AS
+  select ai.item_nm, ai.item_long_nm, ai.admin_stus_nm_dn, ai.regstr_stus_nm_dn, ai.cntxt_nm_dn, v."NON_ENUM_VAL_DOM_DESC",v."DTTYPE_ID",v."VAL_DOM_MAX_CHAR",v."VAL_DOM_TYP_ID",v."UOM_ID",v."CREAT_DT",v."CONC_DOM_VER_NR",
+	v."CREAT_USR_ID",v."CONC_DOM_ITEM_ID",v."LST_UPD_USR_ID",v."REP_CLS_VER_NR",v."FLD_DELETE",v."REP_CLS_ITEM_ID",v."LST_DEL_DT",v."VER_NR",v."S2P_TRN_DT",
+	v."ITEM_ID",v."LST_UPD_DT",v."VAL_DOM_MIN_CHAR",v."VAL_DOM_FMT_ID",v."CHAR_SET_ID",v."VAL_DOM_SYS_NM",v."VAL_DOM_HIGH_VAL_NUM",v."VAL_DOM_LOW_VAL_NUM",
+	v."NCI_DEC_PREC",v."NCI_STD_DTTYPE_ID"  ,v.TERM_CNCPT_ITEM_ID,v.TERM_CNCPT_VER_NR,v.TERM_USE_TYP
+from value_dom v, admin_item ai
+where v.item_id = ai.item_id and v.ver_nr = ai.ver_nr;
+
+
 
