@@ -401,5 +401,7 @@ where v.item_id = ai.item_id and v.ver_nr = ai.ver_nr;
 
 alter table NCI_STG_CDE_CREAT add (TERM_CNCPT_ITEM_ID number, TERM_CNCPT_VER_NR number, TERM_USE_TYP integer, imp_ref_term varchar2(255), imp_term_use_typ varchar2(255));
 
+alter table NCI_STG_CDE_CREAT add (CREAT_PV_VM number(1));
+
 
 
