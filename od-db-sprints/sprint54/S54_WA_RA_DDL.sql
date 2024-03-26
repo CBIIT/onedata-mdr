@@ -403,5 +403,7 @@ alter table NCI_STG_CDE_CREAT add (TERM_CNCPT_ITEM_ID number, TERM_CNCPT_VER_NR 
 
 alter table NCI_STG_CDE_CREAT add (CREAT_PV_VM number(1));
 
+alter table NCI_STG_CDE_CREAT add (IMP_CREAT_PV_VM varchar2(10));
+
 
 
