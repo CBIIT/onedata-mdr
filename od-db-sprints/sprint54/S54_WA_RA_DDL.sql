@@ -407,3 +407,238 @@ alter table NCI_STG_CDE_CREAT add (IMP_CREAT_PV_VM varchar2(10));
 
 
 
+  CREATE OR REPLACE VIEW VW_NCI_MEC AS
+  select m.item_id mdl_item_id, m.ver_nr mdl_ver_nr, m.item_nm mdl_item_nm, me.item_id ME_ITEM_ID, me.ver_nr me_VER_NR,
+	me.ITEM_LONG_NM me_item_nm, me.ITEM_PHY_OBJ_NM me_phy_nm, mec."MEC_ID",mec."MDL_ELMNT_ITEM_ID",mec."MDL_ELMNT_VER_NR",mec."MEC_TYP_ID",mec."CREAT_DT",
+mec."CREAT_USR_ID",mec."LST_UPD_USR_ID",mec."FLD_DELETE", mec.char_ord, mec.pk_ind,
+	  mec."LST_DEL_DT",mec."S2P_TRN_DT",mec."LST_UPD_DT",mec."SRC_DTTYPE",mec."STD_DTTYPE_ID",mec."SRC_MAX_CHAR",mec."SRC_MIN_CHAR",
+vd."VAL_DOM_TYP_ID",mec."SRC_UOM",mec."UOM_ID",mec."SRC_DEFLT_VAL",mec."SRC_ENUM_SRC",mec."DE_CONC_ITEM_ID",mec."DE_CONC_VER_NR",
+mec."VAL_DOM_ITEM_ID",mec."VAL_DOM_VER_NR",mec."NUM_PV",mec."MEC_LONG_NM",mec."MEC_PHY_NM",mec."MEC_DESC",mec."CDE_ITEM_ID",mec."CDE_VER_NR",
+decode(vd.val_dom_typ_id, 16, 'Enumerated by Reference', 17, 'Enumerated',18,'Non-enumerated','') VAL_DOM_TYP_DESC,
+vd.TERM_CNCPT_ITEM_ID,
+vd.TERM_CNCPT_VER_NR,
+cncpt.ITEM_NM  TERM_CNCPT_DESC
+	from admin_item m, NCI_MDL_ELMNT me,NCI_MDL_ELMNT_CHAR mec, value_dom vd, vw_cncpt cncpt
+	where m.item_id = me.mdl_item_id and m.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.MDL_ELMNT_ITEM_ID
+	and me.ver_nr = mec.MDL_ELMNT_VER_NR and m.admin_item_typ_id = 57
+	  and mec.val_dom_item_id = vd.item_id(+) and mec.val_dom_ver_nr = vd.ver_nr(+)
+and vd.TERM_CNCPT_ITEM_ID = cncpt.item_id (+)
+and vd.term_cncpt_ver_nr = cncpt.ver_nr (+);
+
+alter table value_dom add (PRNT_SUBSET_ITEM_ID number, PRNT_SUBSET_VER_NR number(4,2),SUBSET_DESC varchar2(100));
+   
+
+
+  CREATE OR REPLACE VIEW VW_MDL_MAP_FLAT AS
+  select  map.MDL_MAP_ITEM_ID "Model Map ID",
+         map.mdl_map_ver_nr "Model Map Version",
+       m.ITEM_NM "Model Map Name",
+       m.ITEM_NM_CURATED "Model Map Generated Name",
+ m.ADMIN_STUS_NM_DN "Model Map Status",
+         m.REGSTR_STUS_NM_DN "Model Map Registration Status",
+           m.CNTXT_NM_DN "Model Map Context",
+        m.CURRNT_VER_IND "Model Map Latest Version Indicator",
+        s.item_id "Source Model Public ID",
+        s.ver_nr "Source Model Version", 
+        s.item_nm "Source Model Name", 
+         s.ADMIN_STUS_NM_DN "Source Model Status",
+         s.CNTXT_NM_DN "Source Model Context",
+    t.item_id "Target Model Public ID", 
+        t.ver_nr "Target Model Version", 
+        t.item_nm "Target Model Name",  
+         t.ADMIN_STUS_NM_DN "Target Model Status",
+           t.CNTXT_NM_DN "Target Model Context",
+   --   map.MECM_ID "Rule ID",
+        map.mec_map_nm "Characteristic Group Name",
+        map.MEC_GRP_RUL_NBR "Derivation Group Nbr",
+       crd.obj_key_desc "Mapping Cardinality",
+   decode(nvl(map.VAL_MAP_CREATE_IND,0),1, 'Yes','No') "Values Mapped Indicator",
+        sme.ITEM_PHY_OBJ_NM "Source Element Physical Name", 
+        smec."MEC_PHY_NM" "Source Characteristic Physical Name", 
+	smec.char_ord "Source Char Order",        
+smec."CDE_ITEM_ID" "Source CDE Public ID",
+        smec."CDE_VER_NR" "Source CDE Version",
+decode(svd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated',16, 'Enumerated by Reference')  "Source VD Type",
+          src_func.obj_key_Desc "Source Function",
+	--map.SRC_FUNC_PARAM "Source Function Parameter",
+	   map.SRC_VAL "Source Value",
+        tme.ITEM_PHY_OBJ_NM "Target Element Physical Name", 
+       tmec.char_ord "Target Char Order",        
+        tmec."MEC_PHY_NM" "Target Characteristic Physical Name", 
+        tmec."CDE_ITEM_ID" "Target CDE Public ID",
+        tmec."CDE_VER_NR" "Target CDE Version" ,
+decode(tvd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated',16, 'Enumerated by Reference')  "Target VD Type",
+       tgt_func.obj_key_Desc "Target Function",
+	map.TGT_FUNC_PARAM "Target Function Parameter",
+        map.TGT_VAL "Target Value",
+        map.mec_sub_grp_nbr "Group Order",
+        map.mec_map_notes "Transformation Notes",
+        map.MEC_MAP_NOTES "Transformation Rule",
+        map.TRANS_RUL_NOT "Transformation Rule Notation",
+        deg.obj_key_Desc "Mapping Type",
+        map.valid_pltform	   "Validation Platform",
+        org.org_nm "Provenance Organization",
+        c.PRSN_FULL_NM_DERV  "Provenance Contact",
+        --map.prov_cntct_id mec_map_prov_cntct_id, 
+        map.prov_rsn_txt "Provenance Reason",
+        map.prov_typ_rvw_txt "Provenance Type of Review",
+        map.prov_rvw_dt "Provenance Review Date",   
+        map.prov_aprv_dt "Provenance Approval Date",
+	    m.creat_dt "Model Map Create Date",
+	  m.creat_usr_id "Model Map Create User",	  
+	  m.lst_upd_dt "Model Map Last Update Date",
+	  m.lst_upd_usr_id "Model Map Last Update User",	  
+	  map.creat_dt "Characteristic Map Create Date",
+	  map.creat_usr_id "Characteristic Map Create User",	  
+	  map.lst_upd_dt "Characteristic Map Last Update Date",
+	  map.lst_upd_usr_id "Characteristic Map Last Update User" 
+        --map.prov_notes "Provenance Notes"
+	from admin_item s, NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec, admin_item t, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT_CHAR tmec, nci_MEC_MAP map,
+admin_item m,
+	  obj_key crd,
+	  obj_key deg,
+	  nci_org org,
+ obj_key src_func,
+	  obj_key tgt_func,
+	  obj_key op,
+         value_dom svd,
+value_dom tvd,
+    nci_prsn c
+	where s.item_id = sme.mdl_item_id and s.ver_nr = sme.mdl_item_ver_nr and sme.item_id = smec.MDL_ELMNT_ITEM_ID
+	and sme.ver_nr = smec.MDL_ELMNT_VER_NR and s.admin_item_typ_id = 57 and
+	  t.item_id = tme.mdl_item_id and t.ver_nr = tme.mdl_item_ver_nr and tme.item_id = tmec.MDL_ELMNT_ITEM_ID
+	and tme.ver_nr = tmec.MDL_ELMNT_VER_NR and t.admin_item_typ_id = 57 and
+	   smec.MEC_ID = map.SRC_MEC_ID and tmec.mec_id = map.TGT_MEC_ID and
+map.mdl_map_item_id = m.item_id and map.mdl_map_ver_nr = m.ver_nr 
+	  and map.map_deg = deg.obj_key_id (+)
+ and map.src_func_id= src_func.obj_key_id (+)
+	  and map.tgt_func_id= tgt_func.obj_key_id (+)
+	  and map.prov_org_id = org.entty_id (+)
+	  and map.crdnlity_id = crd.obj_key_id (+)
+ and map.op_id = op.obj_key_id (+)
+and map.prov_cntct_id  = c.entty_ID (+)
+          and smec.val_dom_item_id = svd.item_id (+)
+	  and smec.val_dom_ver_nr = svd.ver_nr (+)
+	  and tmec.val_dom_item_id = tvd.item_id (+)
+ 	  and tmec.val_dom_ver_nr = tvd.ver_nr (+);
+
+
+
+  CREATE OR REPLACE  VIEW VW_MDL_VAL_MAP_FLAT AS
+  select  map.MDL_MAP_ITEM_ID "Model Map ID",
+         map.mdl_map_ver_nr "Model Map Version",
+      m.ITEM_NM "Model Map Name",
+ m.ITEM_NM_CURATED "Model Map Generated Name",
+    m.ADMIN_STUS_NM_DN "Model Map Status",
+         m.REGSTR_STUS_NM_DN "Model Map Registration Status",
+              m.CNTXT_NM_DN "Model Map Context",
+       m.CURRNT_VER_IND "Model Map Latest Version Indicator",
+       s.item_id  "Source Model Public ID",
+	  s.ver_nr  "Source Model Version", 
+	  s.item_nm  "Source Model Name",
+        s.CNTXT_NM_DN "Source Model Context",
+ 	  --s.item_desc  "Source Model Definition", --REMOVED
+      --s.cntxt_nm_dn "Source Model Context",  --REMOVED
+	  sme.item_id "Source Element ID", 
+  sme.ver_nr "Source Element Version",
+	--sme.ITEM_LONG_NM "Source Element Name",  --REMOVED
+	  sme.ITEM_PHY_OBJ_NM "Source Element Physical Name", 
+	--  smec."MEC_ID" SRC_MEC_ID, 
+	 -- smec."MEC_TYP_ID" SRC_MEC_TYP_ID,
+	  --map."CREAT_DT",map."CREAT_USR_ID",map."LST_UPD_USR_ID",map."FLD_DELETE",map."LST_DEL_DT",map."S2P_TRN_DT",map."LST_UPD_DT",
+	  -- smec."DE_CONC_ITEM_ID" "Source DEC Public ID", --REMOVED
+	  --smec."DE_CONC_VER_NR" "Source DEC Version", --REMOVED
+	  --smec."VAL_DOM_ITEM_ID" SRC_VAL_DOM_ITEM_ID,smec."VAL_DOM_VER_NR" SRC_VAL_DOM_VER_NR,
+	  --smec."MEC_LONG_NM" "Source Characteristic Name" , --REMOVED
+	  smec."MEC_PHY_NM" "Source Characteristic Physical Name", 
+	  smec."CDE_ITEM_ID" "Source CDE Public ID",
+	  smec."CDE_VER_NR" "Source CDE Version",
+	   t.item_id "Target Model Public ID", 
+	  t.ver_nr "Target Model Version", 
+	  t.item_nm "Target Model Name",  
+          t.CNTXT_NM_DN "Target Model Context",
+ 	  --t.item_desc "Target Model Definition", --REMOVED
+  	 --t.cntxt_nm_dn "Target Model Context", --REMOVED
+	  --tme.ITEM_LONG_NM "Target Element Name",  --REMOVED
+	  tme.ITEM_PHY_OBJ_NM "Target Element Physical Name", 
+	  --tmec."MEC_ID" tgt_MEC_ID, tmec."MDL_ELMNT_ITEM_ID" tgt_ME_ITEM_ID,tmec."MDL_ELMNT_VER_NR" tgt_ME_VER_NR,
+	--tmec."MEC_TYP_ID" tgt_MEC_TYP_ID,  
+	  --tmec."DE_CONC_ITEM_ID" "Target DEC Public Id", --REMOVED
+	  --tmec."DE_CONC_VER_NR" "Target DEC Version", --REMOVED
+	  --tmec."VAL_DOM_ITEM_ID" tgt_VAL_DOM_ITEM_ID,
+	  --tmec."VAL_DOM_VER_NR" tgt_VAL_DOM_VER_NR,
+	  --tmec."MEC_LONG_NM" "Target Characteristic Name" , --REMOVED
+	  tmec."MEC_PHY_NM" "Target Characteristic Physical Name", 
+	  tmec."CDE_ITEM_ID" "Target CDE ID",
+	  tmec."CDE_VER_NR" "Target CDE Version" ,
+	 map.src_pv "Source PV",
+     map.tgt_pv "Target PV",
+      map.vm_cncpt_cd "VM Concept Code", 
+      map.vm_cncpt_nm "VM Concept Name",
+      org.org_nm "Provenance Organization",
+      c.cntct_nm    "Provenance Contact",
+	  --map.prov_cntct_id mec_map_prov_cntct_id, 
+	  map.prov_rsn_txt "Provenance Reason",
+      map.prov_typ_rvw_txt "Provenance Type of Review",
+      map.prov_rvw_dt "Provenance Review Date",   
+      map.prov_aprv_dt "Provenance Approval Date",
+      map.prov_notes "Provenance Notes",
+    m.creat_dt "Model Map Create Date",
+	  m.creat_usr_id "Model Map Create User",	  
+	  m.lst_upd_dt "Model Map Last Update Date",
+	  m.lst_upd_usr_id "Model Map Last Update User",	  
+	  map.creat_dt "Value Map Create Date",
+	  map.creat_usr_id "Value Map Create User",	  
+	  map.lst_upd_dt "Value Map Last Update Date",
+	  map.lst_upd_usr_id "Value Map Last Update User" 
+FROM admin_item s, 
+    NCI_MDL_ELMNT sme,
+    NCI_MDL_ELMNT_CHAR smec, 
+    admin_item t, 
+    NCI_MDL_ELMNT tme,
+    NCI_MDL_ELMNT_CHAR tmec, 
+    nci_MEC_VAL_MAP map, 
+    nci_org org,
+    CNTCT c,admin_item m
+where map.MDL_MAP_ITEM_ID=m.item_id and map.MDL_MAP_VER_NR = m.ver_nr and 
+s.item_id = sme.mdl_item_id and s.ver_nr = sme.mdl_item_ver_nr and sme.item_id = smec.MDL_ELMNT_ITEM_ID
+	and sme.ver_nr = smec.MDL_ELMNT_VER_NR and s.admin_item_typ_id = 57 and
+	  t.item_id = tme.mdl_item_id and t.ver_nr = tme.mdl_item_ver_nr and tme.item_id = tmec.MDL_ELMNT_ITEM_ID
+	and tme.ver_nr = tmec.MDL_ELMNT_VER_NR and t.admin_item_typ_id = 57 and
+	   smec.MEC_ID = map.SRC_MEC_ID and tmec.mec_id = map.TGT_MEC_ID
+	  and map.prov_org_id = org.entty_id (+)
+      AND map.PROV_CNTCT_ID = c.cntct_id (+);
+
+
+
+  CREATE OR REPLACE  VIEW VW_MDL_MAP_LIST AS
+  select  m.ITEM_ID "Model Map ID",
+         m.ver_nr "Model Map Version",
+	m.ITEM_NM "Model Map Name",
+ m.ITEM_NM_CURATED "Model Map Generated Name",
+    m.ADMIN_STUS_NM_DN "Model Map Status",
+         m.REGSTR_STUS_NM_DN "Model Map Registration Status", 
+	m.cntxt_nm_dn "Model Map Context",
+           decode(m.CURRNT_VER_IND,1,'Yes',0,'No') "Model Map Latest Version Indicator",
+     s.item_id "Source Model Public ID",
+        s.ver_nr "Source Model Version", 
+        s.item_nm "Source Model Name",
+         s.ADMIN_STUS_NM_DN "Source Model Status",
+	s.cntxt_nm_dn "Source Model Context",
+        t.item_id "Target Model Public ID", 
+        t.ver_nr "Target Model Version", 
+        t.item_nm "Target Model Name",  
+         t.ADMIN_STUS_NM_DN "Target Model Status",
+	t.cntxt_nm_dn "Target Model Context",
+        org.org_nm "Provenance Organization",
+	p.PRSN_FULL_NM_DERV  "Provenance Contact",
+	   m.creat_dt "Model Map Create Date",
+	  m.creat_usr_id "Model Map Create User",	  
+	  m.lst_upd_dt "Model Map Last Update Date",
+	  m.lst_upd_usr_id "Model Map Last Update User"
+     from admin_item s,  admin_item t, nci_mdl_map mm,
+admin_item m, nci_org org, nci_prsn p
+	where m.item_id = mm.item_id and m.ver_nr = mm.ver_nr and mm.SRC_MDL_ITEM_ID= s.item_id and mm.TGT_MDL_ITEM_ID= t.item_id 
+and mm.SRC_MDL_VER_NR = s.ver_nr and mm.TGT_MDL_VER_NR = t.ver_nr 
+ and mm.PROV_ORG_ID = org.entty_id (+)
+and mm.prov_cntct_id  = p.entty_ID (+);
