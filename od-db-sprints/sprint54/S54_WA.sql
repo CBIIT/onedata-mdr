@@ -15,9 +15,6 @@ create table SAG_LOAD_NCIt_TERM
 delete from nci_admin_item_xmap where dt_src='ICDO';
 commit;
 
-exec nci_ext_import.load_term('UBERON','UBERON');
-
-exec nci_ext_import.load_term('ICDO3','ICD-O');
 
 delete from onedata_Ra.NCI_MDL_ELMNT_CHAR;
 commit;
