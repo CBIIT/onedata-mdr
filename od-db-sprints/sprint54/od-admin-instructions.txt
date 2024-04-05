@@ -1,2 +1,7 @@
 --3244
 Remove all post-hook association for Model Import.
+
+-- After Brad's load is done, need to add to Process Execution table and run.
+exec nci_ext_import.load_term('UBERON','UBERON');
+
+exec nci_ext_import.load_term('ICDO3','ICD-O');
