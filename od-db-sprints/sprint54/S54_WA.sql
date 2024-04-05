@@ -18,3 +18,9 @@ commit;
 exec nci_ext_import.load_term('UBERON','UBERON');
 
 exec nci_ext_import.load_term('ICDO3','ICD-O');
+
+delete from onedata_Ra.NCI_MDL_ELMNT_CHAR;
+commit;
+
+insert into onedata_Ra.NCI_MDL_ELMNT_CHAR select * from NCI_MDL_ELMNT_CHAR;
+commit;
