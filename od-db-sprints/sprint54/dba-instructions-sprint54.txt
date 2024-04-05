@@ -1,3 +1,16 @@
 -- Run as ONEDATA_RA DDL scripts
+S54_RA.sql
+S54_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+
+S54_WA_RA_DDL.sql
+S54_WA.sql
+S54_NCI_11179_2.sql
+S54_NCI_IMPORT.sql
+S54_NCI_CHNG_MGMT.sql
+S54_NCI_DEC_MGMT.sql
+S54_NCI_CODEMAP.sql
+S54_NCI_VD.sql
+S54_NCI_POST_HOOK.sql
+
