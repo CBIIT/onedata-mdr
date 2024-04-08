@@ -605,6 +605,18 @@ elsif (upper(currt.item_nm) <> upper(ihook.getColumnValue(rowform,'ITEM_1_NM')))
 end if;
 
 end loop;
+
+
+if (v_val_ind= true) then
+select count(*) into v_temp from admin_item where item_id = ihook.getColumnValue(rowform, 'REP_CLS_ITEM_ID') and ver_nr = ihook.getColumnValue(rowform, 'REP_CLS_VER_NR');
+
+if (v_temp =0 ) then -- invalid Item Id/ver
+               ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: ID/Ver specified is invalid.' || chr(13));
+                  v_val_ind  := false;
+   
+end if;
+end if;
+
         if (nci_import.ParseGaps (rowform , 3) > 0 and ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is not null ) then
                     ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Gaps in concept drop-downs.' || chr(13));                      
                     v_val_ind := false;
