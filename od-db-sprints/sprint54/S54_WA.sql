@@ -21,3 +21,19 @@ commit;
 
 insert into onedata_Ra.NCI_MDL_ELMNT_CHAR select * from NCI_MDL_ELMNT_CHAR;
 commit;
+
+
+create or replace TRIGGER TR_VD_POST
+  AFTER  UPDATE
+  on VALUE_DOM
+  for each row
+BEGIN
+    update ADMIN_ITEM set LST_UPD_DT = sysdate, LST_UPD_USR_ID = :new.LST_UPD_USR_ID where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+if (:new.VAL_DOM_TYP_ID <> 16 and :new.TERM_CNCPT_ITEM_ID is not null) then -- nullify Ref Term and Ref Term Usage
+   update valUe_dom set term_cncpt_item_id = null, term_cncpt_ver_nr = null, TERM_USE_TYP=null where ITEM_ID = :new.item_id and VER_NR = :new.VER_NR;
+ end if;
+
+END;
+/
+
+
