@@ -2017,14 +2017,14 @@ BEGIN
     end if;
 
 
-  if ( ihook.getColumnValue(row_ori, 'TERM_CNCPT_ITEM_ID') is null and ihook.getColumnOldValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
+  if ( ihook.getColumnValue(row_ori, 'TERM_CNCPT_ITEM_ID') is null and ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
         raise_application_error(-20000, 'Reference Terminology is missing. ');
         return;
     end if;
 
 
 
-  if ( ihook.getColumnValue(row_ori, 'TERM_USE_TYP') is null and ihook.getColumnOldValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
+  if ( ihook.getColumnValue(row_ori, 'TERM_USE_TYP') is null and ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
         raise_application_error(-20000, 'Reference Terminology Usage Type is missing. ');
         return;
     end if;
@@ -2032,6 +2032,23 @@ BEGIN
     -- Tracker 554
   -- raise_application_error(-20000, hookinput.originalRowset.tablename);
 
+-- if changed from Enum with  Reference to Eunm or Non-enum, clear Referenct Term and Usage Type
+
+/*
+  if (  ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID')<>16  and ihook.getColumnOldValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
+        rows:= t_rows();
+        row := t_row();
+         ihook.setColumnValue(row,'ITEM_ID',v_item_id );
+        ihook.setColumnValue(row,'VER_NR',v_ver_nr );
+        ihook.setColumnValue(row,'TERM_USE_TYP','');
+        ihook.setColumnValue(row,'TERM_CNCPT_ITEM_ID','');
+          ihook.setColumnValue(row,'TERM_CNCPT_VER_NR', '');
+       rows.extend;
+        rows(rows.last) := row;
+        action := t_actionrowset(rows, 'Value Domain', 2,0,'update');
+        actions.extend;
+        actions(actions.last) := action;
+    end if;*/
 
  if (hookinput.originalRowset.tablename = 'VALUE_DOM') then
 
