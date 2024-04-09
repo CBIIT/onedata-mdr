@@ -642,3 +642,11 @@ admin_item m, nci_org org, nci_prsn p
 and mm.SRC_MDL_VER_NR = s.ver_nr and mm.TGT_MDL_VER_NR = t.ver_nr 
  and mm.PROV_ORG_ID = org.entty_id (+)
 and mm.prov_cntct_id  = p.entty_ID (+);
+
+
+
+update obj_key set obj_key_def = 'Reference Enumerated' where obj_key_id = 16;
+update obj_key set obj_key_def = 'Enumerated' where obj_key_id = 17;
+update obj_key set obj_key_def = 'Non-Enumerated' where obj_key_id = 18;
+commit;
+
