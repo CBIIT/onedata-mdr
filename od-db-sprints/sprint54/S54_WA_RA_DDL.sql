@@ -406,8 +406,36 @@ alter table NCI_STG_CDE_CREAT add (CREAT_PV_VM number(1));
 alter table NCI_STG_CDE_CREAT add (IMP_CREAT_PV_VM varchar2(10));
 
 
+create materialized view vw_val_dom_ref_term as 
+select
+vd.item_id, vd.ver_nr, vd.term_cncpt_item_id, vd.term_cncpt_ver_nr, nvl(a.nm_desc, c.item_nm) term_name from
+value_dom vd, vw_cncpt c, alt_nms a, (select obj_key_id from obj_key where obj_typ_id = 11 and obj_key_desc = 'Ref Term Short Name') o
+where  vd.val_dom_typ_id = 16 and vd.term_cncpt_item_id = c.item_id and vd.term_cncpt_ver_nr = c.ver_nr and 
+vd.term_cncpt_item_id = a.item_id (+) and vd.term_cncpt_ver_nr = a.ver_nr (+) and a.nm_typ_id = o.obj_key_id (+);
 
-  CREATE OR REPLACE VIEW VW_NCI_MEC AS
+alter table value_dom add (PRNT_SUBSET_ITEM_ID number, PRNT_SUBSET_VER_NR number(4,2),SUBSET_DESC varchar2(100));
+
+
+  CREATE OR REPLACE  VIEW VW_VALUE_DOM AS
+  SELECT ADMIN_ITEM.ITEM_ID, ADMIN_ITEM.VER_NR, ADMIN_ITEM.ITEM_NM, ADMIN_ITEM.ITEM_LONG_NM, ADMIN_ITEM.ITEM_DESC, 
+ADMIN_ITEM.CNTXT_NM_DN,  ADMIN_ITEM.REGSTR_STUS_NM_DN, ADMIN_ITEM.ADMIN_STUS_NM_DN, 
+		      ADMIN_ITEM.CURRNT_VER_IND, VALUE_DOM.DTTYPE_ID, VALUE_DOM.VAL_DOM_MAX_CHAR, VALUE_DOM.CONC_DOM_VER_NR, VALUE_DOM.CONC_DOM_ITEM_ID, 
+VALUE_DOM.NON_ENUM_VAL_DOM_DESC, VALUE_DOM.UOM_ID, VALUE_DOM.VAL_DOM_TYP_ID, VALUE_DOM.VAL_DOM_MIN_CHAR, VALUE_DOM.VAL_DOM_FMT_ID, 
+VALUE_DOM.CHAR_SET_ID, VALUE_DOM.CREAT_DT, VALUE_DOM.CREAT_USR_ID, VALUE_DOM.LST_UPD_USR_ID, 
+VALUE_DOM.FLD_DELETE, VALUE_DOM.LST_DEL_DT, VALUE_DOM.S2P_TRN_DT, VALUE_DOM.LST_UPD_DT , RC.ITEM_NM  REP_TERM_ITEM_NM,
+	  value_dom.NCI_STD_DTTYPE_ID, term.term_name
+FROM ADMIN_ITEM, VALUE_DOM, VW_REP_CLS RC, vw_val_dom_ref_term term
+       WHERE ADMIN_ITEM.ADMIN_ITEM_TYP_ID = 3
+AND ADMIN_ITEM.ITEM_ID = VALUE_DOM.ITEM_ID
+AND ADMIN_ITEM.VER_NR=VALUE_DOM.VER_NR and
+VALUE_DOM.REP_CLS_ITEM_ID = RC.ITEM_ID (+) and 
+VALUE_DOM.REP_CLS_VER_NR = RC.VER_NR (+)
+and
+VALUE_DOM.ITEM_ID = TERM.ITEM_ID (+) and 
+VALUE_DOM.VER_NR = TERM.VER_NR (+)
+;
+
+  CREATE OR REPLACE  VIEW VW_NCI_MEC AS
   select m.item_id mdl_item_id, m.ver_nr mdl_ver_nr, m.item_nm mdl_item_nm, me.item_id ME_ITEM_ID, me.ver_nr me_VER_NR,
 	me.ITEM_LONG_NM me_item_nm, me.ITEM_PHY_OBJ_NM me_phy_nm, mec."MEC_ID",mec."MDL_ELMNT_ITEM_ID",mec."MDL_ELMNT_VER_NR",mec."MEC_TYP_ID",mec."CREAT_DT",
 mec."CREAT_USR_ID",mec."LST_UPD_USR_ID",mec."FLD_DELETE", mec.char_ord, mec.pk_ind,
@@ -417,15 +445,18 @@ mec."VAL_DOM_ITEM_ID",mec."VAL_DOM_VER_NR",mec."NUM_PV",mec."MEC_LONG_NM",mec."M
 decode(vd.val_dom_typ_id, 16, 'Enumerated by Reference', 17, 'Enumerated',18,'Non-enumerated','') VAL_DOM_TYP_DESC,
 vd.TERM_CNCPT_ITEM_ID,
 vd.TERM_CNCPT_VER_NR,
-cncpt.ITEM_NM  TERM_CNCPT_DESC
-	from admin_item m, NCI_MDL_ELMNT me,NCI_MDL_ELMNT_CHAR mec, value_dom vd, vw_cncpt cncpt
+nvl(term.term_name, cncpt.ITEM_NM)  TERM_CNCPT_DESC
+	from admin_item m, NCI_MDL_ELMNT me,NCI_MDL_ELMNT_CHAR mec, value_dom vd, vw_cncpt cncpt, vw_val_dom_ref_term term
 	where m.item_id = me.mdl_item_id and m.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.MDL_ELMNT_ITEM_ID
 	and me.ver_nr = mec.MDL_ELMNT_VER_NR and m.admin_item_typ_id = 57
 	  and mec.val_dom_item_id = vd.item_id(+) and mec.val_dom_ver_nr = vd.ver_nr(+)
 and vd.TERM_CNCPT_ITEM_ID = cncpt.item_id (+)
-and vd.term_cncpt_ver_nr = cncpt.ver_nr (+);
+and vd.term_cncpt_ver_nr = cncpt.ver_nr (+)
+and vd.ITEM_ID = term.item_id (+)
+and vd.ver_nr = term.ver_nr (+);
 
-alter table value_dom add (PRNT_SUBSET_ITEM_ID number, PRNT_SUBSET_VER_NR number(4,2),SUBSET_DESC varchar2(100));
+
+
    
 
 
@@ -649,4 +680,101 @@ update obj_key set obj_key_def = 'Reference Enumerated' where obj_key_id = 16;
 update obj_key set obj_key_def = 'Enumerated' where obj_key_id = 17;
 update obj_key set obj_key_def = 'Non-Enumerated' where obj_key_id = 18;
 commit;
+
+
+
+alter table nci_mec_map add (right_op  varchar2(255), left_op varchar2(255), flow_cntrl integer, op_typ integer);
+alter table nci_stg_mec_map add (right_op  varchar2(255), left_op varchar2(255),imp_flow_cntrl varchar2(255), flow_cntrl integer, imp_op_typ varchar2(255), op_typ integer);
+ 
+insert into obj_typ (obj_typ_Id, obj_typ_Desc) values (56, 'Mapping Flow Control');
+insert into obj_typ (obj_typ_Id, obj_typ_Desc) values (57, 'Mapping Operand Type');
+commit;
+
+
+  CREATE OR REPLACE  VIEW VW_MDL_MAP_IMP_TEMPLATE AS 
+  select  ' ' "DO_NOT_USE",
+       ' ' "BATCH_USER",
+       ' ' "BATCH_NAME",
+       rownum "SEQ_ID",
+       map.mdl_map_item_id "MODEL_MAP_ID",
+       map.mdl_map_ver_nr "MODEL_MAP_VERSION",
+        map.mecm_id "MECM_ID", 
+        smec.char_ord SRC_CHAR_ORD,
+	sme.ITEM_PHY_OBJ_NM "SRC_ELMNT_PHY_NAME", 
+	sme.ITEM_LONG_NM "SRC_ELMNT_NAME", 
+  smec."MEC_PHY_NM" "SRC_PHY_NAME", 
+	smec.MEC_LONG_NM "SRC_MEC_NAME", 
+	  tme.ITEM_PHY_OBJ_NM "TGT_ELMNT_PHY_NAME", 
+	 sme.ITEM_LONG_NM "TGT_ELMNT_NAME", 
+	  tmec."MEC_PHY_NM" "TGT_PHY_NAME", 
+   	tmec.MEC_LONG_NM "TGT_MEC_NAME", 
+       tmec.char_ord TGT_CHAR_ORD,
+          map.MEC_MAP_NM "MAPPING_GROUP_NAME",
+          map.MEC_MAP_DESC "MAPPING_GROUP_DESC",
+	  src_func.obj_key_Desc "SOURCE_FUNCTION",
+	  tgt_func.obj_key_Desc "TARGET_FUNCTION",
+	  crd.obj_key_desc "MAPPING_CARDINALITY",
+	  deg.obj_key_Desc "MAPPING_DEGREE",
+          ' ' "TRANS_RULE_NOTATION",
+map.mec_grp_rul_nbr "DERIVATION_GROUP_NBR",
+map.mec_sub_grp_nbr	"DERIVATION_GROUP_ORDER",
+	map.SRC_VAL "SOURCE_COMPARISON_VALUE",
+	map.TGT_VAL "SET_TARGET_DEFAULT"	,
+map.TGT_FUNC_PARAM "TARGET_FUNCTION_PARAM"	,
+	op.obj_key_desc "OPERATOR",
+	op_typ.obj_key_desc "OPERAND_TYPE",
+	flow_cntrl.obj_key_desc "FLOW_CONTROL",
+	map.right_op "RIGHT_OPERAND",
+	map.left_op "LEFT_OPERAND",
+  map.valid_pltform	   "VALIDATION_PLATFORM",
+	map.mec_map_notes "TRANSFORMATION_NOTES",
+	map.TRNS_DESC_TXT "TRANSFORMATION_RULE",
+	org.org_nm "PROV_ORG",
+' '	"PROV_CONTACT",
+	map.prov_rsn_txt "PROV_REVIEW_REASON",
+	map.prov_typ_rvw_txt "PROV_TYPE_OF_REVIEW",
+	map.PROV_RVW_DT "PROV_REVIEW_DATE",
+	map.prov_APRV_DT "PROV_APPROVAL_DATE",
+decode(nvl(map.VAL_MAP_CREATE_IND,0),1, 'Yes','No') "VALUE_MAP_GENERATED_IND",
+decode(svd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated',16, 'Enumerated by Reference')  "SOURCE_DOMAIN_TYPE",
+decode(tvd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated',16, 'Enumerated by Reference')  "TARGET_DOMAIN_TYPE",
+	   map."CREAT_DT",
+	  map."CREAT_USR_ID",
+	  map."LST_UPD_USR_ID",
+	  map."FLD_DELETE",
+	  map."LST_DEL_DT",
+	  map."S2P_TRN_DT",
+	  map."LST_UPD_DT",
+      smec.MEC_ID SRC_MEC_ID,
+tmec.MEC_ID TGT_MEC_ID,
+tmec.pk_ind TGT_PK_IND,
+smec.pk_ind SRC_PK_IND
+	from  NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT_CHAR tmec, nci_MEC_MAP map,
+	  obj_key crd,
+	  obj_key deg,
+	  obj_key src_func,
+	  obj_key tgt_func,
+	  obj_key op,
+	  obj_key op_typ,
+	  obj_key flow_cntrl,
+	  nci_org org,
+  	  value_dom svd,
+	  value_dom tvd
+	where  sme.item_id (+)= smec.MDL_ELMNT_ITEM_ID
+	and sme.ver_nr (+)= smec.MDL_ELMNT_VER_NR and
+	 tme.item_id (+)= tmec.MDL_ELMNT_ITEM_ID
+	and tme.ver_nr (+)= tmec.MDL_ELMNT_VER_NR  and
+	   smec.MEC_ID (+)= map.SRC_MEC_ID and tmec.mec_id (+)= map.TGT_MEC_ID
+	  and map.map_deg = deg.obj_key_id (+)
+	  and map.src_func_id= src_func.obj_key_id (+)
+	  and map.tgt_func_id= tgt_func.obj_key_id (+)
+	  and map.prov_org_id = org.entty_id (+)
+	  and map.crdnlity_id = crd.obj_key_id (+)
+	  and map.op_id = op.obj_key_id (+)
+	  and map.op_typ = op_typ.obj_key_id (+)
+	  and map.flow_cntrl = flow_cntrl.obj_key_id (+)
+          and smec.val_dom_item_id = svd.item_id (+)
+	  and smec.val_dom_ver_nr = svd.ver_nr (+)
+	  and tmec.val_dom_item_id = tvd.item_id (+)
+ 	  and tmec.val_dom_ver_nr = tvd.ver_nr (+);
 
