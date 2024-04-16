@@ -2018,17 +2018,12 @@ BEGIN
     end if;
 
 
-  if ( ihook.getColumnValue(row_ori, 'TERM_CNCPT_ITEM_ID') is null and ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
-        raise_application_error(-20000, 'Error: Either Reference Terminology or Data Source Value are missing. It is required for Enumerated By Reference VD.');
+  if ( (ihook.getColumnValue(row_ori, 'TERM_CNCPT_ITEM_ID') is null or ihook.getColumnValue(row_ori, 'TERM_USE_TYP') is null ) and ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
+        raise_application_error(-20000, 'ERROR: Either Reference Terminology or Data Source Value are missing. Both are required for Enumerated By Reference VD.  *** Changes will not be saved. ***');
         return;
     end if;
 
 
-
-  if ( ihook.getColumnValue(row_ori, 'TERM_USE_TYP') is null and ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
-        raise_application_error(-20000, 'Error: Either Reference Terminology or Data Source Value are missing. It is required for Enumerated By Reference VD.');
-        return;
-    end if;
 
     -- Tracker 554
   -- raise_application_error(-20000, hookinput.originalRowset.tablename);
