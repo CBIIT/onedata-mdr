@@ -16,4 +16,4 @@ S54_NCI_POST_HOOK.sql
 S54_NCI_PV_VM.sql
 
 -- Run as ONEDATA_RA DDL scripts
-S54_RA_1.sql
+S54_1_RA.sql
