@@ -13,6 +13,7 @@ S54_NCI_DEC_MGMT.sql
 S54_NCI_CODEMAP.sql
 S54_NCI_VD.sql
 S54_NCI_POST_HOOK.sql
+S54_NCI_PV_VM.sql
 
 -- Run as ONEDATA_RA DDL scripts
 S54_RA_1.sql
