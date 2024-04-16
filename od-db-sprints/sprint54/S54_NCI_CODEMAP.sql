@@ -563,7 +563,7 @@ getModelElementAction ( row_ori ,actions , v_mdl_hdr_id , v_mdl_elmnt_id );
       hookoutput.actions := actions;
  
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-   nci_util.debugHook('GENERAL',v_data_out);
+   --nci_util.debugHook('GENERAL',v_data_out);
  --  raise_application_error(-20000,'Here');
 end;
 
@@ -1106,11 +1106,23 @@ v_valid := false;
 v_val_stus_msg := v_val_stus_msg ||'Imported Transformation Notation Type is incorrect; '|| chr(13);
 end if;
  
-if (ihook.getColumnValue(row_ori, 'IMP_TRANS_RUL_NOT') is not null and  ihook.getColumnValue(row_ori, 'TRANS_RUL_NOT') is null ) then
+if (ihook.getColumnValue(row_ori, 'IMP_OP_TYP') is not null and  ihook.getColumnValue(row_ori, 'OP_TYP') is null ) then
 v_valid := false;
-v_val_stus_msg := v_val_stus_msg ||'Imported Transformation Notation Type is incorrect; '|| chr(13);
+v_val_stus_msg := v_val_stus_msg ||'Imported Comparator is incorrect; '|| chr(13);
 end if;
  
+ 
+if (ihook.getColumnValue(row_ori, 'IMP_FLOW_CNTRL') is not null and  ihook.getColumnValue(row_ori, 'FLOW_CNTRL') is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Condition is incorrect; '|| chr(13);
+end if;
+ 
+ 
+ 
+if (ihook.getColumnValue(row_ori, 'IMP_PAREN') is not null and  ihook.getColumnValue(row_ori, 'PAREN') is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Parenthesis is incorrect; '|| chr(13);
+end if;
  
 if (ihook.getColumnValue(row_ori, 'IMP_PROV_ORG') is not null and  ihook.getColumnValue(row_ori, 'PROV_ORG_ID') is null ) then
 v_valid := false;
@@ -1657,6 +1669,7 @@ AS
     v_val_dom_typ integer;
     v_ver_nr number(4,2);
     v_temp integer;
+    v_func integer;
     v_hdr_id number;
     v_already integer :=0;
     i integer := 0;
@@ -1669,6 +1682,7 @@ AS
     v_str varchar2(255);
     v_minlen integer;
     v_entty_nm_with_space varchar2(255);
+    v_nmtyp integer;
 --    v_reg_str varchar2(255);
  -- v_entty_nm varchar2(4000);
 begin
@@ -1678,7 +1692,9 @@ begin
    
 --hookoutput.message := 'Work in progress.';
         row_ori := hookInput.originalRowset.rowset(1);
-  
+  select obj_key_id into v_func from obj_key where obj_key_desc = 'XLOOKUP' and obj_typ_id = 51;
+  select obj_key_id into v_nmtyp from obj_key where obj_key_desc = 'Ref Term Short Name' and obj_typ_id = 11;
+        
     delete from NCI_MEC_MAP where MDL_MAP_ITEM_ID = ihook.getColumnValue(row_ori, 'ITEM_ID') and MDL_MAP_VER_NR = ihook.getColumnValue(row_ori, 'VER_NR')
      and nvl(MAP_DEG,1)<>120;
     commit;
@@ -1713,7 +1729,8 @@ and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook
         	
             
         ihook.setColumnValue(row,'MECM_ID',-1);
-        
+                 
+
                                      rows.extend;
                                             rows(rows.last) := row;
 
@@ -1745,6 +1762,33 @@ and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook
         ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',0);
         ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.SRC_MEC_LONG_NM);
         ihook.setColumnValue(row,'MECM_ID',-1);
+        --  Enumerated by Reference
+        -- Set Target function to xlookup, source and target parameters
+        for curvd in (select val_dom_item_id, val_dom_ver_nr, vd.val_dom_typ_id,TERM_CNCPT_ITEM_ID, TERM_CNCPT_VER_NR, TERM_USE_TYP  
+        from nci_mdl_elmnt_char c, value_dom vd
+        where c.val_dom_item_id = vd.item_id and c.val_dom_ver_nr = vd.ver_nr and vd.val_dom_typ_id = 16 and c.mec_id = cur.src_mec_id) loop
+
+            for curc in (select  nvl(a.nm_desc,c.item_nm) || ' ' || upper(o.obj_key_desc) nm_desc from vw_cncpt c, alt_nms a, obj_key o 
+            where o.obj_key_id = curvd.term_use_typ and c.item_id = curvd.TERM_CNCPT_ITEM_ID and c.ver_nr = curvd.TERM_CNCPT_VER_NR
+            and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp)
+             loop
+              ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+              ihook.setColumnValue(row,'SRC_VAL',curc.nm_desc);
+            end loop;
+            end loop;
+        for curvd in (select val_dom_item_id, val_dom_ver_nr, vd.val_dom_typ_id,TERM_CNCPT_ITEM_ID, TERM_CNCPT_VER_NR, TERM_USE_TYP  
+        from nci_mdl_elmnt_char c, value_dom vd
+        where c.val_dom_item_id = vd.item_id and c.val_dom_ver_nr = vd.ver_nr  and vd.val_dom_typ_id = 16 and c.mec_id = cur.tgt_mec_id) loop
+
+            for curc in (select nvl(a.nm_desc,c.item_nm) || ' ' || upper(o.obj_key_desc)  nm_desc from vw_cncpt c, alt_nms a, obj_key o 
+            where o.obj_key_id = curvd.term_use_typ and c.item_id = curvd.TERM_CNCPT_ITEM_ID and c.ver_nr = curvd.TERM_CNCPT_VER_NR
+            and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp)
+            loop
+              ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+              ihook.setColumnValue(row,'TGT_FUNC_PARAM', curc.nm_desc);
+              ihook.setColumnValue(row,'TGT_VAL',curc.nm_desc);
+            end loop;
+            end loop;
         
                                      rows.extend;
                                             rows(rows.last) := row;
@@ -1777,6 +1821,19 @@ and mm2.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm2.ver_nr = iho
         ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.SRC_MEC_LONG_NM);
         ihook.setColumnValue(row,'MECM_ID',-1);
      ihook.setColumnValue(row,'MEC_MAP_NOTES','No Matching Target DEC Found.');
+       
+        for curvd in (select val_dom_item_id, val_dom_ver_nr, vd.val_dom_typ_id,TERM_CNCPT_ITEM_ID, TERM_CNCPT_VER_NR, TERM_USE_TYP  
+        from nci_mdl_elmnt_char c, value_dom vd
+        where c.val_dom_item_id = vd.item_id and c.val_dom_ver_nr = vd.ver_nr and vd.val_dom_typ_id = 16 and c.mec_id = cur.src_mec_id) loop
+
+            for curc in (select nvl(a.nm_desc,c.item_nm) || ' ' || upper(o.obj_key_desc)  nm_desc from vw_cncpt c, alt_nms a, obj_key o 
+            where o.obj_key_id = curvd.term_use_typ and c.item_id = curvd.TERM_CNCPT_ITEM_ID and c.ver_nr = curvd.TERM_CNCPT_VER_NR
+            and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp)
+             loop
+              ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+              ihook.setColumnValue(row,'SRC_VAL', curc.nm_desc);
+            end loop;
+            end loop;
            
                                      rows.extend;
                                             rows(rows.last) := row;
@@ -1809,6 +1866,19 @@ and mm2.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm2.ver_nr = iho
         ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.SRC_MEC_LONG_NM);
         ihook.setColumnValue(row,'MECM_ID',-1);
         ihook.setColumnValue(row,'MEC_MAP_NOTES','No Matching Source DEC Found.');
+        for curvd in (select val_dom_item_id, val_dom_ver_nr, vd.val_dom_typ_id,TERM_CNCPT_ITEM_ID, TERM_CNCPT_VER_NR, TERM_USE_TYP  
+        from nci_mdl_elmnt_char c, value_dom vd
+        where c.val_dom_item_id = vd.item_id and c.val_dom_ver_nr = vd.ver_nr  and vd.val_dom_typ_id = 16 and c.mec_id = cur.src_mec_id) loop
+
+            for curc in (select nvl(a.nm_desc,c.item_nm) || ' ' || upper(o.obj_key_desc)  nm_desc from vw_cncpt c, alt_nms a, obj_key o 
+            where o.obj_key_id = curvd.term_use_typ and c.item_id = curvd.TERM_CNCPT_ITEM_ID and c.ver_nr = curvd.TERM_CNCPT_VER_NR
+            and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id   (+)= v_nmtyp)
+            loop
+              ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+              ihook.setColumnValue(row,'TGT_FUNC_PARAM', curc.nm_desc);
+              ihook.setColumnValue(row,'TGT_VAL',curc.nm_desc);
+            end loop;
+            end loop;
         
                                      rows.extend;
                                             rows(rows.last) := row;
