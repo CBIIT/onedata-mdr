@@ -1015,7 +1015,7 @@ BEGIN
     action := t_actionrowset(rows, 'Permissible Values', 2,20,'insert');
     actions.extend;    actions(actions.last) := action;
 
---  Create subset relationship
+--  Create subset relationship for CDE
      rows := t_rows();
      row:= t_row();
     ihook.setColumnValue(row,'REL_TYP_ID', 84);
@@ -1025,7 +1025,16 @@ BEGIN
      ihook.setColumnValue(row,'C_ITEM_VER_NR', 1);
      ihook.setColumnValue(row,'REP_NO', 0);
    rows.extend;    rows(rows.last) := row;
-  
+   
+   -- VD relationship
+   row:= t_row();
+    ihook.setColumnValue(row,'REL_TYP_ID', 84);
+      ihook.setColumnValue(row,'P_ITEM_ID', v_vd_id);
+     ihook.setColumnValue(row,'P_ITEM_VER_NR', v_vd_ver_nr);
+     ihook.setColumnValue(row,'C_ITEM_ID', v_vd_new_id);
+     ihook.setColumnValue(row,'C_ITEM_VER_NR', 1);
+     ihook.setColumnValue(row,'REP_NO', 0);
+   rows.extend;    rows(rows.last) := row;
     action := t_actionrowset(rows, 'Generic AI Relationship', 2,30,'insert');
     actions.extend;    actions(actions.last) := action;
 
