@@ -455,7 +455,7 @@ AS
         -- ENumerated by reference checks
         if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') =16 ) then 
                   if (   ihook.getColumnValue(rowform, 'TERM_CNCPT_ITEM_ID') is  null and   ihook.getColumnValue(rowform, 'IMP_REF_TERM') is null) then
-                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Reference Terminology is required for Enumerated By Reference VD.' || chr(13));
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR:  Either Reference Terminology or Data Source Value are missing. Both are required for Enumerated By Reference VD.' || chr(13));
                   v_val_ind  := false;
         end if;
        
@@ -464,11 +464,11 @@ AS
                   v_val_ind  := false;
         end if;
                       if (   ihook.getColumnValue(rowform, 'TERM_USE_TYP') is  null and   ihook.getColumnValue(rowform, 'IMP_TERM_USE_TYP') is null) then
-                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Reference Terminology - Data Value Source is required for Enumerated By Reference VD.' || chr(13));
+                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR:  Either Reference Terminology or Data Source Value are missing. Both are required for Enumerated By Reference VD.' || chr(13));
                   v_val_ind  := false;
         end if;
                 if (   ihook.getColumnValue(rowform, 'TERM_USE_TYP') is  null and   ihook.getColumnValue(rowform, 'IMP_TERM_USE_TYP') is not null) then
-                      ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Specified Reference Terminology - Data Value Srouce is invalid.' || chr(13));
+                      ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Specified Reference Terminology - Data Value Source is invalid.' || chr(13));
                   v_val_ind  := false;
         end if;
       if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') =16 and upper(ihook.getColumnValue(rowform, 'IMP_CREAT_PV_VM')) not in ('YES','No') 
@@ -876,12 +876,9 @@ end if;
         end if;
 -- Enumerated by Reference
 --raise_application_Error(-20000,'HEre');
-        if (   ihook.getColumnValue(rowvd, 'CNCPT_2_ITEM_ID_1') is null and  ihook.getColumnValue(rowvd, 'VAL_DOM_TYP_ID') =  16) then -- Reference Terminology is required
-                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'Reference Terminology missing.');
-                  is_valid := false;
-        end if;
-          if (   ihook.getColumnValue(rowvd, 'BTCH_SEQ_NBR') is null and  ihook.getColumnValue(rowvd, 'VAL_DOM_TYP_ID') =  16) then -- Reference Terminology is required
-                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'Reference Terminology Usage Type missing.');
+        
+          if (   (ihook.getColumnValue(rowvd, 'BTCH_SEQ_NBR') is null or  ihook.getColumnValue(rowvd, 'CNCPT_2_ITEM_ID_1') is null )  and  ihook.getColumnValue(rowvd, 'VAL_DOM_TYP_ID') =  16) then -- Reference Terminology is required
+                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', 'ERROR:  Either Reference Terminology or Data Source Value are missing. Both are required for Enumerated By Reference VD.');
                   is_valid := false;
         end if;
 -- Edit
