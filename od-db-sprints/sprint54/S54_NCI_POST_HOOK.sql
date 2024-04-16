@@ -387,6 +387,7 @@ DBMS_MVIEW.REFRESH('MVW_CSI_TREE_CDE');
 DBMS_MVIEW.REFRESH('MVW_FORM_NODE_DE_REL');
 DBMS_MVIEW.REFRESH('VW_FORM_TREE_CDE');
 DBMS_MVIEW.REFRESH('VW_ADMIN_ITEM_WITH_EXT');
+DBMS_MVIEW.REFRESH('VW_VAL_DOM_REF_TERM');
 
 --execute immediate 'alter table NCI_ADMIN_ITEM_EXT NOLOGGING';
 
@@ -2018,14 +2019,14 @@ BEGIN
 
 
   if ( ihook.getColumnValue(row_ori, 'TERM_CNCPT_ITEM_ID') is null and ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
-        raise_application_error(-20000, 'Reference Terminology is missing. ');
+        raise_application_error(-20000, 'Error: Either Reference Terminology or Data Source Value are missing. It is required for Enumerated By Reference VD.');
         return;
     end if;
 
 
 
   if ( ihook.getColumnValue(row_ori, 'TERM_USE_TYP') is null and ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
-        raise_application_error(-20000, 'Reference Terminology Usage Type is missing. ');
+        raise_application_error(-20000, 'Error: Either Reference Terminology or Data Source Value are missing. It is required for Enumerated By Reference VD.');
         return;
     end if;
 
@@ -2034,9 +2035,11 @@ BEGIN
 
 -- if changed from Enum with  Reference to Eunm or Non-enum, clear Referenct Term and Usage Type
 
-/*
-  if (  ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID')<>16  and ihook.getColumnOldValue(row_ori, 'VAL_DOM_TYP_ID')=16) then
-        rows:= t_rows();
+
+  if (  ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID')<>ihook.getColumnOldValue(row_ori, 'VAL_DOM_TYP_ID')) then
+    hookoutput.message :=  '      ***  Please update Permissible Values as required. ****';
+    end if;
+     /*   rows:= t_rows();
         row := t_row();
          ihook.setColumnValue(row,'ITEM_ID',v_item_id );
         ihook.setColumnValue(row,'VER_NR',v_ver_nr );
