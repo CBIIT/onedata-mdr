@@ -35,3 +35,34 @@ if (:new.VAL_DOM_TYP_ID <> 16 and :new.TERM_CNCPT_ITEM_ID is not null) then -- n
  end if;
 END TR_VAL_DOM_AUD_TS;
 /
+
+
+
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (56,'IF');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (56,'THEN');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (56,'ELSE');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (56,'ENDIF');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (57,'EQUAL TO');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (57,'NOT EQUAL TO');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (57,'GREATER THAN');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (57,'LESS THAN');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (57,'GREATER THAN OR EQUAL TO');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (57,'LESS THAN OR EQUAL TO');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (58,'(');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (58,')');
+
+insert into obj_key (obj_typ_id, obj_key_desc) values (58,'NULL');
+commit;
+
