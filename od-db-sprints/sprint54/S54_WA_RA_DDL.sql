@@ -1,5 +1,9 @@
 alter table nci_mec_map add (TGT_MEC_ID_DERV number);
 
+alter table nci_mec_map add (paren integer);
+alter table nci_stg_mec_map add (paren integer, imp_paren varchar2(100));
+
+
 
   CREATE OR REPLACE VIEW VW_CNCPT_XMAP As
   SELECT XMAP.ITEM_ID, XMAP.VER_NR, 
@@ -408,10 +412,10 @@ alter table NCI_STG_CDE_CREAT add (IMP_CREAT_PV_VM varchar2(10));
 
 create materialized view vw_val_dom_ref_term as 
 select
-vd.item_id, vd.ver_nr, vd.term_cncpt_item_id, vd.term_cncpt_ver_nr, nvl(a.nm_desc, c.item_nm) term_name from
-value_dom vd, vw_cncpt c, alt_nms a, (select obj_key_id from obj_key where obj_typ_id = 11 and obj_key_desc = 'Ref Term Short Name') o
-where  vd.val_dom_typ_id = 16 and vd.term_cncpt_item_id = c.item_id and vd.term_cncpt_ver_nr = c.ver_nr and 
-vd.term_cncpt_item_id = a.item_id (+) and vd.term_cncpt_ver_nr = a.ver_nr (+) and a.nm_typ_id = o.obj_key_id (+);
+vd.item_id, vd.ver_nr, vd.term_cncpt_item_id, vd.term_cncpt_ver_nr, nvl(a.nm_desc, c.item_nm) || '/' || o.obj_key_desc  term_name from
+value_dom vd, vw_cncpt c, obj_key o, (select item_id, ver_nr, nm_desc from alt_nms a, obj_key where obj_typ_id = 11 and obj_key_desc = 'Ref Term Short Name' and a.nm_typ_id = obj_key_id) a
+where  vd.val_dom_typ_id = 16 and vd.term_cncpt_item_id = c.item_id and vd.term_cncpt_ver_nr = c.ver_nr and vd.TERM_USE_TYP= o.obj_key_id and
+vd.term_cncpt_item_id = a.item_id (+) and vd.term_cncpt_ver_nr = a.ver_nr (+) ;
 
 alter table value_dom add (PRNT_SUBSET_ITEM_ID number, PRNT_SUBSET_VER_NR number(4,2),SUBSET_DESC varchar2(100));
 
@@ -686,12 +690,14 @@ commit;
 alter table nci_mec_map add (right_op  varchar2(255), left_op varchar2(255), flow_cntrl integer, op_typ integer);
 alter table nci_stg_mec_map add (right_op  varchar2(255), left_op varchar2(255),imp_flow_cntrl varchar2(255), flow_cntrl integer, imp_op_typ varchar2(255), op_typ integer);
  
-insert into obj_typ (obj_typ_Id, obj_typ_Desc) values (56, 'Mapping Flow Control');
-insert into obj_typ (obj_typ_Id, obj_typ_Desc) values (57, 'Mapping Operand Type');
+insert into obj_typ (obj_typ_Id, obj_typ_Desc) values (58, 'Mapping Parenthesis');
 commit;
 
+insert into obj_typ (obj_typ_Id, obj_typ_Desc) values (56, 'Mapping Condition');
+insert into obj_typ (obj_typ_Id, obj_typ_Desc) values (57, 'Mapping Comparator');
+commit;
 
-  CREATE OR REPLACE  VIEW VW_MDL_MAP_IMP_TEMPLATE AS 
+CREATE OR REPLACE  VIEW VW_MDL_MAP_IMP_TEMPLATE AS 
   select  ' ' "DO_NOT_USE",
        ' ' "BATCH_USER",
        ' ' "BATCH_NAME",
@@ -724,6 +730,7 @@ map.TGT_FUNC_PARAM "TARGET_FUNCTION_PARAM"	,
 	op.obj_key_desc "OPERATOR",
 	op_typ.obj_key_desc "OPERAND_TYPE",
 	flow_cntrl.obj_key_desc "FLOW_CONTROL",
+	paren.obj_key_desc "PARENTHESIS",
 	map.right_op "RIGHT_OPERAND",
 	map.left_op "LEFT_OPERAND",
   map.valid_pltform	   "VALIDATION_PLATFORM",
@@ -746,9 +753,15 @@ decode(tvd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated',16, 'Enumerated 
 	  map."S2P_TRN_DT",
 	  map."LST_UPD_DT",
       smec.MEC_ID SRC_MEC_ID,
+      smec.CDE_ITEM_ID  "SOURCE_CDE_ITEM_ID",
+      smec.CDE_VER_NR  "SOURCE_CDE_VER",
+      tmec.CDE_ITEM_ID  "TARGET_CDE_ITEM_ID",
+      tmec.CDE_VER_NR  "TARGET_CDE_VER",
 tmec.MEC_ID TGT_MEC_ID,
 tmec.pk_ind TGT_PK_IND,
-smec.pk_ind SRC_PK_IND
+smec.pk_ind SRC_PK_IND,
+svdrt.TERM_NAME "SOURCE_REF_TERM_SOURCE",
+tvdrt.TERM_NAME "TARGET_REF_TERM_SOURCE"
 	from  NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT_CHAR tmec, nci_MEC_MAP map,
 	  obj_key crd,
 	  obj_key deg,
@@ -757,9 +770,12 @@ smec.pk_ind SRC_PK_IND
 	  obj_key op,
 	  obj_key op_typ,
 	  obj_key flow_cntrl,
+	  obj_key paren,
 	  nci_org org,
   	  value_dom svd,
-	  value_dom tvd
+	  value_dom tvd,
+vw_val_dom_ref_term svdrt,
+vw_val_dom_ref_term tvdrt
 	where  sme.item_id (+)= smec.MDL_ELMNT_ITEM_ID
 	and sme.ver_nr (+)= smec.MDL_ELMNT_VER_NR and
 	 tme.item_id (+)= tmec.MDL_ELMNT_ITEM_ID
@@ -771,10 +787,14 @@ smec.pk_ind SRC_PK_IND
 	  and map.prov_org_id = org.entty_id (+)
 	  and map.crdnlity_id = crd.obj_key_id (+)
 	  and map.op_id = op.obj_key_id (+)
+	  and map.paren = paren.obj_key_id (+)
 	  and map.op_typ = op_typ.obj_key_id (+)
 	  and map.flow_cntrl = flow_cntrl.obj_key_id (+)
           and smec.val_dom_item_id = svd.item_id (+)
 	  and smec.val_dom_ver_nr = svd.ver_nr (+)
 	  and tmec.val_dom_item_id = tvd.item_id (+)
- 	  and tmec.val_dom_ver_nr = tvd.ver_nr (+);
-
+ 	  and tmec.val_dom_ver_nr = tvd.ver_nr (+)
+          and svd.item_id = svdrt.item_id (+)
+          and svd.ver_nr = svdrt.ver_nr (+)
+          and tvd.item_id = tvdrt.item_id (+)
+          and tvd.ver_nr = tvdrt.ver_nr (+)
