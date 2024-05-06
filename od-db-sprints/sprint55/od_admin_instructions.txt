@@ -1,0 +1,3 @@
+-- After brad loads metacui file, 
+
+run nci_ext_import.load_ncit_cui;
