@@ -1,3 +1,9 @@
+--Run as ONDATA_MD
+S55_MD.sqk
+
 -- Run as ONEDATA_RA DDL scripts
+S55_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S55_WA_RA_DDL.sql
+S55_WA.sql
