@@ -14,5 +14,15 @@ and de.prnt_subset_item_id=de1.item_id and de.prnt_subset_ver_nr=de1.ver_nr)
 and subset_desc is null;
 commit;
 
+insert into nci_admin_item_rel (p_item_id, p_item_Ver_nr, c_item_id, c_item_ver_Nr, rel_typ_id, rep_no)
+select distinct prnt_subset_item_id, prnt_subset_ver_nr, item_id, ver_nr , 84,0 from value_dom where prnt_subset_item_id is not null
+and (prnt_subset_item_id, prnt_subset_ver_nr, item_id, ver_nr ) not in (Select p_item_id, p_item_Ver_nr, c_item_id, c_item_ver_Nr from 
+nci_admin_item_rel where rel_typ_id = 84);
+commit;
+
+insert into onedata_ra.nci_admin_item_rel select * from nci_admin_item_rel where (p_item_id, p_item_Ver_nr, c_item_id, c_item_ver_Nr, rel_typ_id) not in 
+(select p_item_id, p_item_Ver_nr, c_item_id, c_item_ver_Nr, rel_typ_id from onedata_ra.nci_admin_item_rel);
+commit;
+
 
 
