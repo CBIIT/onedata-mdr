@@ -3,7 +3,9 @@ S55_MD.sqk
 
 -- Run as ONEDATA_RA DDL scripts
 S55_WA_RA_DDL.sql
+VW_NCI_PCDC_DE_JIRA_3344.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S55_WA_RA_DDL.sql
 S55_WA.sql
+VW_NCI_PCDC_DE_JIRA_3344.sql
