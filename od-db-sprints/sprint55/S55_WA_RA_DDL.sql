@@ -128,3 +128,6 @@ vw_val_dom_ref_term tvdrt
           and tvd.item_id = tvdrt.item_id (+)
           and tvd.ver_nr = tvdrt.ver_nr (+);
 
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (129,'No CDE',45,'No CDE','No CDE','No CDE' );
+insert into obj_key (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF, OBJ_KEY_CMNTS, NCI_CD) values (130,'Not Mapped',45,'Not Mapped','Not Mapped','Not Mapped' );
+commit;
