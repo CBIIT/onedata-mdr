@@ -5,3 +5,7 @@ exec nci_ext_import.load_meddra_xmap(25.1);
 -- After brad loads metacui file, 
 
 run nci_ext_import.load_ncit_cui;
+
+-- After Brad loads WHO file
+
+run nci_ext_import.load_ICDO_External_codes(3.2)
