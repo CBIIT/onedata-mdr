@@ -8,4 +8,5 @@ run nci_ext_import.load_ncit_cui;
 
 -- After Brad loads WHO file
 
-run nci_ext_import.load_ICDO_External_codes(3.2)
+nci_ext_import.load_term('ICDO3','ICD-O');
+run nci_ext_import.load_ICDO_External_codes(3.2);
