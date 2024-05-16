@@ -1979,7 +1979,7 @@ and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook
                 and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
             
                 ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
-                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_src_nm_desc || ' ' || v_nm_desc); 
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_src_nm_desc || '|' || v_nm_desc); 
                 ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
                
         end if;
