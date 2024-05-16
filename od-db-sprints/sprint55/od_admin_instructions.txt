@@ -2,14 +2,6 @@
 
 exec nci_ext_import.load_meddra_xmap(25.1);
 
--- After brad loads metacui file, 
-
-run nci_ext_import.load_ncit_cui;
-
--- After Brad loads WHO file
-
-nci_ext_import.load_term('ICDO3','ICD-O');
-run nci_ext_import.load_ICDO_External_codes(3.2);
 
 -- Data Values.
-Add QUERY to Target Function list.
+Add QUERY to Target Function list. Run Import on Type details with the file attached to 3347
