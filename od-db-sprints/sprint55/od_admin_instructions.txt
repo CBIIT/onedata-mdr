@@ -1,6 +1,10 @@
 
 
 exec nci_ext_import.load_meddra_xmap(25.1);
+exec nci_ext_import.load_ICDO_External_Codes(3.2)
+exec nci_ext_import.load_MT;
+
+
 
 
 -- Data Values.
