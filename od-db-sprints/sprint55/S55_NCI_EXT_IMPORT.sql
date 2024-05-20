@@ -335,6 +335,9 @@ commit;
 end if;
 
 
+delete from nci_admin_item_xmap where dt_src = v_term_nm_xmap;
+commit;
+
 
 insert into nci_admin_item_xmap (item_id, ver_nr, xmap_cd,xmap_desc, evs_src_id, evs_Src_ver_Nr, PREF_IND,DT_SRC)
 select distinct c.item_id, c.ver_nr, TARGET_CODE,TARGET_TERM,v_evs_Src_id, 
@@ -384,7 +387,30 @@ commit;
 
 update sag_load_mt set PREF_IND = 1 where (nci_code, source)  in 
 (select nci_code,  source
-from sag_load_mt group by nci_code, source having count(distinct source_atom_code) = 1);
+from sag_load_mt group by nci_code, source having count(distinct source_atom_code) = 1)
+and (source_atom_code, source)  in 
+(select source_atom_code,  source
+from sag_load_mt group by source_atom_code, source having count(distinct nci_code) = 1);
+commit;
+
+update sag_load_mt set PREF_IND = 1 where (nci_code, source)  in 
+(select nci_code,  source
+from sag_load_mt group by nci_code, source having count(distinct source_atom_code) > 1)
+and (source_atom_code, source)  in 
+(select source_atom_code,  source
+from sag_load_mt group by source_atom_code, source having count(distinct nci_code) = 1)
+and pref_ind=0 
+and TERM_TYP = 'PT';
+commit;
+
+update sag_load_mt set PREF_IND = 1 where (nci_code, source)  in 
+(select nci_code,  source
+from sag_load_mt group by nci_code, source having count(distinct source_atom_code) = 1)
+and (source_atom_code, source)  in 
+(select source_atom_code,  source
+from sag_load_mt group by source_atom_code, source having count(distinct nci_code) > 1)
+and pref_ind=0 
+and TERM_TYP = 'PT';
 commit;
 
 update sag_load_mt set PREF_IND = 1 where upper(source_atom_name) = upper(nci_meta_concept_name) and (nci_code, source)  in 
@@ -394,7 +420,9 @@ and pref_ind <> 1;
 commit;
 
 
-commit;
+
+
+
 
 
 update sag_load_mt set PREF_IND = 1 where  (nci_code, source)  in 
@@ -442,11 +470,11 @@ commit;
 
 insert into nci_admin_item_xmap (item_id, ver_nr, xmap_cd,xmap_desc, evs_src_id, evs_Src_ver_Nr,pref_ind, dt_src, term_typ)
 select  c.item_id, c.ver_nr, i.SOURCE_ATOM_CODE,i.SOURCE_ATOM_NAME,o.obj_key_Id, 
-1 ,max(pref_ind), 'MT', term_typ from 
+max(version),max(pref_ind), 'MT', term_typ from 
 admin_item c,  sag_load_mt i, obj_Key o
 where c.admin_item_typ_id = 49 and i.nci_CODe = c.item_long_nm
 and i.source = o.OBJ_KEY_CMNTS and o.obj_typ_id = 23
-and (i.source_atom_Code, i.SOURCE_ATOM_NAME,o.obj_key_id) not in (select xmap_cd, xmap_desc, evs_src_id from nci_admin_item_xmap)
+and (i.source_atom_Code, o.obj_key_id) not in (select xmap_cd,  evs_src_id from nci_admin_item_xmap)
 group by c.item_id, c.ver_nr, i.SOURCE_ATOM_CODE,i.SOURCE_ATOM_NAME,o.obj_key_Id, term_typ ;
 commit;
 
@@ -547,8 +575,9 @@ insert into nci_admin_item_xmap (item_id, ver_nr, xmap_cd,xmap_desc, evs_src_id,
 select distinct 0,1, code,LBL_TOPIC, v_evs_Src_id, 
 v_ver,1,'ICDO_EXT_RAW' from 
  SAG_LOAD_ICDo_raw i where 
-(code, LBL_TOPIC) not in (select  xmap_cd, xmap_desc
-from nci_admin_item_xmap where evs_src_id = v_evs_src_id);
+(code) not in (select  xmap_cd
+from nci_admin_item_xmap where evs_src_id = v_evs_src_id)
+and lvl_struct not in ('incl','sub');
 commit;
 
 END;
