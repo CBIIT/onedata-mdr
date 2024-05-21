@@ -57,6 +57,41 @@ from vw_cncpt r, value_dom vd,obj_key o where vd.TERM_CNCPT_ITEM_ID= r.item_id a
 where (admin_item.item_id,admin_item.ver_nr) in (Select item_id, ver_nr from value_dom where val_dom_typ_id = 16);
 commit;
 
+
+update admin_item set RVWR_CMNTS = (select rt.item_nm || '/Non-enum/' || dt.dttype_nm || 
+decode(VAL_DOM_MAX_CHAR,null,'','/Max Len:' ||VAL_DOM_MAX_CHAR  ) || decode(VAL_DOM_MIN_CHAR,null,'','/Min Len:' ||VAL_DOM_MIN_CHAR ) ||
+decode(VAL_DOM_HIGH_VAL_NUM,null,'','/Max Val:' ||VAL_DOM_HIGH_VAL_NUM  ) || decode(VAL_DOM_LOW_VAL_NUM,null,'','/Min Val:' ||VAL_DOM_LOW_VAL_NUM  )
+from admin_item rt, data_typ dt, value_dom vd, cncpt_admin_item cai where vd.REP_CLS_ITEM_ID= cai.item_id and vd.REP_CLS_VER_NR = cai.ver_Nr and cai.nci_prmry_ind = 1
+and cai.cncpt_item_id = rt.item_id and cai.cncpt_ver_nr = rt.ver_nr and
+vd.NCI_STD_DTTYPE_ID = dt.DTTYPE_ID and vd.val_dom_typ_id = 18 and vd.item_id = admin_item.item_id and vd.ver_nr = admin_item.ver_nr)
+where (admin_item.item_id,admin_item.ver_nr) in (Select item_id, ver_nr from value_dom where val_dom_typ_id = 18);
+commit;
+
+
+update admin_item set RVWR_CMNTS = (select substr(rt.item_nm || '/Enum/' || dt.dttype_nm || 
+decode(VAL_DOM_MAX_CHAR,null,'','/Max Len:' ||VAL_DOM_MAX_CHAR) || decode(VAL_DOM_MIN_CHAR,null,'','/Min Len: ' ||VAL_DOM_MIN_CHAR ) ||
+decode(VAL_DOM_HIGH_VAL_NUM,null,'','/Max Val:' ||VAL_DOM_HIGH_VAL_NUM) || decode(VAL_DOM_LOW_VAL_NUM,null,'','/Min Val:' ||VAL_DOM_LOW_VAL_NUM  )
+|| ' (' || nvl(pv.pv_cnt,0) || ' Values)',1,255)
+from admin_item rt, data_typ dt, value_dom vd, cncpt_admin_item cai,
+(select val_dom_item_id, val_dom_ver_nr, count(*) pv_cnt from perm_val where nvl(fld_delete,0) = 0 group by val_dom_item_id, val_dom_ver_nr) pv 
+where vd.REP_CLS_ITEM_ID= cai.item_id and vd.REP_CLS_VER_NR = cai.ver_Nr and 
+vd.NCI_STD_DTTYPE_ID = dt.DTTYPE_ID and vd.val_dom_typ_id = 17 and vd.item_id = admin_item.item_id and vd.ver_nr = admin_item.ver_nr and
+vd.item_id = pv.val_dom_item_id (+) and vd.ver_nr = pv.val_dom_ver_nr (+)
+and cai.cncpt_item_id = rt.item_id and cai.cncpt_ver_nr = rt.ver_nr and cai.nci_prmry_ind = 1)
+where (admin_item.item_id,admin_item.ver_nr) in (Select item_id, ver_nr from value_dom where val_dom_typ_id = 17);
+commit;
+
+
+update admin_item set RVWR_CMNTS = item_nm_curated 
+where (admin_item.item_id,admin_item.ver_nr) in (Select item_id, ver_nr from value_dom where val_dom_typ_id = 16);
+commit; 
+
+update admin_item set item_nm_curated = (select substr(dec.item_nm || ' ' || vd.rvwr_cmnts,1,255) from
+de, admin_item dec, admin_item vd where de.item_id = admin_item.item_id and de.ver_nr = admin_item.ver_nr and de.de_conc_item_id = dec.item_id
+and de.de_conc_ver_nr = dec.ver_nr and de.val_dom_item_id = vd.item_Id and de.val_dom_ver_nr = vd.ver_nr)
+where admin_item_typ_id = 4;
+commit;
+
 execute immediate 'alter table admin_item enable all triggers';
 
 
