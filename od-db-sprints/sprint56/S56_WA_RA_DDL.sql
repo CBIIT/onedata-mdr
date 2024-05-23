@@ -103,7 +103,8 @@ VALUE_DOM.VER_NR = TERM.VER_NR (+);
                 decode(e.cncpt_concat, e.cncpt_concat_nm, null, vm.item_long_nm, null, vm.item_id, null, e.cncpt_concat) cncpt_concat, e.CNCPT_CONCAT_NM,
 		decode(e.cncpt_concat_with_int, e.cncpt_concat_nm, null, vm.item_long_nm, null, vm.item_id, null, e.cncpt_concat_with_int) cncpt_concat_with_int,
 		PV.CREAT_DT, PV.CREAT_USR_ID, PV.LST_UPD_USR_ID, PV.FLD_DELETE, PV.LST_DEL_DT, PV.S2P_TRN_DT, PV.LST_UPD_DT,
-                PV.PRNT_CNCPT_ITEM_ID, PV.PRNT_CNCPT_VER_NR, VM.ITEM_NM || ' ' || VM.ITEM_DESC  VM_SEARCH_STR
+                PV.PRNT_CNCPT_ITEM_ID, PV.PRNT_CNCPT_VER_NR, VM.ITEM_NM || ' ' || VM.ITEM_DESC  VM_SEARCH_STR,
+	  'CDE' PV_TYP, de.VAL_DOM_ITEM_ID, de.val_dom_Ver_nr
        FROM  DE, PERM_VAL PV, ADMIN_ITEM VM, NCI_ADMIN_ITEM_EXT e where
 	PV.VAL_DOM_ITEM_ID = DE.VAL_DOM_ITEM_ID and
 	PV.VAL_DOM_VER_NR = DE.VAL_DOM_VER_NR and
@@ -119,7 +120,7 @@ VALUE_DOM.VER_NR = TERM.VER_NR (+);
                 decode(e.cncpt_concat, e.cncpt_concat_nm, null, vm.item_long_nm, null, vm.item_id, null, e.cncpt_concat) cncpt_concat, e.CNCPT_CONCAT_NM,
 		decode(e.cncpt_concat_with_int, e.cncpt_concat_nm, null, vm.item_long_nm, null, vm.item_id, null, e.cncpt_concat_with_int) cncpt_concat_with_int,
 		PV.CREAT_DT, PV.CREAT_USR_ID, PV.LST_UPD_USR_ID, PV.FLD_DELETE, PV.LST_DEL_DT, PV.S2P_TRN_DT, PV.LST_UPD_DT,
-                null, null, VM.ITEM_NM || ' ' || VM.ITEM_DESC  VM_SEARCH_STR
+                null, null, VM.ITEM_NM || ' ' || VM.ITEM_DESC  VM_SEARCH_STR ,'SUBSET' PV_TYP, de.VAL_DOM_ITEM_ID, de.val_dom_Ver_nr
        FROM  DE, PERM_VAL_SUBSET PV, ADMIN_ITEM VM, NCI_ADMIN_ITEM_EXT e where
 	PV.VAL_DOM_ITEM_ID = DE.VAL_DOM_ITEM_ID and
 	PV.VAL_DOM_VER_NR = DE.VAL_DOM_VER_NR and
