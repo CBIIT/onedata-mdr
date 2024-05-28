@@ -111,8 +111,9 @@ VALUE_DOM.VER_NR = TERM.VER_NR (+);
 	PV.NCI_VAL_MEAN_ITEM_ID = vm.ITEM_ID and
 	PV.NCI_VAL_MEAN_VER_NR = vm.VER_NR and
         VM.ITEM_ID = e.ITEM_ID and
-        VM.VER_NR = e.VER_NR and nvl(de.SUBSET_DESC,'xx') <> 'Subset'
-	  union
+        VM.VER_NR = e.VER_NR 
+	  --and nvl(de.SUBSET_DESC,'xx') <> 'Subset'
+	 /* union
 	 SELECT  pv.val_id,  PV.PERM_VAL_BEG_DT, PERM_VAL_END_DT, PERM_VAL_NM, PERM_VAL_DESC_TXT,
               pv.cde_ITEM_ID  DE_ITEM_ID,
 		pv.cde_VER_NR DE_VER_NR, VM.ITEM_NM, VM.ITEM_LONG_NM,
@@ -126,7 +127,7 @@ VALUE_DOM.VER_NR = TERM.VER_NR (+);
 	PV.NCI_VAL_MEAN_ITEM_ID = vm.ITEM_ID and
 	PV.NCI_VAL_MEAN_VER_NR = vm.VER_NR and
         VM.ITEM_ID = e.ITEM_ID and
-        VM.VER_NR = e.VER_NR and de.SUBSET_DESC = 'Subset' ;
+        VM.VER_NR = e.VER_NR and de.SUBSET_DESC = 'Subset' ; */
 
 
 
