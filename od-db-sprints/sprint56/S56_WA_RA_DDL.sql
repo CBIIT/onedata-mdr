@@ -143,7 +143,7 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
 c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=102\&type=protocol\\Legacy_Form_Builder_Excel' FORM_RPT_PRIOR_EXCEL,
 c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=105\&type=protocol\\Form_Excel'  FORM_RPT_EXCEL,
 c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=109\&type=protocol\\REDCap_DD_Form'  FORM_RPT_RED_CAP,
-c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDE%20Protocol%20Relationship%20%28Data%20Element%20CO%29.PROT_ITEM_VER_NR=' || ai.item_id || 'v' || ai.ver_Nr ITEM_DEEP_LINK ,
+c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDEProt.PROT_ITEM_VER_NR=' || ai.item_id || 'v' || ai.ver_Nr ITEM_DEEP_LINK ,
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES 
 from 
 ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Protocol' group by x.p_item_id , 
@@ -164,7 +164,7 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
 c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=102\&type=frm\\Legacy_Form_Builder_Excel' FORM_RPT_PRIOR_EXCEL,
 c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=105\&type=frm\\Form_Excel'  FORM_RPT_EXCEL,
 c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '\&p_item_ver_nr=' || ai.ver_nr || '\&formatid=109\&type=frm\\REDCap_DD_Form'  FORM_RPT_RED_CAP,
-c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDE%20%2D%20Forms%20%28Data%20Element%20CO%29.FRM_ITEM_VER_NR=' || ai.item_id || 'v' || ai.ver_Nr ITEM_DEEP_LINK ,
+c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDEForm.FRM_ITEM_VER_NR=' || ai.item_id || 'v' || ai.ver_Nr ITEM_DEEP_LINK ,
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES 
  from 
 ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Form' group by x.p_item_id , 
@@ -187,7 +187,7 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
 'NA' FORM_RPT_PRIOR_EXCEL,
 'NA' FORM_RPT_EXCEL,
 'NA' FORM_RPT_RED_CAP,
-c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDEDD%20Classification.P_ITEM_ID_VER=' || ai.item_id || 'v' || ai.ver_Nr ITEM_DEEP_LINK ,
+c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CNTXT_ITEM_ID=' || ai.item_id  ITEM_DEEP_LINK ,
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES 
  from 
 ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Context' group by x.p_item_id , 
