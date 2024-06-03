@@ -128,7 +128,6 @@ VALUE_DOM.VER_NR = TERM.VER_NR (+);
        WHERE o.obj_typ_id = 23 and o.obj_key_id = xmap.evs_src_id and pref_ind = 1 and xmap.item_id <> 0
        group by xmap.item_id, xmap.ver_nr;
 
-
 set escape on;
 drop MATERIALIZED VIEW VW_FORM_TREE_CDE;
    CREATE MATERIALIZED VIEW VW_FORM_TREE_CDE 
@@ -187,7 +186,7 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
 'NA' FORM_RPT_PRIOR_EXCEL,
 'NA' FORM_RPT_EXCEL,
 'NA' FORM_RPT_RED_CAP,
-c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CNTXT_ITEM_ID=' || ai.item_id  ITEM_DEEP_LINK ,
+c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDEForm.FRM_CNTXT_ITEM_ID=' || ai.item_id  ITEM_DEEP_LINK ,
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES 
  from 
 ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Context' group by x.p_item_id , 
