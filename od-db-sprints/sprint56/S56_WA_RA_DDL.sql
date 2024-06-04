@@ -264,6 +264,7 @@ AND AIR.C_ITEM_VER_NR = DE.VER_NR
 and FRM_MOD.P_ITEM_ID = -1;
 
 
+
   CREATE OR REPLACE  VIEW VW_MDL_MAP_MANIFEST AS 
 select   x.MDL_MAP_ITEM_ID ,
          x.mdl_map_ver_nr ,
@@ -281,7 +282,7 @@ select   x.MDL_MAP_ITEM_ID ,
 (  select   map.MDL_MAP_ITEM_ID ,
          map.mdl_map_ver_nr ,
 sme.ITEM_PHY_OBJ_NM SRC_ELMNT_PHY_NM,
-    max(CASE WHEN map.tgt_func_param LIKE 'XMAP%'
+    max(CASE WHEN map.tgt_func_param LIKE '%XWALK%'
            THEN ',XWALK' END)  XWALK,
     max(CASE WHEN map.tgt_func_param LIKE 'VALUE%MAP%'
           THEN ',VALUE MAP' END)  VALUE_MAP,
