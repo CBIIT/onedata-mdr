@@ -274,7 +274,7 @@ select   x.MDL_MAP_ITEM_ID ,
 	  'ONEDATA' creat_usr_id,	  
 	   sysdate lst_upd_dt,
 	  'ONEDATA' lst_upd_usr_id,
-      '0' FLD_DELETE,
+      0 FLD_DELETE,
       sysdate S2P_TRN_DT,
       sysdate LST_DEL_DT
 	from
@@ -283,8 +283,8 @@ select   x.MDL_MAP_ITEM_ID ,
 sme.ITEM_PHY_OBJ_NM SRC_ELMNT_PHY_NM,
     max(CASE WHEN map.tgt_func_param LIKE 'XMAP%'
            THEN ',XWALK' END)  XWALK,
-    max(CASE WHEN map.tgt_func_param LIKE 'VALUE_MAP%'
-          THEN ',VALUE_MAP' END)  VALUE_MAP,
+    max(CASE WHEN map.tgt_func_param LIKE 'VALUE%MAP%'
+          THEN ',VALUE MAP' END)  VALUE_MAP,
         tme.ITEM_PHY_OBJ_NM  TGT_ELMNT_PHY_NM from
     --admin_item s, 
     NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec,NCI_MDL_ELMNT_CHAR tmec,
