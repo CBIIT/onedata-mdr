@@ -186,14 +186,17 @@ c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '\&p_item_
 'NA' FORM_RPT_PRIOR_EXCEL,
 'NA' FORM_RPT_EXCEL,
 'NA' FORM_RPT_RED_CAP,
-c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDEForm.FRM_CNTXT_ITEM_ID=' || ai.item_id  ITEM_DEEP_LINK ,
+--c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDEForm.FRM_CNTXT_ITEM_ID=' || ai.item_id  ITEM_DEEP_LINK ,
+''  ITEM_DEEP_LINK ,
 '******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES 
  from 
 ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Context' group by x.p_item_id , 
-x.p_item_ver_nr) y, nci_mdr_cntrl c, nci_mdr_cntrl c1
+x.p_item_ver_nr) y, nci_mdr_cntrl c
+	   --, nci_mdr_cntrl c1
  where ADMIN_ITEM_TYP_ID = 8 and item_id = y.p_item_id (+)  and ver_nr = y.p_item_ver_nr (+)
  --and admin_stus_nm_dn ='RELEASED' 
- and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING')  	  and c1.param_nm='DEEP_LINK'
+ and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING')  	
+	   --and c1.param_nm='DEEP_LINK'
  and c.param_nm='DOWNLOAD_HOST';
 
 
@@ -392,3 +395,5 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	and vdst.NCI_STD_DTTYPE_ID = dt.dttype_id (+)
 	  and vdst.uom_id = uom.uom_id (+);
 
+update obj_key set obj_key_Desc ='Ignore', obj_key_Def = 'No transformation rule needed for the source or target, ignore.' where obj_key_id = 129;
+commit;
