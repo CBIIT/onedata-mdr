@@ -396,4 +396,11 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  and vdst.uom_id = uom.uom_id (+);
 
 update obj_key set obj_key_Desc ='Ignore', obj_key_Def = 'No transformation rule needed for the source or target, ignore.' where obj_key_id = 129;
+
+update obj_key set  obj_key_Def = 'Not automatically mapped and not ''Derived from'' or ''Ignore''' where obj_key_id = 130;
+update obj_key set  obj_key_Def = 'Target is derived using a function or defaulted to a value, even if the row only has ''ENDIF''' where obj_key_id = 120;
+	update obj_key set  obj_key_Def ='The source and target have the same CDE' where obj_key_id = 86;
+	update obj_key set  obj_key_Def = 'The source and target have the same DEC' where obj_key_id = 87;
 commit;
+
+
