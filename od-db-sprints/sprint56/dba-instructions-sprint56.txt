@@ -1,5 +1,6 @@
 -- Run as ONEDATA_RA DDL scripts
 S56_WA_RA_DDL.sql
+S56_VW_MDL_FLAT_VB_JIRA_3323.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S56_WA_RA_DDL.sql
