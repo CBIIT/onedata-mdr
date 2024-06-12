@@ -78,7 +78,7 @@ v_int_cncpt_id  number := 2433736;
    if (ihook.getcolumnValue(rowvd,'VAL_DOM_TYP_ID')=16) then -- enum by ref
  select obj_key_desc into v_dt from obj_key o where o.obj_key_id = ihook.getColumnValue(rowvd, 'BTCH_SEQ_NBR');
 select item_nm into v_temp_nm from vw_cncpt where item_id = ihook.getcolumnValue(rowvd,'CNCPT_2_ITEM_ID_1') and ver_nr = ihook.getcolumnValue(rowvd,'CNCPT_2_VER_NR_1');
-v_nm := substr('Enum by Ref/' || v_temp_nm || ' ' || v_dt ||v_nm,1,255);
+v_nm := substr(ihook.getcolumnValue(rowvd,'ITEM_1_NM') || '/Enum by Ref/' || v_temp_nm || '/' || v_dt || '/' || v_nm,1,255);
 
 if (ihook.getColumnValue(rowvd, 'CHAR_SET_ID')=1) then -- create pv/vm for enum by ref
 v_nm := substr( v_nm || '(1 Values)',1,255);
@@ -132,7 +132,7 @@ ihook.setcolumnvalue(rowai,'ITEM_NM_CURATED', v_nm);
    if (ihook.getcolumnValue(rowvd,'VAL_DOM_TYP_ID')=16) then -- enum by ref
  select obj_key_desc into v_dt from obj_key o where o.obj_key_id = ihook.getColumnValue(rowvd, 'TERM_USE_TYP');
 select item_nm into v_temp_nm from vw_cncpt where item_id = ihook.getcolumnValue(rowvd,'TERM_CNCPT_ITEM_ID') and ver_nr = ihook.getcolumnValue(rowvd,'TERM_CNCPT_VER_NR');
-v_nm := substr(v_Rt || '/Enum by Ref/' || v_temp_nm || ' ' || v_dt || ' ' || v_nm ||   ' (' || numpv || ' Values)',1,255);
+v_nm := substr(v_Rt || '/Enum by Ref/' || v_temp_nm || '/' || v_dt || '/' || v_nm ||   ' (' || numpv || ' Values)',1,255);
 
 
 end if;
