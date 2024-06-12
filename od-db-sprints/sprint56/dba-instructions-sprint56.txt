@@ -3,6 +3,7 @@ S56_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S56_WA_RA_DDL.sql
+S56_WA.sql
 S56_NCI_11179.sql
 S56_NCI_11179_2.sql
 S56_NCI_UTIL.sql
