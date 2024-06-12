@@ -54,7 +54,7 @@ where (admin_item.item_id,admin_item.ver_nr) in (Select item_id, ver_nr from val
 commit;
 
 -- Enum by reference
-update admin_item set item_nm_curated = (select substr(rt.item_nm || '/Enum by Ref/' || dt.dttype_nm || '/' || vdrt.term_name || ' ' || vdrt.use_name || 
+update admin_item set item_nm_curated = (select substr(rt.item_nm || '/Enum by Ref/' || vdrt.term_name || '/' || vdrt.use_name ||'/' || dt.dttype_nm || 
 decode(vd.UOM_ID,null,'','/UOM:' || uom.UOM_NM ) ||
 decode(VAL_DOM_MAX_CHAR,null,'','/Max Len:' ||VAL_DOM_MAX_CHAR) || decode(VAL_DOM_MIN_CHAR,null,'','/Min Len: ' ||VAL_DOM_MIN_CHAR ) ||
 decode(VAL_DOM_HIGH_VAL_NUM,null,'','/Max Val:' ||VAL_DOM_HIGH_VAL_NUM) || decode(VAL_DOM_LOW_VAL_NUM,null,'','/Min Val:' ||VAL_DOM_LOW_VAL_NUM  )
