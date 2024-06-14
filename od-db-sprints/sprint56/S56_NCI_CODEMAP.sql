@@ -1067,19 +1067,27 @@ end loop;
   commit;
    update nci_stg_mdl_elmnt_char set mec_long_nm = mec_phy_nm where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID') and mec_LONG_NM is null;
   commit;
+  update nci_stg_mdl_elmnt_char set ctl_val_msg = null where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID') ;
+  commit;
   -- update nci_stg_mdl_elmnt_char set ctl_val_msg = null where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID');
   --commit;
-     update nci_stg_mdl_elmnt_char set ctl_val_msg = 'ERROR: CDE ID/Version not valid. '|| cde_item_id || 'v' || cde_ver_nr where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
+     update nci_stg_mdl_elmnt_char set ctl_val_msg = 'ERROR: CDE ID/Version not valid. '|| cde_item_id || 'v' || cde_ver_nr || '.' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
      and (cde_item_id, cde_ver_nr) not in (select item_id, ver_nr from de);
   commit;
-   update nci_stg_mdl_elmnt set ctl_val_msg = 'ERROR: Characteristic CDE ID/Version not valid. ' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
+   update nci_stg_mdl_elmnt_char set ctl_val_msg = nvl(ctl_val_msg,'ERROR: ') || ' Max lenght cannot be null. ' where SRC_MAX_CHAR is null and mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID');
+     
+  commit;
+   update nci_stg_mdl_elmnt set ctl_val_msg = 'ERROR: Issues found at Characteristic level. ' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
      and (ITEM_PHY_OBJ_NM) in (select ME_ITEM_LONG_NM from nci_stg_mdl_elmnt_char where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID') and ctl_val_msg is not null);
   commit;
+    
+  
+  
   select count(*) into v_temp from nci_stg_mdl_elmnt_char where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID') and ctl_val_msg is not null;
   
   if (v_temp > 0) then -- error
   v_valid := false;
-    v_val_stus_msg := v_val_stus_msg || 'Characteristic: ' || v_temp || ' error(s) found in specified CDE Item Id/Version.' || chr(13);
+    v_val_stus_msg := v_val_stus_msg || 'Characteristic: ' || v_temp || ' error(s) found in specified CDE Item Id/Version or max character is blank.' || chr(13);
     end if;
  -- validate ME type id else default Semantic Model - Class. Physical Model - Table
  
@@ -1159,9 +1167,9 @@ end;
   -- check if invalid Mapping degree/Mapping Type
   
  -- Derive Mapping cardinality
-  for cur in (select * from obj_key where obj_typ_id = 47  and upper(obj_key_desc) = nvl(upper(ihook.getColumnValue(row_ori, 'IMP_CRDNLITY')),'XX')) loop
-    ihook.setColumnValue(row_ori, 'CRDNLITY_ID', cur.obj_key_id);
- end loop;
+ -- for cur in (select * from obj_key where obj_typ_id = 47  and upper(obj_key_desc) = nvl(upper(ihook.getColumnValue(row_ori, 'IMP_CRDNLITY')),'XX')) loop
+ --   ihook.setColumnValue(row_ori, 'CRDNLITY_ID', cur.obj_key_id);
+-- end loop;
 
 -- Validate that the source elemnt/char and target element/char belong to the current source and target model
 -- validate that both ME and MEC are specified. May be blank.
