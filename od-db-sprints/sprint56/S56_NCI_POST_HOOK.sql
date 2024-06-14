@@ -303,6 +303,8 @@ commit;
 delete from onedata_Ra.ALT_DEF where  nvl(fld_delete,0) = 1 ;
 commit;
 
+
+
 --tracker 2761
 --nci_import.spDeleteProcImports;
 /*v_days := 7;
@@ -326,6 +328,13 @@ commit;
 
 nci_import.spdeleteprocimports;
 nci_data_audit.spLoadDataAudit(sysdate -2, sysdate);
+
+
+-- Delete logically deleted permissible values 
+delete from PERM_VAL where  nvl(fld_delete,0) = 1 and lst_del_dt < sysdate - 3;
+commit;
+delete from onedata_Ra.PERM_VAL where  nvl(fld_delete,0) = 1  and lst_del_dt < sysdate - 3;
+commit;
 
 /*
 delete from nci_dload_dtl where hdr_id in (select hdr_id from nci_dload_hdr where creat_dt < sysdate - 7 );
