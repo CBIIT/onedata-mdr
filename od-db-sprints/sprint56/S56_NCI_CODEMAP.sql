@@ -1839,10 +1839,10 @@ begin
   select obj_key_id into v_nmtyp from obj_key where obj_key_desc = 'Ref Term Short Name' and obj_typ_id = 11;
         
     delete from NCI_MEC_MAP where MDL_MAP_ITEM_ID = ihook.getColumnValue(row_ori, 'ITEM_ID') and MDL_MAP_VER_NR = ihook.getColumnValue(row_ori, 'VER_NR')
-     and nvl(MAP_DEG,1) not in (120,129);
+     and nvl(MAP_DEG,1) not in (120,131);
     commit;
     delete from onedata_ra.NCI_MEC_MAP where MDL_MAP_ITEM_ID = ihook.getColumnValue(row_ori, 'ITEM_ID') and MDL_MAP_VER_NR = ihook.getColumnValue(row_ori, 'VER_NR')
-     and nvl(MAP_DEG,1) not in (120,129);
+     and nvl(MAP_DEG,1) not in (120,131);
     commit;
     rows := t_rows();
    for cur in (select  mec1.MEC_LONG_NM SRC_MEC_LONG_NM, mec1.mec_id SRC_MEC_ID, mec2.MEC_LONG_NM TGT_MEC_LONG_NM, mec2.mec_id TGT_MEC_ID, me1.mdl_item_id src_mdl_item_id,
@@ -2166,10 +2166,10 @@ and mec1.cde_item_id is null
         ihook.setColumnValue(row,'MDL_MAP_ITEM_ID',ihook.getColumnValue(row_ori, 'ITEM_ID'));
         ihook.setColumnValue(row,'MDL_MAP_VER_NR',ihook.getColumnValue (row_ori,'VER_NR'));
         ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',0);
-         ihook.setColumnValue(row,'MAP_DEG',130); -- no CDE
+         ihook.setColumnValue(row,'MAP_DEG',129); -- no CDE
           ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.SRC_MEC_LONG_NM);
         ihook.setColumnValue(row,'MECM_ID',-1);
-     ihook.setColumnValue(row,'MEC_MAP_NOTES','No Matching Target DEC Found.');
+     ihook.setColumnValue(row,'MEC_MAP_NOTES','No CDE attached.');
        
       
            
@@ -2200,7 +2200,7 @@ and mec1.cde_item_id is null
          ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',0);
         ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.SRC_MEC_LONG_NM);
         ihook.setColumnValue(row,'MECM_ID',-1);
-        ihook.setColumnValue(row,'MEC_MAP_NOTES','No Matching Source DEC Found.');
+        ihook.setColumnValue(row,'MEC_MAP_NOTES','No CDE attached.');
       
                                      rows.extend;
                                             rows(rows.last) := row;
