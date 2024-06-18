@@ -1074,9 +1074,9 @@ end loop;
      update nci_stg_mdl_elmnt_char set ctl_val_msg = 'ERROR: CDE ID/Version not valid. '|| cde_item_id || 'v' || cde_ver_nr || '.' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
      and (cde_item_id, cde_ver_nr) not in (select item_id, ver_nr from de);
   commit;
-   update nci_stg_mdl_elmnt_char set ctl_val_msg = nvl(ctl_val_msg,'ERROR: ') || ' Max lenght cannot be null. ' where SRC_MAX_CHAR is null and mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID');
+  -- update nci_stg_mdl_elmnt_char set ctl_val_msg = nvl(ctl_val_msg,'ERROR: ') || ' Max lenght cannot be null. ' where SRC_MAX_CHAR is null and mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID');
      
-  commit;
+ -- commit;
    update nci_stg_mdl_elmnt set ctl_val_msg = 'ERROR: Issues found at Characteristic level. ' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
      and (ITEM_PHY_OBJ_NM) in (select ME_ITEM_LONG_NM from nci_stg_mdl_elmnt_char where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID') and ctl_val_msg is not null);
   commit;
@@ -1087,7 +1087,8 @@ end loop;
   
   if (v_temp > 0) then -- error
   v_valid := false;
-    v_val_stus_msg := v_val_stus_msg || 'Characteristic: ' || v_temp || ' error(s) found in specified CDE Item Id/Version or max character is blank.' || chr(13);
+   -- v_val_stus_msg := v_val_stus_msg || 'Characteristic: ' || v_temp || ' error(s) found in specified CDE Item Id/Version or max character is blank.' || chr(13);
+    v_val_stus_msg := v_val_stus_msg || 'Characteristic: ' || v_temp || ' error(s) found in specified CDE Item Id/Version.' || chr(13);
     end if;
  -- validate ME type id else default Semantic Model - Class. Physical Model - Table
  
