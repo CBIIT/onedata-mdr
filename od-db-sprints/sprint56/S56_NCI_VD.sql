@@ -884,6 +884,7 @@ AS
     v_err_str varchar2(4000);
     v_answer int;
     v_pv integer;
+    v_ref_term_nm varchar2(255);
  BEGIN
 
 
@@ -1068,6 +1069,7 @@ end if;
                     ihook.setColumnValue(rowai,'ITEM_DESC', ihook.getColumnValue(rowvd,'ITEM_1_DEF'));
                   
                 end if;
+    
              -- If any of the test fails or if the user has triggered validation, then go back to the screen.
         if is_valid=false or v_answer in (1, 2) then
                 rows := t_rows();
@@ -1077,20 +1079,30 @@ end if;
            if (v_op = 'update') then
                     rowvdold := v_init_vd.rowset(1); -- only append if changed.
                 v_nm := ihook.getColumnValue(rowai, 'ITEM_NM'); -- current name
+                v_new_nm :='';
                 v_def := ihook.getColumnValue(rowai, 'ITEM_DESC'); -- current def
                 for i in 2..10 loop
+                         
+                         -- get short name
+                         v_ref_term_nm := '';
+                         if (ihook.getColumnValue(rowvd, 'VAL_DOM_TYP_ID') = 16) then -- Ref Terminology get short name
+                             for curt in (select nm_desc  from alt_nms a, obj_key where obj_typ_id = 11 and obj_key_desc = 'Ref Term Short Name' and a.nm_typ_id = obj_key_id
+                             and item_id = ihook.getColumnValue(rowvd, 'CNCPT_1_ITEM_ID_' || i) and ver_nr = ihook.getColumnValue(rowvd, 'CNCPT_1_VER_NR_' || i)) loop
+                                    v_ref_term_nm := curt.nm_desc;
+                                end loop;
+                          end if;
                       for cur in (select item_nm, item_desc from admin_item  where item_id = ihook.getColumnValue(rowvd, 'CNCPT_1_ITEM_ID_' || i) and ver_nr = ihook.getColumnValue(rowvd, 'CNCPT_1_VER_NR_' || i)) loop
                        if (ihook.getColumnValue(rowvd, 'CNCPT_1_ITEM_ID_' || i) <> nvl(ihook.getColumnValue(rowvdold, 'CNCPT_1_ITEM_ID_' || i),0) ) then
-                           v_nm := substr(v_nm || ' ' || cur.item_nm,1,255);
+                           v_nm := substr(v_nm || ' ' || nvl(v_ref_term_nm,cur.item_nm),1,255);
                           v_def := substr(v_def || '_' || cur.item_desc,1,6000);
                         end if;
-                         v_new_nm := v_new_nm || ' ' || cur.item_nm;
+                         v_new_nm := v_new_nm || ' ' || nvl(v_ref_term_nm,cur.item_nm);
                         v_new_def := v_new_def || '_' || cur.item_desc;
 
                        end loop;
                 end loop;
                     for cur in (select item_nm, item_desc from admin_item  where item_id = ihook.getColumnValue(rowvd, 'CNCPT_1_ITEM_ID_1') and ver_nr = ihook.getColumnValue(rowvd, 'CNCPT_1_VER_NR_1')) loop
-                       if (ihook.getColumnValue(rowvd, 'CNCPT_1_ITEM_ID_1') <> nvl(ihook.getColumnValue(rowvdold, 'CNCPT_1_ITEM_ID_1'),0) ) then
+                       if (ihook.getColumnValue(rowvd, 'CNCPT_1_ITEM_ID_1') <> nvl(ihook.getColumnValue(rowvdold, 'CNCPT_1_ITEM_ID_1'),0)   ) then
                               v_nm := substr(v_nm || ' ' || cur.item_nm,1,255);
                           v_def := substr(v_def || '_' || cur.item_desc,1,6000);
                       end if;
@@ -1116,9 +1128,9 @@ end if;
                    ihook.setColumnValue (rowai, 'ITEM_DESC', substr(v_new_def,2));
         end if;
         
-   
+  -- raise_application_error(-20000, ihook.getColumnValue (rowai, 'ITEM_NM'));
 
-           end if;
+           end if;-- update
 
                 ihook.setColumnValue(rowai,'ADMIN_ITEM_TYP_ID', 3);
 
@@ -1131,6 +1143,8 @@ end if;
                 hookoutput.message := ihook.getColumnValue(rowvd, 'CTL_VAL_MSG');
                       hookOutput.forms := getVDCreateForm(rowsetai,rowset, v_op);
                 HOOKOUTPUT.QUESTION    := getVDCreateQuestion(false,v_from);
+              --       raise_Application_Error(-20000,ihook.getColumnValue(rowvd,'ITEM_1_NM'));
+        
         end if;
 
      -- If all the tests have passed and the user has asked for create, then create VD and Repp.
@@ -2052,13 +2066,23 @@ if (v_cncpt_src ='STRING') then
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || j,'');
                         ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || j, '');
                         v_interim := false;
-                        for cur in(select item_id, item_nm , item_long_nm, item_desc from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
+                        for cur in(select item_id, ver_nr, item_nm , item_long_nm, item_desc from admin_item where admin_item_typ_id = 49 and upper(item_long_nm) = upper(trim(v_cncpt_nm))) loop
                                 ihook.setColumnValue(rowform, 'CNCPT_' || idx  ||'_ITEM_ID_' || j,cur.item_id);
                                 ihook.setColumnValue(rowform, 'CNCPT_' || idx || '_VER_NR_' || j, 1);
                                -- v_dec_nm := trim(v_dec_nm || ' ' || cur.item_nm) ;
                                 v_long_nm_suf := trim(v_long_nm_suf || ':' || cur.item_long_nm);
                                 v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm);
-                                v_nm := trim(v_nm || ' ' || cur.item_nm);
+                             v_ref_term_nm := null;
+                             if (ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') = 16) then -- Ref Terminology get short name
+                             for curt in (select nm_desc  from alt_nms a, obj_key where obj_typ_id = 11 and obj_key_desc = 'Ref Term Short Name' and a.nm_typ_id = obj_key_id
+                             and item_id = cur.item_id and ver_nr = cur.ver_nr) loop
+                                    v_ref_term_nm := curt.nm_desc;
+                       --             raise_application_error(-20000,'HEre');
+                                end loop;
+                          end if;
+  
+                                v_nm := trim(v_nm || ' ' || nvl(v_ref_term_nm, cur.item_nm));
+                     --           raise_application_error(-20000, v_nm);
                               v_def := substr( v_def || '_' ||cur.item_desc  ,1,4000);
                                 v_interim := true;
                         end loop;
@@ -2115,7 +2139,7 @@ if (v_cncpt_src ='DROP-DOWN') then
                              and item_id = v_temp_id and ver_nr = v_temp_ver) loop
                                     v_ref_term_nm := curt.nm_desc;
                                 end loop;
-                                end if;
+                          end if;
                                     v_long_nm_suf_int := trim(v_long_nm_suf_int || ':' || cur.item_long_nm);
                                 v_nm := trim(v_nm || ' ' || nvl(v_ref_term_nm,cur.item_nm));
 
@@ -2149,12 +2173,12 @@ if (v_cncpt_src ='DROP-DOWN') then
              end loop;
             v_long_nm_suf := substr(v_long_nm_suf,2);
 
-     --  raise_application_error(-20000, v_long_nm_suf || '  Long name: ' || v_nm);
+   --   raise_application_error(-20000,  '  Long name: ' || v_nm);
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM', v_long_nm_suf);
                 ihook.setColumnValue(rowform,'ITEM_' || idx || '_NM', v_nm);
                ihook.setColumnValue(rowform,'ITEM_' || idx || '_DEF', substr(v_def,2));
         ihook.setColumnValue(rowform,'ITEM_' || idx || '_LONG_NM_INT', substr(v_long_nm_suf_int,2));
-
+                       
             nci_DEC_MGMT.CncptCombExistsNew (rowform , substr(v_long_nm_suf_int,2), v_item_typ_id, idx , v_item_id, v_ver_nr);
       --      raise_application_error(-20000, 'HErer ' || v_item_id);
 
