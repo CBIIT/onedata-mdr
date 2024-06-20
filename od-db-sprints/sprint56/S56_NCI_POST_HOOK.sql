@@ -331,9 +331,9 @@ nci_data_audit.spLoadDataAudit(sysdate -2, sysdate);
 
 
 -- Delete logically deleted permissible values 
-delete from PERM_VAL where  nvl(fld_delete,0) = 1 and lst_del_dt < sysdate - 3;
+delete from PERM_VAL where  nvl(fld_delete,0) = 1 and lst_del_dt > sysdate - 3;
 commit;
-delete from onedata_Ra.PERM_VAL where  nvl(fld_delete,0) = 1  and lst_del_dt < sysdate - 3;
+delete from onedata_Ra.PERM_VAL where  nvl(fld_delete,0) = 1  and lst_del_dt > sysdate - 3;
 commit;
 
 /*
