@@ -501,6 +501,8 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	and vdst.NCI_STD_DTTYPE_ID = dt.dttype_id (+)
 	  and vdst.uom_id = uom.uom_id (+);
 
+alter table nci_dload_cstm_col_key add is_visible number;
+
 update nci_protcl p set protcl_id = (Select item_long_nm from admin_item ai where ai.item_id = p.item_id and ai.ver_nr = p.ver_nr)
 where protcl_id is null;
 commit;
