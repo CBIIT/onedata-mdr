@@ -1842,7 +1842,7 @@ if ((   ihook.getColumnValue (row_ori, 'DE_CONC_ITEM_ID') <>
                ihook.getColumnOldValue (row_ori, 'DE_CONC_ITEM_ID')
             OR ihook.getColumnValue (row_ori, 'DE_CONC_VER_NR') <>
                ihook.getColumnOldValue (row_ori, 'DE_CONC_VER_NR')) and ihook.getColumnValue (row_ori,'SUBSET_DESC') is not null ) then
-        raise_application_error(-20000, 'You cannot change the DEC for a parent or subset CDE. ');
+        raise_application_error(-20000, 'You cannot change DEC or VD for a parent or subset CDE.');
         return;
     end if;
     
@@ -1852,8 +1852,8 @@ if (  ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID') <>
                ihook.getColumnOldValue (row_ori, 'VAL_DOM_ITEM_ID')
             and ihook.getColumnValue (row_ori,'SUBSET_DESC') is null ) then
             for curx in (Select * from value_dom where item_id = ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID')  
-            and ver_nr = ihook.getColumnValue (row_ori, 'VAL_DOM_VER_NR') and subset_desc is not null) loop
-               raise_application_error(-20000, 'You cannot choose a VD that is a parent of subset. ');
+            and ver_nr = ihook.getColumnValue (row_ori, 'VAL_DOM_VER_NR') and nvl(subset_desc,'X') <> 'Subset') loop
+               raise_application_error(-20000, 'You cannot choose a VD that is a subset. ');
         return;
             end loop;
         
@@ -1862,7 +1862,7 @@ if (  ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID') <>
 if (  ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID') <>
                ihook.getColumnOldValue (row_ori, 'VAL_DOM_ITEM_ID')
             and ihook.getColumnValue (row_ori,'SUBSET_DESC') is not null ) then
-        raise_application_error(-20000, 'You cannot change the VD for a parent or subset CDE. ');
+        raise_application_error(-20000, 'You cannot change DEC or VD for a parent or subset CDE.');
         return;
     end if;
   for cur in (select * from admin_item where item_id = ihook.getColumnValue (row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue (row_ori, 'VER_NR')
