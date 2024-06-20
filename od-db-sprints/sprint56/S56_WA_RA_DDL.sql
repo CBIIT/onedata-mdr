@@ -130,6 +130,7 @@ VALUE_DOM.VER_NR = TERM.VER_NR (+);
        group by xmap.item_id, xmap.ver_nr;
 
 set escape on;
+set define off;
 drop MATERIALIZED VIEW VW_FORM_TREE_CDE;
    CREATE MATERIALIZED VIEW VW_FORM_TREE_CDE 
   AS select CNTXT_ITEM_ID P_ITEM_ID, CNTXT_VER_NR P_ITEM_VER_NR, ITEM_ID, VER_NR, ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ITEM_LONG_NM,  ITEM_NM || ' (' 
