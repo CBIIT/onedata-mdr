@@ -1007,7 +1007,7 @@ end if;
       --  raise_application_error(-20000,v_temp_nm);
                            
          if  (instr(upper(nvl(ihook.getColumnValue(rowai, 'ITEM_NM_CURATED'),ihook.getColumnValue(rowvd, 'ITEM_1_NM'))),v_temp_nm,1) =0) then
-                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', ihook.getColumnValue(rowvd,'CTL_VAL_MSG') || chr(13) || 'WARNING: Reference Terminology name not in the VD Long Name.');
+                  ihook.setColumnValue(rowvd, 'CTL_VAL_MSG', ihook.getColumnValue(rowvd,'CTL_VAL_MSG') || chr(13) || 'WARNING: Reference Terminology Name not in the ''Name Based on Concepts''.');
                 end if;
         end if;
         end if;
