@@ -1853,7 +1853,7 @@ if (  ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID') <>
             and ihook.getColumnValue (row_ori,'SUBSET_DESC') is null ) then
             for curx in (Select * from value_dom where item_id = ihook.getColumnValue (row_ori, 'VAL_DOM_ITEM_ID')  
             and ver_nr = ihook.getColumnValue (row_ori, 'VAL_DOM_VER_NR') and nvl(subset_desc,'X') <> 'Subset') loop
-               raise_application_error(-20000, 'You cannot choose a VD that is a subset. ');
+               raise_application_error(-20000, 'Cannot use Subset VD to edit CDE.');
         return;
             end loop;
         
