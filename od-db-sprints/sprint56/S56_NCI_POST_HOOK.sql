@@ -276,12 +276,6 @@ commit;
 delete from onedata_ra.nci_dload_hdr where creat_dt < sysdate - 7 and nvl(RETAIN_IND,0) = 0;
 commit;
 
-delete from perm_val where  nvl(fld_delete,0) = 1;
-commit;
-
-delete from onedata_ra.perm_val where  nvl(fld_delete,0) = 1;
-commit;
-
 -- Delete logically deleted classifications
 delete from NCI_ADMIN_ITEM_REL where  nvl(fld_delete,0) = 1 and rel_typ_id = 65;
 commit;
@@ -331,10 +325,11 @@ nci_data_audit.spLoadDataAudit(sysdate -2, sysdate);
 
 
 -- Delete logically deleted permissible values 
-delete from PERM_VAL where  nvl(fld_delete,0) = 1 and lst_del_dt > sysdate - 3;
+delete from PERM_VAL where  nvl(fld_delete,0) = 1 and lst_del_dt < sysdate - 3;
 commit;
-delete from onedata_Ra.PERM_VAL where  nvl(fld_delete,0) = 1  and lst_del_dt > sysdate - 3;
+delete from onedata_Ra.PERM_VAL where  nvl(fld_delete,0) = 1  and lst_del_dt < sysdate - 3;
 commit;
+
 
 /*
 delete from nci_dload_dtl where hdr_id in (select hdr_id from nci_dload_hdr where creat_dt < sysdate - 7 );
