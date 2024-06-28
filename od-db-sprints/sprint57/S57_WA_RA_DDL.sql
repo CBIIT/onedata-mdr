@@ -1,5 +1,8 @@
 alter table cncpt add (REF_TERM_IND number(1));
 
+update cncpt set ref_term_ind = 1 where item_id in (select TERM_CNCPT_ITEM_ID from value_dom where TERM_CNCPT_ITEM_ID is not null);
+commit;
+
 drop materialized view VW_CNCPT;
 
   CREATE MATERIALIZED VIEW VW_CNCPT 
@@ -20,3 +23,4 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
        and admin_item.item_id = e.item_id and admin_item.ver_nr = e.ver_nr
 	and cncpt.EVS_SRC_ID = OBJ_KEY.OBJ_KEY_ID (+) and admin_item.admin_stus_nm_dn = 'RELEASED' 
 	and ADMIN_ITEM.ITEM_ID = a.ITEM_ID (+) and ADMIN_ITEM.VER_NR = a.VER_NR (+);
+
