@@ -26,3 +26,21 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
 	and cncpt.EVS_SRC_ID = OBJ_KEY.OBJ_KEY_ID (+) and admin_item.admin_stus_nm_dn = 'RELEASED' 
 	and ADMIN_ITEM.ITEM_ID = a.ITEM_ID (+) and ADMIN_ITEM.VER_NR = a.VER_NR (+);
 
+alter table nci_mdl_elmnt_char modify (req_ind integer);
+alter table nci_stg_mdl_elmnt_char modify (src_mand_ind varchar2(50));
+
+
+insert into obj_typ(obj_typ_id, obj_typ_desc) values (59,'Characteristics Mandatory Indicator');
+commit;
+insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (59,132,'Mandatory');
+insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (59,133,'Not Mandatory');
+insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (59,134,'Expected');
+commit;
+
+alter table nci_mdl_elmnt_char disable all triggers;
+update NCI_MDL_ELMNT_CHAR set REQ_IND = 133 where REQ_IND is null or REQ_IND = 0;
+update NCI_MDL_ELMNT_CHAR set REQ_IND = 132 where REQ_IND = 1;
+commit;
+alter table nci_mdl_elmnt_char enable all triggers;
+
+
