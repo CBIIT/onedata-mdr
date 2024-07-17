@@ -1,1 +1,4 @@
---TBD
+--Tracker: DSRMWS-3454
+Step 1: Grant access to object  DO: Form Download to Guest user account 
+Step 2: Clear personalization
+Step 3: Revoke access to Guest user
