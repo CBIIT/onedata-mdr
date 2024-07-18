@@ -1,6 +1,8 @@
 alter table cncpt add (REF_TERM_IND number(1));
 alter table NCI_MEC_MAP add (CMNTS_DESC_TXT varchar2(4000));
 
+update obj_key set obj_Key_Desc = 'Not Mapped Yet' where obj_key_id = 130;
+commit;
 
 update cncpt set ref_term_ind = 1 where item_id in (select TERM_CNCPT_ITEM_ID from value_dom where TERM_CNCPT_ITEM_ID is not null);
 commit;
