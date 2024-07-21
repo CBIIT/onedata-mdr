@@ -93,4 +93,16 @@ alter table nci_mdl_elmnt_char enable all triggers;
        WHERE o.obj_typ_id = 23 and o.obj_key_id = xmap.evs_src_id and pref_ind != 0 and xmap.item_id <> 0
        group by xmap.item_id, xmap.ver_nr;
 
+  CREATE OR REPLACE  VIEW VW_XMAP_PREF as
+  SELECT 0 PREF_ID, 'No' PREF_DESC,
+ sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, 0 FLD_DELETE, sysdate LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT
+from dual
+union
+  SELECT 1 PREF_ID, 'Yes' PREF_DESC,
+ sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, 0 FLD_DELETE, sysdate LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT
+from dual
+union
+  SELECT 2 PREF_ID, 'Unknown' PREF_DESC,
+ sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, 0 FLD_DELETE, sysdate LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT
+from dual;
 
