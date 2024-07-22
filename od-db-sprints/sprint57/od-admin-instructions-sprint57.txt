@@ -1,1 +1,2 @@
 Run nci_ext_import.load_mt;
+exec nci_util.createGenNAme;
