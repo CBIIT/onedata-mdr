@@ -1,2 +1,4 @@
 Run nci_ext_import.load_mt;
 exec nci_util.createGenNAme;
+
+REmove all roles from HC "Create CDE Alternate NAme" and "Delete CDE Alternate Name" from DO: Model AI.
