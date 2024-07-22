@@ -606,20 +606,22 @@ BEGIN
   
     end loop;
     -- model - do not allow released if max length is missing.
-    for cur in (select MEC_PHY_NM from nci_mdl_elmnt_char mec, nci_mdl_elmnt me where me.mdl_item_id = v_item_id and me.mdl_item_ver_nr = v_ver_nr 
+    for cur in (select me.ITEM_PHY_OBJ_NM ME_PHY_NM, MEC_PHY_NM from nci_mdl_elmnt_char mec, nci_mdl_elmnt me where me.mdl_item_id = v_item_id and me.mdl_item_ver_nr = v_ver_nr 
     and mec.mdl_elmnt_item_id =me.item_id and mec.mdl_elmnt_ver_nr = me.ver_nr and nvl(mec.SRC_MAX_CHAR,0) = 0
     and (upper(mec.SRC_DTTYPE) like '%CHAR%' or upper(mec.SRC_DTTYPE) like '%TEXT%' or upper(mec.SRC_DTTYPE) like '%STRING%')) loop
         j:= j+1;
-        msg1 := substr(msg1 || cur.MEC_PHY_NM || ', ',1,4000);
+        if (j < 11) then
+        msg1 := substr(msg1 || cur.ME_PHY_NM || '.' || cur.MEC_PHY_NM || ', ',1,4000) ;
+        end if;
     end loop;
         
     
     if (j > 0) then
-        msg := substr(msg || 'Some Characteristics with Character/Text/String datatype do not have a required Max Length: ' || substr(msg1, 1, length(msg1)-1),1,4000);
+        msg := substr(msg || j || ' Characteristics with Character/Text/String datatype do not have a required Max Length. Examples: ' || substr(msg1, 1, length(msg1)-1),1,4000);
             row := t_row();
         --    ihook.setColumnValue(row,'Issue', 'Some Characteristics with Character/Text/String datatype do not have a required Max Length: ' || substr(msg1, 1, length(msg1)-1));
-            ihook.setColumnValue(row,'Issue', 'Some Characteristics with Character/Text/String datatype do not have a required Max Length');
-            ihook.setColumnValue(row,'Details',  substr(msg1, 1, length(msg1)-1));
+            ihook.setColumnValue(row,'Issue', j || 'Some Characteristics with Character/Text/String datatype do not have a required Max Length. Examples in Detail Section.');
+            ihook.setColumnValue(row,'Details',  substr(msg1, 1, length(msg1)-2));
             rows.extend; rows(rows.last) := row;
         
         v_valid := false;
@@ -641,24 +643,24 @@ BEGIN
      
             if (v_temp = 0) then 
                 j:= j+1;
-                msg1 := substr(msg1 || curchar.MEC_PHY_NM || ', ',1,4000);
+                msg1 := substr(msg1 || curchar.ME_PHY_NM || '.' || curchar.MEC_PHY_NM || ', ',1,4000) ;
             else
                 select count(*) into v_temp from alt_nms where nm_typ_id = v_assoc_tbl_NM_TYP_ID and upper(nm_desc) = upper(curchar.ME_PHY_NM)
                 and cntxt_item_id = ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(row_ori,'CNTXT_VER_NR')
                 and item_id = curchar.cde_item_id and ver_nr = curchar.cde_ver_nr;
                 if (v_temp = 0) then 
                     j:= j+1;
-                    msg1 := substr(msg1 || curchar.MEC_PHY_NM || ', ',1,4000);
+                    msg1 := substr(msg1 || curchar.ME_PHY_NM || '.' || curchar.MEC_PHY_NM || ', ',1,4000) ;
                 end if;
             end if;
         end loop;
     
         if (j > 0) then
-            msg := substr(msg || chr(13) || 'Alternate Names missing for some elements/characteristics. Please use create Alternate Name command first: ' || msg1,1,4000);
+            msg := substr(msg || chr(13) || 'Alternate Names missing for some elements/characteristics. ' || msg1,1,4000);
             row := t_row();
        --     ihook.setColumnValue(row,'Issue', 'Alternate Names missing for some elements/characteristics. Please use create Alternate Name command first: ' || msg1);
-            ihook.setColumnValue(row,'Issue', 'Alternate Names missing for some elements/characteristics. Please use create Alternate Name command first.' );
-            ihook.setColumnValue(row,'Details',  msg1);
+            ihook.setColumnValue(row,'Issue', 'Alternate Names missing for some elements/characteristics. ' );
+            ihook.setColumnValue(row,'Details',  substr(msg1, 1, length(msg1)-2));
             rows.extend; rows(rows.last) := row;
             
             v_valid := false;
@@ -676,7 +678,7 @@ BEGIN
   and csi.cs_item_ver_nr = v_cs_ver_nr and csi.item_id = r.p_item_id and csi.ver_nr = r.p_item_ver_nr and r.rel_typ_id = 65)) loop
             v_valid := false;
             j:= j+1;
-                msg1 := substr(msg1 || curchar.cde_item_id || ', ',1,4000);
+                msg1 := substr(msg1 || curchar.cde_item_id || 'v' || curchar.cde_ver_nr || ', ',1,4000) ;
             
         end loop;
     
@@ -685,7 +687,7 @@ BEGIN
              row := t_row();
         --    ihook.setColumnValue(row,'Issue', 'Missing classifications for CDE: ' || msg1);
             ihook.setColumnValue(row,'Issue', 'Missing classifications for CDE.');
-            ihook.setColumnValue(row,'Details',  msg1);
+            ihook.setColumnValue(row,'Details',  substr(msg1, 1, length(msg1)-2));
             rows.extend; rows(rows.last) := row;
             v_valid := false;
         end if;
