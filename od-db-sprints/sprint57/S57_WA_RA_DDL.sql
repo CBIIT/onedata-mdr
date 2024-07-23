@@ -106,3 +106,471 @@ union
  sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, 0 FLD_DELETE, sysdate LST_DEL_DT, sysdate S2P_TRN_DT, sysdate LST_UPD_DT
 from dual;
 
+--jira 3357
+alter table nci_stg_pv_vm_import add REF_BTCH_NBR integer;
+--jira 3397
+drop materialized view mvw_csi_node_form_rel;
+CREATE MATERIALIZED VIEW MVW_CSI_NODE_FORM_REL ("CREAT_DT", "CREAT_USR_ID", "LST_UPD_USR_ID", "LST_UPD_DT", "S2P_TRN_DT", "LST_DEL_DT", "FLD_DELETE", "ITEM_NM", "ITEM_LONG_NM", "ITEM_ID", "VER_NR", "ITEM_DESC", "CNTXT_NM_DN", "ADMIN_STUS_NM_DN", "REGSTR_STUS_NM_DN", "P_ITEM_ID", "P_ITEM_VER_NR", "CNTXT_ITEM_ID", "CNTXT_VER_NR", "ADMIN_STUS_ID", "REGSTR_STUS_ID", "USED_BY", "LVL", "P_ITEM_ID_VER", "CURRNT_VER_IND")
+
+  AS select distinct
+           ai.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           r.P_ITEM_ID,
+           r.P_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           e.USED_BY,
+           'Form' LVL,
+           r.c_item_id || 'v' || r.c_item_ver_nr P_ITEM_ID_VER,
+           ai.CURRNT_VER_IND
+from admin_item ai, admin_item ak, mvw_csi_rel csi, nci_admin_item_rel r, nci_admin_item_ext e, admin_item csix
+where ai.admin_item_typ_id = 54 and ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr
+      and r.rel_typ_id =65
+      and csi.item_id = r.p_item_id and csi.ver_nr = r.p_item_ver_nr
+      and ak.item_id = csi.item_id and ak.ver_nr = csi.ver_nr
+      and csi.base_id is not null
+      and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr
+      and ai.regstr_stus_nm_dn not like '%RETIRED%' 
+      and ai.admin_stus_nm_dn not like '%RETIRED%'
+      and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
+      and nvl(ai.CURRNT_VER_IND,0) = 1 
+      and nvl(r.fld_delete,0) = 0
+      and csix.item_id = csi.item_id and csix.ver_nr = csi.ver_nr and csix.admin_stus_nm_dn = 'RELEASED'
+union
+    select distinct
+        ai.CREAT_DT,
+        ai.CREAT_USR_ID,
+        ai.LST_UPD_USR_ID,
+        ai.LST_UPD_DT,
+        ai.S2P_TRN_DT,
+        ai.LST_DEL_DT,
+        ai.FLD_DELETE,
+        ai.ITEM_NM,
+        ai.ITEM_LONG_NM,
+        ai.ITEM_ID,
+        ai.VER_NR,
+        ai.ITEM_DESC,
+        ai.CNTXT_NM_DN,
+        ai.ADMIN_STUS_NM_DN,
+        ai.REGSTR_STUS_NM_DN,
+        csi.BASE_ID P_ITEM_ID,
+        csi.BASE_VER_NR P_ITEM_VER_NR,
+        ai.CNTXT_ITEM_ID,
+        ai.CNTXT_VER_NR,
+        ai.ADMIN_STUS_ID,
+        ai.REGSTR_STUS_ID,
+        e.USED_BY,
+        'CSI' LVL,
+        csi.BASE_ID || 'v' || csi.BASE_VER_NR P_ITEM_ID_VER,
+        ai.CURRNT_VER_IND
+    from admin_item ai, admin_item ak, mvw_csi_rel csi, nci_admin_item_rel r, nci_admin_item_ext e, admin_item csix
+    where ai.admin_item_typ_id = 54 and ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr
+      and r.rel_typ_id =65
+      and csi.item_id = r.p_item_id and csi.ver_nr = r.p_item_ver_nr
+      and ak.item_id = csi.item_id and ak.ver_nr = csi.ver_nr
+      and csi.base_id is not null
+      and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr
+      and ai.regstr_stus_nm_dn not like '%RETIRED%' 
+      and ai.admin_stus_nm_dn not like '%RETIRED%'
+      and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
+      and nvl(ai.CURRNT_VER_IND,0) = 1 
+      and nvl(r.fld_delete,0) = 0
+      and csix.item_id = csi.item_id and csix.ver_nr = csi.ver_nr and csix.admin_stus_nm_dn = 'RELEASED'
+union
+select distinct 
+           ai.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           csi.CS_ITEM_ID,
+           csi.CS_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           e.USED_BY,
+           'CS' LVL,
+           csi.CS_ITEM_ID || 'v' || csi.CS_ITEM_VER_NR P_ITEM_ID_VER,
+           ai.CURRNT_VER_IND
+    from admin_item ai, nci_clsfctn_schm_item csi, nci_admin_item_rel r, nci_admin_item_ext e, admin_item csix
+    where ai.admin_item_typ_id = 54 and ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr
+      and r.rel_typ_id = 65
+      and csi.item_id = r.p_item_id and csi.ver_nr = r.p_item_ver_nr
+      and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr
+      and ai.regstr_stus_nm_dn not like '%RETIRED%' 
+      and ai.admin_stus_nm_dn not like '%RETIRED%'
+      and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
+      and nvl(ai.CURRNT_VER_IND,0) = 1 
+      and nvl(r.fld_delete,0) = 0
+      and csix.item_id = csi.item_id and csix.ver_nr = csi.ver_nr and csix.admin_stus_nm_dn = 'RELEASED'
+union
+SELECT distinct ai.CREAT_DT,
+           ai.CREAT_USR_ID,
+           ai.LST_UPD_USR_ID,
+           ai.LST_UPD_DT,
+           ai.S2P_TRN_DT,
+           ai.LST_DEL_DT,
+           ai.FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           cs.CNTXT_ITEM_ID,
+           cs.CNTXT_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           e.USED_BY,
+           'Context' LVL,
+            cs.CNTXT_ITEM_ID || 'v' || cs.CNTXT_VER_NR P_ITEM_ID_VER,
+            ai.CURRNT_VER_IND
+    from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi, VW_CLSFCTN_SCHM cs, nci_admin_item_ext e, ADMIN_ITEM csix, nci_admin_item_rel r
+    where ai.admin_item_typ_id = 54 and ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr
+      and r.rel_typ_id = 65
+      and csi.item_id = r.p_item_id and csi.ver_nr = r.p_item_ver_nr
+      and csi.CS_ITEM_ID = cs.ITEM_ID and csi.CS_ITEM_VER_NR = cs.VER_NR
+      and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr
+      and ai.regstr_stus_nm_dn not like '%RETIRED%' 
+      and ai.admin_stus_nm_dn not like '%RETIRED%'
+      and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
+      and nvl(ai.CURRNT_VER_IND,0) = 1 
+      and nvl(r.fld_delete,0) = 0
+      and csix.item_id = csi.item_id and csix.ver_nr = csi.ver_nr and csix.admin_stus_nm_dn = 'RELEASED';
+
+   COMMENT ON MATERIALIZED VIEW MVW_CSI_NODE_FORM_REL IS 'snapshot table for snapshot ONEDATA_WA.MVW_CSI_NODE_FORM_REL';
+
+set define off;
+set escape off;
+drop materialized view mvw_csi_tree_form;
+  CREATE MATERIALIZED VIEW MVW_CSI_TREE_FORM ("LVL", "P_ITEM_ID", "P_ITEM_VER_NR", "ITEM_ID", "VER_NR", "ITEM_DESC", "CNTXT_ITEM_ID", "CNTXT_VER_NR", "ITEM_LONG_NM", "ITEM_NM", "ADMIN_STUS_ID", "REGSTR_STUS_ID", "REGISTRR_CNTCT_ID", "SUBMT_CNTCT_ID", "STEWRD_CNTCT_ID", "SUBMT_ORG_ID", "STEWRD_ORG_ID", "CREAT_DT", "CREAT_USR_ID", "LST_UPD_USR_ID", "FLD_DELETE", "LST_DEL_DT", "S2P_TRN_DT", "LST_UPD_DT", "REGSTR_AUTH_ID", "NCI_IDSEQ", "ADMIN_STUS_NM_DN", "CNTXT_NM_DN", "REGSTR_STUS_NM_DN", "ORIGIN_ID", "ORIGIN_ID_DN", "CREAT_USR_ID_X", "LST_UPD_USR_ID_X", "ITEM_RPT_URL", "ITEM_RPT_EXCEL", "ITEM_RPT_PRIOR_EXCEL", "CHNG_NOTES", "TYP_ID", "P_ITEM_VER")
+
+  AS select 98 LVL, null P_ITEM_ID, null P_ITEM_VER_NR,  ai.ITEM_ID || '(Context)' ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM,  
+ ai.ITEM_NM || ' (' || ai.ITEM_DESC  || ') (' || nvl(y.cnt,'0') || ')'  ITEM_NM , ai.ADMIN_STUS_ID, ai.REGSTR_STUS_ID, ai.REGISTRR_CNTCT_ID, ai.SUBMT_CNTCT_ID,
+ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
+ ai.REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X ,
+'NA' ITEM_RPT_URL ,
+'NA' ITEM_RPT_EXCEL ,
+'NA' ITEM_RPT_PRIOR_EXCEL,
+'' CHNG_NOTES,
+    0 TYP_ID,
+null  P_ITEM_VER
+from
+ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_FORM_REL x where lvl='Context' and x.ADMIN_STUS_NM_DN not like '%RETIRED%' group by x.p_item_id ,
+x.p_item_ver_nr) y , nci_mdr_cntrl c,nci_mdr_cntrl c1
+ where ADMIN_ITEM_TYP_ID = 8 and ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
+ and c1.param_nm='DEEP_LINK'
+ and y.cnt > 0
+ union
+select 99 LVL, CNTXT_ITEM_ID || '(Context)' P_ITEM_ID, CNTXT_VER_NR P_ITEM_VER_NR, ai.ITEM_ID || '(CS)' ,ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM,
+ai.ITEM_NM || ' (' || nvl(y.cnt,'0') || ')' ITEM_NM, ai.ADMIN_STUS_ID, ai.REGSTR_STUS_ID, ai.REGISTRR_CNTCT_ID, ai.SUBMT_CNTCT_ID,
+ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
+ai.REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X ,
+'NA' ITEM_RPT_URL ,
+'NA' ITEM_RPT_EXCEL ,
+'NA' ITEM_RPT_PRIOR_EXCEL,
+'' CHNG_NOTES,
+      cs.CLSFCTN_SCHM_TYP_ID,
+CNTXT_ITEM_ID || 'v'|| CNTXT_VER_NR P_ITEM_VER
+ from
+ADMIN_ITEM ai, clsfctn_schm cs,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_FORM_REL x where lvl='CS' and x.ADMIN_STUS_NM_DN not like '%RETIRED%' group by x.p_item_id ,
+x.p_item_ver_nr) y, nci_mdr_cntrl c,nci_mdr_cntrl c1
+ where ADMIN_ITEM_TYP_ID = 9 and ai.item_id =cs.item_id and ai.ver_nr = cs.ver_nr and  ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and admin_stus_nm_dn ='RELEASED' and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
+ and c1.param_nm='DEEP_LINK'
+ and y.cnt > 0
+ union
+  select 100 LVL, csi.CS_ITEM_ID || '(CS)' P_ITEM_ID, csi.CS_ITEM_VER_NR P_ITEM_VER_NR, ai.ITEM_ID || '(CSI)', ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM,
+   ai.ITEM_NM ||  ' (' || nvl(y.cnt,'0') || ')' ITEM_NM,
+ai.ADMIN_STUS_ID, ai.REGSTR_STUS_ID, ai.REGISTRR_CNTCT_ID, ai.SUBMT_CNTCT_ID,
+ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
+ ai.REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X ,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || csi.item_id || '&p_item_ver_nr=' || csi.ver_nr || '&formatid=101&type=csi\Legacy_Form_Builder_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || csi.item_id || '&p_item_ver_nr=' || csi.ver_nr || '&formatid=102&type=csi\Legacy_Form_Builder_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || csi.item_id || '&p_item_ver_nr=' || csi.ver_nr || '&formatid=105&type=csi\Form_Excel' ITEM_RPT_PRIOR_EXCEL,
+'******** USE THE LINKS ABOVE TO DOWNLOAD ALL FORMS FOR THIS NODE ********' CHNG_NOTES,
+    csi.csi_typ_id,
+csi.CS_ITEM_ID || 'v'|| csi.CS_ITEM_VER_NR P_ITEM_VER
+from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_FORM_REL x where lvl='CSI' and x.ADMIN_STUS_NM_DN not like '%RETIRED%' group by x.p_item_id ,
+x.p_item_ver_nr) y, nci_mdr_cntrl c,nci_mdr_cntrl c1
+ where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is null and csi.CS_ITEM_ID is not null and
+ ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
+  and c1.param_nm='DEEP_LINK'
+ and ai.admin_stus_nm_dn = 'RELEASED'
+ and y.cnt > 0
+ union
+ select 100 LVL, csi.P_ITEM_ID || '(CSI)' P_ITEM_ID, csi.P_ITEM_VER_NR P_ITEM_VER_NR, csi.P_ITEM_ID || ' '|| ai.ITEM_ID ITEM_ID , ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM,
+   ai.ITEM_NM ||  ' (' || nvl(y.cnt,'0') || ')' ITEM_NM,
+ai.ADMIN_STUS_ID, ai.REGSTR_STUS_ID, ai.REGISTRR_CNTCT_ID, ai.SUBMT_CNTCT_ID,
+ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
+ ai.REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X ,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || csi.item_id || '&p_item_ver_nr=' || csi.ver_nr || '&formatid=101&type=csi\Legacy_Form_Builder_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || csi.item_id || '&p_item_ver_nr=' || csi.ver_nr || '&formatid=102&type=csi\Legacy_Form_Builder_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || csi.item_id || '&p_item_ver_nr=' || csi.ver_nr || '&formatid=105&type=csi\Form_Excel' ITEM_RPT_PRIOR_EXCEL,
+'******** USE THE LINKS ABOVE TO DOWNLOAD ALL FORMS FOR THIS NODE ********' CHNG_NOTES,
+    csi.CSI_TYP_ID,
+csi.P_ITEM_ID || 'v'|| csi.P_ITEM_VER_NR P_ITEM_VER
+ from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi,  
+-- (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_FORM_REL x where lvl='CSI' and x.ADMIN_STUS_NM_DN not like '%RETIRED%' group by x.p_item_id ,
+--x.p_item_ver_nr) y, 
+(select x.csi_id, x.csi_ver, count(*) cnt from (select distinct z.form_id, z.form_ver, z.csi_id, z.csi_ver, z.admin_stus_nm_dn from mvw_csi_form_node_de_rel z) x 
+where x.admin_stus_nm_dn not like '%RETIRED%' group by x.csi_id, x.csi_ver) y,
+nci_mdr_cntrl c, nci_mdr_cntrl c1
+ where ai.ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null and csi.CS_ITEM_ID is not null and
+ ai.item_id = y.csi_id (+) and ai.ver_nr = y.csi_ver (+) and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
+ and c1.param_nm='DEEP_LINK'
+ and ai.admin_stus_nm_dn ='RELEASED'
+ and y.cnt > 0
+union
+ select 225 LVL, r.P_ITEM_ID || '(CSI)' P_ITEM_ID, r.P_ITEM_VER_NR, r.P_ITEM_ID || ' '|| ai.ITEM_ID ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM,
+   ai.ITEM_NM ITEM_NM,
+ai.ADMIN_STUS_ID, ai.REGSTR_STUS_ID, ai.REGISTRR_CNTCT_ID, ai.SUBMT_CNTCT_ID,
+ai.STEWRD_CNTCT_ID, ai.SUBMT_ORG_ID, ai.STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
+ ai.REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN, ai.REGSTR_STUS_NM_DN, ai.ORIGIN_ID, ai.ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X ,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=101&type=frm\Legacy_Form_Builder_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=102&type=frm\Legacy_Form_Builder_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=105&type=frm\Form_Excel' ITEM_RPT_PRIOR_EXCEL,
+'******** TO SEE THIS FORM''s CDEs SWITCH "Details" TO  "View CDEs on Form". ********' CHNG_NOTES,
+    54 CSI_TYP_ID,
+r.P_ITEM_ID || 'v'|| r.P_ITEM_VER_NR P_ITEM_VER
+ from ADMIN_ITEM ai, NCI_CLSFCTN_SCHM_ITEM csi, nci_mdr_cntrl c, nci_mdr_cntrl c1, nci_admin_item_rel r, 
+ (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_CSI_NODE_FORM_REL x where lvl='Form' and x.ADMIN_STUS_NM_DN not like '%RETIRED%' group by x.p_item_id ,
+x.p_item_ver_nr) y, 
+--(select x.csi_id, x.csi_ver, count(*) from (select distinct z.form_id, z.form_ver, z.csi_id, z.csi_ver, z.admin_stus_nm_dn from mvw_csi_form_node_de_rel z) x 
+--where x.admin_stus_nm_dn not like '%RETIRED%' group by x.csi_id, x.csi_ver) y,
+admin_item csix, admin_item cs
+ where ai.ADMIN_ITEM_TYP_ID = 54 and ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr and r.rel_typ_id = 65 and
+r.p_item_id=csi.item_id and r.p_item_ver_nr=csi.ver_nr and ai.item_id = y.p_item_id (+) and ai.ver_nr = y.p_item_ver_nr (+) and
+ upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') and c.param_nm='DOWNLOAD_HOST'
+ --and c1.param_nm='DEEP_LINK'
+ and ai.admin_stus_nm_dn not like '%RETIRED%'
+ and csi.item_id = csix.item_id and csi.ver_nr = csix.ver_nr and csix.admin_stus_nm_dn = 'RELEASED'
+ and csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr and cs.admin_stus_nm_dn = 'RELEASED'
+ and ai.currnt_ver_ind = 1;
+
+   COMMENT ON MATERIALIZED VIEW MVW_CSI_TREE_FORM  IS 'snapshot table for snapshot ONEDATA_WA.MVW_CSI_TREE_FORM';
+alter table nci_stg_mdl add DT_LST_MODIFIED varchar2(32) default null;
+commit;
+
+--jira 3446
+alter table nci_stg_mdl disable all triggers;
+update nci_stg_mdl a set DT_LST_MODIFIED = to_char( (select lst_upd_dt from nci_stg_mdl b where b.mdl_imp_id = a.mdl_imp_id), 'MM/DD/YY HH24:MI:SS');
+commit;
+alter table nci_stg_mdl enable all triggers;
+
+drop materialized view mvw_form_node_de_rel;
+  CREATE MATERIALIZED VIEW MVW_FORM_NODE_DE_REL ("CREAT_DT", "CREAT_USR_ID", "LST_UPD_USR_ID", "LST_UPD_DT", "S2P_TRN_DT", "LST_DEL_DT", "FLD_DELETE", "ITEM_NM", "ITEM_LONG_NM", "ITEM_ID", "VER_NR", "ITEM_DESC", "CNTXT_NM_DN", "ADMIN_STUS_NM_DN", "REGSTR_STUS_NM_DN", "P_ITEM_ID", "P_ITEM_VER_NR", "CNTXT_ITEM_ID", "CNTXT_VER_NR", "ADMIN_STUS_ID", "REGSTR_STUS_ID", "PREF_QUEST_TXT", "USED_BY", "LVL")
+
+  AS SELECT  distinct sysdate CREAT_DT, 
+           'ONEDATA' CREAT_USR_ID,
+           'ONEDATA' LST_UPD_USR_ID,
+           sysdate LST_UPD_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_DEL_DT,
+           0 FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           r.P_ITEM_ID,  -- Form
+           r.P_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           de.PREF_QUEST_TXT, 
+	   e.USED_BY,
+	   'Form' LVL
+           FROM NCI_ADMIN_ITEM_REL r, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e, admin_item frm
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
+	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr 
+and nvl(ak.fld_delete,0) = 0 
+and r.p_item_id = frm.item_id and r.p_item_ver_nr = frm.ver_nr and upper(frm.CNTXT_NM_DN) not in ('TEST', 'TRAINING') and frm.admin_stus_nm_dn not like '%RETIRED%' --jira 3435 exclude test/training/retired forms from cde counts
+--and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+--and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' and upper(ai.CNTXT_NM_DN) not in ('TEST','TRAINING')
+    UNION
+  SELECT  distinct sysdate CREAT_DT, 
+           'ONEDATA' CREAT_USR_ID,
+           'ONEDATA' LST_UPD_USR_ID,
+           sysdate LST_UPD_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_DEL_DT,
+           0 FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           prot.P_ITEM_ID,  -- Protocol
+           prot.P_ITEM_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           de.PREF_QUEST_TXT, 
+	   e.USED_BY,
+	   'Protocol' LVL
+           FROM NCI_ADMIN_ITEM_REL r, nci_admin_item_rel prot, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e,
+	   admin_item frm
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
+	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+	   and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0
+and r.p_item_id = frm.item_id and r.p_item_ver_nr = frm.ver_nr 
+--and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+--and ai.admin_stus_nm_dn not like '%NON-CMPLNT%' 
+and upper(frm.CNTXT_NM_DN) not in ('TEST','TRAINING') and frm.admin_stus_nm_dn not like '%RETIRED%'
+union
+  SELECT  distinct sysdate CREAT_DT, 
+           'ONEDATA' CREAT_USR_ID,
+           'ONEDATA' LST_UPD_USR_ID,
+           sysdate LST_UPD_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_DEL_DT,
+           0 FLD_DELETE,
+           ai.ITEM_NM,
+           ai.ITEM_LONG_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ai.ITEM_DESC,
+           ai.CNTXT_NM_DN,
+           ai.ADMIN_STUS_NM_DN,
+           ai.REGSTR_STUS_NM_DN,
+           protai.CNTXT_ITEM_ID,  -- Context
+           protai.CNTXT_VER_NR,
+           ai.CNTXT_ITEM_ID,
+           ai.CNTXT_VER_NR,
+           ai.ADMIN_STUS_ID,
+           ai.REGSTR_STUS_ID,
+           de.PREF_QUEST_TXT, 
+	   e.USED_BY,
+	   'Context' LVL
+           FROM NCI_ADMIN_ITEM_REL r, nci_admin_item_rel prot, NCI_ADMIN_ITEM_REL_ALT_KEY ak , ADMIN_ITEM ai, de , nci_admin_item_ext e,
+	   admin_item protai, admin_item frm
+     WHERE     ak.C_ITEM_ID = ai.ITEM_ID
+           AND ak.C_ITEM_VER_NR = ai.VER_NR and ai.admin_item_typ_id = 4 and ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
+	   r.rel_typ_id = 61 and ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
+	   and r.p_item_id = prot.c_item_id and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60
+	   and prot.p_item_id = protai.item_id and prot.P_item_ver_nr = protai.ver_nr and protai.admin_item_typ_id = 50
+and ai.item_id = e.item_id and ai.ver_nr = e.ver_nr and nvl(ak.fld_delete,0) = 0
+and r.p_item_id = frm.item_id and r.p_item_ver_nr = frm.ver_nr and upper(frm.CNTXT_NM_DN) not in ('TEST','TRAINING') and frm.admin_stus_nm_dn not like '%RETIRED%';
+
+drop materialized view vw_form_tree_cde;
+set define off;
+set escape off;
+  CREATE MATERIALIZED VIEW VW_FORM_TREE_CDE ("P_ITEM_ID", "P_ITEM_VER_NR", "ITEM_ID", "VER_NR", "ITEM_DESC", "CNTXT_ITEM_ID", "CNTXT_VER_NR", "ITEM_LONG_NM", "ITEM_NM", "ADMIN_STUS_ID", "REGSTR_STUS_ID", "REGISTRR_CNTCT_ID", "SUBMT_CNTCT_ID", "STEWRD_CNTCT_ID", "SUBMT_ORG_ID", "STEWRD_ORG_ID", "CREAT_DT", "CREAT_USR_ID", "LST_UPD_USR_ID", "FLD_DELETE", "LST_DEL_DT", "S2P_TRN_DT", "LST_UPD_DT", "REGSTR_AUTH_ID", "NCI_IDSEQ", "ADMIN_STUS_NM_DN", "CNTXT_NM_DN", "REGSTR_STUS_NM_DN", "ORIGIN_ID", "ORIGIN_ID_DN", "CREAT_USR_ID_X", "LST_UPD_USR_ID_X", "ITEM_RPT_URL", "ITEM_RPT_EXCEL", "ITEM_RPT_PRIOR_EXCEL", "FORM_RPT_PRIOR_EXCEL", "FORM_RPT_EXCEL", "FORM_RPT_RED_CAP", "ITEM_DEEP_LINK", "CHNG_NOTES")
+
+  AS select CNTXT_ITEM_ID P_ITEM_ID, CNTXT_VER_NR P_ITEM_VER_NR, ITEM_ID, VER_NR, ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ITEM_LONG_NM,  ITEM_NM || ' (' 
+ || nvl(y.cnt,'0') || ')' ITEM_NM , ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
+STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, CREAT_DT, CREAT_USR_ID, LST_UPD_USR_ID, FLD_DELETE, LST_DEL_DT, S2P_TRN_DT, LST_UPD_DT,
+ REGSTR_AUTH_ID,  NCI_IDSEQ, ADMIN_STUS_NM_DN, CNTXT_NM_DN, REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  CREAT_USR_ID_X, LST_UPD_USR_ID_X 
+ ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ver_nr || '&formatid=104&type=frm\Legacy_CDE_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ver_nr || '&formatid=103&type=frm\Legacy_CDE_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ver_nr || '&formatid=114&type=frm\Prior_Legacy_CDE_Excel' ITEM_RPT_PRIOR_EXCEL,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=102&type=protocol\Legacy_Form_Builder_Excel' FORM_RPT_PRIOR_EXCEL,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=105&type=protocol\Form_Excel'  FORM_RPT_EXCEL,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=109&type=protocol\REDCap_DD_Form'  FORM_RPT_RED_CAP,
+c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDEProt.PROT_ITEM_VER_NR=' || ai.item_id || 'v' || ai.ver_Nr ITEM_DEEP_LINK ,
+'******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES 
+from 
+ADMIN_ITEM ai, (select x.p_item_id, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Protocol' group by x.p_item_id , 
+x.p_item_ver_nr) y , nci_mdr_cntrl c, nci_mdr_cntrl c1
+ where ADMIN_ITEM_TYP_ID = 50 and item_id = y.p_item_id (+) and ver_nr = y.p_item_ver_nr (+)
+ and upper(cntxt_nm_dn) not in ('TEST', 'TRAINING') 
+ and c.param_nm='DOWNLOAD_HOST'
+	  and c1.param_nm='DEEP_LINK'
+ union
+select  r.P_ITEM_ID, r.P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM, 
+ITEM_NM || ' (' || nvl(y.cnt,'0') || ')', ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
+STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
+ REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN,ai. REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X
+ ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=104&type=frm\Legacy_CDE_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=103&type=frm\Legacy_CDE_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=114&type=frm\Prior_Legacy_CDE_Excel' ITEM_RPT_PRIOR_EXCEL,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=102&type=frm\Legacy_Form_Builder_Excel' FORM_RPT_PRIOR_EXCEL,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=105&type=frm\Form_Excel'  FORM_RPT_EXCEL,
+c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=109&type=frm\REDCap_DD_Form'  FORM_RPT_RED_CAP,
+c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDEForm.FRM_ITEM_VER_NR=' || ai.item_id || 'v' || ai.ver_Nr ITEM_DEEP_LINK ,
+'******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES 
+ from 
+ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Form' group by x.p_item_id , 
+x.p_item_ver_nr) y, nci_mdr_cntrl c, nci_admin_item_rel r, nci_mdr_cntrl c1
+ where ADMIN_ITEM_TYP_ID = 54 and item_id = y.p_item_id (+) and ver_nr = y.p_item_ver_nr (+)
+and ai.regstr_stus_nm_dn not like '%RETIRED%' and ai.admin_stus_nm_dn not like '%RETIRED%'
+ and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING') 
+ and c.param_nm='DOWNLOAD_HOST' 	  and c1.param_nm='DEEP_LINK'
+
+ and ai.item_id = r.c_item_id and ai.ver_nr = r.c_item_ver_nr and r.rel_typ_id = 60 
+ union
+ select  distinct null P_ITEM_ID,null P_ITEM_VER_NR, ai.ITEM_ID, ai.VER_NR, ai.ITEM_DESC, ai.CNTXT_ITEM_ID, ai.CNTXT_VER_NR, ai.ITEM_LONG_NM,  
+ITEM_NM || ' (' || ITEM_DESC  || ') (' || nvl(y.cnt,'0') || ')' , ADMIN_STUS_ID, REGSTR_STUS_ID, REGISTRR_CNTCT_ID, SUBMT_CNTCT_ID,
+STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.LST_UPD_USR_ID, ai.FLD_DELETE, ai.LST_DEL_DT, ai.S2P_TRN_DT, ai.LST_UPD_DT,
+ REGSTR_AUTH_ID,  ai.NCI_IDSEQ, ai.ADMIN_STUS_NM_DN, ai.CNTXT_NM_DN,ai. REGSTR_STUS_NM_DN, ORIGIN_ID, ORIGIN_ID_DN,  ai.CREAT_USR_ID_X, ai.LST_UPD_USR_ID_X
+ ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=104&type=frm\Legacy_CDE_XML' ITEM_RPT_URL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=103&type=frm\Legacy_CDE_Excel' ITEM_RPT_EXCEL ,
+c.PARAM_VAL || '/Downloads/cdedirect.dsp?p_item_id=' || ai.item_id || '&p_item_ver_nr=' || ai.ver_nr || '&formatid=114&type=frm\Prior_Legacy_CDE_Excel' ITEM_RPT_PRIOR_EXCEL,
+'NA' FORM_RPT_PRIOR_EXCEL,
+'NA' FORM_RPT_EXCEL,
+'NA' FORM_RPT_RED_CAP,
+--c1.PARAM_VAL || '/CO/CDEDD?filter=Administered%20Item%20%28Data%20Element%20CO%29.CDEForm.FRM_CNTXT_ITEM_ID=' || ai.item_id  ITEM_DEEP_LINK ,
+''  ITEM_DEEP_LINK ,
+'******** TO SEE THIS NODE''s CDEs SWITCH "Details" TO  "View Associated CDEs". ********' CHNG_NOTES 
+ from 
+ADMIN_ITEM ai, (select x.P_ITEM_ID, x.p_item_ver_nr, count(*) cnt from MVW_FORM_NODE_DE_REL x where lvl='Context' group by x.p_item_id , 
+x.p_item_ver_nr) y, nci_mdr_cntrl c
+	   --, nci_mdr_cntrl c1
+ where ADMIN_ITEM_TYP_ID = 8 and item_id = y.p_item_id (+)  and ver_nr = y.p_item_ver_nr (+)
+ --and admin_stus_nm_dn ='RELEASED' 
+ and upper(ai.cntxt_nm_dn) not in ('TEST', 'TRAINING')  	
+	   --and c1.param_nm='DEEP_LINK'
+ and c.param_nm='DOWNLOAD_HOST';
+
+
+
+
+
+
+
+
