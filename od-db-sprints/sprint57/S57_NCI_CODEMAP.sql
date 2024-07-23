@@ -501,7 +501,7 @@ BEGIN
      return;
  end loop;
  end if;
- hookoutput.question := nci_form_curator.getProceedQuestion('Confirm', 'Please confirm deletion of Model: ' || v_item_id || 'v' || v_ver_nr);
+ hookoutput.question := nci_form_curator.getProceedQuestion('Confirm', 'Please confirm deletion of Model: ' || ihook.getColumnValue (row_ori,'ITEM_NM') || ' (' ||v_item_id || 'v' || v_ver_nr || ')');
  end if;
  
 if (hookinput.invocationnumber = 1) then 
@@ -764,7 +764,7 @@ BEGIN
      return;
  end loop;
  end if;
-  hookoutput.question := nci_form_curator.getProceedQuestion('Confirm', 'Please confirm deletion of Model: ' || v_item_id || 'v' || v_ver_nr);
+  hookoutput.question := nci_form_curator.getProceedQuestion('Confirm', 'Please confirm deletion of Model: ' || ihook.getColumnValue (row_ori,'ITEM_NM') || ' (' ||v_item_id || 'v' || v_ver_nr || ')');
  end if;
 
  --delete from nci_mec_val_map where mecvm_id = ihook.getColumnValue(row_ori,'MECVM_ID');
