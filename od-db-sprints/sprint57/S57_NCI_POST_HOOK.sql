@@ -397,6 +397,8 @@ DBMS_MVIEW.REFRESH('MVW_CSI_TREE_FORM');
 
 DBMS_MVIEW.REFRESH('VW_ADMIN_ITEM_WITH_EXT');
 DBMS_MVIEW.REFRESH('VW_VAL_DOM_REF_TERM');
+DBMS_MVIEW.REFRESH('MVW_MDL_NODE_DE_REL');
+DBMS_MVIEW.REFRESH('MVW_MDL_TREE_CDE');
 
 --execute immediate 'alter table NCI_ADMIN_ITEM_EXT NOLOGGING';
 
@@ -942,9 +944,10 @@ action t_actionRowset;
 
 
 if (nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_ID'),1) <> nvl(ihook.getColumnOldValue(row_ori, 'CDE_ITEM_ID'),2)  
-or nvl(ihook.getColumnValue(row_ori, 'CDE_VER_NR'),1) <> nvl(ihook.getColumnOldValue(row_ori, 'CDE_VER_NR'),2)  ) then
+or nvl(ihook.getColumnValue(row_ori, 'CDE_VER_NR'),1) <> nvl(ihook.getColumnOldValue(row_ori, 'CDE_VER_NR'),2) 
+and ihook.getColumnValue(row_ori, 'CDE_ITEM_ID') is not null ) then
   rows := t_rows();
-
+ -- raise_Application_error(-20000, 'Not null ' || ihook.getColumnValue(row_ori, 'CDE_ITEM_ID'));
  for cur in (Select * from de where item_id = ihook.getColumnValue(row_ori, 'CDE_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'CDE_VER_NR')) loop
    ihook.setColumnValue(row_ori, 'DE_CONC_ITEM_ID', cur.DE_CONC_ITEM_ID);
    ihook.setColumnValue(row_ori, 'DE_CONC_VER_NR', cur.DE_CONC_VER_NR);
@@ -966,6 +969,32 @@ rows.EXTEND;
 
  end if;
 
+/*
+
+if (ihook.getColumnValue(row_ori, 'CDE_ITEM_ID') is null and ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') is not null  ) then
+  rows := t_rows();
+  --raise_Application_error(-20000, 'Null ' || ihook.getColumnValue(row_ori, 'CDE_ITEM_ID'));
+
+   ihook.setColumnValue(row_ori, 'DE_CONC_ITEM_ID', '');
+   ihook.setColumnValue(row_ori, 'DE_CONC_VER_NR', '');
+   ihook.setColumnValue(row_ori, 'VAL_DOM_ITEM_ID', '');
+   ihook.setColumnValue(row_ori, 'VAL_DOM_VER_NR', '');
+
+
+rows.EXTEND;
+            rows (rows.LAST) := row_ori;
+            action :=
+                t_actionrowset (rows,
+                                'Model Element Characteristics',
+                                2,
+                                0,
+                                'update');
+            actions.EXTEND;
+            actions (actions.LAST) := action;
+        hookoutput.actions := actions;
+
+ end if;
+*/
  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
@@ -1640,7 +1669,7 @@ BEGIN
     */
        if (ihook.getColumnValue (row_ori, 'ADMIN_ITEM_TYP_ID')= 57 and ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID') = 75
     and ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID') <> ihook.getColumnOldValue(row_ori, 'ADMIN_STUS_ID')) then
-      raise_application_error(-20000, 'Please use Release Model hook to change status. Workflow status has NOT been changed.');
+      raise_application_error(-20000, 'Please use Release Model hook to change status. Workflow status has NOT been changed. Please click on any node on the left tree to refresh.');
     end if;
     -- Sysgen for VD - moved to trigger for perforamnce
   /*  if (ihook.getColumnValue (row_ori, 'ADMIN_ITEM_TYP_ID')= 3 and upper(ihook.getColumnValue(row_ori, 'ITEM_NM')) = 'SYSGEN') then
