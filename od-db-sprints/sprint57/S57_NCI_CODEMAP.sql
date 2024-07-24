@@ -572,7 +572,7 @@ BEGIN
  
  rows := t_rows();
    for curmodel in (select * from nci_mdl where item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'VER_NR')) loop
-        if (curmodel.assoc_nm_typ_id is null) then
+        if (curmodel.assoc_nm_typ_id is null or curmodel.assoc_nm_typ_id='' ) then
             msg := msg || chr(13) || 'Model Characteristic Alternate Name Type not set.';
             row := t_row();
             ihook.setColumnValue(row,'Issue', 'Model Characteristic Alternate Name Type not set.');
@@ -617,10 +617,10 @@ BEGIN
         
     
     if (j > 0) then
-        msg := substr(msg || j || ' Characteristics with Character/Text/String datatype do not have a required Max Length. Examples: ' || substr(msg1, 1, length(msg1)-1),1,4000);
+       -- msg := substr(msg || j || ' Characteristics with Character/Text/String datatype do not have a required Max Length. Examples: ' || substr(msg1, 1, length(msg1)-1),1,4000);
             row := t_row();
         --    ihook.setColumnValue(row,'Issue', 'Some Characteristics with Character/Text/String datatype do not have a required Max Length: ' || substr(msg1, 1, length(msg1)-1));
-            ihook.setColumnValue(row,'Issue', j || 'Some Characteristics with Character/Text/String datatype do not have a required Max Length. Examples in Detail Section.');
+            ihook.setColumnValue(row,'Issue', 'Max length missing for ' || j || ' Character/Text/String datatypes. First 10 are listed in Details.');
             ihook.setColumnValue(row,'Details',  substr(msg1, 1, length(msg1)-2));
             rows.extend; rows(rows.last) := row;
         
