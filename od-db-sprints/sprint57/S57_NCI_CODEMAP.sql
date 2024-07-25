@@ -643,14 +643,16 @@ BEGIN
      
             if (v_temp = 0) then 
                 j:= j+1;
-                msg1 := substr(msg1 || curchar.ME_PHY_NM || '.' || curchar.MEC_PHY_NM || ', ',1,4000) ;
+      --          msg1 := substr(msg1 || curchar.ME_PHY_NM || '.' || curchar.MEC_PHY_NM || ', ',1,4000) ;
+                   msg1 := substr(msg1 || curchar.cde_item_id || 'v' || curchar.cde_ver_nr || ', ',1,4000) ;
             else
                 select count(*) into v_temp from alt_nms where nm_typ_id = v_assoc_tbl_NM_TYP_ID and upper(nm_desc) = upper(curchar.ME_PHY_NM)
                 and cntxt_item_id = ihook.getColumnValue(row_ori,'CNTXT_ITEM_ID') and cntxt_ver_nr = ihook.getColumnValue(row_ori,'CNTXT_VER_NR')
                 and item_id = curchar.cde_item_id and ver_nr = curchar.cde_ver_nr;
                 if (v_temp = 0) then 
                     j:= j+1;
-                    msg1 := substr(msg1 || curchar.ME_PHY_NM || '.' || curchar.MEC_PHY_NM || ', ',1,4000) ;
+                 --   msg1 := substr(msg1 || curchar.ME_PHY_NM || '.' || curchar.MEC_PHY_NM || ', ',1,4000) ;
+                   msg1 := substr(msg1 || curchar.cde_item_id || 'v' || curchar.cde_ver_nr || ', ',1,4000) ;
                 end if;
             end if;
         end loop;
@@ -659,7 +661,7 @@ BEGIN
             msg := substr(msg || chr(13) || 'Alternate Names missing for some elements/characteristics. ' || msg1,1,4000);
             row := t_row();
        --     ihook.setColumnValue(row,'Issue', 'Alternate Names missing for some elements/characteristics. Please use create Alternate Name command first: ' || msg1);
-            ihook.setColumnValue(row,'Issue', 'Alternate Names missing for some elements/characteristics. ' );
+            ihook.setColumnValue(row,'Issue', 'Alternate Names missing for Element.Characteristics'' CDEs. See Details.' );
             ihook.setColumnValue(row,'Details',  substr(msg1, 1, length(msg1)-2));
             rows.extend; rows(rows.last) := row;
             
@@ -686,7 +688,7 @@ BEGIN
             msg := substr(msg || chr(13) || 'Missing classifications for CDE: ' || msg1,1,4000);
              row := t_row();
         --    ihook.setColumnValue(row,'Issue', 'Missing classifications for CDE: ' || msg1);
-            ihook.setColumnValue(row,'Issue', 'Missing classifications for CDE.');
+            ihook.setColumnValue(row,'Issue', 'Classifications missing for Element.Characteristics'' CDEs. See Details');
             ihook.setColumnValue(row,'Details',  substr(msg1, 1, length(msg1)-2));
             rows.extend; rows(rows.last) := row;
             v_valid := false;
