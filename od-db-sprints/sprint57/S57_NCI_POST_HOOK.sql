@@ -1669,7 +1669,7 @@ BEGIN
     */
        if (ihook.getColumnValue (row_ori, 'ADMIN_ITEM_TYP_ID')= 57 and ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID') = 75
     and ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID') <> ihook.getColumnOldValue(row_ori, 'ADMIN_STUS_ID')) then
-      raise_application_error(-20000, 'Please use Release Model hook to change status. Workflow status has NOT been changed. Please click on any node on the left tree to refresh.');
+      raise_application_error(-20000, 'Please reset the WFS by selecting the top node again. Use Release Model Command to change the status. Workflow status has NOT been changed.');
     end if;
     -- Sysgen for VD - moved to trigger for perforamnce
   /*  if (ihook.getColumnValue (row_ori, 'ADMIN_ITEM_TYP_ID')= 3 and upper(ihook.getColumnValue(row_ori, 'ITEM_NM')) = 'SYSGEN') then
