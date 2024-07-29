@@ -7,3 +7,5 @@ insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (61,136, 'Targe
 insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (61,137, 'Source or Target');
 insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (61,138, 'No Mapping');
 commit
+
+alter table NCI_MEC_MAP add (PCODE_SYSGEN varchar2(4000));
