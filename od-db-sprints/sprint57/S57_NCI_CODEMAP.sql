@@ -3063,12 +3063,12 @@ begin
         row_ori := hookInput.originalRowset.rowset(1);
         
         if (ihook.getColumnValue(row_ori,'SRC_MEC_ID') is null or ihook.getColumnValue(row_ori,'TGT_MEC_ID') is null) then
-          raise_application_error(-2000,'Both Source Characteristics and Target Characteristics have to be specified for Value Mapping Generation.');
+          raise_application_error(-20000,'Both Source Characteristics and Target Characteristics have to be specified for Value Mapping Generation.');
         end if;
     
     for cur in (select * from nci_mdl_elmnt_char where mec_id in ( ihook.getColumnValue(row_ori,'SRC_MEC_ID'),
      ihook.getColumnValue(row_ori,'TGT_MEC_ID')) and CDE_ITEM_ID is null ) loop
-           raise_application_error(-2000,'Both Source and Target Characteristics should have CDE specified for Value Mapping Generation.');
+           raise_application_error(-20000,'Both Source and Target Characteristics should have CDE specified for Value Mapping Generation.');
      end loop;
      
     for cur in (Select m.* from nci_mdl m, nci_mdl_map mm where mm.item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
