@@ -73,3 +73,5 @@ alter table NCI_MEC_MAP add (PCODE_SYSGEN varchar2(4000));
        WHERE o.obj_typ_id = 23 and o.obj_key_id = xmap.evs_src_id and pref_ind != 0 and xmap.item_id <> 0
        group by xmap.item_id, xmap.ver_nr;
 
+alter table nci_mec_Map modify (TRNS_DESC_TXT varchar2(8000));
+
