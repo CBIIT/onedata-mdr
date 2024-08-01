@@ -10,6 +10,7 @@ commit
 
 alter table NCI_MEC_MAP add (PCODE_SYSGEN varchar2(4000));
 
+alter table NCI_MEC_MAP add (MEC_MAP_NM_GEN varchar2(4000));
 
   CREATE OR REPLACE  VIEW VW_NCI_MDL AS
   select
