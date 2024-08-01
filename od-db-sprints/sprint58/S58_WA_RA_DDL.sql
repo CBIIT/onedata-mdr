@@ -75,3 +75,5 @@ alter table NCI_MEC_MAP add (PCODE_SYSGEN varchar2(4000));
 
 alter table nci_mec_Map modify (TRNS_DESC_TXT varchar2(8000));
 
+alter table nci_stg_mec_Map modify (TRNS_DESC_TXT varchar2(8000));
+
