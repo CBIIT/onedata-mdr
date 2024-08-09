@@ -1,3 +1,7 @@
 -- Run as ONEDATA_RA DDL scripts
+S58_WA_RA_DDL.sql
+S58_del_subset.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S58_WA_RA_DDL.sql
+S58_del_subset.sql
