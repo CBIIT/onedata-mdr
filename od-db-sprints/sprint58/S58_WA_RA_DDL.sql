@@ -5,7 +5,7 @@ commit;
 insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (61,135, 'Source Only');
 insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (61,136, 'Target Only');
 insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (61,137, 'Source or Target');
-insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (61,138, 'No Mapping');
+insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (61,138, 'Do Not Use');
 commit
 
 alter table NCI_MEC_MAP add (PCODE_SYSGEN varchar2(4000));
