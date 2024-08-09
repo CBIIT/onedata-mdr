@@ -8,6 +8,11 @@ insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (61,137, 'Sourc
 insert into obj_key(obj_typ_id, obj_key_id, obj_key_desc) values (61,138, 'Do Not Use');
 commit
 
+	alter table nci_mdl disable all triggers;
+	update nci_mdl set 	MAP_USG_TYP_ID = 137 where 	MAP_USG_TYP_ID is null;
+commit;
+alter table nci_mdl enable all triggers;
+
 alter table NCI_MEC_MAP add (PCODE_SYSGEN varchar2(4000));
 
 alter table NCI_MEC_MAP add (MEC_MAP_NM_GEN varchar2(4000));
