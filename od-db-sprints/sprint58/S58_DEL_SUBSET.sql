@@ -1,4 +1,4 @@
-create table temp_to_delete_de as select ai.item_id, ai.ver_nr from de, admin_item ai where subset_desc is not null and de.item_id = ai.item_id and de.ver_nr = ai.ver_nr and ai.cntxt_nm_dn = 'TEST';
+/*create table temp_to_delete_de as select ai.item_id, ai.ver_nr from de, admin_item ai where subset_desc is not null and de.item_id = ai.item_id and de.ver_nr = ai.ver_nr and ai.cntxt_nm_dn = 'TEST';
 
 delete from de where (item_id, ver_nr) in (Select item_id, ver_nr from temp_to_delete_de);
 delete from admin_item where (item_id, ver_nr) in (Select item_id, ver_nr from temp_to_delete_de);
@@ -15,7 +15,7 @@ delete from admin_item where (item_id, ver_nr) in (Select item_id, ver_nr from t
 commit;
 
 drop table temp_to_delete_vd;
-
+*/
 -- update remaining to not have subset desc
 alter table de disable all triggers;
 update de set subset_desc = null, prnt_subset_item_id = null, prnt_subset_ver_nr = null where subset_desc is not null;
