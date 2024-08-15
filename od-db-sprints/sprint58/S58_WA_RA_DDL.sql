@@ -210,3 +210,46 @@ and vd.term_cncpt_ver_nr = cncpt.ver_nr (+)
 and vd.ITEM_ID = term.item_id (+)
 and vd.ver_nr = term.ver_nr (+);
 
+
+  CREATE OR REPLACE  VIEW VW_MDL_MAP_MANIFEST AS
+  select   x.MDL_MAP_ITEM_ID ,
+         x.mdl_map_ver_nr ,
+        listagg(x.SRC_ELMNT_PHY_NM,',') within group (order by x.SRC_ELMNT_PHY_NM)  || max(x.XWALK) || max(x.VALUE_MAP) SRC_ITEM_NMS, 
+ --  x.XWALK, x.VALUE_MAP,
+        x.TGT_ELMNT_PHY_NM, 
+        sysdate creat_dt,
+	  'ONEDATA' creat_usr_id,	  
+	   sysdate lst_upd_dt,
+	  'ONEDATA' lst_upd_usr_id,
+      0 FLD_DELETE,
+      sysdate S2P_TRN_DT,
+      sysdate LST_DEL_DT
+	from
+(  select   map.MDL_MAP_ITEM_ID ,
+         map.mdl_map_ver_nr ,
+sme.ITEM_PHY_OBJ_NM SRC_ELMNT_PHY_NM,
+    max(CASE WHEN map.tgt_func_param LIKE '%XWALK%'
+           THEN ',XWALK' END)  XWALK,
+    max(CASE WHEN map.tgt_func_param LIKE 'VALUE%MAP%'
+          THEN ',VALUE MAP' END)  VALUE_MAP,
+        tme.ITEM_PHY_OBJ_NM  TGT_ELMNT_PHY_NM from
+    --admin_item s, 
+    NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec,NCI_MDL_ELMNT_CHAR tmec,
+    --admin_item t, 
+    NCI_MDL_ELMNT tme, nci_MEC_MAP map,
+nci_mdl_map mm
+	where mm.src_mdl_item_id = sme.mdl_item_id and mm.src_mdl_ver_nr = sme.mdl_item_ver_nr 
+    and sme.item_id = smec.MDL_ELMNT_ITEM_ID
+	and sme.ver_nr = smec.MDL_ELMNT_VER_NR and tme.item_id = tmec.MDL_ELMNT_ITEM_ID
+	and tme.ver_nr = tmec.MDL_ELMNT_VER_NR and
+	   smec.MEC_ID = map.SRC_MEC_ID and tmec.mec_id = map.TGT_MEC_ID 
+    --and s.admin_item_typ_id = 57 
+    and	  mm.tgt_mdl_item_id = tme.mdl_item_id and mm.tgt_mdl_ver_nr = tme.mdl_item_ver_nr 
+and mm.item_id =  map.mdl_map_item_id and mm.ver_nr = map.mdl_map_ver_nr
+group by map.MDL_MAP_ITEM_ID ,
+         map.mdl_map_ver_nr ,sme.ITEM_PHY_OBJ_NM,tme.ITEM_PHY_OBJ_NM
+         ) x
+         group by x.MDL_MAP_ITEM_ID, x.MDL_MAP_VER_NR, x.TGT_ELMNT_PHY_NM;
+
+
+
