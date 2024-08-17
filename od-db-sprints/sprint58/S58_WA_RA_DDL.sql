@@ -230,9 +230,9 @@ and vd.ver_nr = term.ver_nr (+);
          map.mdl_map_ver_nr ,
 sme.ITEM_PHY_OBJ_NM SRC_ELMNT_PHY_NM,
     max(CASE WHEN map.tgt_func_param LIKE '%XWALK%'
-           THEN ',XWALK' END)  XWALK,
+           THEN 'XWALK,' END)  XWALK,
     max(CASE WHEN map.tgt_func_param LIKE 'VALUE%MAP%'
-          THEN ',VALUE MAP' END)  VALUE_MAP,
+          THEN 'VALUE MAP' END)  VALUE_MAP,
         tme.ITEM_PHY_OBJ_NM  TGT_ELMNT_PHY_NM from
     --admin_item s, 
     NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec,NCI_MDL_ELMNT_CHAR tmec,
