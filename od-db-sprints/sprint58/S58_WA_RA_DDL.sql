@@ -214,7 +214,8 @@ and vd.ver_nr = term.ver_nr (+);
   CREATE OR REPLACE  VIEW VW_MDL_MAP_MANIFEST AS
   select   x.MDL_MAP_ITEM_ID ,
          x.mdl_map_ver_nr ,
-        listagg(x.SRC_ELMNT_PHY_NM,',') within group (order by x.SRC_ELMNT_PHY_NM)  || max(x.XWALK) || max(x.VALUE_MAP) SRC_ITEM_NMS, 
+        listagg(x.SRC_ELMNT_PHY_NM,',') within group (order by x.SRC_ELMNT_PHY_NM) SRC_ELMNT_NMS, 
+	    max(x.XWALK) || max(x.VALUE_MAP) SRC_FILES, 
  --  x.XWALK, x.VALUE_MAP,
         x.TGT_ELMNT_PHY_NM, 
         sysdate creat_dt,
