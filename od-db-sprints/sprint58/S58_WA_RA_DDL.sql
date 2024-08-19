@@ -215,7 +215,7 @@ and vd.ver_nr = term.ver_nr (+);
   select   x.MDL_MAP_ITEM_ID ,
          x.mdl_map_ver_nr ,
         listagg(x.SRC_ELMNT_PHY_NM,',') within group (order by x.SRC_ELMNT_PHY_NM) SRC_ELMNT_NMS, 
-	    max(x.XWALK) || max(x.VALUE_MAP) SRC_FILES, 
+	    substr(max(x.XWALK) || max(x.VALUE_MAP),2) SRC_FILES, 
  --  x.XWALK, x.VALUE_MAP,
         x.TGT_ELMNT_PHY_NM, 
         sysdate creat_dt,
