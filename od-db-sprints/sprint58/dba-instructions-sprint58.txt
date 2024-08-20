@@ -5,7 +5,9 @@ S58_del_subset.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S58_WA_RA_DDL.sql
+S58_WA.sql
 S58_del_subset.sql
 S58_NCI_CODEMAP.sql
 S58_NCI_POST_HOOK.sql
+S58_NCI_DLOAD.sql
 
