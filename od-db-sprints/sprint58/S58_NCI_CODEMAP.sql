@@ -696,7 +696,23 @@ BEGIN
             v_valid := false;
         end if;
    -- end if;
-    
+    msg := '';
+    select listagg(me.ITEM_PHY_OBJ_NM,',') within group (order by me.ITEM_PHY_OBJ_NM) into msg from nci_mdl_elmnt me where 
+    me.mdl_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and me.mdl_item_ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')
+    and (item_id, ver_nr) in (select mec.mdl_elmnt_item_id, mec.mdl_elmnt_ver_nr 
+    from nci_mdl_elmnt_char mec, nci_mdl_elmnt me1 where me1.item_id = mec.mdl_elmnt_item_id 
+    and me1.ver_nr = mec.mdl_elmnt_ver_nr and 
+    me1.mdl_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and me1.mdl_item_ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')group by mec.mdl_elmnt_item_id, mec.mdl_elmnt_ver_nr
+    having sum(PK_IND) =0);
+   -- raise_application_error(-20000, nvl(msg,'Is Null'));
+    if (msg is not null) then
+       v_valid := false;
+         row := t_row();
+        --    ihook.setColumnValue(row,'Issue', 'Missing classifications for CDE: ' || msg1);
+            ihook.setColumnValue(row,'Issue', 'Primary Key missing for the tables:');
+            ihook.setColumnValue(row,'Details', msg);
+            rows.extend; rows(rows.last) := row;
+    end if;
     if (v_valid = false) then
          --   raise_application_error(-20000, msg);
               showRowset := t_showableRowset(rows, 'Issues with Model Release',4, 'unselectable');
