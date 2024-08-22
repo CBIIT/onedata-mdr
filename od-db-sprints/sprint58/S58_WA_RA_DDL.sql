@@ -793,5 +793,18 @@ r.p_item_id=csi.item_id and r.p_item_ver_nr=csi.ver_nr and ai.item_id = y.p_item
  and csi.p_item_id is not null
  and csi.cs_item_id = cs.item_id and csi.cs_item_ver_nr = cs.ver_nr and cs.admin_stus_nm_dn = 'RELEASED'
  and ai.currnt_ver_ind = 1;
+
+
+CREATE TABLE NCI_CNCPT_PATH
+   (	BEGINCONCEPTCODE  varchar2(30),
+ENDCONCEPTCODE  varchar2(400),
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+   primary key (BEGINCONCEPTCODE, ENDCONCEPTCODE));
 set escape on;
 
