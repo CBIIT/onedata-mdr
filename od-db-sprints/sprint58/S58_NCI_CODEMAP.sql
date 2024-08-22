@@ -114,6 +114,7 @@ end if;
  v_mdl_elmnt_char_id number;
  v_mec_id number;
  v_ver number(4,2);
+ v_temp_str varchar2(4000);
   begin
 
 for cur in (select * from NCI_STG_MDL_ELMNT_CHAR where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID') and upper(me_item_long_nm) = upper(v_mdl_elmnt_long_nm)) loop
@@ -122,6 +123,7 @@ for cur in (select * from NCI_STG_MDL_ELMNT_CHAR where mdl_imp_id = ihook.getCol
 select count(*) into v_temp from NCI_MDL_ELMNT_CHAR where upper(MEC_PHY_NM) = upper(cur.MEC_PHY_NM) and mdl_elmnt_item_id = v_mdl_elmnt_id and mdl_elmnt_ver_nr = ihook.getColumnValue(row_ori,'SRC_MDL_VER');
 --and ver_nr = ihook.getColumnvalue(row_ori, 'SRC_VER_NR') ;
 
+select nvl(cur.SRC_DEFLT_VAL,decode(nvl(cur.src_mand_ind,'X'),'EXPECTED',case upper(cur.SRC_DTTYPE) when 'INT' then '0' when 'BIGINT' then '0' when 'NUM' then '0'  when 'INTEGER' then '0' when 'FLOAT' then '0' when 'REAL' then '0'  else 'Null' end )) into v_temp_str from dual;
 
 if (v_temp = 0) then -- insert
 select NCI_SEQ_MEC.nextval into v_mec_id from dual;
@@ -131,7 +133,7 @@ SRC_DEFLT_VAL,SRC_ENUM_SRC,MEC_LONG_NM,MEC_PHY_NM,MEC_DESC,CDE_ITEM_ID,CDE_VER_N
 CHAR_ORD,VAL_DOM_VER_NR,MDL_ELMNT_CHAR_TYP_ID, PK_IND,FK_IND,
 REQ_IND,FK_ELMNT_PHY_NM,FK_ELMNT_CHAR_PHY_NM)
 values (v_mec_id, v_mdl_elmnt_id, v_ver, cur.SRC_DTTYPE, cur.STD_DTTYPE_ID,cur.SRC_MAX_CHAR,cur.SRC_MIN_CHAR, cur.SRC_UOM, cur.UOM_ID,
-cur.SRC_DEFLT_VAL, cur.SRC_ENUM_SRC,cur.MEC_LONG_NM, cur.MEC_PHY_NM, cur.MEC_DESC, cur.CDE_ITEM_ID, cur.CDE_VER_NR,cur.DE_CONC_ITEM_ID, cur.DE_CONC_VER_NR,cur.VAL_DOM_ITEM_ID,
+v_temp_str, cur.SRC_ENUM_SRC,cur.MEC_LONG_NM, cur.MEC_PHY_NM, cur.MEC_DESC, cur.CDE_ITEM_ID, cur.CDE_VER_NR,cur.DE_CONC_ITEM_ID, cur.DE_CONC_VER_NR,cur.VAL_DOM_ITEM_ID,
 cur.CHAR_ORD,cur.VAL_DOM_VER_NR, cur.MDL_ELMNT_CHAR_TYP_ID,decode(nvl(upper(cur.PK_IND),'NO'),'YES',1,0),decode(nvl(upper(cur.FK_IND_TXT),'NO'),'YES',1,0),
 decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),cur.FK_ELMNT_PHY_NM, cur.FK_ELMNT_CHAR_PHY_NM);
 
@@ -140,7 +142,7 @@ SRC_DEFLT_VAL,SRC_ENUM_SRC,MEC_LONG_NM,MEC_PHY_NM,MEC_DESC,CDE_ITEM_ID,CDE_VER_N
 CHAR_ORD,VAL_DOM_VER_NR,MDL_ELMNT_CHAR_TYP_ID, PK_IND,FK_IND,
 REQ_IND,FK_ELMNT_PHY_NM,FK_ELMNT_CHAR_PHY_NM)
 select v_mec_id, v_mdl_elmnt_id, v_ver, cur.SRC_DTTYPE, cur.STD_DTTYPE_ID,cur.SRC_MAX_CHAR,cur.SRC_MIN_CHAR, cur.SRC_UOM, cur.UOM_ID,
-nvl(cur.SRC_DEFLT_VAL,decode(nvl(cur.src_mand_ind,'X'),'EXPECTED','Null')), cur.SRC_ENUM_SRC,cur.MEC_LONG_NM, cur.MEC_PHY_NM, cur.MEC_DESC, cur.CDE_ITEM_ID, cur.CDE_VER_NR,cur.DE_CONC_ITEM_ID, cur.DE_CONC_VER_NR,cur.VAL_DOM_ITEM_ID,
+v_temp_str, cur.SRC_ENUM_SRC,cur.MEC_LONG_NM, cur.MEC_PHY_NM, cur.MEC_DESC, cur.CDE_ITEM_ID, cur.CDE_VER_NR,cur.DE_CONC_ITEM_ID, cur.DE_CONC_VER_NR,cur.VAL_DOM_ITEM_ID,
 cur.CHAR_ORD,cur.VAL_DOM_VER_NR, cur.MDL_ELMNT_CHAR_TYP_ID,decode(nvl(upper(cur.PK_IND),'NO'),'YES',1,0),decode(nvl(upper(cur.FK_IND_TXT),'NO'),'YES',1,0),
 decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),cur.FK_ELMNT_PHY_NM, cur.FK_ELMNT_CHAR_PHY_NM from dual;
 end if;
@@ -154,7 +156,7 @@ SRC_MAX_CHAR=cur.SRC_MAX_CHAR,
 SRC_MIN_CHAR= cur.SRC_MIN_CHAR,
 SRC_UOM = cur.SRC_UOM,
 UOM_ID = cur.UOM_ID,
-SRC_DEFLT_VAL = nvl(cur.SRC_DEFLT_VAL,decode(nvl(cur.src_mand_ind,'X'),'EXPECTED','Null')),
+SRC_DEFLT_VAL = v_temp_str,
 SRC_ENUM_SRC = cur.SRC_ENUM_SRC,
 MEC_LONG_NM= cur.MEC_LONG_NM,
 MEC_PHY_NM = cur.MEC_PHY_NM,
