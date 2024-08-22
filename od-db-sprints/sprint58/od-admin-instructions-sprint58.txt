@@ -1,2 +1,4 @@
 Update Guest Filters for Models - View/Browse and Model Mappings - View/Browse (Jira 3522 and 3531)
 Delete DO: Classification - AI Hierarchy (Jira 3543)
+
+REmove Hook - Set Preferred VM on VM MAtch Details in all tiers.
