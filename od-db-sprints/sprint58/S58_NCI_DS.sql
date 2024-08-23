@@ -1116,6 +1116,7 @@ row := t_row();
             ihook.setColumnValue(row, 'PREF_CNCPT_CONCAT', ihook.getColumnValue(row_ori, 'ITEM_ID'));
             ihook.setColumnValue(row, 'PREF_CNCPT_CONCAT_NM', '');
               ihook.setColumnValue(row, 'PREF_CNCPT_CONCAT_DEF', '');
+               ihook.setColumnValue(row, 'EVS_SRC_ORI', '');
           ihook.setColumnValue(row, 'VM_MTCH_ITEM_TYP', 'ID');
             
             rows:= t_rows();
@@ -1149,10 +1150,11 @@ end loop;
 
 if (v_found = false) then
 
- for cur in (Select * from admin_item where admin_item_typ_id in (49) and item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')) loop
+ for cur in (Select * from vw_cncpt where   item_id = ihook.getColumnValue(row_ori, 'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')) loop
             update nci_ds_hdr set cde_item_id = null, cde_ver_nr = null, pref_cncpt_concat = trim(nvl(decode(VM_MTCH_ITEM_TYP, 'ID', '',pref_cncpt_concat) ,'')|| ' '  || cur.item_long_nm),
             pref_cncpt_concat_nm = trim(nvl( decode(VM_MTCH_ITEM_TYP, 'ID', '',pref_cncpt_concat_nm) ,'')|| ' '  || cur.item_nm),
             pref_cncpt_concat_def = trim( decode(VM_MTCH_ITEM_TYP, 'ID', '',pref_cncpt_concat_def ) || nvl2(pref_cncpt_concat_def, '_','')  || cur.item_desc),
+            evs_src_ori = trim(nvl( decode(VM_MTCH_ITEM_TYP, 'ID', '',evs_src_ori) ,'')|| ' '  || cur.evs_src_ori),
      
             vm_mtch_item_typ = 'Concepts'
             where hdr_id = ihook.getColumnValue(row_ori, 'HDR_ID');
@@ -1320,6 +1322,7 @@ AS
     v_rule_desc varchar2(255);
     v_cncpt_nm varchar2(255);
     v_evs_src varchar2(500);
+    v_cncpt_def varchar2(8000);
 --    v_reg_str varchar2(255);
  -- v_entty_nm varchar2(4000);
 begin
@@ -1352,13 +1355,13 @@ begin
   --  raise_application_error(-20000,'Test ' || v_rule_desc);
     if (v_rule_desc like '%Concept%' or v_rule_desc like '%Synonym%') then
         select evs_src_ori into v_evs_src from vw_cncpt where item_id = (select item_id from nci_ds_rslt where hdr_id = v_hdr_id);
-        select item_long_nm, item_nm into v_code, v_cncpt_nm from vw_cncpt where item_id = (select item_id from nci_ds_rslt where hdr_id=v_hdr_id);
-        update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID, PREF_CNCPT_CONCAT, PREF_CNCPT_CONCAT_NM, 	VM_MTCH_ITEM_TYP, EVS_SRC_ORI) 
-        = (select 1, null, null, v_user_id, v_code,v_cncpt_nm, 'Concepts', v_evs_src from nci_ds_rslt where hdr_id = v_hdr_id)
+        select item_long_nm, item_nm, item_desc into v_code, v_cncpt_nm, v_cncpt_def from vw_cncpt where item_id = (select item_id from nci_ds_rslt where hdr_id=v_hdr_id);
+        update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID, PREF_CNCPT_CONCAT, PREF_CNCPT_CONCAT_NM, 	VM_MTCH_ITEM_TYP, EVS_SRC_ORI, PREF_CNCPT_CONCAT_DEF) 
+        = (select 1, null, null, v_user_id, v_code,v_cncpt_nm, 'Concepts', v_evs_src, v_cncpt_def from nci_ds_rslt where hdr_id = v_hdr_id)
         where hdr_id = v_hdr_id;
     else
-        update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID, PREF_CNCPT_CONCAT, PREF_CNCPT_CONCAT_NM, 	VM_MTCH_ITEM_TYP, EVS_SRC_ORI) 
-        = (select 1, item_id, ver_nr , v_user_id, item_id,null, 'ID', v_evs_src from nci_ds_rslt where hdr_id = v_hdr_id)
+        update nci_ds_hdr set (NUM_CDE_MTCH, CDE_ITEM_ID, CDE_VER_NR, LST_UPD_USR_ID, PREF_CNCPT_CONCAT, PREF_CNCPT_CONCAT_NM, 	VM_MTCH_ITEM_TYP, EVS_SRC_ORI, PREF_CNCPT_CONCAT_DEF) 
+        = (select 1, item_id, ver_nr , v_user_id, item_id,null, 'ID', v_evs_src, v_cncpt_def from nci_ds_rslt where hdr_id = v_hdr_id)
         where hdr_id = v_hdr_id;
     end if;
   else
