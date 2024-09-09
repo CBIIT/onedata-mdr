@@ -128,5 +128,8 @@ vw_val_dom_ref_term tvdrt
           and svd.item_id = svdrt.item_id (+)
           and svd.ver_nr = svdrt.ver_nr (+)
           and tvd.item_id = tvdrt.item_id (+)
+
+	alter table NCI_STG_CDE_CREAT add(  	CHNG_DESC_TXT varchar2(2000));
+
           and tvd.ver_nr = tvdrt.ver_nr (+);
 
