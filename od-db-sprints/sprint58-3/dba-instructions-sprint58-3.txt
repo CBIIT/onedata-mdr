@@ -1,6 +1,7 @@
-
+-- Run as ONEDATA_RA
+S58_3_WA_RA_DDL.sql
 -- Run as ONEDATA_WA DDL scripts
-
+S58_3_WA_RA_DDL.sql
 S58_3_NCI_11179.sql
 S58_3_NCI_PV_VM.sql
 S58_3_NCI_VD.sql
