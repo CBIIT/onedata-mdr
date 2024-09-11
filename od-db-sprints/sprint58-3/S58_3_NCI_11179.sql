@@ -2636,6 +2636,10 @@ begin
             row := t_row();
             v_sql := 'select * from NCI_MDL_ELMNT_CHAR where MEC_ID = ' || curmec.MEC_id  ;
             ReturnRow(v_sql, 'NCI_MDL_ELMNT_CHAR',row);
+            -- some issue where cde items id is null but version is 1
+            if (ihook.getColumnValue(row,'CDE_ITEM_ID') is null) then
+            ihook.setColumnValue(row,'CDE_VER_NR','') ;
+            end if;
             ihook.setColumnValue(row, 'MDL_ELMNT_VER_NR', v_version);
             ihook.setColumnValue(row, 'MEC_ID', -1);
             action_rows.extend; action_rows(action_rows.last) := row;
