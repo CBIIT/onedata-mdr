@@ -886,6 +886,11 @@ if (ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is not null )  then
         createValAIWithConcept(rowform , 3,7,'C','DROP-DOWN',actions); -- Rep
      
 end if;
+
+-- append to existing change description
+   if(ihook.getColumnValue(rowform, 'CHNG_DESC_TXT') is not null) then 
+        ihook.setColumnValue (rowform,'CHNG_DESC_TXT', substr(ihook.getColumnValue(row_ori_vd, 'CHNG_DESC_TXT')|| ' ' ||ihook.getColumnValue(rowform, 'CHNG_DESC_TXT'),1,2000));
+    end if;
                 updateVDImport(rowform, actions );
                 -- only delete if target vd type is non-enumerated
                 if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') =18 and ihook.getColumnValue(row_ori_vd, 'VAL_DOM_TYP_ID') in (16,17)) then
