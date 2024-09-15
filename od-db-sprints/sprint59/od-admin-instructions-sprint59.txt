@@ -1,1 +1,2 @@
---TBD
+Delete "Version Mapping" from Model Mapping AI on all tiers.
+
