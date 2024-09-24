@@ -3251,8 +3251,14 @@ c_ver_suffix varchar2(5) := 'v1.00';
     v_cde_nm varchar2(255);
     v_cde_def varchar2(4000);
     v_cde_long_nm varchar2(255);
-    sys_gen_ind boolean;
+    cde_long_nm_ind boolean;
+    cde_def_ind boolean;
+    cde_nm_ind boolean;
     v_item_long_nm varchar2(255);
+    tmp_dec_id number;
+    tmp_dec_ver_nr number(4,2);
+    tmp_vd_id number;
+    tmp_vd_ver_nr number(4,2);
 BEGIN
        row := t_row();
        rows := t_rows();
@@ -3260,7 +3266,9 @@ BEGIN
     --    v_dec_item_id := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID');
     --    v_dec_ver_nr := ihook.getColumnValue(rowform, 'DE_CONC_VER_NR');
       v_val_ind := true;
-      sys_gen_ind := false;
+      cde_def_ind := false;
+      cde_nm_ind := false;
+      cde_long_nm_ind := false;
     
     select count(*) into v_cnt from admin_item where admin_item_typ_id = 4 and item_id = v_item_id and ver_nr = v_ver_nr;
     if (v_cnt < 1) then
@@ -3270,19 +3278,33 @@ BEGIN
     for cur in (select * from admin_item where admin_item_typ_id = 4 and item_id = v_item_id and ver_nr = v_ver_nr) loop
         if (upper(cur.admin_stus_nm_dn) like '%RETIRED%') then
             v_val_ind := false;
-            v_err_str := 'ERROR: CDE is RETIRED. Update not permitted.' || chr(13);
+            v_err_str :=  v_err_str || 'ERROR: CDE is RETIRED ARCHIVED. Update cannot be performed.' || chr(13);
         end if;
-        if (upper(cur.admin_stus_nm_dn) like '%RELEASED%') then
+        if (upper(cur.admin_stus_nm_dn) = 'RELEASED') then
             v_val_ind := false;
-            v_err_str := 'ERROR: CDE is RELEASED. Update not permitted.' || chr(13);
+            v_err_str :=  v_err_str || 'ERROR: CDE is RELEASED. Update cannot be performed.' || chr(13);
         end if;
     end loop;
+    if (v_val_ind != false) then
     if (ihook.getColumnValue(rowform, 'ADMIN_STUS_ID') = 77 and ihook.getColumnValue(rowform, 'UNTL_DT') is null) then 
         v_val_ind := false;
-        v_err_str := 'ERROR: Provide End Date when setting CDE to Retire.' || chr(13);
+        v_err_str :=  v_err_str || 'ERROR: Provide End Date when setting CDE to Retire.' || chr(13);
     end if;
 -- if DEC specified or found, if VD specified
 -- raise_application_error(-20000,'Gers');
+--default dec version to latest if not specified
+    if (ihook.getColumnValue(rowform, 'ITEM_1_VER_NR') is null and ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null) then
+        select count(*) into v_cnt from admin_item where item_id = ihook.getColumnValue(rowform, 'ITEM_1_ID') and admin_item_typ_id = 2;
+        if (v_cnt < 1) then
+            v_val_ind := false;
+            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || chr(13) || 'Invalid DEC ID/Ver combination.');
+            ihook.setColumnValue(rowform, 'CTL_VAL_STUS', 'ERRORS');
+        else
+            select ver_nr into v_dec_ver_nr from admin_item where item_id = ihook.getColumnValue(rowform, 'ITEM_1_ID') and CURRNT_VER_IND = 1;
+            ihook.setColumnValue(rowform, 'ITEM_1_VER_NR', v_dec_ver_nr);
+            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || chr(13) || 'WARNING: DEC Version not specified. Latest version will be used.');
+        end if;
+    end if;
     for cur in (select * from admin_item where admin_item_typ_id = 2 and item_id = nvl(ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID'),ihook.getColumnValue(rowform,'ITEM_1_ID'))
     and ver_nr =  nvl(ihook.getColumnValue(rowform, 'DE_CONC_VER_NR'),ihook.getColumnValue(rowform,'ITEM_1_VER_NR'))  and nvl(fld_delete,0) = 0) loop
 --  raise_application_error(-20000, cur.admin_stus_nm_dn);
@@ -3291,11 +3313,11 @@ BEGIN
      
         if (upper(cur.admin_stus_nm_dn) like '%RETIRED%') then
             v_val_ind := false;
-            v_err_str :=  'ERROR: DEC is Retired.' || chr(13);
+            v_err_str :=  v_err_str || 'ERROR: DEC is Retired.' || chr(13);
         else
             ihook.setColumnValue(rowform, 'DE_CONC_ITEM_ID',cur.item_id);
             ihook.setColumnValue(rowform, 'DE_CONC_VER_NR', cur.ver_nr);
-     
+     --raise_application_error(-20000, v_dec_item_id);
             v_dec_item_id := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID');
             v_dec_ver_nr := ihook.getColumnValue(rowform, 'DE_CONC_VER_NR');
             if (upper(cur.admin_stus_nm_dn) not like '%RELEASED%') then
@@ -3315,6 +3337,19 @@ BEGIN
       --  v_vd_ver_nr := ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR') ;
      
     v_retired := false;
+--default vd version to latest if not specified
+    if (ihook.getColumnValue(rowform, 'ITEM_2_VER_NR') is null and ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then
+        select count(*) into v_cnt from admin_item where item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID') and admin_item_typ_id = 3;
+        if (v_cnt < 1) then
+            v_val_ind := false;
+            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || chr(13) || 'Invalid VD ID/Ver combination.');
+            ihook.setColumnValue(rowform, 'CTL_VAL_STUS', 'ERRORS');
+        else
+            select ver_nr into v_vd_ver_nr from admin_item where item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID') and CURRNT_VER_IND = 1;
+            ihook.setColumnValue(rowform, 'ITEM_2_VER_NR', v_vd_ver_nr);
+            ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || chr(13) || 'WARNING: VD Version not specified. Latest version will be used.');
+        end if;
+    end if;
     for cur in (select * from admin_item where admin_item_typ_id = 3  and item_id = nvl(ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID'),ihook.getColumnValue(rowform,'ITEM_2_ID'))
     and ver_nr =  nvl(ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR'),ihook.getColumnValue(rowform,'ITEM_2_VER_NR')) and nvl(fld_delete,0) = 0 ) loop
    --  raise_application_error(-20000, 'HErer');
@@ -3337,41 +3372,39 @@ BEGIN
         v_val_ind := false;
         v_err_str := v_err_str  || 'ERROR: VD not found.'|| chr(13);
     end if;
-    
-    if (v_dec_item_id != ihook.getColumnValue(rowform, 'ITEM_1_ID') or v_dec_ver_nr != ihook.getColumnValue(rowform, 'ITEM_1_VER_NR') or
-        v_vd_item_id != ihook.getColumnValue(rowform, 'ITEM_2_ID') or v_vd_ver_nr != ihook.getColumnValue(rowform, 'ITEM_2_VER_NR')) then
-        --values don't match import, regenerate cde long/short name, def
-        select item_nm, item_desc into v_vd_nm, v_vd_def from admin_item where item_id = ihook.getColumnValue(rowform, 'ITEM_2_ID') and ver_nr =ihook.getColumnValue(rowform, 'ITEM_2_VER_NR');
-        select item_nm, item_desc into v_de_nm, v_de_def from admin_item where item_id = ihook.getColumnValue(rowform, 'ITEM_1_ID') and ver_nr =ihook.getColumnValue(rowform, 'ITEM_1_VER_NR');
+-- determine if cde long name, cde short name, and cde definition were previously system generated
+    if (ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null or ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then -- dec id or vd specified for update, check for system generated values
         select item_nm, item_desc, item_long_nm into v_cde_nm, v_cde_def, v_cde_long_nm from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
-        
---        select item_nm, item_desc into v_vd_nm, v_vd_def from admin_item where item_id = v_vd_id and ver_nr = v_vd_ver_nr;
---        select item_nm, item_desc into v_de_nm, v_de_def from admin_item where item_id = v_dec_item_id and ver_nr = v_dec_ver_nr;
---        select item_nm, item_desc into v_cde_nm, v_cde_def from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
-        
-        if (ihook.getColumnValue(rowform, 'CDE_ITEM_NM') like (v_de_nm || ' ' || v_vd_nm)) then
-            select item_nm, item_desc into v_vd_nm, v_vd_def from admin_item where item_id = v_vd_item_id and ver_nr = v_vd_ver_nr;
-            select item_nm, item_desc into v_de_nm, v_de_def from admin_item where item_id = v_dec_item_id and ver_nr = v_dec_ver_nr;
-            
-            ihook.setColumnValue(rowform, 'CDE_ITEM_NM', v_de_nm || ' ' || v_vd_nm);
+        select de_conc_item_id, de_conc_ver_nr, val_dom_item_id, val_dom_ver_nr into tmp_dec_id, tmp_dec_ver_nr, tmp_vd_id, tmp_vd_ver_nr from de where item_id = v_item_id and ver_nr = v_ver_nr;
+        select item_nm, item_desc into v_de_nm, v_de_def from admin_item where item_id = tmp_dec_id and ver_nr = tmp_dec_ver_nr;
+        select item_nm, item_desc into v_vd_nm, v_vd_def from admin_item where item_id = tmp_vd_id and ver_nr = tmp_vd_ver_nr;
+        -- cde long name
+--        if (v_cde_nm like (v_de_nm || ' ' || v_vd_nm)) then
+--            cde_nm_ind := true;
+--        end if;
+        if (ihook.getColumnValue(rowform, 'ITEM_1_ID') is not null) then
+            if (ihook.getColumnValue(rowform, 'ITEM_1_ID') != tmp_dec_id or ihook.getColumnValue(rowform, 'ITEM_1_VER_NR') != tmp_dec_ver_nr) then
+                cde_nm_ind := true;
+                cde_def_ind := true;
+            end if;
         end if;
-        if (ihook.getColumnValue(rowform, 'CDE_ITEM_DESC') like (v_de_def || ':' || v_vd_def)) then
-            select item_nm, item_desc into v_vd_nm, v_vd_def from admin_item where item_id = v_vd_item_id and ver_nr = v_vd_ver_nr;
-            select item_nm, item_desc into v_de_nm, v_de_def from admin_item where item_id = v_dec_item_id and ver_nr = v_dec_ver_nr;
-            
-            ihook.setColumnValue(rowform, 'CDE_ITEM_DESC', v_de_def || ':' || v_vd_def);
+        if (ihook.getColumnValue(rowform, 'ITEM_2_ID') is not null) then
+            if (ihook.getColumnValue(rowform, 'ITEM_2_ID') != tmp_vd_id or ihook.getColumnValue(rowform, 'ITEM_2_VER_NR') != tmp_vd_ver_nr) then
+                cde_nm_ind := true;
+                cde_def_ind := true;
+            end if;
         end if;
         if (v_cde_long_nm is not null) then
+            --raise_application_error(-20000, v_cde_long_nm);
             select count(*) into v_cnt from admin_item where item_id = v_item_id and ver_nr = v_ver_nr and regexp_like(item_long_nm, '(.*)v(.*):(.*)v(.*)');
-            if v_cnt > 0 then
-                sys_gen_ind := true;
+            if (v_cnt > 0) then
+            --raise_application_error(-20000, v_cnt);
+                cde_long_nm_ind := true;
             end if;
         end if; 
-        if (sys_gen_ind = true) then
-            v_item_long_nm := v_dec_item_id || 'v' || to_char(v_dec_ver_nr,'fm99D00') || ':' || v_vd_item_id || 'v' || to_char(v_vd_ver_nr,'fm99D00');
-            ihook.setColumnValue(rowform, 'CDE_ITEM_LONG_NM', v_item_long_nm);
-        end if;
+
     end if;
+
     
     if (ihook.getColumnValue(rowform, 'IMP_ORIGIN') is not null and   ihook.getColumnValue(rowform, 'ORIGIN_ID') is null) then
         v_err_str:=v_err_str || 'ERROR: Specified Origin is invalid.' || chr(13);
@@ -3381,9 +3414,9 @@ BEGIN
 Warning: PQT null, default used
 */
    
-    if (ihook.getColumnValue(rowform, 'PREF_QUEST_TXT') is null) then
-        v_err_str := v_err_str  || 'WARNING: PQT null, default will be used'|| chr(13);
-    end if;
+--    if (ihook.getColumnValue(rowform, 'PREF_QUEST_TXT') is null) then
+--        v_err_str := v_err_str  || 'WARNING: PQT null, default will be used'|| chr(13);
+--    end if;
         
         
    --     raise_application_error(-20000,'Test');
@@ -3411,7 +3444,7 @@ Warning: PQT null, default used
             for cur in (select ai.item_id item_id from admin_item ai, de de
             where ai.item_id = de.item_id and ai.ver_nr = de.ver_nr
             and ai.ITEM_LONG_NM=ihook.getColumnValue(rowform,'CDE_ITEM_LONG_NM')
-            and  ai.ver_nr =  1
+            --and ai.ver_nr = 1
             and ai.cntxt_item_id = ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID')
             and  ai.cntxt_ver_nr = ihook.getColumnValue(rowform, 'CNTXT_VER_NR')
             and ai.item_id != v_item_id) loop
@@ -3420,6 +3453,7 @@ Warning: PQT null, default used
                -- ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'Duplicate CDE found based on context/short name: ' || cur.item_id || chr(13));
           --      return;
             end loop;
+        end if;
         end if;
      
       ihook.setColumnValue(rowform, 'CTL_VAL_MSG', v_err_str);
@@ -3445,11 +3479,18 @@ Warning: PQT null, default used
 
         if (ihook.getColumnValue(rowform, 'CDE_ITEM_NM') is not null) then
             ihook.setColumnValue(row, 'ITEM_NM',ihook.getColumnValue(rowform, 'CDE_ITEM_NM'));
-        else
+        elsif (cde_nm_ind = true) then
             ihook.setColumnValue(row, 'ITEM_NM',substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255));
         end if;
         -- jira 1870
         if (ihook.getColumnValue(rowform, 'CDE_ITEM_LONG_NM') is not null) then
+            ihook.setColumnValue(row, 'ITEM_LONG_NM',ihook.getColumnValue(rowform, 'CDE_ITEM_LONG_NM'));
+        elsif (cde_long_nm_ind = true) then
+            --v_item_long_nm := v_dec_item_id || 'v' || to_char(v_dec_ver_nr,'fm99D00') || ':' || v_vd_item_id || 'v' || to_char(v_vd_ver_nr,'fm99D00');
+            v_item_long_nm := ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID') || 'v' || trim(to_char(ihook.getColumnValue(rowform, 'DE_CONC_VER_NR'), '9999.99')) || ':' || 
+                              ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID') || 'v' || trim(to_char(ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR'), '9999.99'));
+           -- raise_application_error(-20000, v_item_long_nm);
+            ihook.setColumnValue(rowform, 'CDE_ITEM_LONG_NM', v_item_long_nm);
             ihook.setColumnValue(row, 'ITEM_LONG_NM',ihook.getColumnValue(rowform, 'CDE_ITEM_LONG_NM'));
         end if;
         ihook.setColumnValue(rowform,'GEN_DE_NM', ihook.getColumnValue(row,'ITEM_NM'));
@@ -3462,27 +3503,37 @@ Warning: PQT null, default used
  --  raise_application_error(-20000, 'Above ' );
 
    --       ihook.setColumnValue(row, 'ITEM_DESC',substr(v_dec_item_def || ':' || v_vd_item_def,1,4000));
-          if (ihook.getColumnValue(rowform, 'CDE_ITEM_DESC') is not null) then
+        if (ihook.getColumnValue(rowform, 'CDE_ITEM_DESC') is not null) then
             ihook.setColumnValue(row, 'ITEM_DESC',ihook.getColumnValue(rowform, 'CDE_ITEM_DESC'));
-        else
+        elsif (cde_def_ind = true) then
           ihook.setColumnValue(row, 'ITEM_DESC',substr(v_dec_item_def || ':' || v_vd_item_def,1,4000));
           end if;
-            ihook.setColumnValue(row, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || ihook.getColumnValue(row, 'ITEM_NM')|| ' does not have Preferred Question Text.'   ));
-            ihook.setColumnValue(rowform, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || ihook.getColumnValue(row, 'ITEM_NM')|| ' does not have Preferred Question Text.'   ));
+        if (ihook.getColumnValue(rowform, 'PREF_QUEST_TXT') is not null) then
+            ihook.setColumnValue(row, 'PREF_QUEST_TXT',(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT')));
+        end if;
 
       -- v_id := nci_11179.getItemId;
         v_id := v_item_id;
         ihook.setColumnValue(row,'ITEM_ID', v_id);
         ihook.setColumnValue(row,'VER_NR', v_ver_nr);
-        ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
-        ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 4);
+        --ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
+        --ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 4);
 
-   
-        ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
-        ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
-        ihook.setColumnValue(row,'ORIGIN_ID', ihook.getColumnValue(rowform,'ORIGIN_ID'));
-        ihook.setColumnValue(row,'ADMIN_STUS_ID', ihook.getColumnValue(rowform,'ADMIN_STUS_ID'));
-        ihook.setColumnValue(row,'REGSTR_STUS_ID', ihook.getColumnValue(rowform, 'REGSTR_STUS_ID'));
+        if (ihook.getColumnValue(rowform,'CNTXT_ITEM_ID') is not null) then
+            ihook.setColumnValue(row,'CNTXT_ITEM_ID', ihook.getColumnValue(rowform,'CNTXT_ITEM_ID'));
+        end if;
+        if (ihook.getColumnValue(rowform,'CNTXT_VER_NR') is not null) then
+            ihook.setColumnValue(row,'CNTXT_VER_NR', ihook.getColumnValue(rowform,'CNTXT_VER_NR'));
+        end if;
+        if (ihook.getColumnValue(rowform,'ORIGIN_ID') is not null) then
+            ihook.setColumnValue(row,'ORIGIN_ID', ihook.getColumnValue(rowform,'ORIGIN_ID'));
+        end if;
+        if (ihook.getColumnValue(rowform,'ADMIN_STUS_ID') is not null) then
+            ihook.setColumnValue(row,'ADMIN_STUS_ID', ihook.getColumnValue(rowform,'ADMIN_STUS_ID'));
+        end if;
+        if (ihook.getColumnValue(rowform, 'REGSTR_STUS_ID') is not null) then
+            ihook.setColumnValue(row,'REGSTR_STUS_ID', ihook.getColumnValue(rowform, 'REGSTR_STUS_ID'));
+        end if;
         ihook.setColumnValue(row,'DE_CONC_ITEM_ID',nvl(v_dec_item_id, ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID_CREAT') ));
         ihook.setColumnValue(row,'DE_CONC_VER_NR',nvl(v_dec_ver_nr, 1 ));
         ihook.setColumnValue(row,'VAL_DOM_ITEM_ID',nvl(v_vd_item_id, ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID_CREAT') ));
@@ -3500,14 +3551,14 @@ Warning: PQT null, default used
        ihook.setColumnValue(row,'ORIGIN',ihook.getColumnValue(rowform,'CDE_ORIGIN'));
    end if;
   end if;
-          -- jira 1870
-        if (ihook.getColumnValue(rowform, 'CDE_ITEM_LONG_NM') is not null) then
-            ihook.setColumnValue(row, 'ITEM_LONG_NM',ihook.getColumnValue(rowform, 'CDE_ITEM_LONG_NM'));
-        else 
-            ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(row, 'DE_CONC_ITEM_ID') || 'v'
-        || trim(to_char(ihook.getColumnValue(row, 'DE_CONC_VER_NR'), '9999.99')) || ':' || ihook.getColumnValue(row, 'VAL_DOM_ITEM_ID') || 'v' ||
-        trim(to_char(ihook.getColumnValue(row, 'VAL_DOM_VER_NR'), '9999.99')));
-        end if;
+--          -- jira 1870
+--        if (ihook.getColumnValue(rowform, 'CDE_ITEM_LONG_NM') is not null) then
+--            ihook.setColumnValue(row, 'ITEM_LONG_NM',ihook.getColumnValue(rowform, 'CDE_ITEM_LONG_NM'));
+--        else 
+--            ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(row, 'DE_CONC_ITEM_ID') || 'v'
+--        || trim(to_char(ihook.getColumnValue(row, 'DE_CONC_VER_NR'), '9999.99')) || ':' || ihook.getColumnValue(row, 'VAL_DOM_ITEM_ID') || 'v' ||
+--        trim(to_char(ihook.getColumnValue(row, 'VAL_DOM_VER_NR'), '9999.99')));
+--        end if;
         
         if (ihook.getColumnValue(rowform, 'ITEM_2_DEF') is not null) then
             ihook.setColumnValue(row, 'DERV_RUL', ihook.getColumnValue(rowform, 'ITEM_2_DEF'));
