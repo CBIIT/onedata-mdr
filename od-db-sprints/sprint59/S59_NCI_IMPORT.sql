@@ -1775,11 +1775,12 @@ begin
                 ihook.setColumnValue(row_ori,'CTL_VAL_STUS','VALIDATED');   
                 
             end if;           
-            if (ihook.getColumnValue(row_ori, 'PERM_VAL_NM') is null) then
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Permissible Value missing.' || chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG'));
-                ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
-                v_val_ind := false;
-            end if;
+--            if (ihook.getColumnValue(row_ori, 'PERM_VAL_NM') is null) then
+--                ihook.setColumnValue(row_ori, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'ITEM_1_NM'));
+--                --ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Permissible Value missing.' || chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG'));
+--                --ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
+--                --v_val_ind := false;
+--            end if;
             if (ihook.getColumnValue(row_ori, 'VM_STR_TYP') is null) then
                 ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: VM Type missing or invalid.' || chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG'));
                 ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
@@ -1843,7 +1844,7 @@ begin
                 and ihook.getColumnValue(row_ori, 'BTCH_SEQ_NBR') <> ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR')) then
                 --    v_val_ind := false;
                     v_batch_nbr := ihook.getColumnValue(row_to_comp, 'BTCH_SEQ_NBR');
-                    if (ihook.getColumnValue(row_to_comp, 'PERM_VAL_NM') = ihook.getColumnValue(row_ori, 'PERM_VAL_NM') ) then
+                    if (ihook.getColumnValue(row_to_comp, 'PERM_VAL_NM') = ihook.getColumnValue(row_ori, 'PERM_VAL_NM') or (ihook.getColumnValue(row_to_comp, 'PERM_VAL_NM') is null and ihook.getColumnValue(row_ori, 'PERM_VAL_NM') is null) ) then
                         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Duplicate found in the same import file. Batch Number: ' || v_batch_nbr ); 
                         v_val_ind := false;
     -- jira 1962
@@ -1880,8 +1881,16 @@ begin
          rows.extend; rows(rows.last) := row_ori;
          spPVVMValidate(row_ori);
         end if;
+        --jira 3595
+--        if (ihook.getColumnValue(row_ori, 'PERM_VAL_NM') is null) then
+--            ihook.setColumnValue(row_ori, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'ITEM_1_NM'));
+--                --ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'ERROR: Permissible Value missing.' || chr(13) || ihook.getColumnValue(row_ori, 'CTL_VAL_MSG'));
+--                --ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
+--                --v_val_ind := false;
+--        end if;
+            
         rows.extend; rows(rows.last) := row_ori;
-        
+
         -- replace actions with update
         update NCI_STG_PV_VM_IMPORT set
         CNCPT_1_ITEM_ID_1= ihook.getColumnValue(row_ori,'CNCPT_1_ITEM_ID_1'),
@@ -1919,7 +1928,8 @@ VW_SPEC_DEF= ihook.getColumnValue(row_ori,'VW_SPEC_DEF'),
             CONC_DOM_VER_NR= ihook.getColumnValue(row_ori,'CONC_DOM_VER_NR'),
             CMNTS_DESC_TXT= ihook.getColumnValue(row_ori,'CMNTS_DESC_TXT'),
 CTL_VAL_STUS= ihook.getColumnValue(row_ori,'CTL_VAL_STUS'),
-CTL_VAL_MSG=ihook.getColumnValue(row_ori,'CTL_VAL_MSG')
+CTL_VAL_MSG=ihook.getColumnValue(row_ori,'CTL_VAL_MSG')--,
+--PERM_VAL_NM=ihook.getColumnValue(row_ori, 'PERM_VAL_NM')
         where STG_AI_ID= ihook.getColumnValue(row_ori,'STG_AI_ID');
         commit;
    end if; -- only if not processed 
@@ -2265,6 +2275,10 @@ if (v_val_ind = true) then
  ihook.setColumnValue(row_ori, 'ITEM_1_NM',ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'));
     end if;
 end if;
+    --jira 3595
+--    if (ihook.getColumnValue(row_ori, 'PERM_VAL_NM') is null) then
+--        ihook.setColumnValue(row_ori, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'ITEM_1_NM'));
+--    end if;
     
     -- Alternate name validation
     if (ihook.getColumnValue(row_ori,'VM_ALT_NM') is not null) then
@@ -2838,7 +2852,7 @@ actions.extend;
 actions(actions.last) := action;
 hookoutput.actions := actions;
 V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-nci_util.debugHook('GENERAL',v_data_out);
+--nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 end;
