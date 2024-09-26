@@ -1,4 +1,3 @@
-
   CREATE OR REPLACE  VIEW VW_VAL_MAP_IMP_TEMPLATE AS
   select  ' ' "DO_NOT_USE",
        ' ' "BATCH_USER",
@@ -49,7 +48,6 @@ svdrt.TERM_USE_NAME "SOURCE_REF_TERM_SOURCE",
 tvdrt.TERM_USE_NAME "TARGET_REF_TERM_SOURCE",
     ' ' "CMNTS_DESC_TXT"
 	from  NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT_CHAR tmec, nci_MEC_MAP map, 	NCI_MEC_VAL_MAP vmap,
-	  NCI_MDL_ELMNT tmed,NCI_MDL_ELMNT_CHAR tmecd,
 	  obj_key deg,
 	  nci_org org,
   	  value_dom svd,
@@ -60,10 +58,7 @@ vw_val_dom_ref_term tvdrt
 	and sme.ver_nr (+)= smec.MDL_ELMNT_VER_NR and
 	 tme.item_id (+)= tmec.MDL_ELMNT_ITEM_ID
 	and tme.ver_nr (+)= tmec.MDL_ELMNT_VER_NR  and
-	 tmed.item_id (+)= tmecd.MDL_ELMNT_ITEM_ID
-	and tmed.ver_nr (+)= tmecd.MDL_ELMNT_VER_NR  and
 	   smec.MEC_ID (+)= map.SRC_MEC_ID and tmec.mec_id (+)= map.TGT_MEC_ID
-	  and tmecd.mec_id (+)= map.TGT_MEC_ID_DERV
 	  and map.map_deg = deg.obj_key_id (+)
 	  and map.prov_org_id = org.entty_id (+)
 	        and smec.val_dom_item_id = svd.item_id (+)
@@ -75,5 +70,7 @@ vw_val_dom_ref_term tvdrt
           and tvd.item_id = tvdrt.item_id (+)
           and tvd.ver_nr = tvdrt.ver_nr (+)
     and map.MDL_MAP_ITEM_ID = vmap.MDL_MAP_ITEM_ID
-    and map.MDL_MAP_VER_NR = vmap.MDL_MAP_VER_NR;
+    and map.MDL_MAP_VER_NR = vmap.MDL_MAP_VER_NR
+    and map.SRC_MEC_ID = vmap.SRC_MEC_ID
+    and map.tgt_mec_id = vmap.tgt_mec_id;
 
