@@ -30,6 +30,8 @@ function getDloadItemTyp (v_fmt_id in integer) return integer;
 procedure spBulkUpdateContext (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spBulkUpdateCSI (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 function isCSParentCSIValid(row in t_row) return boolean;
+function isDDE(v_item_id in number, v_ver_nr in number) return boolean;
+
 procedure spAddAIToCartID (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 procedure spShowCharCount (v_data_in in clob, v_data_out out clob);
 procedure updCSIHier (row_ori in t_row ,actions in out t_actions);
@@ -217,6 +219,16 @@ else return 4;
 end case;
 
 end;
+
+function isDDE(v_item_id in number, v_ver_nr in number) return boolean is 
+begin
+for cur in (select * from de where nvl(derv_de_ind,0) = 1 ) loop
+    return true;
+end loop;
+
+return false;
+end;
+
 
 function isCSParentCSIValid(row in t_row) return boolean is
 v_item_id  number;
