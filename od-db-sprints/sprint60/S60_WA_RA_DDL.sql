@@ -121,13 +121,13 @@ XMAP_TGT_DESC_COL_NM  varchar2(1000),
 primary key (CNFG_ID));
 
 
-
 alter table admin_item disable all triggers;
 
-update admin_item set creation_dt = creat_dt where admin_item_typ_id = 53;
+update admin_item set creation_dt = creat_dt ;
 commit;
 
 alter table admin_item enable all triggers;
+
 
 
 
