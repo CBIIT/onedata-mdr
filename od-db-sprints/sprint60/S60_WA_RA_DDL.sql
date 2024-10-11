@@ -129,6 +129,12 @@ commit;
 alter table admin_item enable all triggers;
 
 
-
-
+create table 
+"CREAT_DT" DATE DEFAULT sysdate,
+"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user,
+"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user,
+"FLD_DELETE" NUMBER(1,0) DEFAULT 0,
+"LST_DEL_DT" DATE DEFAULT sysdate,
+"S2P_TRN_DT" DATE DEFAULT sysdate,
+"LST_UPD_DT" DATE DEFAULT sysdate,
 
