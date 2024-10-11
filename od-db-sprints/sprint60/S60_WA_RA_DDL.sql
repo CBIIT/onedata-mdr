@@ -129,12 +129,29 @@ commit;
 alter table admin_item enable all triggers;
 
 
-create table 
+
+create table NCI_XWALK_DERV
+	SRC_CD		Varchar2(4000) not null,
+	SRC_TERM  varchar2(1000) not null,
+	SRC_EVS_SRC_ID integer not null,
+	SRC_EVS_SRC_VER_NR varchar2(100), default 1
+	SRC_EVS_SRC_DESC  varchar2(255),
+	SRC_TERM_TYP varchar2(100),
+	TGT_CD		Varchar2(4000) not null,
+	TGT_TERM  varchar2(1000) not null,
+	TGT_EVS_SRC_ID integer not null,
+	TGT_EVS_SRC_VER_NR varchar2(100) default 1,
+	TGT_EVS_SRC_DESC  varchar2(255),
+	TGT_TERM_TYP varchar2(100),
 "CREAT_DT" DATE DEFAULT sysdate,
 "CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user,
 "LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user,
 "FLD_DELETE" NUMBER(1,0) DEFAULT 0,
 "LST_DEL_DT" DATE DEFAULT sysdate,
 "S2P_TRN_DT" DATE DEFAULT sysdate,
+"LST_UPD_DT" DATE DEFAULT sysdate,
+primary key (SRC_CD, SRC_EVS_SRC_ID, SRC_EVS_SRC_VER_NR, TGT_CD, TGT_EVS_SRC_ID, TGT_EVS_SRC_VER_NR));
+
+
 "LST_UPD_DT" DATE DEFAULT sysdate,
 
