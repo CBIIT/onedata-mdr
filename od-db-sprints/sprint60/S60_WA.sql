@@ -13,3 +13,26 @@ BEGIN    IF (:NEW.CNFG_ID<= 0  or :NEW.CNFG_ID is null)  THEN
     :new.CREATED_DT := :new.CREAT_DT;
     END ;
 /
+
+
+CREATE OR REPLACE TRIGGER TR_NCI_STG_VAL_MAP_SEQ  BEFORE INSERT  on NCI_STG_MEC_VAL_MAP
+  for each row
+         BEGIN    IF (:NEW.STG_MECVM_ID<= 0  or :NEW.STG_MECVM_ID is null)  THEN
+         select NCI_SEQ_MECVM.nextval
+    into :new.STG_MECVM_ID  from  dual ;
+END IF;
+
+END ;
+/
+ 
+
+
+CREATE OR REPLACE TRIGGER OD_TR_NCI_STG_MEC_VAL_MAP_UPD 
+BEFORE INSERT or UPDATE ON NCI_STG_MEC_VAL_MAP
+for each row
+BEGIN
+  :new.DT_SORT := systimestamp();
+:new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
+  :new.lst_upd_dt := sysdate();
+END;
+/
