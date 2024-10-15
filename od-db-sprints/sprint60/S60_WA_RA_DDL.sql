@@ -153,7 +153,7 @@ CNCPT_VER_NR number(4,2),
 "LST_DEL_DT" DATE DEFAULT sysdate,
 "S2P_TRN_DT" DATE DEFAULT sysdate,
 "LST_UPD_DT" DATE DEFAULT sysdate,
-primary key (SRC_CD, SRC_EVS_SRC_ID, SRC_EVS_SRC_VER_NR, TGT_CD, TGT_EVS_SRC_ID, TGT_EVS_SRC_VER_NR));
+primary key (SRC_CD, SRC_EVS_SRC_ID, SRC_EVS_SRC_VER_NR, TGT_CD, TGT_EVS_SRC_ID, TGT_EVS_SRC_VER_NR,cncpt_item_id, cncpt_ver_nr));
 
 
 create table NCI_STG_MEC_VAL_MAP
