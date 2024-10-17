@@ -5,7 +5,7 @@
        rownum "SEQ_ID",
        map.mdl_map_item_id "MODEL_MAP_ID",
        map.mdl_map_ver_nr "MODEL_MAP_VERSION",
-        vmap.mecvm_id "MECvM_ID", 
+        vmap.mecvm_id "MECVM_ID", 
         map.mecm_id,
    	sme.ITEM_PHY_OBJ_NM "SRC_ELMNT_PHY_NAME", 
 	sme.ITEM_LONG_NM "SRC_ELMNT_NAME", 
@@ -59,7 +59,7 @@ vw_val_dom_ref_term tvdrt
 	 tme.item_id (+)= tmec.MDL_ELMNT_ITEM_ID
 	and tme.ver_nr (+)= tmec.MDL_ELMNT_VER_NR  and
 	   smec.MEC_ID (+)= map.SRC_MEC_ID and tmec.mec_id (+)= map.TGT_MEC_ID
-	  and map.map_deg = deg.obj_key_id (+)
+	  and vmap.map_deg = deg.obj_key_id (+)
 	  and map.prov_org_id = org.entty_id (+)
 	        and smec.val_dom_item_id = svd.item_id (+)
 	  and smec.val_dom_ver_nr = svd.ver_nr (+)
