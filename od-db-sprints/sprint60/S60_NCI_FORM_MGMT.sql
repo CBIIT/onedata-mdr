@@ -334,7 +334,7 @@ return question;
 end;
 
 procedure spAddQuestionIDSub (row_ori in t_row, row_sel in t_row, v_item_id in number, v_ver_nr in  number, v_found in out boolean, 
-v_disp_ord in out number, v_usr_id in varchar2, rep in integer, rows in out t_rows, rowsvv in out t_rows, rowsrep in out t_rows)
+v_disp_ord in out number, v_usr_id in varchar2, rep in integer, rows in out t_rows, rowsvv in out t_rows, rowsrep in out t_rows, v_quest_txt_pre in varchar2)
 as
 row t_row;
 v_id number;
@@ -358,7 +358,7 @@ begin
                                             ihook.setColumnValue (row, 'C_ITEM_VER_NR', cur.ver_nr);
                                             ihook.setColumnValue (row, 'CNTXT_CS_ITEM_ID', cur.cntxt_item_id);
                                             ihook.setColumnValue (row, 'CNTXT_CS_VER_NR', cur.cntxt_ver_nr);
-                                            ihook.setColumnValue (row, 'ITEM_LONG_NM', cur.QUEST_TEXT );
+                                            ihook.setColumnValue (row, 'ITEM_LONG_NM', v_quest_txt_pre || cur.QUEST_TEXT );
                                              ihook.setColumnValue (row, 'ITEM_NM', cur.ITEM_LONG_NM );
                                             ihook.setColumnValue (row, 'EDIT_IND', 1 );
                                             ihook.setColumnValue (row, 'REQ_IND', 0 );
@@ -454,6 +454,7 @@ AS
   v_retain_ind number(1);
   v_c_item_id number;
   v_c_ver_nr number(4,2);
+  v_pqt varchar2(4000);
 begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -510,20 +511,23 @@ select max(nvl(retain_ind,0)) into v_retain_ind from nci_usr_cart where cart_nm 
                                     v_cnt_valid_type := v_cnt_valid_type + 1;
                                     v_found := true;
                                 -- Add to user cart as well as per curator.
-                                spAddQuestionIdSub(row_ori, row_sel, v_item_id, v_ver_nr, v_found, v_disp_ord, v_usr_id, rep, rows, rowsvv, rowsrep);
+                                spAddQuestionIdSub(row_ori, row_sel, v_item_id, v_ver_nr, v_found, v_disp_ord, v_usr_id, rep, rows, rowsvv, rowsrep,'');
                                 nci_11179_2.AddItemToCart(v_item_id, v_ver_nr, v_usr_id, v_deflt_cart_nm, v_retain_ind, rowscart);
                              
                                 -- if DDE, then add components as well.
                                 if (nci_11179_2.isDDE(v_item_id, v_ver_nr) = true) then
+                                -- get Preferred Question Txt for parent
+                                select pref_quest_txt || ':' into v_pqt from de where item_id = v_item_id and ver_nr = v_ver_nr;
+                                
                                 for curint in (select  c_item_id, c_item_ver_nr from nci_admin_item_rel where rel_typ_id = 66 and p_item_id = v_item_id and p_item_ver_nr = v_ver_nr) loop
                                 v_c_item_id := curint.c_item_id;
                                 v_c_ver_nr := curint.c_item_ver_nr;
-                                   select count(*) into v_temp from admin_item where item_id = v_c_item_id and ver_nr = v_c_ver_nr and admin_item_typ_id = v_item_typ_id
-                                     and (upper(admin_stus_nm_dn) not like '%RETIRED%' and upper(regstr_stus_nm_dn) not like  '%RETIRED%');
+                                   select count(*) into v_temp from admin_item where item_id = v_c_item_id and ver_nr = v_c_ver_nr and admin_item_typ_id = v_item_typ_id;
+                                   --  and (upper(admin_stus_nm_dn) not like '%RETIRED%' and upper(regstr_stus_nm_dn) not like  '%RETIRED%');
                                     if (v_temp = 1) then
                                       v_cnt_valid_type := v_cnt_valid_type + 1;
                                       v_cmp_add := v_cmp_add+ 1;
-                                        spAddQuestionIdSub(row_ori, row_sel, v_c_item_id, v_c_ver_nr, v_found, v_disp_ord, v_usr_id, rep, rows, rowsvv, rowsrep);
+                                        spAddQuestionIdSub(row_ori, row_sel, v_c_item_id, v_c_ver_nr, v_found, v_disp_ord, v_usr_id, rep, rows, rowsvv, rowsrep, v_pqt);
                                         nci_11179_2.AddItemToCart(v_c_item_id, v_c_ver_nr, v_usr_id, v_deflt_cart_nm, v_retain_ind, rowscart);
                   
                                 end if;
