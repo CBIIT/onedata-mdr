@@ -920,7 +920,7 @@ select max(nvl(retain_ind,0)) into v_retain_ind from nci_usr_cart where cart_nm 
             -- Add DDE components
             if (nci_11179_2.isDDE(v_item_id, v_ver_nr) = true) then
                     for curint in (select  c_item_id, c_item_ver_nr from nci_admin_item_rel where rel_typ_id = 66
-                    and p_item_id = v_item_id and p_item_ver_nr = v_ver_nr and c_item_id <> p_Item_id ) loop
+                    and p_item_id = v_item_id and p_item_ver_nr = v_ver_nr and c_item_id <> p_Item_id order by disp_ord ) loop
                                 v_c_item_id := curint.c_item_id;
                                 v_c_ver_nr := curint.c_item_ver_nr;
                                 select count(*) into v_temp from nci_usr_cart 
@@ -1152,7 +1152,7 @@ begin
                     rows.extend;    rows(rows.last) := row;
                     if (nci_11179_2.isDDE(v_item_id, v_ver_nr) = true) then
                     for curint in (select  c_item_id, c_item_ver_nr from nci_admin_item_rel where rel_typ_id = 66 and p_item_id = v_item_id 
-                    and p_item_ver_nr = v_ver_nr and c_item_id <> p_item_id ) loop
+                    and p_item_ver_nr = v_ver_nr and c_item_id <> p_item_id  order by disp_ord) loop
                                 v_c_item_id := curint.c_item_id;
                                 v_c_ver_nr := curint.c_item_ver_nr;
                                 select count(*) into v_temp from nci_usr_cart 
