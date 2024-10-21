@@ -519,7 +519,8 @@ select max(nvl(retain_ind,0)) into v_retain_ind from nci_usr_cart where cart_nm 
                                 -- get Preferred Question Txt for parent
                                 select pref_quest_txt || ':' into v_pqt from de where item_id = v_item_id and ver_nr = v_ver_nr;
                                 
-                                for curint in (select  c_item_id, c_item_ver_nr from nci_admin_item_rel where rel_typ_id = 66 and p_item_id = v_item_id and p_item_ver_nr = v_ver_nr) loop
+                                for curint in (select  c_item_id, c_item_ver_nr from nci_admin_item_rel where rel_typ_id = 66 and p_item_id = v_item_id and p_item_ver_nr = v_ver_nr
+                                and p_item_id <> c_item_id order by disp_ord ) loop
                                 v_c_item_id := curint.c_item_id;
                                 v_c_ver_nr := curint.c_item_ver_nr;
                                    select count(*) into v_temp from admin_item where item_id = v_c_item_id and ver_nr = v_c_ver_nr and admin_item_typ_id = v_item_typ_id;
