@@ -266,3 +266,6 @@ add (	"CNCPT_2_ITEM_ID_1" NUMBER,
 	"CNCPT_2_VER_NR_9" NUMBER(4,2), 
 	"CNCPT_2_ITEM_ID_10" NUMBER, 
 	"CNCPT_2_VER_NR_10" NUMBER(4,2));
+
+insert into obj_key (obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (230, 'Export Data Collection Excel File', 31, 'Export Data Collection Excel File');
+commit;
