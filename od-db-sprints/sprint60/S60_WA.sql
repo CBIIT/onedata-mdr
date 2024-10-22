@@ -83,3 +83,34 @@ update nci_dload_cstm_col_key set xpath = '/dataElements/objectClass/version' wh
 update nci_dload_cstm_col_key set xpath = replace(xpath, '/dataElements/valueDomain/', '/') where data_object = 'PV';
 update nci_dload_cstm_col_key set xpath = replace(xpath, '/dataElements/', '/') where data_object = 'CLASSIFICATION_SCHEME';
 commit;
+
+
+  CREATE TABLE NCI_DLOAD_CSTM_DATA_COLL
+   (	"HDR_ID" NUMBER, 
+	"COL_ID" NUMBER,  
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	 PRIMARY KEY ("HDR_ID"));
+     
+     
+       GRANT SELECT ON NCI_DLOAD_CSTM_DATA_COLL TO "ONEDATA_RO";
+       
+CREATE OR REPLACE EDITIONABLE TRIGGER "ONEDATA_WA"."TR_NCI_DLOAD_CSTM_DATA_COLL_TS" 
+  BEFORE  UPDATE
+  on NCI_DLOAD_CSTM_DATA_COLL
+  for each row
+BEGIN
+  :new.LST_UPD_DT := SYSDATE;
+  update NCI_DLOAD_HDR set LST_UPD_DT = sysdate, lst_upd_usr_id =:new.lst_upd_usr_id where hdr_id = :new.hdr_id;
+
+END;
+
+
+
+/
+ALTER TRIGGER "ONEDATA_WA"."TR_NCI_DLOAD_MDL_MAP_TS" ENABLE;
