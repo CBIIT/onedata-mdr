@@ -33,3 +33,16 @@ drop table nci_dload_cstm_col_key;
 alter table nci_dload_cstm_col_key add OUTPUT varchar2(16) default 'ROW';
 insert into nci_dload_cstm_col_key select * from onedata_wa.nci_dload_cstm_col_key;
 commit;
+
+
+  CREATE TABLE NCI_DLOAD_CSTM_DATA_COLL
+   (	"HDR_ID" NUMBER, 
+	"COL_ID" NUMBER,  
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	 PRIMARY KEY ("HDR_ID"));
