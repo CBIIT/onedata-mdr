@@ -62,6 +62,7 @@ vw_val_dom_ref_term svdrt,
 vw_val_dom_ref_term tvdrt
 	where  sme.item_id = smec.MDL_ELMNT_ITEM_ID
 	and sme.ver_nr = smec.MDL_ELMNT_VER_NR and
+	  nvl(vmap.fld_delete,0) = 0
 	 tme.item_id = tmec.MDL_ELMNT_ITEM_ID
 	and tme.ver_nr = tmec.MDL_ELMNT_VER_NR  
 	  and vmap.map_deg = deg.obj_key_id (+)
