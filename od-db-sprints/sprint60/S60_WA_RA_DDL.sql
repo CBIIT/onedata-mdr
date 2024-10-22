@@ -1,3 +1,4 @@
+alter table NCI_MEC_VAL_MAP add (MECM_ID number);
 
   CREATE OR REPLACE   VIEW "VW_VAL_MAP_IMP_TEMPLATE"  AS
   select  ' ' "DO_NOT_USE",
@@ -6,6 +7,7 @@
        rownum "SEQ_ID",
        vmap.mdl_map_item_id "MODEL_MAP_ID",
        vmap.mdl_map_ver_nr "MODEL_MAP_VERSION",
+	vmap.MECM_ID,
         vmap.mecvm_id "MECVM_ID", 
    	sme.ITEM_PHY_OBJ_NM "SRC_ELMNT_PHY_NAME", 
 	sme.ITEM_LONG_NM "SRC_ELMNT_NAME", 
@@ -22,6 +24,7 @@
 	vmap.prov_typ_rvw_txt "PROV_TYPE_OF_REVIEW",
 	vmap.PROV_RVW_DT "PROV_REVIEW_DATE",
 	vmap.prov_APRV_DT "PROV_APPROVAL_DATE",
+	vmap.prov_Notes "PROV_APPROVAL_NOTES",
 decode(svd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated',16, 'Enumerated by Reference')  "SOURCE_DOMAIN_TYPE",
 decode(tvd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated',16, 'Enumerated by Reference')  "TARGET_DOMAIN_TYPE",
     vmap.SRC_PV,
@@ -74,6 +77,7 @@ vw_val_dom_ref_term tvdrt
           and vmap.src_mec_id = smec.mec_id
           and vmap.tgt_mec_id = tmec.mec_id;
 	  
+
 	  
 	  create table NCI_MDL_MAP_CNFG (
 CNFG_ID  number,
