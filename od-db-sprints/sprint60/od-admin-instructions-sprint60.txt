@@ -1,1 +1,3 @@
 --TBD
+exec nci_ext_import.load_mt;
+exec nci_ext_import.load_xwalk_derv;
