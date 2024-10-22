@@ -4343,6 +4343,7 @@ AS
  
   rowform t_row;
 v_found boolean;
+v_mdl_nm varchar2(255);
  
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -4367,7 +4368,8 @@ BEGIN
                                 nci_mec_map.tgt_mec_id = v_item_id )) loop
 --                            and (nci_mec_map.src_mec_id = nci_mdl_elmnt_char.mec_id or nci_mec_map.tgt_mec_id = nci_mdl_elmnt_char.mec_id) 
 --                            and nci_mdl_elmnt_char.mdl_elmnt_item_id = v_item_id and nci_mdl_elmnt_char.mdl_elmnt_ver_nr = v_ver_nr) loop
-                    hookoutput.message := 'Model Element Characteristic cannot be deleted. It is associated with Model Mapping ID: ' || cur.item_id;
+                    select item_nm into v_mdl_nm from admin_item where item_id = cur.item_id and ver_nr = cur.ver_nr;
+                    hookoutput.message := 'Model Element Characteristic cannot be deleted. It is associated with Model Mapping ID: ' || cur.item_id || ' - ' || v_mdl_nm;
                     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
                     return;
                 end loop;
