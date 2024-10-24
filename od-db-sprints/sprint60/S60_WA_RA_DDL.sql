@@ -379,3 +379,7 @@ vw_val_dom_ref_term tvdrt
           and svd.ver_nr = svdrt.ver_nr (+)
           and tvd.item_id = tvdrt.item_id (+)
           and tvd.ver_nr = tvdrt.ver_nr (+);
+
+
+update obj_key set fld_delete = 1 where obj_key_id = 56;
+commit;
