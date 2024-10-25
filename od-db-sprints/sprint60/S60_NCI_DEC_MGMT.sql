@@ -1880,11 +1880,13 @@ if (v_item_typ <> 53) then
            v_str := cur.item_id || 'v' || cur.ver_nr || ';' || v_str ;
                j := j + 1;
                 
-   
+         v_found := true;
     end loop;
   --  if (v_str <> '') then 
   -- raise_application_error(-20000,j);
+  if (v_found = true) then
     ihook.setColumnValue(rowform,'CTL_VAL_MSG',ihook.getColumnValue(rowform,'CTL_VAL_MSG') || 'WARNING: VM Concepts matched but neither Name or Definition match. '|| v_str || chr(13));
+end if;
   --  end if;
     end if;
  end if;
