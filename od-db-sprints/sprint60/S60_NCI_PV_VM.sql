@@ -2222,7 +2222,7 @@ begin
                 z := 1;
                  for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
                 where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int =substr(v_long_nm_suf_int,2) and a.admin_item_typ_id = v_item_typ_glb
-                and ext.item_id <> v_item_id ) loop
+                and ext.item_id <> v_item_id and a.admin_stus_nm_dn = 'RELEASED' ) loop
                         hookoutput.message :=  'WARNING: Duplicate found based on concepts. See Duplicates Section. ' ;
                  ihook.setColumnValue(rowform, 'CNCPT_2_ITEM_ID_' || z,cur.item_id);
                  ihook.setColumnValue(rowform, 'CNCPT_2_VER_NR_' || z,cur.ver_nr);
