@@ -1800,13 +1800,24 @@ if (v_item_typ <> 53) then
 
     end loop;
  else  -- if VM
-  v_def  := ihook.getColumnValue(rowform,'ITEM_' || v_idx || '_DEF');
+ -- v_def  := ihook.getColumnValue(rowform,'ITEM_' || v_idx || '_DEF');
+  v_def  := replace(replace(ihook.getColumnValue(rowform,'ITEM_' || v_idx || '_DEF'),':',''),'_','');
+ -- raise_Application_error(-20000,v_def);
     v_nm  := ihook.getColumnValue(rowform,'ITEM_' || v_idx || '_NM');
   --  raise_application_error(-20000,v_nm || '--' || v_def);
 -- both name and definition match
+    for i in 1..10 loop
+      ihook.setColumnValue(rowform, 'CNCPT_2_ITEM_ID_' || j,'');
+              ihook.setColumnValue(rowform, 'CNCPT_2_VER_NR_' || j,'');
+      end loop;
+      j:=1;
+     
    for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
     where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int = v_item_nm and a.admin_item_typ_id = v_item_typ
-    and a.admin_stus_nm_dn='RELEASED' and upper(a.item_desc) = upper(v_def) and upper(a.item_nm) = upper(v_nm) 
+    and a.admin_stus_nm_dn='RELEASED' 
+    and replace(replace(upper(a.item_desc),':',''),'_','') = upper(v_def) 
+   -- and trim(upper(a.item_desc)) = trim(upper(v_def)) 
+    and upper(a.item_nm) = upper(v_nm) 
     order by a.creat_dt asc) loop
               
                  ihook.setColumnValue(rowform, 'ITEM_' || v_idx  ||'_ID',cur.item_id);
@@ -1817,7 +1828,9 @@ if (v_item_typ <> 53) then
                 ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_DEF',  cur.CNCPT_CONCAT_DEF);
                 ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_NM', cur.CNCPT_CONCAT_NM);
               v_found := true;
-             exit;
+          ihook.setColumnValue(rowform, 'CNCPT_2_ITEM_ID_' || j,cur.item_id);
+              ihook.setColumnValue(rowform, 'CNCPT_2_VER_NR_' || j,cur.ver_nr);
+               j := j + 1;
     end loop;
     
     -- definition matches but name does not
@@ -1825,7 +1838,7 @@ if (v_item_typ <> 53) then
    -- raise_application_error(-20000,v_def || '-' || v_item_nm);
      for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
     where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int = v_item_nm and a.admin_item_typ_id = v_item_typ
-    and a.admin_stus_nm_dn='RELEASED' and upper(a.item_desc) = upper(v_def) and upper(a.item_nm) <> upper(v_nm)
+    and a.admin_stus_nm_dn='RELEASED' and replace(replace(upper(a.item_desc),':',''),'_','') = upper(v_def) and upper(a.item_nm) <> upper(v_nm)
     order by a.creat_Dt asc) loop
               
                  ihook.setColumnValue(rowform, 'ITEM_' || v_idx  ||'_ID',cur.item_id);
@@ -1837,15 +1850,17 @@ if (v_item_typ <> 53) then
                 ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_NM', cur.CNCPT_CONCAT_NM);
                ihook.setColumnValue(rowform,'CTL_VAL_MSG',ihook.getColumnValue(rowform,'CTL_VAL_MSG') || 'Partial Match: VM Definition Matches, VM Name does not.');
               v_found := true;
-                exit;
-   
+          ihook.setColumnValue(rowform, 'CNCPT_2_ITEM_ID_' || j,cur.item_id);
+              ihook.setColumnValue(rowform, 'CNCPT_2_VER_NR_' || j,cur.ver_nr);
+               j := j + 1;
+     
     end loop;
     end if;
        -- name matches but definition does not-- newest item
     if (v_found = false) then
      for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
     where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int = v_item_nm and a.admin_item_typ_id = v_item_typ
-    and a.admin_stus_nm_dn='RELEASED' and upper(a.item_desc) <> upper(v_def) and upper(a.item_nm) = upper(v_nm)
+    and a.admin_stus_nm_dn='RELEASED' and replace(replace(upper(a.item_desc),':',''),'_','') <> upper(v_def) and upper(a.item_nm) = upper(v_nm)
     order by a.creat_Dt desc) loop
               
                  ihook.setColumnValue(rowform, 'ITEM_' || v_idx  ||'_ID',cur.item_id);
@@ -1857,22 +1872,19 @@ if (v_item_typ <> 53) then
                 ihook.setColumnValue(rowform,'ITEM_' || v_idx || '_NM', cur.CNCPT_CONCAT_NM);
                ihook.setColumnValue(rowform,'CTL_VAL_MSG',ihook.getColumnValue(rowform,'CTL_VAL_MSG') || 'Partial Match: VM Name matches, VM Definition does not.');
               v_found := true;
-                exit;
-   
+          ihook.setColumnValue(rowform, 'CNCPT_2_ITEM_ID_' || j,cur.item_id);
+              ihook.setColumnValue(rowform, 'CNCPT_2_VER_NR_' || j,cur.ver_nr);
+               j := j + 1;
+        
     end loop;
     end if;
       if (v_found = false) then
      --   raise_application_error(-20000,'Here;');
   
       v_str := '';
-      j:=1;
-      for i in 1..10 loop
-      ihook.setColumnValue(rowform, 'CNCPT_2_ITEM_ID_' || j,'');
-              ihook.setColumnValue(rowform, 'CNCPT_2_VER_NR_' || j,'');
-      end loop;
      for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
     where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int = v_item_nm and a.admin_item_typ_id = v_item_typ
-    and a.admin_stus_nm_dn='RELEASED' and upper(a.item_desc) <> upper(v_def) and upper(a.item_nm) <> upper(v_nm) 
+    and a.admin_stus_nm_dn='RELEASED' and replace(replace(upper(a.item_desc),':',''),'_','') <> upper(v_def) and upper(a.item_nm) <> upper(v_nm) 
    ) loop
               
           ihook.setColumnValue(rowform, 'CNCPT_2_ITEM_ID_' || j,cur.item_id);
