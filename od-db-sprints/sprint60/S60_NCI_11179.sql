@@ -929,7 +929,8 @@ select max(nvl(retain_ind,0)) into v_retain_ind from nci_usr_cart where cart_nm 
                                     if (v_temp = 0) then
                                         nci_11179_2.AddItemToCart(v_c_item_id, v_c_ver_nr, v_usr_id, v_cart_nm, v_retain_ind, rows);
                                               v_add := v_add + 1;
-      
+                                    else
+                                        v_already := v_already + 1;
                                     end if;
                         end loop;
             end if;
@@ -1167,7 +1168,8 @@ begin
                                         ihook.setColumnValue(row,'GUEST_USR_NM', v_user_nm);
                                         ihook.setColumnValue(row,'CART_NM', v_user_nm);
                                         rows.extend;    rows(rows.last) := row;
-      
+       else
+                                        v_already := v_already + 1;
                                     end if;
                         end loop;
             end if;
