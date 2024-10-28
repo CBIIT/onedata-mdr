@@ -848,7 +848,8 @@ BEGIN
     and (item_id, ver_nr) in (select mec.mdl_elmnt_item_id, mec.mdl_elmnt_ver_nr 
     from nci_mdl_elmnt_char mec, nci_mdl_elmnt me1 where me1.item_id = mec.mdl_elmnt_item_id 
     and me1.ver_nr = mec.mdl_elmnt_ver_nr and 
-    me1.mdl_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and me1.mdl_item_ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')group by mec.mdl_elmnt_item_id, mec.mdl_elmnt_ver_nr
+    me1.mdl_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and me1.mdl_item_ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')
+    group by mec.mdl_elmnt_item_id, mec.mdl_elmnt_ver_nr
     having sum(PK_IND) =0);
    -- raise_application_error(-20000, nvl(msg,'Is Null'));
     if (msg is not null) then
@@ -1979,6 +1980,9 @@ end;
   v_valid boolean;
   v_val_stus_msg varchar2(2000);
  i integer;
+ j integer;
+ k integer;
+ v_nm varchar2(4000);
  v_typ integer;
  v_dflt_typ integer;
  v_temp integer;
@@ -2056,9 +2060,9 @@ end if;
  
  -- Rules id provided is incorrect.
  
-if (ihook.getColumnValue(row_ori, 'MECVM_ID') is not null) then
+if (ihook.getColumnValue(row_ori, 'IMP_MECVM_ID') is not null) then
     select count(*) into v_temp from NCI_MEC_VAL_MAP where  MDL_MAP_ITEM_ID  = ihook.getColumnValue(row_ori, 'MDL_MAP_ITEM_ID')
-    and MDL_MAP_VER_NR = ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR') and MECVM_ID=ihook.getColumnValue(row_ori, 'MECVM_ID') and nvl(fld_Delete,0) = 0
+    and MDL_MAP_VER_NR = ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR') and MECVM_ID=ihook.getColumnValue(row_ori, 'IMP_MECVM_ID') and nvl(fld_Delete,0) = 0
     and src_mec_id = ihook.getColumnValue(row_ori, 'SRC_MEC_ID') and tgt_mec_id = ihook.getColumnValue(row_ori, 'TGT_MEC_ID');
     if (v_temp = 0) then
         v_valid := false;
@@ -2080,24 +2084,37 @@ end if;
  	
     -- if enumerated, then check PV values
   if (v_Valid = true) then 
-  for cur in (Select * from vw_nci_mec where mec_id = ihook.getColumnValue(row_ori,'SRC_MEC_ID') and  val_dom_typ_desc= 'Enumerated') loop
+  for cur in (Select * from vw_nci_mec where mec_id = ihook.getColumnValue(row_ori,'SRC_MEC_ID') and  val_dom_typ_desc= 'Enumerated' and ihook.getColumnValue(row_ori,'SRC_PV') is not null) loop
+  j := nci_11179.getWordCountDelim(ihook.getColumnValue(row_ori,'SRC_PV'),'\|');
+  for k in 1..j loop
+  v_nm :=upper(nci_11179.getWordDelim(ihook.getColumnValue(row_ori,'SRC_PV'),k,j,'|'));
   select count(*) into v_temp from perm_Val where val_dom_item_id = cur.val_dom_item_id and val_dom_Ver_nr = cur.val_dom_ver_nr and 
-  upper(perm_val_nm) = ihook.getColumnValue(row_ori,'SRC_PV');
+  upper(perm_val_nm) = v_nm;
   if (v_temp = 0) then
        v_valid := false;
-        v_val_stus_msg := v_val_stus_msg ||'Source PV specified is not valid.' ||  chr(13);
+     
+  End if;
+  end loop;
+if (v_valid = false) then
+    v_val_stus_msg := v_val_stus_msg ||'Source PV specified is not valid.' ||  chr(13);
+end if;
+  end loop;
+  v_valid := true;
+  for cur in (Select * from vw_nci_mec where mec_id = ihook.getColumnValue(row_ori,'TGT_MEC_ID') and val_dom_typ_desc = 'Enumerated' and ihook.getColumnValue(row_ori,'TGT_PV') is not null) loop
+  j := nci_11179.getWordCountDelim(ihook.getColumnValue(row_ori,'TGT_PV'),'\|');
+   for k in 1..j Loop
+  v_nm :=upper(nci_11179.getWordDelim(ihook.getColumnValue(row_ori,'TGT_PV'),k,j,'|'));
+  --raise_application_error(-20000,  j || '- ' || ihook.getColumnValue(row_ori,'TGT_PV') || '- ' || v_nm);
+ select count(*) into v_temp from perm_Val where val_dom_item_id = cur.val_dom_item_id and val_dom_Ver_nr = cur.val_dom_ver_nr and 
+  upper(perm_val_nm) = v_nm;
+  if (v_temp = 0) then
+       v_valid := false;
   
   End if;
   end loop;
-  
-  for cur in (Select * from vw_nci_mec where mec_id = ihook.getColumnValue(row_ori,'TGT_MEC_ID') and val_dom_typ_desc = 'Enumerated') loop
-  select count(*) into v_temp from perm_Val where val_dom_item_id = cur.val_dom_item_id and val_dom_Ver_nr = cur.val_dom_ver_nr and 
-  upper(perm_val_nm) = ihook.getColumnValue(row_ori,'TGT_PV');
-  if (v_temp = 0) then
-       v_valid := false;
+  if (v_valid = false) then
         v_val_stus_msg := v_val_stus_msg ||'Target PV specified is not valid.' ||  chr(13);
-  
-  End if;
+        end if;
   end loop;
   
   end if;
@@ -3980,6 +3997,7 @@ begin
       row := t_row();
       ihook.setColumnValue (row, 'ITEM_ID', cur.val_dom_item_id);
       ihook.setColumnValue (row, 'VER_NR', cur.val_dom_ver_nr);
+      ihook.setColumnValue(row,'MECM_ID', outercur.MECM_ID);
       input_rows.extend;  input_rows(input_rows.last) := row;
 
     end loop;
@@ -4005,9 +4023,9 @@ begin
    
     nci_11179_2.spCreateValueMap(input_rows, output_rows, v_src_alt_nm_typ, v_tgt_alt_nm_typ);
     
-    delete from NCI_MEC_VAL_MAP where src_mec_id = outercur.SRC_MEC_ID  and tgt_mec_id = outercur.tgt_MEC_ID  and nvl(map_deg,87) = 87;
+    delete from NCI_MEC_VAL_MAP where src_mec_id = outercur.SRC_MEC_ID  and tgt_mec_id = outercur.tgt_MEC_ID  and nvl(map_deg,87) not in (120,131);
     commit;
-    delete from onedata_ra.NCI_MEC_VAL_MAP where src_mec_id = outercur.SRC_MEC_ID  and tgt_mec_id = outercur.tgt_MEC_ID  and nvl(map_deg,87) = 87;
+    delete from onedata_ra.NCI_MEC_VAL_MAP where src_mec_id = outercur.SRC_MEC_ID  and tgt_mec_id = outercur.tgt_MEC_ID  and nvl(map_deg,87)  not in (120,131);
     commit;
     
     rows := t_rows();
@@ -4019,6 +4037,8 @@ begin
         ihook.setColumnValue(row,'SRC_MEC_ID',outercur.src_mec_id);
         ihook.setColumnValue(row,'TGT_MEC_ID',outercur.TGT_mec_id);
     
+       ihook.setColumnValue(row,'MECM_ID',ihook.getColumnValue(output_rows(i),'MECM_ID'));
+     
         ihook.setColumnValue(row,'SRC_PV',ihook.getColumnValue(output_rows(i),'1'));
         ihook.setColumnValue(row,'TGT_PV',ihook.getColumnValue(output_rows(i),'2'));
         ihook.setColumnValue(row,'SRC_LBL',ihook.getColumnValue(output_rows(i),'LBL_1'));
@@ -4340,10 +4360,10 @@ AS
  v_ver_nr number(4,2);
  v_mdl_id number;
  v_mdl_ver_nr number(4,2);
+ v_mdl_nm varchar(255);
  
   rowform t_row;
 v_found boolean;
-v_mdl_nm varchar2(255);
  
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -4369,7 +4389,7 @@ BEGIN
 --                            and (nci_mec_map.src_mec_id = nci_mdl_elmnt_char.mec_id or nci_mec_map.tgt_mec_id = nci_mdl_elmnt_char.mec_id) 
 --                            and nci_mdl_elmnt_char.mdl_elmnt_item_id = v_item_id and nci_mdl_elmnt_char.mdl_elmnt_ver_nr = v_ver_nr) loop
                     select item_nm into v_mdl_nm from admin_item where item_id = cur.item_id and ver_nr = cur.ver_nr;
-                    hookoutput.message := 'Model Element Characteristic cannot be deleted. It is associated with Model Mapping ID: ' || cur.item_id || ' - ' || v_mdl_nm;
+                    hookoutput.message := 'Model Element Characteristic cannot be deleted. It is associated with Model Mapping ID: ' || cur.item_id  || ' - ' || v_mdl_nm;
                     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
                     return;
                 end loop;
