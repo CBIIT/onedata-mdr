@@ -5,7 +5,7 @@ function getCreateSubsetQuestion(v_itr_num in number) return t_question ;
 PROCEDURE spAddSubsetPV (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 PROCEDURE spDeleteSubsetPV (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 PROCEDURE spPVVMCreateNew (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
-pROCEDURE spPVVMCreateNew2 (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2); -- This is currently used.
+pROCEDURE spPVVMCreateNew2 (v_data_in in clob, v_data_out out clob, v_usr_id  INa varchar2); -- This is currently used.
 PROCEDURE spPVVMCreateWithTerm (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2); -- select termnilogy
 PROCEDURE spPVVMCreateNewBulk (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
 PROCEDURE spVMEdit (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
@@ -2140,6 +2140,8 @@ z integer;
   v_op varchar2(50);
   rownmdef t_row;
   i integer;
+  v_item_id_tmp number;
+  v_ver_nr_tmp number(4,2);
 begin
     v_item_typ_glb := 53;
     row_ori :=  hookInput.originalRowset.rowset(1);
@@ -2219,7 +2221,7 @@ begin
                     end loop;
                 end if;
               --  raise_application_error(-20000, v_long_nm_suf_int);
-                z := 1;
+        /*       z := 1;
                  for cur in (select ext.* from nci_admin_item_ext ext,admin_item a
                 where nvl(a.fld_delete,0) = 0 and a.item_id = ext.item_id and a.ver_nr = ext.ver_nr and cncpt_concat_with_int =substr(v_long_nm_suf_int,2) and a.admin_item_typ_id = v_item_typ_glb
                 and ext.item_id <> v_item_id and a.admin_stus_nm_dn = 'RELEASED' ) loop
@@ -2230,10 +2232,20 @@ begin
                         v_dup_item_id := cur.item_id;
                         v_dup_ver_nr :=cur.ver_nr;
                         is_dup := true;
-                end loop;
+                end loop;  */
+                
                 ihook.setColumnValue(rowform, 'ITEM_1_DEF', substr(v_def,2));
                ihook.setColumnValue(rowform, 'ITEM_1_LONG_NM', substr(v_long_nm_suf,2));
                ihook.setColumnValue(rowform, 'ITEM_1_LONG_NM_INT', substr(v_long_nm_suf_int,2));
+               --rowform in out t_row, v_item_nm in varchar2, v_item_typ in integer, v_idx in number, v_item_id out number, v_item_ver_nr out number)
+               nci_Dec_mgmt.CncptCombExistsNew(rowform,  substr(v_long_nm_suf_int,2),53,1,v_item_id_tmp, v_ver_nr_tmp);
+               
+               -- reset Item id and version number to edit vm row
+                ihook.setColumnValue(rowform, 'ITEM_1_ID', v_item_id);
+                ihook.setColumnValue(rowform, 'ITEM_1_VER_NR', v_ver_nr);
+                if (ihook.getColumnValue(rowform,'CNCPT_2_ITEM_ID_1') is not null) then 
+                is_dup := true;
+                end if;
                rows := t_rows();  rows.extend;  rows(rows.last) := rowform;
                rowset := t_rowset(rows, 'VM Edit (Hook)', 1, 'NCI_STG_AI_CNCPT_CREAT');
               
