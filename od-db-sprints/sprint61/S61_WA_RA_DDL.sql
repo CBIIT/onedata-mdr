@@ -80,8 +80,11 @@ and VALUE_DOM.UOM_ID = UOM.UOM_ID (+)
 and value_dom.ITEM_ID = term.item_id (+)
 and value_dom.ver_nr = term.ver_nr (+);
 
-alter table nci_admin_item_xmap add (ITEM_NM varchar2(255), ITEM_LONG_NM varchar2(50));
 
   GRANT SELECT ON "ONEDATA_WA"."VW_DE" TO "ONEDATA_RO";
   GRANT READ ON "ONEDATA_WA"."VW_DE" TO "ONEDATA_RO";
+
+alter table nci_admin_item_xmap add (ITEM_NM varchar2(255), ITEM_LONG_NM varchar2(50));
+
+create unique index idx_vw_cncpt on vw_cncpt (item_id, ver_nr);
 
