@@ -15,7 +15,7 @@ mec."SRC_UOM",mec."UOM_ID",mec."SRC_DEFLT_VAL",mec."SRC_ENUM_SRC",mec."DE_CONC_I
 mec."VAL_DOM_ITEM_ID",mec."VAL_DOM_VER_NR",mec."NUM_PV",
     mec."MEC_LONG_NM",
     mec."MEC_PHY_NM",
-    upper(me.ITEM_PHY_OBJ_NM || '.' || mec."MEC_PHY_NM") me_mec_phy_nm, 
+    lower(me.ITEM_PHY_OBJ_NM) || '.' || upper(mec."MEC_PHY_NM") me_mec_phy_nm, 
     mec."MEC_DESC",mec."CDE_ITEM_ID",mec."CDE_VER_NR"
 	from admin_item m, NCI_MDL_ELMNT me,NCI_MDL_ELMNT_CHAR mec
 	where m.item_id = me.mdl_item_id and m.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.MDL_ELMNT_ITEM_ID
