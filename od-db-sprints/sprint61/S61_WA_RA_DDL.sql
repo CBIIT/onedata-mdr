@@ -88,3 +88,6 @@ alter table nci_admin_item_xmap add (ITEM_NM varchar2(255), ITEM_LONG_NM varchar
 
 create unique index idx_vw_cncpt on vw_cncpt (item_id, ver_nr);
 
+alter table nci_mec_val_map add (SRC_VM_CNCPT_CD varchar2(4000), SRC_VM_CNCPT_NM  varchar2(4000), TGT_VM_CNCPT_CD varchar2(4000), TGT_VM_CNCPT_NM  varchar2(4000), SRC_VD_ITEM_ID number, SRC_VD_VER_NR number(4,2), TGT_VD_ITEM_ID number,
+	TGT_VD_VER_NR number(4,2),  SRC_CDE_ITEM_ID number, SRC_CDE_VER_NR number(4,2), TGT_CDE_ITEM_ID number,
+	TGT_CDE_VER_NR number(4,2));
