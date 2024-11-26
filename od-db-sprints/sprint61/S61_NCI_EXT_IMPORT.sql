@@ -95,22 +95,9 @@ cnt integer;
 v_code varchar2(4000);
 v_c_item_id number;
 v_c_ver_nr number(4,2);
+v_evs_nci integer;
 begin
-/*SRC_CD
-SRC_TERM
-SRC_EVS_SRC_ID
-SRC_EVS_SRC_VER_NR
-SRC_EVS_SRC_DESC
-SRC_TERM_TYP
-TGT_CD
-TGT_TERM
-TGT_EVS_SRC_ID
-TGT_EVS_SRC_VER_NR
-TGT_EVS_SRC_DESC
-TGT_TERM_TYP
-CNCPT_CODE
-CNCPT_ITEM_ID
-CNCPT_VER_NR*/
+
 
 execute immediate 'truncate table nci_xwalk_derv';
 
@@ -131,6 +118,33 @@ s.item_id, s.ver_Nr,c.item_long_nm, c.item_nm, c.nci_meta_cui;
 commit;
 end loop;
 end loop;
+
+select obj_key_id into v_evs_nci from obj_key where obj_typ_id = 23 and obj_key_Desc = 'NCI_CONCEPT_CODE';
+
+ insert into nci_xwalk_derv(SRC_CD,SRC_TERM,SRC_EVS_SRC_ID,SRC_EVS_SRC_VER_NR,SRC_EVS_SRC_DESC,SRC_TERM_TYP,
+TGT_CD,TGT_TERM,TGT_EVS_SRC_ID,TGT_EVS_SRC_VER_NR,TGT_EVS_SRC_DESC,TGT_TERM_TYP,CNCPT_ITEM_ID, CNCPT_VER_NR, cncpt_cd, cncpt_nm)
+select c.item_long_nm, c.item_nm, v_evs_nci, 1, 'NCI_CONCEPT_CODE','-',
+s.xmap_cd,listagg(s.xmap_desc, '|') within group (order by s.xmap_desc),  s.evs_src_id,s.evs_src_ver_nr, o.obj_key_desc, listagg(s.term_typ, '|') within group (order by s.xmap_desc),s.item_id, s.ver_nr,
+c.item_long_nm, c.item_nm from 
+nci_admin_item_xmap s , vw_cncpt c , obj_key o where 
+s.item_id = c.item_id and s.ver_nr = c.ver_nr and s.evs_src_id = o.obj_key_id
+and s.PREF_IND= 1 and s.item_id <> 0 
+group by s.xmap_cd, s.evs_src_id, s.evs_src_ver_nr, v_evs_nci,
+s.item_id, s.ver_Nr,c.item_long_nm, c.item_nm, o.obj_key_Desc;
+commit;
+
+ insert into nci_xwalk_derv(SRC_CD,SRC_TERM,SRC_EVS_SRC_ID,SRC_EVS_SRC_VER_NR,SRC_EVS_SRC_DESC,SRC_TERM_TYP,
+TGT_CD,TGT_TERM,TGT_EVS_SRC_ID,TGT_EVS_SRC_VER_NR,TGT_EVS_SRC_DESC,TGT_TERM_TYP,CNCPT_ITEM_ID, CNCPT_VER_NR, cncpt_cd, cncpt_nm)
+select 
+s.xmap_cd,listagg(s.xmap_desc, '|') within group (order by s.xmap_desc),  s.evs_src_id,s.evs_src_ver_nr, o.obj_key_Desc, listagg(s.term_typ, '|') within group (order by s.xmap_desc),
+c.item_long_nm, c.item_nm, v_evs_nci, 1, 'NCI_CONCEPT_CODE','-',s.item_id, s.ver_nr,
+c.item_long_nm, c.item_nm from 
+nci_admin_item_xmap s , vw_cncpt c , obj_key o where 
+s.item_id = c.item_id and s.ver_nr = c.ver_nr and s.evs_src_id = o.obj_key_id
+and s.PREF_IND= 1 and s.item_id <> 0 
+group by s.xmap_cd, s.evs_src_id, s.evs_src_ver_nr, v_evs_nci,
+s.item_id, s.ver_Nr,c.item_long_nm, c.item_nm, o.obj_key_Desc;
+commit;
 
 end;
 
