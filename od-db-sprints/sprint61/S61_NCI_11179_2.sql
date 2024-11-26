@@ -24,6 +24,10 @@ function getLegacyDataType (v_data_typ_id in number) return number;
 function getLangId (v_lang_nm in varchar2) return number;
 function getCncptStrFromCncpt (v_item_id in number, v_ver_nr in number, v_admin_item_typ_id in number) return varchar2;
 function getCncptStrFromForm (rowform in t_row, v_admin_item_typ_id in number, idx in integer) return varchar2;
+
+
+function getGenericQuestion (v_quest_str in varchar2, v_cmd_str in varchar2, v_id in integer)  return t_question ;
+
 procedure copyDDEComponents (v_src_item_id in number, v_src_ver_nr in number, v_tgt_item_id in number, v_tgt_ver_nr in number, actions in out t_actions);
 function getCollectionId return integer;
 function getDloadItemTyp (v_fmt_id in integer) return integer;
@@ -1805,7 +1809,18 @@ as
     v_cart boolean;
     vd_id_nm    varchar2(300);
     v_item_typ_id integer;
+    v_src_vd_id  number;
+    v_tgt_vd_id number;
+    v_src_vd_ver number(4,2);
+    v_tgt_vd_ver number(4,2);
 begin
+
+        row_cur := input_rows(1);
+        v_src_vd_id := ihook.getColumnValue(row_cur,'ITEM_ID');
+           v_src_vd_ver := ihook.getColumnValue(row_cur,'VER_NR');
+      row_cur := input_rows(2);
+        v_tgt_vd_id := ihook.getColumnValue(row_cur,'ITEM_ID');
+           v_tgt_vd_ver := ihook.getColumnValue(row_cur,'VER_NR');
 
 --raise_application_error(-20000,'Here');
     for i in 1 .. input_rows.count loop
@@ -1862,6 +1877,25 @@ begin
             and a.val_dom_item_id=ihook.getColumnValue(row_cur,'ITEM_ID')
             and a.val_dom_ver_nr= ihook.getColumnValue(row_cur,'VER_NR') and a.fld_delete=0 order by perm_val_nm) loop
                v_perm_val_nm :=  v_perm_val_nm || '|' || rec.perm_val_nm ;
+               if (k = 1) then
+                   ihook.setColumnValue(row, 'Source Concept Code', ihook.getColumnValue(row,'VM Concept Codes'));
+                   ihook.setColumnValue(row, 'Source Concept Name', ihook.getColumnValue(row,'VM Name'));
+                     ihook.setColumnValue(row, 'SRC_VD_ITEM_ID', v_src_vd_id);
+                   ihook.setColumnValue(row, 'SRC_VD_VER_NR', v_src_vd_ver);
+                      ihook.setColumnValue(row, 'TGT_VD_ITEM_ID', v_tgt_vd_id);
+                   ihook.setColumnValue(row, 'TGT_VD_VER_NR', v_tgt_vd_ver);
+                    ihook.setColumnValue(row, 'SRC_CDE_ITEM_ID', ihook.getColumnValue(row_cur,'CDE_ITEM_ID'));
+                   ihook.setColumnValue(row, 'SRC_CDE_VER_NR', ihook.getColumnValue(row_cur,'CDE_VER_NR'));
+              end if;
+                    if (k = 2) then
+                   ihook.setColumnValue(row, 'Target Concept Code', ihook.getColumnValue(row,'VM Concept Codes'));
+                   ihook.setColumnValue(row, 'Target Concept Name', ihook.getColumnValue(row,'VM Name'));
+                       ihook.setColumnValue(row, 'SRC_VD_ITEM_ID', v_src_vd_id);
+                   ihook.setColumnValue(row, 'SRC_VD_VER_NR', v_src_vd_ver);
+                      ihook.setColumnValue(row, 'TGT_VD_ITEM_ID', v_tgt_vd_id);
+                   ihook.setColumnValue(row, 'TGT_VD_VER_NR', v_tgt_vd_ver);
+               ihook.setColumnValue(row, 'TGT_CDE_ITEM_ID', ihook.getColumnValue(row_cur,'CDE_ITEM_ID'));
+                   ihook.setColumnValue(row, 'TGT_CDE_VER_NR', ihook.getColumnValue(row_cur,'CDE_VER_NR'));end if;
              end loop;
             ihook.setColumnValue(row, v_tab_admin_item_nm(k), substr(v_perm_val_nm,2));
             if (v_src_alt_nm_typ is not null and v_src_alt_nm_typ > 0 and k=1) then
@@ -2148,6 +2182,24 @@ else
   hookoutput.message := 'Selected items are non-enumerated,';
 end if;
     v_data_out := ihook.getHookOutput(hookOutput);
+end;
+
+
+function getGenericQuestion (v_quest_str in varchar2, v_cmd_str in varchar2, v_id in integer)   return t_question is
+
+  question t_question;
+  answer t_answer;
+  answers t_answers;
+begin
+
+        ANSWERS                    := T_ANSWERS();
+        ANSWER                     := T_ANSWER(v_id, 1, v_cmd_str );
+        ANSWERS.EXTEND;
+        ANSWERS(ANSWERS.LAST) := ANSWER;
+        QUESTION               := T_QUESTION(v_quest_str , ANSWERS);
+
+
+return question;
 end;
 
 end;
