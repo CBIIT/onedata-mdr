@@ -133,17 +133,18 @@ BEGIN
         hookoutput.question := nci_form_curator.getProceedQuestion('Confirm', 'Please confirm deletion option: ' || ihook.getColumnValue (row_ori,'ITEM_NM') || ' (' ||v_item_id || 'v' || v_ver_nr || ')');
         rows := t_rows();        row := t_row();
         
-        ihook.setColumnValue(row,'Option','Purge Model Mapping, All Rules and ALl Value Mappings');
+        
+        ihook.setColumnValue(row,'Option','Delete the Model Mapping, including all Rules and all Value Mappings');
         ihook.setColumnValue(row,'ID',1);
         rows.extend; rows(rows.last) := row;
         
         row := t_row();
-        ihook.setColumnValue(row,'Option','Purge All Rules and All Value Mappings');
+        ihook.setColumnValue(row,'Option','Delete only all Rules and Value Mappings');
         ihook.setColumnValue(row,'ID',2);
         rows.extend; rows(rows.last) := row;
     
         row := t_row();
-        ihook.setColumnValue(row,'Option','Purge All Value Mappings');
+        ihook.setColumnValue(row,'Option','Delete only Value Mappings ');
         ihook.setColumnValue(row,'ID',3);
         rows.extend; rows(rows.last) := row;
  
@@ -1424,6 +1425,49 @@ MDL_MAP_ITEM_ID  = ihook.getColumnValue(row_ori, 'ITEM_ID') and MDL_MAP_VER_NR =
 
 end;
 
+function getManualMapForm (row in out t_row) return t_forms
+is
+  forms t_forms;
+  form1 t_form;
+  rows t_rows;
+  rowsetmap t_rowset;
+begin
+
+          rows := t_rows();
+             
+          for cur in ( select * from nci_mdl_map where item_id = ihook.getColumnValue(row,'MDL_MAP_ITEM_ID') and ver_nr = ihook.getColumnValue(row,'MDL_MAP_VER_NR')) loop
+          ihook.setColumnValue(row, 'SRC_MDL_ITEM_ID', cur.src_mdl_item_id);
+          ihook.setColumnValue(row, 'SRC_MDL_VER_NR', cur.src_mdl_ver_nr);
+          ihook.setColumnValue(row, 'TGT_MDL_ITEM_ID', cur.tgt_mdl_item_id);
+          ihook.setColumnValue(row, 'TGT_MDL_VER_NR', cur.tgt_mdl_ver_nr);
+            ihook.setColumnValue(row, 'MECM_ID', -1);
+          end loop;
+         
+          rows.extend;
+          rows(rows.last) := row;
+          rowsetmap := t_rowset(rows, 'Model Map Characteristics (Insert)', 1, 'NCI_MEC_MAP');
+        forms                  := t_forms();
+    form1                  := t_form('Model Map Characteristics (Insert)', 2,1);
+    form1.rowset :=rowsetmap;
+    forms.extend;    forms(forms.last) := form1;
+ 
+ return forms;
+ end;
+ 
+function getAddManualMapQuestion return t_question 
+ is
+  question t_question;
+  answer t_answer;
+  answers t_answers;
+  begin
+ ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, 'Add New Mapping');
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    QUESTION               := T_QUESTION('Add Manual Mapping', ANSWERS);
+    return question;
+    end;
+    
 PROCEDURE spAddManualMap (v_data_in IN CLOB,    v_data_out OUT CLOB, v_user_id  IN varchar2)
 AS
     hookInput t_hookInput;
@@ -1439,10 +1483,9 @@ AS
     actions t_actions := t_actions();
     action t_actionRowset;
    row_ori t_row;
-  
- question t_question;
-  answer t_answer;
-  answers t_answers;
+  v_Valid boolean;
+  v_temp integer;
+  v_err_str varchar2(1000);
 
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -1453,37 +1496,16 @@ BEGIN
   
     if hookInput.invocationNumber = 0 then
 
- ANSWERS                    := T_ANSWERS();
-    ANSWER                     := T_ANSWER(1, 1, 'Add New Mapping');
-    ANSWERS.EXTEND;
-    ANSWERS(ANSWERS.LAST) := ANSWER;
-    QUESTION               := T_QUESTION('Add Manual Mapping', ANSWERS);
-HOOKOUTPUT.QUESTION    := question;
-
-          row := t_row();
+    row := t_row();
           rows := t_rows();
          
           ihook.setColumnValue(row, 'MDL_MAP_ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
           ihook.setColumnValue(row, 'MDL_MAP_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
-          
-          for cur in ( select * from nci_mdl_map where item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'VER_NR')) loop
-          ihook.setColumnValue(row, 'SRC_MDL_ITEM_ID', cur.src_mdl_item_id);
-          ihook.setColumnValue(row, 'SRC_MDL_VER_NR', cur.src_mdl_ver_nr);
-          ihook.setColumnValue(row, 'TGT_MDL_ITEM_ID', cur.tgt_mdl_item_id);
-          ihook.setColumnValue(row, 'TGT_MDL_VER_NR', cur.tgt_mdl_ver_nr);
-            ihook.setColumnValue(row, 'MECM_ID', -1);
-          end loop;
-          rows.extend;
-          rows(rows.last) := row;
-          rowsetmap := t_rowset(rows, 'Model Map - Characteristics', 1, 'NCI_MEC_MAP');
-        forms                  := t_forms();
-    form1                  := t_form('Model Map - Characteristics', 2,1);
-    form1.rowset :=rowsetmap;
-    forms.extend;    forms(forms.last) := form1;
- 
-    hookOutput.forms := forms;
-
-
+           ihook.setColumnValue(row, 'MAP_DEG', 120);
+        
+    HOOKOUTPUT.QUESTION    := getAddManualMapQuestion;
+    hookoutput.forms := getManualMapForm(row);
+     
   ELSE
       forms              := hookInput.forms;
       form1              := forms(1);
@@ -1492,6 +1514,33 @@ HOOKOUTPUT.QUESTION    := question;
       ihook.setColumnValue(rowmap, 'MDL_MAP_ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
           ihook.setColumnValue(rowmap, 'MDL_MAP_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
     
+        v_valid := true;
+        -- check if the source and target char are from the correct models
+        if (ihook.getColumnValue(rowmap,'SRC_MEC_ID') is not null) then
+        select count(*) into v_temp from VW_NCI_MEC_NO_CDE where  mec_id = ihook.getColumnValue(rowmap,'SRC_MEC_ID') and 
+        mdl_item_id =ihook.getColumnValue(rowmap,'SRC_MDL_ITEM_ID')  and mdl_ver_nr = ihook.getColumnValue(rowmap,'SRC_MDL_VER_NR');
+     --   raise_application_error(-20000,ihook.getColumnValue(rowmap,'SRC_MDL_ITEM_ID') );
+        if (v_temp = 0) then
+            v_err_Str := 'Source Characteristic is not from the correct model;';
+            v_valid := false;
+            end if;
+        end if;
+      if (ihook.getColumnValue(rowmap,'TGT_MEC_ID') is not null) then
+        select count(*) into v_temp from VW_NCI_MEC_NO_CDE where  mec_id = ihook.getColumnValue(rowmap,'TGT_MEC_ID') and 
+        mdl_item_id =ihook.getColumnValue(rowmap,'TGT_MDL_ITEM_ID')  and mdl_ver_nr = ihook.getColumnValue(rowmap,'TGT_MDL_VER_NR');
+        if (v_temp = 0) then
+            v_err_Str := v_err_Str || ' Target Characteristic is not from the correct model;';
+            v_valid := false;
+         end if;
+    end if;
+        --check if they are duplicates
+        if (v_valid = false) then
+        
+HOOKOUTPUT.QUESTION    := getAddManualMapQuestion;
+         hookoutput.forms := getManualMapForm(rowmap);
+         hookoutput.message := v_err_str;
+        end if;
+        if (v_valid = true) then
             rows := t_rows();
             rows.extend;    rows(rows.last) := rowmap;
             action := t_actionrowset(rows, 'Model Map - Characteristics', 2,1,'insert');
@@ -1500,7 +1549,7 @@ HOOKOUTPUT.QUESTION    := question;
 
             hookoutput.message := 'Manual Map created successfully.';
                 hookoutput.actions := actions;
-    
+       end if;
  end if;
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 --  nci_util.debugHook('GENERAL', v_data_out);
