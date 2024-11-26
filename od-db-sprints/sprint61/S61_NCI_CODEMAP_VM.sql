@@ -10,6 +10,9 @@ procedure spDeleteValueMapping  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_usr_
  
 procedure spValidateValueMapImport ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
  procedure spUpdateValueMapImport( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+ procedure spAddValueMap ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+ procedure spEditValueMap ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_mode in char);
+ 
 END;
 /
 create or replace PACKAGE BODY            nci_codemap_vm AS
@@ -69,22 +72,26 @@ begin
     input_rows := t_rows();
     output_rows := t_rows();
     
-    for cur in (select val_dom_item_id, val_dom_ver_nr from nci_mdl_elmnt_char c, value_dom v where mec_id = ihook.getColumnValue(row_ori,'SRC_MEC_ID') and
+    for cur in (select val_dom_item_id, val_dom_ver_nr, cde_item_id, cde_ver_nr from nci_mdl_elmnt_char c, value_dom v where mec_id = ihook.getColumnValue(row_ori,'SRC_MEC_ID') and
     c.val_dom_item_id = v.item_id and c.val_dom_ver_Nr = v.ver_nr) loop
       row := t_row();
       ihook.setColumnValue (row, 'ITEM_ID', cur.val_dom_item_id);
       ihook.setColumnValue (row, 'VER_NR', cur.val_dom_ver_nr);
-      input_rows.extend;  input_rows(input_rows.last) := row;
+        ihook.setColumnValue (row, 'CDE_ITEM_ID', cur.cde_item_id);
+      ihook.setColumnValue (row, 'CDE_VER_NR', cur.cde_ver_nr);
+     input_rows.extend;  input_rows(input_rows.last) := row;
 
     end loop;
  
  
-    for cur in (select val_dom_item_id, val_dom_ver_nr from nci_mdl_elmnt_char c, value_dom v where mec_id = ihook.getColumnValue(row_ori,'TGT_MEC_ID')  and
+    for cur in (select val_dom_item_id, val_dom_ver_nr, cde_item_id, cde_ver_nr  from nci_mdl_elmnt_char c, value_dom v where mec_id = ihook.getColumnValue(row_ori,'TGT_MEC_ID')  and
     c.val_dom_item_id = v.item_id and c.val_dom_ver_Nr = v.ver_nr and v.val_dom_typ_id = 17) loop
       row := t_row();
       ihook.setColumnValue (row, 'ITEM_ID', cur.val_dom_item_id);
       ihook.setColumnValue (row, 'VER_NR', cur.val_dom_ver_nr);
-      input_rows.extend;  input_rows(input_rows.last) := row;
+        ihook.setColumnValue (row, 'CDE_ITEM_ID', cur.cde_item_id);
+      ihook.setColumnValue (row, 'CDE_VER_NR', cur.cde_ver_nr);
+     input_rows.extend;  input_rows(input_rows.last) := row;
 
     end loop;
     
@@ -95,8 +102,8 @@ begin
     nci_11179_2.spCreateValueMap(input_rows, output_rows, v_src_alt_nm_typ, v_tgt_alt_nm_typ);
     
     delete from NCI_MEC_VAL_MAP where src_mec_id = ihook.getColumnValue(row_ori, 'SRC_MEC_ID') and tgt_mec_id = ihook.getColumnValue(row_ori, 'TGT_MEC_ID') and 
- nvl(map_deg,0) <> 120 and mdl_map_item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
-    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR');
+ mdl_map_item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
+    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') and map_deg not in (120,131);
     commit;
     delete from onedata_ra.NCI_MEC_VAL_MAP where 
     src_mec_id = ihook.getColumnValue(row_ori, 'SRC_MEC_ID') 
@@ -109,21 +116,37 @@ begin
         row := row_ori;
  --   raise_application_error(-20000,output_rows.count);
         
-        select count(*) into v_temp from nci_mec_val_map where src_mec_id =ihook.getColumnValue(row_ori, 'SRC_MEC_ID')
+       /* select count(*) into v_temp from nci_mec_val_map where src_mec_id =ihook.getColumnValue(row_ori, 'SRC_MEC_ID')
         and tgt_mec_id = ihook.getColumnValue(row_ori, 'TGT_MEC_ID')
         and nvl(src_pv,0) = nvl(ihook.getColumnValue(output_rows(i),'1'),0)
         and nvl(tgt_pv,0) = nvl(ihook.getColumnValue(output_rows(i),'2'),0)
         and mdl_map_item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
-    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') ;
+    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') ;*/
+    v_temp := 0;
         if (v_temp = 0) then -- insert
         insert into nci_mec_val_map (SRC_MEC_ID, TGT_MEC_ID, MDL_MAP_ITEM_ID, MDL_MAP_VER_NR, SRC_PV, TGT_PV, VM_CNCPT_CD, VM_CNCPT_NM,
-        SRC_LBL, TGT_LBL, MAP_DEG, MECM_ID)
+        SRC_LBL, TGT_LBL, MAP_DEG, MECM_ID,SRC_VM_CNCPT_CD, SRC_VM_CNCPT_NM, TGT_VM_CNCPT_CD, TGT_VM_CNCPT_NM,
+        SRC_VD_ITEM_ID,SRC_VD_VER_NR,SRC_CDE_ITEM_ID,SRC_CDE_VER_NR,
+        TGT_VD_ITEM_ID,TGT_VD_VER_NR,TGT_CDE_ITEM_ID,TGT_CDE_VER_NR)
         select ihook.getColumnValue(row_ori, 'SRC_MEC_ID'),ihook.getColumnValue(row_ori, 'TGT_MEC_ID'),ihook.getColumnValue(row_ori, 'MDL_MAP_ITEM_ID'),
         ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR'),ihook.getColumnValue(output_rows(i),'1'),ihook.getColumnValue(output_rows(i),'2'),
         ihook.getColumnValue(output_rows(i),'VM Concept Codes'),ihook.getColumnValue(output_rows(i),'VM Name'),
         ihook.getColumnValue(output_rows(i),'LBL_1'),ihook.getColumnValue(output_rows(i),'LBL_2'),
-        decode(ihook.getColumnValue(output_rows(i),'1'),null,decode(ihook.getColumnValue(output_rows(i),'2'),null,130,86),130),
-        ihook.getColumnValue(row_ori, 'MECM_ID') from dual;
+        decode(ihook.getColumnValue(output_rows(i),'1'),null,130,decode(ihook.getColumnValue(output_rows(i),'2'),null,130,86)),
+        ihook.getColumnValue(row_ori, 'MECM_ID'), ihook.getColumnValue(output_rows(i),'Source Concept Code'),
+        ihook.getColumnValue(output_rows(i),'Source Concept Name'),ihook.getColumnValue(output_rows(i),'Target Concept Code'),
+        ihook.getColumnValue(output_rows(i),'Target Concept Name'),
+        ihook.getColumnValue(output_rows(i),'SRC_VD_ITEM_ID'),
+        ihook.getColumnValue(output_rows(i),'SRC_VD_VER_NR'),
+         ihook.getColumnValue(output_rows(i),'SRC_CDE_ITEM_ID'),
+         ihook.getColumnValue(output_rows(i),'SRC_CDE_VER_NR'),
+       ihook.getColumnValue(output_rows(i),'TGT_VD_ITEM_ID'),
+        ihook.getColumnValue(output_rows(i),'TGT_VD_VER_NR'),
+         ihook.getColumnValue(output_rows(i),'TGT_CDE_ITEM_ID'),
+         ihook.getColumnValue(output_rows(i),'TGT_CDE_VER_NR')
+        from dual;
+        
+        
        /*
         ihook.setColumnValue(row,'SRC_PV',ihook.getColumnValue(output_rows(i),'1'));
         ihook.setColumnValue(row,'TGT_PV',ihook.getColumnValue(output_rows(i),'2'));
@@ -143,6 +166,13 @@ begin
         end if;
 
     end loop;
+    commit;
+      delete from nci_mec_val_map where map_deg not in (120,131) and mdl_map_item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
+    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') and src_mec_id = ihook.getColumnValue(row_ori, 'SRC_MEC_ID')
+    and tgt_mec_id = ihook.getColumnValue(row_ori, 'TGT_MEC_ID') and src_pv is not null and (   src_pv) in
+    (select  src_pv from nci_mec_val_map where map_deg in ( 120,131) and mdl_map_item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
+    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') and src_pv is not null and src_mec_id = ihook.getColumnValue(row_ori, 'SRC_MEC_ID')
+    and tgt_mec_id = ihook.getColumnValue(row_ori, 'TGT_MEC_ID') );
     commit;
     
     insert into  onedata_ra.NCI_MEC_VAL_MAP 
@@ -204,7 +234,7 @@ begin
         row_ori := hookInput.originalRowset.rowset(1);
         
         
-     delete from NCI_MEC_VAL_MAP where map_deg <> 120 and mdl_map_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') 
+     delete from NCI_MEC_VAL_MAP where map_deg not in ( 120,131) and mdl_map_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') 
     and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'VER_NR');
     commit;
     delete from onedata_ra.NCI_MEC_VAL_MAP where  mdl_map_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') 
@@ -224,7 +254,9 @@ begin
     -- Semantically similar
     for outercur in (select * from VW_MDL_MAP_IMP_TEMPLATE where MODEL_MAP_ID=ihook.getColumnValue(row_ori,'ITEM_ID')  and MODEL_MAP_VERSION=ihook.getColumnValue(row_ori,'VER_NR')
   --  and (upper(SOURCE_DOMAIN_TYPE)= 'ENUMERATED' or upper(TARGET_DOMAIN_TYPE)='ENUMERATED')and src_mec_id is not null and tgt_mec_id is not null) loop
-    and (upper(SOURCE_DOMAIN_TYPE)= 'ENUMERATED' and upper(TARGET_DOMAIN_TYPE)='ENUMERATED')and src_mec_id is not null and tgt_mec_id is not null) loop
+    and (upper(SOURCE_DOMAIN_TYPE)= 'ENUMERATED' and TARGET_DOMAIN_TYPE is not null)
+   -- and upper(TARGET_DOMAIN_TYPE)='ENUMERATED')
+    and src_mec_id is not null and tgt_mec_id is not null) loop
     --and upper(MAPPING_DEGREE)='SEMANTIC SIMILAR') loop
    
   --  raise_application_error(-20000, v_src_alt_nm_typ);
@@ -232,30 +264,36 @@ begin
     input_rows := t_rows();
     output_rows := t_rows();
     
-    for cur in (select val_dom_item_id, val_dom_ver_nr from nci_mdl_elmnt_char c, value_dom v where mec_id = outercur.SRC_MEC_ID and
+    for cur in (select val_dom_item_id, val_dom_ver_nr, cde_item_id, cde_ver_nr from nci_mdl_elmnt_char c, value_dom v where mec_id = outercur.SRC_MEC_ID and
     c.val_dom_item_id = v.item_id and c.val_dom_ver_Nr = v.ver_nr ) loop
       row := t_row();
       ihook.setColumnValue (row, 'ITEM_ID', cur.val_dom_item_id);
       ihook.setColumnValue (row, 'VER_NR', cur.val_dom_ver_nr);
-      ihook.setColumnValue(row,'MECM_ID', outercur.MECM_ID);
+    ihook.setColumnValue (row, 'CDE_ITEM_ID', cur.cde_item_id);
+      ihook.setColumnValue (row, 'CDE_VER_NR', cur.cde_ver_nr);
+         ihook.setColumnValue(row,'MECM_ID', outercur.MECM_ID);
       input_rows.extend;  input_rows(input_rows.last) := row;
 
     end loop;
     
-    for cur in (select val_dom_item_id, val_dom_ver_nr from nci_mdl_elmnt_char c, value_dom v where mec_id = outercur.TGT_MEC_ID  and
+    for cur in (select val_dom_item_id, val_dom_ver_nr , cde_item_id, cde_ver_nr from nci_mdl_elmnt_char c, value_dom v where mec_id = outercur.TGT_MEC_ID  and
     c.val_dom_item_id = v.item_id and c.val_dom_ver_Nr = v.ver_nr ) loop
-      if(input_rows.count = 0) then
+    /*  if(input_rows.count = 0) then
       -- insert dummy row
       
       row := t_row();
       ihook.setColumnValue (row, 'ITEM_ID', 1);
       ihook.setColumnValue (row, 'VER_NR', 1);
+       ihook.setColumnValue (row, 'CDE_ITEM_ID', cur.cde_item_id);
+      ihook.setColumnValue (row, 'CDE_VER_NR', cur.cde_ver_nr);
       input_rows.extend;  input_rows(input_rows.last) := row;
-      end if;
+      end if;*/
       row := t_row();
       ihook.setColumnValue (row, 'ITEM_ID', cur.val_dom_item_id);
       ihook.setColumnValue (row, 'VER_NR', cur.val_dom_ver_nr);
-      input_rows.extend;  input_rows(input_rows.last) := row;
+         ihook.setColumnValue (row, 'CDE_ITEM_ID', cur.cde_item_id);
+      ihook.setColumnValue (row, 'CDE_VER_NR', cur.cde_ver_nr);
+    input_rows.extend;  input_rows(input_rows.last) := row;
 
     end loop;
     
@@ -267,21 +305,33 @@ begin
     
     rows := t_rows();
     for i in 1..output_rows.count loop
-             select count(*) into v_temp from nci_mec_val_map where src_mec_id =ihook.getColumnValue(row_ori, 'SRC_MEC_ID')
+         /*    select count(*) into v_temp from nci_mec_val_map where src_mec_id =ihook.getColumnValue(row_ori, 'SRC_MEC_ID')
         and tgt_mec_id = ihook.getColumnValue(row_ori, 'TGT_MEC_ID')
         and nvl(src_pv,0) = nvl(ihook.getColumnValue(output_rows(i),'1'),0)
         and nvl(tgt_pv,0) = nvl(ihook.getColumnValue(output_rows(i),'2'),0)
         and mdl_map_item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
-    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') ;
+    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') ;*/
+    v_temp := 0;
         if (v_temp = 0) then -- insert
         insert into nci_mec_val_map (SRC_MEC_ID, TGT_MEC_ID, MDL_MAP_ITEM_ID, MDL_MAP_VER_NR, SRC_PV, TGT_PV, VM_CNCPT_CD, VM_CNCPT_NM,
-        SRC_LBL, TGT_LBL, MAP_DEG, MECM_ID)
+           SRC_LBL, TGT_LBL, MAP_DEG, MECM_ID,SRC_VM_CNCPT_CD, SRC_VM_CNCPT_NM, TGT_VM_CNCPT_CD, TGT_VM_CNCPT_NM,
+              SRC_VD_ITEM_ID,SRC_VD_VER_NR,SRC_CDE_ITEM_ID,SRC_CDE_VER_NR,
+        TGT_VD_ITEM_ID,TGT_VD_VER_NR,TGT_CDE_ITEM_ID,TGT_CDE_VER_NR)
         select outercur.SRC_MEC_ID,outercur.TGT_MEC_ID,ihook.getColumnValue(row_ori, 'ITEM_ID'),
         ihook.getColumnValue(row_ori, 'VER_NR'),ihook.getColumnValue(output_rows(i),'1'),ihook.getColumnValue(output_rows(i),'2'),
         ihook.getColumnValue(output_rows(i),'VM Concept Codes'),ihook.getColumnValue(output_rows(i),'VM Name'),
         ihook.getColumnValue(output_rows(i),'LBL_1'),ihook.getColumnValue(output_rows(i),'LBL_2'),
-        decode(ihook.getColumnValue(output_rows(i),'1'),null,decode(ihook.getColumnValue(output_rows(i),'2'),null,130,86),130),
-        ihook.getColumnValue(row_ori, 'MECM_ID') from dual;
+        decode(ihook.getColumnValue(output_rows(i),'1'),null,130,decode(ihook.getColumnValue(output_rows(i),'2'),null,130,86)),
+        outercur.MECM_ID , ihook.getColumnValue(output_rows(i),'Source Concept Code'),
+        ihook.getColumnValue(output_rows(i),'Source Concept Name'),ihook.getColumnValue(output_rows(i),'Target Concept Code'),
+        ihook.getColumnValue(output_rows(i),'Target Concept Name'), ihook.getColumnValue(output_rows(i),'SRC_VD_ITEM_ID'),
+        ihook.getColumnValue(output_rows(i),'SRC_VD_VER_NR'),
+         ihook.getColumnValue(output_rows(i),'SRC_CDE_ITEM_ID'),
+         ihook.getColumnValue(output_rows(i),'SRC_CDE_VER_NR'),
+       ihook.getColumnValue(output_rows(i),'TGT_VD_ITEM_ID'),
+        ihook.getColumnValue(output_rows(i),'TGT_VD_VER_NR'),
+         ihook.getColumnValue(output_rows(i),'TGT_CDE_ITEM_ID'),
+         ihook.getColumnValue(output_rows(i),'TGT_CDE_VER_NR') from dual;
    
 /*    row := t_row();
          ihook.setColumnValue(row,'MDL_MAP_ITEM_ID',ihook.getColumnValue(row_ori,'ITEM_ID'));
@@ -313,7 +363,12 @@ begin
     end loop;
    -- raise_application_Error(-20000,rows.count);
      commit;
-     
+     -- delete where mapping degree is Derived From
+     delete from nci_mec_val_map where map_deg not in ( 120,131) and mdl_map_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') 
+    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'VER_NR') and src_pv is not null and (src_mec_id, tgt_mec_id ,   src_pv) in
+    (select src_mec_id, tgt_mec_id ,   src_pv from nci_mec_val_map where map_deg in ( 120,131) and mdl_map_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') 
+    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'VER_NR') and src_pv is not null);
+    commit;
         row:= t_row();
         ihook.setColumnValue(row, 'MECM_ID',outercur.MECM_ID);
         ihook.setColumnValue(row,'VAL_MAP_CREATE_IND',1);
@@ -331,8 +386,8 @@ begin
   
     insert into  onedata_ra.NCI_MEC_VAL_MAP 
     select * from nci_mec_val_map where  
-     mdl_map_item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
-    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR');
+     mdl_map_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') 
+    and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'VER_NR');
     commit;
     
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -348,10 +403,12 @@ begin
 if (v_chk_ind = 0) then -- no check
 insert into nci_mec_val_Map (SRC_MEC_ID, TGT_MEC_ID, MDL_MAP_ITEM_ID, MDL_MAP_VER_NR, 
 SRC_PV, TGT_PV, VM_CNCPT_CD, VM_CNCPT_NM,
-PROV_ORG_ID, PROV_CNTCT_ID, PROV_RSN_TXT, PROV_TYP_RVW_TXT, PROV_RVW_DT, PROV_APRV_DT, SRC_LBL, TGT_LBL, PROV_NOTES, MAP_DEG,CREAT_USR_ID, LST_UPD_USR_ID)
+PROV_ORG_ID, PROV_CNTCT_ID, PROV_RSN_TXT, PROV_TYP_RVW_TXT, PROV_RVW_DT, PROV_APRV_DT, SRC_LBL, TGT_LBL, PROV_NOTES, MAP_DEG,CREAT_USR_ID, LST_UPD_USR_ID,
+SRC_VM_CNCPT_CD, TGT_VM_CNCPT_CD, SRC_VM_CNCPT_NM, TGT_VM_CNCPT_NM)
 select SRC_MEC_ID, TGT_MEC_ID, v_tgt_mm_id, v_tgt_mm_ver_nr, 
 SRC_PV, TGT_PV, VM_CNCPT_CD, VM_CNCPT_NM,
-PROV_ORG_ID, PROV_CNTCT_ID, PROV_RSN_TXT, PROV_TYP_RVW_TXT, PROV_RVW_DT, PROV_APRV_DT, SRC_LBL, TGT_LBL, PROV_NOTES, MAP_DEg, v_user_id, v_user_id
+PROV_ORG_ID, PROV_CNTCT_ID, PROV_RSN_TXT, PROV_TYP_RVW_TXT, PROV_RVW_DT, PROV_APRV_DT, SRC_LBL, TGT_LBL, PROV_NOTES, MAP_DEg, v_user_id, v_user_id,
+SRC_VM_CNCPT_CD, TGT_VM_CNCPT_CD, SRC_VM_CNCPT_NM, TGT_VM_CNCPT_NM
 from nci_mec_val_map where mdl_map_item_id = v_src_mm_id and mdl_map_ver_nr = v_src_mm_ver_nr;
 commit;
 
@@ -671,6 +728,390 @@ end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
   -- nci_util.debugHook('GENERAL',v_data_out);
 end;
+
+function getPVForm (v_cur_text in varchar2)  return t_forms is
+  forms t_forms;
+  form1 t_form;
+  rowset t_rowset;
+  rows t_rows;
+  row t_row;
+begin
+    rows := t_rows();
+    row := t_row();
+    ihook.setColumnValue(row,'CUR_PV','.');
+    rows.extend;     rows(rows.last) := row;
+    rowset := t_rowset(rows,'Value Map (Edit Hook)',1,'VW_VAL_MAP_EDIT');
+      
+    forms                  := t_forms();
+    form1                  := t_form('Value Map (Edit Hook)', 2,1);
+    form1.rowset :=rowset;
+  
+   forms.extend;    forms(forms.last) := form1;
+     
+  return forms;
+end;
+
+
+-- assuming v_Valid is true and v_err_Str is null when called.  
+procedure validateValMapAddEdit (row_ori in t_row, v_vd_typ in integer, v_end_point_ind in char, v_mode in char, v_valid in out boolean, v_err_str in out varchar2 ) 
+as
+  i integer;
+begin
+--raise_application_error(-20000, v_vd_typ || v_end_point_ind || v_mode);
+if (v_mode ='U') and ihook.getColumnValue(row_ori,'MAP_DEG') not in (130)  then
+  v_valid := false;
+  v_err_str := 'Cannot update PV for Semantically Equivalent or Derived From Mapping.';
+end if;
+  if (v_vd_typ = 17 and v_end_point_ind = 'S' and v_mode = 'I') then -- Enuerated cannot Insert or update
+  v_valid := false;
+  v_err_str := 'Cannot insert new Value Map Rule for a Mapping where the Source PV is Enumerated. Please generate Value Mapping first';
+  end if;
+   if (v_vd_typ = 17 and v_end_point_ind = 'S' and v_mode = 'U') then
+  v_valid := false;
+  v_err_str := 'Cannot update Source PV for Enumerated Value Domains.';
+  end if;
+  
+end;
+
+procedure getPVSelection (v_vd_id in number, v_vd_ver in number, v_vd_typ in integer, hookoutput in out t_hookOutput ) 
+as
+    row t_row;
+    rows  t_rows;
+    
+    showrowset	t_showablerowset;
+begin
+    rows := t_rows();
+-- enumerated vd 
+    if (v_vd_typ = 17) then 
+
+        for cur in (select 	VAL_ID from perm_val where val_dom_item_id = v_vd_id and val_dom_ver_nr = v_vd_ver) loop
+            row := t_row();
+            ihook.setColumnValue(row, 'VAL_ID', cur.val_id);
+            rows.extend;     rows(rows.last) := row;
+        end loop;
+        showrowset := t_showablerowset (rows, 'Permissible Values (Edit AI)', 2, 'single');
+         hookoutput.showrowset := showrowset;
+    end if;
+      --  
+-- non-enum or enum by ref
+    if (v_vd_typ in (16,18)) then 
+     hookoutput.forms := getPVForm ('Test');
+    end if;
+
+end;
+ 
+ procedure spEditValueMAp ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_mode in char)
+   as
+   hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+    row_sel t_row;
+    v_id integer;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+  v_cur_pv varchar2(255);
+  v_new_pv varchar2(255);
+  v_vd_typ integer;
+  v_valid boolean := true;
+  v_str varchar2(1000) := '';
+  showrowset	t_showablerowset;
+v_item_id number;
+v_ver_nr number(4,2);
+  forms     t_forms;
+  form1  t_form;
+rowform t_row;
+v_msg_str varchar2(1000);
+    v_tgt_alt_nm_typ integer;
+  
+ BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+    
+  row_ori :=  hookInput.originalRowset.rowset(1);
+   if (v_mode = 'S') then -- Source
+  v_item_id := ihook.getColumnValue(row_ori,'SRC_VD_ITEM_ID');
+  v_ver_nr := ihook.getColumnValue(row_ori,'SRC_VD_VER_NR');
+     v_cur_pv := ihook.getColumnValue(row_ori, 'SRC_PV');
+     v_msg_str := 'Source PV';
+   else
+  v_item_id := ihook.getColumnValue(row_ori,'TGT_VD_ITEM_ID');
+  v_ver_nr := ihook.getColumnValue(row_ori,'TGT_VD_VER_NR');
+     v_cur_pv := ihook.getColumnValue(row_ori, 'TGT_PV');
+      v_msg_str := 'Target PV';
+     
+   end if;
+  select val_dom_typ_id into v_vd_typ from value_dom where item_id = v_item_id and ver_nr= v_ver_nr;
+      
+  if (hookinput.invocationnumber = 0) then -- source PV
+      validateValMapAddEdit(row_ori, v_vd_typ, v_mode,'U',v_valid, v_str);
+      if (v_valid= true) then
+            hookoutput.question := nci_11179_2.getGenericQuestion(v_msg_str, 'Save',1);
+            getPVSelection(v_item_id, v_ver_nr,v_vd_typ, hookoutput);
+            hookoutput.message := 'Please specify ' || v_msg_str || ' Current PV is:' || v_cur_pv ;
+      else
+       hookoutput.message := v_str;
+      end if;
+  end if;
+
+    if (hookinput.invocationnumber =1 ) then 
+        rows := t_rows();
+        row := t_row();       
+        ihook.setColumnValue(row,'MECVM_ID', ihook.getColumnValue(row_ori,'MECVM_ID'));
+        ihook.setColumnValue(row,'MAP_DEG', 120); -- derived from
+        
+      -- forms
+        if (v_vd_typ <> 17) then
+            forms              := hookInput.forms;
+            form1              := forms(1);
+            rowform := form1.rowset.rowset(1);  -- entered values from user
+            if (ihook.getColumnValue(rowform, 'NEW_PV') is not null) then
+                v_new_pv := ihook.getColumnValue(rowform, 'NEW_PV') ;
+            end if;
+        end if;
+        if(v_vd_typ = 17) then
+            row_sel := hookInput.selectedRowset.rowset(1);
+            v_new_pv := ihook.getColumnValue(row_sel,'PERM_VAL_NM');
+        
+        for cur in (Select m.* from nci_mdl m, nci_mdl_map mm where mm.item_id = ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') 
+        and mm.ver_nr = ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') and mm.TGT_MDL_ITEM_ID = m.item_id and mm.TGT_MDL_VER_NR = m.VER_NR) loop
+            v_tgt_alt_nm_typ := cur.ASSOC_NM_TYP_ID;
+        end loop;
+        for cur in (select * from nci_admin_item_ext where item_id = ihook.getColumnValue(row_sel,'NCI_VAL_MEAN_ITEM_ID') 
+        and ver_nr = ihook.getColumnValue(row_sel,'NCI_VAL_MEAN_VER_NR')) loop
+            ihook.setColumnValue(row,'TGT_VM_CNCPT_CD',cur.CNCPT_CONCAT);
+            ihook.setColumnValue(row,'TGT_VM_CNCPT_NM',cur.CNCPT_CONCAT_NM);
+        end loop;
+        if (v_tgt_alt_nm_typ is not null) then
+            for cur in (     
+            select listagg(nm_desc, '|') nm_desc from alt_Nms where item_id = ihook.getColumnValue(row_sel,'NCI_VAL_MEAN_ITEM_ID') 
+            and ver_nr = ihook.getColumnValue(row_sel,'NCI_VAL_MEAN_VER_NR') and nm_typ_id = v_tgt_alt_nm_typ and fld_delete = 0) loop
+                ihook.setColumnValue(row,'TGT_LBL',cur.nm_desc);
+            end loop;
+        end if;
+    end if;
+        
+        if (v_mode = 'S') then
+        ihook.setColumnValue(row,'SRC_PV',v_new_pv);
+        else
+        ihook.setColumnValue(row,'TGT_PV',v_new_pv);
+        end if;
+        rows.extend;     rows(rows.last) := row;
+         action             := t_actionrowset(rows, 'Model Map Characteristic Values', 2, 10,'update');
+            actions.extend;
+            actions(actions.last) := action;
+            hookoutput.actions := actions;
+            hookoutput.message := 'Update Successful.';
+     end if;
+
+   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+  end;
+ 
+  /*
+ procedure spEditValueMAp ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+   as
+   hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+    row_sel t_row;
+    v_id integer;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+  v_cur_pv varchar2(255);
+  v_src_vd_typ integer;
+  v_tgt_vd_typ integer;
+  v_valid boolean := true;
+  v_str varchar2(1000) := '';
+  showrowset	t_showablerowset;
+
+  forms     t_forms;
+  form1  t_form;
+rowform t_row;
+
+ BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+    
+  row_ori :=  hookInput.originalRowset.rowset(1);
+  select val_dom_typ_id into v_src_vd_typ from value_dom where item_id = ihook.getColumnValue(row_ori,'SRC_VD_ITEM_ID') and ver_nr= ihook.getColumnValue(row_ori,'SRC_VD_VER_NR');
+  select val_dom_typ_id into v_tgt_vd_typ from value_dom where item_id = ihook.getColumnValue(row_ori,'TGT_VD_ITEM_ID') and ver_nr= ihook.getColumnValue(row_ori,'TGT_VD_VER_NR');
+      
+  if (hookinput.invocationnumber = 0) then -- source PV
+      v_cur_pv := ihook.getColumnValue(row_ori, 'SRC_PV');
+      validateValMapAddEdit(v_src_vd_typ, 'S','U',v_valid, v_str);
+      if (v_valid= true) then
+            hookoutput.question := nci_11179_2.getGenericQuestion('Source PV', 'Next',1);
+            getPVSelection(ihook.getColumnValue(row_ori,'SRC_VD_ITEM_ID'), ihook.getColumnValue(row_ori,'SRC_VD_VER_NR'),v_src_vd_typ, hookoutput);
+            hookoutput.message := 'Please select source pv. Current PV is:' || v_cur_pv ;
+       
+      end if;
+  end if;
+
+    if (hookinput.invocationnumber =1 and hookinput.answerid = 1) then --  save source pv - always non-enum
+      -- forms
+        forms              := hookInput.forms;
+        form1              := forms(1);
+        rowform := form1.rowset.rowset(1);  -- entered values from user
+        if (ihook.getColumnValue(rowform, 'NEW_PV') is not null) then
+        update nci_mec_val_map set src_pv = ihook.getColumnValue(rowform,'NEW_PV') where mecvm_id = ihook.getColumnValue(row_ori,'MECVM_ID');
+        commit;
+        end if;
+        
+    end if;
+    if ((hookinput.invocationnumber =1 and hookinput.answerid = 2) or hookinput.invocationnumber = 2) then -- save target pv, end
+      if(v_tgt_vd_typ = 17) then
+         row_sel := hookInput.selectedRowset.rowset(1);
+      --   raise_application_error(-20000,ihook.getColumnValue(row_sel,'PERM_VAL_NM'));
+        --update nci_mec_val_map set tgt_pv =  where mecvm_id = ihook.getColumnValue(row_ori,'MECVM_ID');
+       -- commit;
+      end if;
+      if(v_tgt_vd_typ <> 17) then
+      forms              := hookInput.forms;
+        form1              := forms(1);
+        rowform := form1.rowset.rowset(1);  -- entered values from user
+      if (ihook.getColumnValue(rowform, 'NEW_PV') is not null) then
+        update nci_mec_val_map set tgt_pv = ihook.getColumnValue(rowform,'NEW_PV') where mecvm_id = ihook.getColumnValue(row_ori,'MECVM_ID');
+        commit;
+        end if;
+        end if;
+    end if;
+
+if (hookinput.invocationnumber = 1 or (hookinput.invocationnumber = 0 and v_valid = false)) then -- target PV 
+     v_valid := true;
+      validateValMapAddEdit(v_tgt_vd_typ, 'T','U',v_valid, v_str);
+      if (v_valid = true) then
+      v_cur_pv := ihook.getColumnValue(row_ori, 'TGT_PV');
+      hookoutput.question := nci_11179_2.getGenericQuestion('Target PV', 'Save',2);
+      getPVSelection(ihook.getColumnValue(row_ori,'TGT_VD_ITEM_ID'), ihook.getColumnValue(row_ori,'TGT_VD_VER_NR'), v_tgt_vd_typ, hookoutput);
+      hookoutput.message := 'Please specify Target PV. Current PV is:' || v_cur_pv ;
+       else 
+        hookoutput.message := v_str;
+      end if;
+  end if;
+
+ 
+   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+  end;
+
+*/
+ procedure spAddValueMAp ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+   as
+   hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+    rowform t_row;
+    v_vd_id number;
+    v_vd_ver number(4,2);
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+  v_new_pv varchar2(255);
+  v_vd_typ integer;
+  v_valid boolean := true;
+  v_str varchar2(1000) := '';
+forms     t_forms;
+  form1  t_form;
+ BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+    
+  row_ori :=  hookInput.originalRowset.rowset(1); -- MOdel Map
+  
+  if (ihook.getColumnValue(row_ori, 'SRC_MEC_ID') is null or ihook.getColumnValue(row_ori, 'TGT_MEC_ID') is null) then
+    raise_application_error(-20000,'Both Source and Target Characteristics have to be populated to add a Value Mapping.');
+    return;
+  end if;
+  
+  
+  if (ihook.getColumnValue(row_ori, 'SRC_CDE_ITEM_ID') is null or ihook.getColumnValue(row_ori, 'TGT_CDE_ITEM_ID') is null) then
+    raise_application_error(-20000,'Both Source and Target CDEs have to be associated.');
+    return;
+  end if;
+  
+  select val_dom_item_id , val_dom_ver_nr into v_vd_id,v_vd_ver from de where item_id =ihook.getColumnValue(row_ori, 'SRC_CDE_ITEM_ID')
+  and ver_nr = ihook.getColumnValue(row_ori, 'SRC_CDE_VER_NR');
+  
+    select val_dom_typ_id into v_vd_typ from value_dom where item_id = v_vd_id and ver_nr= v_vd_ver;
+  if (v_vd_typ = 17) then
+    raise_application_error(-20000,'Cannot insert new Value Map Rule for a Mapping where the Source PV is Enumerated. Please generate Value Mapping first');
+    return;
+  end if;
+  if (hookinput.invocationnumber = 0) then -- source PV
+            hookoutput.question := nci_11179_2.getGenericQuestion('Source PV', 'Next',1);
+            getPVSelection(v_vd_id,v_vd_ver,v_vd_typ, hookoutput);
+            hookoutput.message := 'Please specify source PV. ' ;
+     
+  end if;
+    if (hookinput.invocationnumber = 1) then -- insert row
+      forms              := hookInput.forms;
+            form1              := forms(1);
+            rowform := form1.rowset.rowset(1);  -- entered values from user
+         --   if (ihook.getColumnValue(rowform, 'NEW_PV') is not null) then
+                v_new_pv := ihook.getColumnValue(rowform, 'NEW_PV') ;
+           -- end if;
+      --v_new_pv := ihook.getColumnValue(row_sel, 'NEW_PV');  
+     -- raise_application_error(-20000,v_new_pv);
+      for cur in (select * from nci_mec_val_map where MECM_ID = ihook.getColumnValue(row_ori,'MECM_ID') and upper(src_pv) = upper(v_new_pv)) loop
+        hookoutput.message := 'Duplicate Source PV found.';
+        V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+        return;
+      end loop;
+     
+     rows := t_rows();
+     row := t_row();
+        ihook.setColumnValue(row,'MDL_MAP_VER_NR', ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR'));
+        ihook.setColumnValue(row,'MDL_MAP_ITEM_ID', ihook.getColumnValue(row_ori, 'MDL_MAP_ITEM_ID'));
+        
+        ihook.setColumnValue(row, 'MECM_ID', ihook.getColumnValue(row_ori, 'MECM_ID'));
+        ihook.setColumnValue(row, 'SRC_MEC_ID', ihook.getColumnValue(row_ori, 'SRC_MEC_ID'));
+        ihook.setColumnValue(row, 'TGT_MEC_ID', ihook.getColumnValue(row_ori, 'TGT_MEC_ID'));
+        
+        ihook.setColumnValue(row, 'SRC_VD_ITEM_ID', v_vd_id);
+        ihook.setColumnValue(row, 'SRC_VD_VER_NR', v_vd_ver);
+        ihook.setColumnValue(row,'SRC_CDE_ITEM_ID', ihook.getColumnValue(row_ori, 'SRC_CDE_ITEM_ID'));
+        ihook.setColumnValue(row,'SRC_CDE_VER_NR', ihook.getColumnValue(row_ori, 'SRC_CDE_VER_NR'));
+        ihook.setColumnValue(row,'TGT_CDE_ITEM_ID', ihook.getColumnValue(row_ori, 'TGT_CDE_ITEM_ID'));
+        ihook.setColumnValue(row,'TGT_CDE_VER_NR', ihook.getColumnValue(row_ori, 'TGT_CDE_VER_NR'));
+        
+        for cur in (select * from de where item_id = ihook.getColumnValue(row_ori, 'TGT_CDE_ITEM_ID')
+        and ver_nr = ihook.getColumnValue(row_ori, 'TGT_CDE_VER_NR')) loop
+        ihook.setColumnValue(row, 'TGT_VD_ITEM_ID', cur.val_dom_item_id);
+        ihook.setColumnValue(row, 'TGT_VD_VER_NR', cur.val_dom_ver_nr);
+        
+        end loop;
+        
+       
+        ihook.setColumnValue(row,'SRC_PV',v_new_pv);
+                ihook.setColumnValue(row,'MAP_DEG',130);-- not mapped yet.
+        ihook.setColumnValue(row,'MECVM_ID',-1); 
+        rows.extend;     rows(rows.last) := row;
+       action             := t_actionrowset(rows, 'Model Map Characteristic Values', 2, 10,'insert');
+            actions.extend;
+            actions(actions.last) := action;
+            hookoutput.actions := actions;
+            hookoutput.message := 'Rule inserted. Please use Edit Target PV next.';
+  end if;
+
+ 
+   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+nci_util.debugHook('GENERAL', v_data_out);
+  end;
 
 END;
 /
