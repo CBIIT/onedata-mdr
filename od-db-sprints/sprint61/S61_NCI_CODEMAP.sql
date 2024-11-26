@@ -505,6 +505,8 @@ AS
   rowform t_row;
 v_found boolean;
 v_mdl_nm varchar2(255);
+tmp_mdl_str varchar(2000);
+v_map_ind boolean;
  
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -514,6 +516,8 @@ BEGIN
   row_ori :=  hookInput.originalRowset.rowset(1);
   v_mdl_id := ihook.getColumnValue(row_ori, 'MDL_ITEM_ID');
   v_mdl_ver_nr := ihook.getColumnValue(row_ori, 'MDL_ITEM_VER_NR');
+  tmp_mdl_str := '';
+  v_map_ind := false;
   
   if (hookinput.invocationnumber = 0) then 
  -- verfiy no model mapping exist
@@ -523,18 +527,26 @@ BEGIN
                 row_ori :=  hookInput.originalRowset.rowset(i);
                 v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
                 v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR'); 
+                tmp_mdl_str := tmp_mdl_str || to_char(cur.item_id) || 'v' || to_char(cur.ver_nr) || ' ';
                 for elm in (select * from nci_mec_map where nci_mec_map.mdl_map_item_id = cur.item_id and nci_mec_map.mdl_map_ver_nr = cur.ver_nr 
                             and (nci_mec_map.src_mec_id in (select mec_id from nci_mdl_elmnt_char where mdl_elmnt_item_id = v_item_id and mdl_elmnt_ver_nr = v_ver_nr) OR
                                 nci_mec_map.tgt_mec_id in (select mec_id from nci_mdl_elmnt_char where mdl_elmnt_item_id = v_item_id and mdl_elmnt_ver_nr = v_ver_nr))) loop
 --                            and (nci_mec_map.src_mec_id = nci_mdl_elmnt_char.mec_id or nci_mec_map.tgt_mec_id = nci_mdl_elmnt_char.mec_id) 
 --                            and nci_mdl_elmnt_char.mdl_elmnt_item_id = v_item_id and nci_mdl_elmnt_char.mdl_elmnt_ver_nr = v_ver_nr) loop
-                    select item_nm into v_mdl_nm from admin_item where item_id = cur.item_id and ver_nr = cur.ver_nr;
-                    hookoutput.message := 'Model Element cannot be deleted. Its characteristics are associated with Model Mapping ID: ' || cur.item_id || ' - ' || v_mdl_nm;
-                    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-                    return;
+                    --select item_nm, item_id, ver_nr into v_mdl_nm, tmp_mdl_id, tmp_mdl_ver from admin_item where item_id = cur.item_id and ver_nr = cur.ver_nr;
+                    --tmp_mdl_str := tmp_mdl_str || to_char(cur.item_id) || 'v' || to_char(cur.ver_nr) || ' ';
+                    v_map_ind := true;
+                    --hookoutput.message := 'Model Element cannot be deleted. Its characteristics are associated with Model Mapping ID: ' || cur.item_id || ' - ' || v_mdl_nm;
+                   -- V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+                    --return;
                 end loop;
             end loop;
         end loop;
+        if (v_map_ind = true) then
+            hookoutput.message := 'Model Element cannot be deleted. Its characteristics are associated with Model Mapping ID(s): ' || tmp_mdl_str;
+            V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+            return;
+        end if;
         hookoutput.question := nci_form_curator.getProceedQuestion('Confirm', 'Please confirm deletion of Model Elements.');
     end if;
 if (hookinput.invocationnumber = 1) then
@@ -1928,6 +1940,8 @@ AS
  
   rowform t_row;
 v_found boolean;
+tmp_mdl_str varchar(255);
+v_map_ind boolean;
  
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -1937,7 +1951,7 @@ BEGIN
   row_ori :=  hookInput.originalRowset.rowset(1);
   select mdl_item_id, mdl_item_ver_nr into v_mdl_id, v_mdl_ver_nr 
   from nci_mdl_elmnt where item_id = ihook.getColumnValue(row_ori, 'MDL_ELMNT_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'MDL_ELMNT_VER_NR');
-
+    v_map_ind := false;
   
   if (hookinput.invocationnumber = 0) then 
  -- verfiy no model mapping exist
@@ -1946,19 +1960,26 @@ BEGIN
             for i in 1..hookInput.originalRowset.rowset.count loop
                 row_ori :=  hookInput.originalRowset.rowset(i);
                 v_item_id := ihook.getColumnValue(row_ori,'MEC_ID');
+                tmp_mdl_str := tmp_mdl_str || to_char(cur.item_id) || 'v' || to_char(cur.ver_nr) || ' ';
                 --v_ver_nr := ihook.getColumnValue(row_ori,'MDL_ELMNT_VER_NR'); 
                 for elm in (select * from nci_mec_map where nci_mec_map.mdl_map_item_id = cur.item_id and nci_mec_map.mdl_map_ver_nr = cur.ver_nr 
                             and (nci_mec_map.src_mec_id = v_item_id  OR
                                 nci_mec_map.tgt_mec_id = v_item_id )) loop
 --                            and (nci_mec_map.src_mec_id = nci_mdl_elmnt_char.mec_id or nci_mec_map.tgt_mec_id = nci_mdl_elmnt_char.mec_id) 
 --                            and nci_mdl_elmnt_char.mdl_elmnt_item_id = v_item_id and nci_mdl_elmnt_char.mdl_elmnt_ver_nr = v_ver_nr) loop
-                    select item_nm into v_mdl_nm from admin_item where item_id = cur.item_id and ver_nr = cur.ver_nr;
-                    hookoutput.message := 'Model Element Characteristic cannot be deleted. It is associated with Model Mapping ID: ' || cur.item_id  || ' - ' || v_mdl_nm;
-                    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-                    return;
+                    v_map_ind := true;
+                    --select item_nm into v_mdl_nm from admin_item where item_id = cur.item_id and ver_nr = cur.ver_nr;
+                    --hookoutput.message := 'Model Element Characteristic cannot be deleted. It is associated with Model Mapping ID: ' || cur.item_id  || ' - ' || v_mdl_nm;
+                    --V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+                    --return;
                 end loop;
             end loop;
         end loop;
+        if (v_map_ind = true) then
+            hookoutput.message := 'Model Element Characteristic cannot be deleted. It is associated with Model Mapping ID(s): ' || tmp_mdl_str;
+            V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+            return;
+        end if;
         hookoutput.question := nci_form_curator.getProceedQuestion('Confirm', 'Please confirm deletion of Model Element Characteristics.');
     end if;
 if (hookinput.invocationnumber = 1) then
