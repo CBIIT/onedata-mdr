@@ -1,1 +1,2 @@
---TBD
+Export and import Type Details from Dev for "Concept Source" Object TYpe and load into higher environments.
+exec nci_ext_import.load_xwalk_derv
