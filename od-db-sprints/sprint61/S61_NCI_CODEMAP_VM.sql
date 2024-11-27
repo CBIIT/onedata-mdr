@@ -1052,10 +1052,20 @@ forms     t_forms;
     raise_application_error(-20000,'Cannot insert new Value Map Rule for a Mapping where the Source PV is Enumerated. Please generate Value Mapping first');
     return;
   end if;
+  
+  
+  select val_dom_item_id , val_dom_ver_nr into v_vd_id,v_vd_ver from de where item_id =ihook.getColumnValue(row_ori, 'TGT_CDE_ITEM_ID')
+  and ver_nr = ihook.getColumnValue(row_ori, 'TGT_CDE_VER_NR');
+  
+    select val_dom_typ_id into v_vd_typ from value_dom where item_id = v_vd_id and ver_nr= v_vd_ver;
+  if (v_vd_typ = 17) then
+    raise_application_error(-20000,'Cannot insert new Value Map Rule for a Mapping where the Target PV is Enumerated. Please use Generate for Rule.');
+    return;
+  end if;
   if (hookinput.invocationnumber = 0) then -- source PV
-            hookoutput.question := nci_11179_2.getGenericQuestion('Source PV', 'Next',1);
-            getPVSelection(v_vd_id,v_vd_ver,v_vd_typ, hookoutput);
-            hookoutput.message := 'Please specify source PV. ' ;
+            hookoutput.question := nci_11179_2.getGenericQuestion('Source and Target PV', 'Add',1);
+           hookoutput.forms := nci_11179_2.getGenericForm('Value Map (Insert Hook)'); 
+            hookoutput.message := 'Please specify Source and Target PV. ' ;
      
   end if;
     if (hookinput.invocationnumber = 1) then -- insert row
@@ -1063,7 +1073,7 @@ forms     t_forms;
             form1              := forms(1);
             rowform := form1.rowset.rowset(1);  -- entered values from user
          --   if (ihook.getColumnValue(rowform, 'NEW_PV') is not null) then
-                v_new_pv := ihook.getColumnValue(rowform, 'NEW_PV') ;
+                v_new_pv := ihook.getColumnValue(rowform, 'CUR_PV') ;
            -- end if;
       --v_new_pv := ihook.getColumnValue(row_sel, 'NEW_PV');  
      -- raise_application_error(-20000,v_new_pv);
@@ -1098,6 +1108,8 @@ forms     t_forms;
         
        
         ihook.setColumnValue(row,'SRC_PV',v_new_pv);
+        ihook.setColumnValue(row,'TGT_PV',ihook.getColumnValue(rowform, 'NEW_PV') );
+        
                 ihook.setColumnValue(row,'MAP_DEG',130);-- not mapped yet.
         ihook.setColumnValue(row,'MECVM_ID',-1); 
         rows.extend;     rows(rows.last) := row;
@@ -1105,12 +1117,12 @@ forms     t_forms;
             actions.extend;
             actions(actions.last) := action;
             hookoutput.actions := actions;
-            hookoutput.message := 'Rule inserted. Please use Edit Target PV next.';
+            hookoutput.message := 'Value Map Rule inserted successfully.';
   end if;
 
  
    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-nci_util.debugHook('GENERAL', v_data_out);
+--nci_util.debugHook('GENERAL', v_data_out);
   end;
 
 END;
