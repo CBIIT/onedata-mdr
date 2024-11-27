@@ -1,3 +1,15 @@
+-- Run as ONEDATA_MD
+S61_MD.sql
+
 -- Run as ONEDATA_RA DDL scripts
+S61_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S61_WA_RA_DDL.sql
+S61_NCI_11179_2.sql
+S61_NCI_CODEMAP.sql
+S61_NCI_CODEMAP_MM.sql
+S61_NCI_CODEMAP_VM.sql
+S61_NCI_DEC_MGMT.sql
+S61_NCI_EXT_IMPORT.sql
+
