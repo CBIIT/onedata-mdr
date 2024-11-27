@@ -115,25 +115,4 @@ alter table nci_stg_definition add IMP_ALT_DEF_CNTXT_ID number;
 alter table nci_stg_definition add IMP_ALT_DEF_CNTXT_VER number(4,2);
 alter table nci_stg_definition add IMP_ALT_DEF_LANG_ID number;
 
---jira 3658
-  CREATE TABLE NCI_DLOAD_NIH_SUB_TEMP 
-   (	"HDR_ID" NUMBER, 
-	"TYP_IND" NUMBER DEFAULT null, 
-	"CREAT_DT" DATE DEFAULT sysdate, 
-	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
-	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
-	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
-	"LST_DEL_DT" DATE DEFAULT sysdate, 
-	"S2P_TRN_DT" DATE DEFAULT sysdate, 
-	"LST_UPD_DT" DATE DEFAULT sysdate, 
-	 PRIMARY KEY ("HDR_ID")
-);
 
-  GRANT SELECT ON NCI_DLOAD_NIH_SUB_TEMP TO "ONEDATA_RO";
-  
-insert into obj_typ (obj_typ_id, obj_typ_desc) values (62, 'UMLS-Concept Indicator');
-commit;
-
-insert into obj_key (obj_key_id, obj_typ_id, obj_key_desc, obj_key_def) values (231, 62, 'UMLS CUIs', 'UMLS CUIs');
-insert into obj_key (obj_key_id, obj_typ_id, obj_key_desc, obj_key_def) values (232, 62, 'Existing Concepts', 'Existing Concepts');
-commit;
