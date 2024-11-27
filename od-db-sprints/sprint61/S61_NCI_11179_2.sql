@@ -1,4 +1,5 @@
 create or replace PACKAGE nci_11179_2 AS
+function getGenericForm (v_obj_nm in varchar2) return t_forms ;
 procedure spNCICompareDE (v_data_in in clob, v_data_out out clob);
 procedure spNCIComparePV (v_data_in in clob, v_data_out out clob);
 procedure spNCICompareVD (v_data_in in clob, v_data_out out clob);
@@ -52,6 +53,16 @@ v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
 DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
 v_int_cncpt_id  number := 2433736;
 v_deflt_cart_nm varchar2(255) := 'Default';
+
+function getGenericForm (v_obj_nm in varchar2) return t_forms is
+  forms t_forms;
+  form1 t_form;
+begin
+    forms                  := t_forms();
+   form1                  := t_form(v_obj_nm, 2,1);
+    forms.extend;    forms(forms.last) := form1;
+  return forms;
+end;
 
 function getCollectionId return integer is
 v_out integer;
