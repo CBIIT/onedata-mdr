@@ -6,6 +6,7 @@ S61_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S61_WA_RA_DDL.sql
+S61_WA.sql
 S61_NCI_11179_2.sql
 S61_NCI_CODEMAP.sql
 S61_NCI_CODEMAP_MM.sql
