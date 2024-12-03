@@ -758,9 +758,9 @@ as
   i integer;
 begin
 --raise_application_error(-20000, v_vd_typ || v_end_point_ind || v_mode);
-if (v_mode ='U') and ihook.getColumnValue(row_ori,'MAP_DEG') not in (130)  then
+if (v_mode ='U') and ihook.getColumnValue(row_ori,'MAP_DEG') not in (130,120)  then
   v_valid := false;
-  v_err_str := 'Cannot update PV for Semantically Equivalent or Derived From Mapping.';
+  v_err_str := 'Cannot update PV for Semantically Equivalent.';
 end if;
   if (v_vd_typ = 17 and v_end_point_ind = 'S' and v_mode = 'I') then -- Enuerated cannot Insert or update
   v_valid := false;
