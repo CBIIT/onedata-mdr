@@ -356,8 +356,8 @@ ihook.setColumnValue(row_ori, 'SRC_MEC_ID','');
     select mec.mec_id from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.src_mdl_item_id 
     and me.MDL_ITEM_VER_NR = mm.src_mdl_ver_Nr
     and mm.item_id  = ihook.getColumnValue(row_ori, 'MDL_MAP_ITEM_ID')
-    and mm.ver_nr = ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR') and  me.ITEM_PHY_OBJ_NM =ihook.getColumnValue(row_ori, 'SRC_ME_PHY_NM')
-    and MEC.MEC_PHY_NM=ihook.getColumnValue(row_ori, 'SRC_MEC_PHY_NM') and me.ITEM_ID = mec.MDL_ELMNT_ITEM_ID and me.ver_nr = mec.MDL_ELMNT_VER_NR) loop
+    and mm.ver_nr = ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR') and  upper(me.ITEM_PHY_OBJ_NM) =upper(ihook.getColumnValue(row_ori, 'SRC_ME_PHY_NM'))
+    and upper(MEC.MEC_PHY_NM)=upper(ihook.getColumnValue(row_ori, 'SRC_MEC_PHY_NM')) and me.ITEM_ID = mec.MDL_ELMNT_ITEM_ID and me.ver_nr = mec.MDL_ELMNT_VER_NR) loop
       ihook.setColumnValue(row_ori, 'SRC_MEC_ID', cur.mec_id);
     end loop;
     if (ihook.getColumnValue(row_ori, 'SRC_MEC_ID') is null) then 
@@ -371,8 +371,8 @@ if ( ihook.getColumnValue(row_ori, 'TGT_ME_PHY_NM') is not null and  ihook.getCo
     select mec.mec_id from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.tgt_mdl_item_id 
     and me.MDL_ITEM_VER_NR = mm.tgt_mdl_ver_Nr
     and mm.item_id  = ihook.getColumnValue(row_ori, 'MDL_MAP_ITEM_ID')
-    and mm.ver_nr = ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR') and  me.ITEM_PHY_OBJ_NM =ihook.getColumnValue(row_ori, 'TGT_ME_PHY_NM')
-    and MEC.MEC_PHY_NM=ihook.getColumnValue(row_ori, 'TGT_MEC_PHY_NM') and me.ITEM_ID = mec.MDL_ELMNT_ITEM_ID and me.ver_nr = mec.MDL_ELMNT_VER_NR) loop
+    and mm.ver_nr = ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR') and  upper(me.ITEM_PHY_OBJ_NM) =upper(ihook.getColumnValue(row_ori, 'TGT_ME_PHY_NM'))
+    and upper(MEC.MEC_PHY_NM)=upper(ihook.getColumnValue(row_ori, 'TGT_MEC_PHY_NM')) and me.ITEM_ID = mec.MDL_ELMNT_ITEM_ID and me.ver_nr = mec.MDL_ELMNT_VER_NR) loop
       ihook.setColumnValue(row_ori, 'TGT_MEC_ID', cur.mec_id);
     end loop;
     if (ihook.getColumnValue(row_ori, 'TGT_MEC_ID') is null) then 
@@ -1117,35 +1117,92 @@ and tgt_mec_id is not null)) loop
         --  src is enum, target is enum
         if (cursrc.val_dom_typ_id =17 and curtgt.val_dom_typ_id = 17) then
              ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
-              ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|SOURCE PV|TARGET PV'); 
-           ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+             
+         --     ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|SOURCE PV|TARGET PV'); 
+            ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.TGT_ME_ITEM_LONG_NM ||'.'|| cur.SRC_MEC_LONG_NM);
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP'); 
+            rows.extend;   rows(rows.last) := row;
+           
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+            ihook.setColumnValue(row,'TGT_FUNC_ID','');
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','SOURCE PV'); 
+            rows.extend;   rows(rows.last) := row;
+            
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',3);
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','TARGET PV'); 
+      
      end if;
         --enum/non-enum
         if (cursrc.val_dom_typ_id =17 and curtgt.val_dom_typ_id = 18) then
              ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
-              ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|SOURCE PV|SOURCE LABEL'); 
+           --   ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|SOURCE PV|SOURCE LABEL'); 
+            ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.TGT_ME_ITEM_LONG_NM ||'.'|| cur.SRC_MEC_LONG_NM);
            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP'); 
+            rows.extend;   rows(rows.last) := row;
+           
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+            ihook.setColumnValue(row,'TGT_FUNC_ID','');
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','SOURCE PV'); 
+            rows.extend;   rows(rows.last) := row;
+            
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',3);
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','SOURCE LABEL'); 
      end if;
      -- non-enum/enum then 2 rows - use case 3
      
          if (cursrc.val_dom_typ_id =18 and curtgt.val_dom_typ_id = 17) then
-                ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
-            --    ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt|NCIt TERM|NCIt CODE'); 
-                    ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|NCIt TERM|NCIt CODE'); 
-            
-                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
-                rows.extend;   rows(rows.last) := row;
-                ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|NCIt CODE|TARGET PV'); 
+               ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.TGT_ME_ITEM_LONG_NM ||'.'|| cur.SRC_MEC_LONG_NM);
+            ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+          --      ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|NCIt TERM|NCIt CODE'); 
+              ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+              ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK'); 
+            rows.extend;   rows(rows.last) := row;
+           
             ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+            ihook.setColumnValue(row,'TGT_FUNC_ID','');
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt TERM'); 
+            rows.extend;   rows(rows.last) := row;
+            
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',3);
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt CODE'); 
+                rows.extend;   rows(rows.last) := row;
+                
+             --   ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|NCIt CODE|TARGET PV'); 
+                         ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',4);
+              ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP'); 
+            rows.extend;   rows(rows.last) := row;
+           
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',5);
+            ihook.setColumnValue(row,'TGT_FUNC_ID','');
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt CODE'); 
+            rows.extend;   rows(rows.last) := row;
+            
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',6);
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','TARGET PV'); 
+          --      rows.extend;   rows(rows.last) := row;
             
         end if;
         
         -- non-enum/Enum by Ref - use case 4
          if (cursrc.val_dom_typ_id =18 and curtgt.val_dom_typ_id = 16) then
+                -- ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|NCIt TERM|NCIt CODE'); 
                 ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
-                     ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|NCIt TERM|NCIt CODE'); 
-          -- ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt|NCIt TERM|NCIt CODE'); 
-                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+              ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.TGT_ME_ITEM_LONG_NM ||'.'|| cur.SRC_MEC_LONG_NM);
+   
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+              ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK'); 
+            rows.extend;   rows(rows.last) := row;
+           
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+            ihook.setColumnValue(row,'TGT_FUNC_ID','');
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt TERM'); 
+            rows.extend;   rows(rows.last) := row;
+            
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',3);
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt CODE'); 
                 rows.extend;   rows(rows.last) := row;
                 -- get ref term name
                 select  nvl(a.nm_desc,c.item_nm) || ' ' || upper(o.obj_key_desc) into v_nm_desc from vw_cncpt c, alt_nms a, obj_key o 
@@ -1153,23 +1210,58 @@ and tgt_mec_id is not null)) loop
                 and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
             
                 ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|NCIt CODE|' || v_nm_Desc); 
-            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+                   ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+      
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',4);
+              ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK'); 
+            rows.extend;   rows(rows.last) := row;
+           
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',5);
+            ihook.setColumnValue(row,'TGT_FUNC_ID','');
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt CODE'); 
+            rows.extend;   rows(rows.last) := row;
             
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',6);
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM',v_nm_desc); 
         end if;
         
          -- enum/Enum by Ref
          if (cursrc.val_dom_typ_id =17 and curtgt.val_dom_typ_id = 16) then
-                ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
-                ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|SOURCE PV|NCIt CODE'); 
-                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+         --       ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|SOURCE PV|NCIt CODE'); 
+                 ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+              ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.TGT_ME_ITEM_LONG_NM ||'.'|| cur.SRC_MEC_LONG_NM);
+   
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+              ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP'); 
+            rows.extend;   rows(rows.last) := row;
+           
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+            ihook.setColumnValue(row,'TGT_FUNC_ID','');
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','SOURCE PV'); 
+            rows.extend;   rows(rows.last) := row;
+            
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',3);
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt CODE'); 
                 rows.extend;   rows(rows.last) := row;
                 -- get ref term name
                 select  nvl(a.nm_desc,c.item_nm) || ' ' || upper(o.obj_key_desc) into v_nm_desc from vw_cncpt c, alt_nms a, obj_key o 
                 where o.obj_key_id = curtgt.term_use_typ and c.item_id = curtgt.TERM_CNCPT_ITEM_ID and c.ver_nr = curtgt.TERM_CNCPT_VER_NR
                 and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
             
-                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|NCIt CODE|' || v_nm_Desc); 
-            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+             --   ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|NCIt CODE|' || v_nm_Desc); 
+                ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+      
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',4);
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK'); 
+                rows.extend;   rows(rows.last) := row;
+           
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',5);
+                ihook.setColumnValue(row,'TGT_FUNC_ID','');
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt CODE'); 
+                rows.extend;   rows(rows.last) := row;
+            
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',6);
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM',v_nm_Desc); 
             
         end if;
         
@@ -1179,15 +1271,38 @@ and tgt_mec_id is not null)) loop
                 where o.obj_key_id = cursrc.term_use_typ and c.item_id = cursrc.TERM_CNCPT_ITEM_ID and c.ver_nr = cursrc.TERM_CNCPT_VER_NR
                 and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
             
-                ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
-                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_nm_desc || '|NCIt CODE'); 
+         --       ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_nm_desc || '|NCIt CODE'); 
+             ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+              ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.TGT_ME_ITEM_LONG_NM ||'.'|| cur.SRC_MEC_LONG_NM);
+   
                 ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK'); 
+                rows.extend;   rows(rows.last) := row;
+           
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+                ihook.setColumnValue(row,'TGT_FUNC_ID','');
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM',v_nm_desc); 
+                rows.extend;   rows(rows.last) := row;
+            
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',3);
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt CODE'); 
                 rows.extend;   rows(rows.last) := row;
                 -- get ref term name
                
-                ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|NCIt CODE|TARGET PV'); 
-            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+             --   ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|NCIt CODE|TARGET PV'); 
+           ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+      
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',4);
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK'); 
+                rows.extend;   rows(rows.last) := row;
+           
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',5);
+                ihook.setColumnValue(row,'TGT_FUNC_ID','');
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM','NCIt CODE'); 
+                rows.extend;   rows(rows.last) := row;
             
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',6);
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM',v_nm_Desc); 
         end if;
         
            -- Enum by Ref/non-enum
@@ -1197,9 +1312,23 @@ and tgt_mec_id is not null)) loop
                 and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
             -- use case 8
                 if (v_term_src= 'CODE') then
-                    ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
-                    ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_nm_desc || '|TERM'); 
-                    ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+                 --    ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_nm_desc || '|TERM'); 
+                 --   ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+                  ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+      
+               ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.TGT_ME_ITEM_LONG_NM ||'.'|| cur.SRC_MEC_LONG_NM);
+            ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK'); 
+                rows.extend;   rows(rows.last) := row;
+           
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+                ihook.setColumnValue(row,'TGT_FUNC_ID','');
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM',v_nm_desc); 
+                rows.extend;   rows(rows.last) := row;
+            
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',3);
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM','TERM'); 
+           --     rows.extend;   rows(rows.last) := row;
                 end if;
                 
                 if (v_term_src= 'TERM') then
@@ -1226,9 +1355,21 @@ and tgt_mec_id is not null)) loop
                 where o.obj_key_id = curtgt.term_use_typ and c.item_id = curtgt.TERM_CNCPT_ITEM_ID and c.ver_nr = curtgt.TERM_CNCPT_VER_NR
                 and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
             
-                ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
-                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_src_nm_desc || '|' || v_nm_desc); 
+          --         ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_src_nm_desc || '|' || v_nm_desc); 
+                 ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
+              ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.TGT_ME_ITEM_LONG_NM ||'.'|| cur.SRC_MEC_LONG_NM);
+   
                 ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK'); 
+                rows.extend;   rows(rows.last) := row;
+           
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
+                ihook.setColumnValue(row,'TGT_FUNC_ID','');
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM',v_src_nm_desc); 
+                rows.extend;   rows(rows.last) := row;
+            
+                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',3);
+                ihook.setColumnValue(row,'TGT_FUNC_PARAM',v_nm_desc); 
                
         end if;
         /*
@@ -1585,16 +1726,24 @@ update nci_mec_map set tgt_mec_id_derv = (select min(tgt_mec_id) from nci_mec_ma
 where mec_map_nm = cur.mec_map_nm and MDL_MAP_ITEM_ID=cur.MDL_MAP_ITEM_ID and MDL_MAP_VER_NR = cur.MDL_MAP_VER_NR
 and tgt_mec_id is not null and mec_sub_grp_nbr < cur.mec_sub_grp_nbr )
 where mecm_id = cur.mecm_id;
-
+commit;
 for cux in (Select * from nci_mec_map where mecm_id = cur.mecm_id and tgt_mec_id_derv is null and MDL_MAP_ITEM_ID=v_item_id and MDL_MAP_VER_NR=v_ver_nr) loop
 update nci_mec_map set tgt_mec_id_derv = (select min(tgt_mec_id) from nci_mec_map where mec_map_nm = cur.mec_map_nm and MDL_MAP_ITEM_ID=cur.MDL_MAP_ITEM_ID and MDL_MAP_VER_NR = cur.MDL_MAP_VER_NR
 and tgt_mec_id is not null and mec_sub_grp_nbr > cur.mec_sub_grp_nbr )
-where mecm_id = cur.mecm_id;
+where mecm_id = cur.mecm_id and tgt_mec_id_derv is null ;
 end loop;
-
+commit;
 end loop;
 
 update nci_mec_map set tgt_mec_id_derv =tgt_mec_id where tgt_mec_id_derv is null and tgt_mec_id is not null and MDL_MAP_ITEM_ID=v_item_id and MDL_MAP_VER_NR=v_ver_nr;
+commit;
+
+
+for curx in (Select * from nci_mec_map where  MDL_MAP_ITEM_ID=v_item_id and MDL_MAP_VER_NR=v_ver_nr order by mec_map_nm, mec_sub_grp_nbr) loop
+update nci_mec_map set tgt_mec_id_derv = (select min(tgt_mec_id_derv) from nci_mec_map where mec_map_nm = curx.mec_map_nm and MDL_MAP_ITEM_ID=v_item_id and MDL_MAP_VER_NR = v_ver_nr
+and tgt_mec_id_derv is not null )
+where mecm_id = curx.mecm_id and tgt_mec_id_derv is null ;
+end loop;
 commit;
 
      execute immediate 'ALTER TABLE NCI_MEC_MAP ENABLE ALL TRIGGERS';
