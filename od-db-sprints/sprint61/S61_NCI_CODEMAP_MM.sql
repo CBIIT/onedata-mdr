@@ -20,7 +20,8 @@ procedure dervTgtMEC( v_data_in in clob, v_data_out out clob);
  procedure spDeleteModelMapRule( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2);
  
  procedure spPostHookUpdMM( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
- 
+  procedure spGeneratePcodeNew ( v_data_in in clob, v_data_out out clob);
+
 END;
 /
 create or replace PACKAGE BODY            nci_codemap_mm AS
@@ -1655,23 +1656,34 @@ BEGIN
       ihook.setColumnValue(rowmap, 'MDL_MAP_ITEM_ID', ihook.getColumnValue(row_ori,'ITEM_ID'));
           ihook.setColumnValue(rowmap, 'MDL_MAP_VER_NR', ihook.getColumnValue(row_ori,'VER_NR'));
     
-        v_valid := true;
+        v_valid := false;
         -- check if the source and target char are from the correct models
         if (ihook.getColumnValue(rowmap,'SRC_MEC_ID') is not null) then
-        select count(*) into v_temp from VW_NCI_MEC_NO_CDE where  mec_id = ihook.getColumnValue(rowmap,'SRC_MEC_ID') and 
-        mdl_item_id =ihook.getColumnValue(rowmap,'SRC_MDL_ITEM_ID')  and mdl_ver_nr = ihook.getColumnValue(rowmap,'SRC_MDL_VER_NR');
+       for cur in (select *  from VW_NCI_MEC_NO_CDE where  mec_id = ihook.getColumnValue(rowmap,'SRC_MEC_ID') and 
+        mdl_item_id =ihook.getColumnValue(rowmap,'SRC_MDL_ITEM_ID')  and mdl_ver_nr = ihook.getColumnValue(rowmap,'SRC_MDL_VER_NR')) loop
+        v_valid := true;
+        ihook.setColumnValue(rowmap, 'SRC_CDE_ITEM_ID', cur.cde_item_id);
+             ihook.setColumnValue(rowmap, 'SRC_CDE_VER_NR', cur.cde_ver_nr);
+   
+        end loop;
      --   raise_application_error(-20000,ihook.getColumnValue(rowmap,'SRC_MDL_ITEM_ID') );
-        if (v_temp = 0) then
+        if (v_valid = false) then
             v_err_Str := 'Source Characteristic is not from the correct model;';
-            v_valid := false;
+       
             end if;
+            
         end if;
-      if (ihook.getColumnValue(rowmap,'TGT_MEC_ID') is not null) then
-        select count(*) into v_temp from VW_NCI_MEC_NO_CDE where  mec_id = ihook.getColumnValue(rowmap,'TGT_MEC_ID') and 
-        mdl_item_id =ihook.getColumnValue(rowmap,'TGT_MDL_ITEM_ID')  and mdl_ver_nr = ihook.getColumnValue(rowmap,'TGT_MDL_VER_NR');
-        if (v_temp = 0) then
-            v_err_Str := v_err_Str || ' Target Characteristic is not from the correct model;';
             v_valid := false;
+    
+      if (ihook.getColumnValue(rowmap,'TGT_MEC_ID') is not null) then
+           for cur in (select *  from  VW_NCI_MEC_NO_CDE where  mec_id = ihook.getColumnValue(rowmap,'TGT_MEC_ID') and 
+        mdl_item_id =ihook.getColumnValue(rowmap,'TGT_MDL_ITEM_ID')  and mdl_ver_nr = ihook.getColumnValue(rowmap,'TGT_MDL_VER_NR')) loop
+          v_valid := true;
+        ihook.setColumnValue(rowmap, 'TGT_CDE_ITEM_ID', cur.cde_item_id);
+             ihook.setColumnValue(rowmap, 'TGT_CDE_VER_NR', cur.cde_ver_nr);
+        end loop;
+         if (v_valid = false) then
+           v_err_Str := v_err_Str || ' Target Characteristic is not from the correct model;';
          end if;
     end if;
         --check if they are duplicates
@@ -1807,6 +1819,107 @@ cur.TARGET_FUNCTION || '(' || cur.SMEC_NM || ')')  where mecm_id = cur.mecm_id;
 end if;
 end loop;
 -- Operations is null
+for curouter in (select  MAPPING_GROUP_NAME, min(DERIVATION_GROUP_ORDER) DERIVATION_GROUP_ORDER from VW_MDL_MAP_IMP_TEMPLATE  map
+where map.MODEL_MAP_ID= v_item_id and map.MODEL_MAP_VERSION = v_ver_nr
+and (map.FLOW_CONTROL is not null or map.PARENTHESIS is not null or map.OPERATOR is not null or map.LEFT_OPERAND is not null 
+or map.RIGHT_OPERAND is not null or map.OPERAND_TYPE is not null) group by MAPPING_GROUP_NAME) loop
+v_str := '';
+
+for cur in (select map.mecm_id ,map.DERIVATION_GROUP_NBR, map.src_mec_id, v_src_mdl_nm || map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,
+ v_tgt_mdl_nm || map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME TMEC_NM, SOURCE_FUNCTION, TARGET_FUNCTION, SOURCE_COMPARISON_VALUE,
+ SET_TARGET_DEFAULT, OPERATOR, OPERAND_TYPE, FLOW_CONTROL, PARENTHESIS, RIGHT_OPERAND, LEFT_OPERAND from VW_MDL_MAP_IMP_TEMPLATE  map
+where map.MODEL_MAP_ID= v_item_id and map.MODEL_MAP_VERSION = v_ver_nr
+and MAPPING_GROUP_NAME = curouter.MAPPING_GROUP_NAME order by DERIVATION_GROUP_ORDER) loop
+-- if
+if (cur.FLOW_CONTROL ='IF' or cur.OPERATOR in ('AND','OR')) then 
+  v_str :=v_Str ||  cur.FLOW_CONTROL || ' ' ||  cur.OPERATOR || ' ' || case cur.parenthesis when '(' then '( ' else '' end || cur.SMEC_NM || ' ' || cur.OPERAND_TYPE || ' ' || cur.RIGHT_OPERAND || ' ' || case cur.parenthesis when ')' then ') ' else '' end ;
+end if;
+-- if
+if (cur.FLOW_CONTROL is not null and cur.FLOW_CONTROL <> 'IF' ) then 
+ v_str := v_str || cur.FLOW_CONTROL || ' ';
+ if (cur.src_mec_id is null) then
+
+ v_str := v_Str ||  cur.tmec_nm || '=' || cur.SET_TARGET_DEFAULT || ' ' ;
+end if;
+if (cur.src_mec_id is not null and cur.target_function = 'EQUALS') then
+ v_str := v_str  || ' ' || cur.tmec_nm || '=' || cur.SMEC_NM || ' ' ;
+end if;
+if (cur.src_mec_id is not null and cur.target_function <> 'EQUALS') then
+ v_str := v_str  || ' '|| cur.tmec_nm || '=' || 
+cur.TARGET_FUNCTION || '(' || cur.SMEC_NM || ') ';
+end if;
+end if;
+
+end loop;
+--raise_application_error(-20000,v_str);
+update nci_mec_map set PCODE_SYSGEN =  upper(v_str)  where MDL_MAP_ITEM_ID= v_item_id and MDL_MAP_VER_NR = v_ver_nr and MEC_MAP_NM=curouter.mapping_group_name
+and mec_sub_grp_nbr=curouter.DERIVATION_GROUP_ORDER;
+end loop;
+commit;
+
+     execute immediate 'ALTER TABLE NCI_MEC_MAP ENABLE ALL TRIGGERS';
+     
+                 hookoutput.message := 'Pseudocode generation complete.';
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+     end;
+
+
+procedure spGeneratePcodeNew(v_data_in IN CLOB,    v_data_out OUT CLOB)
+as
+v_temp integer;
+   hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+    row_ori t_row;
+    v_item_id number;
+    v_ver_nr number(4,2);
+    v_src_mdl_nm varchar2(255);
+    v_tgt_mdl_nm varchar2(255);
+    v_str varchar2(8000);
+ begin
+     hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+
+  row_ori := hookInput.originalRowset.rowset(1);
+  v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
+  v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+  for cur in (select item_nm from admin_item ai, NCI_MDL_MAP mm where ai.item_id = mm.SRC_MDL_ITEM_ID 
+  and ai.ver_nr = mm.SRC_MDL_VER_NR and mm.item_id = v_item_id and mm.ver_nr = v_ver_nr) loop
+  v_src_mdl_nm := cur.item_nm || '.';
+  end loop;
+  for cur in (select item_nm from admin_item ai, NCI_MDL_MAP mm where ai.item_id = mm.TGT_MDL_ITEM_ID 
+  and ai.ver_nr = mm.TGT_MDL_VER_NR and mm.item_id = v_item_id and mm.ver_nr = v_ver_nr) loop
+  v_tgt_mdl_nm := cur.item_nm || '.';
+  end loop;
+  
+    execute immediate 'ALTER TABLE NCI_MEC_MAP DISABLE ALL TRIGGERS';
+   
+update nci_mec_map set PCODE_SYSGEN = null where MDL_MAP_ITEM_ID= v_item_id and MDL_MAP_VER_NR = v_ver_nr;
+commit;
+-- Straight assignment
+for cur in (select map.mecm_id , map.src_mec_id, v_src_mdl_nm || map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,
+ v_tgt_mdl_nm || map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME TMEC_NM, SOURCE_FUNCTION, TARGET_FUNCTION, SOURCE_COMPARISON_VALUE,
+ SET_TARGET_DEFAULT, OPERATOR, OPERAND_TYPE, FLOW_CONTROL, PARENTHESIS, RIGHT_OPERAND, LEFT_OPERAND from VW_MDL_MAP_IMP_TEMPLATE  map
+where map.MODEL_MAP_ID= v_item_id and map.MODEL_MAP_VERSION = v_ver_nr
+and map.FLOW_CONTROL is null and map.PARENTHESIS is null 
+and map.OPERATOR is null and map.LEFT_OPERAND is null 
+and map.RIGHT_OPERAND is null and map.OPERAND_TYPE is null and 
+map.TGT_PHY_NAME is not null ) loop
+if (cur.src_mec_id is null) then
+update nci_mec_map set PCODE_SYSGEN =  upper( cur.tmec_nm || '=' || 
+cur.SET_TARGET_DEFAULT)  where mecm_id = cur.mecm_id;
+end if;
+if (cur.src_mec_id is not null and cur.target_function = 'EQUALS') then
+update nci_mec_map set PCODE_SYSGEN =  upper( cur.tmec_nm || '=' || 
+cur.SMEC_NM)  where mecm_id = cur.mecm_id;
+end if;
+if (cur.src_mec_id is not null and cur.target_function <> 'EQUALS') then
+update nci_mec_map set PCODE_SYSGEN =  upper( cur.tmec_nm || '=' || 
+cur.TARGET_FUNCTION || '(' || cur.SMEC_NM || ')')  where mecm_id = cur.mecm_id;
+end if;
+end loop;
+-- go by mapping group
 for curouter in (select  MAPPING_GROUP_NAME, min(DERIVATION_GROUP_ORDER) DERIVATION_GROUP_ORDER from VW_MDL_MAP_IMP_TEMPLATE  map
 where map.MODEL_MAP_ID= v_item_id and map.MODEL_MAP_VERSION = v_ver_nr
 and (map.FLOW_CONTROL is not null or map.PARENTHESIS is not null or map.OPERATOR is not null or map.LEFT_OPERAND is not null 
