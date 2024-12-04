@@ -85,7 +85,8 @@ begin
  
  
     for cur in (select val_dom_item_id, val_dom_ver_nr, cde_item_id, cde_ver_nr  from nci_mdl_elmnt_char c, value_dom v where mec_id = ihook.getColumnValue(row_ori,'TGT_MEC_ID')  and
-    c.val_dom_item_id = v.item_id and c.val_dom_ver_Nr = v.ver_nr and v.val_dom_typ_id = 17) loop
+    c.val_dom_item_id = v.item_id and c.val_dom_ver_Nr = v.ver_nr ) loop
+    --and v.val_dom_typ_id = 17) loop
       row := t_row();
       ihook.setColumnValue (row, 'ITEM_ID', cur.val_dom_item_id);
       ihook.setColumnValue (row, 'VER_NR', cur.val_dom_ver_nr);
@@ -95,8 +96,10 @@ begin
 
     end loop;
     
-    
-  --    raise_application_error(-20000, input_rows.count);
+    if (input_rows.count < 2) then
+      raise_application_error(-20000, 'Error in generation. Please contact Administrator.');
+    end if;
+   --   raise_application_error(-20000, input_rows.count);
   
    
     nci_11179_2.spCreateValueMap(input_rows, output_rows, v_src_alt_nm_typ, v_tgt_alt_nm_typ);
