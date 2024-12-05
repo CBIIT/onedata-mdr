@@ -1,2 +1,3 @@
 Export and import Type Details from Dev for "Concept Source" Object TYpe and load into higher environments.
 exec nci_ext_import.load_xwalk_derv
+Remove old Delete Model Map command from Model Mapping AI.
