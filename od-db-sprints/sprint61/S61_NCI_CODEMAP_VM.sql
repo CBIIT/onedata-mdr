@@ -1113,7 +1113,7 @@ forms     t_forms;
         ihook.setColumnValue(row,'SRC_PV',v_new_pv);
         ihook.setColumnValue(row,'TGT_PV',ihook.getColumnValue(rowform, 'NEW_PV') );
         
-                ihook.setColumnValue(row,'MAP_DEG',130);-- not mapped yet.
+                ihook.setColumnValue(row,'MAP_DEG',120);-- not mapped yet.
         ihook.setColumnValue(row,'MECVM_ID',-1); 
         rows.extend;     rows(rows.last) := row;
        action             := t_actionrowset(rows, 'Model Map Characteristic Values', 2, 10,'insert');
