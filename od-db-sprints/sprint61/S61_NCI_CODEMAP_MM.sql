@@ -21,7 +21,7 @@ procedure dervTgtMEC( v_data_in in clob, v_data_out out clob);
  
  procedure spPostHookUpdMM( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure spGeneratePcodeNew ( v_data_in in clob, v_data_out out clob);
-function getFuncPcode (v_mm_id in number, v_mm_ver in number, v_grp_nm in varchar2, v_cur_idx in integer, v_max_idx in integer,
+function getFuncPcode (v_mm_id in number, v_mm_ver in number, v_grp_nm in varchar2, v_cur_idx in out integer, v_max_idx in integer,
 v_func_id in integer,v_open_paren_id in integer, v_close_paren_id in integer,  v_err in out integer)  return varchar2;
 END;
 /
@@ -34,6 +34,8 @@ v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
 --  v_reg_str_adv varchar2(255) := '\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}|\s';
   v_reg_str_adv varchar2(255) := '[^A-Za-z0-9]';
 v_reg_str varchar2(255) := '[^ A-Za-z0-9]';
+
+
 
 procedure spCopyMM ( v_src_mm_id in number, v_src_mm_ver_nr in number, v_tgt_mm_id in number, v_tgt_mm_ver_nr in number, v_user_id in varchar2,v_chk_ind in integer)
 as
@@ -439,12 +441,13 @@ v_valid := false;
 v_val_stus_msg := v_val_stus_msg ||'Imported Cardinaliy is incorrect; '|| chr(13);
 end if;
 
+/*
 
 if (ihook.getColumnValue(row_ori, 'IMP_SRC_FUNC') is not null and  ihook.getColumnValue(row_ori, 'SRC_FUNC_ID') is null ) then
 v_valid := false;
 v_val_stus_msg := v_val_stus_msg ||'Imported Source Function is incorrect; '|| chr(13);
 end if;
-
+*/
 if (ihook.getColumnValue(row_ori, 'IMP_TGT_FUNC') is not null and  ihook.getColumnValue(row_ori, 'TGT_FUNC_ID') is null ) then
 v_valid := false;
 v_val_stus_msg := v_val_stus_msg ||'Imported Target Function is incorrect; '|| chr(13);
@@ -924,21 +927,21 @@ end;
    begin
                     ihook.setColumnValue(row,'MEC_MAP_NM',v_map_nm);
          ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
-                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+               ihook.setColumnValue(row,'PAREN',v_open_paren); 
+              ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
          rows.extend;   rows(rows.last) := row;
              
          --     ihook.setColumnValue(row,'TGT_FUNC_PARAM','VALUE MAP|SOURCE PV|TARGET PV'); 
               ihook.setColumnValue(row,'TGT_FUNC_ID','');
             ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',2);
             ihook.setColumnValue(row,'TGT_FUNC_PARAM',v_param_1); 
-            ihook.setColumnValue(row,'PAREN',v_open_paren); 
+            ihook.setColumnValue(row,'PAREN',''); 
             rows.extend;   rows(rows.last) := row;
            
             ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',3);
             ihook.setColumnValue(row,'TGT_FUNC_ID','');
             ihook.setColumnValue(row,'TGT_FUNC_PARAM',v_param_2); 
-             ihook.setColumnValue(row,'PAREN',''); 
-            rows.extend;   rows(rows.last) := row;
+             rows.extend;   rows(rows.last) := row;
             
             ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',4);
             ihook.setColumnValue(row,'TGT_FUNC_PARAM',v_param_3); 
@@ -952,9 +955,10 @@ end;
                      ihook.setColumnValue(row,'TGT_FUNC_ID',v_func);
                 ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',5);
                 ihook.setColumnValue(row,'TGT_FUNC_PARAM',''); 
-                
+                     ihook.setColumnValue(row,'PAREN',v_open_paren); 
+           
          rows.extend;   rows(rows.last) := row;
-                 ihook.setColumnValue(row,'PAREN',v_open_paren); 
+                 ihook.setColumnValue(row,'PAREN',''); 
                 ihook.setColumnValue(row,'TGT_FUNC_ID','');
     
                ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',6);
@@ -1837,7 +1841,7 @@ commit;
      end;
 
 -- v_cur_idx is the line that the function was found
-function getFuncPcode (v_mm_id in number, v_mm_ver in number, v_grp_nm in varchar2, v_cur_idx in integer, v_max_idx in integer,
+function getFuncPcode (v_mm_id in number, v_mm_ver in number, v_grp_nm in varchar2, v_cur_idx in out integer, v_max_idx in integer,
 v_func_id in integer, v_open_paren_id in integer, v_close_paren_id in integer,  v_err in out integer)  return varchar2
 is
 i integer;
@@ -1845,42 +1849,54 @@ v_open_found boolean := false;
 v_close_fond boolean := false;
 v_rtn_str varchar2(1000);
 v_func_nm varchar2(255);
+v_found boolean;
 begin
 
 
 select obj_key_Desc into v_func_nm from obj_key where obj_key_id = v_func_id;
 
+i := v_cur_idx;
+v_found := false;
+v_rtn_str := v_func_nm || '( ';
 
+while i <= v_max_idx and v_found = false loop
+i := i+1;
 for cur in (select * from nci_mec_map where mdl_map_item_id = v_mm_id and mdl_map_ver_nr = v_mm_ver and upper(MEC_MAP_NM) = v_grp_nm
-and MEC_SUB_GRP_NBR >= v_cur_idx+1 order by mec_sub_grp_nbr) loop
-i:= cur.mec_sub_grp_nbr;
--- looking for open parenthesis first
- v_rtn_str := v_func_nm || '(';
-if cur.paren = v_open_paren_id then
+and MEC_SUB_GRP_NBR =i ) loop
 
+-- looking for open parenthesis first
+ 
    if (cur.tgt_func_id is not null) then -- another function found
- v_rtn_str := v_rtn_str  || getFuncPcode (v_mm_id, v_mm_ver, v_grp_nm, i, v_max_idx,
-cur.tgt_func_id,v_open_paren_id, v_close_paren_id, v_err) ;
+   if (cur.paren <> v_open_paren_id) then
+    v_rtn_str := v_rtn_str || 'Target function found with no open parenthesis.' ;
+  else
+    v_rtn_str := v_rtn_str  || getFuncPcode (v_mm_id, v_mm_ver, v_grp_nm, i, v_max_idx,
+    cur.tgt_func_id,v_open_paren_id, v_close_paren_id, v_err) ;
+end if;
  else
-   if (cur.TGT_FUNC_PARAM is not null) then
-   v_rtn_str := v_rtn_str || cur.TGT_FUNC_PARAM;
+    if (cur.TGT_FUNC_PARAM is not null) then
+        v_rtn_str := v_rtn_str || cur.TGT_FUNC_PARAM || ',';
    end if;
   -- look for close paren
   if cur.paren = v_close_paren_id  then
-  v_rtn_str := v_rtn_str || ')';
+        v_rtn_str := substr(v_rtn_str,1,length(v_rtn_str)-1) || ' ) ' ;
+        v_found := true;
  -- return v_rtn_str;
   end if;
  
  
  end if;
-end if;
+
  --if (i = v_max_idx ) then
   --v_err := 1;
-    v_rtn_str := 'Inconsistent Rule Found';
+  --  v_rtn_str := 'Inconsistent Rule Found';
+  v_cur_idx := i;
+  
   --end if;
-  return v_rtn_str;
+ 
 end loop;
-
+end loop;
+ return v_rtn_str;
 end ;
 
 
@@ -1898,6 +1914,7 @@ v_temp integer;
     v_open_paren integer;
     v_close_paren integer;
     v_err integer := 0;
+    j integer;
  begin
      hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -1923,7 +1940,7 @@ v_temp integer;
 update nci_mec_map set PCODE_SYSGEN = null where MDL_MAP_ITEM_ID= v_item_id and MDL_MAP_VER_NR = v_ver_nr;
 commit;
 -- Straight assignment
-/*
+
 for cur in (select map.mecm_id , map.src_mec_id, v_src_mdl_nm || map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,
  v_tgt_mdl_nm || map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME TMEC_NM, SOURCE_FUNCTION, TARGET_FUNCTION, SOURCE_COMPARISON_VALUE,
  SET_TARGET_DEFAULT, OPERATOR, OPERAND_TYPE, FLOW_CONTROL, PARENTHESIS, RIGHT_OPERAND, LEFT_OPERAND from VW_MDL_MAP_IMP_TEMPLATE  map
@@ -1945,22 +1962,38 @@ end if;
 if (cur.src_mec_id is not null and cur.target_function <> 'EQUALS') then
 update nci_mec_map set PCODE_SYSGEN =  upper( cur.tmec_nm || '=' || 
 cur.TARGET_FUNCTION || '(' || cur.SMEC_NM || ')')  where mecm_id = cur.mecm_id;
-end if;
+end if;*/
 end loop;
-*/
+
 -- go by mapping group
-for curouter in (select  MAPPING_GROUP_NAME, min(DERIVATION_GROUP_ORDER) DERIVATION_GROUP_ORDER, max(derivation_group_order) max_grp_ord from VW_MDL_MAP_IMP_TEMPLATE  map
+for curouter in (select  MAPPING_GROUP_NAME, min(DERIVATION_GROUP_ORDER) min_grp_ord, max(derivation_group_order) max_grp_ord from VW_MDL_MAP_IMP_TEMPLATE  map
 where map.MODEL_MAP_ID= v_item_id and map.MODEL_MAP_VERSION = v_ver_nr
 and (map.FLOW_CONTROL is not null or map.PARENTHESIS is not null or map.OPERATOR is not null or map.LEFT_OPERAND is not null 
-or map.RIGHT_OPERAND is not null or map.OPERAND_TYPE is not null) and upper(MAPPING_GROUP_NAME) like '%RISK%' group by MAPPING_GROUP_NAME) loop
+or map.RIGHT_OPERAND is not null or map.OPERAND_TYPE is not null) and map.map_deg in (86,87,120)
+--and upper(MAPPING_GROUP_NAME) like '%RECUR%' 
+group by MAPPING_GROUP_NAME) loop
 v_str := '';
-
-for cur in (select map.mecm_id ,map.DERIVATION_GROUP_NBR, map.DERIVATION_GROUP_ORDER, map.src_mec_id, v_src_mdl_nm || map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,trim(map.SRC_ELMNT_PHY_NAME || '.'|| map.SRC_PHY_NAME) SRC_PHY_NAME,
+j := curouter.min_grp_ord;
+while j <= curouter.max_grp_ord loop
+for cur in (select map.mecm_id ,map.DERIVATION_GROUP_NBR, map.DERIVATION_GROUP_ORDER, map.src_mec_id, v_src_mdl_nm || map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,
+trim(map.SRC_ELMNT_PHY_NAME || '.'|| map.SRC_PHY_NAME) SRC_PHY_NAME,trim(map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME) TGT_PHY_NAME,
  v_tgt_mdl_nm || map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME TMEC_NM, target_function_id, TARGET_FUNCTION, SOURCE_COMPARISON_VALUE,
  SET_TARGET_DEFAULT, OPERATOR, OPERAND_TYPE, FLOW_CONTROL, PARENTHESIS, RIGHT_OPERAND, LEFT_OPERAND from VW_MDL_MAP_IMP_TEMPLATE  map
 where map.MODEL_MAP_ID= v_item_id and map.MODEL_MAP_VERSION = v_ver_nr
-and MAPPING_GROUP_NAME = curouter.MAPPING_GROUP_NAME  order by DERIVATION_GROUP_ORDER) loop
+and MAPPING_GROUP_NAME = curouter.MAPPING_GROUP_NAME and  map.DERIVATION_GROUP_ORDER = j order by DERIVATION_GROUP_ORDER) loop
 -- if
+
+if ( cur.target_function <> 'EQUALS' and cur.target_function is not null) then
+if (cur.parenthesis <> '(') then
+v_Str := v_str || 'Function found with no open parenthesis.';
+--raise_application_error(-20000, curouter.mapping_group_name || cur.target_function);
+ --v_str := v_str  || ' '|| cur.tmec_nm || '=' || 
+--cur.TARGET_FUNCTION || '(' || cur.SMEC_NM || ') ';
+else
+v_str := v_str || getFuncPcode (v_item_id, v_ver_nr, upper(curouter.MAPPING_GROUP_NAME), j, curouter.max_grp_ord,
+cur.target_function_id,v_open_paren, v_close_paren, v_err) ;
+end if;
+end if;
 if (cur.FLOW_CONTROL ='IF' or cur.OPERATOR in ('AND','OR')) then 
   v_str :=v_Str ||  nvl(cur.FLOW_CONTROL,'') || ' ' ||  cur.OPERATOR || ' ' || case nvl(cur.parenthesis,'') when '(' then '( ' else '' end || cur.SRC_PHY_NAME ||
   --case cur.SRC_PHY_NAME when null  then '' else cur.SMEC_NM end || 
@@ -1974,24 +2007,21 @@ if (cur.FLOW_CONTROL is not null and cur.FLOW_CONTROL <> 'IF' ) then
  v_str := v_Str ||  cur.tmec_nm || '=' || cur.SET_TARGET_DEFAULT || ' ' ;
 end if;
 if (cur.src_mec_id is not null and cur.target_function = 'EQUALS') then
- v_str := v_str  || ' ' || cur.tmec_nm || '=' || cur.SMEC_NM || ' ' ;
+ v_str := v_str  || ' ' || cur.TGT_PHY_NAME || '=' ||  cur.SRC_PHY_NAME || ' ' ;
 end if;
 end if;
-if ( cur.target_function <> 'EQUALS' and cur.target_function is not null) then
---raise_application_error(-20000, curouter.mapping_group_name || cur.target_function);
- --v_str := v_str  || ' '|| cur.tmec_nm || '=' || 
---cur.TARGET_FUNCTION || '(' || cur.SMEC_NM || ') ';
-v_str := v_str || getFuncPcode (v_item_id, v_ver_nr, upper(curouter.MAPPING_GROUP_NAME), cur.derivation_group_order, curouter.max_grp_ord,
-cur.target_function_id,v_open_paren, v_close_paren, v_err) ;
-end if;
+--insert into junk select cur.derivation_group_order, v_str from dual;
+---commit;
 
 /*if(cur.derivation_group_order = 2) then
 raise_application_error (-20000,v_str || '|' ||cur.src_phy_name ||';');
 end if;*/
+j:= j+1;
+end loop;
 end loop;
 --raise_application_error(-20000,v_str);
 update nci_mec_map set PCODE_SYSGEN =  upper(v_str)  where MDL_MAP_ITEM_ID= v_item_id and MDL_MAP_VER_NR = v_ver_nr and MEC_MAP_NM=curouter.mapping_group_name
-and mec_sub_grp_nbr=curouter.DERIVATION_GROUP_ORDER;
+and mec_sub_grp_nbr=curouter.min_grp_ord;
 end loop;
 commit;
 
