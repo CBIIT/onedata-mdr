@@ -1,4 +1,4 @@
-create or replace TRIGGER TR_MEC_MAP  BEFORE INSERT or UPDATE ON NCI_MEC_MAP for each row
+/*create or replace TRIGGER TR_MEC_MAP  BEFORE INSERT or UPDATE ON NCI_MEC_MAP for each row
 declare 
 v_src_nm varchar2(1000);
 v_param_Val varchar2(255);
@@ -18,7 +18,10 @@ if (:new.TGT_FUNC_PARAM = 'SOURCE') then
 end if;
 end if;
 end;
-/create or replace TRIGGER TR_MEC_MAP_UPD  BEFORE UPDATE ON NCI_MEC_MAP for each row
+/
+
+*/
+  create or replace TRIGGER TR_MEC_MAP_UPD  BEFORE UPDATE ON NCI_MEC_MAP for each row
 declare 
 v_src_nm varchar2(1000);
 v_param_Val varchar2(255);
