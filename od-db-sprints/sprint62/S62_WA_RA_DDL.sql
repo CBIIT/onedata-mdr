@@ -100,3 +100,26 @@ vw_val_dom_ref_term tvdrt
           and tvd.item_id = tvdrt.item_id (+)
           and tvd.ver_nr = tvdrt.ver_nr (+);
 
+
+  CREATE OR REPLACE  VIEW VW_MDL_MAP_RSLT as
+  select   map.MDL_MAP_ITEM_ID ,
+         map.mdl_map_ver_nr ,
+         map.MEC_MAP_NM,
+          tmed.ITEM_PHY_OBJ_NM,
+            tmecd."MEC_PHY_NM",
+            map.PCODE_SYSGEN,
+        sysdate creat_dt,
+	  'ONEDATA' creat_usr_id,	  
+	   sysdate lst_upd_dt,
+	  'ONEDATA' lst_upd_usr_id,
+      0 FLD_DELETE,
+      sysdate S2P_TRN_DT,
+      sysdate LST_DEL_DT
+	from
+     nci_MEC_MAP map,
+	  NCI_MDL_ELMNT tmed,NCI_MDL_ELMNT_CHAR tmecd
+	where  	 tmed.item_id = tmecd.MDL_ELMNT_ITEM_ID
+	and tmed.ver_nr = tmecd.MDL_ELMNT_VER_NR  
+	  and tmecd.mec_id = map.TGT_MEC_ID_DERV
+      and pcode_sysgen is not null;
+
