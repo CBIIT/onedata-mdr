@@ -47,9 +47,10 @@ CREATE OR REPLACE TRIGGER TR_NCI_MDL_MAP_SHORT_NM
   on NCI_MDL_MAP
   for each row
 BEGIN
-   update ADMIN_ITEM set ITEM_LONG_NM = (Select substr(s.item_nm || 'v' || :new.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || :new.tgt_mdl_ver_nr || ' | ' || :new.item_id || '|' || :new.ver_nr,1,30)
+   update ADMIN_ITEM set ITEM_LONG_NM = (Select substr(s.item_nm || 'v' || :new.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || :new.tgt_mdl_ver_nr ,1,30)
    from admin_item s, admin_item t where s.item_id = :new.src_mdl_item_id and s.ver_nr = :new.src_mdl_ver_nr and t.item_id = :new.tgt_mdl_item_id and t.ver_nr = :new.tgt_mdl_ver_nr);
   -- commit;
 
 END;
 /
+
