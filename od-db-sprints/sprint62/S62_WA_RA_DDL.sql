@@ -123,7 +123,7 @@ vw_val_dom_ref_term tvdrt
 	  and tmecd.mec_id = map.TGT_MEC_ID_DERV
       and pcode_sysgen is not null;
 
-
+/*
   CREATE OR REPLACE  VIEW VW_NCI_AI_CNCPT AS
   SELECT  '5. Object Class' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
 		DE.VER_NR VER_NR,
@@ -343,4 +343,16 @@ and nonai.item_id = noncncpt.item_id and nonai.ver_nr = noncncpt.ver_nr
 
 
   GRANT SELECT ON "ONEDATA_WA"."VW_NCI_VD_CNCPT" TO "ONEDATA_RO";
+*/
+
+  CREATE OR REPLACE  VIEW VW_CNCPT_ADMIN_ITEM AS
+  select "CNCPT_ITEM_ID","CNCPT_VER_NR","ITEM_ID","VER_NR","CREAT_DT","CREAT_USR_ID","LST_UPD_USR_ID","FLD_DELETE","LST_DEL_DT","S2P_TRN_DT",
+	  "LST_UPD_DT","NCI_ORD","NCI_PRMRY_IND","CNCPT_AI_ID","NCI_CNCPT_VAL" from cncpt_admin_item
+union
+SELECT  x.TERM_CNCPT_ITEM_ID,x.TERM_CNCPT_VER_NR ,
+		x.ITEM_ID ITEM_ID, x.VER_NR VER_NR,
+		sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID,
+		0 FLD_DELETE, sysdate LST_DEL_DT, sysdate S2P_TRN_DT,
+		sysdate LST_UPD_DT, 1 NCI_ORD, 1 NCI_PRMRY_IND , x.term_cncpt_item_Id + 1000*x.item_id + x.ver_nr, '1' NCI_CNCPT_VAL
+       FROM vw_val_dom_ref_term x;
 
