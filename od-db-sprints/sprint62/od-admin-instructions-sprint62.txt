@@ -1,1 +1,3 @@
---TBD
+-- WA schema
+
+exec nci_util.createGenName
