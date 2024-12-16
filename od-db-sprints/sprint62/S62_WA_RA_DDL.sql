@@ -109,6 +109,7 @@ vw_val_dom_ref_term tvdrt
           tmed.ITEM_PHY_OBJ_NM,
             tmecd."MEC_PHY_NM",
             map.PCODE_SYSGEN,
+	  MEC_MAP_NOTES,
         sysdate creat_dt,
 	  'ONEDATA' creat_usr_id,	  
 	   sysdate lst_upd_dt,
@@ -122,7 +123,7 @@ vw_val_dom_ref_term tvdrt
 	where  	 tmed.item_id = tmecd.MDL_ELMNT_ITEM_ID
 	and tmed.ver_nr = tmecd.MDL_ELMNT_VER_NR  
 	  and tmecd.mec_id = map.TGT_MEC_ID_DERV
-      and pcode_sysgen is not null;
+      and (pcode_sysgen is not null or mec_map_notes is not null);
 
 /*
   CREATE OR REPLACE  VIEW VW_NCI_AI_CNCPT AS
