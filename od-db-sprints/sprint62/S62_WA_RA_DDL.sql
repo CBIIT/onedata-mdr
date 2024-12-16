@@ -123,8 +123,8 @@ vw_val_dom_ref_term tvdrt
 	where  	 tmed.item_id = tmecd.MDL_ELMNT_ITEM_ID
 	and tmed.ver_nr = tmecd.MDL_ELMNT_VER_NR  
 	  and tmecd.mec_id = map.TGT_MEC_ID_DERV
+      and map.map_deg in (86,87,120)
       and (pcode_sysgen is not null or mec_map_notes is not null);
-
 /*
   CREATE OR REPLACE  VIEW VW_NCI_AI_CNCPT AS
   SELECT  '5. Object Class' ALT_NMS_LVL, DE.ITEM_ID  ITEM_ID,
