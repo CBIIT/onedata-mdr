@@ -63,7 +63,11 @@ smec.pk_ind SRC_PK_IND,
 svdrt.TERM_USE_NAME "SOURCE_REF_TERM_SOURCE",
 tvdrt.TERM_USE_NAME "TARGET_REF_TERM_SOURCE"
 	, tmed.ITEM_PHY_OBJ_NM "TGT_ELMNT_PHY_NAME_DERV",
-    ' ' "CMNTS_DESC_TXT"
+    ' ' "CMNTS_DESC_TXT",
+	  map.creat_usr_id creat_usr_id_x,
+	  map.lst_upd_usr_id lst_upd_usr_id_x,
+	  map.creat_dt creat_dt_x,
+	  map.lst_upd_dt lst_upd_dt_x
 	from  NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT_CHAR tmec, nci_MEC_MAP map,
 	  NCI_MDL_ELMNT tmed,NCI_MDL_ELMNT_CHAR tmecd,
 	  obj_key deg,
