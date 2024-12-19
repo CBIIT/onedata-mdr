@@ -135,7 +135,7 @@ SELECT  x.TERM_CNCPT_ITEM_ID,x.TERM_CNCPT_VER_NR ,
 		x.ITEM_ID ITEM_ID, x.VER_NR VER_NR,
 		sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID,
 		0 FLD_DELETE, sysdate LST_DEL_DT, sysdate S2P_TRN_DT,
-		sysdate LST_UPD_DT, null NCI_ORD, null NCI_PRMRY_IND , x.term_cncpt_item_Id + 1000*x.item_id + x.ver_nr, '1' NCI_CNCPT_VAL
+		sysdate LST_UPD_DT, null NCI_ORD, null NCI_PRMRY_IND , x.term_cncpt_item_Id + 1000*x.item_id + x.ver_nr, null NCI_CNCPT_VAL
        FROM vw_val_dom_ref_term x;
 
 
