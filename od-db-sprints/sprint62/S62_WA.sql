@@ -42,13 +42,13 @@ end loop;
 end if;
 end;
 /
-/*
+
   CREATE OR REPLACE TRIGGER TR_NCI_MDL_MAP_SHORT_NM
   AFTER INSERT 
   on NCI_MDL_MAP
   for each row
 BEGIN
-   update ADMIN_ITEM set ITEM_LONG_NM = (Select substr(s.item_nm || 'v' || :new.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || :new.tgt_mdl_ver_nr ,1,30)
+   update ADMIN_ITEM set MDL_MAP_SNAME = (Select substr(s.item_nm || 'v' || :new.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || :new.tgt_mdl_ver_nr ,1,30)
    from admin_item s, admin_item t where s.item_id = :new.src_mdl_item_id and s.ver_nr = :new.src_mdl_ver_nr and t.item_id = :new.tgt_mdl_item_id and t.ver_nr = :new.tgt_mdl_ver_nr)
    where item_id = :new.item_id and ver_nr = :new.ver_nr;
   -- commit;
@@ -56,12 +56,10 @@ BEGIN
 END;
 /
 
-
 alter table ADMIN_ITEM disable all triggers;
-update ADMIN_ITEM x set ITEM_LONG_NM =  (Select substr(s.item_nm || 'v' || s.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || s.tgt_mdl_ver_nr || ,1,30)
+update ADMIN_ITEM x set MDL_MAP_SNAME =  (Select substr(s.item_nm || 'v' || map.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || map.tgt_mdl_ver_nr  ,1,30)
    from admin_item s, admin_item t, nci_mdl_map map where s.item_id = map.src_mdl_item_id and s.ver_nr = map.src_mdl_ver_nr
   and t.item_id = map.tgt_mdl_item_id and t.ver_nr = map.tgt_mdl_ver_nr and map.item_id = x.item_id and map.ver_nr = x.ver_nr)
   where admin_item_typ_id = 58;
 commit;
 alter table ADMIN_ITEM enable all triggers;
-*/
