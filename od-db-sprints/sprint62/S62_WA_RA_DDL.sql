@@ -183,4 +183,6 @@ and vd.term_cncpt_ver_nr = cncpt.ver_nr (+)
 and vd.ITEM_ID = term.item_id (+)
 and vd.ver_nr = term.ver_nr (+);
 
+alter table admin_item add (MDL_MAP_SNAME varchar2(255));
+
 
