@@ -127,6 +127,10 @@ vw_val_dom_ref_term tvdrt
 	  'ONEDATA' creat_usr_id,	  
 	   sysdate lst_upd_dt,
 	  'ONEDATA' lst_upd_usr_id,
+        map.creat_dt creat_dt_x,
+	 map.creat_usr_id creat_usr_id_x,	  
+	  map.lst_upd_dt lst_upd_dt_x,
+	  map.lst_upd_usr_id lst_upd_usr_id_x,
       0 FLD_DELETE,
       sysdate S2P_TRN_DT,
       sysdate LST_DEL_DT
