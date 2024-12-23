@@ -207,7 +207,7 @@ hookInput        t_hookInput;
 
     row_ori := hookInput.originalRowset.rowset (1);
    if ( ihook.getColumnValue(row_ori, 'MAP_DEG')  in (86,87) and ihook.getColumnValue(row_ori, 'MAP_DEG') <> ihook.getColumnOldValue(row_ori, 'MAP_DEG') ) then
-      raise_application_error(-20000, 'Mapping type cannot be manually set to Semantically Equiv/Similar.');
+      raise_application_error(-20000, 'Mapping type cannot be manually set to Semantically Equivalent/Similar.');
     return;
     end if;
     
@@ -1893,7 +1893,7 @@ and MEC_SUB_GRP_NBR =i ) loop
      v_rtn_str := v_rtn_str || ',' || cur.TGT_FUNC_PARAM ;
      end if;
    end if;
-    v_rtn_str := v_rtn_str  || getFuncPcode (v_mm_id, v_mm_ver, v_grp_nm, cur.tgt_func_param, i, v_max_idx,
+    v_rtn_str := v_rtn_str  ||',' || getFuncPcode (v_mm_id, v_mm_ver, v_grp_nm, cur.tgt_func_param, i, v_max_idx,
     cur.tgt_func_id,v_open_paren_id, v_close_paren_id, v_err) ;
 end if;
  else
@@ -1908,6 +1908,9 @@ end if;
   -- look for close paren
   if cur.paren = v_close_paren_id  then
      --   v_rtn_str := substr(v_rtn_str,2) || ' ) ' ;
+     if (substr(trim(v_rtn_str),length(trim(v_rtn_Str)),1) = ',') then
+v_rtn_str := substr(trim(v_rtn_str),1,length(trim(v_rtn_str))-1);
+end if;
         v_rtn_str := v_rtn_str || ' ) ' ;
         v_found := true;
  -- return v_rtn_str;
@@ -1924,6 +1927,7 @@ end if;
   v_cur_idx := i;
 end loop;
 end loop;
+
  return v_rtn_str;
 end ;
 
@@ -1983,13 +1987,13 @@ and map.RIGHT_OPERAND is null and map.OPERAND_TYPE is null and
 map.TGT_PHY_NAME is not null
 and map.map_deg in (86,87,120)) loop
 if (cur.src_mec_id is null) then
-update nci_mec_map set PCODE_SYSGEN =  upper( cur.tmec_nm || '=' || 
-cur.SET_TARGET_DEFAULT)  where mecm_id = cur.mecm_id;
+update nci_mec_map set PCODE_SYSGEN =   cur.tmec_nm || ' = ' || 
+cur.SET_TARGET_DEFAULT  where mecm_id = cur.mecm_id;
 end if;
 --if (cur.src_mec_id is not null and cur.target_function = 'EQUALS') then
 if (cur.src_mec_id is not null and cur.tgt_mec_id is not null) then
-update nci_mec_map set PCODE_SYSGEN =  upper( cur.tmec_nm || '=' || 
-cur.SMEC_NM)  where mecm_id = cur.mecm_id;
+update nci_mec_map set PCODE_SYSGEN =  cur.tmec_nm || ' = ' || 
+cur.SMEC_NM where mecm_id = cur.mecm_id;
 end if;
 
 end loop;
@@ -2031,7 +2035,10 @@ and MAPPING_GROUP_NAME = curouter.MAPPING_GROUP_NAME and  map.DERIVATION_GROUP_O
     end if;
     if ((cur.FLOW_CONTROL is null or cur.FLOW_CONTROL = 'THEN' or cur.FLOW_CONTROL = 'ELSE') and cur.target_function is null and cur.tgt_mec_Id is not null
     and (cur.SET_TARGET_DEFAULT is not null or cur.src_mec_id is not null)) then 
-      v_str := v_str  ||' ' || cur.FLOW_CONTROL ||  ' ' || cur.TGT_PHY_NAME || '=' ||  nvl(cur.SET_TARGET_DEFAULT,cur.SRC_PHY_NAME) || '; ' ; 
+      v_str := v_str  ||' ' || cur.FLOW_CONTROL ||  ' ' || cur.TMEC_NM || ' = ' ||  nvl(cur.SET_TARGET_DEFAULT,cur.SMEC_NM) || '; ' ; 
+      if (cur.flow_control is null and inif = false) then
+        v_assign := true;
+      end if;
    --   if (upper(curouter.MAPPING_GROUP_NAME) like '%RISK%') then
     --  raise_application_error(-20000, 'Here' || cur.tgt_phy_name || j);
      -- end if;
