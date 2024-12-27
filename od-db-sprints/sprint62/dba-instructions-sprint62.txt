@@ -1,3 +1,13 @@
 -- Run as ONEDATA_RA DDL scripts
+S62_RA.sql
+S62_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S62_WA_RA_DDL.sql
+S62_WA.sql
+S62_NCI_UTIL.sql
+S62_NCI_VD.sql
+S62_FORM_CURATOR.sql
+S62_NCI_CODEMAP_MM.sql
+S62_NCI_CODEMAP_VM.sql
+
