@@ -605,6 +605,7 @@ end;
  v_typ integer;
  v_dflt_typ integer;
  v_temp integer;
+ v_found boolean;
  BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -690,7 +691,7 @@ if (ihook.getColumnValue(row_ori, 'IMP_MECVM_ID') is not null) then
     end if;    
 end if;
 
- -- duplicae based on src/tgt/op/src func/tgt func/condition/operator
+ -- duplicate based on src/tgt/op/src func/tgt func/condition/operator
  if (v_valid = true) then -- check for duplicate
     for cur in (select * from nci_mec_val_map where mdl_map_item_id = ihook.getColumnValue(row_ori, 'MDL_MAP_ITEM_ID')
     and mdl_map_ver_nr =  ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR') and nvl(src_mec_id,0) = nvl( ihook.getColumnValue(row_ori, 'SRC_MEC_ID'),0)
@@ -703,6 +704,7 @@ end if;
 
     -- if enumerated, then check PV values
   if (v_Valid = true) then 
+  v_found := false;
   for cur in (Select * from vw_nci_mec where mec_id = ihook.getColumnValue(row_ori,'SRC_MEC_ID') and  val_dom_typ_desc= 'Enumerated' and ihook.getColumnValue(row_ori,'SRC_PV') is not null) loop
   j := nci_11179.getWordCountDelim(ihook.getColumnValue(row_ori,'SRC_PV'),'\|');
   for k in 1..j loop
@@ -711,11 +713,19 @@ end if;
   upper(perm_val_nm) = v_nm;
   if (v_temp = 0) then
        v_valid := false;
-
+  End if;
+  -- check if value already in the value map table if enumerated
+  select count(*) into v_temp from nci_mec_val_map where mecm_id = ihook.getColumnValue(row_ori,'MECM_ID') and upper(v_nm) = upper(SRc_PV);
+   if (v_temp = 0) then
+       v_found := true;
   End if;
   end loop;
 if (v_valid = false) then
     v_val_stus_msg := v_val_stus_msg ||'Source PV specified is not valid.' ||  chr(13);
+end if;
+if (v_found = true) then
+    v_val_stus_msg := v_val_stus_msg ||'Source PV for enumerated Value Domain found. Duplicates cannot be inserted.' ||  chr(13);
+    v_valid := false;
 end if;
   end loop;
   v_valid := true;
