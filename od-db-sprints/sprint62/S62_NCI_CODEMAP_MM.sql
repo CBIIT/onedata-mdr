@@ -1375,11 +1375,11 @@ me1.mdl_item_id =mm.SRC_MDL_ITEM_ID and me1.mdl_item_ver_nr = mm.SRC_MDL_VER_NR
 and me1.ITEM_ID = mec1.MDL_ELMNT_ITEM_ID and me1.ver_nr = mec1.MDL_ELMNT_VER_NR
 and mec1.cde_item_id is not null
 and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook.getColumnValue (row_ori,'VER_NR') 
-and nvl(mec1.de_conc_item_id,333) not in (select distinct mec2.de_conc_item_id from 
+/*and nvl(mec1.de_conc_item_id,333) not in (select distinct mec2.de_conc_item_id from 
 nci_mdl_elmnt me2,  nci_mdl_elmnt_char mec2,  NCI_MDL_MAP mm2
 where me2.ITEM_ID = mec2.MDL_ELMNT_ITEM_ID and me2.ver_nr = mec2.MDL_ELMNT_VER_NR
 and me2.mdl_item_id = mm2.TGT_MDL_ITEM_ID and me2.mdl_item_ver_nr = mm2.TGT_MDL_VER_NR 
-and mm2.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm2.ver_nr = ihook.getColumnValue (row_ori,'VER_NR') and mec2.de_conc_item_id is not null)
+and mm2.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm2.ver_nr = ihook.getColumnValue (row_ori,'VER_NR') and mec2.de_conc_item_id is not null)*/
 and (mec1.mec_id ) not in (select src_mec_id from nci_mec_map where 
 MDL_MAP_ITEM_ID  = ihook.getColumnValue(row_ori, 'ITEM_ID') and MDL_MAP_VER_NR = ihook.getColumnValue (row_ori,'VER_NR') and src_mec_id is not null )
 ) loop
@@ -1928,7 +1928,7 @@ end if;
 end loop;
 end loop;
 
- return v_rtn_str;
+ return replace(v_rtn_str,',,',',');
 end ;
 
 
@@ -1977,8 +1977,8 @@ update nci_mec_map set PCODE_SYSGEN = null where MDL_MAP_ITEM_ID= v_item_id and 
 commit;
 -- Straight assignment
 
-for cur in (select map.mecm_id , map.src_mec_id, map.tgt_mec_id,  map.SRC_ELMNT_NAME || '.' || map.SRC_MEC_NAME SMEC_NM,
-  map.TGT_ELMNT_NAME || '.'|| map.TGT_MEC_NAME TMEC_NM, TARGET_FUNCTION, 
+for cur in (select map.mecm_id , map.src_mec_id, map.tgt_mec_id,  map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,
+  trim(map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME) TMEC_NM, TARGET_FUNCTION, 
  SET_TARGET_DEFAULT, OPERATOR, OPERAND_TYPE, FLOW_CONTROL, PARENTHESIS, RIGHT_OPERAND, LEFT_OPERAND from VW_MDL_MAP_IMP_TEMPLATE  map
 where map.MODEL_MAP_ID= v_item_id and map.MODEL_MAP_VERSION = v_ver_nr
 and map.FLOW_CONTROL is null and map.PARENTHESIS is null 
@@ -2015,7 +2015,7 @@ j := curouter.min_grp_ord;
 while j <= curouter.max_grp_ord loop
 v_assign := false;
 for cur in (select map.mecm_id ,map.DERIVATION_GROUP_ORDER, map.src_mec_id, v_src_mdl_nm || map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,
-trim(map.SRC_ELMNT_NAME || '.'|| map.SRC_MEC_NAME) SRC_PHY_NAME,trim(map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME) TGT_PHY_NAME,
+trim(map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME) SRC_PHY_NAME,trim(map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME) TGT_PHY_NAME,
  v_tgt_mdl_nm || map.TGT_ELMNT_NAME || '.'|| map.TGT_MEC_NAME TMEC_NM, target_function_id, TARGET_FUNCTION, map.tgt_mec_id,
  decode(upper(TARGET_FUNCTION_PARAM),'SOURCE',trim(map.SRC_ELMNT_NAME || '.'|| map.SRC_MEC_NAME),TARGET_FUNCTION_PARAM) TARGET_FUNCTION_PARAM,
  SET_TARGET_DEFAULT, OPERATOR, OPERAND_TYPE, FLOW_CONTROL, PARENTHESIS, 
@@ -2035,7 +2035,7 @@ and MAPPING_GROUP_NAME = curouter.MAPPING_GROUP_NAME and  map.DERIVATION_GROUP_O
     end if;
     if ((cur.FLOW_CONTROL is null or cur.FLOW_CONTROL = 'THEN' or cur.FLOW_CONTROL = 'ELSE') and cur.target_function is null and cur.tgt_mec_Id is not null
     and (cur.SET_TARGET_DEFAULT is not null or cur.src_mec_id is not null)) then 
-      v_str := v_str  ||' ' || cur.FLOW_CONTROL ||  ' ' || cur.TMEC_NM || ' = ' ||  nvl(cur.SET_TARGET_DEFAULT,cur.SMEC_NM) || '; ' ; 
+      v_str := v_str  ||' ' || cur.FLOW_CONTROL ||  ' ' || cur.TGT_PHY_NAME || ' = ' ||  nvl(cur.SET_TARGET_DEFAULT,cur.SMEC_NM)  ; 
       if (cur.flow_control is null and inif = false) then
         v_assign := true;
       end if;
@@ -2055,7 +2055,7 @@ and MAPPING_GROUP_NAME = curouter.MAPPING_GROUP_NAME and  map.DERIVATION_GROUP_O
             v_Str := v_str || 'Function found with no open parenthesis.';
             v_assign := true;
         else
-            v_str := v_str || getFuncPcode (v_item_id, v_ver_nr, upper(curouter.MAPPING_GROUP_NAME), cur.target_function_param, j, curouter.max_grp_ord,
+            v_str := v_str || cur.TGT_PHY_NAME || ' = ' || getFuncPcode (v_item_id, v_ver_nr, upper(curouter.MAPPING_GROUP_NAME), cur.target_function_param, j, curouter.max_grp_ord,
             cur.target_function_id,v_open_paren, v_close_paren, v_err) ;
 -- raise_application_error(-20000, upper(curouter.MAPPING_GROUP_NAME) || j);
             v_assign := true;
@@ -2065,7 +2065,7 @@ and MAPPING_GROUP_NAME = curouter.MAPPING_GROUP_NAME and  map.DERIVATION_GROUP_O
   
 end loop;
 if (v_assign = true and inIf = false) then
-update nci_mec_map set PCODE_SYSGEN =  upper(v_str)  where MDL_MAP_ITEM_ID= v_item_id and MDL_MAP_VER_NR = v_ver_nr and MEC_MAP_NM=curouter.mapping_group_name
+update nci_mec_map set PCODE_SYSGEN =  trim(v_str)  where MDL_MAP_ITEM_ID= v_item_id and MDL_MAP_VER_NR = v_ver_nr and MEC_MAP_NM=curouter.mapping_group_name
 and mec_sub_grp_nbr=v_min_grp;
 update nci_mec_map set PCODE_SYSGEN =  ''  where MDL_MAP_ITEM_ID= v_item_id and MDL_MAP_VER_NR = v_ver_nr and MEC_MAP_NM=curouter.mapping_group_name
 and mec_sub_grp_nbr>v_min_grp and mec_sub_grp_nbr <j;
