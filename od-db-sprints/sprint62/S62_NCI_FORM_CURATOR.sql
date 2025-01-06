@@ -957,18 +957,38 @@ BEGIN
  end if;
  */
  
- if (hookinput.invocationNUmber = 0) then
- 
  select admin_item_typ_id into v_typ from admin_item where item_id = v_id and ver_nr = v_ver_nr;
+ 
+ if (hookinput.invocationNUmber = 0) then
  
  if (v_typ not in (9,51)) then -- CS and CSI only
  raise_application_error(-20000,'Deletes only allowed for CS and CSI.');
  end if;
  -- check if CSi exist
+ if (v_typ = 9) then
  for cur in (select * from  NCI_CLSFCTN_SCHM_ITEM where CS_ITEM_ID= v_id and CS_ITEM_VER_NR= v_ver_nr and nvl(fld_Delete,0) = 0) loop
  raise_application_error(-20000,'CSI found for CS. Please delete CSI first.');
  end loop;
- hookoutput.question := getProceedQuestion ('Submit', 'Permanently Delete Item: ' || v_id || 'v' || v_ver_nr);
+ end if;
+ -- check if Classifications exist
+ if (v_typ = 51) then
+ 
+   for cur in (select ai.* from admin_item ai, nci_clsfctn_schm_item csi where p_item_id= v_id and p_item_ver_nr = v_ver_nr and nvl(ai.fld_delete,0) = 0
+   and csi.item_id = ai.item_id and csi.ver_nr = ai.ver_nr and upper(ai.admin_stus_nm_dn) not like '%DELETED%') loop
+    raise_application_error(-20000, 'Select CSI has children nodes. Please move children before deleting.');
+    end loop;
+
+   for cur in (select * from NCI_CSI_ALT_DEFNMS where  NCI_PUB_ID =v_id and NCI_VER_NR = v_ver_nr and nvl(fld_delete,0) = 0) loop
+        raise_application_error(-20000, 'CSI linked to Alternate Names or Definition classifications. Please delete before CSI can be deleted.');
+    end loop;
+
+
+   for cur in (select * from NCI_ADMIN_ITEM_REL where  P_ITEM_ID= v_id and P_ITEM_VER_NR = v_ver_nr and rel_typ_id = 65 and nvl(fld_delete,0) = 0) loop
+        raise_application_error(-20000, 'Classifications found for this CSI. Please delete classification before CSI can be deleted.');
+    end loop;
+end if;
+
+ hookoutput.question := getProceedQuestion ('Submit', 'Permanently Delete Item: ' || v_id || 'v' || v_ver_nr );
  else
  
  select nci_idseq into v_idseq from admin_item where item_id = v_id and ver_nr = v_ver_nr;
@@ -992,6 +1012,7 @@ delete from nci_admin_item_ext where item_id = v_id and ver_nr = v_ver_nr;
 delete from onedata_ra.nci_admin_item_ext where item_id = v_id and ver_nr = v_ver_nr;
 
 
+--raise_application_error(-20000, v_typ);
 case v_typ
 when 9 then
 delete from clsfctn_schm where item_id = v_id and ver_nr = v_ver_nr;
