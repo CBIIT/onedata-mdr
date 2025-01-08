@@ -55,6 +55,15 @@ BEGIN
 
 END;
 /
+  create or replace TRIGGER TR_AI_END_EFF_DT
+  BEFORE UPDATE or INSERT ON ADMIN_ITEM
+  FOR EACH ROW
+     WHEN (
+     (DECODE(new.UNTL_DT, old.CREAT_DT,0,1)=0) and new.UNTL_DT is not null) --new End Date is same as create date
+   BEGIN
+RAISE_APPLICATION_ERROR( -20001,'!!!! The item is not saved. "End Date" must be set later than "Effective Date"  !!!!');
+END TR_AI_END_EFF_DT;
+/
 
 alter table ADMIN_ITEM disable all triggers;
 update ADMIN_ITEM x set MDL_MAP_SNAME =  (Select substr(s.item_nm || 'v' || map.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || map.tgt_mdl_ver_nr  ,1,30)
