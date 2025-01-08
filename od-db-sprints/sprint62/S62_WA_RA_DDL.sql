@@ -206,4 +206,39 @@ and vd.ver_nr = term.ver_nr (+);
 
 alter table admin_item add (MDL_MAP_SNAME varchar2(255));
 
+--jira 3753
+alter table nci_mec_val_map add src_vd_typ number;
+alter table nci_mec_val_map add tgt_vd_typ number;
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW VW_VALUE_DOM ("ITEM_ID", "VER_NR", "ITEM_NM", "ITEM_LONG_NM", "ITEM_DESC", "CNTXT_NM_DN", "REGSTR_STUS_NM_DN", "ADMIN_STUS_NM_DN", "CURRNT_VER_IND", "DTTYPE_ID", "VAL_DOM_MAX_CHAR", "CONC_DOM_VER_NR", "CONC_DOM_ITEM_ID", "NON_ENUM_VAL_DOM_DESC", "UOM_ID", "VAL_DOM_TYP_ID", "VAL_DOM_MIN_CHAR", "VAL_DOM_FMT_ID", "CHAR_SET_ID", "CREAT_DT", "CREAT_USR_ID", "LST_UPD_USR_ID", "FLD_DELETE", "LST_DEL_DT", "S2P_TRN_DT", "LST_UPD_DT", "REP_TERM_ITEM_NM", "SUBSET_DESC", "PRNT_SUBSET_ITEM_ID", "PRNT_SUBSET_VER_NR", "NCI_STD_DTTYPE_ID", "TERM_NAME", "USE_NAME", "TERM_USE_NAME", "VAL_DOM_TYP_NM") DEFAULT COLLATION "USING_NLS_COMP"  AS 
+  SELECT ADMIN_ITEM.ITEM_ID, ADMIN_ITEM.VER_NR, ADMIN_ITEM.ITEM_NM, ADMIN_ITEM.ITEM_LONG_NM, ADMIN_ITEM.ITEM_DESC, 
+ADMIN_ITEM.CNTXT_NM_DN,  ADMIN_ITEM.REGSTR_STUS_NM_DN, ADMIN_ITEM.ADMIN_STUS_NM_DN, 
+		      ADMIN_ITEM.CURRNT_VER_IND, VALUE_DOM.DTTYPE_ID, VALUE_DOM.VAL_DOM_MAX_CHAR, VALUE_DOM.CONC_DOM_VER_NR, VALUE_DOM.CONC_DOM_ITEM_ID, 
+VALUE_DOM.NON_ENUM_VAL_DOM_DESC, VALUE_DOM.UOM_ID, VALUE_DOM.VAL_DOM_TYP_ID, VALUE_DOM.VAL_DOM_MIN_CHAR, VALUE_DOM.VAL_DOM_FMT_ID, 
+VALUE_DOM.CHAR_SET_ID, VALUE_DOM.CREAT_DT, VALUE_DOM.CREAT_USR_ID, VALUE_DOM.LST_UPD_USR_ID, 
+VALUE_DOM.FLD_DELETE, VALUE_DOM.LST_DEL_DT, VALUE_DOM.S2P_TRN_DT, VALUE_DOM.LST_UPD_DT , RC.ITEM_NM  REP_TERM_ITEM_NM,
+	  value_dom.subset_desc, value_dom.PRNT_SUBSET_ITEM_ID, value_dom.PRNT_SUBSET_VER_NR,
+	  value_dom.NCI_STD_DTTYPE_ID, term.term_name, term.use_name, term.term_use_name, DECODE(value_dom.val_dom_typ_id, 17, 'Enumerated', 18, 'Non-enumerated', 16, 'Enumerated by Reference')
+FROM ADMIN_ITEM, VALUE_DOM, VW_REP_CLS RC, vw_val_dom_ref_term term
+       WHERE ADMIN_ITEM.ADMIN_ITEM_TYP_ID = 3
+AND ADMIN_ITEM.ITEM_ID = VALUE_DOM.ITEM_ID
+AND ADMIN_ITEM.VER_NR=VALUE_DOM.VER_NR and
+VALUE_DOM.REP_CLS_ITEM_ID = RC.ITEM_ID (+) and 
+VALUE_DOM.REP_CLS_VER_NR = RC.VER_NR (+)
+and
+VALUE_DOM.ITEM_ID = TERM.ITEM_ID (+) and 
+VALUE_DOM.VER_NR = TERM.VER_NR (+);
+
+--jira 3703
+update nci_dload_cstm_col_key set col_def = 'CDE Short Name' where col_id = 1;
+update nci_dload_cstm_col_key set col_def = 'CDE Long Name' where col_id = 2;
+update nci_dload_cstm_col_key set col_def = 'CDE Alternate Name' where col_id = 91;
+commit;
+
+alter table nci_dload_cstm_data_coll add cntxt_id number;
+alter table nci_dload_cstm_data_coll add cntxt_ver_nr number (4,2);
+
+--jira 3805
+alter table nci_stg_pv_vm_import add REF_BTCH_STR varchar2(128);
+
 
