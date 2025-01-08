@@ -1,0 +1,220 @@
+Sprint 62 DB Log
+
+--OneData RA
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_RA.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_WA_RA_DDL.sql"
+
+
+Grant succeeded.
+
+
+Grant succeeded.
+
+
+View VW_MDL_MAP_IMP_TEMPLATE created.
+
+
+View VW_MDL_MAP_RSLT created.
+
+
+View VW_CNCPT_ADMIN_ITEM created.
+
+
+View VW_NCI_MEC_NO_CDE created.
+
+
+View VW_NCI_MEC created.
+
+
+Table ADMIN_ITEM altered.
+
+
+Table NCI_MEC_VAL_MAP altered.
+
+
+Table NCI_MEC_VAL_MAP altered.
+
+
+View VW_VALUE_DOM created.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+Commit complete.
+
+
+Table NCI_DLOAD_CSTM_DATA_COLL altered.
+
+
+Table NCI_DLOAD_CSTM_DATA_COLL altered.
+
+Table NCI_DLOAD_CSTM_DATA_COLL altered.
+
+Table NCI_STG_PV_VM_IMPORT altered.
+
+--OneData WA
+
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_WA_RA_DDL.sql"
+
+View VW_MDL_MAP_IMP_TEMPLATE created.
+
+
+View VW_MDL_MAP_RSLT created.
+
+
+View VW_CNCPT_ADMIN_ITEM created.
+
+
+View VW_NCI_MEC_NO_CDE created.
+
+
+View VW_NCI_MEC created.
+
+
+Table ADMIN_ITEM altered.
+
+
+Table NCI_MEC_VAL_MAP altered.
+
+
+Table NCI_MEC_VAL_MAP altered.
+
+
+View VW_VALUE_DOM created.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+1 row updated.
+
+
+Commit complete.
+
+
+Table NCI_DLOAD_CSTM_DATA_COLL altered.
+
+
+Table NCI_DLOAD_CSTM_DATA_COLL altered.
+
+
+Table NCI_DLOAD_CSTM_DATA_COLL altered.
+
+Table NCI_STG_PV_VM_IMPORT altered.
+
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_WA.sql"
+
+Trigger TR_MEC_MAP_UPD compiled
+
+
+Trigger TR_NCI_MDL_MAP_SHORT_NM compiled
+
+
+Trigger TR_AI_END_EFF_DT compiled
+
+Table ADMIN_ITEM altered.
+
+
+20 rows updated.
+
+
+Commit complete.
+
+
+Table ADMIN_ITEM altered.
+
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_NCI_UTIL.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_NCI_VD.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_FORM_CURATOR.sql"
+
+Package NCI_UTIL compiled
+
+
+Package Body NCI_UTIL compiled
+
+
+Package NCI_VD compiled
+
+
+Package Body NCI_VD compiled
+
+
+Error starting at line : 5 in command -
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_FORM_CURATOR.sql"
+Error report -
+SP2-0310: Unable to open file: "C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_FORM_CURATOR.sql"
+
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_NCI_FORM_CURATOR.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_NCI_CODEMAP_MM.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_NCI_CODEMAP_VM.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_NCI_EXT_IMPORT.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_NCI_IMPORT.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_NCI_PV_VM.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_NCI_11179_2.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Deployments\Database\sprint62\S62_NCI_DLOAD.sql"
+
+
+Package NCI_FORM_CURATOR compiled
+
+
+Package Body NCI_FORM_CURATOR compiled
+
+
+Package NCI_CODEMAP_MM compiled
+
+
+Package Body NCI_CODEMAP_MM compiled
+
+
+Package NCI_CODEMAP_VM compiled
+
+
+Package Body NCI_CODEMAP_VM compiled
+
+
+Package NCI_EXT_IMPORT compiled
+
+
+Package Body NCI_EXT_IMPORT compiled
+
+
+Package NCI_IMPORT compiled
+
+
+Package Body NCI_IMPORT compiled
+
+
+Package NCI_PV_VM compiled
+
+
+Package Body NCI_PV_VM compiled
+
+
+Package NCI_11179_2 compiled
+
+
+Package Body NCI_11179_2 compiled
+
+
+Package NCI_DLOAD compiled
+
+
+Package Body NCI_DLOAD compiled
+
+
+
+
+
+
+
+
