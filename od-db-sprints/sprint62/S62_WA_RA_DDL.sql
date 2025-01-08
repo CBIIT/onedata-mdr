@@ -237,6 +237,7 @@ commit;
 
 alter table nci_dload_cstm_data_coll add cntxt_id number;
 alter table nci_dload_cstm_data_coll add cntxt_ver_nr number (4,2);
+alter table nci_dload_cstm_data_coll add LANG_ID number default 1000;
 
 --jira 3805
 alter table nci_stg_pv_vm_import add REF_BTCH_STR varchar2(128);
