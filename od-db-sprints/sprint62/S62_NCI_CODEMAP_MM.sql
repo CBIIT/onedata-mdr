@@ -2245,10 +2245,10 @@ v_assign := false;
 for cur in (select map.mecm_id ,map.DERIVATION_GROUP_ORDER, map.src_mec_id, v_src_mdl_nm || map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,
 trim(map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME) SRC_PHY_NAME,trim(map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME) TGT_PHY_NAME,
  v_tgt_mdl_nm || map.TGT_ELMNT_NAME || '.'|| map.TGT_MEC_NAME TMEC_NM, target_function_id, TARGET_FUNCTION, map.tgt_mec_id,
- decode(upper(TARGET_FUNCTION_PARAM),'SOURCE',trim(map.SRC_ELMNT_NAME || '.'|| map.SRC_MEC_NAME),TARGET_FUNCTION_PARAM) TARGET_FUNCTION_PARAM,
- SET_TARGET_DEFAULT, OPERATOR, OPERAND_TYPE, FLOW_CONTROL, PARENTHESIS, 
- decode(upper(RIGHT_OPERAND),'SOURCE',trim(map.SRC_ELMNT_NAME || '.'|| map.SRC_MEC_NAME),right_operand) right_operand,
- decode(upper(LEFT_OPERAND),'SOURCE',trim(map.SRC_ELMNT_NAME || '.'|| map.SRC_MEC_NAME),LEFT_operand) LEFT_OPERAND from VW_MDL_MAP_IMP_TEMPLATE  map
+ decode(upper(TARGET_FUNCTION_PARAM),'SOURCE',trim(map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME),TARGET_FUNCTION_PARAM) TARGET_FUNCTION_PARAM,
+ decode(upper(SET_TARGET_DEFAULT),'SOURCE',trim(map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME),SET_TARGET_DEFAULT) SET_TARGET_DEFAULT, OPERATOR, OPERAND_TYPE, FLOW_CONTROL, PARENTHESIS, 
+ decode(upper(RIGHT_OPERAND),'SOURCE',trim(map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME),right_operand) right_operand,
+ decode(upper(LEFT_OPERAND),'SOURCE',trim(map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME),LEFT_operand) LEFT_OPERAND from VW_MDL_MAP_IMP_TEMPLATE  map
 where map.MODEL_MAP_ID= v_item_id and map.MODEL_MAP_VERSION = v_ver_nr
 and MAPPING_GROUP_NAME = curouter.MAPPING_GROUP_NAME and  map.DERIVATION_GROUP_ORDER = j order by DERIVATION_GROUP_ORDER) loop
 
@@ -2263,14 +2263,15 @@ and MAPPING_GROUP_NAME = curouter.MAPPING_GROUP_NAME and  map.DERIVATION_GROUP_O
     end if;
     if ((cur.FLOW_CONTROL is null or cur.FLOW_CONTROL = 'THEN' or cur.FLOW_CONTROL = 'ELSE') and (cur.target_function is null or cur.target_function ='EQUALS') and cur.tgt_mec_Id is not null
     and (cur.SET_TARGET_DEFAULT is not null or cur.src_mec_id is not null)) then 
-      v_str := v_str  ||' ' || cur.FLOW_CONTROL ||  ' ' || cur.TGT_PHY_NAME || ' = ' ||  nvl(cur.SET_TARGET_DEFAULT,cur.SMEC_NM)  ; 
+      v_str := v_str  ||' ' || nvl(cur.FLOW_CONTROL,'') ||  ' ' || cur.TGT_PHY_NAME || ' = ' ||  nvl(cur.SET_TARGET_DEFAULT,cur.SMEC_NM)  ; 
+      end if;
       if (cur.flow_control is null and inif = false) then
         v_assign := true;
       end if;
    --   if (upper(curouter.MAPPING_GROUP_NAME) like '%RISK%') then
     --  raise_application_error(-20000, 'Here' || cur.tgt_phy_name || j);
      -- end if;
-    end if;
+ --   end if;
     
     
     if (cur.FLOW_CONTROL = 'ENDIF')  then 
