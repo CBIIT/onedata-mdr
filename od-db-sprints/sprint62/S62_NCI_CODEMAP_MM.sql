@@ -359,6 +359,235 @@ end;
  v_typ integer;
  v_dflt_typ integer;
  v_temp integer;
+ v_st_ts timestamp;
+ v_end_ts timestamp;
+ v_mm_id number;
+ v_mm_ver number(4,2);
+ BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+  
+  rows := t_rows();
+  v_st_ts := systimestamp();
+  row_ori :=  hookInput.originalRowset.rowset(1);
+   v_mm_id := ihook.getColumnValue(row_ori, 'MDL_MAP_ITEM_ID');
+   v_mm_ver := ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR');
+    
+for cur in (select * from nci_mdl_map mm where mm.item_id  = v_mm_id
+    and mm.ver_nr = v_mm_ver) loop
+    ihook.setColumnValue(row_ori, 'SRC_MDL_ITEM_ID', cur.SRC_MDL_ITEM_ID);
+    ihook.setColumnValue(row_ori, 'TGT_MDL_ITEM_ID', cur.TGT_MDL_ITEM_ID);
+    ihook.setColumnValue(row_ori, 'SRC_MDL_VER_NR', cur.SRC_MDL_VER_NR);
+    ihook.setColumnValue(row_ori, 'TGT_MDL_VER_NR', cur.TGT_MDL_VER_NR);
+    
+    end loop; --raise_application_error(-20000,ihook.getColumnValue(row_ori, 'BTCH_NM'));
+   
+  for cur1 in (Select * from nci_stg_mec_map where mdl_map_item_id = v_mm_id and mdl_map_ver_nr = v_mm_ver and BTCH_NM = ihook.getColumnValue(row_ori, 'BTCH_NM')
+  and CTL_VAL_STUS in ( 'IMPORTED','ERROR','VALIDATED')) loop
+  --and CTL_VAL_STUS in ( 'IMPORTED')) loop
+  --raise_application_error(-20000,'here');
+  v_valid := true;
+  v_val_stus_msg := '';
+
+-- Validate that the source elemnt/char and target element/char belong to the current source and target model
+-- validate that both ME and MEC are specified. May be blank.
+if ((cur1.SRC_ME_PHY_NM is null and cur1.SRC_MEC_PHY_NM is not null ) or
+(cur1.SRC_ME_PHY_NM is not null and  cur1.SRC_MEC_PHY_NM is  null)) then
+v_valid := false;
+v_val_stus_msg := 'Both Source Element and Characteristics have to be specified; ';
+end if;
+
+if (((cur1.TGT_ME_PHY_NM is null and  cur1.TGT_MEC_PHY_NM is not null ) or
+(cur1.TGT_ME_PHY_NM is not null and  cur1.TGT_MEC_PHY_NM is  null)) and v_valid= true) then
+v_valid := false;
+v_val_stus_msg := 'Both Target Element and Characteristics have to be specified; ';
+end if;
+
+if ( cur1.SRC_ME_PHY_NM  is not null and  cur1.SRC_MEC_PHY_NM is not null) then 
+ihook.setColumnValue(row_ori, 'SRC_MEC_ID','');
+   for cur in (
+    select mec.mec_id from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.src_mdl_item_id 
+    and me.MDL_ITEM_VER_NR = mm.src_mdl_ver_Nr
+    and mm.item_id  = v_mm_id
+    and mm.ver_nr = v_mm_ver and  upper(me.ITEM_PHY_OBJ_NM) =upper(cur1.SRC_ME_PHY_NM)
+    and upper(MEC.MEC_PHY_NM)=upper(cur1.SRC_MEC_PHY_NM) and me.ITEM_ID = mec.MDL_ELMNT_ITEM_ID and me.ver_nr = mec.MDL_ELMNT_VER_NR) loop
+      ihook.setColumnValue(row_ori, 'SRC_MEC_ID', cur.mec_id);
+    end loop;
+    if (ihook.getColumnValue(row_ori, 'SRC_MEC_ID') is null) then 
+        v_valid := false;
+        v_val_stus_msg := v_val_stus_msg || 'Invalid Source Characteristics; '|| chr(13);
+    end if;
+end if;    
+
+if ( cur1.TGT_ME_PHY_NM is not null and  cur1.TGT_MEC_PHY_NM is not null) then 
+    for cur in (
+    select mec.mec_id from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.tgt_mdl_item_id 
+    and me.MDL_ITEM_VER_NR = mm.tgt_mdl_ver_Nr
+    and mm.item_id  = v_mm_id
+    and mm.ver_nr = v_mm_ver and  upper(me.ITEM_PHY_OBJ_NM) =upper(cur1.TGT_ME_PHY_NM)
+    and upper(MEC.MEC_PHY_NM)=upper(cur1.TGT_MEC_PHY_NM) and me.ITEM_ID = mec.MDL_ELMNT_ITEM_ID and me.ver_nr = mec.MDL_ELMNT_VER_NR) loop
+      ihook.setColumnValue(row_ori, 'TGT_MEC_ID', cur.mec_id);
+    end loop;
+    if (ihook.getColumnValue(row_ori, 'TGT_MEC_ID') is null) then 
+        v_valid := false;
+        v_val_stus_msg := v_val_stus_msg || 'Invalid Target Characteristics; '|| chr(13);
+    end if;
+end if;    
+
+if (cur1.IMP_MAP_DEG is not null and cur1.MAP_DEG is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Mapping Type is incorrect; '|| chr(13);
+else -- validate to make sure mapping type is not Semantically Equiv or Semantically Similar
+for cur in (select * from nci_mec_map where mecm_id = cur1.STG_MECM_ID and 
+cur1.MAP_DEG <> map_deg and cur1.MAP_DEG in (86,87)) loop
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Cannot change the mapping type to Semntically Similar/Equivalent.'|| chr(13);
+end loop;
+end if;
+
+if (cur1.IMP_CRDNLITY is not null and  cur1.CRDNLITY_ID is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Cardinaliy is incorrect; '|| chr(13);
+end if;
+
+/*
+
+if (ihook.getColumnValue(row_ori, 'IMP_SRC_FUNC') is not null and  ihook.getColumnValue(row_ori, 'SRC_FUNC_ID') is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Source Function is incorrect; '|| chr(13);
+end if;
+*/
+if (cur1.IMP_TGT_FUNC is not null and  cur1.TGT_FUNC_ID is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Target Function is incorrect; '|| chr(13);
+end if;
+ 
+if (cur1.IMP_TRANS_RUL_NOT is not null and  cur1.TRANS_RUL_NOT is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Transformation Notation Type is incorrect; '|| chr(13);
+end if;
+ 
+if (cur1.IMP_OP_TYP is not null and cur1.OP_TYP is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Comparator is incorrect; '|| chr(13);
+end if;
+ 
+ 
+if (cur1.IMP_FLOW_CNTRL is not null and  cur1.FLOW_CNTRL is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Condition is incorrect; '|| chr(13);
+end if;
+ 
+ 
+ 
+if (cur1.IMP_PAREN is not null and  cur1.PAREN is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Parenthesis is incorrect; '|| chr(13);
+end if;
+ 
+ 
+if (cur1.IMP_PROV_ORG is not null and  cur1.PROV_ORG_ID is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Provenance Organization is incorrect; '|| chr(13);
+end if;
+
+
+ 
+if (cur1.IMP_PROV_CNTCT is not null and cur1.PROV_CNTCT_ID is null ) then
+v_valid := false;
+v_val_stus_msg := v_val_stus_msg ||'Imported Provenance Contact is incorrect; '|| chr(13);
+end if;
+ 	
+ 
+
+-- Rules id provided is incorrect.
+ 
+if (cur1.IMP_RULE_ID is not null) then
+    select count(*) into v_temp from NCI_MEC_MAP where  MDL_MAP_ITEM_ID  = v_mm_id
+    and MDL_MAP_VER_NR = v_mm_ver and MECM_ID=cur1.IMP_RULE_ID and nvl(fld_Delete,0) = 0;
+    if (v_temp = 0) then
+        v_valid := false;
+        v_val_stus_msg := v_val_stus_msg ||'Imported Rule ID is incorrect or does not exist; '|| chr(13);
+
+    end if;    
+end if;
+ 
+ -- duplicae based on src/tgt/op/src func/tgt func/condition/operator
+ if (v_valid = true) then -- check for duplicate
+    for cur in (select * from nci_mec_map where mdl_map_item_id = ihook.getColumnValue(row_ori, 'MDL_MAP_ITEM_ID')
+    and mdl_map_ver_nr =  ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR') and nvl(src_mec_id,0) = nvl( ihook.getColumnValue(row_ori, 'SRC_MEC_ID'),0)
+    and nvl(tgt_mec_id,0) = nvl( ihook.getColumnValue(row_ori, 'TGT_MEC_ID'),0)
+    and nvl(OP_id,0) = nvl( ihook.getColumnValue(row_ori, 'OP_ID'),0)
+     and nvl(PAREN,0) = nvl( ihook.getColumnValue(row_ori, 'PAREN'),0)
+      and nvl(MEC_SUB_GRP_NBR,0) = nvl( ihook.getColumnValue(row_ori, 'MEC_SUB_GRP_NBR'),0)
+     and nvl(MEC_MAP_NM,0) = nvl( ihook.getColumnValue(row_ori, 'MEC_MAP_NM'),0)
+   and nvl(TGT_FUNC_id,0) = nvl( ihook.getColumnValue(row_ori, 'TGT_FUNC_ID'),0)
+    and nvl(FLOW_CNTRL,0) = nvl( ihook.getColumnValue(row_ori, 'FLOW_CNTRL'),0)
+    and  ihook.getColumnValue(row_ori, 'IMP_RULE_ID') is null) loop
+       v_valid := false;
+        v_val_stus_msg := v_val_stus_msg ||'Duplicate found with Rule ID: '|| cur.MECM_ID ||  chr(13);
+   end loop;
+ end if;
+ 
+ 
+
+  if (v_valid = false) then 
+  ihook.setColumnValue(row_ori, 'CTL_VAL_STUS','ERROR');
+  ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',v_val_stus_msg);
+  else
+  ihook.setColumnValue(row_ori, 'CTL_VAL_STUS','VALIDATED');
+  ihook.setColumnValue(row_ori, 'CTL_VAL_MSG','Valid');
+  end if;
+   update nci_stg_mec_map set CTL_VAL_STUS= ihook.getColumnValue(row_ori,'CTL_VAL_STUS'),
+   CTL_VAL_MSG= ihook.getColumnValue(row_ori,'CTL_VAL_MSG'),
+   SRC_MDL_ITEM_ID =  ihook.getColumnValue(row_ori, 'SRC_MDL_ITEM_ID'),
+   SRC_MDL_VER_NR =  ihook.getColumnValue(row_ori, 'SRC_MDL_VER_NR'),
+   TGT_MDL_ITEM_ID =  ihook.getColumnValue(row_ori, 'TGT_MDL_ITEM_ID'),
+   TGT_MDL_VER_NR =  ihook.getColumnValue(row_ori, 'TGT_MDL_VER_NR'),
+   SRC_MEC_ID = ihook.getColumnValue(row_ori, 'SRC_MEC_ID'), 
+   TGT_MEC_ID = ihook.getColumnValue(row_ori, 'TGT_MEC_ID')
+    where STG_MECM_ID = cur1.STG_MECM_ID;
+   --  rows.extend;   rows(rows.last) := row_ori;
+ --end if;
+ end loop;
+ 
+  /* action := t_actionrowset(rows, 'Model Map Import', 2,6,'update');
+        actions.extend;
+        actions(actions.last) := action;
+        
+       hookoutput.actions := actions;*/
+       commit;
+
+  v_end_ts := systimestamp();
+ hookoutput.message := 'Validation completed. Execution time in seconds: ' ||  extract( day from(v_end_ts - v_st_ts)*24*60*60);
+    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+  -- nci_util.debugHook('GENERAL',v_data_out);
+end;
+
+
+   procedure spValidateModelMapOld ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+   as
+   hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+   actions t_actions := t_actions();
+  action t_actionRowset;
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+    row_sel t_row;
+    v_id integer;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+  v_mdl_hdr_id number;
+  v_mdl_elmnt_id number;
+  v_valid boolean;
+  v_val_stus_msg varchar2(2000);
+ i integer;
+ v_typ integer;
+ v_dflt_typ integer;
+ v_temp integer;
  BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -512,7 +741,7 @@ if (ihook.getColumnValue(row_ori, 'IMP_RULE_ID') is not null) then
 
     end if;    
 end if;
- 
+ /*
  -- duplicae based on src/tgt/op/src func/tgt func/condition/operator
  if (v_valid = true) then -- check for duplicate
     for cur in (select * from nci_mec_map where mdl_map_item_id = ihook.getColumnValue(row_ori, 'MDL_MAP_ITEM_ID')
@@ -530,7 +759,7 @@ end if;
    end loop;
  end if;
  
- 
+ */
 
   if (v_valid = false) then 
   ihook.setColumnValue(row_ori, 'CTL_VAL_STUS','ERROR');
@@ -552,7 +781,6 @@ end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
   -- nci_util.debugHook('GENERAL',v_data_out);
 end;
-
 
    procedure spValDeriveModelMap ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
    as
@@ -2033,7 +2261,7 @@ and MAPPING_GROUP_NAME = curouter.MAPPING_GROUP_NAME and  map.DERIVATION_GROUP_O
   inif := true;
   
     end if;
-    if ((cur.FLOW_CONTROL is null or cur.FLOW_CONTROL = 'THEN' or cur.FLOW_CONTROL = 'ELSE') and cur.target_function is null and cur.tgt_mec_Id is not null
+    if ((cur.FLOW_CONTROL is null or cur.FLOW_CONTROL = 'THEN' or cur.FLOW_CONTROL = 'ELSE') and (cur.target_function is null or cur.target_function ='EQUALS') and cur.tgt_mec_Id is not null
     and (cur.SET_TARGET_DEFAULT is not null or cur.src_mec_id is not null)) then 
       v_str := v_str  ||' ' || cur.FLOW_CONTROL ||  ' ' || cur.TGT_PHY_NAME || ' = ' ||  nvl(cur.SET_TARGET_DEFAULT,cur.SMEC_NM)  ; 
       if (cur.flow_control is null and inif = false) then
