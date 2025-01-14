@@ -66,7 +66,7 @@ END TR_AI_END_EFF_DT;
 /
 
 alter table ADMIN_ITEM disable all triggers;
-update ADMIN_ITEM x set MDL_MAP_SNAME =  (Select substr(s.item_nm || 'v' || map.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || map.tgt_mdl_ver_nr  ,1,30)
+update ADMIN_ITEM x set MDL_MAP_SNAME =  (Select substr(s.item_nm || 'v' || map.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || map.tgt_mdl_ver_nr  ,1,255)
    from admin_item s, admin_item t, nci_mdl_map map where s.item_id = map.src_mdl_item_id and s.ver_nr = map.src_mdl_ver_nr
   and t.item_id = map.tgt_mdl_item_id and t.ver_nr = map.tgt_mdl_ver_nr and map.item_id = x.item_id and map.ver_nr = x.ver_nr)
   where admin_item_typ_id = 58;
