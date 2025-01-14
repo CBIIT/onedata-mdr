@@ -48,7 +48,7 @@ end;
   on NCI_MDL_MAP
   for each row
 BEGIN
-   update ADMIN_ITEM set MDL_MAP_SNAME = (Select substr(s.item_nm || 'v' || :new.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || :new.tgt_mdl_ver_nr ,1,30)
+   update ADMIN_ITEM set MDL_MAP_SNAME = (Select substr(s.item_nm || 'v' || :new.src_mdl_ver_nr || ' -> ' || t.item_nm || 'v' || :new.tgt_mdl_ver_nr ,1,255)
    from admin_item s, admin_item t where s.item_id = :new.src_mdl_item_id and s.ver_nr = :new.src_mdl_ver_nr and t.item_id = :new.tgt_mdl_item_id and t.ver_nr = :new.tgt_mdl_ver_nr)
    where item_id = :new.item_id and ver_nr = :new.ver_nr;
   -- commit;
