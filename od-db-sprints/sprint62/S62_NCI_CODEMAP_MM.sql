@@ -404,8 +404,9 @@ v_valid := false;
 v_val_stus_msg := 'Both Target Element and Characteristics have to be specified; ';
 end if;
 
-if ( cur1.SRC_ME_PHY_NM  is not null and  cur1.SRC_MEC_PHY_NM is not null) then 
 ihook.setColumnValue(row_ori, 'SRC_MEC_ID','');
+
+if ( cur1.SRC_ME_PHY_NM  is not null and  cur1.SRC_MEC_PHY_NM is not null) then 
    for cur in (
     select mec.mec_id from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.src_mdl_item_id 
     and me.MDL_ITEM_VER_NR = mm.src_mdl_ver_Nr
@@ -419,6 +420,8 @@ ihook.setColumnValue(row_ori, 'SRC_MEC_ID','');
         v_val_stus_msg := v_val_stus_msg || 'Invalid Source Characteristics; '|| chr(13);
     end if;
 end if;    
+
+ihook.setColumnValue(row_ori, 'TGT_MEC_ID','');
 
 if ( cur1.TGT_ME_PHY_NM is not null and  cur1.TGT_MEC_PHY_NM is not null) then 
     for cur in (
@@ -1942,7 +1945,7 @@ i integer;
 begin
  
     execute immediate 'ALTER TABLE NCI_MEC_MAP DISABLE ALL TRIGGERS';
-        
+    --    raise_application_Error(-20000, v_item_id || v_ver_nr);
 update nci_mec_map set tgt_mec_id_derv = null where MDL_MAP_ITEM_ID=v_item_id and MDL_MAP_VER_NR=v_ver_nr;
 commit;
 update nci_mec_map set tgt_mec_id_derv = tgt_mec_id where src_mec_id is not null and tgt_mec_id is not null and MDL_MAP_ITEM_ID=v_item_id and MDL_MAP_VER_NR=v_ver_nr;
@@ -1977,7 +1980,7 @@ end loop;
 commit;
 
      execute immediate 'ALTER TABLE NCI_MEC_MAP ENABLE ALL TRIGGERS';
-     
+     --  raise_application_Error(-20000, v_item_id || v_ver_nr);
  end;   
 procedure spGeneratePcode(v_data_in IN CLOB,    v_data_out OUT CLOB)
 as
@@ -2168,8 +2171,8 @@ v_temp integer;
     row_ori t_row;
     v_item_id number;
     v_ver_nr number(4,2);
-    v_src_mdl_nm varchar2(255);
-    v_tgt_mdl_nm varchar2(255);
+  --  v_src_mdl_nm varchar2(255);
+  --  v_tgt_mdl_nm varchar2(255);
     v_str varchar2(8000);
     v_open_paren integer;
     v_close_paren integer;
@@ -2190,7 +2193,7 @@ v_temp integer;
   v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
   v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
    execDeriveTarget (v_item_id, v_ver_nr);
-  for cur in (select item_nm from admin_item ai, NCI_MDL_MAP mm where ai.item_id = mm.SRC_MDL_ITEM_ID 
+ /* for cur in (select item_nm from admin_item ai, NCI_MDL_MAP mm where ai.item_id = mm.SRC_MDL_ITEM_ID 
   and ai.ver_nr = mm.SRC_MDL_VER_NR and mm.item_id = v_item_id and mm.ver_nr = v_ver_nr) loop
   v_src_mdl_nm := cur.item_nm || '.';
   end loop;
@@ -2198,13 +2201,13 @@ v_temp integer;
   and ai.ver_nr = mm.TGT_MDL_VER_NR and mm.item_id = v_item_id and mm.ver_nr = v_ver_nr) loop
   v_tgt_mdl_nm := cur.item_nm || '.';
   end loop;
-  
+  */
     execute immediate 'ALTER TABLE NCI_MEC_MAP DISABLE ALL TRIGGERS';
    
 update nci_mec_map set PCODE_SYSGEN = null where MDL_MAP_ITEM_ID= v_item_id and MDL_MAP_VER_NR = v_ver_nr;
 commit;
 -- Straight assignment
-
+--raise_application_error(-20000,'HEre');
 for cur in (select map.mecm_id , map.src_mec_id, map.tgt_mec_id,  map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,
   trim(map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME) TMEC_NM, TARGET_FUNCTION, 
  SET_TARGET_DEFAULT, OPERATOR, OPERAND_TYPE, FLOW_CONTROL, PARENTHESIS, RIGHT_OPERAND, LEFT_OPERAND from VW_MDL_MAP_IMP_TEMPLATE  map
@@ -2242,9 +2245,9 @@ v_min_grp := curouter.min_grp_ord;
 j := curouter.min_grp_ord;
 while j <= curouter.max_grp_ord loop
 v_assign := false;
-for cur in (select map.mecm_id ,map.DERIVATION_GROUP_ORDER, map.src_mec_id, v_src_mdl_nm || map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,
+for cur in (select map.mecm_id ,map.DERIVATION_GROUP_ORDER, map.src_mec_id,  map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME SMEC_NM,
 trim(map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME) SRC_PHY_NAME,trim(map.TGT_ELMNT_PHY_NAME || '.'|| map.TGT_PHY_NAME) TGT_PHY_NAME,
- v_tgt_mdl_nm || map.TGT_ELMNT_NAME || '.'|| map.TGT_MEC_NAME TMEC_NM, target_function_id, TARGET_FUNCTION, map.tgt_mec_id,
+  map.TGT_ELMNT_NAME || '.'|| map.TGT_MEC_NAME TMEC_NM, target_function_id, TARGET_FUNCTION, map.tgt_mec_id,
  decode(upper(TARGET_FUNCTION_PARAM),'SOURCE',trim(map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME),TARGET_FUNCTION_PARAM) TARGET_FUNCTION_PARAM,
  decode(upper(SET_TARGET_DEFAULT),'SOURCE',trim(map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME),SET_TARGET_DEFAULT) SET_TARGET_DEFAULT, OPERATOR, OPERAND_TYPE, FLOW_CONTROL, PARENTHESIS, 
  decode(upper(RIGHT_OPERAND),'SOURCE',trim(map.SRC_ELMNT_PHY_NAME || '.' || map.SRC_PHY_NAME),right_operand) right_operand,
