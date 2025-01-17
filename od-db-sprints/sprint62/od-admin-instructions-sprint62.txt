@@ -2,4 +2,6 @@
 
 exec nci_util.createGenName
 Export and import Type details for type - "Concept Source"
+
+exec nci_ext_import.spSetPreferred;
 exec nci_ext_import.load_xwalk_derv;
