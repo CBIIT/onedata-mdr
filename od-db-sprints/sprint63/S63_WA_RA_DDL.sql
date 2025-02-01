@@ -3,6 +3,8 @@ commit;
 
 alter table nci_mec_val_map add (MECM_ID_DESC varchar2(4000));
 
+alter table NCI_STG_MEC_VAL_MAP add MECM_ID_DESC varchar2(4000);
+
 create or replace view vw_nci_mec_val_map as
 select 
 MECVM_ID,
