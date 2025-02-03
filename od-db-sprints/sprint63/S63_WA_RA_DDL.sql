@@ -128,4 +128,59 @@ vw_val_dom_ref_term tvdrt
           and vmap.src_mec_id = smec.mec_id
           and vmap.tgt_mec_id = tmec.mec_id;
 
+-- Tracker: DSRMWS-3853 
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ONEDATA_WA"."VW_MDL_IMP_TEMPLATE" ("DO_NOT_USE", "BATCH_USER", "BATCH_NAME", "SEQ_ID", "MDL_NM", "MDL_ID", "MDL_VER_NR", "ME_LONG_NM", "ME_PHY_NM", "ME_DESC", "ME_TYP_DESC", "MEC_LONG_NM", "MEC_PHY_NM", "MEC_CHAR_ORD", "MEC_DESC", "MEC_TYP_DESC", "MEC_MIN_CHAR", "MEC_MAX_CHAR", "MEC_DT_TYP_DESC", "UOM_DESC", "MEC_MNDTRY", "MEC_PK_IND", "MEC_DEFLT_VAL", "CDE_ID", "CDE_VERSION", "MEC_FK_IND", "FK_ELMNT_PHY_NM", "FK_ELMNT_CHAR_PHY_NM", "COMMENTS") DEFAULT COLLATION "USING_NLS_COMP"  AS 
+  SELECT ' '                DO_NOT_USE,
+       ' '                  BATCH_USER,
+       ' '                  BATCH_NAME,
+       ROWNUM               SEQ_ID,
+       ai.item_nm           MDL_NM, 
+       ai.item_id           MDL_ID, 
+       ai.ver_nr            MDL_VER_NR, 
+       me.item_long_nm      ME_LONG_NM, 
+       me.item_phy_obj_nm   ME_PHY_NM, 
+       me.item_desc         ME_DESC, 
+       me_typ.obj_key_desc ME_TYP_DESC,   
+       mec.mec_long_nm      MEC_LONG_NM, 
+       mec.MEC_PHY_NM       MEC_PHY_NM, 
+       mec.CHAR_ORD         MEC_CHAR_ORD, 
+       mec.                 MEC_DESC, 
+       mec_typ.obj_key_Desc MEC_TYP_DESC,  
+       mec.src_min_char     MEC_MIN_CHAR, 
+       mec.src_max_char     MEC_MAX_CHAR, 
+       dt.dttype_nm         MEC_DT_TYP_DESC, 
+       uom.uom_nm           UOM_DESC,  
+       mec_req.obj_key_Desc          MEC_MNDTRY,  
+       mec.pk_ind           MEC_PK_IND,    
+       mec.src_deflt_val    MEC_DEFLT_VAL, 
+       mec.cde_item_id      CDE_ID, 
+       mec.cde_ver_nr       CDE_vERSION, 
+       mec.FK_IND           MEC_FK_IND, 
+       mec.                 FK_ELMNT_PHY_NM, 
+       mec.                 FK_ELMNT_CHAR_PHY_NM, 
+       ' '                  COMMENTS            
+FROM admin_item            ai,
+     nci_mdl               mdl,
+     nci_mdl_elmnt         me,
+     nci_mdl_elmnt_char    mec,
+     obj_key               mec_typ,
+     obj_key               me_typ,
+     obj_key               mec_req,
+     data_typ              dt,
+     uom                   uom,
+     value_dom             vdst 
+WHERE ai.item_id                  = mdl.item_id
+  AND ai.ver_nr                   = mdl.ver_nr
+  AND ai.admin_item_typ_id        = 57
+  AND mdl.item_id                 = me.mdl_item_id
+  AND mdl.ver_nr                  = me.mdl_item_ver_nr
+  AND me.item_id                  = mec.mdl_elmnt_item_id
+  AND me.ver_nr                   = mec.mdl_elmnt_ver_nr
+  AND mec.val_dom_item_id         = vdst.item_id (+)
+  AND mec.val_dom_ver_nr          = vdst.ver_nr (+)
+  AND mec.mdl_elmnt_char_typ_id   = mec_typ.obj_key_id (+)
+  AND mec.req_ind  = mec_req.obj_key_id (+)
+  AND me.ME_TYP_ID  = me_typ.obj_key_id (+)
+  AND vdst.nci_std_dttype_id      = dt.dttype_id (+)
+  AND vdst.uom_id                 = uom.uom_id (+);
 
