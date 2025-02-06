@@ -254,10 +254,10 @@ vw_val_dom_ref_term tvdrt
 	and tme.ver_nr = tmec.MDL_ELMNT_VER_NR  
 	  and vmap.map_deg = deg.obj_key_id (+)
 	  and vmap.prov_org_id = org.entty_id (+)
-	        and smec.val_dom_item_id = svd.item_id 
-	  and smec.val_dom_ver_nr = svd.ver_nr 
-	  and tmec.val_dom_item_id = tvd.item_id 
- 	  and tmec.val_dom_ver_nr = tvd.ver_nr 
+	        and smec.val_dom_item_id = svd.item_id (+)
+	  and smec.val_dom_ver_nr = svd.ver_nr (+)
+	  and tmec.val_dom_item_id = tvd.item_id (+)
+ 	  and tmec.val_dom_ver_nr = tvd.ver_nr  (+)
           and svd.item_id = svdrt.item_id (+)
           and svd.ver_nr = svdrt.ver_nr (+)
           and tvd.item_id = tvdrt.item_id (+)
