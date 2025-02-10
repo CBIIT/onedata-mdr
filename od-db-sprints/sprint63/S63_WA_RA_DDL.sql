@@ -69,7 +69,7 @@ where mm.src_mec_id = vm.src_mec_id and mm.tgt_mec_id = vm.tgt_mec_id
    	tmec.MEC_LONG_NM "TGT_MEC_NAME", 
    	  deg.obj_key_Desc "MAPPING_DEGREE",
 	org.org_nm "PROV_ORG",
-' '	"PROV_CONTACT",
+cnt.PRSN_FULL_NM_DERV	"PROV_CONTACT",
 	vmap.prov_rsn_txt "PROV_REVIEW_REASON",
 	vmap.prov_typ_rvw_txt "PROV_TYPE_OF_REVIEW",
 	vmap.PROV_RVW_DT "PROV_REVIEW_DATE",
@@ -109,7 +109,9 @@ tvdrt.TERM_USE_NAME "TARGET_REF_TERM_SOURCE",
   	  value_dom svd,
 	  value_dom tvd,
 vw_val_dom_ref_term svdrt,
-vw_val_dom_ref_term tvdrt
+vw_val_dom_ref_term tvdrt,
+	
+	  NCI_PRSN cnt
 	where  sme.item_id = smec.MDL_ELMNT_ITEM_ID
 	and sme.ver_nr = smec.MDL_ELMNT_VER_NR and
 	  nvl(vmap.fld_delete,0) = 0 and
@@ -125,11 +127,13 @@ vw_val_dom_ref_term tvdrt
           and svd.ver_nr = svdrt.ver_nr (+)
           and tvd.item_id = tvdrt.item_id (+)
           and tvd.ver_nr = tvdrt.ver_nr (+)
+	  and vmap.PROV_CNTCT_ID = cnt.entty_id (+)
           and vmap.src_mec_id = smec.mec_id
           and vmap.tgt_mec_id = tmec.mec_id;
 
+
 -- Tracker: DSRMWS-3853 
-  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ONEDATA_WA"."VW_MDL_IMP_TEMPLATE" ("DO_NOT_USE", "BATCH_USER", "BATCH_NAME", "SEQ_ID", "MDL_NM", "MDL_ID", "MDL_VER_NR", "ME_LONG_NM", "ME_PHY_NM", "ME_DESC", "ME_TYP_DESC", "MEC_LONG_NM", "MEC_PHY_NM", "MEC_CHAR_ORD", "MEC_DESC", "MEC_TYP_DESC", "MEC_MIN_CHAR", "MEC_MAX_CHAR", "MEC_DT_TYP_DESC", "UOM_DESC", "MEC_MNDTRY", "MEC_PK_IND", "MEC_DEFLT_VAL", "CDE_ID", "CDE_VERSION", "MEC_FK_IND", "FK_ELMNT_PHY_NM", "FK_ELMNT_CHAR_PHY_NM", "COMMENTS") DEFAULT COLLATION "USING_NLS_COMP"  AS 
+  CREATE OR REPLACE  VIEW VW_MDL_IMP_TEMPLATE AS
   SELECT ' '                DO_NOT_USE,
        ' '                  BATCH_USER,
        ' '                  BATCH_NAME,
@@ -264,6 +268,125 @@ vw_val_dom_ref_term tvdrt
           and tvd.ver_nr = tvdrt.ver_nr (+)
           and vmap.src_mec_id = smec.mec_id
           and vmap.tgt_mec_id = tmec.mec_id;
+
+
+  CREATE OR REPLACE  VIEW VW_MDL_MAP_IMP_TEMPLATE AS
+  select  ' ' "DO_NOT_USE",
+       ' ' "BATCH_USER",
+       ' ' "BATCH_NAME",
+       rownum "SEQ_ID",
+       map.mdl_map_item_id "MODEL_MAP_ID",
+       map.mdl_map_ver_nr "MODEL_MAP_VERSION",
+        map.mecm_id "MECM_ID", 
+        smec.char_ord SRC_CHAR_ORD,
+	sme.ITEM_PHY_OBJ_NM "SRC_ELMNT_PHY_NAME", 
+	sme.ITEM_LONG_NM "SRC_ELMNT_NAME", 
+  smec."MEC_PHY_NM" "SRC_PHY_NAME", 
+	smec.MEC_LONG_NM "SRC_MEC_NAME", 
+	  tme.ITEM_PHY_OBJ_NM "TGT_ELMNT_PHY_NAME", 
+	 tme.ITEM_LONG_NM "TGT_ELMNT_NAME", 
+	  tmec."MEC_PHY_NM" "TGT_PHY_NAME", 
+   	tmec.MEC_LONG_NM "TGT_MEC_NAME", 
+       tmec.char_ord TGT_CHAR_ORD,
+          map.MEC_MAP_NM "MAPPING_GROUP_NAME",
+      tgt_func.obj_key_Desc "TARGET_FUNCTION",
+    tgt_func.obj_key_id "TARGET_FUNCTION_ID",
+	  deg.obj_key_Desc "MAPPING_DEGREE",
+          ' ' "TRANS_RULE_NOTATION",
+map.mec_sub_grp_nbr	"DERIVATION_GROUP_ORDER",
+	map.TGT_VAL "SET_TARGET_DEFAULT"	,
+map.TGT_FUNC_PARAM "TARGET_FUNCTION_PARAM"	,
+	op.obj_key_desc "OPERATOR",
+	op_typ.obj_key_desc "OPERAND_TYPE",
+	flow_cntrl.obj_key_desc "FLOW_CONTROL",
+	paren.obj_key_desc "PARENTHESIS",
+	map.right_op "RIGHT_OPERAND",
+	map.left_op "LEFT_OPERAND",
+  map.valid_pltform	   "VALIDATION_PLATFORM",
+	map.mec_map_notes "TRANSFORMATION_NOTES",
+	map.TRNS_DESC_TXT "TRANSFORMATION_RULE",
+	org.org_nm "PROV_ORG",
+cnt.PRSN_FULL_NM_DERV	"PROV_CONTACT",
+	map.prov_rsn_txt "PROV_REVIEW_REASON",
+	map.prov_typ_rvw_txt "PROV_TYPE_OF_REVIEW",
+	map.PROV_RVW_DT "PROV_REVIEW_DATE",
+	map.prov_APRV_DT "PROV_APPROVAL_DATE",
+	  map.pcode_sysgen,
+	  map.map_deg,
+decode(nvl(map.VAL_MAP_CREATE_IND,0),1, 'Yes','No') "VALUE_MAP_GENERATED_IND",
+decode(svd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated',16, 'Enumerated by Reference')  "SOURCE_DOMAIN_TYPE",
+decode(tvd.val_dom_typ_id,17, 'Enumerated',18, 'Non-enumerated',16, 'Enumerated by Reference')  "TARGET_DOMAIN_TYPE",
+	   map."CREAT_DT",
+	  map."CREAT_USR_ID",
+	  map."LST_UPD_USR_ID",
+	  map."FLD_DELETE",
+	  map."LST_DEL_DT",
+	  map."S2P_TRN_DT",
+	  map."LST_UPD_DT",
+      smec.MEC_ID SRC_MEC_ID,
+      smec.CDE_ITEM_ID  "SOURCE_CDE_ITEM_ID",
+      smec.CDE_VER_NR  "SOURCE_CDE_VER",
+      tmec.CDE_ITEM_ID  "TARGET_CDE_ITEM_ID",
+      tmec.CDE_VER_NR  "TARGET_CDE_VER",
+	  smec.val_dom_item_id "SOURCE_VD_ITEM_ID",
+	  smec.val_dom_ver_nr "SOURCE_VD_VER_NR",
+	    tmec.val_dom_item_id "TARGET_VD_ITEM_ID",
+	  tmec.val_dom_ver_nr "TARGET_VD_VER_NR",
+	  sme.MDL_ITEM_ID SRC_MDL_ITEM_ID,
+	  sme.MDL_item_ver_nr src_mdl_ver_nr,
+	  tme.MDL_ITEM_ID TGT_MDL_ITEM_ID,
+	  tme.MDL_item_ver_nr TGT_mdl_ver_nr,
+tmec.MEC_ID TGT_MEC_ID,
+tmec.pk_ind TGT_PK_IND,
+smec.pk_ind SRC_PK_IND,
+svdrt.TERM_USE_NAME "SOURCE_REF_TERM_SOURCE",
+tvdrt.TERM_USE_NAME "TARGET_REF_TERM_SOURCE"
+	, tmed.ITEM_PHY_OBJ_NM "TGT_ELMNT_PHY_NAME_DERV",
+    ' ' "CMNTS_DESC_TXT",
+	  map.creat_usr_id creat_usr_id_x,
+	  map.lst_upd_usr_id lst_upd_usr_id_x,
+	  map.creat_dt creat_dt_x,
+	  map.lst_upd_dt lst_upd_dt_x
+	from  NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT_CHAR tmec, nci_MEC_MAP map,
+	  NCI_MDL_ELMNT tmed,NCI_MDL_ELMNT_CHAR tmecd,
+	  obj_key deg,
+	  obj_key tgt_func,
+	  obj_key op,
+	  obj_key op_typ,
+	  obj_key flow_cntrl,
+	  obj_key paren,
+	  nci_org org,
+  	  value_dom svd,
+	  value_dom tvd,
+vw_val_dom_ref_term svdrt,
+vw_val_dom_ref_term tvdrt,
+	  NCI_PRSN cnt
+	where  sme.item_id (+)= smec.MDL_ELMNT_ITEM_ID
+	and sme.ver_nr (+)= smec.MDL_ELMNT_VER_NR and
+	 tme.item_id (+)= tmec.MDL_ELMNT_ITEM_ID
+	and tme.ver_nr (+)= tmec.MDL_ELMNT_VER_NR  and
+	 tmed.item_id (+)= tmecd.MDL_ELMNT_ITEM_ID
+	and tmed.ver_nr (+)= tmecd.MDL_ELMNT_VER_NR  and
+	   smec.MEC_ID (+)= map.SRC_MEC_ID and tmec.mec_id (+)= map.TGT_MEC_ID
+	  and tmecd.mec_id (+)= map.TGT_MEC_ID_DERV
+	  and map.map_deg = deg.obj_key_id (+)
+	and map.tgt_func_id= tgt_func.obj_key_id (+)
+	  and map.PROV_CNTCT_ID = cnt.entty_id (+)
+	  and map.prov_org_id = org.entty_id (+)
+	  and map.op_id = op.obj_key_id (+)
+	  and map.paren = paren.obj_key_id (+)
+	  and map.op_typ = op_typ.obj_key_id (+)
+	  and map.flow_cntrl = flow_cntrl.obj_key_id (+)
+          and smec.val_dom_item_id = svd.item_id (+)
+	  and smec.val_dom_ver_nr = svd.ver_nr (+)
+	  and tmec.val_dom_item_id = tvd.item_id (+)
+ 	  and tmec.val_dom_ver_nr = tvd.ver_nr (+)
+          and svd.item_id = svdrt.item_id (+)
+          and svd.ver_nr = svdrt.ver_nr (+)
+          and tvd.item_id = tvdrt.item_id (+)
+          and tvd.ver_nr = tvdrt.ver_nr (+);
+
+
 
 alter table nci_stg_mec_val_map add  (SRC_VM_CNCPT_CD varchar2(4000), 	TGT_VM_CNCPT_CD varchar2(4000),SRC_VM_CNCPT_NM varchar2(4000), TGT_VM_CNCPT_NM   varchar2(4000));
 alter table nci_stg_mec_val_map drop column VM_CNCPT_CD;
