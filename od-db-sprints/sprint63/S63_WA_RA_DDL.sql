@@ -48,6 +48,7 @@ vm.TGT_CDE_VER_NR,
 mm.mecm_id
 from nci_mec_map mm, nci_mec_val_map vm
 where mm.src_mec_id = vm.src_mec_id and mm.tgt_mec_id = vm.tgt_mec_id
+	and mm.mdl_map_item_id = vm.mdl_map_item_id and mm.mdl_map_ver_nr = vm.mdl_map_ver_nr;
 
 
 
