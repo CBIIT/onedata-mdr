@@ -39,17 +39,21 @@ TGT_VM_CNCPT_CD,
 TGT_VM_CNCPT_NM,
 vm.SRC_VD_ITEM_ID,
 vm.SRC_VD_VER_NR,
+decode(svd.VAL_DOM_TYP_ID,17 ,'Enumerated', 18,'Non-Enumerated', 16, 'Enumerated by Reference') SRC_VD_TYP,
 vm.TGT_VD_ITEM_ID,
 vm.TGT_VD_VER_NR,
+decode(tvd.VAL_DOM_TYP_ID,17 ,'Enumerated', 18,'Non-Enumerated', 16, 'Enumerated by Reference') TGT_VD_TYP,
 vm.SRC_CDE_ITEM_ID,
 vm.SRC_CDE_VER_NR,
 vm.TGT_CDE_ITEM_ID,
 vm.TGT_CDE_VER_NR,
 mm.mecm_id,
 	vm.SRC_VD_TYP, vm.TGT_VD_TYP
-from nci_mec_map mm, nci_mec_val_map vm
+from nci_mec_map mm, nci_mec_val_map vm, value_dom svd, value_dom tvd
 where mm.src_mec_id = vm.src_mec_id and mm.tgt_mec_id = vm.tgt_mec_id
-	and mm.mdl_map_item_id = vm.mdl_map_item_id and mm.mdl_map_ver_nr = vm.mdl_map_ver_nr;
+	and mm.mdl_map_item_id = vm.mdl_map_item_id and mm.mdl_map_ver_nr = vm.mdl_map_ver_nr
+	and vm.src_vd_item_id = svd.item_id and vm.src_vd_ver_nr = svd.ver_nr
+	and vm.tgt_vd_item_id = tvd.item_id and vm.tgt_vd_ver_nr = tvd.ver_nr;
 
 
 
@@ -326,3 +330,77 @@ rename column PROV_REVIEW_DATE to PROV_RVW_DT;
 
 alter table nci_stg_mec_val_map 
 rename column PROV_APPROVAL_DATE to PROV_APRV_DT;
+
+--jira 3658
+  CREATE TABLE NCI_DLOAD_NIH_SUB_TEMP 
+   (	"HDR_ID" NUMBER, 
+	"TYP_IND" NUMBER DEFAULT null, 
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	 PRIMARY KEY ("HDR_ID")
+);
+
+  GRANT SELECT ON NCI_DLOAD_NIH_SUB_TEMP TO "ONEDATA_RO";
+  
+insert into obj_typ (obj_typ_id, obj_typ_desc) values (62, 'UMLS-Concept Indicator');
+commit;
+
+insert into obj_key (obj_key_id, obj_typ_id, obj_key_desc, obj_key_def) values (231, 62, 'UMLS CUI', 'UMLS CUI');
+insert into obj_key (obj_key_id, obj_typ_id, obj_key_desc, obj_key_def) values (232, 62, 'Existing Concepts', 'Existing Concepts');
+commit;
+
+--jira 3837
+CREATE OR REPLACE FORCE EDITIONABLE VIEW VW_MDL_MAP_LIST_DLOAD ("MM_ID", "MM_VER_NR", "MM_NM", "MM_CURATED_NM", "CREAT_DT", "CREAT_USR_ID", "LST_UPD_DT", "LST_UPD_USR_ID", "FLD_DELETE") DEFAULT COLLATION "USING_NLS_COMP"  AS 
+  select  m.ITEM_ID "MM_ID",
+         m.ver_nr "MM_VER_NR",
+	m.ITEM_NM "MM_NM",
+ m.ITEM_NM_CURATED "MM_CURATED_NM",
+	   m.creat_dt "CREAT_DT",
+	  m.creat_usr_id "CREAT_USR_ID",	  
+	  m.lst_upd_dt "LST_UPD_DT",
+	  m.lst_upd_usr_id "LST_UPD_USR_ID",
+      0 "FLD_DELETE"
+     from admin_item s,  admin_item t, nci_mdl_map mm,
+admin_item m, nci_org org, nci_prsn p
+	where m.item_id = mm.item_id and m.ver_nr = mm.ver_nr and mm.SRC_MDL_ITEM_ID= s.item_id and mm.TGT_MDL_ITEM_ID= t.item_id 
+and mm.SRC_MDL_VER_NR = s.ver_nr and mm.TGT_MDL_VER_NR = t.ver_nr 
+ and mm.PROV_ORG_ID = org.entty_id (+)
+and mm.prov_cntct_id  = p.entty_ID (+);
+
+alter table nci_dload_mdl_map add MDL_MAP_NM_CURATED varchar2(255);
+
+CREATE TABLE NCI_DLOAD_MDL_MAP_DTL
+   (	"HDR_ID" NUMBER NOT NULL ENABLE, 
+	"FMT_NM" VARCHAR2(128 BYTE) COLLATE "USING_NLS_COMP", 
+	"MM_ID" NUMBER, 
+    "MM_VER_NR" NUMBER(4,2),
+	"DT_LAST_MODIFIED" DATE, 
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP", 
+	"RETAIN_IND" NUMBER(1,0) DEFAULT 0, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	"MM_NM_CURATED" varchar2(255), 
+	 PRIMARY KEY ("HDR_ID", "MM_NM_CURATED")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE
+   )  DEFAULT COLLATION "USING_NLS_COMP" SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+grant select on nci_dlaod_mdl_map_dtl to onedata_ro;
