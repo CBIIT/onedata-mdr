@@ -205,7 +205,7 @@ begin
         actions(actions.last) := action; 
 */
   --hookoutput.actions := actions;
-
+updValueMapRuleStr (ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') , ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') );
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 -- nci_util.debugHook('GENERAL', v_data_out);
 
@@ -546,18 +546,9 @@ END;
             rowsadd.extend;   rowsadd(rowsadd.last) := row_ori;
  --   raise_application_error(-20000,' Add');
         else
-        row := t_row();
-        ihook.setColumnValue(row, 'MECVM_ID',ihook.getColumnValue(row_ori, 'MECVM_ID'));
-        ihook.setColumnValue(row, 'MDL_MAP_ITEM_ID',ihook.getColumnValue(row_ori, 'MDL_MAP_ITEM_ID'));
-        ihook.setColumnValue(row, 'MDL_MAP_VER_NR',ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR'));
-        ihook.setColumnValue(row, 'SRC_MEC_ID', ihook.getColumnValue(row_ori, 'SRC_MEC_ID'));
-        ihook.setColumnValue(row, 'TGT_MEC_ID', ihook.getColumnValue(row_ori, 'TGT_MEC_ID'));
-        ihook.setColumnValue(row, 'SRC_PV', ihook.getColumnValue(row_ori, 'SRC_PV'));
-        ihook.setColumnValue(row, 'TGT_PV', ihook.getColumnValue(row_ori, 'TGT_PV'));
-        ihook.setColumnValue(row, 'MAP_DEG', 120);
+   
 
-
-        rowsupd.extend;   rowsupd(rowsupd.last) := row;
+        rowsupd.extend;   rowsupd(rowsupd.last) := row_ori;
      --   raise_application_error(-20000,' Update');
     end if;
 
