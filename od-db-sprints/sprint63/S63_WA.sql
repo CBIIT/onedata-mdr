@@ -61,3 +61,51 @@ end if;
 
 end;
 /
+--jira 3658 
+ CREATE OR REPLACE EDITIONABLE TRIGGER "ONEDATA_WA"."TR_NCI_DLOAD_NIH_SUB_TS" 
+  BEFORE  UPDATE
+  on NCI_DLOAD_NIH_SUB_TEMP
+  for each row
+BEGIN
+  :new.LST_UPD_DT := SYSDATE;
+  update NCI_DLOAD_HDR set LST_UPD_DT = sysdate, lst_upd_usr_id =:new.lst_upd_usr_id where hdr_id = :new.hdr_id;
+
+END;
+/
+ALTER TRIGGER "ONEDATA_WA"."TR_NCI_DLOAD_NIH_SUB_TS" ENABLE;
+
+CREATE OR REPLACE TRIGGER TR_DLOAD_MM_INS 
+AFTER INSERT ON NCI_DLOAD_MDL_MAP_DTL 
+for each row
+DECLARE
+v_hdr_id number;
+v_mm_id number;
+v_mm_ver_nr number (4,2);
+v_temp number;
+BEGIN
+v_hdr_id := :new.hdr_id;
+select mml.mm_id, mml.mm_ver_nr into v_mm_id, v_mm_ver_nr from vw_mdl_map_list_dload mml where mml.mm_curated_nm = :new.mm_nm_curated;
+select count(*) into v_temp from nci_dload_dtl where hdr_id = v_hdr_id and item_id = v_mm_id and ver_nr = v_mm_ver_nr;
+if (v_temp = 0) then
+    insert into nci_dload_dtl(hdr_id,item_id,ver_nr) values (v_hdr_id, v_mm_id, v_mm_ver_nr);
+    insert into onedata_ra.nci_dload_dtl(hdr_id,item_id,ver_nr) values (v_hdr_id, v_mm_id, v_mm_ver_nr);
+end if;
+END;
+/
+alter trigger tr_dload_mm_ins enable;
+
+CREATE OR REPLACE TRIGGER TR_DLOAD_MM_DEL 
+AFTER DELETE ON NCI_DLOAD_MDL_MAP_DTL 
+for each row
+DECLARE
+v_hdr_id number;
+v_mm_id number;
+v_mm_ver_nr number (4,2);
+BEGIN
+v_hdr_id := :old.hdr_id;
+select mml.mm_id, mml.mm_ver_nr into v_mm_id, v_mm_ver_nr from vw_mdl_map_list_dload mml where mml.mm_curated_nm = :old.mm_nm_curated;
+delete from nci_dload_dtl where hdr_id = v_hdr_id and item_id = v_mm_id and ver_nr = v_mm_ver_nr;
+delete from onedata_ra.nci_dload_dtl where hdr_id = v_hdr_id and item_id = v_mm_id and ver_nr = v_mm_ver_nr;
+END;
+/
+alter trigger tr_dload_mm_del enable;
