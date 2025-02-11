@@ -16,6 +16,8 @@ procedure spValidateValueMapImport ( v_data_in in clob, v_data_out out clob, v_u
 procedure getPVSelection (v_vd_id in number, v_vd_ver in number, v_alt_nm_typ in integer, v_vd_typ in integer,  hookoutput in out t_hookOutput ) ;
  procedure spPostHookUpdVM( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
  procedure updValueMapRuleStr (v_mm_id number, v_mm_Ver number);
+ procedure updValueMapRuleStrMain (v_mm_id number, v_mm_Ver number);
+  procedure updValueMapRuleStrMainMEC(v_mm_id number, v_mm_Ver number, v_src_mec_id number, v_tgt_mec_id number);
 END;
 /
 create or replace PACKAGE BODY            nci_codemap_vm AS
@@ -205,7 +207,9 @@ begin
         actions(actions.last) := action; 
 */
   --hookoutput.actions := actions;
-updValueMapRuleStr (ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') , ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') );
+  --raise_application_error(-20000, ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID'));
+updValueMapRuleStrMainMEC (ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID') , ihook.getColumnValue(row_ori,'MDL_MAP_VER_NR') ,
+ihook.getColumnValue(row_ori, 'SRC_MEC_ID') ,ihook.getColumnValue(row_ori, 'TGT_MEC_ID'));
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 -- nci_util.debugHook('GENERAL', v_data_out);
 
@@ -432,6 +436,8 @@ begin
     and mdl_map_ver_nr = ihook.getColumnValue(row_ori,'VER_NR');
     commit;
 end if;
+updValueMapRuleStrMain (v_id , v_ver_nr );
+
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 -- nci_util.debugHook('GENERAL', v_data_out);
 
@@ -801,6 +807,35 @@ i integer;
 begin
  execute immediate 'ALTER trigger TR_NCI_MEC_VAL_MAP_TS disable';
 update nci_stg_mec_val_map svm set mecm_id_Desc =  
+(select substr(','||listagg(mecm_id, ',') WITHIN GROUP (ORDER by mecm_ID)||',',1,4000) mecm_id_desc 
+from nci_mec_map m where MDL_MAP_ITEM_ID=v_mm_id and MDL_MAP_VER_NR=v_mm_ver
+  and m.src_mec_id = svm.src_mec_id and m.tgt_mec_id = svm.tgt_mec_id and m.src_mec_id is not null and m.tgt_mec_id is not null)
+where mdl_map_item_id = v_mm_id and mdl_map_ver_nr =v_mm_ver;
+commit;
+execute immediate 'ALTER trigger TR_NCI_MEC_VAL_MAP_TS enable';
+end;
+
+ procedure updValueMapRuleStrMainMEC(v_mm_id number, v_mm_Ver number, v_src_mec_id number, v_tgt_mec_id number) as
+i integer;
+begin
+ execute immediate 'ALTER trigger TR_NCI_MEC_VAL_MAP_TS disable';
+update nci_mec_val_map svm set mecm_id_Desc =  
+(select substr(','||listagg(mecm_id, ',') WITHIN GROUP (ORDER by mecm_ID)||',',1,4000) mecm_id_desc 
+from nci_mec_map m where MDL_MAP_ITEM_ID=v_mm_id and MDL_MAP_VER_NR=v_mm_ver
+  and m.src_mec_id = svm.src_mec_id and m.tgt_mec_id = svm.tgt_mec_id and m.src_mec_id =v_src_mec_id and m.tgt_mec_id =v_tgt_mec_id)
+where mdl_map_item_id = v_mm_id and mdl_map_ver_nr =v_mm_ver
+and src_mec_id =v_src_mec_id and tgt_mec_id =v_tgt_mec_id;
+commit;
+--raise_application_error(-20000,'here');
+execute immediate 'ALTER trigger TR_NCI_MEC_VAL_MAP_TS enable';
+end;
+ 
+
+procedure updValueMapRuleStrMain (v_mm_id number, v_mm_Ver number) as
+i integer;
+begin
+ execute immediate 'ALTER trigger TR_NCI_MEC_VAL_MAP_TS disable';
+update nci_mec_val_map svm set mecm_id_Desc =  
 (select substr(','||listagg(mecm_id, ',') WITHIN GROUP (ORDER by mecm_ID)||',',1,4000) mecm_id_desc 
 from nci_mec_map m where MDL_MAP_ITEM_ID=v_mm_id and MDL_MAP_VER_NR=v_mm_ver
   and m.src_mec_id = svm.src_mec_id and m.tgt_mec_id = svm.tgt_mec_id and m.src_mec_id is not null and m.tgt_mec_id is not null)
