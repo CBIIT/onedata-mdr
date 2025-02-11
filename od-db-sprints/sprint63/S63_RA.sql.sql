@@ -1,0 +1,1 @@
+GRANT ALL on nci_dload_mdl_map_dtl to onedata_wa;
