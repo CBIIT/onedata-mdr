@@ -317,8 +317,8 @@ vw_val_dom_ref_term tvdrt,
 
 
 alter table nci_stg_mec_val_map add  (SRC_VM_CNCPT_CD varchar2(4000), 	TGT_VM_CNCPT_CD varchar2(4000),SRC_VM_CNCPT_NM varchar2(4000), TGT_VM_CNCPT_NM   varchar2(4000));
-alter table nci_stg_mec_val_map drop column VM_CNCPT_CD;
-alter table nci_stg_mec_val_map drop column VM_CNCPT_NM;
+--alter table nci_stg_mec_val_map drop column VM_CNCPT_CD;
+--alter table nci_stg_mec_val_map drop column VM_CNCPT_NM;
 alter table nci_stg_mec_val_map 
 rename column PROV_REVIEW_REASON to PROV_RSN_TXT;
 
