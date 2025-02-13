@@ -1401,7 +1401,24 @@ end;
          rows.extend;   rows(rows.last) := row;
              
       end;
-      
+
+procedure setRowMECNull(row in out t_row, v_typ in varchar) as
+    i integer;
+begin
+           if (v_typ in ('S','B') ) then
+           ihook.setColumnValue(row,'SRC_MEC_ID','');
+          ihook.setColumnValue(row,'SRC_CDE_ITEM_ID','');
+        ihook.setColumnValue(row,'SRC_CDE_VER_NR','');
+        end if;
+                 if (v_typ in ('T','B') ) then
+  
+          ihook.setColumnValue(row,'TGT_MEC_ID','');
+         ihook.setColumnValue(row,'TGT_CDE_ITEM_ID','');
+        ihook.setColumnValue(row,'TGT_CDE_VER_NR','');
+        end if;
+
+end;
+              
 procedure spGenerateMapIncrement ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
 
 AS
@@ -1467,77 +1484,6 @@ begin
         -- no deletes
     rows := t_rows();
   
-  --update Target Function if semantically similar
-  /*
-  rows := t_rows();
-  for cur in ( select * from nci_mec_map mm 
-  where mm.mdl_map_item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.mdl_map_ver_nr = ihook.getColumnValue (row_ori,'VER_NR') and
-  map_Deg = 87 and mm.TGT_FUNC_PARAM like 'XWALK%') loop
-  
-     for cursrc in (select val_dom_item_id, val_dom_ver_nr, vd.val_dom_typ_id,TERM_CNCPT_ITEM_ID, TERM_CNCPT_VER_NR, TERM_USE_TYP  
-        from nci_mdl_elmnt_char c, value_dom vd
-        where c.val_dom_item_id = vd.item_id and c.val_dom_ver_nr = vd.ver_nr and c.mec_id = cur.src_mec_id) loop
-
-        for curtgt in (select val_dom_item_id, val_dom_ver_nr, vd.val_dom_typ_id,TERM_CNCPT_ITEM_ID, TERM_CNCPT_VER_NR, TERM_USE_TYP  
-        from nci_mdl_elmnt_char c, value_dom vd
-        where c.val_dom_item_id = vd.item_id and c.val_dom_ver_nr = vd.ver_nr and c.mec_id = cur.tgt_mec_id) loop
-                    row := t_row();
-                ihook.setColumnValue(row,'MECM_ID',cur.mecm_id);
-
-        if (cursrc.val_dom_typ_id =18 and curtgt.val_dom_typ_id = 16 and cur.mec_sub_grp_nbr = 2) then
-
-                -- get ref term name
-                select  nvl(a.nm_desc,c.item_nm) || ' ' || upper(o.obj_key_desc) into v_nm_desc from vw_cncpt c, alt_nms a, obj_key o 
-                where o.obj_key_id = curtgt.term_use_typ and c.item_id = curtgt.TERM_CNCPT_ITEM_ID and c.ver_nr = curtgt.TERM_CNCPT_VER_NR
-                and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
-            
-                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|NCIt CODE|' || v_nm_Desc); 
-                                rows.extend;   rows(rows.last) := row;
-               
-        end if;
-        
-         -- enum/Enum by Ref
-         if (cursrc.val_dom_typ_id =17 and curtgt.val_dom_typ_id = 16) then
-                -- get ref term name
-                select  nvl(a.nm_desc,c.item_nm) || ' ' || upper(o.obj_key_desc) into v_nm_desc from vw_cncpt c, alt_nms a, obj_key o 
-                where o.obj_key_id = curtgt.term_use_typ and c.item_id = curtgt.TERM_CNCPT_ITEM_ID and c.ver_nr = curtgt.TERM_CNCPT_VER_NR
-                and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
-            
-                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|NCIt CODE|' || v_nm_Desc); 
-                                rows.extend;   rows(rows.last) := row;
-            
-        end if;
-        
-           -- Enum by Ref/Enum
-         if (cursrc.val_dom_typ_id =16 and curtgt.val_dom_typ_id = 17) then
-            select  nvl(a.nm_desc,c.item_nm) || ' ' || upper(o.obj_key_desc) into v_nm_desc from vw_cncpt c, alt_nms a, obj_key o 
-                where o.obj_key_id = cursrc.term_use_typ and c.item_id = cursrc.TERM_CNCPT_ITEM_ID and c.ver_nr = cursrc.TERM_CNCPT_VER_NR
-                and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
-            
-                ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_nm_desc || '|NCIt CODE'); 
-                                rows.extend;   rows(rows.last) := row;
-               
-        end if;
-        
-           -- Enum by Ref/non-enum
-         if (cursrc.val_dom_typ_id =16 and curtgt.val_dom_typ_id = 18) then
-            select  nvl(a.nm_desc,c.item_nm) || ' ' || upper(o.obj_key_desc), upper(o.obj_key_Desc)  into v_nm_desc,  v_term_src from vw_cncpt c, alt_nms a, obj_key o 
-                where o.obj_key_id = cursrc.term_use_typ and c.item_id = cursrc.TERM_CNCPT_ITEM_ID and c.ver_nr = cursrc.TERM_CNCPT_VER_NR
-                and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
-            -- use case 8
-                if (v_term_src= 'CODE') then
-                    ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_nm_desc || '|TERM'); 
-                                rows.extend;   rows(rows.last) := row;
-                end if;
-                
-        
-        end if;
-        
-  
-  end loop;
-  end loop;
-  end loop;
-*/
 -- delete where NO CDE or NOT MAPPED
 
     delete from NCI_MEC_MAP where MDL_MAP_ITEM_ID = ihook.getColumnValue(row_ori, 'ITEM_ID') and MDL_MAP_VER_NR = ihook.getColumnValue(row_ori, 'VER_NR')
@@ -1663,16 +1609,20 @@ and tgt_mec_id is not null)) loop
         if (cursrc.val_dom_typ_id =17 and curtgt.val_dom_typ_id = 17) then
         -- generateQueryRowSingle(v_grp_nm,'', v_func, v_open_paren, 1, row, rows);
          generateQueryRowSingle(v_grp_nm,'VALUE_MAP', v_func, v_open_paren ,1, row, rows);
+         setRowMECNull(row,'T');
          generateQueryRowSingle(v_grp_nm,'SOURCE', null, null, 2, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE_PV', null, null, 3, row, rows);
+          setRowMECNull(row,'B');
+       generateQueryRowSingle(v_grp_nm,'SOURCE_PV', null, null, 3, row, rows);
          generateQueryRowSingle(v_grp_nm,'TARGET_PV', null, null, 4, row, rows);
          generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 5, row, rows);
      end if;
         --enum/non-enum
         if (cursrc.val_dom_typ_id =17 and curtgt.val_dom_typ_id = 18) then
          generateQueryRowSingle(v_grp_nm,'VALUE_MAP', v_func, v_open_paren, 1, row, rows);
+         setRowMECNull(row,'T');
          generateQueryRowSingle(v_grp_nm,'SOURCE', null, null, 2, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE_PV', null, null, 3, row, rows);
+            setRowMECNull(row,'B');
+      generateQueryRowSingle(v_grp_nm,'SOURCE_PV', null, null, 3, row, rows);
          generateQueryRowSingle(v_grp_nm,'SOURCE_LABEL', null, null, 4, row, rows);
          generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 5, row, rows);
 
@@ -1681,8 +1631,10 @@ and tgt_mec_id is not null)) loop
      
          if (cursrc.val_dom_typ_id =18 and curtgt.val_dom_typ_id = 17) then
          generateQueryRowSingle(v_grp_nm,'VALUE_MAP', v_func, v_open_paren ,1, row, rows);
+         setRowMECNull(row,'T');
          generateQueryRowSingle(v_grp_nm,'SOURCE', null, null, 2, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE_LABEL', null, null, 3, row, rows);
+            setRowMECNull(row,'B');
+     generateQueryRowSingle(v_grp_nm,'SOURCE_LABEL', null, null, 3, row, rows);
          generateQueryRowSingle(v_grp_nm,'TARGET_PV', null, null, 4, row, rows);
          generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 5, row, rows);
    
@@ -1698,11 +1650,13 @@ and tgt_mec_id is not null)) loop
                 and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
    
          generateQueryRowSingle(v_grp_nm,'XWALK', v_func, v_open_paren ,1, row, rows);
+         setRowMECNull(row,'T');
          generateQueryRowSingle(v_grp_nm,'SOURCE', null, null, 2, row, rows);
-         generateQueryRowSingle(v_grp_nm,'NCIt', null, null, 3, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE TERM', null, null, 4, row, rows);
-         generateQueryRowSingle(v_grp_nm,v_nm, null, null, 5, row, rows);
-         generateQueryRowSingle(v_grp_nm,'TARGET ' ||v_desc, null, null, 6, row, rows);
+           setRowMECNull(row,'B');
+       generateQueryRowSingle(v_grp_nm,'SOURCE_TERMINOLOGY: NCIt', null, null, 3, row, rows);
+         generateQueryRowSingle(v_grp_nm,'SOURCE_TERM', null, null, 4, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_TERMINOLOGY: ' || v_nm, null, null, 5, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_' ||v_desc, null, null, 6, row, rows);
          generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 7, row, rows);
             
             /*
@@ -1723,16 +1677,21 @@ and tgt_mec_id is not null)) loop
                 
                 
          generateQueryRowSingle(v_grp_nm,'XWALK', v_func, v_open_paren ,1, row, rows);
+          setRowMECNull(row,'T');
+      
          generateQueryRowSingle(v_grp_nm,'VALUE_MAP', v_func, v_open_paren ,2, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE_PV', null, null,3, row, rows);
-         generateQueryRowSingle(v_grp_nm,'NCIT_CODE', null, null,4, row, rows);
-         generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 5, row, rows);
-         
-         generateQueryRowSingle(v_grp_nm,'NCIt', null, null, 6, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE CODE', null, null, 7, row, rows);
-         generateQueryRowSingle(v_grp_nm,v_nm, null, null, 8, row, rows);
-         generateQueryRowSingle(v_grp_nm,'TARGET ' ||v_desc, null, null, 9, row, rows);
-         generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 10, row, rows);
+            generateQueryRowSingle(v_grp_nm,'SOURCE', null, null ,3, row, rows);
+                    setRowMECNull(row,'B');
+  
+          generateQueryRowSingle(v_grp_nm,'SOURCE_PV', null, null,4, row, rows);
+         generateQueryRowSingle(v_grp_nm,'NCIT_CODE', null, null,5, row, rows);
+         generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 6, row, rows);
+    
+         generateQueryRowSingle(v_grp_nm,'SOURCE_TERMINOLOGY: NCIt', null, null, 7, row, rows);
+         generateQueryRowSingle(v_grp_nm,'SOURCE_CODE', null, null, 8, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_TERMINOLOGY: ' || v_nm, null, null, 9, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_' ||v_desc, null, null, 10, row, rows);
+         generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 11, row, rows);
             
     
             
@@ -1746,13 +1705,16 @@ and tgt_mec_id is not null)) loop
             
             
          generateQueryRowSingle(v_grp_nm,'VALUE_MAP', v_func, v_open_paren ,1, row, rows);
+        setRowMECNull(row,'T');
          generateQueryRowSingle(v_grp_nm,'XWALK', v_func, v_open_paren ,2, row, rows);
          generateQueryRowSingle(v_grp_nm,'SOURCE', null, null,3, row, rows);
-         generateQueryRowSingle(v_grp_nm,v_nm, null, null, 4, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE ' ||v_desc, null, null, 5, row, rows);
-         generateQueryRowSingle(v_grp_nm,'NCIt', null, null,6, row, rows);
-         generateQueryRowSingle(v_grp_nm,'TARGET CODE', null, null,7, row, rows);
-         generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 8, row, rows);
+               setRowMECNull(row,'B');
+  
+         generateQueryRowSingle(v_grp_nm,'SOURCE_TERMINOLOGY: ' || v_nm, null, null, 4, row, rows);
+         generateQueryRowSingle(v_grp_nm,'SOURCE_' ||v_desc, null, null, 5, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_TERMINOLOGY: NCIt', null, null,6, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_CODE', null, null,7, row, rows);
+          generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 8, row, rows);
          generateQueryRowSingle(v_grp_nm,'SOURCE_PV', null, null, 9, row, rows);
          generateQueryRowSingle(v_grp_nm,'TARGET_PV', null, null, 10, row, rows);
          generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 11, row, rows);
@@ -1773,18 +1735,25 @@ and tgt_mec_id is not null)) loop
               
                       
          generateQueryRowSingle(v_grp_nm,'XWALK', v_func, v_open_paren ,1, row, rows);
+               setRowMECNull(row,'T');
+  
          generateQueryRowSingle(v_grp_nm,'SOURCE', null, null,2, row, rows);
-         generateQueryRowSingle(v_grp_nm,v_nm, null, null, 3, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE ' ||v_desc, null, null, 4, row, rows);
-         generateQueryRowSingle(v_grp_nm,'NCIt', null, null,4, row, rows);
-         generateQueryRowSingle(v_grp_nm,'TARGET CODE', null, null,5, row, rows);
+               setRowMECNull(row,'B');
+  
+         generateQueryRowSingle(v_grp_nm,'SOURCE_TERMINOLOGY: ' ||v_nm, null, null, 3, row, rows);
+         generateQueryRowSingle(v_grp_nm,'SOURCE_' ||v_desc, null, null, 4, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_TERMINOLOGY: NCIt', null, null,5, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_CODE', null, null,6, row, rows);
+             generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 7, row, rows);
+     
         end if;
         
         -- use case 5 - non-enum/non-enum
             if (cursrc.val_dom_typ_id =18 and curtgt.val_dom_typ_id = 18) then
-                ihook.setColumnValue(row,'TGT_FUNC_ID',v_equals_func);
-                    ihook.setColumnValue(row,'TGT_FUNC_PARAM','SOURCE'); 
-                    ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',1);
+              generateQueryRowSingle(v_grp_nm,'SOURCE', v_equals_func, v_open_paren, 1, row, rows);
+                     setRowMECNull(row,'B');
+                             generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 2, row, rows);
+    
           end if;
             -- Enum by Ref/Enum by Ref
          if (cursrc.val_dom_typ_id =16 and curtgt.val_dom_typ_id = 16) then
@@ -1797,11 +1766,13 @@ and tgt_mec_id is not null)) loop
                 and c.item_id = a.item_id (+) and c.ver_nr = a.ver_nr (+) and a.nm_typ_id  (+)= v_nmtyp;
             
          generateQueryRowSingle(v_grp_nm,'XWALK', v_func, v_open_paren ,1, row, rows);
+         setRowMECNull(row,'T');
          generateQueryRowSingle(v_grp_nm,'SOURCE', null, null,2, row, rows);
-         generateQueryRowSingle(v_grp_nm,v_src_nm, null, null, 3, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE ' ||v_src_desc, null, null, 4, row, rows);
-         generateQueryRowSingle(v_grp_nm,v_nm, null, null,5, row, rows);
-         generateQueryRowSingle(v_grp_nm,'TARGET '|| v_desc, null, null,6, row, rows);
+         setRowMECNull(row,'B');
+         generateQueryRowSingle(v_grp_nm,'SOURCE_TERMINOLOGY: ' ||v_src_nm, null, null, 3, row, rows);
+         generateQueryRowSingle(v_grp_nm,'SOURCE_' ||v_src_desc, null, null, 4, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_TERMINOLOGY: ' || v_nm, null, null,5, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_'|| v_desc, null, null,6, row, rows);
          generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 7, row, rows);
         
           --         ihook.setColumnValue(row,'TGT_FUNC_PARAM','XWALK|' || v_src_nm_desc || '|' || v_nm_desc); 
