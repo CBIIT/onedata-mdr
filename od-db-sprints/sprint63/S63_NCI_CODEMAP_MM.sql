@@ -1729,7 +1729,7 @@ and tgt_mec_id is not null)) loop
          generateQueryRowSingle(v_grp_nm,'TARGET_TERMINOLOGY: NCIt', null, null,6, row, rows);
          generateQueryRowSingle(v_grp_nm,'TARGET_CODE', null, null,7, row, rows);
           generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 8, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE_PV', null, null, 9, row, rows);
+         generateQueryRowSingle(v_grp_nm,'SOURCE_NCIT_CODE', null, null, 9, row, rows);
          generateQueryRowSingle(v_grp_nm,'TARGET_PV', null, null, 10, row, rows);
          generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 11, row, rows);
          
