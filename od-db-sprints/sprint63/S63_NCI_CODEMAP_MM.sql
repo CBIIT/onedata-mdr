@@ -1483,7 +1483,7 @@ begin
   v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR') ;
    
  if (hookinput.invocationNUmber = 0) then
- hookoutput.question := nci_form_curator.getProceedQuestion ('Proceed', 'Please confirm semantic map generation for: ' || v_id || 'v' || v_ver_nr);
+ hookoutput.question := nci_form_curator.getProceedQuestion ('Proceed', 'All rules except MappingType "Derived From" and "Ignore" will be regenerated. Please confirm semantic map generation for: ' || v_id || 'v' || v_ver_nr);
  else
 
    select obj_key_id into v_open_paren from obj_key where obj_typ_id = 58 and obj_key_Desc = '(';
