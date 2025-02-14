@@ -1282,6 +1282,20 @@ and m.tgt_mec_id = tmec.mec_id
 and tmec.ME_PHY_NM = ntmec.ME_PHY_NM and tmec.MEC_PHY_NM=ntmec.MEC_PHY_NM 
 and  ntmec.MDL_ITEM_ID= v_tgt_mdl_id and ntmec.MDL_VER_NR = v_to_tgt_ver_nr and m.src_mec_id is  null and m.tgt_mec_id is not null;
 commit;
+insert into nci_mec_Map (MDL_MAP_ITEM_ID, MDL_MAP_VER_NR, TRNS_DESC_TXT, 
+ SRC_MDL_ITEM_ID, SRC_MDL_VER_NR, TGT_MDL_ITEM_ID, TGT_MDL_VER_NR, MEC_MAP_NM, MAP_DEG, MEC_MAP_DESC, DIRECT_TYP, TRANS_RUL_NOT,
+VALID_PLTFORM, PROV_ORG_ID, MEC_GRP_RUL_NBR, MEC_GRP_RUL_DESC, SRC_VAL, TGT_VAL, CRDNLITY_ID, MEC_MAP_NOTES, MEC_SUB_GRP_NBR, PROV_CNTCT_ID, 
+PROV_RSN_TXT, PROV_TYP_RVW_TXT, PROV_RVW_DT, PROV_APRV_DT, VAL_MAP_CREATE_IND, SRC_FUNC_ID, TGT_FUNC_ID, TGT_FUNC_PARAM, OP_ID, IMP_OP_NM, 
+ RIGHT_OP, LEFT_OP, FLOW_CNTRL, OP_TYP, PAREN, CMNTS_DESC_TXT, PCODE_SYSGEN, MEC_MAP_NM_GEN,CREAT_USR_ID, LST_UPD_USR_ID)
+select  v_id, 1, TRNS_DESC_TXT, 
+ v_src_mdl_id, v_to_src_ver_nr, v_tgt_mdl_id, v_to_tgt_Ver_Nr, MEC_MAP_NM, MAP_DEG, MEC_MAP_DESC, DIRECT_TYP, TRANS_RUL_NOT, 
+VALID_PLTFORM, PROV_ORG_ID, MEC_GRP_RUL_NBR, MEC_GRP_RUL_DESC, SRC_VAL, TGT_VAL, CRDNLITY_ID, MEC_MAP_NOTES, MEC_SUB_GRP_NBR, PROV_CNTCT_ID,
+PROV_RSN_TXT, PROV_TYP_RVW_TXT, PROV_RVW_DT, PROV_APRV_DT, VAL_MAP_CREATE_IND, SRC_FUNC_ID, TGT_FUNC_ID, TGT_FUNC_PARAM, OP_ID, IMP_OP_NM,
+ RIGHT_OP, LEFT_OP, FLOW_CNTRL, OP_TYP, PAREN, CMNTS_DESC_TXT, PCODE_SYSGEN, MEC_MAP_NM_GEN, v_user_id, v_user_id
+from nci_mec_map m  where nvl(m.fld_delete,0) = 0 and m.mdl_map_item_id = v_item_id and mdl_map_ver_nr = v_ver_nr
+ and m.src_mec_id is  null and m.tgt_mec_id is null;
+commit;
+
 insert into onedata_Ra.nci_mec_map (MECM_ID, MDL_MAP_ITEM_ID, MDL_MAP_VER_NR,SRC_MEC_ID,
 TGT_MEC_ID) 
 select MECM_ID, MDL_MAP_ITEM_ID, MDL_MAP_VER_NR,SRC_MEC_ID,
