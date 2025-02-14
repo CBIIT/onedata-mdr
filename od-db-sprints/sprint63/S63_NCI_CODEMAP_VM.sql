@@ -635,8 +635,6 @@ v_mm_ver:= ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR');
   and CTL_VAL_STUS in ( 'IMPORTED','ERROR','VALIDATED')) loop
       v_valid := true;
       v_val_stus_msg := '';
-
-
 -- Validate that the source elemnt/char and target element/char belong to the current source and target model
 -- validate that both ME and MEC are specified. May be blank.
     if (cur1.SRC_ME_PHY_NM is null or  cur1.SRC_MEC_PHY_NM is  null )  then
@@ -649,7 +647,7 @@ v_mm_ver:= ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR');
         v_val_stus_msg := 'Both Target Element and Characteristics have to be specified; ';
     end if;
 
-    if ( cur1.SRC_ME_PHY_NM is not null and  cur1.SRC_MEC_PHY_NM is not null) then 
+    if ( cur1.SRC_ME_PHY_NM is not null and cur1.SRC_MEC_PHY_NM is not null) then 
         ihook.setColumnValue(row_ori, 'SRC_MEC_ID','');
         for cur in (
             select mec.mec_id from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.src_mdl_item_id 
@@ -667,6 +665,7 @@ v_mm_ver:= ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR');
     end if;    
 
     if ( cur1.TGT_ME_PHY_NM is not null and cur1.TGT_MEC_PHY_NM is not null) then 
+        ihook.setColumnValue(row_ori, 'TGT_MEC_ID','');
         for cur in (
         select mec.mec_id from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.tgt_mdl_item_id 
         and me.MDL_ITEM_VER_NR = mm.tgt_mdl_ver_Nr
