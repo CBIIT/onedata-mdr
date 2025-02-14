@@ -1755,7 +1755,7 @@ and tgt_mec_id is not null)) loop
                setRowMECNull(row,'B');
   
          generateQueryRowSingle(v_grp_nm,'SOURCE_TERMINOLOGY: ' ||v_nm, null, null, 3, row, rows);
-         generateQueryRowSingle(v_grp_nm,'SOURCE_' ||v_desc, null, null, 4, row, rows);
+         generateQueryRowSingle(v_grp_nm,'SOURCE_' ||v_term_src, null, null, 4, row, rows);
          generateQueryRowSingle(v_grp_nm,'TARGET_TERMINOLOGY: NCIt', null, null,5, row, rows);
          generateQueryRowSingle(v_grp_nm,'TARGET_CODE', null, null,6, row, rows);
              generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 7, row, rows);
@@ -2324,37 +2324,41 @@ and MEC_SUB_GRP_NBR =i ) loop
 -- looking for open parenthesis first
  
    if (cur.tgt_func_id is not null) then -- another function found
-   if (cur.paren <> v_open_paren_id) then
-    v_rtn_str := v_rtn_str || 'Target function found with no open parenthesis.' ;
-  else
-  if (cur.TGT_FUNC_PARAM is not null) then
+      if (cur.paren <> v_open_paren_id) then
+          v_rtn_str := v_rtn_str || 'Target function found with no open parenthesis.' ;
+          return replace(v_rtn_str,',,',',');
+      else
+       /*   if (cur.TGT_FUNC_PARAM is not null) then
       --  v_rtn_str := v_rtn_str || cur.TGT_FUNC_PARAM || ',';
-      if(substr(trim(v_rtn_str),length(trim(v_rtn_str)),1) in ( '(',',')) then
-        v_rtn_str := v_rtn_str ||  cur.TGT_FUNC_PARAM ;
-    else
-     v_rtn_str := v_rtn_str || ',' || cur.TGT_FUNC_PARAM ;
-     end if;
-   end if;
-    v_rtn_str := v_rtn_str  ||',' || getFuncPcode (v_mm_id, v_mm_ver, v_grp_nm, cur.tgt_func_param, i, v_max_idx,
-    cur.tgt_func_id,v_open_paren_id, v_close_paren_id, v_err) ;
-end if;
- else
-    if (cur.TGT_FUNC_PARAM is not null) then
+              if(substr(trim(v_rtn_str),length(trim(v_rtn_str)),1) in ( '(',',')) then
+                     v_rtn_str := v_rtn_str ||  cur.TGT_FUNC_PARAM ;
+              else
+                     v_rtn_str := v_rtn_str || ',' || cur.TGT_FUNC_PARAM ;
+              end if;
+          end if;*/
+         v_rtn_str := v_rtn_str  ||',' || getFuncPcode (v_mm_id, v_mm_ver, v_grp_nm, cur.tgt_func_param, i, v_max_idx,
+         cur.tgt_func_id,v_open_paren_id, v_close_paren_id, v_err) ;
+         exit;
+--  v_rtn_str := v_rtn_str  ||',' || getFuncPcode (v_mm_id, v_mm_ver, v_grp_nm, '', i, v_max_idx,
+ --   cur.tgt_func_id,v_open_paren_id, v_close_paren_id, v_err) ;
+      end if;
+   else
+       if (cur.TGT_FUNC_PARAM is not null) then
     --    v_rtn_str := v_rtn_str || cur.TGT_FUNC_PARAM || ',';
-      if(substr(trim(v_rtn_str),length(trim(v_rtn_str)),1)  in ( '(',',')) then
-        v_rtn_str := v_rtn_str ||  cur.TGT_FUNC_PARAM ;
-    else
-     v_rtn_str := v_rtn_str || ',' || cur.TGT_FUNC_PARAM ;
-     end if;
+        if(substr(trim(v_rtn_str),length(trim(v_rtn_str)),1)  in ( '(',',')) then
+              v_rtn_str := v_rtn_str ||  cur.TGT_FUNC_PARAM ;
+        else
+             v_rtn_str := v_rtn_str || ',' || cur.TGT_FUNC_PARAM ;
+        end if;
    end if;
   -- look for close paren
   if cur.paren = v_close_paren_id  then
      --   v_rtn_str := substr(v_rtn_str,2) || ' ) ' ;
      if (substr(trim(v_rtn_str),length(trim(v_rtn_Str)),1) = ',') then
-v_rtn_str := substr(trim(v_rtn_str),1,length(trim(v_rtn_str))-1);
-end if;
-        v_rtn_str := v_rtn_str || ' ) ' ;
-        v_found := true;
+        v_rtn_str := substr(trim(v_rtn_str),1,length(trim(v_rtn_str))-1);
+     end if;
+     v_rtn_str := v_rtn_str || ' ) ' ;
+     v_found := true;
  -- return v_rtn_str;
   end if;
  
