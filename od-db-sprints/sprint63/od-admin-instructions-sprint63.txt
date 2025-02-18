@@ -1,1 +1,2 @@
 --TBD
+Jira 3927: Delete duplicate Validate hook from Value Map Import.
