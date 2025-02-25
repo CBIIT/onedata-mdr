@@ -149,4 +149,6 @@ and tmecd.VAL_DOM_ITEM_ID = vd.ITEM_ID (+)
 	  and tmecd.VAL_DOM_VER_NR = vd.VER_NR (+)
       and (pcode_sysgen is not null or mec_map_notes is not null);
 
+alter table NCI_STG_MEC_MAP add (CMNTS_DESC_TXT varchar2(4000));
+
 
