@@ -539,7 +539,7 @@ procedure            sp_reverse_upd;
 
 END;
 /
-create or replace PACKAGE BODY nci_fixes AS
+ create or replace PACKAGE BODY nci_fixes AS
 
 --v_str varchar2(1000) := 'This content is being reviewed for compliance with Executive Order 14168 which mandates that gender should not be used as a replacement for sex and gender identity shall not be requested. ';
 v_str varchar2(1000) := 'This content is being reviewed for compliance with Executive Order 14168 which mandates that gender should not be used as a replacement for sex. ';
@@ -561,11 +561,6 @@ admin_item_typ_id = 4 and (item_id,ver_nr) in (select cde_item_id, cde_ver_nr fr
 commit;
 
 
-insert into onedata_ra.alt_def (item_id, ver_nr, nci_def_typ_id, DEF_DESC, CNTXT_ITEM_ID, CNTXT_VER_NR)
-select item_id, ver_nr, v_def_Typ, item_desc, cntxt_item_id, cntxt_ver_nr from admin_item where 
-admin_item_typ_id = 4 and (item_id,ver_nr) in (select cde_item_id, cde_ver_nr from temp_gender_report);
-commit;
-
 
 insert into alt_def (item_id, ver_nr, nci_def_typ_id, DEF_DESC, CNTXT_ITEM_ID, CNTXT_VER_NR)
 select item_id, ver_nr, v_def_Typ, item_desc, cntxt_item_id, cntxt_ver_nr from admin_item where 
@@ -575,11 +570,8 @@ and (item_id, Ver_nr) in
 commit;
 
 
-insert into onedata_ra.alt_def (item_id, ver_nr, nci_def_typ_id, DEF_DESC, CNTXT_ITEM_ID, CNTXT_VER_NR)
-select item_id, ver_nr, v_def_Typ, item_desc, cntxt_item_id, cntxt_ver_nr from admin_item where 
-admin_item_typ_id = 54 
-and (item_id, Ver_nr) in 
-(select distinct FRM_ITEM_ID, FRM_VER_NR from vw_nci_module_de where (de_item_id, de_ver_nr) in (select cde_item_id, cde_ver_nr from temp_gender_report));
+insert into onedata_ra.alt_def select * from alt_def where 
+creat_dt > sysdate - 1 and nci_def_typ_id = v_def_typ;
 commit;
 
 -- update cde definition
@@ -641,6 +633,6 @@ commit;
 end;
 end;
 /
-
+ 
 exec nci_fixes.sp_gender_desc_upd;
 
