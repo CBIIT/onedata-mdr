@@ -1,4 +1,4 @@
-
+delete table temp_gender_report;
 
 create table temp_gender_report
 (CDE_ITEM_ID number,
@@ -566,7 +566,8 @@ insert into alt_def (item_id, ver_nr, nci_def_typ_id, DEF_DESC, CNTXT_ITEM_ID, C
 select item_id, ver_nr, v_def_Typ, item_desc, cntxt_item_id, cntxt_ver_nr from admin_item where 
 admin_item_typ_id = 54 
 and (item_id, Ver_nr) in 
-(select distinct FRM_ITEM_ID, FRM_VER_NR from vw_nci_module_de where (de_item_id, de_ver_nr) in (select cde_item_id, cde_ver_nr from temp_gender_report));
+(select distinct FRM_ITEM_ID, FRM_VER_NR from vw_nci_module_de where FRM_ADMIN_STUS_NM_DN not like '%RETIRED%'
+and (de_item_id) in (select cde_item_id from temp_gender_report));
 commit;
 
 
@@ -585,15 +586,16 @@ commit;
 update nci_admin_item_rel set instr = substr(v_str || instr, 1, 4000)
 where rel_typ_id = 61
 and (p_item_id, p_item_Ver_nr, c_item_id, c_item_ver_nr) in 
-(select distinct FRM_ITEM_ID, FRM_VER_NR, MOD_ITEM_ID, MOD_VER_NR from vw_nci_module_de where (de_item_id, de_ver_nr) in (select cde_item_id, cde_ver_nr from temp_gender_report));
+(select distinct FRM_ITEM_ID, FRM_VER_NR, MOD_ITEM_ID, MOD_VER_NR from vw_nci_module_de where FRM_ADMIN_STUS_NM_DN not like '%RETIRED%'
+and (de_item_id) in (select cde_item_id from temp_gender_report));
 commit;
 
 -- update form
 
 update admin_item set item_desc = substr(v_str ||  item_desc, 1, 4000)
-where admin_item_typ_id = 54
+where admin_item_typ_id = 54 and admin_stus_nm_dn not like '%RETIRED%'
 and (item_id, Ver_nr) in 
-(select distinct FRM_ITEM_ID, FRM_VER_NR from vw_nci_module_de where (de_item_id, de_ver_nr) in (select cde_item_id, cde_ver_nr from temp_gender_report));
+(select distinct FRM_ITEM_ID, FRM_VER_NR from vw_nci_module_de where (de_item_id) in (select cde_item_id from temp_gender_report));
 commit;
 
 
@@ -633,6 +635,5 @@ commit;
 end;
 end;
 /
- 
 exec nci_fixes.sp_gender_desc_upd;
 
