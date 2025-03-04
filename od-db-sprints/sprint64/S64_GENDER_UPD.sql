@@ -131,10 +131,11 @@ Insert into ONEDATA_WA.TEMP_CONCEPT (CNCPT_CD,CNCPT_ITEM_ID,CNCPT_VER_NR) values
 Insert into ONEDATA_WA.TEMP_CONCEPT (CNCPT_CD,CNCPT_ITEM_ID,CNCPT_VER_NR) values ('C46120',2238736,1);
 commit;
 
- create or replace PACKAGE nci_fixes AS
+create or replace PACKAGE nci_fixes AS
 
 procedure            sp_gender_desc_upd;
 procedure            sp_reverse_upd;
+procedure sp_gender_concept;
 
 END;
 /
@@ -142,6 +143,29 @@ END;
 
 --v_str varchar2(1000) := 'This content is being reviewed for compliance with Executive Order 14168 which mandates that gender should not be used as a replacement for sex and gender identity shall not be requested. ';
 v_str varchar2(1000) := 'This content is being reviewed for compliance with Executive Order 14168 which mandates that gender should not be used as a replacement for sex. ';
+
+procedure            sp_gender_concept
+as
+v_cnt integer;
+v_phrase varchar2(20);
+begin
+/*
+update temp_concept t set (cncpt_item_id, cncpt_ver_nr) = (Select item_id, ver_nr from admin_item where 
+t.cncpt_cd = item_long_nm and admin_item_typ_id = 49);
+
+commit;
+*/
+execute immediate 'truncate table temp_gender_report';
+for cur in (select * from temp_concept) loop
+
+insert into temp_gender_report (CDE_ITEM_ID, CDE_VER_NR, PHRASE)
+select distinct de_item_id, de_ver_nr,cur.cncpt_cd from 
+vw_nci_de_cncpt where cncpt_item_id = cur.cncpt_item_id and cncpt_ver_nr = cur.cncpt_ver_nr and
+(de_item_id, de_ver_nr) not in (select cde_item_id, cde_ver_nr from temp_gender_report);
+commit;
+end loop;
+end;
+
  procedure            sp_gender_desc_upd
 as
 v_cnt integer;
@@ -150,6 +174,7 @@ v_def_typ integer;
 begin
 
 
+--sp_gender_concept;
 select obj_key_id into v_def_typ from obj_key where obj_typ_id = 15 and obj_key_desc = 'Prior Preferred Definition';
 
 
@@ -234,5 +259,8 @@ commit;
 end;
 end;
 /
+ 
+exec nci_fixes.sp_reverse_upd;
+exec nci_fixes.sp_gender_concept;
 exec nci_fixes.sp_gender_desc_upd;
 
