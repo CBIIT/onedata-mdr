@@ -130,12 +130,12 @@ Insert into ONEDATA_WA.TEMP_CONCEPT (CNCPT_CD,CNCPT_ITEM_ID,CNCPT_VER_NR) values
 Insert into ONEDATA_WA.TEMP_CONCEPT (CNCPT_CD,CNCPT_ITEM_ID,CNCPT_VER_NR) values ('C46121',2238737,1);
 Insert into ONEDATA_WA.TEMP_CONCEPT (CNCPT_CD,CNCPT_ITEM_ID,CNCPT_VER_NR) values ('C46120',2238736,1);
 commit;
-
 create or replace PACKAGE nci_fixes AS
 
 procedure            sp_gender_desc_upd;
 procedure            sp_reverse_upd;
 procedure sp_gender_concept;
+procedure            sp_reverse_upd_suffix;
 
 END;
 /
@@ -200,14 +200,14 @@ creat_dt > sysdate - 1 and nci_def_typ_id = v_def_typ;
 commit;
 
 -- update cde definition
-update admin_item set item_desc = substr(v_str || item_Desc, 1, 4000) where admin_item_typ_id = 4
+update admin_item set item_desc = substr(item_Desc || ' ' || v_str, 1, 4000) where admin_item_typ_id = 4
 and (item_id, ver_nr) in (select cde_item_id, cde_ver_nr from temp_gender_report);
 commit;
 
 
 -- update module instructions
 
-update nci_admin_item_rel set instr = substr(v_str || instr, 1, 4000)
+update nci_admin_item_rel set instr = substr(instr || ' ' || v_str, 1, 4000)
 where rel_typ_id = 61
 and (p_item_id, p_item_Ver_nr, c_item_id, c_item_ver_nr) in 
 (select distinct FRM_ITEM_ID, FRM_VER_NR, MOD_ITEM_ID, MOD_VER_NR from vw_nci_module_de where FRM_ADMIN_STUS_NM_DN not like '%RETIRED%'
@@ -216,7 +216,7 @@ commit;
 
 -- update form
 
-update admin_item set item_desc = substr(v_str ||  item_desc, 1, 4000)
+update admin_item set item_desc = substr(item_Desc || ' ' || v_str, 1, 4000)
 where admin_item_typ_id = 54 and admin_stus_nm_dn not like '%RETIRED%'
 and (item_id, Ver_nr) in 
 (select distinct FRM_ITEM_ID, FRM_VER_NR from vw_nci_module_de where (de_item_id) in (select cde_item_id from temp_gender_report));
@@ -252,6 +252,39 @@ commit;
 update nci_admin_item_rel set instr = replace(instr, v_str,'') where 
  rel_typ_id = 61
 and instr like v_str || '%';
+commit;
+
+
+
+end;
+
+
+ procedure            sp_reverse_upd_suffix
+as
+v_cnt integer;
+
+v_def_typ integer;
+begin
+
+
+select obj_key_id into v_def_typ from obj_key where obj_typ_id = 15 and obj_key_desc = 'Prior Preferred Definition';
+
+-- delete alternate definition
+
+delete from alt_def where nci_def_typ_id= v_def_typ and (item_id, ver_nr) in 
+(select item_id, ver_nr from admin_item where trim(item_desc) like '%'|| trim(v_str)  and admin_item_typ_id in (4,54));
+commit;
+
+-- remove prefix from description
+update admin_item set item_desc = replace(item_desc, v_str,'') where
+item_desc like  '%' ||v_str ;
+commit;
+
+-- remove prefix from module instructions
+
+update nci_admin_item_rel set instr = replace(instr, v_str,'') where 
+ rel_typ_id = 61
+and instr like  '%' ||v_str;
 commit;
 
 
