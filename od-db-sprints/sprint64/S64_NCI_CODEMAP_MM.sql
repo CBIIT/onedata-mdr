@@ -1479,6 +1479,10 @@ AS
       v_id number;
 --    v_reg_str varchar2(255);
  -- v_entty_nm varchar2(4000);
+ k integer;
+ v_prev_grp_nm varchar2(1000);
+ v_cur_grp_nm varchar2(1000);
+ 
 begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -1535,7 +1539,8 @@ if (rows.count > 0) then
         
         rows := t_rows();
     -- Both source and target CDE are present
-  
+  k := 1;
+  v_prev_grp_nm := '';
    for cur in (select  mec1.MEC_LONG_NM SRC_MEC_LONG_NM, mec1.mec_id SRC_MEC_ID,
    mec2.MEC_LONG_NM TGT_MEC_LONG_NM, mec2.mec_id TGT_MEC_ID, me1.mdl_item_id src_mdl_item_id,
     me1.mdl_item_ver_nr src_mdl_ver_nr ,me2.mdl_item_id tgt_mdl_item_id, me1.ITEM_LONG_NM SRC_ME_ITEM_LONG_NM,
@@ -1551,8 +1556,15 @@ and mec1.CDE_ITEM_ID = mec2.CDE_ITEM_ID and mec1.CDE_VER_NR = mec2.CDE_VER_NR
 and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook.getColumnValue (row_ori,'VER_NR')
 and (mec1.mec_id , mec2.mec_id) not in (select src_mec_id, tgt_mec_id from nci_mec_map where 
 MDL_MAP_ITEM_ID  = ihook.getColumnValue(row_ori, 'ITEM_ID') and MDL_MAP_VER_NR = ihook.getColumnValue (row_ori,'VER_NR') and src_mec_id is not null 
-and tgt_mec_id is not null)) loop
-
+and tgt_mec_id is not null) order by me1.ITEM_LONG_NM,me2.ITEM_LONG_NM ) loop
+        
+        v_cur_grp_nm := cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.TGT_ME_ITEM_LONG_NM;
+        if (v_cur_grp_nm <> nvl(v_prev_grp_nm ,'XX') or v_prev_grp_nm = '') then
+        v_prev_grp_nm := v_cur_grp_nm;
+        k := 1;
+        else
+        k := k+2;
+        end if;
         row := t_row();
         ihook.setColumnValue(row,'SRC_MEC_ID',cur.src_MEC_ID);
         ihook.setColumnValue(row,'TGT_MEC_ID',cur.tgt_mec_id);
@@ -1561,23 +1573,42 @@ and tgt_mec_id is not null)) loop
         ihook.setColumnValue(row,'TGT_MDL_ITEM_ID',cur.TGT_MDL_ITEM_ID);
         ihook.setColumnValue(row,'TGT_MDL_VER_NR',cur.TGT_MDL_VER_NR);
         ihook.setColumnValue(row,'MAP_DEG',86);
-        ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',0);
+        ihook.setColumnValue(row,'TGT_MDL_VER_NR',cur.TGT_MDL_VER_NR);
+
+        ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',k);
       --  ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.SRC_MEC_LONG_NM);
-        ihook.setColumnValue(row,'MEC_MAP_NM',cur.SRC_ME_ITEM_LONG_NM  ||'.'  || cur.TGT_ME_ITEM_LONG_NM);
+        ihook.setColumnValue(row,'MEC_MAP_NM',v_cur_grp_nm);
           ihook.setColumnValue(row,'SRC_CDE_ITEM_ID',cur.SRC_CDE_ITEM_ID);
         ihook.setColumnValue(row,'SRC_CDE_VER_NR',cur.SRC_CDE_VER_NR);
            ihook.setColumnValue(row,'TGT_CDE_ITEM_ID',cur.TGT_CDE_ITEM_ID);
         ihook.setColumnValue(row,'TGT_CDE_VER_NR',cur.TGT_CDE_VER_NR);
-        
+           ihook.setColumnValue(row,'TGT_FUNC_ID',v_equals_func);
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM','SOURCE'); 
+               ihook.setColumnValue(row,'PAREN',v_open_paren); 
+      
         getStdMMComment(row,row_ori);
             
                
 
                                      rows.extend;
                                             rows(rows.last) := row;
-
+                                            
+  ihook.setColumnValue(row,'TGT_FUNC_ID','');
+            ihook.setColumnValue(row,'TGT_FUNC_PARAM',''); 
+               ihook.setColumnValue(row,'PAREN',v_close_paren); 
+        ihook.setColumnValue(row,'MEC_SUB_GRP_NBR',k+1);
+        ihook.setColumnValue(row,'SRC_MEC_ID','');
+        ihook.setColumnValue(row,'TGT_MEC_ID','');
+          ihook.setColumnValue(row,'SRC_CDE_ITEM_ID','');
+        ihook.setColumnValue(row,'SRC_CDE_VER_NR','');
+           ihook.setColumnValue(row,'TGT_CDE_ITEM_ID','');
+        ihook.setColumnValue(row,'TGT_CDE_VER_NR','');
+      
+                        rows.extend;
+                                            rows(rows.last) := row;
     end loop;
- -- Semantically similar
+    
+ -- Semantically similar/equivivalent
     for cur in (select  mec1.MEC_LONG_NM SRC_MEC_LONG_NM, mec1.mec_id SRC_MEC_ID, mec2.MEC_LONG_NM TGT_MEC_LONG_NM, mec2.mec_id TGT_MEC_ID, me1.mdl_item_id src_mdl_item_id,
     me1.mdl_item_ver_nr src_mdl_ver_nr ,me2.mdl_item_id tgt_mdl_item_id, me1.ITEM_LONG_NM SRC_ME_ITEM_LONG_NM,
     me2.mdl_item_ver_nr tgt_mdl_ver_nr ,me2.ITEM_LONG_NM TGT_ME_ITEM_LONG_NM,
