@@ -1,3 +1,4 @@
+alter table NCI_MEC_VAL_MAP add (CMNTS_DESC_TXT varchar2(4000));
 
   CREATE OR REPLACE  VIEW VW_MDL_MAP_IMP_TEMPLATE AS
   select  ' ' "DO_NOT_USE",
