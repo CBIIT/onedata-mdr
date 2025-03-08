@@ -1,3 +1,10 @@
 -- Run as ONEDATA_RA DDL scripts
+S64_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S64_WA_RA_DDL.sql
+S64_NCI_11179.sql
+S64_NCI_11179_2.sql
+S64_NCI_CODEMAP.sql
+S64_NCI_CODEMAP_MM.sql
+S64_NCI_CODEMAP_VM.sql
