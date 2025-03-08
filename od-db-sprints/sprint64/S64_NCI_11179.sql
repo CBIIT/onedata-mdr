@@ -45,7 +45,7 @@ function replaceChar(v_str in varchar2) return varchar2;
 procedure CopyPermVal (actions in out t_actions, v_from_id in number, v_from_ver_nr in number, v_to_id in number, v_to_ver_nr in number);
 procedure ReturnRow (v_sql varchar2,  v_table_name in varchar2, row in out t_row);
 procedure spReturnSubtypeSpecifiedRow (v_item_id in number, v_ver_nr in number, v_type in number, row in out t_row, rowform in t_row) ;
-
+function getQuestionGeneric (v_quest_str in varchar2, v_cmd_str in varchar2)  return t_question;
 /*  This package includes generic functions as well as versioning related procedures for NCI
 
 geWordCOunt - gets the word count of a string separated by spaces. Used to parse the string the user provides in DEC creation
@@ -59,7 +59,6 @@ spCreateVerNCI - Create new version customized
 */
 END;
 /
-
 create or replace PACKAGE BODY NCI_11179 AS
 
 v_err_str      varchar2(1000) := '';
@@ -67,6 +66,28 @@ DEFAULT_TS_FORMAT    varchar2(50) := 'YYYY-MM-DD HH24:MI:SS';
 type       t_orgs is table of org_cntct.org_id%type;
 v_int_cncpt_id  number := 2433736;
 v_deflt_cart_nm varchar2(255) := 'Default';
+
+
+
+function getQuestionGeneric (v_quest_str in varchar2, v_cmd_str in varchar2)  return t_question
+is
+  question t_question;
+  answer t_answer;
+  answers t_answers;
+  v_add integer :=0;
+begin
+
+-- There is no way for a hook step to know what the previous selection was. I am using AnswerId to determine if 50+ then use Name. Else, use code.
+ ANSWERS                    := T_ANSWERS();
+    ANSWER                     := T_ANSWER(1, 1, v_cmd_str);
+    ANSWERS.EXTEND;
+    ANSWERS(ANSWERS.LAST) := ANSWER;
+    
+  QUESTION               := T_QUESTION(v_quest_str, ANSWERS);
+
+return question;
+end;
+
 
 /*  This package includes generic functions as well as versioning related procedures for NCI */
 /***********************************************/
