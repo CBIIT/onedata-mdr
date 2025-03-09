@@ -192,12 +192,11 @@ from
 where   tmed.item_id = tmecd.MDL_ELMNT_ITEM_ID
 and tmed.ver_nr = tmecd.MDL_ELMNT_VER_NR  
 and tmecd.mec_id = map.TGT_MEC_ID_DERV
-    and  sme.item_id = smec.MDL_ELMNT_ITEM_ID (+)
-and sme.ver_nr = smec.MDL_ELMNT_VER_NR  (+)
-and smec.mec_id (+)= map.SRC_MEC_ID
+    and  smec.MDL_ELMNT_ITEM_ID = sme.item_id  (+)
+and smec.MDL_ELMNT_VER_NR= sme.ver_nr  (+)
+and map.SRC_MEC_ID = smec.mec_id (+)
   and map.map_deg in (86,87,120)
   and tmecd.VAL_DOM_ITEM_ID = vd.ITEM_ID (+)
 and tmecd.VAL_DOM_VER_NR = vd.VER_NR (+)
   and trns_desc_txt is not null;
-
 
