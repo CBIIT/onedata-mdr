@@ -153,3 +153,51 @@ and tmecd.VAL_DOM_ITEM_ID = vd.ITEM_ID (+)
 alter table NCI_STG_MEC_MAP add (CMNTS_DESC_TXT varchar2(4000));
 
 
+  CREATE OR REPLACE VIEW VW_MDL_MAP_RSLT_SHRT as
+  select   map.MDL_MAP_ITEM_ID ,
+    map.mdl_map_ver_nr ,
+    map.MEC_MAP_NM,
+    tmed.ITEM_PHY_OBJ_NM ||  '.'  || tmecd."MEC_PHY_NM"  MEC_PHY_NM,
+    tmed.ITEM_PHY_OBJ_NM  TGT_ME_PHY_NM,
+     tmecd.MEC_PHY_NM  TGT_MEC_PHY_NM,
+    sme.ITEM_PHY_OBJ_NM  SRC_ME_PHY_NM,
+     smec.MEC_PHY_NM  SRC_MEC_PHY_NM,
+    --    tmecd."MEC_PHY_NM",
+  --       tmecd.MEC_LONG_NM,
+  decode(vd.val_dom_typ_id, 16, 'Enumerated by Reference', 17, 'Enumerated', 18, 'Non-enumerated', '') VAL_DOM_TYP,
+  MEC_MAP_NOTES,
+  TRNS_DESC_TXT,
+      TRANS_RUL_NOT,
+  PROV_ORG_ID,
+  PROV_CNTCT_ID,
+  PROV_RSN_TXT,
+  PROV_TYP_RVW_TXT,
+  PROV_RVW_DT,
+  PROV_APRV_DT,
+    sysdate creat_dt,
+  'ONEDATA' creat_usr_id,  
+   sysdate lst_upd_dt,
+  'ONEDATA' lst_upd_usr_id,
+     map.creat_dt creat_dt_x,
+   map.creat_usr_id creat_usr_id_x,  
+   map.lst_upd_dt lst_upd_dt_x,
+   map.lst_upd_usr_id lst_upd_usr_id_x,
+     0 FLD_DELETE,
+     sysdate S2P_TRN_DT,
+     sysdate LST_DEL_DT
+from
+    nci_MEC_MAP map,
+  NCI_MDL_ELMNT tmed,NCI_MDL_ELMNT_CHAR tmecd, VALUE_DOM vd,
+      NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec
+where   tmed.item_id = tmecd.MDL_ELMNT_ITEM_ID
+and tmed.ver_nr = tmecd.MDL_ELMNT_VER_NR  
+and tmecd.mec_id = map.TGT_MEC_ID_DERV
+    and  sme.item_id = smec.MDL_ELMNT_ITEM_ID (+)
+and sme.ver_nr = smec.MDL_ELMNT_VER_NR  (+)
+and smec.mec_id (+)= map.SRC_MEC_ID
+  and map.map_deg in (86,87,120)
+  and tmecd.VAL_DOM_ITEM_ID = vd.ITEM_ID (+)
+and tmecd.VAL_DOM_VER_NR = vd.VER_NR (+)
+  and trns_desc_txt is not null;
+
+
