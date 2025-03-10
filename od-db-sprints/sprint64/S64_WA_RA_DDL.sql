@@ -164,16 +164,23 @@ alter table NCI_STG_MEC_MAP add (CMNTS_DESC_TXT varchar2(4000));
      smec.MEC_PHY_NM  SRC_MEC_PHY_NM,
     --    tmecd."MEC_PHY_NM",
   --       tmecd.MEC_LONG_NM,
-  decode(vd.val_dom_typ_id, 16, 'Enumerated by Reference', 17, 'Enumerated', 18, 'Non-enumerated', '') VAL_DOM_TYP,
+  decode(tvd.val_dom_typ_id, 16, 'Enumerated by Reference', 17, 'Enumerated', 18, 'Non-enumerated', '') TGT_VAL_DOM_TYP,
+  decode(svd.val_dom_typ_id, 16, 'Enumerated by Reference', 17, 'Enumerated', 18, 'Non-enumerated', '') SRC_VAL_DOM_TYP,
+  tmecd.cde_item_id tgt_cde_item_id,
+  tmecd.cde_ver_nr tgt_cde_ver_nr,
+   smec.cde_item_id src_cde_item_id,
+  smec.cde_ver_nr src_cde_ver_nr,
   MEC_MAP_NOTES,
   TRNS_DESC_TXT,
       TRANS_RUL_NOT,
+      VALID_PLTFORM,
   PROV_ORG_ID,
   PROV_CNTCT_ID,
   PROV_RSN_TXT,
   PROV_TYP_RVW_TXT,
   PROV_RVW_DT,
   PROV_APRV_DT,
+  cmnts_desc_txt,
     sysdate creat_dt,
   'ONEDATA' creat_usr_id,  
    sysdate lst_upd_dt,
@@ -187,7 +194,7 @@ alter table NCI_STG_MEC_MAP add (CMNTS_DESC_TXT varchar2(4000));
      sysdate LST_DEL_DT
 from
     nci_MEC_MAP map,
-  NCI_MDL_ELMNT tmed,NCI_MDL_ELMNT_CHAR tmecd, VALUE_DOM vd,
+  NCI_MDL_ELMNT tmed,NCI_MDL_ELMNT_CHAR tmecd, VALUE_DOM tvd,VALUE_DOM svd,
       NCI_MDL_ELMNT sme,NCI_MDL_ELMNT_CHAR smec
 where   tmed.item_id = tmecd.MDL_ELMNT_ITEM_ID
 and tmed.ver_nr = tmecd.MDL_ELMNT_VER_NR  
@@ -196,7 +203,9 @@ and tmecd.mec_id = map.TGT_MEC_ID_DERV
 and smec.MDL_ELMNT_VER_NR= sme.ver_nr  (+)
 and map.SRC_MEC_ID = smec.mec_id (+)
   and map.map_deg in (86,87,120)
-  and tmecd.VAL_DOM_ITEM_ID = vd.ITEM_ID (+)
-and tmecd.VAL_DOM_VER_NR = vd.VER_NR (+)
+  and tmecd.VAL_DOM_ITEM_ID = tvd.ITEM_ID (+)
+and tmecd.VAL_DOM_VER_NR = tvd.VER_NR (+)
+ and smec.VAL_DOM_ITEM_ID = svd.ITEM_ID (+)
+and smec.VAL_DOM_VER_NR = svd.VER_NR (+)
   and trns_desc_txt is not null;
 
