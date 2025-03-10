@@ -209,3 +209,55 @@ and tmecd.VAL_DOM_VER_NR = tvd.VER_NR (+)
 and smec.VAL_DOM_VER_NR = svd.VER_NR (+)
   and trns_desc_txt is not null;
 
+
+  CREATE OR REPLACE VIEW VW_NCI_MEC_VAL_MAP AS
+  select 
+MECVM_ID,
+vm.SRC_MEC_ID,
+vm.TGT_MEC_ID,
+vm.MDL_MAP_ITEM_ID,
+vm.MDL_MAP_VER_NR,
+SRC_PV,
+TGT_PV,
+VM_CNCPT_CD,
+VM_CNCPT_NM,
+vm.CREAT_DT,
+vm.CREAT_USR_ID,
+vm.LST_UPD_USR_ID,
+vm.FLD_DELETE,
+vm.LST_DEL_DT,
+vm.LST_UPD_DT,
+vm.S2P_TRN_DT,
+vm.PROV_ORG_ID,
+vm.PROV_CNTCT_ID,
+vm.PROV_RSN_TXT,
+vm.PROV_TYP_RVW_TXT,
+vm.PROV_RVW_DT,
+vm.PROV_APRV_DT,
+SRC_LBL,
+TGT_LBL,
+PROV_NOTES,
+vm.MAP_DEG,
+SRC_VM_CNCPT_CD,
+SRC_VM_CNCPT_NM,
+TGT_VM_CNCPT_CD,
+TGT_VM_CNCPT_NM,
+vm.SRC_VD_ITEM_ID,
+vm.SRC_VD_VER_NR,
+decode(svd.VAL_DOM_TYP_ID,17 ,'Enumerated', 18,'Non-Enumerated', 16, 'Enumerated by Reference') SRC_VD_TYP,
+vm.TGT_VD_ITEM_ID,
+vm.TGT_VD_VER_NR,
+decode(tvd.VAL_DOM_TYP_ID,17 ,'Enumerated', 18,'Non-Enumerated', 16, 'Enumerated by Reference') TGT_VD_TYP,
+vm.SRC_CDE_ITEM_ID,
+vm.SRC_CDE_VER_NR,
+vm.TGT_CDE_ITEM_ID,
+vm.TGT_CDE_VER_NR,
+mm.mecm_id,
+vm.cmnts_desc_txt
+--,	vm.SRC_VD_TYP, vm.TGT_VD_TYP
+from nci_mec_map mm, nci_mec_val_map vm, value_dom svd, value_dom tvd
+where mm.src_mec_id = vm.src_mec_id and mm.tgt_mec_id = vm.tgt_mec_id
+	and mm.mdl_map_item_id = vm.mdl_map_item_id and mm.mdl_map_ver_nr = vm.mdl_map_ver_nr
+	and vm.src_vd_item_id = svd.item_id and vm.src_vd_ver_nr = svd.ver_nr
+	and vm.tgt_vd_item_id = tvd.item_id and vm.tgt_vd_ver_nr = tvd.ver_nr;
+
