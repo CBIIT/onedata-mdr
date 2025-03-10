@@ -11,6 +11,7 @@ procedure    execDeriveTarget (v_item_id in number, v_ver_nr in number);
  
   procedure spCopyModelMapping ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure spCreateMapGroup ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+ procedure spUpdateModelCDEAssocFromMM ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 
   procedure spValidateModelMap ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
  
@@ -20,6 +21,7 @@ procedure dervTgtMEC( v_data_in in clob, v_data_out out clob);
  
  procedure spDeleteModelMap( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
  procedure spDeleteModelMapRule( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2);
+ procedure spRegenerateMMGroup( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2);
  
  procedure spPostHookUpdMM( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure spGeneratePcodeNew ( v_data_in in clob, v_data_out out clob);
@@ -37,6 +39,79 @@ v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
   v_reg_str_adv varchar2(255) := '[^A-Za-z0-9]';
 v_reg_str varchar2(255) := '[^ A-Za-z0-9]';
 
+procedure spRegenerateMMGroup( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2)
+as
+   hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+ 
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+ BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+  
+  row_ori :=  hookInput.originalRowset.rowset(1);
+raise_application_error (-20000, 'Work in progress.');
+end;
+
+ procedure spUpdateModelCDEAssocFromMM ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+ as
+
+   hookInput t_hookInput;
+  hookOutput t_hookOutput := t_hookOutput();
+ 
+  row t_row;
+  rows  t_rows;
+    row_ori t_row;
+    row_sel t_row;
+    v_cnt integer :=0;
+    v_mdl_id number;
+    v_mdl_ver_nr number(4,2);
+    showRowset     t_showableRowset;
+ BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+  
+  row_ori :=  hookInput.originalRowset.rowset(1);
+  
+  if (hookinput.invocationnumber = 0) then
+  -- showable rowset
+    rows := t_rows();
+    for cur in (Select * from nci_mdl_map where item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori,'VER_NR')) loop
+        row := t_row();
+        ihook.setColumnValue(row, 'Model Type','Source');
+       ihook.setColumnValue(row, 'Model Public Id',cur.src_mdl_item_id);
+       ihook.setColumnValue(row, 'Model Version',cur.src_mdl_ver_nr);
+       for curname in (select item_nm from admin_item where item_id = cur.src_mdl_item_id and ver_nr = cur.src_mdl_ver_nr) loop
+            ihook.setColumnValue(row, 'Model Name',curname.item_nm);
+        end loop;   
+         rows.extend; rows(rows.last) := row;
+        ihook.setColumnValue(row, 'Model Type','Target');
+       ihook.setColumnValue(row, 'Model Public Id',cur.tgt_mdl_item_id);
+       ihook.setColumnValue(row, 'Model Version',cur.tgt_mdl_ver_nr);
+       for curname in (select item_nm from admin_item where item_id = cur.tgt_mdl_item_id and ver_nr = cur.tgt_mdl_ver_nr) loop
+            ihook.setColumnValue(row, 'Model Name',curname.item_nm);
+        end loop;  
+         rows.extend; rows(rows.last) := row;
+        showrowset := t_showablerowset (rows, 'Model Selection', 4, 'single');
+       	 hookoutput.showrowset := showrowset;
+        hookoutput.question := nci_11179.getQuestionGeneric ('Please select model to refresh.', 'Proceed') ;
+    end loop;
+  end if;
+  if (hookinput.invocationnumber = 1) then
+   row_sel := hookInput.selectedRowset.rowset(1);
+         
+  v_mdl_id := ihook.getColumnValue(row_sel,'Model Public Id');
+  v_mdl_ver_nr := ihook.getColumnValue(row_sel,'Model Version');
+  nci_codemap.spUpdateModelCDEAssocSub (v_mdl_id,v_mdl_ver_nr, v_cnt);
+  
+ hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated.';
+ end if;
+    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+end;
 
 
 procedure spCopyMM ( v_src_mm_id in number, v_src_mm_ver_nr in number, v_tgt_mm_id in number, v_tgt_mm_ver_nr in number, v_user_id in varchar2,v_chk_ind in integer)
@@ -925,7 +1000,8 @@ end;
   v_valid boolean;
   v_val_stus_msg varchar2(2000);
  i integer;
- 
+ v_open_paren integer;
+ v_close_paren integer;
  v_temp integer;
  BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -936,90 +1012,11 @@ end;
   v_val_stus_msg := '';
   v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
   v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
-  /*
-  *..*	Many-To-Many
-TBD 0..1	Zero-To-One. Used to show the default value of a target model characteristic.
-1..0	One-To-Zero. Used to indicate that the source characteristic has no mapping in the target model, or must be ignored.
-0..*	Zero-To-Many
-1..1	One-To-One = 121
-*..1	Many-To-One = 119
-1..*	One-To-Many = 118
-*/
-  
  
-  -- Derive Mapping cardinality
-  
-  /*
-  update nci_mec_map set  CRDNLITY_ID = null where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr;
-  commit;
-  
- 
-  
-  -- 1..0
-  select obj_key_id into v_id from obj_Key where obj_typ_id = 47 and obj_key_desc = '1..0';
-  update nci_mec_map set  CRDNLITY_ID = v_id where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr and 	SRC_MEC_ID is  not null and 
-  TGT_MEC_ID is null and SRC_FUNC_ID is null and 	SRC_VAL is  null and 
-  CRDNLITY_ID is null and upper(mec_map_nm) like '%IGNORE%';
-  commit;
-  
-  -- 1..1
-  select obj_key_id into v_id from obj_Key where obj_typ_id = 47 and obj_key_desc = '1..1';
-  update nci_mec_map set  CRDNLITY_ID = v_id where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr and CRDNLITY_ID is null and ( MEC_MAP_NM) in
-  (select  MEC_MAP_NM from nci_mec_map where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr and 	SRC_MEC_ID is  not null and 
-  TGT_MEC_ID is not null  and nvl(fld_Delete,0) = 0
-  group by MEC_MAP_NM having count(*) =1)
-;
-  
-  commit;
-  
- -- 0..* 
-  select obj_key_id into v_id from obj_Key where obj_typ_id = 47 and obj_key_desc = '0..*';
-  update nci_mec_map set  CRDNLITY_ID = v_id where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr and 
-  CRDNLITY_ID is null and ( MEC_MAP_NM) in
-  (select  MEC_MAP_NM from nci_mec_map where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr  and nvl(fld_Delete,0) = 0 
-  group by MEC_MAP_NM having count(distinct src_mec_id) =0 and count(distinct tgt_mec_id) > 0);
-  commit;
-  
-  -- 1..*
-  select obj_key_id into v_id from obj_Key where obj_typ_id = 47 and obj_key_desc = '1..*';
-  update nci_mec_map set  CRDNLITY_ID = v_id where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr and CRDNLITY_ID is null  and ( MEC_MAP_NM) in (
-  select MEC_MAP_NM from nci_mec_map where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr 
-  --and 	SRC_MEC_ID is  not null and 
- -- TGT_MEC_ID is not null  
- and nvl(fld_Delete,0) = 0
-  group by MEC_MAP_NM having count(distinct src_mec_id) =1 and count(distinct tgt_mec_id) > 1);
-  
-  commit;
-  
-  -- *..1
-  select obj_key_id into v_id from obj_Key where obj_typ_id = 47 and obj_key_desc = '*..1';
-  update nci_mec_map set  CRDNLITY_ID = v_id where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr and 	CRDNLITY_ID is null  and (MEC_MAP_NM) in (
-  select MEC_MAP_NM from nci_mec_map where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr 
-  --and 	SRC_MEC_ID is  not null and 
-  --TGT_MEC_ID is not null  
-  and nvl(fld_Delete,0) = 0
-  group by MEC_MAP_NM having count(distinct src_mec_id) >1 and count(distinct tgt_mec_id) = 1);
-  
-  commit;
-  
-  -- *..1
-  select obj_key_id into v_id from obj_Key where obj_typ_id = 47 and obj_key_desc = '*..*';
-  update nci_mec_map set  CRDNLITY_ID = v_id where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr and 	 CRDNLITY_ID is null and 
-   ( MEC_MAP_NM) in (
-  select MEC_MAP_NM from nci_mec_map where MDL_MAP_ITEM_ID = v_item_id and MDL_MAP_VER_NR = v_ver_nr 
-  --and 	SRC_MEC_ID is  not null and 
-  --TGT_MEC_ID is not null  
-  and nvl(fld_Delete,0) = 0
-  group by MEC_MAP_NM having count(distinct src_mec_id) >1 and count(distinct tgt_mec_id) > 1);
-  
-  commit;
-
-
-hookoutput.message := 'Derivation of Cardinality completed.'; 
-
-*/
-
 rows := t_rows();
+ select obj_key_id into v_open_paren from obj_key where obj_typ_id = 58 and obj_key_Desc = '(';
+   select obj_key_id into v_close_paren from obj_key where obj_typ_id = 58 and obj_key_Desc = ')';
+   
 
 for cur in (
 select map1.mec_Map_nm,  x.SRC_item_phy_obj_nm, x.SRC_MEC_PHY_NM,  x.TGT_ITEM_PHY_OBJ_NM
@@ -1055,22 +1052,129 @@ map1.MDL_MAP_ITEM_ID = v_item_id
    and tme1.ITEM_PHY_OBJ_NM = x.TGT_ITEM_PHY_OBJ_NM
  ) loop
  row := t_row();
+ ihook.setColumnValue(row,'Rule Type','Code Generation');
+ ihook.setColumnValue(row, 'Rule Description','Consolidate groups where the source and target is the same.');
  ihook.setColumnValue(row, 'Source Element', cur.src_item_phy_obj_nm);
  ihook.setColumnValue(row, 'Source Characteristic', cur.src_mec_phy_nm);
  ihook.setColumnValue(row, 'Target Element', cur.tgt_item_phy_obj_nm);
  ihook.setColumnValue(row, 'Characteristic Group', cur.mec_map_nm);
    rows.extend;     rows(rows.last) := row;
       end loop;
-row := t_row();
- ihook.setColumnValue(row, 'Source Element','mn test');
- ihook.setColumnValue(row, 'Source Characteristic', 'mn test');
- ihook.setColumnValue(row, 'Target Element', 'mn test');
- ihook.setColumnValue(row, 'Characteristic Group',  'mn test');
+      
+ 
+for cur in (
+select    map.mec_map_nm,  count(*) 
+from NCI_MDL_ELMNT_CHAR smec, NCI_MDL_ELMNT tme,NCI_MDL_ELMNT sme,
+                NCI_MDL_ELMNT_CHAR tmec,   nci_MEC_MAP map
+where  map.SRC_MEC_ID = smec.MEC_ID (+)
+    and smec.MDL_ELMNT_ITEM_ID = sme.item_id
+    and smec.MDL_ELMNT_VER_NR = sme.ver_nr
+    and map.TGT_MEC_ID = tmec.MEC_ID
+    and tmec.MDL_ELMNT_ITEM_ID = tme.item_id
+    and tmec.MDL_ELMNT_VER_NR = tme.ver_nr 
+    and map.MAP_DEG in (86,87,120)
+    and map.MDL_MAP_ITEM_ID = v_item_id
+    and map.MDL_MAP_VER_NR = v_ver_nr
+group by map.mec_map_nm having count (distinct tme.ITEM_PHY_OBJ_NM  ) > 1
+ ) loop
+ row := t_row();
+ ihook.setColumnValue(row,'Rule Type','Code Generation');
+ ihook.setColumnValue(row, 'Rule Description','Multiple target elements in the same group.');
+ --ihook.setColumnValue(row, 'Source Element', cur.src_item_phy_obj_nm);
+ --ihook.setColumnValue(row, 'Source Characteristic', cur.src_mec_phy_nm);
+ --ihook.setColumnValue(row, 'Target Element', cur.tgt_item_phy_obj_nm);
+ ihook.setColumnValue(row, 'Characteristic Group', cur.mec_map_nm);
    rows.extend;     rows(rows.last) := row;
+      end loop;
 
- showrowset := t_showablerowset (rows, 'Consolidate Groups', 4, 'unselectable');
+
+for cur in (
+select    map.mec_map_nm,  count(*) 
+from  nci_MEC_MAP map
+where   map.MAP_DEG in (86,87,120)
+    and map.MDL_MAP_ITEM_ID = v_item_id
+    and map.MDL_MAP_VER_NR = v_ver_nr
+group by map.mec_map_nm having sum(decode(map.paren ,v_open_paren,1,0)  ) <> sum(decode(map.paren ,v_close_paren,1,0)  )
+ ) loop
+ row := t_row();
+ ihook.setColumnValue(row,'Rule Type','Consistency');
+ ihook.setColumnValue(row, 'Rule Description','Open/close parenthesis do not match.');
+ --ihook.setColumnValue(row, 'Source Element', cur.src_item_phy_obj_nm);
+ --ihook.setColumnValue(row, 'Source Characteristic', cur.src_mec_phy_nm);
+ --ihook.setColumnValue(row, 'Target Element', cur.tgt_item_phy_obj_nm);
+ ihook.setColumnValue(row, 'Characteristic Group', cur.mec_map_nm);
+   rows.extend;     rows(rows.last) := row;
+      end loop;
+
+
+
+for cur in (
+select    map.mecm_id , map.mec_map_nm
+from  nci_MEC_MAP map
+where   map.MAP_DEG in (86,87,120)
+    and map.MDL_MAP_ITEM_ID = v_item_id
+    and map.MDL_MAP_VER_NR = v_ver_nr
+    and map.FLOW_CNTRL is not null and map.OP_ID is not null
+ ) loop
+ row := t_row();
+ ihook.setColumnValue(row,'Rule Type','Consistency');
+ ihook.setColumnValue(row, 'Rule Description','IF/THEN/ELSE and AND/OR cannot be specified in the same rule.');
+ --ihook.setColumnValue(row, 'Source Element', cur.src_item_phy_obj_nm);
+ --ihook.setColumnValue(row, 'Source Characteristic', cur.src_mec_phy_nm);
+ --ihook.setColumnValue(row, 'Target Element', cur.tgt_item_phy_obj_nm);
+ ihook.setColumnValue(row, 'Rule ID', cur.mecm_id);
+ ihook.setColumnValue(row, 'Characteristic Group', cur.mec_map_nm);
+ 
+   rows.extend;     rows(rows.last) := row;
+      end loop;
+
+
+for cur in (
+select    map.mecm_id , map.mec_map_nm
+from  nci_MEC_MAP map
+where   map.MAP_DEG in (86,87,120)
+    and map.MDL_MAP_ITEM_ID = v_item_id
+    and map.MDL_MAP_VER_NR = v_ver_nr
+    and nvl(map.PAREN,0) <> v_open_paren  and map.TGT_FUNC_ID is not null
+ ) loop
+ row := t_row();
+ ihook.setColumnValue(row,'Rule Type','Consistency');
+ ihook.setColumnValue(row, 'Rule Description','Function does not have an open parenthesis.');
+ ihook.setColumnValue(row, 'Rule ID', cur.mecm_id);
+ ihook.setColumnValue(row, 'Characteristic Group', cur.mec_map_nm);
+ 
+   rows.extend;     rows(rows.last) := row;
+      end loop;
+
+
+for cur in (
+select    map.mecm_id , map.mec_map_nm
+from  nci_MEC_MAP map
+where   map.MAP_DEG in (86,87,120)
+    and map.MDL_MAP_ITEM_ID = v_item_id
+    and map.MDL_MAP_VER_NR = v_ver_nr
+    and nvl(map.PAREN,0)  = v_close_paren  and 
+    (map.TGT_FUNC_ID is not null or map.op_id is not null or map.FLOW_CNTRL is not null or map.TGT_FUNC_PARAM is not null or map.RIGHT_OP is not null or map.right_op is not null)
+ ) loop
+ row := t_row();
+ ihook.setColumnValue(row,'Rule Type','Consistency');
+ ihook.setColumnValue(row, 'Rule Description','Close parenthesis should be its own rule.');
+ 
+ ihook.setColumnValue(row, 'Rule ID', cur.mecm_id);
+ ihook.setColumnValue(row, 'Characteristic Group', cur.mec_map_nm);
+ 
+   rows.extend;     rows(rows.last) := row;
+      end loop;
+--row := t_row();
+-- ihook.setColumnValue(row, 'Source Element','mn test');
+-- ihook.setColumnValue(row, 'Source Characteristic', 'mn test');
+-- ihook.setColumnValue(row, 'Target Element', 'mn test');
+-- ihook.setColumnValue(row, 'Characteristic Group',  'mn test');
+ --  rows.extend;     rows(rows.last) := row;
+
+ showrowset := t_showablerowset (rows, 'Validation Results', 4, 'unselectable');
        	 hookoutput.showrowset := showrowset;
-   hookoutput.question := nci_11179_2.getGenericQuestion('Please consolidate groups where the source and target is the same. It will not impact the mapping rules', 'Okay',1);
+   hookoutput.question := nci_11179_2.getGenericQuestion('Please address issues mentioned.', 'Confirm',1);
          
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
   -- nci_util.debugHook('GENERAL',v_data_out);
@@ -1856,11 +1960,11 @@ me1.mdl_item_id =mm.SRC_MDL_ITEM_ID and me1.mdl_item_ver_nr = mm.SRC_MDL_VER_NR
 and me1.ITEM_ID = mec1.MDL_ELMNT_ITEM_ID and me1.ver_nr = mec1.MDL_ELMNT_VER_NR
 and mec1.cde_item_id is not null
 and mm.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm.ver_nr = ihook.getColumnValue (row_ori,'VER_NR') 
-/*and nvl(mec1.de_conc_item_id,333) not in (select distinct mec2.de_conc_item_id from 
+and mec1.de_conc_item_id not in (select distinct mec2.de_conc_item_id from 
 nci_mdl_elmnt me2,  nci_mdl_elmnt_char mec2,  NCI_MDL_MAP mm2
 where me2.ITEM_ID = mec2.MDL_ELMNT_ITEM_ID and me2.ver_nr = mec2.MDL_ELMNT_VER_NR
 and me2.mdl_item_id = mm2.TGT_MDL_ITEM_ID and me2.mdl_item_ver_nr = mm2.TGT_MDL_VER_NR 
-and mm2.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm2.ver_nr = ihook.getColumnValue (row_ori,'VER_NR') and mec2.de_conc_item_id is not null)*/
+and mm2.item_id  = ihook.getColumnValue(row_ori, 'ITEM_ID') and mm2.ver_nr = ihook.getColumnValue (row_ori,'VER_NR') and mec2.de_conc_item_id is not null)
 and (mec1.mec_id ) not in (select src_mec_id from nci_mec_map where 
 MDL_MAP_ITEM_ID  = ihook.getColumnValue(row_ori, 'ITEM_ID') and MDL_MAP_VER_NR = ihook.getColumnValue (row_ori,'VER_NR') and src_mec_id is not null )
 ) loop
