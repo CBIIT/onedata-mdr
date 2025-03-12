@@ -206,7 +206,7 @@ and map.SRC_MEC_ID = smec.mec_id (+)
   and tmec.VAL_DOM_ITEM_ID = tvd.ITEM_ID (+)
 and tmec.VAL_DOM_VER_NR = tvd.VER_NR (+)
  and smec.VAL_DOM_ITEM_ID = svd.ITEM_ID (+)
-and smec.VAL_DOM_VER_NR = svd.VER_NR (+);
+and smec.VAL_DOM_VER_NR = svd.VER_NR (+)
  and TRNS_DESC_TXT is not null;
 
 
