@@ -22,7 +22,7 @@ procedure getPVSelection (v_vd_id in number, v_vd_ver in number, v_alt_nm_typ in
   procedure updValueMapRuleStrMainMEC(v_mm_id number, v_mm_Ver number, v_src_mec_id number, v_tgt_mec_id number);
 END;
 /
-create or replace PACKAGE BODY            nci_codemap_vm AS
+ create or replace PACKAGE BODY            nci_codemap_vm AS
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
 c_ver_suffix varchar2(5) := 'v1.00';
@@ -681,7 +681,13 @@ v_st_ts := systimestamp();
         v_val_stus_msg := 'Both Target Element and Characteristics have to be specified; ';
     end if;
 
-   
+   if (cur1.mecvm_id is not null) then
+      Select count(*) into v_temp  from nci_mec_VAL_map where mecvm_id = cur1.mecvm_id;
+    if (v_temp= 0) then
+        v_valid := false;
+        v_val_stus_msg := 'Specified Value Map Rule ID is invalid; ';
+    end if;
+   end if;
     if ( cur1.SRC_ME_PHY_NM is not null and cur1.SRC_MEC_PHY_NM is not null) then 
         ihook.setColumnValue(row_ori, 'SRC_MEC_ID','');
         for cur in (
