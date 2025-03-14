@@ -4,7 +4,7 @@ create or replace TRIGGER TR_NCI_MDL_ELMNT_CHAR
   for each row
 BEGIN
    :new.LST_UPD_DT := SYSDATE;
-   if ((:new.CDE_ITEM_ID is null and (:new.VAL_DOM_ITEM_ID is not null or :new.DE_CONC_ITEM_ID is not null) then
+   if (:new.CDE_ITEM_ID is null and (:new.VAL_DOM_ITEM_ID is not null or :new.DE_CONC_ITEM_ID is not null)) then
      :new.VAL_DOM_ITEM_ID := null;
      :new.VAL_DOM_VER_NR := null;
      :new.DE_CONC_ITEM_ID := null;
@@ -23,3 +23,4 @@ end loop;
 END;
 /
   
+
