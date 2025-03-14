@@ -20,9 +20,10 @@ procedure getPVSelection (v_vd_id in number, v_vd_ver in number, v_alt_nm_typ in
  procedure updValueMapRuleStrMain (v_mm_id number, v_mm_Ver number);
  procedure deleteValueMapSync (v_mm_id number, v_mm_Ver number);
   procedure updValueMapRuleStrMainMEC(v_mm_id number, v_mm_Ver number, v_src_mec_id number, v_tgt_mec_id number);
+  procedure getPVDetails (row in out t_row, v_pv_nm in varchar2, k in integer, v_src_alt_nm_typ in integer, v_tgt_alt_nm_typ in integer) ;
 END;
 /
- create or replace PACKAGE BODY            nci_codemap_vm AS
+create or replace PACKAGE BODY            nci_codemap_vm AS
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
 c_ver_suffix varchar2(5) := 'v1.00';
@@ -576,6 +577,15 @@ END;
 
         ihook.setcolumnValue(row_ori, 'MECVM_ID', nvl(ihook.getColumnValue(row_ori,'MECVM_ID'),ihook.getColumnValue(row_ori,'STG_MECVM_ID')));
         Select count(*) into v_temp  from nci_mec_VAL_map where mecvm_id = ihook.getcolumnValue(row_ori,'MECVM_ID');
+        ihook.setColumnValue( row_ori,  'SRC_CDE_ITEM_ID' ,ihook.getColumnValue(row_ori, 'SOURCE_CDE_ITEM_ID'));
+        ihook.setColumnValue( row_ori,  'SRC_CDE_VER_NR' ,ihook.getColumnValue(row_ori, 'SOURCE_CDE_VER'));
+        ihook.setColumnValue( row_ori,  'SRC_VD_ITEM_ID' ,ihook.getColumnValue(row_ori, 'SOURCE_VD_ITEM_ID'));
+        ihook.setColumnValue( row_ori,  'SRC_VD_VER_NR' ,ihook.getColumnValue(row_ori, 'SOURCE_VD_VER'));
+        ihook.setColumnValue( row_ori,  'TGT_CDE_ITEM_ID' ,ihook.getColumnValue(row_ori, 'TARGET_CDE_ITEM_ID'));
+        ihook.setColumnValue( row_ori,  'TGT_CDE_VER_NR' ,ihook.getColumnValue(row_ori, 'TARGET_CDE_VER'));
+        ihook.setColumnValue( row_ori,  'TGT_VD_ITEM_ID' ,ihook.getColumnValue(row_ori, 'TARGET_VD_ITEM_ID'));
+        ihook.setColumnValue( row_ori,  'TGT_VD_VER_NR' ,ihook.getColumnValue(row_ori, 'TARGET_VD_VER'));
+        
 
         if (v_temp= 0) then
             rowsadd.extend;   rowsadd(rowsadd.last) := row_ori;
@@ -649,6 +659,9 @@ end;
  v_mm_ver number(4,2);
  v_st_ts timestamp;
  v_end_ts timestamp;
+ v_src_alt_nm_typ integer;
+ v_tgt_alt_nm_typ integer;
+ 
  BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -659,10 +672,23 @@ end;
  v_mm_id := ihook.getColumnValue(row_ori,'MDL_MAP_ITEM_ID');
 v_mm_ver:= ihook.getColumnValue(row_ori, 'MDL_MAP_VER_NR');
 
+ 
 if (v_mm_id is null) then 
 raise_application_error(-20000,'Model Mapping ID is missing or invalid.');
 end if;
 
+for cur in (Select m.* from nci_mdl m, nci_mdl_map mm where mm.item_id = v_mm_id
+    and mm.ver_nr = v_mm_ver and mm.SRC_MDL_ITEM_ID = m.item_id and mm.SRC_MDL_VER_NR = m.VER_NR) loop
+
+    v_src_alt_nm_typ := cur.ASSOC_NM_TYP_ID;
+    end loop;
+    for cur in (Select m.* from nci_mdl m, nci_mdl_map mm where mm.item_id = v_mm_id
+    and mm.ver_nr = v_mm_ver and mm.TGT_MDL_ITEM_ID = m.item_id and mm.TGT_MDL_VER_NR = m.VER_NR) loop
+
+    v_tgt_alt_nm_typ := cur.ASSOC_NM_TYP_ID;
+    end loop;
+    
+    
 v_st_ts := systimestamp();
   for cur1 in (Select * from nci_stg_mec_val_map where mdl_map_item_id = v_mm_id and mdl_map_ver_nr = v_mm_ver 
   and BTCH_NM = ihook.getColumnValue(row_ori, 'BTCH_NM') and BTCH_USR_NM =  ihook.getColumnValue(row_ori, 'BTCH_USR_NM')
@@ -691,12 +717,17 @@ v_st_ts := systimestamp();
     if ( cur1.SRC_ME_PHY_NM is not null and cur1.SRC_MEC_PHY_NM is not null) then 
         ihook.setColumnValue(row_ori, 'SRC_MEC_ID','');
         for cur in (
-            select mec.mec_id from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.src_mdl_item_id 
+            select mec.* from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.src_mdl_item_id 
             and me.MDL_ITEM_VER_NR = mm.src_mdl_ver_Nr
             and mm.item_id  = v_mm_id
             and mm.ver_nr = v_mm_ver and  me.ITEM_PHY_OBJ_NM =cur1.SRC_ME_PHY_NM
             and MEC.MEC_PHY_NM=cur1.SRC_MEC_PHY_NM and me.ITEM_ID = mec.MDL_ELMNT_ITEM_ID and me.ver_nr = mec.MDL_ELMNT_VER_NR) loop
               ihook.setColumnValue(row_ori, 'SRC_MEC_ID', cur.mec_id);
+              ihook.setColumnValue(row_ori, 'SRC_CDE_ITEM_ID', cur.cde_item_id);
+              ihook.setColumnValue(row_ori, 'SRC_CDE_VER_NR', cur.cde_ver_nr);
+              ihook.setColumnValue(row_ori, 'SRC_VD_ITEM_ID', cur.val_dom_item_id);
+              ihook.setColumnValue(row_ori, 'SRC_VD_VER_NR', cur.val_dom_ver_nr);
+              
         end loop;
     
         if (ihook.getColumnValue(row_ori, 'SRC_MEC_ID') is null) then 
@@ -708,12 +739,16 @@ v_st_ts := systimestamp();
     if ( cur1.TGT_ME_PHY_NM is not null and cur1.TGT_MEC_PHY_NM is not null) then 
         ihook.setColumnValue(row_ori, 'TGT_MEC_ID','');
         for cur in (
-        select mec.mec_id from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.tgt_mdl_item_id 
+        select mec.* from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec, nci_mdl_map mm where me.MDL_ITEM_ID = mm.tgt_mdl_item_id 
         and me.MDL_ITEM_VER_NR = mm.tgt_mdl_ver_Nr
         and mm.item_id  = v_mm_id
         and mm.ver_nr =v_mm_ver and  me.ITEM_PHY_OBJ_NM =cur1.TGT_ME_PHY_NM
         and MEC.MEC_PHY_NM=cur1.TGT_MEC_PHY_NM and me.ITEM_ID = mec.MDL_ELMNT_ITEM_ID and me.ver_nr = mec.MDL_ELMNT_VER_NR) loop
           ihook.setColumnValue(row_ori, 'TGT_MEC_ID', cur.mec_id);
+              ihook.setColumnValue(row_ori, 'TGT_CDE_ITEM_ID', cur.cde_item_id);
+              ihook.setColumnValue(row_ori, 'TGT_CDE_VER_NR', cur.cde_ver_nr);
+              ihook.setColumnValue(row_ori, 'TGT_VD_ITEM_ID', cur.val_dom_item_id);
+              ihook.setColumnValue(row_ori, 'TGT_VD_VER_NR', cur.val_dom_ver_nr);
         end loop;
         if (ihook.getColumnValue(row_ori, 'TGT_MEC_ID') is null) then 
             v_valid := false;
@@ -757,22 +792,26 @@ v_st_ts := systimestamp();
         and  cur1.mecvm_id is null and src_pv = cur1.SRC_PV 
         ) loop
            v_valid := false;
-            v_val_stus_msg := v_val_stus_msg ||'Duplicate found with Value Map Rule ID: '|| cur.MECVM_ID ||  chr(13);
+            v_val_stus_msg := v_val_stus_msg ||'Duplicate with Value Map Rule ID: '|| cur.MECVM_ID ||  chr(13);
        end loop;
      end if;
 
     -- if enumerated, then check PV values
   if (v_Valid = true) then 
       v_found := false;
+     -- raise_application_error(-20000,'1');
       if (cur1.src_pv is not null) then
       for cur in (Select * from vw_nci_mec where mec_id = ihook.getColumnValue(row_ori,'SRC_MEC_ID') and  val_dom_typ_desc= 'Enumerated' and ihook.getColumnValue(row_ori,'SRC_PV') is not null) loop
       j := nci_11179.getWordCountDelim(cur1.SRC_PV,'\|');
       for k in 1..j loop
       v_nm :=upper(nci_11179.getWordDelim(cur1.SRC_PV,k,j,'|'));
-      select count(*) into v_temp from perm_Val where val_dom_item_id = cur.val_dom_item_id and val_dom_Ver_nr = cur.val_dom_ver_nr and 
+      select count(*) into v_temp from perm_Val where val_dom_item_id = cur.val_dom_item_id and val_dom_Ver_nr = cur.val_dom_Ver_nr and 
       upper(perm_val_nm) = v_nm;
+    --  raise_application_error(-20000, v_temp);
       if (v_temp = 0) then
            v_valid := false;
+      else
+        getPVDetails (row_ori, v_nm ,1, v_src_alt_nm_typ , v_tgt_alt_nm_typ );
       End if;
       -- check if value already in the value map table if enumerated
       /*select count(*) into v_temp from nci_mec_val_map where src_mec_id =  and upper(v_nm) = upper(SRc_PV);
@@ -788,6 +827,17 @@ v_st_ts := systimestamp();
         v_val_stus_msg := v_val_stus_msg ||'Source PV for enumerated Value Domain found. Duplicates cannot be inserted.' ||  chr(13);
         v_valid := false;
     end if;
+      end loop;
+      end if;
+  
+  --Duplicate rule with trgt enumerated
+  if (v_Valid = true) then 
+      v_found := false;
+      for curint in (select * from nci_mec_val_map where mdl_map_item_id = v_mm_id and mdl_map_ver_nr = v_mm_ver
+      and nvl(src_pv,0) = nvl(cur1.src_pv,0) and nvl(tgt_pv,0) = nvl(cur1.tgt_pv,0) and src_mec_id = ihook.getColumnValue(row_ori,'SRC_MEC_ID') and tgt_mec_id = ihook.getColumnValue(row_ori,'TGT_MEC_ID') ) loop
+        v_val_stus_msg := v_val_stus_msg ||'Duplicate found with Value Map Rule ID.' ||  curint.mecvm_id ||  chr(13);
+        v_valid := false;
+    
       end loop;
       end if;
   
@@ -807,6 +857,8 @@ v_st_ts := systimestamp();
   end loop;
   if (v_valid = false) then
         v_val_stus_msg := v_val_stus_msg ||'Target PV specified is not valid.' ||  chr(13);
+         else
+        getPVDetails (row_ori, v_nm ,2, v_src_alt_nm_typ , v_tgt_alt_nm_typ );
         end if;
   end loop;
   end if;
@@ -825,7 +877,22 @@ v_st_ts := systimestamp();
 update nci_stg_mec_val_map set CTL_VAL_STUS= ihook.getColumnValue(row_ori,'CTL_VAL_STUS'),
    CTL_VAL_MSG= ihook.getColumnValue(row_ori,'CTL_VAL_MSG'),
    SRC_MEC_ID = ihook.getColumnValue(row_ori, 'SRC_MEC_ID'), 
-   TGT_MEC_ID = ihook.getColumnValue(row_ori, 'TGT_MEC_ID')
+   TGT_MEC_ID = ihook.getColumnValue(row_ori, 'TGT_MEC_ID'),
+    Source_CDE_ITEM_ID =  ihook.getColumnValue(row_ori, 'SRC_CDE_ITEM_ID'),
+         Source_CDE_VER =      ihook.getColumnValue(row_ori, 'SRC_CDE_VER_NR'),
+         source_VD_ITEM_ID =      ihook.getColumnValue(row_ori, 'SRC_VD_ITEM_ID'),
+          Source_VD_VER =     ihook.getColumnValue(row_ori, 'SRC_VD_VER_NR'),
+              Target_CDE_ITEM_ID =  ihook.getColumnValue(row_ori, 'TGT_CDE_ITEM_ID'),
+         Target_CDE_VER =      ihook.getColumnValue(row_ori, 'TGT_CDE_VER_NR'),
+         Target_VD_ITEM_ID =      ihook.getColumnValue(row_ori, 'TGT_VD_ITEM_ID'),
+          Target_VD_VER =     ihook.getColumnValue(row_ori, 'TGT_VD_VER_NR'),
+           SRC_VM_CNCPT_CD =     ihook.getColumnValue(row_ori, 'SRC_VM_CNCPT_CD'),
+           SRC_VM_CNCPT_NM =     ihook.getColumnValue(row_ori, 'SRC_VM_CNCPT_NM'),
+           TGT_VM_CNCPT_CD =     ihook.getColumnValue(row_ori, 'TGT_VM_CNCPT_CD'),
+           TGT_VM_CNCPT_NM =     ihook.getColumnValue(row_ori, 'TGT_VM_CNCPT_NM'),
+           SRC_LBL =     ihook.getColumnValue(row_ori, 'SRC_LBL'),
+                    TGT_LBL =     ihook.getColumnValue(row_ori, 'TGT_LBL')
+  
     where STG_MECVM_ID = cur1.STG_MECVM_ID;
 
 
@@ -847,6 +914,62 @@ updValueMapRuleStr (v_mm_id, v_mm_ver);
   -- nci_util.debugHook('GENERAL',v_data_out);
 end;
 
+procedure getPVDetails (row in out t_row, v_pv_nm in varchar2, k in integer, v_src_alt_nm_typ in integer, v_tgt_alt_nm_typ in integer) 
+as
+i integer;
+begin
+
+  if (k = 1) then
+   for rec in   (select ext.cncpt_concat, ext.cncpt_concat_nm from  perm_val a, nci_admin_item_Ext ext
+            where nci_val_mean_item_id=ext.item_id  and nci_val_mean_ver_nr = ext.ver_nr --and ext.cncpt_concat = v_tab_val_mean_cd(i)
+            and a.val_dom_item_id=ihook.getColumnValue(row,'SRC_VD_ITEM_ID')
+            and a.val_dom_ver_nr= ihook.getColumnValue(row,'SRC_VD_VER_NR') and a.fld_delete=0 and upper(a.perm_val_nm) = upper(v_pv_nm))  loop
+            
+ -- raise_application_error (-20000, 'HEre');
+                   ihook.setColumnValue(row, 'SRC_VM_CNCPT_CD',rec.cncpt_concat);
+                   ihook.setColumnValue(row, 'SRC_VM_CNCPT_NM',rec.cncpt_concat_nm);
+                
+              end loop;
+              end if;
+                    if (k = 2) then
+                  for rec in   (select ext.cncpt_concat, ext.cncpt_concat_nm from  perm_val a, nci_admin_item_Ext ext
+            where nci_val_mean_item_id=ext.item_id  and nci_val_mean_ver_nr = ext.ver_nr --and ext.cncpt_concat = v_tab_val_mean_cd(i)
+            and a.val_dom_item_id=ihook.getColumnValue(row,'TGT_VD_ITEM_ID')
+            and a.val_dom_ver_nr= ihook.getColumnValue(row,'TGT_VD_VER_NR') and a.fld_delete=0 and upper(a.perm_val_nm) = upper(v_pv_nm))  loop
+            
+ -- raise_application_error (-20000, 'HEre');
+                   ihook.setColumnValue(row, 'TGT_VM_CNCPT_CD',rec.cncpt_concat);
+                   ihook.setColumnValue(row, 'TGT_VM_CNCPT_NM',rec.cncpt_concat_nm);
+                
+              end loop;
+                    end if;
+            -- end loop;
+          --  ihook.setColumnValue(row, v_tab_admin_item_nm(k), substr(v_perm_val_nm,2));
+            if (v_src_alt_nm_typ is not null and v_src_alt_nm_typ > 0 and k=1) then
+             for rec in   (select listagg(nm_desc, '|') nm_desc from (select distinct nm_Desc   from perm_val a, nci_admin_item_Ext ext, alt_nms an
+            where nci_val_mean_item_id=ext.item_id  and nci_val_mean_ver_nr = ext.ver_nr --and ext.cncpt_concat = v_tab_val_mean_cd(i)
+            and a.val_dom_item_id=ihook.getColumnValue(row,'SRC_VD_ITEM_ID')
+            and a.val_dom_ver_nr= ihook.getColumnValue(row,'SRC_VD_VER_NR') and a.fld_delete=0
+            and an.nm_typ_id = v_src_alt_nm_typ and an.item_id =nci_val_mean_item_id and an.ver_nr = nci_val_mean_ver_nr and upper(perm_val_nm) = upper(v_pv_nm) ) a
+            --order by an.lst_upd_dt desc fetch  first 1 rows only
+            ) loop
+            ihook.setColumnValue(row, 'SRC_LBL' , rec.nm_desc);
+         --      raise_application_error(-20000,rec.nm_desc);
+             end loop;
+             end if;
+             if (v_tgt_alt_nm_typ is not null and v_tgt_alt_nm_typ > 0 and k=2) then
+             for rec in   (
+             select listagg(nm_desc,'|')   nm_desc from (select distinct nm_Desc from perm_val a, nci_admin_item_Ext ext, alt_nms an
+            where nci_val_mean_item_id=ext.item_id  and nci_val_mean_ver_nr = ext.ver_nr -- and ext.cncpt_concat = v_tab_val_mean_cd(i)
+            and a.val_dom_item_id=ihook.getColumnValue(row,'TGT_VD_ITEM_ID')
+            and a.val_dom_ver_nr= ihook.getColumnValue(row,'TGT_VD_VER_NR') and a.fld_delete=0
+            and an.nm_typ_id = v_tgt_alt_nm_typ and an.item_id =nci_val_mean_item_id and an.ver_nr = nci_val_mean_ver_nr and upper(perm_val_nm) = upper(v_pv_nm)) a
+             ) loop
+            ihook.setColumnValue(row, 'TGT_LBL' , rec.nm_desc);
+             end loop;
+             end if;
+             
+ end;            
 procedure updValueMapRuleStr (v_mm_id number, v_mm_Ver number) as
 i integer;
 begin
