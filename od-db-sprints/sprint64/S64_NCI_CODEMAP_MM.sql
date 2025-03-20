@@ -1146,6 +1146,17 @@ where   map.MAP_DEG in (86,87,120)
    rows.extend;     rows(rows.last) := row;
       end loop;
 
+for cur in (select a.mecm_id, a.mec_map_nm
+    from nci_mec_map a, nci_mec_map b
+    where a.mdl_map_item_id = v_item_id and a.mdl_map_ver_nr = v_ver_nr and a.mdl_map_item_id = b.mdl_map_item_id and a.mdl_map_ver_nr = b.mdl_map_ver_nr
+    and a.src_mec_id = b.src_mec_id and a.tgt_mec_id = b.tgt_mec_id and a.mecm_id <> b.mecm_id) loop
+        row := t_row();
+        ihook.setColumnValue(row,'Rule Type','Uniqueness');
+        ihook.setColumnValue(row, 'Rule Description','More than one rule exists for the Source/Target Characteristic');
+        ihook.setColumnValue(row, 'Rule ID', cur.mecm_id);
+        ihook.setColumnValue(row, 'Characteristic Group', cur.mec_map_nm);
+            rows.extend;     rows(rows.last) := row;
+    end loop;
 
 for cur in (
 select    map.mecm_id , map.mec_map_nm
@@ -1154,27 +1165,23 @@ where   map.MAP_DEG in (86,87,120)
     and map.MDL_MAP_ITEM_ID = v_item_id
     and map.MDL_MAP_VER_NR = v_ver_nr
     and nvl(map.PAREN,0)  = v_close_paren  and 
-    (map.TGT_FUNC_ID is not null or map.op_id is not null or map.FLOW_CNTRL is not null or map.TGT_FUNC_PARAM is not null or map.RIGHT_OP is not null or map.right_op is not null)
+    (map.TGT_FUNC_ID is not null or map.op_id is not null or map.FLOW_CNTRL is not null or map.TGT_FUNC_PARAM is not null or map.left_op is not null or map.right_op is not null)
  ) loop
  row := t_row();
  ihook.setColumnValue(row,'Rule Type','Consistency');
- ihook.setColumnValue(row, 'Rule Description','Close parenthesis should be its own rule.');
+ ihook.setColumnValue(row, 'Rule Description','Close parenthesis should be in its own row.');
  
  ihook.setColumnValue(row, 'Rule ID', cur.mecm_id);
  ihook.setColumnValue(row, 'Characteristic Group', cur.mec_map_nm);
  
    rows.extend;     rows(rows.last) := row;
       end loop;
---row := t_row();
--- ihook.setColumnValue(row, 'Source Element','mn test');
--- ihook.setColumnValue(row, 'Source Characteristic', 'mn test');
--- ihook.setColumnValue(row, 'Target Element', 'mn test');
--- ihook.setColumnValue(row, 'Characteristic Group',  'mn test');
- --  rows.extend;     rows(rows.last) := row;
 
+if hookinput.invocationnumber = 0 then
  showrowset := t_showablerowset (rows, 'Validation Results', 4, 'unselectable');
        	 hookoutput.showrowset := showrowset;
-   hookoutput.question := nci_11179_2.getGenericQuestion('Please address issues mentioned.', 'Confirm',1);
+   hookoutput.question := nci_11179_2.getGenericQuestion('Please address issues mentioned.', 'Close',1);
+end if;
          
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
   -- nci_util.debugHook('GENERAL',v_data_out);
