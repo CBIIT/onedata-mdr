@@ -232,6 +232,9 @@ t.cncpt_cd = item_long_nm and admin_item_typ_id = 49);
 
 commit;
 
+DBMS_MVIEW.REFRESH('VW_CNCPT');
+
+
 -- OC/Prop
 for cur in (select item_id, ver_nr from admin_item where admin_item_typ_id in (5,6,7) 
 and (item_id,ver_nr) in (select item_id, ver_nr from cncpt_admin_item ac, temp_concept c where c.cncpt_item_id = ac.cncpt_item_id 
