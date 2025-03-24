@@ -1,4 +1,6 @@
 
+create table admin_item_gender_upd as select * from admin_item where admin_item_typ_id in (5,6,7);
+
 create table temp_concept (cncpt_cd varchar2(20), cncpt_item_id number, cncpt_ver_nr number(4,2));
 truncate table temp_concept;
 
