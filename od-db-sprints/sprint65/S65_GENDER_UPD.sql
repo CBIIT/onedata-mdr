@@ -252,7 +252,10 @@ v_nm := v_nm || ' ' || cur1.item_nm;
 --raise_application_error(-20000,'here');
 end loop;
 --raise_application_error(-20000,'Test' || v_desc || cur.item_id);
-update admin_item set item_desc = substr(v_desc,2), item_nm = trim(v_nm) where item_id = cur.item_id and ver_nr = cur.ver_nr;
+--update admin_item set item_desc = substr(v_desc,2), item_nm = trim(v_nm) where item_id = cur.item_id and ver_nr = cur.ver_nr;
+update admin_item set item_desc = substr(v_desc,2)
+--, item_nm = trim(v_nm) 
+where item_id = cur.item_id and ver_nr = cur.ver_nr;
 end loop;
 commit;
 end;
