@@ -16,15 +16,45 @@
     }
     </style>
     <div class="news">
-<P><font color="blue"><B>caDSR II</B> Release 1.58.2.0 includes the following improvements:</b></font>
+<P><font color="blue"><B>caDSR II</b> Release 1.64.2.0 includes the following improvements::</b></font>
 <UL class=multi>
-<li><p><b>VM/Concept Match</B> - When Concepts are selected as the “preferred” match, the Concepts' definition will now be visible on the main results page and in Export to Excel.</p></li>
-<li><p><b>Browse CDEs by Protocol Forms</B> - A new Printer Friendly Link "Click to View" is available at Form Level.</p></li>
-<li><p><b>Browse Forms by Classifications</b> - A new Printer Friendly Link "Click to View" is available at Form Level</p></li>
-<li><p><b>Model View/Browse and Model Mapping View/Browse</b> - Content in the “Test” Context will be hidden for Public Users.</p></li>
-<li><p><b>Models API: Target Model Manifest</b> - New query for Target Model Manifest by Target Model returns a list of the Source Model Elements and Mapping Files that are needed to perform a transform</p></li>
-<li><p><b>Models API: Cross-Walk Mapping</b> - In addition to an API to export the NCI Cross-Walk file, the API now has the ability to query for a concept mapping between supported terminologies.</p></li>
+<h4>New Features</h4>
+<ul>
+  <li>Added APIs to return <strong>Context Names</strong> and <strong>Workflow Status List of Values</strong>.</li>
+  <li>Added <strong>Change Management</strong> email notifications for versioned content.</li>
+  <li>Enhanced <strong>Code Map Model Mapping View</strong> to make all nodes visible to non-logged-in customers.</li>
 </ul>
+
+<h4>Bug Fixes</h4>
+<ul>
+  <li>Resolved <strong>REST API</strong> issue where Data Element API incorrectly returned DECs.</li>
+  <li>Fixed <strong>Bulk Load</strong> issues related to DEC updates and form imports.</li>
+  <li>Corrected multiple <strong>Model Mapping</strong> and <strong>Model Mapping Import</strong> bugs, including:
+    <ul>
+      <li>Incorrect characteristic rule handling.</li>
+      <li>Missing semantic equivalency.</li>
+    </ul>
+  </li>
+  <li>Fixed download issues with <strong>CDE JSON format</strong> and <strong>Model Mapping Rules</strong>.</li>
+</ul>
+
+<h4>Improvements</h4>
+<ul>
+  <li>Enhanced <strong>CDE Match usability</strong> by allowing users to select permissible values to include/exclude when matching.</li>
+  <li>Strengthened validation in <strong>Code Map Services</strong> for mapping consistency.</li>
+  <li>Improved UI and functionality for <strong>Model Mapping</strong>, including:
+    <ul>
+      <li>Pseudocode generation.</li>
+      <li>Transformation rule UI.</li>
+      <li>Value mapping imports.</li>
+    </ul>
+  </li>
+  <li>Refined <strong>External Terminology Crosswalk</strong> with updated labels and column headings.</li>
+  <li>Expanded <strong>search and browsing</strong> capabilities, including UI changes and export enhancements.</li>
+</ul>
+
+<p>
+  This update focuses on improving model mapping rule validation, enhancing user experience, fixing critical bugs, and strengthening system compliance and interoperability.
 <p>As always, this release also has a number of UI improvements and bug fixes. For details, refer to the <a class="underline" href="https://wiki.nci.nih.gov/x/Zwd-Gw" target="_blank" rel="noopener noreferrer">caDSR II Release Notes</a>.</p>
  <p><B>caDSR II</B> provides access to NCI's metadata standards for: Common Data Elements (CDEs), Case Report Forms (CRFs), and Data Models. These metadata resources describe a common way of structuring and understanding data.
         </P>
