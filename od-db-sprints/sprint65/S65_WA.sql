@@ -7,3 +7,20 @@ x.cde_item_id, x.cde_ver_nr, x.de_conc_item_id, x.de_conc_ver_nr from nci_mdl_el
 or x.de_conc_ver_nr <> de.de_conc_ver_nr))
 and c.cde_item_id is not null  and c.de_conc_item_id is not null;
 commit;
+
+create or replace TRIGGER TR_AI_AFTER_INS_UPD
+  AFTER INSERT or UPDATE
+  on ADMIN_ITEM
+  for each row
+BEGIN
+
+if (:new.admin_item_typ_id = 8) then -- context
+DBMS_MVIEW.REFRESH('VW_CNTXT');
+end if;
+
+if (:new.admin_item_typ_id = 1) then -- conc dom
+DBMS_MVIEW.REFRESH('VW_CONC_DOM');
+end if;
+
+END;
+/
