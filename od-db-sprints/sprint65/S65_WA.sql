@@ -8,6 +8,21 @@ or x.de_conc_ver_nr <> de.de_conc_ver_nr))
 and c.cde_item_id is not null  and c.de_conc_item_id is not null;
 commit;
 
+
+create or replace procedure mv_refresh (v_view_nm varchar2) as
+   pragma autonomous_transaction;
+   i      number;
+begin
+ dbms_job.submit(i,
+             'begin DBMS_MVIEW.REFRESH(''' || v_view_nm || '''); end;',
+                 sysdate + 1/(24*60*60),
+                 'null'
+                );
+  commit;
+ end;
+ /
+
+  
 create or replace TRIGGER TR_AI_AFTER_INS_UPD
   AFTER INSERT or UPDATE
   on ADMIN_ITEM
@@ -15,12 +30,14 @@ create or replace TRIGGER TR_AI_AFTER_INS_UPD
 BEGIN
 
 if (:new.admin_item_typ_id = 8) then -- context
-DBMS_MVIEW.REFRESH('VW_CNTXT');
+mv_refresh('VW_CNTXT');
 end if;
 
 if (:new.admin_item_typ_id = 1) then -- conc dom
-DBMS_MVIEW.REFRESH('VW_CONC_DOM');
+mv_refresh('VW_CONC_DOM');
 end if;
 
 END;
 /
+
+
