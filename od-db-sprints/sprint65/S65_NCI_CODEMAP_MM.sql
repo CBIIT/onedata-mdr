@@ -1151,7 +1151,7 @@ group by map.mec_map_nm having count (distinct tme.ITEM_PHY_OBJ_NM  ) > 1
 
 
 for cur in (
-select    map.mec_map_nm,  count(*) 
+select    map.mec_map_nm, sum(decode(map.paren ,v_open_paren,1,0) ) v_open, sum(decode(map.paren ,v_close_paren,1,0))  v_close, count(*) 
 from  nci_MEC_MAP map
 where   map.MAP_DEG in (86,87,120)
     and map.MDL_MAP_ITEM_ID = v_item_id
@@ -1160,7 +1160,7 @@ group by map.mec_map_nm having sum(decode(map.paren ,v_open_paren,1,0)  ) <> sum
  ) loop
  row := t_row();
  ihook.setColumnValue(row,'Rule Type','Consistency');
- ihook.setColumnValue(row, 'Rule Description','Open/close parenthesis do not match.');
+ ihook.setColumnValue(row, 'Rule Description','Open/close parenthesis do not match. ' || cur.v_open || '/' || cur.v_close);
  --ihook.setColumnValue(row, 'Source Element', cur.src_item_phy_obj_nm);
  --ihook.setColumnValue(row, 'Source Characteristic', cur.src_mec_phy_nm);
  --ihook.setColumnValue(row, 'Target Element', cur.tgt_item_phy_obj_nm);
@@ -2932,6 +2932,7 @@ v_cur_param integer;
 v_num_open integer;
 v_num_close integer;
 v_func_query integer;
+v_cur_func varchar2(255);
 BEGIN
  
  select obj_key_id into v_func_query from obj_key where obj_key_desc = 'QUERY' and obj_typ_id = 51;
@@ -2941,6 +2942,7 @@ BEGIN
  and tgt_func_id is not null and tgt_func_id in (select obj_key_id from obj_key where 
  obj_typ_id = 51 and (min_cnt is not null or max_cnt is not null))) loop
  select nvl(min_cnt,0) , nvl(max_cnt,0) into  v_min_param,v_max_param from obj_key where obj_key_id = curfunc.tgt_func_id;
+ select obj_key_desc into v_cur_func from obj_key where obj_key_Id = curfunc.tgt_func_id;
  -- choose all groups and rule number where the functions in found and correcsponding open paren is found and there is no error
  for curgrp in (select mec_map_nm, mecm_id, tgt_func_param, mec_sub_grp_nbr, tgt_func_id from nci_mec_map where mdl_map_item_id = v_item_id and mdl_map_ver_nr = v_ver_nr 
  and tgt_func_id = curfunc.tgt_func_id and paren = v_open_paren  and ctl_val_msg is null ) loop
@@ -2985,7 +2987,7 @@ BEGIN
     if (v_cur_param < v_min_param or v_cur_param > v_max_param) then -- reached end-- determine param count        
         row :=     t_row();
         ihook.setColumnValue(row,'Rule Type','Function Parameter');
- ihook.setColumnValue(row, 'Rule Description','Function does not have the right number of parameters. Min/Max/Current ' || v_min_param || '/' || v_max_param || '/' || v_cur_param );
+ ihook.setColumnValue(row, 'Rule Description','Function does not have the right number of parameters. Function : Min/Max/Current ' || v_cur_func || ' :' || v_min_param || '/' || v_max_param || '/' || v_cur_param );
  ihook.setColumnValue(row, 'Rule ID', curgrp.mecm_id);
  ihook.setColumnValue(row, 'Characteristic Group', curgrp.mec_map_nm);
   rows.extend;    rows(rows.last) := row;
@@ -2993,7 +2995,7 @@ BEGIN
    if (v_num_open <> v_num_close) then
         row :=     t_row();
         ihook.setColumnValue(row,'Rule Type','Function Parameter');
- ihook.setColumnValue(row, 'Rule Description','Function does not have close parathesis.' );
+ ihook.setColumnValue(row, 'Rule Description','Function does not have close parathesis. Open/Close Parenthesis count: ' || v_num_open || '/' ||v_num_close );
  ihook.setColumnValue(row, 'Rule ID', curgrp.mecm_id);
  ihook.setColumnValue(row, 'Characteristic Group', curgrp.mec_map_nm);
   rows.extend;    rows(rows.last) := row;
