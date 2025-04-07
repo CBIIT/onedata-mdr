@@ -364,11 +364,12 @@ end loop;
 */
 nci_util.creategenname;
 
--- model CDE association
+-- model CDE association -commented for now.
+/*
 for cur in (select * from nci_mdl where ASSOC_NM_TYP_ID is not null and ASSOC_TBL_NM_TYP_ID is not null and ASSOC_CS_ITEM_ID is not null ) loop 
  nci_codemap.spUpdateModelCDEAssocSub ( cur.item_id, cur.ver_nr, v_cnt , 'B');
  end loop;
-   
+*/
    -- update DEC change
    update nci_mdl_elmnt_char c set (de_conc_item_id, de_conc_ver_nr) = (select de.de_conc_item_id, de.de_conc_ver_nr from
  de where c.cde_item_id = de.item_id and c.cde_ver_nr = de.ver_nr and (c.de_conc_item_id <> de.de_conc_item_id 
