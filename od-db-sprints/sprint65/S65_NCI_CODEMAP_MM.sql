@@ -805,8 +805,15 @@ end if;
         actions(actions.last) := action;
 
        hookoutput.actions := actions;*/
-       commit;
-
+      
+       
+       -- Wrong model map
+for cur1 in (Select * from nci_stg_mec_map where (mdl_map_item_id <> v_mm_id or mdl_map_ver_nr = v_mm_ver) and BTCH_NM = v_btch_nm
+and btch_usr_nm = ihook.getColumnValue(row_ori, 'BTCH_USR_NM')
+  and CTL_VAL_STUS in ( 'IMPORTED')) loop
+  update nci_stg_mec_map set CTL_VAL_STUS='ERROR', CTL_VAL_MSG = 'Invalid Model Mapping ID or Version specified. ' || cur1.mdl_map_item_id || 'v' || cur1.mdl_map_ver_nr where STG_MECM_ID = cur1.STG_MECM_ID;
+end loop;
+ commit;
   v_end_ts := systimestamp();
  hookoutput.message := 'Validation completed. Execution time in seconds: ' ||  extract( day from(v_end_ts - v_st_ts)*24*60*60);
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
