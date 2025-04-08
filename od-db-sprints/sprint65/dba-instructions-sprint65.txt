@@ -1,11 +1,15 @@
 -- Run as ONEDATA_RA DDL scripts
 S65_WA_RA_DDL.sql
+S65_RA.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S65_WA_RA_DDL.sql
 S65_WA.sql
+S65_NCI_11179_2.sql
 S65_NCI_POST_HOOK.sql
 S65_NCI_CODEMAP.sql
 S65_NCI_CODEMAP_MM.sql
 S65_NCI_CODEMAP_VM.sql
-
+S65_NCI_VD.sql
+S65_NCI_DLOAD.sql
+S65_NCI_DS.sql
