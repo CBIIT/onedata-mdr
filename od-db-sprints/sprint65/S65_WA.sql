@@ -40,4 +40,38 @@ end if;
 END;
 /
 
+--jira 3936
+CREATE OR REPLACE TRIGGER TR_DLOAD_MM_INS_NEW 
+AFTER INSERT ON NCI_DLOAD_MDL_MAP_DTL_NEW 
+for each row
+DECLARE
+v_hdr_id number;
+v_mm_id number;
+v_mm_ver_nr number (4,2);
+v_temp number;
+BEGIN
+v_hdr_id := :new.hdr_id;
+select mml.mm_id, mml.mm_ver_nr into v_mm_id, v_mm_ver_nr from vw_mdl_map_list_dload_new mml where mml.mm_id_ver = :new.mm_id_ver;
+select count(*) into v_temp from nci_dload_dtl where hdr_id = v_hdr_id and item_id = v_mm_id and ver_nr = v_mm_ver_nr;
+if (v_temp = 0) then
+    insert into nci_dload_dtl(hdr_id,item_id,ver_nr) values (v_hdr_id, v_mm_id, v_mm_ver_nr);
+    insert into onedata_ra.nci_dload_dtl(hdr_id,item_id,ver_nr) values (v_hdr_id, v_mm_id, v_mm_ver_nr);
+end if;
+END;
+/
 
+CREATE OR REPLACE TRIGGER TR_DLOAD_MM_DEL_NEW 
+AFTER DELETE ON NCI_DLOAD_MDL_MAP_DTL_NEW
+for each row
+DECLARE
+v_hdr_id number;
+v_mm_id number;
+v_mm_ver_nr number (4,2);
+BEGIN
+v_hdr_id := :old.hdr_id;
+select mml.mm_id, mml.mm_ver_nr into v_mm_id, v_mm_ver_nr from vw_mdl_map_list_dload_new mml where mml.mm_id_ver = :old.mm_id_ver;
+delete from nci_dload_dtl where hdr_id = v_hdr_id and item_id = v_mm_id and ver_nr = v_mm_ver_nr;
+delete from onedata_ra.nci_dload_dtl where hdr_id = v_hdr_id and item_id = v_mm_id and ver_nr = v_mm_ver_nr;
+END;
+/
+alter table nci_dload_mdl_map_dtl_new enable all triggers;
