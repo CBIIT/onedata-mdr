@@ -23,6 +23,8 @@ procedure spShowImportModelCount ( v_data_in in clob, v_data_out out clob); -- s
  procedure spDeleteModel( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spDeleteModelElement  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2);
  procedure spDeleteModelElementChar(v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id in varchar2);
+ procedure spUpdStatsModel ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+ 
  
 END;
 /
@@ -36,6 +38,44 @@ v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
   v_reg_str_adv varchar2(255) := '[^A-Za-z0-9]';
 v_reg_str varchar2(255) := '[^ A-Za-z0-9]';
   
+  
+  
+procedure spUpdStatsModel( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+
+    row_ori t_row;
+ v_item_id number;
+v_ver_nr number(4,2);
+
+
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+    for i in 1..hookInput.originalRowset.rowset.count loop
+        row_ori :=  hookInput.originalRowset.rowset(i);
+        v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
+        v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+-- INT_1 - total char, INT_2 - with CDE, INT_3 - %
+        update ADMIN_ITEM set (INT_1, INT_2, INT_3) =
+        (Select count(*), 
+        sum(decode(mec.cde_item_id, null,0,1)) ,
+        round(sum(decode(mec.cde_item_id, null,0,1)) /count(*) *100)
+        from nci_mdl_elmnt me, nci_mdl_elmnt_char mec where me.mdl_item_id = v_item_id and me.mdl_item_ver_nr = v_ver_nr
+        and me.item_id = mec.mdl_elmnt_item_id and me.ver_nr = mec.mdl_elmnt_ver_nr)
+        where item_id = v_item_id and ver_nr = v_ver_nr;
+    end loop;
+commit;
+hookoutput.message :=  'Model Mapping Statistics updated.';
+
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+
+END;
+
   procedure getModelAction ( row_ori in out t_row, actions in out t_actions, v_mdl_hdr_id in out number)
   as
   action t_actionRowset;
