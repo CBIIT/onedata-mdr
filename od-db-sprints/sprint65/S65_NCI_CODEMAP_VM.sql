@@ -769,7 +769,7 @@ v_st_ts := systimestamp();
 
  if (nvl(cur1.map_deg,0) not in  (120,131) ) then
         v_valid := false;
-        v_val_stus_msg := v_val_stus_msg ||'Mapping Type can onlu be Derived From or Ignore.'|| chr(13);
+        v_val_stus_msg := v_val_stus_msg ||'Mapping Type can only be Derived From or Ignore.'|| chr(13);
     end if;
     
  -- Rules id provided is incorrect.
