@@ -23,6 +23,8 @@ procedure dervTgtMEC( v_data_in in clob, v_data_out out clob);
  procedure spDeleteModelMapRule( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2);
  procedure spRegenerateMMGroup( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2);
 
+ procedure spUpdStatsModelMap( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+ 
  procedure spPostHookUpdMM( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure spGeneratePcodeNew ( v_data_in in clob, v_data_out out clob);
   procedure    spModelMapFuncValidation(v_item_id in number, v_ver_nr in number, v_open_paren in integer, v_close_paren in integer, rows in out t_rows);
@@ -2921,6 +2923,48 @@ end if;
 
 
 END;
+
+
+procedure spUpdStatsModelMap( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+
+    row_ori t_row;
+ v_item_id number;
+v_ver_nr number(4,2);
+
+
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+    for i in 1..hookInput.originalRowset.rowset.count loop
+        row_ori :=  hookInput.originalRowset.rowset(i);
+        v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
+        v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+-- INT_1 - total rules, INT_2 - Semantica, INT_3 - Derived from, INT_4 - no CDE, INT_5 - not mapped yet, INT_6 - Ignore - Int_7 - # groups, INT_8 - With transformation rules
+        update ADMIN_ITEM set (INT_1, INT_2, INT_3, INT_4, INT_5, INT_6, INT_7, INT_8) =
+        (Select count(*), 
+        sum(decode(map_deg, 86,1 ,decode(map_deg, 87, 1,0))) ,
+        sum(decode(map_deg, 120,1,0)),
+        sum(decode(map_deg, 129,1,0)),
+        sum(decode(map_deg, 130,1,0)),
+        sum(decode(map_deg, 131,1,0)),
+        count(distinct mec_map_nm),
+        sum(decode(TRNS_DESC_TXT,null,0,1))
+        from nci_mec_Map where mdl_map_item_id = v_item_id and mdl_map_ver_nr = v_ver_nr)
+        where item_id = v_item_id and ver_nr = v_ver_nr;
+    end loop;
+commit;
+hookoutput.message :=  'Model Mapping Statistics updated.';
+
+
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+
+END;
+
 
 -- Function Validation
   procedure    spModelMapFuncValidation(v_item_id in number, v_ver_nr in number, v_open_paren in integer, v_close_paren in integer, rows in out t_rows)
