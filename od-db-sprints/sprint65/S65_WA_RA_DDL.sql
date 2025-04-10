@@ -92,3 +92,5 @@ CREATE OR REPLACE VIEW MVW_VAL_MEAN ("DATA_ID_STR", "ITEM_ID", "VER_NR", "CLSFCT
 
 alter table ADMIN_ITEM add 
 (INT_1 integer, INT_2 integer, INT_3 integer, INT_4 integer, INT_5 integer, INT_6 integer, INT_7 integer, INT_8 integer);
+
+alter table nci_ds_hdr add LST_RUN_DT timestamp;
