@@ -229,3 +229,5 @@ commit;
 end;
 end;
 /
+
+ exec nci_fixes.sp_Reverse_HHS_CSI;
