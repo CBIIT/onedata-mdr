@@ -1,2 +1,4 @@
 Delete CO Models - View/Browse and Model Mapping - View/Browse from NCI Project.
 
+Add Codemap Browser role to GUEST user in Codemap Portal.
+Reorder GUEST favorites in Codemap Portal to match lower tiers.
