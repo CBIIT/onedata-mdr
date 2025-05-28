@@ -50,3 +50,5 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
 alter table NCI_MEC_MAP add (IMP_SEQ_NBR number);
 alter table NCI_MEC_VAL_MAP add (IMP_SEQ_NBR number);
 
+--jira 4135
+insert into obj_key( obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (244, 'Value Mapping Export with validation', 31,'Value Mapping Export with validation');
