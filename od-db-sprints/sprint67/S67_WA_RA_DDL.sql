@@ -2,20 +2,21 @@
 create materialized view vw_prmry_oc_cncpt as select ai.item_id, ai.ver_nr, item_nm from admin_item ai, cncpt c where ai.item_id = c.item_id and ai.ver_nr= c.ver_nr and
 nvl(prmry_obj_cls_ind,0) = 1;
 
+drop materialized view vw_prmry_cncpt_rel;
 
 create materialized view vw_prmry_oc_cncpt_rel as
-select c_item_id, c_item_ver_nr, listagg(sys_path_distinct, '|') sys_path_final
+select c_item_id, c_item_ver_nr, listagg(sys_path_distinct, '|') sys_path_final, listagg(lvl, '|') lvl
 from (
-select distinct c_item_id, c_item_ver_nr, substr( sys_path, instr(sys_path,'|',1,1)+1, instr(sys_path,'|',1,2)-instr(sys_path,'|',1,1)-1) sys_path_distinct
+select distinct c_item_id, c_item_ver_nr, substr( sys_path, instr(sys_path,'|',1,1)+1, instr(sys_path,'|',1,2)-instr(sys_path,'|',1,1)-1) sys_path_distinct, lvl
  from
 (select  c_item_id, c_item_ver_nr,
- CAST (SYS_CONNECT_BY_PATH (ai.ITEM_NM, '|') AS VARCHAR2 (4000)) SYS_PATH
+ CAST (SYS_CONNECT_BY_PATH (ai.ITEM_NM, '|') AS VARCHAR2 (4000)) SYS_PATH, level lvl
 --listagg(ai.item_nm ,'|')
 from admin_Item ai, nci_cncpt_rel r where r.rel_typ_id = 68 and ai.item_id = r.p_item_id and ai.ver_nr = r.p_item_ver_nr
 and ai.admin_item_typ_id = 49
 start with r.p_item_id in (select item_id from vw_prmry_oc_cncpt) 
   CONNECT BY PRIOR  to_char(r.c_item_id || to_char(r.c_item_ver_nr,'99.99')) = to_char(r.p_item_id || to_char(r.P_item_ver_nr,'99.99'))) )
-  group by c_iteM_id, c_item_ver_nr
+  group by c_iteM_id, c_item_ver_nr;
   
 
 drop materialized view vw_cncpt;
@@ -35,6 +36,7 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
         substr(ADMIN_ITEM.ITEM_NM || ' | ' || a.SYN, 1, 4000) SYN,substr(a.SYN_MTCH_TERM,1,4000) SYN_MTCH_TERM, MTCH_TERM, MTCH_TERM_ADV,
     nvl(PRMRY_OBJ_CLS_IND,0) PRMRY_OBJ_CLS_IND,  decode(PRMRY_OBJ_CLS_IND,1,'Yes','') PRMRY_OBJ_CLS_IND_NM ,
     b.sys_path_final,
+	  b.lvl,
  'TEST' NCI_META_CUI
   --  xm.xmap_cd NCI_META_CUI
               FROM ADMIN_ITEM,  CNCPT, nci_admin_item_ext e, OBJ_KEY, (select item_id, ver_nr,  substr( LISTAGG(nm_desc, ' | ') WITHIN GROUP (ORDER by ITEM_ID),1,8000) AS SYN,
