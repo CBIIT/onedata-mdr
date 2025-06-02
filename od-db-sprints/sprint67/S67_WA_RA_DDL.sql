@@ -2,12 +2,13 @@
 create materialized view vw_prmry_oc_cncpt as select ai.item_id, ai.ver_nr, item_nm from admin_item ai, cncpt c where ai.item_id = c.item_id and ai.ver_nr= c.ver_nr and
 nvl(prmry_obj_cls_ind,0) = 1;
 
+    
 drop materialized view VW_PRMRY_OC_CNCPT_REL;
 
   CREATE MATERIALIZED VIEW VW_PRMRY_OC_CNCPT_REL
   AS select c_item_id, c_item_ver_nr, listagg(sys_path_distinct, '|') sys_path_final, listagg(lvl, '|') lvl
 from (
-select  c_item_id, c_item_ver_nr, min(substr( sys_path, instr(sys_path,'|',1,1)+1, instr(sys_path,'|',1,2)-instr(sys_path,'|',1,1)-1)) sys_path_distinct, min(lvl) lvl
+select  c_item_id, c_item_ver_nr, substr( sys_path, instr(sys_path,'|',1,1)+1, instr(sys_path,'|',1,2)-instr(sys_path,'|',1,1)-1) sys_path_distinct, min(lvl) lvl
  from
 (select  c_item_id, c_item_ver_nr,
  CAST (SYS_CONNECT_BY_PATH (ai.ITEM_NM, '|') AS VARCHAR2 (4000)) SYS_PATH, level lvl
@@ -16,7 +17,7 @@ from admin_Item ai, nci_cncpt_rel r where r.rel_typ_id = 68 and ai.item_id = r.p
 and ai.admin_item_typ_id = 49
 start with r.p_item_id in (select item_id from vw_prmry_oc_cncpt) 
   CONNECT BY PRIOR  to_char(r.c_item_id || to_char(r.c_item_ver_nr,'99.99')) = to_char(r.p_item_id || to_char(r.P_item_ver_nr,'99.99'))) 
-  group by c_item_id, c_item_ver_nr)
+  group by c_item_id, c_item_ver_nr, substr( sys_path, instr(sys_path,'|',1,1)+1, instr(sys_path,'|',1,2)-instr(sys_path,'|',1,1)-1))
   group by c_iteM_id, c_item_ver_nr;
   
 drop materialized view vw_cncpt;
