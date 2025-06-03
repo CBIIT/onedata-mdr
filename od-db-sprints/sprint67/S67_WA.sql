@@ -23,11 +23,12 @@ BEGIN
 END;
 /
 
+  
   alter table admin_item disable all triggers;
 
  update ADMIN_ITEM set MDL_MAP_SNAME = (Select substr(s.item_nm ||' '|| mm.src_mdl_item_id || 'v' || mm.src_mdl_ver_nr || ' -> ' || t.item_nm || ' ' || mm.tgt_mdl_item_id || 'v' || mm.tgt_mdl_ver_nr ,1,255)
-   from admin_item s, admin_item t, nci_mdl_Map mm where s.item_id = mm.src_mdl_item_id and s.ver_nr = mm.src_mdl_ver_nr and t.item_id = mm.tgt_mdl_item_id and t.ver_nr = mm.tgt_mdl_ver_nr)
-   where mm.item_id = admin_item.item_id and mm.ver_nr = admin_item.ver_nr)
+   from admin_item s, admin_item t, nci_mdl_Map mm where s.item_id = mm.src_mdl_item_id and s.ver_nr = mm.src_mdl_ver_nr and t.item_id = mm.tgt_mdl_item_id and t.ver_nr = mm.tgt_mdl_ver_nr
+   and mm.item_id = admin_item.item_id and mm.ver_nr = admin_item.ver_nr)
    where admin_item_typ_id = 58;
 commit;
 alter table admin_item enable all triggers;
