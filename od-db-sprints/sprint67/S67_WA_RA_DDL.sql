@@ -50,8 +50,11 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
     and admin_item.item_id = b.c_item_id  (+) and admin_item.ver_nr = b.c_item_ver_nr (+);
 
 
-alter table NCI_MEC_MAP add (IMP_SEQ_NBR number);
-alter table NCI_MEC_VAL_MAP add (IMP_SEQ_NBR number);
+
+alter table NCI_MEC_VAL_MAP add (SORT_ORD integer);
+alter table NCI_STG_MEC_VAL_MAP add (SORT_ORD integer);
+alter table NCI_MEC_MAP add (SORT_ORD integer);
+alter table NCI_STG_MEC_MAP add (SORT_ORD integer);
 
 --jira 4135
 insert into obj_key( obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (244, 'Value Mapping Export with validation', 31,'Value Mapping Export with validation');
