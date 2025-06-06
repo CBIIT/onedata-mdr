@@ -57,7 +57,7 @@ alter table NCI_MEC_MAP add (SORT_ORD integer);
 alter table NCI_STG_MEC_MAP add (SORT_ORD integer);
 
 --jira 4135
-insert into obj_key( obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (244, 'Value Mapping Export with validation', 31,'Value Mapping Export with validation');
+insert into obj_key( obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (244, 'Model Mappings - Value Mappings', 31,'Model Mappings - Value Mappings');
 commit;
 
 
