@@ -257,7 +257,7 @@ vw_val_dom_ref_term tvdrt,
           and tvd.ver_nr = tvdrt.ver_nr (+);
 
 alter table nci_mdl_elmnt_char add (MDL_PK_IND number(1));
-alter table nci_stg_mdl_elmnt_char add (MDL_PK_IND number(1));
+alter table nci_stg_mdl_elmnt_char add (MDL_PK_IND varchar2(10));
 
 
   CREATE OR REPLACE  VIEW VW_MDL_IMP_TEMPLATE AS
