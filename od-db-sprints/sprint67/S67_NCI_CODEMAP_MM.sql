@@ -77,6 +77,7 @@ end;
     v_mdl_id number;
     v_mdl_ver_nr number(4,2);
     showRowset     t_showableRowset;
+    v_msg varchar2(4000); 
  BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -113,9 +114,9 @@ end;
 
   v_mdl_id := ihook.getColumnValue(row_sel,'Model Public Id');
   v_mdl_ver_nr := ihook.getColumnValue(row_sel,'Model Version');
-  nci_codemap.spUpdateModelCDEAssocSub (v_mdl_id,v_mdl_ver_nr, v_cnt,'F');
+  nci_codemap.spUpdateModelCDEAssocSub (v_mdl_id,v_mdl_ver_nr, v_cnt,'F', v_msg);
 
- hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated.';
+ hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated.' || v_msg;
  end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
