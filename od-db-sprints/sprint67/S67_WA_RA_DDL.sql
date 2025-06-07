@@ -256,4 +256,5 @@ vw_val_dom_ref_term tvdrt,
           and tvd.item_id = tvdrt.item_id (+)
           and tvd.ver_nr = tvdrt.ver_nr (+);
 
+alter table nci_mdl_elmnt_char add (MDL_PK_IND number(1));
 
