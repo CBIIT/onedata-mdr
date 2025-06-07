@@ -166,11 +166,11 @@ v_ver := ihook.getColumnvalue(row_ori, 'SRC_MDL_VER');
 insert into NCI_MDL_ELMNT_CHAR (MEC_ID, MDL_ELMNT_ITEM_ID, MDL_ELMNT_VER_NR,SRC_DTTYPE,STD_DTTYPE_ID,SRC_MAX_CHAR,SRC_MIN_CHAR,SRC_UOM,UOM_ID,
 SRC_DEFLT_VAL,SRC_ENUM_SRC,MEC_LONG_NM,MEC_PHY_NM,MEC_DESC,CDE_ITEM_ID,CDE_VER_NR,DE_CONC_ITEM_ID,DE_CONC_VER_NR,VAL_DOM_ITEM_ID,
 CHAR_ORD,VAL_DOM_VER_NR,MDL_ELMNT_CHAR_TYP_ID, PK_IND,FK_IND,
-REQ_IND,FK_ELMNT_PHY_NM,FK_ELMNT_CHAR_PHY_NM)
+REQ_IND,FK_ELMNT_PHY_NM,FK_ELMNT_CHAR_PHY_NM, MDL_PK_IND)
 values (v_mec_id, v_mdl_elmnt_id, v_ver, cur.SRC_DTTYPE, cur.STD_DTTYPE_ID,cur.SRC_MAX_CHAR,cur.SRC_MIN_CHAR, cur.SRC_UOM, cur.UOM_ID,
 v_temp_str, cur.SRC_ENUM_SRC,cur.MEC_LONG_NM, cur.MEC_PHY_NM, cur.MEC_DESC, cur.CDE_ITEM_ID, cur.CDE_VER_NR,cur.DE_CONC_ITEM_ID, cur.DE_CONC_VER_NR,cur.VAL_DOM_ITEM_ID,
 cur.CHAR_ORD,cur.VAL_DOM_VER_NR, cur.MDL_ELMNT_CHAR_TYP_ID,decode(nvl(upper(cur.PK_IND),'NO'),'YES',1,0),decode(nvl(upper(cur.FK_IND_TXT),'NO'),'YES',1,0),
-decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),cur.FK_ELMNT_PHY_NM, cur.FK_ELMNT_CHAR_PHY_NM);
+decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),cur.FK_ELMNT_PHY_NM, cur.FK_ELMNT_CHAR_PHY_NM,decode(nvl(upper(cur.MDL_PK_IND),'NO'),'YES',1,0));
 
 insert into onedata_Ra.NCI_MDL_ELMNT_CHAR (MEC_ID, MDL_ELMNT_ITEM_ID, MDL_ELMNT_VER_NR,SRC_DTTYPE,STD_DTTYPE_ID,SRC_MAX_CHAR,SRC_MIN_CHAR,SRC_UOM,UOM_ID,
 SRC_DEFLT_VAL,SRC_ENUM_SRC,MEC_LONG_NM,MEC_PHY_NM,MEC_DESC,CDE_ITEM_ID,CDE_VER_NR,DE_CONC_ITEM_ID,DE_CONC_VER_NR,VAL_DOM_ITEM_ID,
@@ -206,6 +206,7 @@ VAL_DOM_VER_NR = cur.VAL_DOM_VER_NR,
 MDL_ELMNT_CHAR_TYP_ID = cur.MDL_ELMNT_CHAR_TYP_ID,
 PK_IND = decode(nvl(upper(cur.PK_IND),'NO'),'YES',1,0),
 FK_IND = decode(nvl(upper(cur.FK_IND_TXT),'NO'),'YES',1,0),
+MDL_PK_IND = decode(nvl(upper(cur.MDL_PK_IND),'NO'),'YES',1,0),
 REQ_IND = decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),
 FK_ELMNT_PHY_NM = cur.FK_ELMNT_PHY_NM,
 FK_ELMNT_CHAR_PHY_NM = cur.FK_ELMNT_CHAR_PHY_NM
@@ -403,6 +404,7 @@ end if;
 --getModelElementCharAction ( row_ori, rowscharins , rowscharupd, v_mdl_elmnt_id, cur.item_long_nm);
 
 -- even though the column nae in NCI_STG_MMDL_ELMNT_CHAR is ME_ITEM_LONG_NM, the actual value is Physical Name
+--raise_application_error (-20000,'here');
 getModelElementCharActionDirect ( row_ori, rowscharins , rowscharupd, v_mdl_elmnt_id, cur.item_phy_obj_nm);
 
 end loop;
