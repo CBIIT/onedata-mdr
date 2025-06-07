@@ -18,7 +18,7 @@ create or replace PACKAGE            nci_codemap AS
   procedure spValidateModelMap ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure spValidateModelAI ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2); -- Validate model from model maintenance
  procedure spUpdateModelCDEAssoc ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
- procedure spUpdateModelCDEAssocSub ( v_mdl_id in number, v_mdl_ver_nr in number, v_cnt in out integer, v_mode in varchar2);
+ procedure spUpdateModelCDEAssocSub ( v_mdl_id in number, v_mdl_ver_nr in number, v_cnt in out integer, v_mode in varchar2, v_msg in out varchar2);
 procedure spShowImportModelCount ( v_data_in in clob, v_data_out out clob); -- show summarized import model count
  procedure spDeleteModel( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spDeleteModelElement  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2);
@@ -1273,7 +1273,7 @@ end loop;
    --nci_util.debugHook('GENERAL',v_data_out);
 end;
 
-procedure spUpdateModelCDEAssocSub ( v_mdl_id in number, v_mdl_ver_nr in number, v_cnt in out integer, v_mode in varchar2)
+procedure spUpdateModelCDEAssocSub ( v_mdl_id in number, v_mdl_ver_nr in number, v_cnt in out integer, v_mode in varchar2, v_msg in out varchar2)
 as
  v_mdl_hdr_id number;
   v_mdl_elmnt_id number;
@@ -1282,22 +1282,22 @@ as
  v_cs_ver_nr number(4,2);
  v_alt_nm_typ integer;
  v_tbl_alt_nm_typ integer;
+ v_temp integer;
+ v_err integer :=0;
  BEGIN
   
+  v_msg := '';
    for cur in (select * from nci_mdl where item_id = v_mdl_id and  ver_nr = v_mdl_ver_nr) loop
    v_cs_item_id := cur.ASSOC_CS_ITEM_ID;
    v_cs_ver_nr := cur.ASSOC_CS_VER_NR;
    v_alt_nm_typ := cur.ASSOC_NM_TYP_ID;
    v_tbl_alt_nm_typ := cur.ASSOC_TBL_NM_TYP_ID;
-   if (cur.ASSOC_NM_TYP_ID is null or cur.ASSOC_TBL_NM_TYP_ID is null or cur.ASSOC_CS_ITEM_ID is null ) then 
-   if (v_mode = 'F') then -- front-end
-  raise_application_error(-20000, 'For this functionality, please make sure Model Alternate Name Type, Table Alternate Name Type and CS is specified.');
-  end if;
- --  if (v_mode = 'B') then -- nightly job
---  return;
---  end if;
-  end if;
-  end loop;
+       if (cur.ASSOC_NM_TYP_ID is null or cur.ASSOC_TBL_NM_TYP_ID is null or cur.ASSOC_CS_ITEM_ID is null ) then 
+            if (v_mode = 'F') then -- front-end
+                raise_application_error(-20000, 'For this functionality, please make sure Model Alternate Name Type, Table Alternate Name Type and CS is specified.');
+            end if;
+       end if;
+    end loop;
   
  -- rows := t_rows();
   -- raise_application_Error(-20000, v_cs_item_id || ' ' || v_alt_nm_typ || ' ' || v_tbl_alt_nm_typ);
@@ -1306,28 +1306,43 @@ as
   from  nci_mdl_elmnt me, nci_mdl_elmnt_char mec where me.MDL_ITEM_ID =v_mdl_id
   and me.MDL_ITEM_VER_NR= v_mdl_ver_nr and me.item_id = mec.MDL_ELMNT_ITEM_ID and me.ver_nr =mec.MDL_ELMNT_VER_NR) loop
   
-  for curcde in (select item_id, ver_nr, de_conc_item_id,de_conc_ver_nr, val_dom_item_id, val_dom_ver_nr from de where
+  select count(*) into v_temp from de where
   (item_id, ver_nr) in (Select item_id, ver_nr from alt_nms where nm_typ_id = v_alt_nm_typ and upper(nm_desc) = upper(curchar.mec_phy_nm))
   and  (item_id, ver_nr) in (Select item_id, ver_nr from alt_nms where nm_typ_id = v_tbl_alt_nm_typ and upper(nm_desc) = upper(curchar.me_phy_nm))
   and  (item_id, ver_nr) in (Select r.c_item_id, r.c_item_ver_nr from nci_admin_item_rel r, vw_clsfctn_schm_item csi where csi.cs_item_id = v_cs_item_id 
-  and csi.cs_item_ver_nr = v_cs_ver_nr and csi.item_id = r.p_item_id and csi.ver_nr = r.p_item_ver_nr and r.rel_typ_id = 65)) loop
-  if (curchar.cde_item_id != curcde.item_id and curchar.cde_item_id is not null and curcde.item_id is not null) then
-    update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, chng_desc_txt)
-= (select curcde.ITEM_ID, curcde.VER_NR, curcde.DE_CONC_ITEM_ID, curcde.DE_CONC_VER_NR, curcde.VAL_DOM_ITEM_Id, curcde.VAL_DOM_VER_NR, 'Updated CDE from ' || curchar.cde_item_id from dual)
-where  mec_id = curchar.mec_id;
- raise_application_Error(-20000, curchar.mec_phy_nm ||curchar.cde_item_id  || curcde.item_id);
- v_cnt := v_cnt + 1;
-  end if;
-  if ( curchar.cde_item_id is null and curcde.item_id is not null) then
-    update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR)
-= (select curcde.ITEM_ID, curcde.VER_NR, curcde.DE_CONC_ITEM_ID, curcde.DE_CONC_VER_NR, curcde.VAL_DOM_ITEM_Id, curcde.VAL_DOM_VER_NR from dual)
-where  mec_id = curchar.mec_id;
-v_cnt := v_cnt + 1;
-  end if;
-  
-  end loop;
+  and csi.cs_item_ver_nr = v_cs_ver_nr and csi.item_id = r.p_item_id and csi.ver_nr = r.p_item_ver_nr and r.rel_typ_id = 65);
+    if (v_temp = 1) then
+      for curcde in (select item_id, ver_nr, de_conc_item_id,de_conc_ver_nr, val_dom_item_id, val_dom_ver_nr from de where
+      (item_id, ver_nr) in (Select item_id, ver_nr from alt_nms where nm_typ_id = v_alt_nm_typ and upper(nm_desc) = upper(curchar.mec_phy_nm))
+      and  (item_id, ver_nr) in (Select item_id, ver_nr from alt_nms where nm_typ_id = v_tbl_alt_nm_typ and upper(nm_desc) = upper(curchar.me_phy_nm))
+      and  (item_id, ver_nr) in (Select r.c_item_id, r.c_item_ver_nr from nci_admin_item_rel r, vw_clsfctn_schm_item csi where csi.cs_item_id = v_cs_item_id 
+      and csi.cs_item_ver_nr = v_cs_ver_nr and csi.item_id = r.p_item_id and csi.ver_nr = r.p_item_ver_nr and r.rel_typ_id = 65)) loop
+          if (curchar.cde_item_id != curcde.item_id and curchar.cde_item_id is not null and curcde.item_id is not null) then
+            update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, chng_desc_txt)
+            = (select curcde.ITEM_ID, curcde.VER_NR, curcde.DE_CONC_ITEM_ID, curcde.DE_CONC_VER_NR, curcde.VAL_DOM_ITEM_Id, curcde.VAL_DOM_VER_NR, 'Updated CDE from ' || curchar.cde_item_id from dual)
+            where  mec_id = curchar.mec_id;
+         --raise_application_Error(-20000, curchar.mec_phy_nm ||curchar.cde_item_id  || curcde.item_id);
+             v_cnt := v_cnt + 1;
+          end if;
+          if ( curchar.cde_item_id is null and curcde.item_id is not null) then
+            update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR)
+            = (select curcde.ITEM_ID, curcde.VER_NR, curcde.DE_CONC_ITEM_ID, curcde.DE_CONC_VER_NR, curcde.VAL_DOM_ITEM_Id, curcde.VAL_DOM_VER_NR from dual)
+            where  mec_id = curchar.mec_id;
+            v_cnt := v_cnt + 1;
+          end if;         
+        end loop;
+    end if;
+    if (v_temp > 1) then
+    -- error message
+        v_msg :=   v_msg || '  ' || curchar.me_phy_nm || '.' || curchar.mec_phy_nm || ';';
+        v_err := v_err + 1;
+    end if;
   end loop;
   commit;
+  
+  if (v_err > 0) then
+  v_msg := 'Duplicate CDEs found for the following. No CDE was attached. ' || v_msg;
+  end if;
   /*
 update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR)
 = (select CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_Id, VAL_DOM_VER_NR
@@ -1348,6 +1363,7 @@ commit;
   rows  t_rows;
     row_ori t_row;
     v_cnt integer :=0;
+    v_msg  varchar2(4000);
     
  BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
@@ -1356,9 +1372,9 @@ commit;
   
   row_ori :=  hookInput.originalRowset.rowset(1);
   
-  spUpdateModelCDEAssocSub (ihook.getColumnValue(row_ori,'ITEM_ID'),ihook.getColumnValue(row_ori,'VER_NR'), v_cnt,'F');
+  spUpdateModelCDEAssocSub (ihook.getColumnValue(row_ori,'ITEM_ID'),ihook.getColumnValue(row_ori,'VER_NR'), v_cnt,'F', v_msg);
   
- hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated.';
+ hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated. ' || v_msg;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
