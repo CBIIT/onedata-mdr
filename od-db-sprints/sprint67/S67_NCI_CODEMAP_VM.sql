@@ -607,14 +607,18 @@ v_st_ts := systimestamp();
             PROV_NOTES, MAP_DEG, MECM_ID, SRC_VM_CNCPT_CD, SRC_VM_CNCPT_NM, TGT_VM_CNCPT_CD, TGT_VM_CNCPT_NM, SRC_VD_ITEM_ID, SRC_VD_VER_NR, 
             TGT_VD_ITEM_ID, TGT_VD_VER_NR, SRC_CDE_ITEM_ID, SRC_CDE_VER_NR, TGT_CDE_ITEM_ID, TGT_CDE_VER_NR, MECM_ID_DESC, 
             CMNTS_DESC_TXT, SORT_ORD)
-            values (nvl(cur1.MECVM_ID,cur1.STG_MECVM_ID), cur1.src_mec_id, cur1.TGT_MEC_ID, cur1.MDL_MAP_ITEM_ID, cur1.MDL_MAP_VER_NR, cur1.SRC_PV, cur1.TGT_PV, 
+            select nvl(cur1.MECVM_ID,cur1.STG_MECVM_ID), cur1.src_mec_id, cur1.TGT_MEC_ID, cur1.MDL_MAP_ITEM_ID, cur1.MDL_MAP_VER_NR, cur1.SRC_PV, cur1.TGT_PV, 
             cur1.VM_CNCPT_CD, cur1.VM_CNCPT_NM,
             cur1.PROV_ORG_ID, cur1.PROV_CNTCT_ID, cur1.PROV_RSN_TXT, cur1.PROV_TYP_RVW_TXT, cur1.PROV_RVW_DT, cur1.PROV_APRV_DT, cur1.SRC_LBL, cur1.TGT_LBL,
-            cur1.PROV_NOTES, cur1.MAP_DEG, cur1.MECM_ID, cur1.SRC_VM_CNCPT_CD, cur1.SRC_VM_CNCPT_NM, cur1.TGT_VM_CNCPT_CD, cur1.TGT_VM_CNCPT_NM, 
+            cur1.PROV_NOTES, cur1.MAP_DEG, cur1.MECM_ID, 
+            decode(cur1.SOURCE_DOMAIN_TYPE,'ENUMERATED',cur1.SRC_VM_CNCPT_CD,''), 
+            decode(cur1.SOURCE_DOMAIN_TYPE,'ENUMERATED',cur1.SRC_VM_CNCPT_NM,''), 
+            decode(cur1.TARGET_DOMAIN_TYPE,'ENUMERATED',cur1.TGT_VM_CNCPT_CD,''),
+            decode(cur1.TARGET_DOMAIN_TYPE,'ENUMERATED',cur1.TGT_VM_CNCPT_NM,''), 
             cur1.SOURCE_VD_ITEM_ID, cur1.SOURCE_VD_VER, 
             cur1.TARGET_VD_ITEM_ID, cur1.TARGET_VD_VER, cur1.SOURCE_CDE_ITEM_ID, cur1.SOURCE_CDE_VER, cur1.SOURCE_CDE_ITEM_ID, cur1.TARGET_CDE_VER, 
             cur1.MECM_ID_DESC, 
-            cur1.CMNTS_DESC_TXT, cur1.SORT_ORD);
+            cur1.CMNTS_DESC_TXT, cur1.SORT_ORD from dual;
  --   raise_application_error(-20000,' Add');
         else
       v_upd := v_upd + 1;
@@ -626,7 +630,11 @@ v_st_ts := systimestamp();
             (select  cur1.src_mec_id, cur1.TGT_MEC_ID,  cur1.SRC_PV, cur1.TGT_PV, 
             cur1.VM_CNCPT_CD, cur1.VM_CNCPT_NM,
             cur1.PROV_ORG_ID, cur1.PROV_CNTCT_ID, cur1.PROV_RSN_TXT, cur1.PROV_TYP_RVW_TXT, cur1.PROV_RVW_DT, cur1.PROV_APRV_DT, cur1.SRC_LBL, cur1.TGT_LBL,
-            cur1.PROV_NOTES, cur1.MAP_DEG, cur1.MECM_ID, cur1.SRC_VM_CNCPT_CD, cur1.SRC_VM_CNCPT_NM, cur1.TGT_VM_CNCPT_CD, cur1.TGT_VM_CNCPT_NM, 
+            cur1.PROV_NOTES, cur1.MAP_DEG, cur1.MECM_ID, 
+               decode(cur1.SOURCE_DOMAIN_TYPE,'ENUMERATED',cur1.SRC_VM_CNCPT_CD,''), 
+            decode(cur1.SOURCE_DOMAIN_TYPE,'ENUMERATED',cur1.SRC_VM_CNCPT_NM,''), 
+            decode(cur1.TARGET_DOMAIN_TYPE,'ENUMERATED',cur1.TGT_VM_CNCPT_CD,''),
+            decode(cur1.TARGET_DOMAIN_TYPE,'ENUMERATED',cur1.TGT_VM_CNCPT_NM,''), 
             cur1.SOURCE_VD_ITEM_ID, cur1.SOURCE_VD_VER, 
             cur1.TARGET_VD_ITEM_ID, cur1.TARGET_VD_VER, cur1.SOURCE_CDE_ITEM_ID, cur1.SOURCE_CDE_VER, cur1.SOURCE_CDE_ITEM_ID, cur1.TARGET_CDE_VER, 
             cur1.MECM_ID_DESC, 
@@ -864,6 +872,13 @@ v_st_ts := systimestamp();
         if (ihook.getColumnValue(row_ori, 'SRC_MEC_ID') is null) then 
             v_valid := false;
             v_val_stus_msg := v_val_stus_msg || 'Invalid Source Characteristics; '|| chr(13);
+        else
+        -- get value dom type
+        if (ihook.getColumnValue(row_ori,'SRC_VD_ITEM_ID') is not null) then
+        for curx in (Select decode(val_dom_typ_id,16,'ENUMERATED BY REFERENCE', 17, 'ENUMERATED',18, 'NON-ENUMERATED') VAL_DOM_TYP from value_dom where item_id = ihook.getColumnValue(row_ori, 'SRC_VD_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'SRC_VD_VER_NR')) loop
+            ihook.setColumnValue(row_ori,'SOURCE_DOMAIN_TYPE', curx.VAL_DOM_TYP);
+        end loop;
+        end if;
         end if;
     end if;    
 
@@ -884,6 +899,14 @@ v_st_ts := systimestamp();
         if (ihook.getColumnValue(row_ori, 'TGT_MEC_ID') is null) then 
             v_valid := false;
             v_val_stus_msg := v_val_stus_msg || 'Invalid Target Characteristics; '|| chr(13);
+        else
+           -- get value dom type
+        if (ihook.getColumnValue(row_ori,'TGT_VD_ITEM_ID') is not null) then
+        for curx in (Select decode(val_dom_typ_id,16,'ENUMERATED BY REFERENCE', 17, 'ENUMERATED',18, 'NON-ENUMERATED') VAL_DOM_TYP from value_dom where 
+        item_id = ihook.getColumnValue(row_ori, 'TGT_VD_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'TGT_VD_VER_NR')) loop
+            ihook.setColumnValue(row_ori,'TARGET_DOMAIN_TYPE', curx.VAL_DOM_TYP);
+        end loop;
+        end if;
         end if;
     end if;    
 
