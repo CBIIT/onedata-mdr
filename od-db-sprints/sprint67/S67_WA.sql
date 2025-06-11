@@ -68,3 +68,34 @@ if (v_cnt < 1) then
 
 END;
 /
+--create sequence
+create sequence SEQ_DS_ENTTY_PVVM_ID
+start with 1
+increment by 1;
+
+--update onedata_wa.nci_ds_dtl.PVVM_ID with new sequence values
+update nci_ds_dtl set PVVM_ID = SEQ_DS_ENTTY_PVVM_ID.nextval;
+commit;
+
+--drop primary key: replace primary key value per tier; Dev: SYS_C00117472, QA: SYS_C0028116
+alter table nci_ds_dtl drop constraint SYS_C0028116;
+
+--create new primary key; Dev: SYS_C00117472, QA: SYS_C0028116 
+alter table nci_ds_dtl add constraint SYS_C0028116 primary key (HDR_ID, PVVM_ID);
+
+delete from onedata_ra.nci_ds_dtl;
+insert into onedata_ra.nci_ds_dtl 
+select * from nci_ds_dtl;
+
+CREATE OR REPLACE TRIGGER TR_DS_ENTTY_PVVM_ID_INS
+BEFORE INSERT ON NCI_DS_DTL
+FOR EACH ROW
+BEGIN
+    IF (:NEW.PVVM_ID<= 0  or :NEW.PVVM_ID is null)  THEN 
+
+        SELECT SEQ_DS_ENTTY_PVVM_ID.NEXTVAL
+        INTO :new.PVVM_ID
+        FROM dual;
+    END IF;
+END;
+/
