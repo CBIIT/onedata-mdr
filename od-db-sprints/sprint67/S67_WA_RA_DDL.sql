@@ -627,4 +627,5 @@ commit;
 update nci_dload_cstm_col_key set xpath = replace(xpath, 'valueDomain', 'valueDomains') where DLOAD_TYP = 'VD';
 commit;
 
-
+---jira 4114
+ALTER TABLE nci_ds_dtl ADD PVVM_ID number;
