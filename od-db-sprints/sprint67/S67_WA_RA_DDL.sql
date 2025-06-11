@@ -627,8 +627,10 @@ commit;
 update nci_dload_cstm_col_key set xpath = replace(xpath, 'valueDomain', 'valueDomains') where DLOAD_TYP = 'VD';
 commit;
 
-update nci_dload_cstm_col_key set is_visible = 0 where dload_typ = 'DEC' and data_object = 'CLASSIFICATION_SCHEME';
 update nci_dload_cstm_col_key set is_visible = 0 where col_nm like '%RAI%' and dload_typ = 'DEC';
+commit;
+
+update nci_dload_cstm_col_key set xpath = replace(xpath, '/classificationScheme/','/classificationSchemes/'),is_visible = 1 where dload_typ = 'DEC' and data_object = 'CLASSIFICATION_SCHEME';
 commit;
 
 update nci_dload_cstm_col_key set xpath = '/dataElementConcepts/objectClass/concepts/shortName' where col_id = 145;
