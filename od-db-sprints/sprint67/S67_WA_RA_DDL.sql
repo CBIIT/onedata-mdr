@@ -646,5 +646,11 @@ commit;
 update nci_dload_cstm_col_key set xpath = '/valueDomains/referenceTerminolgoyDataValue' where col_id = 247;
 commit;
 
+INSERT ALL
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'DEC','Data Element Concept Workflow Status',248,'/dataElementConcepts/workflowStatus','DATA_ELEMENT_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'DEC','Data Element Concept Registration Status',249,'/dataElementConcepts/registrationStatus','DATA_ELEMENT_CONCEPT')
+SELECT * FROM DUAL;
+commit;
+
 ---jira 4114
 ALTER TABLE nci_ds_dtl ADD PVVM_ID number;
