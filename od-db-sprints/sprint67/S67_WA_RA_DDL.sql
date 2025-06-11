@@ -631,5 +631,11 @@ update nci_dload_cstm_col_key set is_visible = 0 where dload_typ = 'DEC' and dat
 update nci_dload_cstm_col_key set is_visible = 0 where col_nm like '%RAI%' and dload_typ = 'DEC';
 commit;
 
+update nci_dload_cstm_col_key set xpath = '/dataElementConcepts/objectClass/concepts/shortName' where col_id = 145;
+update nci_dload_cstm_col_key set xpath = '/dataElementConcepts/objectClass/concepts/primaryflag' where col_id = 149;
+update nci_dload_cstm_col_key set xpath = '/dataElementConcepts/property/concepts/shortName' where col_id = 156;
+update nci_dload_cstm_col_key set xpath = '/dataElementConcepts/property/concepts/primaryflag' where col_id = 160;
+commit;
+
 ---jira 4114
 ALTER TABLE nci_ds_dtl ADD PVVM_ID number;
