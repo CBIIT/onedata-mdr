@@ -627,5 +627,9 @@ commit;
 update nci_dload_cstm_col_key set xpath = replace(xpath, 'valueDomain', 'valueDomains') where DLOAD_TYP = 'VD';
 commit;
 
+update nci_dload_cstm_col_key set is_visible = 0 where dload_typ = 'DEC' and data_object = 'CLASSIFICATION_SCHEME';
+update nci_dload_cstm_col_key set is_visible = 0 where col_nm like '%RAI%' and dload_typ = 'DEC';
+commit;
+
 ---jira 4114
 ALTER TABLE nci_ds_dtl ADD PVVM_ID number;
