@@ -430,3 +430,201 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	and vdst.NCI_STD_DTTYPE_ID = dt.dttype_id (+)
 	  and vdst.uom_id = uom.uom_id (+);
 
+--jira 4091 and 4092
+INSERT ALL
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',133,'Data Element Concept Public ID', '/dataElementConcepts/publicId','DATA_ELEMENT_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',134,'Data Element Concept Short Name','/dataElementConcepts/shortName','DATA_ELEMENT_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',135,'Data Element Concept Long Name','/dataElementConcepts/longName','DATA_ELEMENT_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',136,'Data Element Concept Version','/dataElementConcepts/version','DATA_ELEMENT_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',137,'Data Element Concept Context Name','/dataElementConcepts/contextName','DATA_ELEMENT_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',138,'Data Element Concept Context Version','/dataElementConcepts/contextVersion','DATA_ELEMENT_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',139,'Object Class Public ID','/dataElementConcepts/objectClass/publicId','OBJECT_CLASS')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',140,'Object Class Long Name','/dataElementConcepts/objectClass/longName','OBJECT_CLASS')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',141,'Object Class Short Name','/dataElementConcepts/objectClass/shortName','OBJECT_CLASS')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',142,'Object Class Context Name','/dataElementConcepts/objectClass/contextName','OBJECT_CLASS')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',143,'Object Class Version','/dataElementConcepts/objectClass/version','OBJECT_CLASS')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',144,'Object Class Concept Name','/dataElementConcepts/objectClass/concepts/longName','OBJECT_CLASS_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',145,'Object Class Concept Code','/dataElementConcepts/objectClass/concepts/value','OBJECT_CLASS_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',146,'Object Class Concept Public ID','/dataElementConcepts/objectClass/concepts/publicId','OBJECT_CLASS_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',147,'Object Class Concept Definition Source','/dataElementConcepts/objectClass/concepts/definitionSource','OBJECT_CLASS_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',148,'Object Class Concept EVS Source','/dataElementConcepts/objectClass/concepts/evsSource','OBJECT_CLASS_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',149,'Object Class Concept Primary Flag','/dataElementConcepts/objectClass/concepts/primaryFlag','OBJECT_CLASS_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',150,'Property Public ID','/dataElementConcepts/property/publicId','PROPERTY')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',151,'Property Long Name','/dataElementConcepts/property/longName','PROPERTY')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',152,'Property Short Name','/dataElementConcepts/property/shortName','PROPERTY')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',153,'Property Context Name','/dataElementConcepts/property/contextName','PROPERTY')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',154,'Property Version','/dataElementConcepts/property/version','PROPERTY')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',155,'Property Concept Name','/dataElementConcepts/property/concepts/longName','PROPERTY_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',156,'Property Concept Code','/dataElementConcepts/property/concepts/value','PROPERTY_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',157,'Property Concept Public ID','/dataElementConcepts/property/concepts/publicId','PROPERTY_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',158,'Property Concept Definition Source','/dataElementConcepts/property/concepts/definitionSource','PROPERTY_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',159,'Property Concept EVS Source','/dataElementConcepts/property/concepts/evsSource','PROPERTY_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',160,'Property Concept Primary Flag','/dataElementConcepts/property/concepts/primaryFlag','PROPERTY_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',161,'Classification Scheme Short Name','/dataElementConcepts/classificationScheme/shortName','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',162,'Classification Scheme Public ID','/dataElementConcepts/classificationScheme/publicId','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',163,'Classification Scheme Version','/dataElementConcepts/classificationScheme/version','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',164,'Classification Scheme Context Name','/dataElementConcepts/classificationScheme/contextName','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',165,'Classification Scheme Context Version','/dataElementConcepts/classificationScheme/contextVersion','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',166,'Classification Scheme Item Name','/dataElementConcepts/classificationScheme/classificationSchemeItems/longName','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',167,'Classification Scheme Item Type Name','/dataElementConcepts/classificationScheme/classificationSchemeItems/typeName','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',168,'Classification Scheme Item Public Id','/dataElementConcepts/classificationScheme/classificationSchemeItems/publicId','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',169,'Classification Scheme Item Version','/dataElementConcepts/classificationScheme/classificationSchemeItems/version','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',170,'Data Element Concept Alternate Name Context Name','/dataElementConcepts/alternateNames/contextName','ALTERNATE_NAME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',171,'Data Element Concept Alternate Name Context Version','/dataElementConcepts/alternateNames/contextVersion','ALTERNATE_NAME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',172,'Data Element Concept Alternate Name','/dataElementConcepts/alternateNames/name','ALTERNATE_NAME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',173,'Data Element Concept Alternate Name Type','/dataElementConcepts/alternateNames/nameType','ALTERNATE_NAME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',174,'Data Element Concept RAI','/dataElementConcepts/RAI','')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',175,'Object Class RAI','/dataElementConcepts/objectClass/RAI','')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',176,'Property RAI','/dataElementConcepts/property/RAI','')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',177,'Object Class Concept Origin','/dataElementConcepts/objectClass/concepts/origin','OBJECT_CLASS_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',178,'Property Concept Origin','/dataElementConcepts/property/concepts/origin','PROPERTY_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',179,'Conceptual Domain Public ID','/dataElementConcepts/conceptualDomain/publicId','DATA_ELEMENT_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',180,'Conceptual Domain Short Name','/dataElementConcepts/conceptualDomain/shortName','DATA_ELEMENT_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',181,'Conceptual Domain Version','/dataElementConcepts/conceptualDomain/version','DATA_ELEMENT_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_id, col_nm, xpath, data_object) VALUES (1, 'ROW', 'DEC',182,'Conceptual Domain Context Name','/dataElementConcepts/conceptualDomain/contextName','DATA_ELEMENT_CONCEPT')
+SELECT * FROM DUAL;
+commit;
+
+
+CREATE TABLE NCI_DLOAD_CSTM_DEC_SUBTYP
+   (	"HDR_ID" NUMBER NOT NULL ENABLE, 
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	 PRIMARY KEY ("HDR_ID"));
+     
+       CREATE TABLE NCI_DLOAD_CSTM_VD_SUBTYP
+   (	"HDR_ID" NUMBER NOT NULL ENABLE, 
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	 PRIMARY KEY ("HDR_ID"));
+     
+       CREATE TABLE NCI_DLOAD_CSTM_COL_DTL_DEC
+   (	"HDR_ID" NUMBER NOT NULL ENABLE, 
+	"FMT_NM" VARCHAR2(128 BYTE) COLLATE "USING_NLS_COMP", 
+	"COL_ID" NUMBER NOT NULL ENABLE, 
+	"DT_LAST_MODIFIED" DATE, 
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP", 
+	"RETAIN_IND" NUMBER(1,0) DEFAULT 0, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	"COL_POS" NUMBER DEFAULT 1, 
+	 PRIMARY KEY ("HDR_ID", "COL_ID"));
+     
+       CREATE TABLE NCI_DLOAD_CSTM_COL_DTL_VD
+   (	"HDR_ID" NUMBER NOT NULL ENABLE, 
+	"FMT_NM" VARCHAR2(128 BYTE) COLLATE "USING_NLS_COMP", 
+	"COL_ID" NUMBER NOT NULL ENABLE, 
+	"DT_LAST_MODIFIED" DATE, 
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP", 
+	"RETAIN_IND" NUMBER(1,0) DEFAULT 0, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	"COL_POS" NUMBER DEFAULT 1, 
+	 PRIMARY KEY ("HDR_ID", "COL_ID"));
+     
+    grant read on nci_dload_cstm_dec_subtyp to onedata_ro;
+     grant read on nci_dload_cstm_vd_subtyp to onedata_ro;
+     grant read on nci_dload_cstm_col_dtl_dec to onedata_ro;
+     grant read on nci_dload_cstm_col_dtl_vd to onedata_ro;
+     
+     grant all on nci_dload_cstm_dec_subtyp to onedata_wa;
+     grant all on nci_dload_cstm_vd_subtyp to onedata_wa;
+     grant all on nci_dload_cstm_col_dtl_dec to onedata_wa;
+     grant all on nci_dload_cstm_col_dtl_vd to onedata_wa;
+
+update nci_dload_cstm_col_key set xpath = replace(xpath, '/dataElementConcepts', '') where data_object = 'CLASSIFICATION_SCHEME' and DLOAD_TYP = 'DEC';
+commit;
+
+INSERT ALL
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Public ID',183,'/valueDomain/publicId','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Short Name',184,'/valueDomain/shortName','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Long Name',185,'/valueDomain/longName','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Version',186,'/valueDomain/version','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Context Name',187,'/valueDomain/contextName','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Context Version',188,'/valueDomain/contextVersion','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Type',189,'/valueDomain/Type','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Datatype',190,'/valueDomain/dataType','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Min Length',191,'/valueDomain/minlength','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Max Length',192,'/valueDomain/maxlength','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Min Value',193,'/valueDomain/minValue','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Max Value',194,'/valueDomain/maxValue','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Decimal Place',195,'/valueDomain/decimalPlace','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Format',196,'/valueDomain/format','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Concept Name',197,'/valueDomain/concepts/longName','VALUE_DOMAIN_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Concept Code',198,'/valueDomain/concepts/shortName','VALUE_DOMAIN_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Concept Public ID',199,'/valueDomain/concepts/publicId','VALUE_DOMAIN_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Concept Definition Source',200,'/valueDomain/concepts/definitionSource','VALUE_DOMAIN_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Concept EVS Source',201,'/valueDomain/concepts/evsSource','VALUE_DOMAIN_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Concept Primary Flag',202,'/valueDomain/concepts/primaryFlag','VALUE_DOMAIN_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Public ID',203,'/valueDomain/representation/publicId','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Long Name',204,'/valueDomain/representation/longName','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Short Name',205,'/valueDomain/representation/shortName','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Context Name',206,'/valueDomain/representation/contextName','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Version',207,'/valueDomain/representation/version','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Concept Name',208,'/valueDomain/representation/concepts/longName','REPRESENTATION_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Concept Code',209,'/valueDomain/representation/concepts/shortName','REPRESENTATION_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Concept Public ID',210,'/valueDomain/representation/concepts/publicId','REPRESENTATION_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Concept Definition Source',211,'/valueDomain/representation/concepts/definitionSource','REPRESENTATION_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Concept EVS Source',212,'/valueDomain/representation/concepts/evsSource','REPRESENTATION_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Concept Primary Flag',213,'/valueDomain/representation/concepts/primaryFlag','REPRESENTATION_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Valid Values',214,'/valueDomain/permissibleValues/value','PV')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Meaning Name',215,'/valueDomain/permissibleValues/valueMeanings/longName','PV')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Meaning Description',216,'/valueDomain/permissibleValues/valueMeanings/definition','PV')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Meaning Concepts',217,'/valueDomain/permissibleValues/valueMeanings/concepts','PV')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','PV Begin Date',218,'/valueDomain/permissibleValues/beginDate','PV')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','PV End Date',219,'/valueDomain/permissibleValues/endDate','PV')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Meaning Public ID',220,'/valueDomain/permissibleValues/valueMeanings/publicId','PV')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Meaning Version',221,'/valueDomain/permissibleValues/valueMeanings/version','PV')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Meaning Alternate Definitions',222,'/valueDomain/permissibleValues/valueMeanings/designations','PV')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Classification Scheme Short Name',223,'/classificationSchemes/shortName','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Classification Scheme Version',224,'/classificationSchemes/version','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Classification Scheme Context Name',225,'/classificationSchemes/contextName','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Classification Scheme Context Version',226,'/classificationSchemes/contextVersion','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Classification Scheme Item Name',227,'/classificationSchemes/classificationSchemeItems/longName','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Classification Scheme Item Type Name',228,'/classificationSchemes/classificationSchemeItems/typeName','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Classification Scheme Item Public Id',229,'/classificationSchemes/classificationSchemeItems/publicId','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Classification Scheme Item Version',230,'/classificationSchemes/classificationSchemeItems/version','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Alternate Name Context Name',231,'/valueDomain/alternateNames/contextName','ALTERNATE_NAME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Alternate Name Context Version',232,'/valueDomain/alternateNames/contextVersion','ALTERNATE_NAME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Alternate Name',233,'/valueDomain/alternateNames/name','ALTERNATE_NAME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Alternate Name Type',234,'/valueDomain/alternateNames/nameType','ALTERNATE_NAME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain RAI',235,'/valueDomain/RAI','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation RAI',236,'/valueDomain/representation/RAI', 'VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Workflow Status',237,'/valueDomain/workflowStatus','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Registration Status',238,'/valueDomain/registrationStatus','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Value Domain Concept Origin',239,'/valueDomain/concepts/origin','VALUE_DOMAIN_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Representation Concept Origin',240,'/valueDomain/representation/concepts/origin','REPRESENTATION_CONCEPT')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Classification Scheme Public ID',241,'/classificationScheme/publicId','CLASSIFICATION_SCHEME')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Conceptual Domain Public ID',242,'/valueDomain/conceptualDomain/publicId','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Conceptual Domain Short Name',243,'/valueDomain/conceptualDomain/shortName','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Conceptual Domain Version',244,'/valueDomain/conceptualDomain/version','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Conceptual Domain Context Name',245,'/valueDomain/conceptualDomain/contextName','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Reference Terminology',246,'/valueDomain/referenceTerminology','VALUE_DOMAIN')
+INTO nci_dload_cstm_col_key(is_visible, output, dload_typ, col_nm, col_id, xpath, data_object) VALUES (1, 'ROW', 'VD','Reference Terminology Data Value Source',247,'/valueDomain/referenceTerminologyDataValue','VALUE_DOMAIN')
+SELECT * FROM DUAL;
+commit;
+
+update nci_dload_cstm_col_key set xpath = replace(xpath, 'valueDomain', 'valueDomains') where DLOAD_TYP = 'VD';
+commit;
+
+
