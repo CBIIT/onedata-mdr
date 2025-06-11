@@ -32,3 +32,39 @@ END;
    where admin_item_typ_id = 58;
 commit;
 alter table admin_item enable all triggers;
+
+--jira 4091,4092
+create or replace TRIGGER TR_NCI_DLOAD_DEC_INIT_COL 
+BEFORE INSERT ON NCI_DLOAD_CSTM_COL_DTL_DEC
+for each row
+DECLARE
+v_cnt number;
+v_pos number;
+BEGIN
+select count(*), max(col_pos) into v_cnt, v_pos from nci_dload_cstm_col_dtl_dec where hdr_id = :new.hdr_id;
+if (v_cnt < 1) then
+  nci_dload.spInitCstmColOrder(:new.hdr_id, 'DECI');
+  else
+ -- nci_dload.spAppendColumn(:new.hdr_id, :new.col_id);
+  :new.col_pos := v_pos + 1;
+  end if;
+
+END;
+/
+create or replace TRIGGER TR_NCI_DLOAD_VD_INIT_COL 
+BEFORE INSERT ON NCI_DLOAD_CSTM_COL_DTL_VD
+for each row
+DECLARE
+v_cnt number;
+v_pos number;
+BEGIN
+select count(*), max(col_pos) into v_cnt, v_pos from nci_dload_cstm_col_dtl_vd where hdr_id = :new.hdr_id;
+if (v_cnt < 1) then
+  nci_dload.spInitCstmColOrder(:new.hdr_id, 'VDI');
+  else
+ -- nci_dload.spAppendColumn(:new.hdr_id, :new.col_id);
+  :new.col_pos := v_pos + 1;
+  end if;
+
+END;
+/
