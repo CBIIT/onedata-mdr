@@ -639,5 +639,12 @@ update nci_dload_cstm_col_key set xpath = '/dataElementConcepts/property/concept
 update nci_dload_cstm_col_key set xpath = '/dataElementConcepts/property/concepts/primaryflag' where col_id = 160;
 commit;
 
+update nci_dload_cstm_col_key set xpath = replace(xpath, '/classificationScheme/','/classificationSchemes/') where dload_typ = 'VD' and data_object = 'CLASSIFICATION_SCHEME';
+update nci_dload_cstm_col_key set xpath = replace(xpath, '/valueDomains/permissibleValues/', '/permissibleValue/') where dload_typ = 'VD';
+commit;
+
+update nci_dload_cstm_col_key set xpath = '/valueDomains/referenceTerminolgoyDataValue' where col_id = 247;
+commit;
+
 ---jira 4114
 ALTER TABLE nci_ds_dtl ADD PVVM_ID number;
