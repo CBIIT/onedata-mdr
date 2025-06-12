@@ -12,8 +12,8 @@ BEGIN
 END;
 /
 
-CREATE OR REPLACE TRIGGER OD_TR_MEC_VAL_MAP_UPD 
-BEFORE INSERT OR UPDATE ON NCI_STG_MEC_VAL_MAP
+create or replace TRIGGER OD_TR_MEC_VAL_MAP_UPD 
+BEFORE insert or UPDATE ON NCI_STG_MEC_VAL_MAP
 for each row
 BEGIN
 :new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
@@ -22,7 +22,6 @@ BEGIN
 
 END;
 /
-
   
   alter table admin_item disable all triggers;
 
