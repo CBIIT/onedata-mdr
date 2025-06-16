@@ -2396,7 +2396,7 @@ end if;
   hookoutput.message := 'Semantic mapping generated.';
   end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-  --    nci_util.debugHook('GENERAL', v_data_out);
+     nci_util.debugHook('GENERAL', v_data_out);
 
 end;
 
