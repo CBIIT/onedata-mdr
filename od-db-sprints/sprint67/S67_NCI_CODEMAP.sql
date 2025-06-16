@@ -581,7 +581,7 @@ BEGIN
               --  raise_application_error(-20000,tmp_mdl_str || '-'|| cur.item_id);
                     v_map_ind := true;
                     v_found := true;
-                             tmp_mdl_str := tmp_mdl_str || to_char(cur.mdl_map_item_id) || 'v' || to_char(cur.mdl_map_ver_nr) || ';';
+                             tmp_mdl_str := tmp_mdl_str || to_char(cur.mdl_map_item_id) || 'v' || to_char(cur.mdl_map_ver_nr) || '; ';
                     --hookoutput.message := 'Model Element cannot be deleted. Its characteristics are associated with Model Mapping ID: ' || cur.item_id || ' - ' || v_mdl_nm;
                    -- V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
                     --return;
@@ -2119,7 +2119,7 @@ BEGIN
 --                            and nci_mdl_elmnt_char.mdl_elmnt_item_id = v_item_id and nci_mdl_elmnt_char.mdl_elmnt_ver_nr = v_ver_nr) loop
                     v_map_ind := true;
                     v_found := true;
-                    tmp_mdl_str := tmp_mdl_str || to_char(cur.mdl_map_item_id) || 'v' || to_char(cur.mdl_map_ver_nr) || ';';
+                    tmp_mdl_str := tmp_mdl_str || to_char(cur.mdl_map_item_id) || 'v' || to_char(cur.mdl_map_ver_nr) || '; ';
                 end loop;
                 if (v_map_ind = false) then
                 tmp_mdl_str := tmp_mdl_str || ' None';
