@@ -305,7 +305,7 @@ begin
   -- Enum-by-Ref --> Enum 
   
  if (hookinput.invocationNUmber = 0) then
- hookoutput.question := nci_form_curator.getProceedQuestion ('Proceed', 'Please confirm value map generation for: ' || v_id || 'v' || v_ver_nr);
+ hookoutput.question := nci_form_curator.getProceedQuestion ('Proceed', 'All rules except Value Mapping Types "Derived From" and "Ignore" will be regenerated. Please confirm value map generation for: ' || v_id || 'v' || v_ver_nr);
  else
 
      delete from NCI_MEC_VAL_MAP where map_deg not in ( 120,131) and mdl_map_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') 
@@ -909,6 +909,16 @@ v_st_ts := systimestamp();
         end if;
         end if;
     end if;    
+-- if Source or target doamin type is NON-ENUM/ENUM by Ref and concept code/concept name is set, warning.
+   if (ihook.getColumnValue(row_ori,'SOURCE_DOMAIN_TYPE') <> 'ENUMERATED' and (cur1.SRC_VM_CNCPT_CD is not null or cur1.src_vm_cncpt_nm is not null)) then
+     v_val_stus_msg := v_val_stus_msg ||'Source concept code/name will not be updated in rule.'|| chr(13);
+     
+   end if;
+   
+   if (ihook.getColumnValue(row_ori,'TARGET_DOMAIN_TYPE') <> 'ENUMERATED' and (cur1.TGT_VM_CNCPT_CD is not null or cur1.TGT_VM_CNCPT_nm is not null)) then
+     v_val_stus_msg := v_val_stus_msg ||'Target concept code/name will not be updated in rule.'|| chr(13);
+     
+   end if;
 
     if (cur1.IMP_PROV_ORG is not null and cur1.PROV_ORG_ID is null ) then
         v_valid := false;
