@@ -911,12 +911,12 @@ v_st_ts := systimestamp();
     end if;    
 -- if Source or target doamin type is NON-ENUM/ENUM by Ref and concept code/concept name is set, warning.
    if (ihook.getColumnValue(row_ori,'SOURCE_DOMAIN_TYPE') <> 'ENUMERATED' and (cur1.SRC_VM_CNCPT_CD is not null or cur1.src_vm_cncpt_nm is not null)) then
-     v_val_stus_msg := v_val_stus_msg ||'Source concept code/name will not be updated in rule.'|| chr(13);
+     v_val_stus_msg := v_val_stus_msg ||'WARNING: Source is not enumerated. Concept information will not be updated in rule.'|| chr(13);
      
    end if;
    
    if (ihook.getColumnValue(row_ori,'TARGET_DOMAIN_TYPE') <> 'ENUMERATED' and (cur1.TGT_VM_CNCPT_CD is not null or cur1.TGT_VM_CNCPT_nm is not null)) then
-     v_val_stus_msg := v_val_stus_msg ||'Target concept code/name will not be updated in rule.'|| chr(13);
+     v_val_stus_msg := v_val_stus_msg ||'WARNING: Target is not enumerated. Concept information will not be updated in rule.'|| chr(13);
      
    end if;
 
@@ -961,6 +961,8 @@ v_st_ts := systimestamp();
        end loop;
      end if;
 */
+
+   
     -- if enumerated, then check PV values
   if (v_Valid = true) then 
       v_found := false;
@@ -984,6 +986,7 @@ v_st_ts := systimestamp();
            v_found := true;
       End if;*/
       end loop;
+      
      
     if (v_valid = false) then
         v_val_stus_msg := v_val_stus_msg ||'Source PV specified is not valid.' ||  chr(13);
@@ -1049,7 +1052,7 @@ v_st_ts := systimestamp();
   ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',v_val_stus_msg);
   else
   ihook.setColumnValue(row_ori, 'CTL_VAL_STUS','VALIDATED');
-  ihook.setColumnValue(row_ori, 'CTL_VAL_MSG','Valid');
+  ihook.setColumnValue(row_ori, 'CTL_VAL_MSG','Valid. ' || v_val_stus_msg);
   end if;
   
   
@@ -1070,6 +1073,8 @@ update nci_stg_mec_val_map set CTL_VAL_STUS= ihook.getColumnValue(row_ori,'CTL_V
            SRC_VM_CNCPT_NM =     ihook.getColumnValue(row_ori, 'SRC_VM_CNCPT_NM'),
            TGT_VM_CNCPT_CD =     ihook.getColumnValue(row_ori, 'TGT_VM_CNCPT_CD'),
            TGT_VM_CNCPT_NM =     ihook.getColumnValue(row_ori, 'TGT_VM_CNCPT_NM'),
+           SOURCE_DOMAIN_TYPE = ihook.getColumnValue(row_ori, 'SOURCE_DOMAIN_TYPE'),
+           TARGET_DOMAIN_TYPE = ihook.getColumnValue(row_ori, 'TARGET_DOMAIN_TYPE'),
            SRC_LBL =     ihook.getColumnValue(row_ori, 'SRC_LBL'),
                     TGT_LBL =     ihook.getColumnValue(row_ori, 'TGT_LBL'),
                     UPD_TYP =   ihook.getColumnValue(row_ori, 'UPD_TYP')
