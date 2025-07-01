@@ -56,7 +56,7 @@ end loop;
 end if;
 end if;
 
-if ((:old.tgt_mec_id is null or :old.src_mec_id is null) and :new.tgt_mec_id is not null and :new.src_mec_id is not null and :new.map_deg <> 120) then
+if ((:old.tgt_mec_id is null or :old.src_mec_id is null) and :new.tgt_mec_id is not null and :new.src_mec_id is not null and :new.map_deg in ( 129, 130)) then
 :new.map_deg := 120;
 end if;
 end;
