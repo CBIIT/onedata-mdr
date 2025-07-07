@@ -56,3 +56,14 @@ and map.SRC_MEC_ID = smec.mec_id (+)
 and tmec.VAL_DOM_VER_NR = tvd.VER_NR (+)
  and smec.VAL_DOM_ITEM_ID = svd.ITEM_ID (+)
 and smec.VAL_DOM_VER_NR = svd.VER_NR (+);
+
+-- To check if needs to be executed.
+
+delete from nci_mec_map where src_mec_id in (select mec_id from nci_mdl_elmnt_Char where upper(mec_long_nm) like '%DELETED%')
+and map_deg in (129,130,131);
+
+delete from nci_mec_map where tgt_mec_id in (select mec_id from nci_mdl_elmnt_Char where upper(mec_long_nm) like '%DELETED%')
+and map_deg in (129,130,131);
+
+commit;
+
