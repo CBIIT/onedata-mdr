@@ -80,3 +80,4 @@ commit;
        and admin_item_typ_id in (2,3,4,54,57,58)
        and ver_nr <> 1;
 
+
