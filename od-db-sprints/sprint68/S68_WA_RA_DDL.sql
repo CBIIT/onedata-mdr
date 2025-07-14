@@ -81,3 +81,7 @@ commit;
        and ver_nr <> 1;
 
 
+alter table alt_nms add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREATE_DT date);
+alter table alt_def add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREATE_DT date);
+alter table ref add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREATE_DT date);
+alter table NCI_ADMIN_ITEM_REL add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREATE_DT date);
