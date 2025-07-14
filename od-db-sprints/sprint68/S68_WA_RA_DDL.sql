@@ -85,3 +85,7 @@ alter table alt_nms add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREATE_DT da
 alter table alt_def add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREATE_DT date);
 alter table ref add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREATE_DT date);
 alter table NCI_ADMIN_ITEM_REL add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREATE_DT date);
+
+alter table alt_nms disable all triggers;
+
+alter table alt_nms enable all triggers;
