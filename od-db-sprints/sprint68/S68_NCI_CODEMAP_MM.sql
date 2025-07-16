@@ -1705,7 +1705,7 @@ begin
         ANSWERS                    := T_ANSWERS();
         ANSWER                     := T_ANSWER(1, 1, 'Generate for All Elements' );
         ANSWERS.EXTEND;        ANSWERS(ANSWERS.LAST) := ANSWER;
-           ANSWER                     := T_ANSWER(2, 2, 'Selected Element Only' );
+           ANSWER                     := T_ANSWER(2, 2, 'Generate for Selected Element(s)' );
         ANSWERS.EXTEND;        ANSWERS(ANSWERS.LAST) := ANSWER;
         QUESTION               := T_QUESTION('All rules except Mapping Type "Derived From" and "Ignore" will be regenerated.', ANSWERS);
 
@@ -2006,15 +2006,25 @@ and tgt_mec_id is not null)) loop
      -- non-enum/enum then 2 rows - use case 3
 
          if (cursrc.val_dom_typ_id =18 and curtgt.val_dom_typ_id = 17) then
-         generateQueryRowSingle(v_grp_nm,'VALUE_MAP', v_func, v_open_paren ,1, row, rows);
+     /*    generateQueryRowSingle(v_grp_nm,'VALUE_MAP', v_func, v_open_paren ,1, row, rows);
          setRowMECNull(row,'T');
          generateQueryRowSingle(v_grp_nm,'SOURCE', null, null, 2, row, rows);
             setRowMECNull(row,'B');
      generateQueryRowSingle(v_grp_nm,'SOURCE_LABEL', null, null, 3, row, rows);
          generateQueryRowSingle(v_grp_nm,'TARGET_PV', null, null, 4, row, rows);
-         generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 5, row, rows);
-
-
+         generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 5, row, rows); */
+--VALUE_MAP|(QUERY|NCIT|SOURCE|PREF_TERM_SYN|NCIT_CODE)|TARGET_CODE|TARGET_PV
+    generateQueryRowSingle(v_grp_nm,'VALUE_MAP', v_func, v_open_paren ,1, row, rows);
+         setRowMECNull(row,'T');
+      generateQueryRowSingle(v_grp_nm,'NCIT', v_func, v_open_paren ,2, row, rows);
+         generateQueryRowSingle(v_grp_nm,'SOURCE', null, null, 3, row, rows);
+            setRowMECNull(row,'B');
+     generateQueryRowSingle(v_grp_nm,'PREF_TERM_SYN', null, null, 4, row, rows);
+     generateQueryRowSingle(v_grp_nm,'NCIT_CODE', null, null, 5, row, rows);
+         generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 6, row, rows); 
+     generateQueryRowSingle(v_grp_nm,'TARGET_CODE', null, null, 7, row, rows);
+         generateQueryRowSingle(v_grp_nm,'TARGET_PV', null, null, 8, row, rows);
+         generateQueryRowSingle(v_grp_nm,'', null, v_close_paren, 9, row, rows); 
 
         end if;
 
