@@ -76,6 +76,43 @@ if (:new.ORI_VER_CREAT_USR_ID is null) then
     
 end if;
 END;
+/
 
+create or replace TRIGGER TR_ALT_DEF_POST_ORI
+  BEFORE INSERT
+  on ALT_DEF
+  for each row
+BEGIN
+if (:new.ORI_VER_CREAT_USR_ID is null) then
+    :new.ORI_VER_CREAT_USR_ID := :new.CREAT_USR_ID;
+    :new.ORI_VER_CREAT_DT := :new.CREAT_DT;
+    
+end if;
+END;
+/
 
+create or replace TRIGGER TR_REF_POST_ORI
+  BEFORE INSERT
+  on REF
+  for each row
+BEGIN
+if (:new.ORI_VER_CREAT_USR_ID is null) then
+    :new.ORI_VER_CREAT_USR_ID := :new.CREAT_USR_ID;
+    :new.ORI_VER_CREAT_DT := :new.CREAT_DT;
+    
+end if;
+END;
+/
+
+create or replace TRIGGER TR_NCI_AI_REL_POST_ORI
+  BEFORE INSERT
+  on NCI_ADMIN_ITEM_REL
+  for each row
+BEGIN
+if (:new.ORI_VER_CREAT_USR_ID is null) then
+    :new.ORI_VER_CREAT_USR_ID := :new.CREAT_USR_ID;
+    :new.ORI_VER_CREAT_DT := :new.CREAT_DT;
+    
+end if;
+END;
 /
