@@ -64,3 +64,18 @@ if ((:old.tgt_mec_id is null or :old.src_mec_id is null) and :new.tgt_mec_id is 
 end if;
 end;
 /
+
+create or replace TRIGGER TR_ALT_NMS_POST_ORI
+  BEFORE INSERT
+  on ALT_NMS
+  for each row
+BEGIN
+if (:new.ORI_VER_CREAT_USR_ID is null) then
+    :new.ORI_VER_CREAT_USR_ID := :new.CREAT_USR_ID;
+    :new.ORI_VER_CREAT_DT := :new.CREAT_DT;
+    
+end if;
+END;
+
+
+/
