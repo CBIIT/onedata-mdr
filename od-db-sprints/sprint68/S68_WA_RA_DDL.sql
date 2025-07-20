@@ -85,6 +85,7 @@ alter table alt_nms add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREAT_DT dat
 alter table alt_def add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREAT_DT date);
 alter table ref add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREAT_DT date);
 alter table NCI_ADMIN_ITEM_REL add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREAT_DT date);
+alter table REF_DOC add (ORI_VER_CREAT_USR_ID varchar2(50), ORI_VER_CREAT_DT date);
 
 alter table alt_nms disable all triggers;
 update alt_nms set ori_ver_creat_usr_id = creat_usr_id, ori_ver_creat_dt = creat_dt;
@@ -100,6 +101,12 @@ alter table ref disable all triggers;
 update ref set ori_ver_creat_usr_id = creat_usr_id, ori_ver_creat_dt = creat_dt;
 commit;
 alter table ref enable all triggers;
+
+
+alter table ref_DOC disable all triggers;
+update ref_DOC set ori_ver_creat_usr_id = creat_usr_id, ori_ver_creat_dt = creat_dt;
+commit;
+alter table ref_DOC enable all triggers;
 
 alter table nci_admin_item_rel disable all triggers;
 update nci_admin_item_rel set ori_ver_creat_usr_id = creat_usr_id, ori_ver_creat_dt = creat_dt;
