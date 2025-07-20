@@ -116,3 +116,17 @@ if (:new.ORI_VER_CREAT_USR_ID is null) then
 end if;
 END;
 /
+
+
+create or replace TRIGGER TR_REF_DOC_POST_ORI
+  BEFORE INSERT
+  on REF_DOC
+  for each row
+BEGIN
+if (:new.ORI_VER_CREAT_USR_ID is null) then
+    :new.ORI_VER_CREAT_USR_ID := :new.CREAT_USR_ID;
+    :new.ORI_VER_CREAT_DT := :new.CREAT_DT;
+    
+end if;
+END;
+/
