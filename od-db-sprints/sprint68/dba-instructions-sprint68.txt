@@ -1,3 +1,8 @@
 -- Run as ONEDATA_RA DDL scripts
+S68_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S68_WA_RA_DDL.sql
+S68_NCI_11179_2.sql
+S68_NCI_DS.sql
+S68_NCI_IMPORT.sql
