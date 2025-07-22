@@ -772,7 +772,7 @@ end if;
 -- QUERY function
 -- First parameter is always VALUE_MAP or XWALK
 if (cur1.TGT_FUNC_ID = v_query_func  ) then -- check for first and second parameters
- if( cur1.TGT_FUNC_PARAM not in ('VALUE_MAP','XWALK')) then
+ if( upper(cur1.TGT_FUNC_PARAM) not in ('VALUE_MAP','XWALK','NCIT')) then
         v_valid := false;
         v_val_stus_msg := v_val_stus_msg ||'First parameter of QUERY function has to be VALUE_MAP or XWALK. '|| chr(13);
  else -- check second parameter
@@ -1086,7 +1086,14 @@ end;
  i integer;
  v_open_paren integer;
  v_close_paren integer;
+ v_if integer;
+ v_then integer;
+ v_endif integer;
+ v_else integer;
  v_temp integer;
+ v_err integer;
+ v_err_str varchar2(4000);
+ v_step integer;
  BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -1096,10 +1103,15 @@ end;
   v_val_stus_msg := '';
   v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
   v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+-- get all the obj key ids
+  select obj_key_id into v_open_paren from obj_key where obj_typ_id = 58 and obj_key_Desc = '(';
+   select obj_key_id into v_close_paren from obj_key where obj_typ_id = 58 and obj_key_Desc = ')';
+ select obj_key_id into v_if from obj_key where obj_typ_id = 56 and upper(obj_key_Desc) = 'IF';
+ select obj_key_id into v_endif from obj_key where obj_typ_id = 56 and upper(obj_key_Desc) = 'ENDIF';
+ select obj_key_id into v_else from obj_key where obj_typ_id = 56 and upper(obj_key_Desc) = 'ELSE'; 
+ select obj_key_id into v_then from obj_key where obj_typ_id = 56 and upper(obj_key_Desc) = 'THEN';
 
 rows := t_rows();
- select obj_key_id into v_open_paren from obj_key where obj_typ_id = 58 and obj_key_Desc = '(';
-   select obj_key_id into v_close_paren from obj_key where obj_typ_id = 58 and obj_key_Desc = ')';
 
 update nci_mec_map set ctl_val_msg = null where ctl_val_msg is not null and mdl_map_item_id = v_item_id and mdl_map_ver_nr = v_ver_nr;
 commit;
@@ -1139,7 +1151,7 @@ map1.MDL_MAP_ITEM_ID = v_item_id
  ) loop
  row := t_row();
  ihook.setColumnValue(row,'Rule Type','Code Generation');
- ihook.setColumnValue(row, 'Rule Description','Consolidate groups where the Source and Target Elements are the same.');
+ ihook.setColumnValue(row, 'Rule Description','Error  - Consolidate groups where the Source Element Natural Key is mapped to different/distinct multiple Characteristics in the same Target Element.');
  ihook.setColumnValue(row, 'Source Element', cur.src_item_phy_obj_nm);
  ihook.setColumnValue(row, 'Source Characteristic', cur.src_mec_phy_nm);
  ihook.setColumnValue(row, 'Target Element', cur.tgt_item_phy_obj_nm);
@@ -1213,6 +1225,73 @@ where   map.MAP_DEG in (86,87,120)
       end loop;
 
 
+--- Find all distinct groups with IF/THEN/ELSE
+for curgrp in (
+select   distinct  map.mec_map_nm, mec_sub_grp_nbr start_grp_nbr
+from  nci_MEC_MAP map
+where   map.MAP_DEG in (86,87,120)
+    and map.MDL_MAP_ITEM_ID = v_item_id
+    and map.MDL_MAP_VER_NR = v_ver_nr
+    and map.FLOW_CNTRL =v_if
+ ) loop
+ i := curgrp.start_grp_nbr;
+ v_err :=0;
+ v_err_str := '';
+ v_step :=1;
+ -- start with the group number 
+for curif in (
+select   * 
+from  nci_MEC_MAP map
+where   map.MAP_DEG in (86,87,120)
+    and map.MDL_MAP_ITEM_ID = v_item_id
+    and map.MDL_MAP_VER_NR = v_ver_nr
+    and map.mec_map_nm = curgrp.mec_map_nm and flow_cntrl is not null and mec_sub_grp_nbr > i order by MEC_SUB_GRP_NBR 
+ ) loop
+  if curif.flow_cntrl = v_then then
+    if (v_step = 1) then
+        v_step := 2;
+    else 
+    v_err_str :=v_err_str || 'THEN in the wrong place.'; 
+    v_err := 1;
+  end if;
+  end if;
+  if (curif.flow_cntrl = v_else) then
+   if (v_step = 2) then
+        v_step := 3;
+    else 
+    v_err_str :=v_err_str || 'ELSE in the wrong place.'; 
+    v_err := 1;
+  end if;
+  end if;
+  if (curif.flow_cntrl = v_endif) then
+   if (v_step in  (2,3)) then
+        v_step := 4;
+     else
+    v_err_str :=v_err_str || 'ENDIF in the wrong place.'; 
+    v_err := 1;
+  end if;
+  end if;
+  --raise_application_error(-20000,v_step);
+  if (curif.flow_cntrl = v_if and v_step < 4 ) then
+    v_err :=1;
+    v_err_str :=v_err_str || 'Nested IF not allowed.'; 
+  end if;
+  
+  end loop;
+  if ( v_step = 1) then 
+  v_err_str :=v_err_str || 'THEN missing.'; 
+  elsif v_step < 4 then
+  v_err_str :=v_err_str || 'ENDIF missing.'; 
+  end if;
+ if (v_err = 1 or v_step <> 4) then 
+ row := t_row();
+ ihook.setColumnValue(row,'Rule Type','Rule Construction');
+ ihook.setColumnValue(row, 'Rule Description',v_err_str );
+ ihook.setColumnValue(row, 'Characteristic Group', curgrp.mec_map_nm);
+
+   rows.extend;     rows(rows.last) := row;
+   end if;
+      end loop;
 for cur in (
 select    map.mecm_id , map.mec_map_nm
 from  nci_MEC_MAP map
@@ -3194,10 +3273,10 @@ BEGIN
  v_min_param := 4;
  v_max_param := 4;
  end if;
-  if (curgrp.tgt_func_id = v_func_query and curgrp.tgt_func_param not in('XWALK', 'VALUE_MAP')) then -- Parameter value is incored     
+  if (curgrp.tgt_func_id = v_func_query and curgrp.tgt_func_param not in('XWALK', 'VALUE_MAP', 'NCIT')) then -- Parameter value is incored     
         row :=     t_row();
         ihook.setColumnValue(row,'Rule Type','Function Parameter');
- ihook.setColumnValue(row, 'Rule Description','Function QUERY first parameter is incorrect. Expected Parameters: XWALK, VALUE_MAP. Current Paramter: ' || curgrp.tgt_func_param );
+ ihook.setColumnValue(row, 'Rule Description','Function QUERY first parameter is incorrect. Expected Parameters: XWALK, VALUE_MAP, NCIT. Current Paramter: ' || curgrp.tgt_func_param );
  ihook.setColumnValue(row, 'Rule ID', curgrp.mecm_id);
  ihook.setColumnValue(row, 'Characteristic Group', curgrp.mec_map_nm);
   rows.extend;    rows(rows.last) := row;
