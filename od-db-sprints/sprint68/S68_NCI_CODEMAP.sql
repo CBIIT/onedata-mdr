@@ -659,8 +659,8 @@ v_valid boolean := true;
  v_temp integer;
  v_cs_item_id number;
  v_cs_ver_nr number(4,2);
-  v_item_user_name VARCHAR2(100);
-  v_item_long_nm   VARCHAR2(255);
+ v_CNTCT_NM  VARCHAR2(100);  
+ v_ITEM_NM VARCHAR2(255);
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -764,7 +764,7 @@ BEGIN
             msg := substr(msg || chr(13) || 'Alternate Names missing for some elements/characteristics. ' || msg1,1,4000);
             row := t_row();
        --     ihook.setColumnValue(row,'Issue', 'Alternate Names missing for some elements/characteristics. Please use create Alternate Name command first: ' || msg1);
-            ihook.setColumnValue(row,'Issue', 'Alternate Names missing for Element. Characteristics'' CDEs. See Details.' );
+            ihook.setColumnValue(row,'Issue', 'Alternate Names missing for Element.Characteristics'' CDEs. See Details.' );
             ihook.setColumnValue(row,'Details',  substr(msg1, 1, length(msg1)-2));
             rows.extend; rows(rows.last) := row;
             
@@ -837,16 +837,20 @@ BEGIN
     -- { 07/07/25 (RV Tracker DSRMWS-4066) 
     -- Add Model User Name, Model Long Name, Public ID and Version to the popup
         BEGIN
-            SELECT creat_usr_id_x, item_long_nm
-            INTO v_item_user_name, v_item_long_nm
-            FROM admin_item 
-            WHERE item_id = v_item_id
-              AND ver_nr = v_ver_nr
-              AND ROWNUM = 1;
+            SELECT  C.CNTCT_NM, AI.ITEM_NM
+            INTO v_CNTCT_NM, v_ITEM_NM
+            FROM   ADMIN_ITEM AI,
+                   CNTCT C
+            WHERE  AI.ITEM_ID = v_item_id
+              AND  AI.VER_NR = v_ver_nr
+              AND  AI.ADMIN_ITEM_TYP_ID = 57
+              AND  AI.CREAT_USR_ID = C.CNTCT_SECU_ID;
+              
+              -- AND ROWNUM = 1; 
         EXCEPTION  -- this should never happen unless for a bad data
             WHEN NO_DATA_FOUND THEN
-                v_item_user_name := 'null';
-                v_item_long_nm := 'null';
+                v_CNTCT_NM := 'null';
+                v_ITEM_NM := 'null';
         END;
 
         IF ( v_valid = false ) THEN
@@ -855,8 +859,8 @@ BEGIN
             showrowset := t_showablerowset(
                               rows,
                               'Issues with Model Validation for: '
-                              || v_item_user_name || ';'
-                              || v_item_long_nm || ';'
+                              || v_CNTCT_NM || ';'
+                              || v_ITEM_NM || ';'
                               || v_item_id || 'v' || v_ver_nr,
                               4,
                               'unselectable');
