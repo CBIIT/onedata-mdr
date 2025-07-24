@@ -1954,7 +1954,7 @@ end;
 procedure setAuditColumn (row in out t_row, v_user_id varchar2) as
 i integer;
 begin
-    ihook.setColumnValue(row, 'CREAT_USR_ID', v_user_id);
+    ihook.setColumnValue(row, 'CREAT_USR_ID', 'ONEDATA_WA');
     ihook.setColumnValue(row, 'CREAT_DT',  to_char(sysdate, DEFAULT_TS_FORMAT) );
      
 end;
@@ -2130,8 +2130,10 @@ begin
 
         -- Blobs are not supported in iHooks. Copying blobs as direct sql. No other option
 
-        insert into ref_doc (nci_ref_id, file_nm, blob_col, nci_mime_type, nci_doc_size, NCI_DOC_LST_UPD_DT, ref_doc_id, creat_usr_id, lst_upd_usr_id)
-        select v_temp, file_nm ||'-' ||  v_to_item_id || '-' || v_to_ver_nr, blob_col, nci_mime_type, nci_doc_size, NCI_DOC_LST_UPD_DT,-1, v_user_id, v_user_id from ref_doc where
+        insert into ref_doc (nci_ref_id, file_nm, blob_col, nci_mime_type, nci_doc_size, NCI_DOC_LST_UPD_DT, ref_doc_id, creat_usr_id, lst_upd_usr_id, 
+    ORI_VER_CREAT_USR_ID, ORI_VER_CREAT_DT)
+        select v_temp, file_nm ||'-' ||  v_to_item_id || '-' || v_to_ver_nr, blob_col, nci_mime_type, nci_doc_size, NCI_DOC_LST_UPD_DT,-1, 
+        v_user_id, v_user_id,ORI_VER_CREAT_USR_ID, ORI_VER_CREAT_DT from ref_doc where
         nci_ref_id = ref_cur.ref_id and  nvl(fld_delete,0)=0;
         commit;
         insert into onedata_ra.ref_doc select * from ref_doc where nci_ref_id = v_temp;
