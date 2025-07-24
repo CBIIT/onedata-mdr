@@ -1113,7 +1113,7 @@ begin
             
             if (v_val_dom_typ = 17) then -- enumerated
 
-            v_pv := getPVExclusionList(v_hdr_id);
+            v_pv := substr(getPVExclusionList(v_hdr_id),0,1000);
 
             spDSMatchEnum(v_hdr_id, v_user_id, v_flt_str,'CDE_MATCH', nvl(ihook.getColumnValue(row_ori,'ENTTY_NM_USR'), ihook.getColumnValue(row_ori, 'ENTTY_NM')),
               v_suffix, getPVFilterString(v_hdr_id), v_mode);
@@ -1155,7 +1155,7 @@ BEGIN
 END;
 
 function getPVFilterString (v_hdr_id in number) return varchar2 is
-v_pv_flt_str varchar2(1000);
+v_pv_flt_str varchar2(4000);
 v_temp number;
 v_lst_run_typ varchar2(128);
 begin
@@ -1202,7 +1202,7 @@ if (v_temp > 0) then
     v_lst_run_typ := getLastDSRun(v_hdr_id);
     if (v_lst_run_typ LIKE '%(PV)%') then
         for pv in (select entty_nm_usr,perm_val_nm from nci_ds_dtl where hdr_id = v_hdr_id and excl_pv_ind = 1 and nvl(fld_delete,0) <> 1) loop
-            if ((length(nvl(v_pv_flt_str,0)) + length(nvl(pv.entty_nm_usr, pv.perm_val_nm))) < 1990) then
+            if ((length(nvl(v_pv_flt_str,0)) + length(nvl(pv.entty_nm_usr, pv.perm_val_nm))) < 1970) then
                 v_pv_flt_str := nvl(v_pv_flt_str, '') || nvl(pv.entty_nm_usr,pv.perm_val_nm) || ', ';
             else
                 v_overflow := v_overflow + 1;
@@ -1216,7 +1216,7 @@ if (v_temp > 0) then
         --v_pv_flt_str := LTRIM(v_pv_flt_str, ' ');
     else
         for vm in (select entty_nm_usr,val_mean_nm from nci_ds_dtl where hdr_id = v_hdr_id and excl_pv_ind = 1 and nvl(fld_delete,0) <> 1) loop
-            if ((length(nvl(v_pv_flt_str,0)) + length(nvl(vm.entty_nm_usr, vm.val_mean_nm))) < 1990) then
+            if ((length(nvl(v_pv_flt_str,0)) + length(nvl(vm.entty_nm_usr, vm.val_mean_nm))) < 1970) then
                 v_pv_flt_str := nvl(v_pv_flt_str, '') || nvl(vm.entty_nm_usr,vm.val_mean_nm) || ', ';
             else
                 v_overflow := v_overflow + 1;
@@ -1238,7 +1238,7 @@ if (v_temp > 0) then
         v_pv_flt_str := v_pv_flt_str || ', <i>and ' || v_overflow || ' more...</i>';
     end if;
 else
-    v_pv_flt_str := 'TEST';
+    v_pv_flt_str := '';
 end if;
 
 
@@ -1256,7 +1256,7 @@ AS
     v_entty_nm_like varchar2(255);
     v_cntxt_str varchar2(255);
     v_cnt integer;
-    v_pv_filter varchar2(1000);
+    v_pv_filter varchar2(4000);
     v_pv_cnt integer;
     v_src_dtl varchar2(255);
     v_mtch_pcnt number(4,2);
@@ -1372,7 +1372,7 @@ for cur in (select hdr_id,(count(*) - v_pv_cnt) cnt from nci_ds_dtl d where hdr_
 --            'dtl.hdr_id = ' || cur.hdr_id || ' and dtl.item_id = de_item_id and dtl.ver_nr = de_ver_nr and upper(v.perm_val_nm) in (select upper(perm_val_nm) from nci_ds_dtl where hdr_id = ' || cur.hdr_id || ' and ' ||
 --            v_pv_filter || ') ' ||
 --            'group by de_item_id, de_ver_nr, dtl.rule_Desc having count(*) = ' || cur.cnt;
-    v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc, ' 
+    v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || ''(PV)'', ' 
             || '''' || 'CDE' || '''' || ' from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and v.de_ver_nr = ai.ver_nr and ' ||
             'dtl.hdr_id = ' || cur.hdr_id || ' and dtl.item_id = de_item_id and dtl.ver_nr = de_ver_nr and upper(v.perm_val_nm) in (select upper(' || v_src_dtl || ') from nci_ds_dtl where hdr_id = ' || cur.hdr_id || ' and ' ||
             v_pv_filter || ') ' ||
@@ -1380,15 +1380,16 @@ for cur in (select hdr_id,(count(*) - v_pv_cnt) cnt from nci_ds_dtl d where hdr_
     execute immediate v_sql;
 
 if  (sql%rowcount = 0) then
-    v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc, ' 
+    v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || ''(VM)'', ' 
             || '''' || 'CDE' || '''' || ' from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and v.de_ver_nr = ai.ver_nr and ' ||
             'dtl.hdr_id = ' || cur.hdr_id || ' and dtl.item_id = de_item_id and dtl.ver_nr = de_ver_nr and upper(v.item_nm) in (select upper(' || v_src_dtl || ') from nci_ds_dtl where hdr_id = ' || cur.hdr_id || ' and ' ||
             v_pv_filter || ') ' ||
             'group by de_item_id, de_ver_nr, dtl.rule_Desc having count(*) = ' || cur.cnt;
     execute immediate v_sql;
 end if;
+--same queries as above but with percent match
 if  (sql%rowcount = 0) then
-    v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc, ' 
+    v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || ''(PV)'', ' 
             || '''' || 'CDE' || '''' || ' from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and v.de_ver_nr = ai.ver_nr and ' ||
             'dtl.hdr_id = ' || cur.hdr_id || ' and dtl.item_id = de_item_id and dtl.ver_nr = de_ver_nr and upper(v.perm_val_nm) in (select upper(' || v_src_dtl || ') from nci_ds_dtl where hdr_id = ' || cur.hdr_id || ' and ' ||
             v_pv_filter || ') ' ||
@@ -1396,7 +1397,7 @@ if  (sql%rowcount = 0) then
     execute immediate v_sql;
 end if;
 if  (sql%rowcount = 0) then
-    v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc, ' 
+    v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || ''(VM)'', ' 
             || '''' || 'CDE' || '''' || ' from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and v.de_ver_nr = ai.ver_nr and ' ||
             'dtl.hdr_id = ' || cur.hdr_id || ' and dtl.item_id = de_item_id and dtl.ver_nr = de_ver_nr and upper(v.item_nm) in (select upper(' || v_src_dtl || ') from nci_ds_dtl where hdr_id = ' || cur.hdr_id || ' and ' ||
             v_pv_filter || ') ' ||
