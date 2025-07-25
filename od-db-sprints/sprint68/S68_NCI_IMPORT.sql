@@ -12,7 +12,7 @@ procedure spValPVVMImport (v_data_in in clob, v_data_out out clob, v_usr_id in v
 procedure spCreatePVVMImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure spPostPVVMImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure spPostPVVMImportEdit (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
-procedure spPVVMValidate (row_ori in out t_row);
+procedure spPVVMValidate (row_ori in out t_row, v_mode in varchar2); 
 procedure spCreateValDECImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode in varchar2);
 procedure spCreateValVDImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode in varchar2);
 procedure spUpdateValVDImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode in varchar2);
@@ -33,7 +33,9 @@ procedure spValPVVMImportOLD (v_data_in in clob, v_data_out out clob, v_usr_id i
 procedure spValPVVMUpdate (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure spUpdatePVVMImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 function FormatConceptString (v_str in varchar2) return varchar2;
-END;/
+procedure spPVVMUpdate ( row_ori in out t_row, actions in out t_actions, rowais in out t_rows, rowiucs in out t_rows, rowcdvms in out t_rows, rowpvs in out t_rows, rowaltnms in out t_rows, row_pvvms in out t_rows);
+END;
+/
 create or replace PACKAGE BODY            nci_import AS
 
 procedure spDeleteProcImports
@@ -1739,6 +1741,7 @@ as
    rowcdvms  t_rows;
    rowpvs  t_rows;
    rowaltnms  t_rows;
+   row_pvvms t_rows;
 begin
 
 
@@ -1753,6 +1756,7 @@ begin
  rowcdvms := t_rows();
    rowpvs :=  t_rows();
    rowaltnms := t_rows();
+   row_pvvms := t_rows();
  cnt := least(hookinput.originalRowset.rowset.count,1000);
 --raise_application_error(-20000,cnt);
 
@@ -1761,17 +1765,21 @@ for i in 1..cnt loop
     v_val_ind := true;
     ihook.setColumnValue(row_ori,'CTL_VAL_MSG', '');
    if (ihook.getColumnValue(row_ori, 'CTL_VAL_STUS') = 'VALIDATED') then
-       nci_pv_vm.spPVVMImport ( row_ori,actions ,rowais, rowiucs,rowcdvms, rowpvs, rowaltnms);
+       --nci_pv_vm.spPVVMImport ( row_ori,actions ,rowais, rowiucs,rowcdvms, rowpvs, rowaltnms);
+       spPVVMUpdate(row_ori, actions,rowais,rowiucs,rowcdvms,rowpvs,rowaltnms,row_pvvms);
        row := t_row();
        ihook.setColumnValue(row, 'ITEM_1_ID', ihook.getColumnValue(row_ori, 'ITEM_1_ID'));
    --    if (ihook.getColumnValue(row_ori, 'REF_BTCH_NBR') is not null) then      raise_application_error(-20000, ihook.getColumnValue(row, 'ITEM_1_ID')); end if;
-       ihook.setColumnValue(row,'CTL_VAL_MSG', 'PV/VM created successfully.');
+       ihook.setColumnValue(row,'CTL_VAL_MSG', 'PV/VM updated successfully.');
        ihook.setColumnValue(row,'CTL_VAL_STUS', 'PROCESSED');
        ihook.setColumnValue(row,'STG_AI_ID',  ihook.getColumnValue(row_ori,'STG_AI_ID'));
     rows.extend; rows(rows.last) := row;
        
      end if;
 end loop;
+
+
+
 
   action := t_actionrowset(rowais, 'Administered Item (No FK)', 2,1,'insert');
         actions.extend;
@@ -1788,19 +1796,22 @@ end loop;
     action := t_actionrowset(rowiucs, 'Items under Concept (Hook)', 2,6,'insert');
         actions.extend;
         actions(actions.last) := action;
-    
-        action := t_actionrowset(rowcdvms, 'Value Meanings (No FK)', 2,10,'insert');
-          actions.extend;
-          actions(actions.last) := action;
+--    
+--        action := t_actionrowset(rowcdvms, 'Value Meanings (No FK)', 2,10,'insert');
+--          actions.extend;
+--          actions(actions.last) := action;
+--
+--          action := t_actionrowset(rowpvs, 'Permissible Values (No FK)', 2,19,'insert');
+--           actions.extend;
+--           actions(actions.last) := action;
+--
+--      action := t_actionrowset(rowaltnms, 'Alternate Names', 2,23,'insert');
+--           actions.extend;
+--           actions(actions.last) := action;
 
-          action := t_actionrowset(rowpvs, 'Permissible Values (No FK)', 2,19,'insert');
+          action := t_actionrowset(row_pvvms, 'Permissible Values (Edit AI)', 2,19,'update');
            actions.extend;
            actions(actions.last) := action;
-
-      action := t_actionrowset(rowaltnms, 'Alternate Names', 2,23,'insert');
-           actions.extend;
-           actions(actions.last) := action;
-
    action := t_actionrowset(rows, 'PV VM Import (No FK)', 2,10,'update');
         actions.extend;
         actions(actions.last) := action;
@@ -1808,6 +1819,286 @@ end loop;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 nci_util.debugHook('GENERAL',v_data_out);
 end;
+
+procedure spPVVMUpdate ( row_ori in out t_row, actions in out t_actions, rowais in out t_rows, rowiucs in out t_rows, rowcdvms in out t_rows, rowpvs in out t_rows, rowaltnms in out t_rows, row_pvvms in out t_rows)
+AS
+ 
+  forms t_forms;
+  form1 t_form;
+
+  row t_row;
+  rows  t_rows;
+  rowset            t_rowset;
+  row_pvvm t_row;
+  --row_pvvms t_rows;
+  rowset_pvvms t_rowset;
+  row_vm_cd t_row;
+  v_str  varchar2(255);
+ v_nm  varchar2(255);
+ v_item_id number;
+ v_ver_nr number(4,2);
+  cnt integer;
+k integer;
+  action t_actionRowset;
+  i integer := 0;
+  v_typ  varchar2(50);
+  v_temp integer;
+  is_valid boolean;
+  v_item_typ_glb integer;
+  v_pv  varchar2(255);
+  v_vm_nm varchar2(255);
+  v_cur_item_id number;
+  --jira 3357:reuse vm if exists
+  v_vm_txt varchar2(255);
+  v_vm_cnt integer;
+  v_vm_item_id number;
+  v_vm_ver_nr number (4,2);
+  v_cdvm_ind integer;
+  v_tmp_vm_id number;
+  v_pv_val_id number;
+begin
+    v_item_typ_glb := 53;
+    v_cdvm_ind := 1;
+        row := t_row();        rows := t_rows();
+        row_pvvm := t_row();   row_pvvms := t_rows();
+        row_vm_cd := t_row();
+        k := 1;
+
+
+    v_typ := upper(ihook.getColumnValue(row_ori, 'VM_STR_TYP'));
+    v_ver_nr := 1; --default
+
+    select max(item_id) into v_cur_item_id from admin_item where admin_item_typ_id <> 8;
+
+    case
+    when v_typ = 'CONCEPTS' then
+        if (ihook.getColumnValue(row_ori, 'REF_BTCH_STR') is null) then --no reference in the batch, get new ID
+--        nci_dec_mgmt.createValAIWithConcept(row_ori , 1,v_item_typ_glb ,'C','DROP-DOWN',actions); -- Vm
+            nci_dec_mgmt.createValAIWithConceptRow(row_ori , 1,v_item_typ_glb ,'C','DROP-DOWN',rowais, rowiucs); -- Vm
+       
+
+            v_item_id := ihook.getColumnValue(row_ori,'ITEM_1_ID');
+            v_ver_nr :=  ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR');
+            update nci_stg_pv_vm_import set ITEM_1_ID = ihook.getColumnValue(row_ori,'ITEM_1_ID'), ITEM_1_VER_NR = ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR') where STG_AI_ID = ihook.getColumnValue(row_ori, 'STG_AI_ID');
+            commit;
+            
+            --updated code
+            --nci_dec_mgmt.createValAIWithConcept(row_ori , 1,v_item_typ_glb ,'O','DROP-DOWN',actions);
+               --   raise_application_error(-20000, ihook.getColumnValue(rowform, 'ITEM_1_ID'));
+            select max(val_id) into v_pv_val_id from perm_val where val_dom_item_id = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and val_dom_ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') and perm_val_nm = ihook.getColumnValue(row_ori, 'PERM_VAL_NM');
+            ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+            ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+            ihook.setColumnValue(row_pvvm, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));
+            ihook.setColumnValue(row_pvvm, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));
+            ihook.setColumnValue(row_pvvm, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'PERM_VAL_NM'));
+            ihook.setColumnValue(row_pvvm, 'VAL_ID', v_pv_val_id);
+            ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+            ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+        else
+        --parse ref_btch_str for referenced seq ids, then iterate over each seq id and check if item_1_id is set
+            --if item_1_id is not set, create the vm id
+            --if item_1_id is set, reuse it
+            v_vm_item_id := nci_pv_vm.parsePVVMRefStr(ihook.getColumnValue(row_ori, 'REF_BTCH_STR'), ',', row_ori);
+          --  raise_application_error(-20000, v_vm_item_id);
+            
+            if (v_vm_item_id = 0) then
+                nci_dec_mgmt.createValAIWithConceptRow(row_ori , 1,v_item_typ_glb ,'C','DROP-DOWN',rowais, rowiucs); -- Vm
+                v_item_id := ihook.getColumnValue(row_ori,'ITEM_1_ID');
+                v_ver_nr :=  ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR');
+                update nci_stg_pv_vm_import set ITEM_1_ID = ihook.getColumnValue(row_ori,'ITEM_1_ID'), ITEM_1_VER_NR = ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR') where STG_AI_ID = ihook.getColumnValue(row_ori, 'STG_AI_ID');
+                commit;
+                select max(val_id) into v_pv_val_id from perm_val where val_dom_item_id = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and val_dom_ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') and perm_val_nm = ihook.getColumnValue(row_ori, 'PERM_VAL_NM');
+                ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+                ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+                ihook.setColumnValue(row_pvvm, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));
+                ihook.setColumnValue(row_pvvm, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));
+                ihook.setColumnValue(row_pvvm, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'PERM_VAL_NM'));
+                ihook.setColumnValue(row_pvvm, 'VAL_ID', v_pv_val_id);
+                ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+                ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+            else
+                v_cdvm_ind := 0;
+           -- raise_application_error(-20000, v_vm_item_id);
+                v_item_id := v_vm_item_id;
+                ihook.setColumnValue(row_ori, 'GEN_STR', ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'));
+                ihook.setColumnValue(row_ori,'ITEM_1_ID', v_item_id);
+                ihook.setColumnValue(row_ori, 'ITEM_1_VER_NR', 1);
+            update nci_stg_pv_vm_import set ITEM_1_ID = ihook.getColumnValue(row_ori,'ITEM_1_ID') where STG_AI_ID = ihook.getColumnValue(row_ori, 'STG_AI_ID');
+            update nci_stg_pv_vm_import set ITEM_1_VER_NR = ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR') where STG_AI_ID = ihook.getColumnValue(row_ori, 'STG_AI_ID');
+            commit;
+                select max(val_id) into v_pv_val_id from perm_val where val_dom_item_id = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and val_dom_ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') and perm_val_nm = ihook.getColumnValue(row_ori, 'PERM_VAL_NM');
+                ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+                ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_VER_NR', 1);
+                ihook.setColumnValue(row_pvvm, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));
+                ihook.setColumnValue(row_pvvm, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));
+                ihook.setColumnValue(row_pvvm, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'PERM_VAL_NM'));
+                ihook.setColumnValue(row_pvvm, 'VAL_ID', v_pv_val_id);
+                ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+                ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+           -- raise_application_error(-20000, ihook.getColumnValue(row_ori, 'ITEM_1_ID'));
+           end if;
+
+        end if;
+     when v_typ = 'TEXT' then
+
+   --     raise_application_error(-20000, v_vm_cnt);
+   --  raise_application_error(-20000,'HEre' || nvl(ihook.getColumnValue(row_ori, 'VM_SPEC_DEF'), ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1')));VW_SPEC_DEF
+       -- nci_dec_mgmt.createAIWithoutConcept(row_ori , 1, 53, ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'),nvl(ihook.getColumnValue(row_ori, 'VW_SPEC_DEF'), ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1')),'C', actions);
+        if (ihook.getColumnValue(row_ori, 'REF_BTCH_STR') is null) then
+            nci_dec_mgmt.createAIWithoutConcept(row_ori , 1, 53, ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'),nvl(ihook.getColumnValue(row_ori, 'VW_SPEC_DEF'), ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1')),'C',
+            actions);
+            v_item_id := ihook.getColumnValue(row_ori,'ITEM_1_ID');
+            v_ver_nr :=  ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR');
+            ihook.setColumnValue(row_ori, 'GEN_STR', ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'));
+            update nci_stg_pv_vm_import set ITEM_1_ID = ihook.getColumnValue(row_ori,'ITEM_1_ID') where STG_AI_ID = ihook.getColumnValue(row_ori, 'STG_AI_ID');
+            update nci_stg_pv_vm_import set ITEM_1_VER_NR = ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR') where STG_AI_ID = ihook.getColumnValue(row_ori, 'STG_AI_ID');
+            commit;
+                select max(val_id) into v_pv_val_id from perm_val where val_dom_item_id = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and val_dom_ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') and perm_val_nm = ihook.getColumnValue(row_ori, 'PERM_VAL_NM');
+                ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+                ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+                ihook.setColumnValue(row_pvvm, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));
+                ihook.setColumnValue(row_pvvm, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));
+                ihook.setColumnValue(row_pvvm, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'PERM_VAL_NM'));
+                ihook.setColumnValue(row_pvvm, 'VAL_ID', v_pv_val_id);
+                ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+                ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+        else --jira 3357; vm already exists, reuse id and ver, do not try to create a second vm/cd relationship
+        --raise_application_error(-20000, ihook.getColumnValue(row_ori, 'REF_BTCH_STR'));
+        v_vm_item_id := nci_pv_vm.parsePVVMRefStr(ihook.getColumnValue(row_ori, 'REF_BTCH_STR'), ',', row_ori);
+        
+        if (v_vm_item_id = 0) then
+                nci_dec_mgmt.createAIWithoutConcept(row_ori , 1, 53, ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'),nvl(ihook.getColumnValue(row_ori, 'VW_SPEC_DEF'), ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1')),'C',
+            actions);
+                v_item_id := ihook.getColumnValue(row_ori,'ITEM_1_ID');
+                v_ver_nr :=  ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR');
+                update nci_stg_pv_vm_import set ITEM_1_ID = ihook.getColumnValue(row_ori,'ITEM_1_ID'), ITEM_1_VER_NR = ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR') where STG_AI_ID = ihook.getColumnValue(row_ori, 'STG_AI_ID');
+                commit;
+            else
+                v_cdvm_ind := 0;
+           --raise_application_error(-20000, v_vm_item_id);
+                v_item_id := v_vm_item_id;
+                ihook.setColumnValue(row_ori, 'GEN_STR', ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1'));
+                ihook.setColumnValue(row_ori,'ITEM_1_ID', v_item_id);
+                ihook.setColumnValue(row_ori, 'ITEM_1_VER_NR', 1);
+            update nci_stg_pv_vm_import set ITEM_1_ID = ihook.getColumnValue(row_ori,'ITEM_1_ID') where STG_AI_ID = ihook.getColumnValue(row_ori, 'STG_AI_ID');
+            update nci_stg_pv_vm_import set ITEM_1_VER_NR = ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR') where STG_AI_ID = ihook.getColumnValue(row_ori, 'STG_AI_ID');
+            commit;
+                select max(val_id) into v_pv_val_id from perm_val where val_dom_item_id = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and val_dom_ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') and perm_val_nm = ihook.getColumnValue(row_ori, 'PERM_VAL_NM');
+                ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+                ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_VER_NR', 1);
+                ihook.setColumnValue(row_pvvm, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));
+                ihook.setColumnValue(row_pvvm, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));
+                ihook.setColumnValue(row_pvvm, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'PERM_VAL_NM'));
+                ihook.setColumnValue(row_pvvm, 'VAL_ID', v_pv_val_id);
+                ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+                ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+           -- raise_application_error(-20000, ihook.getColumnValue(row_ori, 'ITEM_1_ID'));
+           end if;
+        end if;
+     when v_typ = 'ID' then
+        for cur in (select * from admin_item where item_id = ihook.getColumnValue(row_ori, 'CNCPT_CONCAT_STR_1') and currnt_ver_ind = 1 and admin_item_typ_id = v_item_typ_glb) loop
+            v_item_id := cur.item_id;
+            v_ver_nr :=  cur.ver_nr;
+            v_cdvm_ind := 0;
+        end loop;
+        select max(val_id) into v_pv_val_id from perm_val where val_dom_item_id = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and val_dom_ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') and perm_val_nm = ihook.getColumnValue(row_ori, 'PERM_VAL_NM');
+            ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+            ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+            ihook.setColumnValue(row_pvvm, 'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));
+            ihook.setColumnValue(row_pvvm, 'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));
+            ihook.setColumnValue(row_pvvm, 'PERM_VAL_NM', ihook.getColumnValue(row_ori, 'PERM_VAL_NM'));
+            ihook.setColumnValue(row_pvvm, 'VAL_ID', v_pv_val_id);
+            ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_ITEM_ID', v_item_id);
+            ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+    end case;
+      
+--            ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_1_ID'));
+--            ihook.setColumnValue(row_pvvm, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR'));
+--            ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_1_ID'));
+--            ihook.setColumnValue(row_vm_cd, 'NCI_VAL_MEAN_VER_NR', ihook.getColumnValue(row_ori, 'ITEM_1_VER_NR'));
+      -- Create PV
+       
+
+        select count(*) into v_temp from CONC_DOM_VAL_MEAN where CONC_DOM_ITEM_ID = ihook.getColumnValue(row_ori, 'CONC_DOM_ITEM_ID') and
+        CONC_DOM_VER_NR = ihook.getColumnValue(row_ori, 'CONC_DOM_VER_NR') and NCI_VAL_MEAN_ITEM_ID = v_item_id and NCI_VAL_MEAN_VER_NR = v_ver_nr;
+
+        
+--  If VM/CONC_DOM new
+        if (v_temp = 0 and v_cdvm_ind = 1) then
+            row := t_row();
+            ihook.setColumnValue(row,'CONC_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'CONC_DOM_ITEM_ID'));
+            ihook.setColumnValue(row,'CONC_DOM_VER_NR', ihook.getColumnValue(row_ori, 'CONC_DOM_VER_NR'));
+            ihook.setColumnValue(row,'NCI_VAL_MEAN_ITEM_ID',  v_item_id);
+            ihook.setColumnValue(row,'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+
+            rowcdvms.extend;
+            rowcdvms(rowcdvms.last) := row;
+
+        end if;
+        --raise_application_error(-20000, 'here');
+        row := t_row();
+        ihook.setColumnValue(row,'PERM_VAL_NM', nvl(ihook.getColumnValue(row_ori, 'PERM_VAL_NM'),ihook.getColumnValue(row_ori, 'ITEM_1_NM')) );
+        ihook.setColumnValue(row,'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID'));
+        ihook.setColumnValue(row,'VAL_DOM_VER_NR', ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR'));
+        ihook.setColumnValue(row,'NCI_VAL_MEAN_ITEM_ID',  v_item_id);
+        ihook.setColumnValue(row,'NCI_VAL_MEAN_VER_NR', v_ver_nr);
+
+        ihook.setColumnValue(row,'VAL_ID',-1);
+            rowpvs.extend;
+            rowpvs(rowpvs.last) := row;
+            
+    -- VM Alternate Name
+        if (ihook.getColumnValue(row_ori, 'VM_ALT_NM') is not null and ihook.getColumnValue(row_ori, 'VM_ALT_NM_TYP_ID') is not null
+        and ihook.getColumnValue(row_ori, 'VM_ALT_NM_CNTXT_ITEM_ID') is not null and ihook.getColumnValue(row_ori, 'VM_ALT_NM_CNTXT_VER_NR') is not null and ihook.getColumnValue(row_ori, 'REF_BTCH_NBR') is null) then
+        --raise_application_error(-20000, 'here2');
+        -- Check if alternate name exists
+        select count(*) into v_temp from alt_nms where 
+         item_id = v_item_id and ver_nr = v_ver_nr 
+            and nm_desc = ihook.getColumnValue(row_ori, 'VM_ALT_NM') and nm_typ_id = ihook.getColumnValue(row_ori, 'VM_ALT_NM_TYP_ID') 
+            and cntxt_item_id  = ihook.getColumnValue(row_ori, 'VM_ALT_NM_CNTXT_ITEM_ID')
+             and cntxt_ver_nr = ihook.getColumnValue(row_ori, 'VM_ALT_NM_CNTXT_VER_NR')  ;
+             if (v_temp =0) then -- no alternate name found
+          
+        row := t_row();
+        ihook.setColumnValue(row,'ITEM_ID', v_item_id );
+        ihook.setColumnValue(row,'VER_NR', 1);
+        ihook.setColumnValue(row,'NM_TYP_ID', ihook.getColumnValue(row_ori, 'VM_ALT_NM_TYP_ID'));
+        ihook.setColumnValue(row,'NM_DESC', ihook.getColumnValue(row_ori, 'VM_ALT_NM'));
+        ihook.setColumnValue(row,'CNTXT_ITEM_ID',nvl(ihook.getColumnValue(row_ori, 'VM_ALT_NM_CNTXT_ITEM_ID'), ihook.getColumnValue(row_ori, 'CNTXT_ITEM_ID') ));
+        ihook.setColumnValue(row,'CNTXT_VER_NR',nvl(ihook.getColumnValue(row_ori, 'VM_ALT_NM_CNTXT_VER_NR'),ihook.getColumnValue(row_ori, 'CNTXT_VER_NR')) );
+        ihook.setColumnValue(row,'LANG_ID', nci_11179_2.getLangID(ihook.getColumnValue(row_ori, 'VM_ALT_NM_LANG')));
+      
+        ihook.setColumnValue(row,'NM_ID',-1);
+            rowaltnms.extend;
+            rowaltnms(rowaltnms.last) := row;
+    
+           end if;
+
+        end if;
+        
+    --PV/VM association update
+        row_pvvms.extend;
+        row_pvvms(row_pvvms.last) := row_pvvm;
+    
+        ihook.setColumnValue(row_ori, 'ITEM_1_ID', v_item_id);
+        --raise_application_error(-20000, ihook.getColumnValue(row_ori, 'ITEM_1_ID'));
+        ihook.setColumnValue(row_ori,'CTL_VAL_STUS',  'PROCESSED');
+         ihook.setColumnValue(row_ori,'CTL_VAL_MSG',  'PV/VM created successfully.');
+       
+       -- Jira 1889 Remove VM ID from Validation message
+       -- ihook.setColumnValue(row_ori,'CTL_VAL_MSG', 'Value Meaning ID: ' || v_item_id );
+
+-- Jira 1889 The code below removes the VM ID from the ITEM_1_ID column if it already exists. They now want to have only one column that always has whatever the VM ID is, so comment it out.
+       -- if (v_item_id <= v_cur_item_id) then
+       --             ihook.setColumnValue(row_ori, 'ITEM_1_ID', '');
+       --             ihook.setColumnValue(row_ori, 'ITEM_1_VER_NR', '');
+    --  end if; 
+        -- end if
+
+
+
+
+END;
 
 procedure spValPVVMImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2)
 as
@@ -1945,7 +2236,7 @@ begin
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
         else 
          rows.extend; rows(rows.last) := row_ori;
-         spPVVMValidate(row_ori);
+         spPVVMValidate(row_ori, 'I');
         end if;
         --jira 3595
 --        if (ihook.getColumnValue(row_ori, 'PERM_VAL_NM') is null) then
@@ -2029,6 +2320,7 @@ end loop;
 
 end;
 
+--first procedure called by PV VM Update - Validate command
 procedure spValPVVMUpdate (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2)
 as
     hookInput           t_hookInput;
@@ -2147,7 +2439,7 @@ begin
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
         else 
          rows.extend; rows(rows.last) := row_ori;
-         spPVVMValidate(row_ori);
+         spPVVMValidate(row_ori, 'U');
         end if;
             
         rows.extend; rows(rows.last) := row_ori;
@@ -2339,7 +2631,7 @@ begin
             ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
         else 
          rows.extend; rows(rows.last) := row_ori;
-         spPVVMValidate(row_ori);
+         spPVVMValidate(row_ori, 'I');
         end if;
         --jira 3595
 --        if (ihook.getColumnValue(row_ori, 'PERM_VAL_NM') is null) then
@@ -2614,7 +2906,7 @@ begin
       
   if (ihook.getColumnValue (row_ori, 'CTL_VAL_STUS') <> 'PROCESSED' and ihook.getColumnValue (row_ori, 'CTL_VAL_STUS') <> 'IMPORTED') then 
    
-    spPVVMValidate(row_ori);      
+    spPVVMValidate(row_ori, 'I');      
           rows := t_rows();
     rows.extend; rows(rows.last) := row_ori;
     
@@ -2679,7 +2971,10 @@ end loop;
 return 0;
 end;
 
-procedure spPVVMValidate (row_ori in out t_row)
+--v_mode should be set to 'I' or 'U'
+-- 'I' = PV VM Import
+-- 'U' = PV VM Update
+procedure spPVVMValidate (row_ori in out t_row, v_mode in varchar2)
 as
   actions t_actions := t_actions();
 
@@ -2696,6 +2991,7 @@ as
     cd_ver_nr number(4,2);
     row_to_comp t_row;
     v_batch_nbr number;
+    v_pv_fnd number;
  begin
  
   
@@ -2845,6 +3141,29 @@ end if;
     end loop;
     end if;
 
+--Unique validations for PV VM Update
+if (v_mode = 'U') then
+    v_pv_fnd := 0;
+    --check that PV exists in the VD for update
+    if (v_val_ind = true) then
+        for cur in (select * from perm_val where val_dom_item_id = ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') and val_dom_ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR')
+                    and upper(perm_val_nm) = upper(ihook.getColumnValue(row_ori, 'PERM_VAL_NM'))) loop
+                --ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || '. PV found.' || chr(13));
+                v_pv_fnd := v_pv_fnd + 1;
+        end loop;
+        if (v_pv_fnd > 1) then
+            v_val_ind := false;
+            ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Duplicate PVs found in the VD.' || chr(13));
+        elsif (v_pv_fnd = 1) then
+            ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || ' PV found.' || chr(13));
+        else --PV not found
+            v_val_ind := false;
+            ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: PV not found in the VD. Please use PV VM Import.' || chr(13));
+        end if;
+    end if;
+    
+end if;
+--end unique validations for PV VM Update
     
    -- nci_pv_vm.spValCreateImport(row_ori, 'V', actions, v_val_ind);
    
