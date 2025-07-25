@@ -69,12 +69,13 @@ commit;
 
 
   CREATE OR REPLACE  VIEW VW_ADMIN_ITEM_VER_CREATED AS
-  SELECT "ITEM_ID","VER_NR","ITEM_DESC","CNTXT_ITEM_ID","CNTXT_VER_NR","ITEM_LONG_NM","ITEM_NM","ADMIN_NOTES","CHNG_DESC_TXT","CREATION_DT","EFF_DT","ORIGIN","UNRSLVD_ISSUE","UNTL_DT","CLSFCTN_SCHM_VER_NR","ADMIN_ITEM_TYP_ID",
+  SELECT "ITEM_ID","VER_NR","ITEM_DESC","CNTXT_ITEM_ID","CNTXT_VER_NR","ITEM_LONG_NM","ITEM_NM","ADMIN_NOTES",
+  "CHNG_DESC_TXT","CREATION_DT","EFF_DT","ORIGIN","UNRSLVD_ISSUE","UNTL_DT","CLSFCTN_SCHM_VER_NR","ADMIN_ITEM_TYP_ID",
   "CURRNT_VER_IND","ADMIN_STUS_ID","REGSTR_STUS_ID","REGISTRR_CNTCT_ID","SUBMT_CNTCT_ID","STEWRD_CNTCT_ID","SUBMT_ORG_ID","STEWRD_ORG_ID",
   "CREAT_DT","CREAT_USR_ID","LST_UPD_USR_ID","FLD_DELETE","LST_DEL_DT","S2P_TRN_DT","LST_UPD_DT","REGSTR_AUTH_ID",
   "ADMIN_STUS_NM_DN","CNTXT_NM_DN","REGSTR_STUS_NM_DN","ORIGIN_ID","ORIGIN_ID_DN","DEF_SRC",
   "CREAT_USR_ID_X","LST_UPD_USR_ID_X","ITEM_NM_CURATED","ITEM_NM_ID_VER","RVWR_CMNTS","LST_UPD_DT_X",
-	  CNTXT_NM_DN, decode(admin_item_typ_id, 4, 'Data Element', 2, 'Data Element Concept',3, 'Value Domain', 54 , 'Form', 57, 'Model', 58, 'Model Map') ADMIN_ITEM_TYP_NM
+    decode(admin_item_typ_id, 4, 'Data Element', 2, 'Data Element Concept',3, 'Value Domain', 54 , 'Form', 57, 'Model', 58, 'Model Map') ADMIN_ITEM_TYP_NM
        FROM ADMIN_ITEM
        where (item_id) in (Select item_id from admin_item where admin_item_typ_id in (2,3,4,54,57,58)
        group by item_id having count(*) > 1)
