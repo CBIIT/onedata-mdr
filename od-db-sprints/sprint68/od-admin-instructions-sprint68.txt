@@ -1,1 +1,23 @@
---TBD
+S68 OD Admin Instructions
+--
+
+--Jira 4115
+Add CO: CDE Match Guest to Guest Favorites as 'CDE Match'. Reorder it just above VM or Concept Match.
+
+--Jira 4228
+In Guest Favorites, rename 'VM or Concept Match - Guest User' to 'VM or Concept Match'.
+
+--Jira 4182
+Under DO: PV VM Update, remove all privileges for Curator, Form Builder, and Read-Only roles 
+
+Check the DECODEs for the following IMs: 
+	Model Map Import v1
+
+
+Additional Notes:
+1. If there is a need to update the interchange mappings for PV VM Import or PV VM Update, the Python Transformations must be re-entered otherwise the system will throw an error (there is a bug where the script is only partially saved when you navigate to the mapping step). For either IM, copy/paste the code below into the Python Transformation pop-up for the 'PV' column. You should then be able to save the IM.
+
+	def transform_input(string_list):
+	auxiliary_list = [(x, unicode(x,'UTF-8')) for x in string_list]
+	uni_list = [(y, y[1].replace(u'\u00A0','')) for y in auxiliary_list]
+	return [y[1] for y in uni_list]
