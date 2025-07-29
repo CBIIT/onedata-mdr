@@ -3,6 +3,7 @@ S68_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S68_WA_RA_DDL.sql
+S68_WA.sql
 S68_NCI_11179_2.sql
 S68_NCI_11179.sql
 S68_NCI_CODEMAP.sql
