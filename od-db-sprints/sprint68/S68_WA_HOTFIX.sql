@@ -15,4 +15,4 @@ update ref set  mtch_term = regexp_replace(upper(ref_nm),'\(|\)|\;|\-|\_|\||\:|\
 mtch_term_adv = regexp_replace(upper(ref_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');
 commit;
 
-alter table ref enable all trigger;
+alter table ref enable all triggers;
