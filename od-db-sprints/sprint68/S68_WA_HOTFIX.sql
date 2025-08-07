@@ -4,15 +4,15 @@ create or replace TRIGGER TR_REF_BEFORE
   for each row
 BEGIN
 
-:new.MTCH_TERM := regexp_replace(upper(:new.ref_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');
-:new.MTCH_TERM_ADV := regexp_replace(upper(:new.ref_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');  
+:new.MTCH_TERM := regexp_replace(upper(:new.ref_desc),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');
+:new.MTCH_TERM_ADV := regexp_replace(upper(:new.ref_desc),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');  
 END;
 /
 
 alter table ref disable all triggers;
 
-update ref set  mtch_term = regexp_replace(upper(ref_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}',''),
-mtch_term_adv = regexp_replace(upper(ref_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');
+update ref set  mtch_term = regexp_replace(upper(ref_desc),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}',''),
+mtch_term_adv = regexp_replace(upper(ref_desc),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|\"|\%|\*|\&|\#|\@|\{|\}','');
 commit;
 
 alter table ref enable all triggers;
