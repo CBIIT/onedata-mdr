@@ -16,3 +16,5 @@ mtch_term_adv = regexp_replace(upper(ref_nm),'\(|\)|\;|\-|\_|\||\:|\$|\[|\]|\''|
 commit;
 
 alter table ref enable all triggers;
+
+alter table nci_ds_rslt_dtl add (mtch_desc_txt varchar2(4000));
