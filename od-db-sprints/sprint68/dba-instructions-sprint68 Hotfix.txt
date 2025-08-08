@@ -1,0 +1,8 @@
+-- Run as RA
+S68_WA_RA_HOTFIX.sql
+
+-- Run as WA
+S68_WA_HOTFIX.sql
+S68_WA_RA_HOTFIX.sql
+S68_NSI_DS_HOTFIX.sql
+
