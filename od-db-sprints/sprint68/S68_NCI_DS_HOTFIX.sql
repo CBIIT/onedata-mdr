@@ -32,7 +32,9 @@ function isUserAuth(v_hdr_id in number, v_user_id in varchar2) return boolean;
 function getLastDSRun (v_hdr_id in number) return varchar2;
 procedure spDSSubPVVMDynmcSQL(v_hdr_id in number, v_mtch_typ in varchar2, v_entty_nm in varchar2, v_sel_word in varchar2, v_mtch_min_len in number, v_flt_str in varchar2, v_pv_cnt in number, v_src_dtl in varchar2, v_pv_filter in varchar2, v_mtch_pcnt in number);
 END;
+
 /
+
 create or replace PACKAGE BODY            nci_ds AS
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
@@ -889,9 +891,10 @@ begin
                     
                  
                     v_sql := ' insert into nci_ds_rslt (hdr_id, mtch_typ, item_id, ver_nr,  rule_id, score, rule_desc, mtch_desc_txt) 
-                    select  ' ||  v_hdr_id ||  ', ''' || v_mtch_typ || ''' , r.item_id, r.ver_nr,  2, 100, ''2. Question Text Exact Match'' ,max(r.ref_nm)
+                    select  ' ||  v_hdr_id ||  ', ''' || v_mtch_typ || ''' , r.item_id, r.ver_nr,  2, 100, ''2. Question Text Exact Match'' ,max(r.ref_desc)
                     from ref r, obj_key ok, vw_de de 
-                    where ' || v_entty_nm || ' =  r.MTCH_TERM  and r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
+                    where ' || v_entty_nm || ' =  r.MTCH_TERM  and r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' 
+                    and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
                     and (' || v_hdr_id || ',r.item_id, r.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt)
                     and de.val_dom_typ_id = 18 and ' || v_flt_str
                      || ' group by r.item_id, r.ver_nr ' ;
@@ -920,7 +923,7 @@ begin
                     4, 100, ''4. Long Name Like Match'', max(de.item_nm) from vw_de  de 
                     where instr(de.MTCH_TERM , ' || concat(v_entty_nm,' ') || ',1) > 0 
                      and currnt_ver_ind = 1 and de.val_dom_typ_id = 18 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
-                     and (' || v_hdr_id || ',de.item_id, de.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt) and ' || v_flt_str
+                     and (' || v_hdr_id || ') not in (select hdr_id from nci_ds_rslt) and ' || v_flt_str
                       || ' group by de.item_id, de.ver_nr ' ;
                    --  raise_application_error(-20000, v_sql);
                      execute immediate v_sql;
@@ -929,10 +932,10 @@ begin
                 
                     v_sql := ' insert into nci_ds_rslt (hdr_id, mtch_typ, item_id, ver_nr,  rule_id, score, rule_desc , mtch_desc_txt) 
                     select  ' ||  v_hdr_id ||  ', ''' || v_mtch_typ || ''' , r.item_id, r.ver_nr, 
-                    5, 100, ''5. Question Text Like Match'', max(r.ref_nm) from ref r, obj_key ok, vw_de de
+                    5, 100, ''5. Question Text Like Match'', max(r.ref_desc) from ref r, obj_key ok, vw_de de
                     where instr(r.MTCH_TERM ,' || concat(v_entty_nm,' ')  || ', 1) > 0                     and
-                    r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and r.ref_nm != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
-                    and (' || v_hdr_id || ',r.item_id, r.ver_nr) not in (select  hdr_id , item_id, ver_nr from nci_ds_rslt) and de.val_dom_typ_id = 18 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%'' and ' || v_flt_str
+                    r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and r.ref_desc != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
+                    and (' || v_hdr_id || ') not in (select  hdr_id from nci_ds_rslt) and de.val_dom_typ_id = 18 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%'' and ' || v_flt_str
                      || ' group by r.item_id, r.ver_nr ' ;
                    --  raise_application_error(-20000, v_sql);
                 execute immediate v_sql;
@@ -944,7 +947,7 @@ begin
                     6, 100, ''6. Alternate Name Like Match'', max(r.nm_desc) from alt_nms r, vw_de de
                     where instr( r.MTCH_TERM, ' || concat(v_entty_nm,' ')  || ',1) > 0
                     and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1 and de.val_dom_typ_id = 18 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
-                    and (' || v_hdr_id || ',r.item_id, r.ver_nr) not  in (select hdr_id ,item_id, ver_nr from nci_ds_rslt) and ' || v_flt_str
+                    and (' || v_hdr_id || ') not  in (select hdr_id  from nci_ds_rslt) and ' || v_flt_str
                      || ' group by r.item_id, r.ver_nr ' ;
 --raise_application_error(-20000,v_sql);
                      execute immediate v_sql;
@@ -954,7 +957,7 @@ begin
                     4, 100, ''7. Long Name Reverse Like Match'', max(de.item_nm) from vw_de  de 
                     where instr('|| concat(v_entty_nm,' ')  || ',de.MTCH_TERM , 1) > 0  and length(de.mtch_term) > ' || v_mtch_min_len ||
                     ' and currnt_ver_ind = 1 and de.val_dom_typ_id = 18 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
-                     and (' || v_hdr_id || ',de.item_id, de.ver_nr) not in (select hdr_id ,item_id, ver_nr from nci_ds_rslt) and ' || v_flt_str
+                     and (' || v_hdr_id || ') not in (select hdr_id  from nci_ds_rslt) and ' || v_flt_str
                       || ' group by de.item_id, de.ver_nr ' ;
                    --  raise_application_error(-20000, v_sql);
                      execute immediate v_sql;
@@ -963,10 +966,10 @@ begin
                 
                     v_sql := ' insert into nci_ds_rslt (hdr_id, mtch_typ, item_id, ver_nr,  rule_id, score, rule_desc , mtch_desc_txt) 
                     select  ' ||  v_hdr_id ||  ', ''' || v_mtch_typ || ''' , r.item_id, r.ver_nr, 
-                    5, 100, ''8. Question Text Reverse Like Match'', max(r.ref_nm) from ref r, obj_key ok, vw_de de
+                    5, 100, ''8. Question Text Reverse Like Match'', max(r.ref_desc) from ref r, obj_key ok, vw_de de
                     where instr(' || concat(v_entty_nm,' ')  || ',r.MTCH_TERM , 1) > 0       and length(r.mtch_term) > ' || v_mtch_min_len || '           and
-                    r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and r.ref_nm != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
-                    and (' || v_hdr_id || ',r.item_id, r.ver_nr) not in (select  hdr_id,item_id, ver_nr  from nci_ds_rslt) and de.val_dom_typ_id = 18 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%'' and ' || v_flt_str
+                    r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and r.ref_desc != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
+                    and (' || v_hdr_id || ') not in (select  hdr_id  from nci_ds_rslt) and de.val_dom_typ_id = 18 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%'' and ' || v_flt_str
                      || ' group by r.item_id, r.ver_nr ' ;
                    --  raise_application_error(-20000, v_sql);
                 execute immediate v_sql;
@@ -978,7 +981,7 @@ begin
                     6, 100, ''9. Alternate Name Reverse Like Match'' , max(r.nm_desc) from alt_nms r, vw_de de
                     where instr( ' || concat(v_entty_nm,' ')  || ', r.MTCH_TERM, 1) > 0 and length(r.mtch_term) > ' || v_mtch_min_len ||
                     ' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1 and de.val_dom_typ_id = 18 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
-                    and (' || v_hdr_id || ',r.item_id, r.ver_nr) not  in (select hdr_id ,item_id, ver_nr  from nci_ds_rslt) and ' || v_flt_str
+                    and (' || v_hdr_id || ') not  in (select hdr_id from nci_ds_rslt) and ' || v_flt_str
                      || ' group by r.item_id, r.ver_nr ' ;
 --raise_application_error(-20000,v_sql);
                      execute immediate v_sql;
@@ -1318,8 +1321,8 @@ v_mtch_pcnt := 0.5;
         
     -- Rule id 2:  Entity alternate question text name exact match
     v_sql := ' insert into nci_ds_rslt_dtl (hdr_id, mtch_typ, item_id, ver_nr, perm_val_nm, rule_id, score, rule_desc, mtch_desc_txt)
-        select distinct ' || v_hdr_id || ', ''' || v_mtch_typ || ''', r.item_id, r.ver_nr, ''NA'', 2, 100, ''2. Question Text Exact Match'',
-        max(r.ref_nm) from ref r, obj_key ok, vw_de de  where ' || v_entty_nm || '  = r.MTCH_TERM         and
+        select  ' || v_hdr_id || ', ''' || v_mtch_typ || ''', r.item_id, r.ver_nr, ''NA'', 2, 100, ''2. Question Text Exact Match'',
+        max(r.ref_desc) from ref r, obj_key ok, vw_de de  where ' || v_entty_nm || '  = r.MTCH_TERM         and
         r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
         and (' || v_hdr_id || ',r.item_id, r.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt_dtl) and de.val_dom_typ_id = 17 and ' || v_flt_str
         || ' group by r.item_id, r.ver_nr';
@@ -1330,7 +1333,7 @@ v_mtch_pcnt := 0.5;
         
     -- Rule id 3:  Entity alternate  name exact match
     v_sql := ' insert into nci_ds_rslt_dtl (hdr_id,mtch_typ,  item_id, ver_nr, perm_val_nm, rule_id, score, rule_desc, mtch_desc_txt)
-        select distinct ' || v_hdr_id || ', ''' || v_mtch_typ || ''', r.item_id, r.ver_nr, ''NA'', 3, 100, ''3. Alternate Name Exact Match'',
+        select  ' || v_hdr_id || ', ''' || v_mtch_typ || ''', r.item_id, r.ver_nr, ''NA'', 3, 100, ''3. Alternate Name Exact Match'',
         max(r.nm_desc) from alt_nms r, vw_de de  where 
        ' || v_entty_nm || '  = r.MTCH_TERM
         and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1 and de.val_dom_typ_id = 17 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
@@ -1354,17 +1357,17 @@ v_mtch_pcnt := 0.5;
         
         
         v_sql := ' insert into nci_ds_rslt_dtl (hdr_id, mtch_typ, item_id, ver_nr, perm_val_nm,  rule_id, score, rule_desc, mtch_desc_txt)
-                    select distinct ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''', r.item_id, r.ver_nr,  ''NA'', 5, 100, ''5. Question Text Like Match'' ,
-                    max(r.ref_nm) from ref r, obj_key ok, vw_de de
+                    select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''', r.item_id, r.ver_nr,  ''NA'', 5, 100, ''5. Question Text Like Match'' ,
+                    max(r.ref_desc) from ref r, obj_key ok, vw_de de
                     where ((instr(r.MTCH_TERM,' || v_entty_nm || ', 1) > 0  )   or (instr(' || v_entty_nm || ',r.MTCH_TERM, 1) > 0  ))  and length(r.mtch_term) > ' || v_mtch_min_len || '   and de.ADMIN_STUS_NM_DN not like ''%RETIRED%'' and
-                    r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and r.ref_nm != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
+                    r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and r.ref_desc != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1
                     and (' || v_hdr_id || ', r.item_id, r.ver_nr) not in (select  hdr_id, item_id, ver_nr from nci_ds_rslt_dtl) and de.val_dom_typ_id = 17 and ' || v_flt_str
                     || ' group by r.item_id, r.ver_nr';
                 --      raise_application_error(-20000, v_sql);
         execute immediate v_sql;
               
         v_sql := ' insert into nci_ds_rslt_dtl (hdr_id, mtch_typ, item_id, ver_nr,  perm_val_nm, rule_id, score, rule_desc, mtch_desc_txt)
-                    select distinct ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''', r.item_id, r.ver_nr, ''NA'', 6, 100, ''6. Alternate Name Like Match'', 
+                    select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''', r.item_id, r.ver_nr, ''NA'', 6, 100, ''6. Alternate Name Like Match'', 
                     max(r.nm_Desc) from alt_nms r, vw_de de
                     where ((instr(r.MTCH_TERM, ' || v_entty_nm || ',1) > 0)  or (instr(' || v_entty_nm || ',r.MTCH_TERM,1) > 0)) and length(r.mtch_term) > ' || v_mtch_min_len || '  
                     and de.item_id = r.item_id and de.ver_nr = r.ver_nr and de.currnt_ver_ind = 1 and de.val_dom_typ_id = 17 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
@@ -1457,7 +1460,7 @@ if (sql%rowcount = 0 ) then --longest term like match
         end loop;
  
         v_sel_word := regexp_replace(upper(v_sel_word),v_reg_str_adv,'');
-
+--- Longest name match to CDE Long Name
         v_sql := ' insert into nci_ds_rslt_dtl (hdr_id, mtch_typ, item_id, ver_nr, perm_val_nm, rule_id, score, rule_desc, mtch_desc_txt)
             select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''' , de.item_id, de.ver_nr, ''NA'', 4, 100, ''7. Longest Term Like Match'' ,
             max(de.item_nm) from vw_de  de 
@@ -1467,7 +1470,29 @@ if (sql%rowcount = 0 ) then --longest term like match
             and (' || v_hdr_id || ' , de.item_id, de.ver_nr) not in (select  hdr_id, item_id, ver_nr from nci_ds_rslt_dtl) and de.val_dom_typ_id = 17 and ' || v_flt_str
             || ' group by de.item_id, de.ver_nr';
         execute immediate v_sql;
-
+-- Longest name match to Question Text
+           v_sql := ' insert into nci_ds_rslt_dtl (hdr_id, mtch_typ, item_id, ver_nr, perm_val_nm, rule_id, score, rule_desc, mtch_desc_txt)
+            select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''' , de.item_id, de.ver_nr, ''NA'', 4, 100, ''7. Longest Term Question Text Like Match'' ,
+            max(r.ref_desc) from   ref r , obj_key ok, vw_de de
+            where ((r.MTCH_TERM_ADV  like ''%' || v_sel_word || '%'') or  (''' ||   v_sel_word || ''' like ''%'' || r.MTCH_TERM_ADV || ''%'' )) and length(r.mtch_term_adv) >= length(''' ||  v_sel_word || ''') ' ||
+            ' and currnt_ver_ind = 1 and de.val_dom_typ_id = 17 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
+            and length(r.mtch_term_adv) > ' || v_mtch_min_len || 
+           ' and r.ref_typ_id = ok.obj_key_id and upper(obj_key_desc) like ''%QUESTION%'' and r.ref_desc != ''%'' and de.item_id = r.item_id and de.ver_nr = r.ver_nr '
+               ||   '  and (' || v_hdr_id || ' , de.item_id, de.ver_nr) not in (select  hdr_id, item_id, ver_nr from nci_ds_rslt_dtl) and de.val_dom_typ_id = 17 and ' || v_flt_str
+            || ' group by de.item_id, de.ver_nr';
+        execute immediate v_sql;
+        
+           v_sql := ' insert into nci_ds_rslt_dtl (hdr_id, mtch_typ, item_id, ver_nr, perm_val_nm, rule_id, score, rule_desc, mtch_desc_txt)
+            select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''' , de.item_id, de.ver_nr, ''NA'', 4, 100, ''7. Longest Term Alt Name Like Match'' ,
+            max(r.nm_desc) from   alt_nms r,  vw_de de
+            where ((r.MTCH_TERM_ADV  like ''%' || v_sel_word || '%'') or  (''' ||   v_sel_word || ''' like ''%'' || r.MTCH_TERM_ADV || ''%'' )) and length(r.mtch_term_adv) >= length(''' ||  v_sel_word || ''') ' ||
+            ' and currnt_ver_ind = 1 and de.val_dom_typ_id = 17 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
+            and length(r.mtch_term_adv) > ' || v_mtch_min_len || 
+           '  and de.item_id = r.item_id and de.ver_nr = r.ver_nr '
+               ||   '  and (' || v_hdr_id || ' , de.item_id, de.ver_nr) not in (select  hdr_id, item_id, ver_nr from nci_ds_rslt_dtl) and de.val_dom_typ_id = 17 and ' || v_flt_str
+            || ' group by de.item_id, de.ver_nr';
+        execute immediate v_sql;
+     
         spDSSubPVVMDynmcSQL(v_hdr_id, v_mtch_typ, v_entty_nm, v_sel_word, v_mtch_min_len, v_flt_str, v_pv_cnt, v_src_dtl, v_pv_filter, v_mtch_pcnt); 
 end if;
 --END JIRA 3904-----------------
