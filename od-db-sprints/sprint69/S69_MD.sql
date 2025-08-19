@@ -39,3 +39,10 @@ update od_md_objcol set prop_val= 'Date Last Modified' where prop_id = 802 and (
 (select obj_id, schm_id, col_id from od_mdv_objcolhort where col_nm = 'LST_UPD_DT')
 and prop_val <> 'Date Last Modified';
 commit;
+
+
+update od_md_objcol set prop_val = 1000 where prop_id = 807 and (obj_id,proj_id, schm_id, col_id) in 
+(select obj_id, proj_id, schm_id, col_id from od_mdv_objcolhort where col_nm = 'LANG_ID'
+and nvl(pk_ind,0)<> 1)
+;
+commit;
