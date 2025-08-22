@@ -1,5 +1,61 @@
 
   CREATE OR REPLACE  VIEW VW_NCI_DE_HORT_EXPANDED as
+  SELECT   DE.DE_CONC_ITEM_ID,
+           DE.DE_CONC_VER_NR,
+           DE.VAL_DOM_VER_NR,
+           DE.VAL_DOM_ITEM_ID,
+           DE.REP_CLS_VER_NR,
+           DE.REP_CLS_ITEM_ID,
+           nvl(DE.DERV_DE_IND,0) DERV_DE_IND,
+           DE.DERV_MTHD,
+           DE.DERV_RUL,
+           DE.DERV_TYP_ID,
+           DE.CONCAT_CHAR,
+          DE.CREAT_USR_ID,
+           DE.LST_UPD_USR_ID,
+           DE.FLD_DELETE,
+           DE.LST_DEL_DT,
+           DE.S2P_TRN_DT,
+           DE.LST_UPD_DT,
+           DE.CREAT_DT,
+           DE_CONC.OBJ_CLS_ITEM_ID,
+           DE_CONC.OBJ_CLS_VER_NR,
+           OC.ITEM_NM                        OBJ_CLS_ITEM_NM,
+           OC.ITEM_LONG_NM                   OBJ_CLS_ITEM_LONG_NM,
+           CONOC.CNCPT_CONCAT 			OC_CNCPT_CONCAT,
+           CONOC.CNCPT_CONCAT_NM			OC_CNCPT_CONCAT_NM,
+           PROP.ITEM_NM                      PROP_ITEM_NM,
+           PROP.ITEM_LONG_NM                 PROP_ITEM_LONG_NM,
+           DE_CONC.PROP_ITEM_ID,
+           DE_CONC.PROP_VER_NR,
+           CONPROP.CNCPT_CONCAT			PROP_CNCPT_CONCAT,
+           CONPROP.CNCPT_CONCAT_NM			PROP_CNCPT_CONCAT_NM	,
+           DE_CONC.CONC_DOM_ITEM_ID          DEC_CD_ITEM_ID,
+           DE_CONC.CONC_DOM_VER_NR           DEC_CD_VER_NR,
+           DEC_CD.ITEM_NM                    DEC_CD_ITEM_NM,
+           DEC_CD.ITEM_LONG_NM               DEC_CD_ITEM_LONG_NM,
+           DEC_CD.ITEM_DESC                  DEC_CD_ITEM_DESC,
+           DEC_CD.CNTXT_NM_DN                DEC_CD_CNTXT_NM,
+           DEC_CD.CURRNT_VER_IND             DEC_CD_CURRNT_VER_IND,
+           DEC_CD.REGSTR_STUS_NM_DN          DEC_CD_REGSTR_STUS_NM,
+           DEC_CD.ADMIN_STUS_NM_DN           DEC_CD_ADMIN_STUS_NM,
+      FROM --ADMIN_ITEM,
+           DE,
+           DE_CONC,
+          (select listagg(
+     WHERE   DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID
+            AND DE.DE_CONC_VER_NR = DE_CONC.VER_NR
+           
+
+  GRANT SELECT ON "ONEDATA_WA"."VW_NCI_DE_HORT" TO "ONEDATA_RO";
+  GRANT READ ON "ONEDATA_WA"."VW_NCI_DE_HORT" TO "ONEDATA_RO";
+
+alter table NCI_DS_HDR add CMP_TO_AI varchar2(4000);
+
+
+/*
+
+  CREATE OR REPLACE  VIEW VW_NCI_DE_HORT_EXPANDED as
   SELECT ADMIN_ITEM.ITEM_ID                ITEM_ID,
            ADMIN_ITEM.VER_NR,
            ADMIN_ITEM.ITEM_NM,
@@ -39,10 +95,10 @@
            DE.S2P_TRN_DT,
            ADMIN_ITEM.LST_UPD_DT,
            ADMIN_ITEM.CREAT_DT,
-           ADMIN_ITEM.CREAT_USR_ID                   CREAT_USR_ID_API,
-          ADMIN_ITEM.LST_UPD_USR_ID                 LST_UPD_USR_ID_API,
-           ADMIN_ITEM.CREAT_DT                       CREAT_DT_API,
-           ADMIN_ITEM.LST_UPD_DT                     LST_UPD_DT_API,
+           ADMIN_ITEM.CREAT_USR_ID                   CREAT_USR_ID_X,
+          ADMIN_ITEM.LST_UPD_USR_ID                 LST_UPD_USR_ID_X,
+           ADMIN_ITEM.CREAT_DT                       CREAT_DT_X,
+           ADMIN_ITEM.LST_UPD_DT                     LST_UPD_DT_X,
            VALUE_DOM.CONC_DOM_VER_NR,
            VALUE_DOM.CONC_DOM_ITEM_ID,
            VALUE_DOM.NON_ENUM_VAL_DOM_DESC,
@@ -111,51 +167,46 @@
            CD_AI.REGSTR_STUS_NM_DN           CD_REGSTR_STUS_NM,
            CD_AI.ADMIN_STUS_NM_DN            CD_ADMIN_STUS_NM,
            ADMIN_ITEM.ADMIN_ITEM_TYP_ID,
-           ''                                CNTXT_AGG,
-             SYSDATE
-           - GREATEST (DE.LST_UPD_DT,
-                       admin_item.lst_upd_dt,
-                       Value_dom.LST_UPD_DT,
-                       dec_ai.LST_UPD_DT)    LST_UPD_CHG_DAYS
-      FROM ADMIN_ITEM,
+      FROM --ADMIN_ITEM,
            DE,
-           VALUE_DOM,
-           ADMIN_ITEM          VALUE_DOM_AI,
-           ADMIN_ITEM          DEC_AI,
+           --VALUE_DOM,
+           --ADMIN_ITEM          VALUE_DOM_AI,
+           --ADMIN_ITEM          DEC_AI,
            DE_CONC,
-           VW_CONC_DOM         DEC_CD,
-           VW_CONC_DOM         CD_AI,
-           ADMIN_ITEM          OC,
-           ADMIN_ITEM          PROP,
-           NCI_ADMIN_ITEM_EXT  CONOC,
-           NCI_ADMIN_ITEM_EXT  CONPROP
+           --VW_CONC_DOM         DEC_CD,
+           --VW_CONC_DOM         CD_AI,
+           --ADMIN_ITEM          OC,
+           --ADMIN_ITEM          PROP,
+           --NCI_ADMIN_ITEM_EXT  CONOC,
+           --NCI_ADMIN_ITEM_EXT  CONPROP,
+	       (select listagg(
      WHERE     ADMIN_ITEM.ADMIN_ITEM_TYP_ID = 4
            AND DE.ITEM_ID = ADMIN_ITEM.ITEM_ID
            AND DE.VER_NR = ADMIN_ITEM.VER_NR
-           AND DE.VAL_DOM_ITEM_ID = VALUE_DOM_AI.ITEM_ID
-           AND DE.VAL_DOM_VER_NR = VALUE_DOM_AI.VER_NR
-           AND DE.VAL_DOM_ITEM_ID = VALUE_DOM.ITEM_ID
-           AND DE.VAL_DOM_VER_NR = VALUE_DOM.VER_NR
-           AND DE.DE_CONC_ITEM_ID = DEC_AI.ITEM_ID
-           AND DE.DE_CONC_VER_NR = DEC_AI.VER_NR
+          -- AND DE.VAL_DOM_ITEM_ID = VALUE_DOM_AI.ITEM_ID
+           --AND DE.VAL_DOM_VER_NR = VALUE_DOM_AI.VER_NR
+           --AND DE.VAL_DOM_ITEM_ID = VALUE_DOM.ITEM_ID
+          -- AND DE.VAL_DOM_VER_NR = VALUE_DOM.VER_NR
+           --AND DE.DE_CONC_ITEM_ID = DEC_AI.ITEM_ID
+           --AND DE.DE_CONC_VER_NR = DEC_AI.VER_NR
            AND DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID
-           AND DE_CONC.OBJ_CLS_ITEM_ID = OC.ITEM_ID
-           AND DE_CONC.OBJ_CLS_VER_NR = OC.VER_NR
-           AND DE_CONC.PROP_ITEM_ID = PROP.ITEM_ID
-           AND DE_CONC.PROP_VER_NR = PROP.VER_NR
+           --AND DE_CONC.OBJ_CLS_ITEM_ID = OC.ITEM_ID
+           --AND DE_CONC.OBJ_CLS_VER_NR = OC.VER_NR
+           --AND DE_CONC.PROP_ITEM_ID = PROP.ITEM_ID
+           --AND DE_CONC.PROP_VER_NR = PROP.VER_NR
            AND DE.DE_CONC_VER_NR = DE_CONC.VER_NR
-           AND DE_CONC.CONC_DOM_ITEM_ID = DEC_CD.ITEM_ID
-           AND DE_CONC.CONC_DOM_VER_NR = DEC_CD.VER_NR
-           AND VALUE_DOM.CONC_DOM_ITEM_ID = CD_AI.ITEM_ID
-           AND VALUE_DOM.CONC_DOM_VER_NR = CD_AI.VER_NR
-           AND OC.ITEM_ID = CONOC.ITEM_ID
-           AND OC.VER_NR = CONOC.VER_NR
-           AND PROP.ITEM_ID = CONPROP.ITEM_ID
-           AND PROP.VER_NR = CONPROP.VER_NR;
+           --AND DE_CONC.CONC_DOM_ITEM_ID = DEC_CD.ITEM_ID
+           --AND DE_CONC.CONC_DOM_VER_NR = DEC_CD.VER_NR
+           --AND VALUE_DOM.CONC_DOM_ITEM_ID = CD_AI.ITEM_ID
+           --AND VALUE_DOM.CONC_DOM_VER_NR = CD_AI.VER_NR
+           --AND OC.ITEM_ID = CONOC.ITEM_ID
+           --AND OC.VER_NR = CONOC.VER_NR
+           --AND PROP.ITEM_ID = CONPROP.ITEM_ID
+           --AND PROP.VER_NR = CONPROP.VER_NR;
 
 
   GRANT SELECT ON "ONEDATA_WA"."VW_NCI_DE_HORT" TO "ONEDATA_RO";
   GRANT READ ON "ONEDATA_WA"."VW_NCI_DE_HORT" TO "ONEDATA_RO";
 
-alter table NCI_DS_HDR add CMP_TO_AI varchar2(4000);
 
+*/
