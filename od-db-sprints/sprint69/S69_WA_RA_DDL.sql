@@ -210,3 +210,56 @@ alter table NCI_DS_HDR add CMP_TO_AI varchar2(4000);
 
 
 */
+
+alter table nci_mdl_elmnt_char add (CMNTS_DESC_TXT varchar2(4000));
+
+
+  CREATE OR REPLACE VIEW VW_MDL_IMP_TEMPLATE AS
+  SELECT ' '                DO_NOT_USE,
+       ' '                  BATCH_USER,
+       ' '                  BATCH_NAME,
+       ROWNUM               SEQ_ID,
+       ai.item_nm           MDL_NM, 
+       ai.item_id           MDL_ID, 
+       ai.ver_nr            MDL_VER_NR, 
+       me.item_long_nm      ME_LONG_NM, 
+       me.item_phy_obj_nm   ME_PHY_NM, 
+       me.item_desc         ME_DESC, 
+       me_typ.obj_key_desc ME_TYP_DESC,   
+       mec.mec_long_nm      MEC_LONG_NM, 
+       mec.MEC_PHY_NM       MEC_PHY_NM, 
+       mec.CHAR_ORD         MEC_CHAR_ORD, 
+       mec.                 MEC_DESC, 
+       mec_typ.obj_key_Desc MEC_TYP_DESC,  
+       mec.src_min_char     MEC_MIN_CHAR, 
+       mec.src_max_char     MEC_MAX_CHAR, 
+       SRC_DTTYPE         MEC_DT_TYP_DESC, 
+       SRC_UOM             UOM_DESC,  
+       mec_req.obj_key_Desc          MEC_MNDTRY,  
+       decode(mec.pk_ind,1,'Yes','No')           MEC_PK_IND,    
+       decode(mec.mdl_pk_ind,1,'Yes','No')           MEC_MDL_PK_IND,    
+       mec.src_deflt_val    MEC_DEFLT_VAL, 
+       mec.cde_item_id      CDE_ID, 
+       mec.cde_ver_nr       CDE_vERSION, 
+       decode(mec.FK_IND,1,'Yes','No')           MEC_FK_IND, 
+       mec.                 FK_ELMNT_PHY_NM, 
+       mec.                 FK_ELMNT_CHAR_PHY_NM, 
+       mec.cmnts_desc_txt                  COMMENTS            
+FROM admin_item            ai,
+     nci_mdl               mdl,
+     nci_mdl_elmnt         me,
+     nci_mdl_elmnt_char    mec,
+     obj_key               mec_typ,
+     obj_key               me_typ,
+     obj_key               mec_req
+WHERE ai.item_id                  = mdl.item_id
+  AND ai.ver_nr                   = mdl.ver_nr
+  AND ai.admin_item_typ_id        = 57
+  AND mdl.item_id                 = me.mdl_item_id
+  AND mdl.ver_nr                  = me.mdl_item_ver_nr
+  AND me.item_id                  = mec.mdl_elmnt_item_id
+  AND me.ver_nr                   = mec.mdl_elmnt_ver_nr
+  AND mec.mdl_elmnt_char_typ_id   = mec_typ.obj_key_id (+)
+  AND mec.req_ind  = mec_req.obj_key_id (+)
+  AND me.ME_TYP_ID  = me_typ.obj_key_id (+);
+
