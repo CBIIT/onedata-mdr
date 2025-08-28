@@ -353,3 +353,10 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  and vdst.uom_id = uom.uom_id (+);
 
 
+-- Update missing languages due to bug in 67.
+update alt_nms set lang_id = 1000 where creat_dt >= sysdate - 30 and lang_id is null;
+commit;
+
+
+update alt_def set lang_id = 1000 where creat_dt >= sysdate - 30 and lang_id is null;
+commit;
