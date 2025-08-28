@@ -1,5 +1,5 @@
 
-  CREATE OR REPLACE  VIEW VW_NCI_DE_HORT_EXPANDED as
+  CREATE or replace  VIEW VW_NCI_DE_HORT_EXPANDED as
   SELECT   DE.DE_CONC_ITEM_ID,
            DE.DE_CONC_VER_NR,
            DE.VAL_DOM_VER_NR,
@@ -21,34 +21,31 @@
            DE_CONC.OBJ_CLS_ITEM_ID,
            DE_CONC.OBJ_CLS_VER_NR,
            OC.ITEM_NM                        OBJ_CLS_ITEM_NM,
-           OC.ITEM_LONG_NM                   OBJ_CLS_ITEM_LONG_NM,
-           CONOC.CNCPT_CONCAT 			OC_CNCPT_CONCAT,
-           CONOC.CNCPT_CONCAT_NM			OC_CNCPT_CONCAT_NM,
-           PROP.ITEM_NM                      PROP_ITEM_NM,
-           PROP.ITEM_LONG_NM                 PROP_ITEM_LONG_NM,
            DE_CONC.PROP_ITEM_ID,
            DE_CONC.PROP_VER_NR,
-           CONPROP.CNCPT_CONCAT			PROP_CNCPT_CONCAT,
-           CONPROP.CNCPT_CONCAT_NM			PROP_CNCPT_CONCAT_NM	,
-           DE_CONC.CONC_DOM_ITEM_ID          DEC_CD_ITEM_ID,
-           DE_CONC.CONC_DOM_VER_NR           DEC_CD_VER_NR,
-           DEC_CD.ITEM_NM                    DEC_CD_ITEM_NM,
-           DEC_CD.ITEM_LONG_NM               DEC_CD_ITEM_LONG_NM,
-           DEC_CD.ITEM_DESC                  DEC_CD_ITEM_DESC,
-           DEC_CD.CNTXT_NM_DN                DEC_CD_CNTXT_NM,
-           DEC_CD.CURRNT_VER_IND             DEC_CD_CURRNT_VER_IND,
-           DEC_CD.REGSTR_STUS_NM_DN          DEC_CD_REGSTR_STUS_NM,
-           DEC_CD.ADMIN_STUS_NM_DN           DEC_CD_ADMIN_STUS_NM,
-      FROM --ADMIN_ITEM,
+          alt.altnm,
+	      refdoc.refdesc,
+	  pvvm.pv,
+	  pvvm.vm,
+	  pvvm.vm_cncpt
+	  FROM --ADMIN_ITEM,
            DE,
            DE_CONC,
-          (select listagg(
+          (select distinct item_id, ver_nr, LISTAGG(nm_desc, ',') WITHIN GROUP (ORDER by ITEM_ID) as altnm from alt_nms group by item_id, ver_nr)  alt,
+	      (select  item_id, ver_nr, LISTAGG(ref_desc, ',') WITHIN GROUP (ORDER by ITEM_ID) as refdesc from ref group by item_id, ver_nr) refdoc,
+		(select  de_item_id,de_ver_nr, LISTAGG(PERM_VAL_NM, ',') WITHIN GROUP (ORDER by de_ITEM_ID) as PV,
+	   LISTAGG(ITEM_NM, ',') WITHIN GROUP (ORDER by de_ITEM_ID) as VM ,
+	  LISTAGG(CNCPT_CONCAT, ',') WITHIN GROUP (ORDER by de_ITEM_ID) as VM_CNCPT  from VW_NCI_DE_PV group by de_item_id, de_ver_nr) PVVM
      WHERE   DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID
             AND DE.DE_CONC_VER_NR = DE_CONC.VER_NR
-           
+	  and de.item_id = alt.item_id (+)
+	  and de.ver_nr = alt.ver_nr (+)
+	    and de.item_id = refdoc.item_id (+)
+	  and de.ver_nr = refdoc.ver_nr (+)
+	    and de.item_id = pvvm.item_id (+)
+	  and de.ver_nr = pvvm.ver_nr (+)
+	  
 
-  GRANT SELECT ON "ONEDATA_WA"."VW_NCI_DE_HORT" TO "ONEDATA_RO";
-  GRANT READ ON "ONEDATA_WA"."VW_NCI_DE_HORT" TO "ONEDATA_RO";
 
 alter table NCI_DS_HDR add CMP_TO_AI varchar2(4000);
 
