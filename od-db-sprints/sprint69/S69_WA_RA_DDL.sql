@@ -1,8 +1,9 @@
 
---drop view VW_NCI_DE_HORT_EXPANDED;
+--drop materialized view VW_NCI_DE_HORT_EXPANDED;
 
 CREATE materialized VIEW VW_NCI_DE_HORT_EXPANDED as
-  SELECT   DE.DE_CONC_ITEM_ID,
+  SELECT DE.ITEM_ID, DE.VER_NR,   
+        DE.DE_CONC_ITEM_ID,
            DE.DE_CONC_VER_NR,
            DE.VAL_DOM_VER_NR,
            DE.VAL_DOM_ITEM_ID,
