@@ -1,5 +1,7 @@
 
-  CREATE or replace  VIEW VW_NCI_DE_HORT_EXPANDED as
+--drop view VW_NCI_DE_HORT_EXPANDED;
+
+CREATE materialized VIEW VW_NCI_DE_HORT_EXPANDED as
   SELECT   DE.DE_CONC_ITEM_ID,
            DE.DE_CONC_VER_NR,
            DE.VAL_DOM_VER_NR,
@@ -20,7 +22,6 @@
            DE.CREAT_DT,
            DE_CONC.OBJ_CLS_ITEM_ID,
            DE_CONC.OBJ_CLS_VER_NR,
-           OC.ITEM_NM                        OBJ_CLS_ITEM_NM,
            DE_CONC.PROP_ITEM_ID,
            DE_CONC.PROP_VER_NR,
           alt.altnm,
@@ -31,19 +32,19 @@
 	  FROM --ADMIN_ITEM,
            DE,
            DE_CONC,
-          (select distinct item_id, ver_nr, LISTAGG(nm_desc, ',') WITHIN GROUP (ORDER by ITEM_ID) as altnm from alt_nms group by item_id, ver_nr)  alt,
-	      (select  item_id, ver_nr, LISTAGG(ref_desc, ',') WITHIN GROUP (ORDER by ITEM_ID) as refdesc from ref group by item_id, ver_nr) refdoc,
-		(select  de_item_id,de_ver_nr, LISTAGG(PERM_VAL_NM, ',') WITHIN GROUP (ORDER by de_ITEM_ID) as PV,
-	   LISTAGG(ITEM_NM, ',') WITHIN GROUP (ORDER by de_ITEM_ID) as VM ,
-	  LISTAGG(CNCPT_CONCAT, ',') WITHIN GROUP (ORDER by de_ITEM_ID) as VM_CNCPT  from VW_NCI_DE_PV group by de_item_id, de_ver_nr) PVVM
+          (select distinct item_id, ver_nr, substr(LISTAGG(nm_desc, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as altnm from alt_nms group by item_id, ver_nr)  alt,
+	      (select  item_id, ver_nr, substr(LISTAGG(ref_desc, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as refdesc from ref group by item_id, ver_nr) refdoc,
+		(select  de_item_id,de_ver_nr, substr(LISTAGG(PERM_VAL_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as PV,
+	   substr( LISTAGG(ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as VM ,
+	  substr(LISTAGG(CNCPT_CONCAT, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as VM_CNCPT  from VW_NCI_DE_PV group by de_item_id, de_ver_nr) PVVM
      WHERE   DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID
             AND DE.DE_CONC_VER_NR = DE_CONC.VER_NR
 	  and de.item_id = alt.item_id (+)
 	  and de.ver_nr = alt.ver_nr (+)
 	    and de.item_id = refdoc.item_id (+)
 	  and de.ver_nr = refdoc.ver_nr (+)
-	    and de.item_id = pvvm.item_id (+)
-	  and de.ver_nr = pvvm.ver_nr (+)
+	    and de.item_id = pvvm.de_item_id (+)
+	  and de.ver_nr = pvvm.de_ver_nr (+)
 	  
 
 
