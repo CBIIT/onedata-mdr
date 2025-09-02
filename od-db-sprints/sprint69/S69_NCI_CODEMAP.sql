@@ -9,9 +9,9 @@ create or replace PACKAGE            nci_codemap AS
   procedure spVersionModel ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);-- not used. Create Version is used.
   procedure spCompareModel ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure spCreateMapGroup ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
-  procedure getModelElementAction ( row_ori in out t_row, actions in out t_actions, v_mdl_hdr_id in number, v_mdl_elmnt_id in out number);
+  procedure getModelElementAction ( row_ori in out t_row, actions in out t_actions, v_mdl_hdr_id in number, v_mdl_elmnt_id in out number, v_ins_cnt in out number, v_upd_cnt in out number);
  procedure getModelElementCharAction ( row_ori in out t_row, rowscharins in out t_rows,rowscharupd in out t_rows, v_mdl_elmnt_id in number, v_mdl_elmnt_long_nm in varchar2);
- procedure getModelElementCharActionDirect ( row_ori in out t_row, rowscharins in out t_rows,rowscharupd in out t_rows, v_mdl_elmnt_id in number, v_mdl_elmnt_long_nm in varchar2);
+ procedure getModelElementCharActionDirect ( row_ori in out t_row, rowscharins in out t_rows,rowscharupd in out t_rows, v_mdl_elmnt_id in number, v_mdl_elmnt_long_nm in varchar2,v_ins_cnt in out number, v_upd_cnt in out number);
  procedure getModelElementCharUpdateAction ( row_ori in out t_row, rowschar in out t_rows, v_mdl_elmnt_id in number, v_mdl_elmnt_long_nm in varchar2);
  procedure spCreateModelAltNm ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
  procedure spDeleteModelAltNm ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
@@ -143,7 +143,7 @@ end if;
  end;
  
  
- procedure getModelElementCharActionDirect ( row_ori in out t_row, rowscharins in out t_rows, rowscharupd in out t_rows,  v_mdl_elmnt_id in number, v_mdl_elmnt_long_nm in varchar2)
+ procedure getModelElementCharActionDirect ( row_ori in out t_row, rowscharins in out t_rows, rowscharupd in out t_rows,  v_mdl_elmnt_id in number, v_mdl_elmnt_long_nm in varchar2, v_ins_cnt in out number, v_upd_cnt in out number)
  as
   action t_actionRowset;
   row t_row;
@@ -169,11 +169,11 @@ v_ver := ihook.getColumnvalue(row_ori, 'SRC_MDL_VER');
 insert into NCI_MDL_ELMNT_CHAR (MEC_ID, MDL_ELMNT_ITEM_ID, MDL_ELMNT_VER_NR,SRC_DTTYPE,STD_DTTYPE_ID,SRC_MAX_CHAR,SRC_MIN_CHAR,SRC_UOM,UOM_ID,
 SRC_DEFLT_VAL,SRC_ENUM_SRC,MEC_LONG_NM,MEC_PHY_NM,MEC_DESC,CDE_ITEM_ID,CDE_VER_NR,DE_CONC_ITEM_ID,DE_CONC_VER_NR,VAL_DOM_ITEM_ID,
 CHAR_ORD,VAL_DOM_VER_NR,MDL_ELMNT_CHAR_TYP_ID, PK_IND,FK_IND,
-REQ_IND,FK_ELMNT_PHY_NM,FK_ELMNT_CHAR_PHY_NM, MDL_PK_IND)
+REQ_IND,FK_ELMNT_PHY_NM,FK_ELMNT_CHAR_PHY_NM, MDL_PK_IND, CMNTS_DESC_TXT)
 values (v_mec_id, v_mdl_elmnt_id, v_ver, cur.SRC_DTTYPE, cur.STD_DTTYPE_ID,cur.SRC_MAX_CHAR,cur.SRC_MIN_CHAR, cur.SRC_UOM, cur.UOM_ID,
 v_temp_str, cur.SRC_ENUM_SRC,cur.MEC_LONG_NM, cur.MEC_PHY_NM, cur.MEC_DESC, cur.CDE_ITEM_ID, cur.CDE_VER_NR,cur.DE_CONC_ITEM_ID, cur.DE_CONC_VER_NR,cur.VAL_DOM_ITEM_ID,
 cur.CHAR_ORD,cur.VAL_DOM_VER_NR, cur.MDL_ELMNT_CHAR_TYP_ID,decode(nvl(upper(cur.PK_IND),'NO'),'YES',1,0),decode(nvl(upper(cur.FK_IND_TXT),'NO'),'YES',1,0),
-decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),cur.FK_ELMNT_PHY_NM, cur.FK_ELMNT_CHAR_PHY_NM,decode(nvl(upper(cur.MDL_PK_IND),'NO'),'YES',1,0));
+decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),cur.FK_ELMNT_PHY_NM, cur.FK_ELMNT_CHAR_PHY_NM,decode(nvl(upper(cur.MDL_PK_IND),'NO'),'YES',1,0), cur.cmnts_desc_txt);
 
 insert into onedata_Ra.NCI_MDL_ELMNT_CHAR (MEC_ID, MDL_ELMNT_ITEM_ID, MDL_ELMNT_VER_NR,SRC_DTTYPE,STD_DTTYPE_ID,SRC_MAX_CHAR,SRC_MIN_CHAR,SRC_UOM,UOM_ID,
 SRC_DEFLT_VAL,SRC_ENUM_SRC,MEC_LONG_NM,MEC_PHY_NM,MEC_DESC,CDE_ITEM_ID,CDE_VER_NR,DE_CONC_ITEM_ID,DE_CONC_VER_NR,VAL_DOM_ITEM_ID,
@@ -183,7 +183,9 @@ select v_mec_id, v_mdl_elmnt_id, v_ver, cur.SRC_DTTYPE, cur.STD_DTTYPE_ID,cur.SR
 v_temp_str, cur.SRC_ENUM_SRC,cur.MEC_LONG_NM, cur.MEC_PHY_NM, cur.MEC_DESC, cur.CDE_ITEM_ID, cur.CDE_VER_NR,cur.DE_CONC_ITEM_ID, cur.DE_CONC_VER_NR,cur.VAL_DOM_ITEM_ID,
 cur.CHAR_ORD,cur.VAL_DOM_VER_NR, cur.MDL_ELMNT_CHAR_TYP_ID,decode(nvl(upper(cur.PK_IND),'NO'),'YES',1,0),decode(nvl(upper(cur.FK_IND_TXT),'NO'),'YES',1,0),
 decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),cur.FK_ELMNT_PHY_NM, cur.FK_ELMNT_CHAR_PHY_NM from dual;
+v_ins_cnt := v_ins_cnt + SQL%ROWCOUNT;
 end if;
+
 if (v_temp = 1) then
 select mec_id into v_mec_id from NCI_MDL_ELMNT_CHAR where upper(MEC_PHY_NM) = upper(cur.MEC_PHY_NM) and mdl_elmnt_item_id = v_mdl_elmnt_id and mdl_elmnt_ver_nr = ihook.getColumnValue(row_ori,'SRC_MDL_VER');
 
@@ -212,9 +214,11 @@ FK_IND = decode(nvl(upper(cur.FK_IND_TXT),'NO'),'YES',1,0),
 MDL_PK_IND = decode(nvl(upper(cur.MDL_PK_IND),'NO'),'YES',1,0),
 REQ_IND = decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),
 FK_ELMNT_PHY_NM = cur.FK_ELMNT_PHY_NM,
-FK_ELMNT_CHAR_PHY_NM = cur.FK_ELMNT_CHAR_PHY_NM
+FK_ELMNT_CHAR_PHY_NM = cur.FK_ELMNT_CHAR_PHY_NM,
+cmnts_desc_txt = cur.cmnts_desc_txt
 where MEC_ID = v_mec_id;
 --ihook.setColumnValue(row,'MDL_ITEM_ID',v_mdl_hdr_id);
+v_upd_cnt := v_upd_cnt + SQL%ROWCOUNT;
 end if;
 
 end loop;
@@ -352,7 +356,7 @@ end loop;
  end;
   
   
- procedure getModelElementAction ( row_ori in out t_row, actions in out t_actions, v_mdl_hdr_id in number, v_mdl_elmnt_id in out number)
+ procedure getModelElementAction ( row_ori in out t_row, actions in out t_actions, v_mdl_hdr_id in number, v_mdl_elmnt_id in out number, v_ins_cnt in out number, v_upd_cnt in out number)
   as
   action t_actionRowset;
   row t_row;
@@ -392,8 +396,8 @@ v_mdl_elmnt_id := nci_11179.getItemId;
 ihook.setColumnValue(row,'ITEM_ID', v_mdl_elmnt_id);
 
 
-     rowsmeins.extend;
-                                            rowsmeins(rowsmeins.last) := row;
+    rowsmeins.extend;
+    rowsmeins(rowsmeins.last) := row;
 
 
 else
@@ -402,24 +406,28 @@ ihook.setColumnValue(row,'ITEM_ID', v_mdl_elmnt_id);
 ihook.setColumnValue(row,'VER_NR',ihook.getColumnvalue(row_ori, 'SRC_MDL_VER'));
 
      rowsmeupd.extend;
-                                            rowsmeupd(rowsmeupd.last) := row;
+                                         rowsmeupd(rowsmeupd.last) := row;
 end if;
 --getModelElementCharAction ( row_ori, rowscharins , rowscharupd, v_mdl_elmnt_id, cur.item_long_nm);
-
+--raise_application_error(-20001, to_char(rowsmeins.count));
 -- even though the column nae in NCI_STG_MMDL_ELMNT_CHAR is ME_ITEM_LONG_NM, the actual value is Physical Name
 --raise_application_error (-20000,'here');
-getModelElementCharActionDirect ( row_ori, rowscharins , rowscharupd, v_mdl_elmnt_id, cur.item_phy_obj_nm);
+getModelElementCharActionDirect ( row_ori, rowscharins , rowscharupd, v_mdl_elmnt_id, cur.item_phy_obj_nm, v_ins_cnt, v_upd_cnt);
 
 end loop;
 if (rowsmeins.count > 0) then
             action := t_actionrowset(rowsmeins, 'Model Element (No Sequence)', 2,5,'insert');
         actions.extend;
         actions(actions.last) := action;
+        v_ins_cnt := v_ins_cnt + rowsmeins.count;
+       -- v_ins_cnt := rowsmeins.count;
 end if;
 if (rowsmeupd.count > 0) then
             action := t_actionrowset(rowsmeupd, 'Model Element (No Sequence)', 2,5,'update');
         actions.extend;
         actions(actions.last) := action;
+        --v_upd_cnt := v_upd_cnt + rowsmeupd.count;
+       -- v_upd_cnt := rowsmeupd.count;
 end if;
 
 /*if (rowscharins.count > 0) then
@@ -971,6 +979,8 @@ end;
   v_mdl_elmnt_id number;
   v_dflt_typ integer;
  i integer;
+ v_upd_cnt number := 0;
+ v_ins_cnt number := 0;
  BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -1011,7 +1021,7 @@ end;
   
   --getModelAction(row_ori,actions, v_mdl_hdr_id);
   v_mdl_hdr_id := ihook.getColumnValue(row_ori,'CREATED_MDL_ITEM_ID');
-getModelElementAction ( row_ori ,actions , v_mdl_hdr_id , v_mdl_elmnt_id );
+getModelElementAction ( row_ori ,actions , v_mdl_hdr_id , v_mdl_elmnt_id , v_ins_cnt, v_upd_cnt);
  
  -- raise_application_error(-20000,v_mdl_hdr_id);
  
@@ -1037,6 +1047,7 @@ getModelElementAction ( row_ori ,actions , v_mdl_hdr_id , v_mdl_elmnt_id );
    action := t_actionrowset(rows, 'Model Element Relationship', 2,6,'insert');
         actions.extend;
         actions(actions.last) := action;
+        --v_ins_cnt := v_ins_cnt + rows.count;
     end if;
     
     rows := t_rows();
@@ -1058,7 +1069,9 @@ getModelElementAction ( row_ori ,actions , v_mdl_hdr_id , v_mdl_elmnt_id );
       SET ctl_val_msg = 'Update Command Successful'
       WHERE mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID');
       COMMIT;
- 
+      --jira 3869: add message about how many rows inserted vs updated
+    hookoutput.message := to_char(v_ins_cnt) || ' row(s) inserted. ' || to_char(v_upd_cnt) || ' row(s) updated.'; 
+    
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
    --nci_util.debugHook('GENERAL',v_data_out);
  --  raise_application_error(-20000,'Here');
@@ -1387,8 +1400,8 @@ as
   ) loop
   
   select count(*) into v_temp from de where
-  (item_id, ver_nr) in (Select item_id, ver_nr from alt_nms where nm_typ_id = v_alt_nm_typ and upper(nm_desc) = upper(curchar.mec_phy_nm))
-  and  (item_id, ver_nr) in (Select item_id, ver_nr from alt_nms where nm_typ_id = v_tbl_alt_nm_typ and upper(nm_desc) = upper(curchar.me_phy_nm))
+  (item_id, ver_nr) in (Select item_id, ver_nr from alt_nms where nm_typ_id = v_alt_nm_typ and upper(nm_desc) = upper(curchar.mec_phy_nm) and nvl(fld_delete,0) <> 1)
+  and  (item_id, ver_nr) in (Select item_id, ver_nr from alt_nms where nm_typ_id = v_tbl_alt_nm_typ and upper(nm_desc) = upper(curchar.me_phy_nm) and nvl(fld_delete,0) <> 1)
   and  (item_id, ver_nr) in (Select r.c_item_id, r.c_item_ver_nr from nci_admin_item_rel r, vw_clsfctn_schm_item csi where csi.cs_item_id = v_cs_item_id 
   and csi.cs_item_ver_nr = v_cs_ver_nr and csi.item_id = r.p_item_id and csi.ver_nr = r.p_item_ver_nr and r.rel_typ_id = 65);
     if (v_temp = 1) then
@@ -1405,10 +1418,18 @@ as
           ihook.setColumnValue(showrow,'Change Type', 'CDE');
           ihook.setColumnValue(showrow,'New Item ID', curcde.item_id);
           ihook.setColumnValue(showrow,'New Version', curcde.ver_nr);
+          ihook.setColumnValue(showrow,'New Item Name', '');        
           ihook.setColumnValue(showrow,'Current Item ID', curchar.CDE_ITEM_ID);
           ihook.setColumnValue(showrow,'Current Version', curchar.CDE_VER_NR);
+          ihook.setColumnValue(showrow,'Current Item Name', '');
           ihook.setColumnValue(showrow,'MEC_ID', curchar.mec_id);
           
+          for curx in (Select item_nm from admin_item where item_id = curcde.item_id and ver_nr = curcde.ver_nr) loop
+          ihook.setColumnValue(showrow,'New Item Name', curx.item_nm);        
+          end loop;
+          for curx in (Select item_nm from admin_item where item_id = curchar.cde_item_id and ver_nr = curchar.cde_ver_nr) loop
+          ihook.setColumnValue(showrow,'Current Item Name', curx.item_nm);        
+          end loop;
           showrows.extend;
                     showrows (showrows.last) := showrow;
            /* update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, chng_desc_txt)
@@ -1421,8 +1442,18 @@ as
             = (select curcde.ITEM_ID, curcde.VER_NR, curcde.DE_CONC_ITEM_ID, curcde.DE_CONC_VER_NR, curcde.VAL_DOM_ITEM_Id, curcde.VAL_DOM_VER_NR from dual)
             where  mec_id = curchar.mec_id;
             v_cnt := v_cnt + 1;
-          end if;         
+          end if;    
         end loop;
+    end if;
+    if ( v_temp = 0) then
+   -- raise_application_Error(-20000, curchar.mec_phy_nm || curchar.cde_item_id || curchar.mec_id);
+        if ( curchar.cde_item_id is not null) then
+        --raise_application_Error(-20000, curchar.mec_phy_nm || curchar.cde_item_id || curchar.mec_id);
+            update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR)
+            = (select null, null, null, null, null, null from dual)
+            where mec_id = curchar.mec_id;
+            v_cnt := v_cnt + 1;
+          end if;
     end if;
     if (v_temp > 1) then
     -- error message
@@ -1433,7 +1464,7 @@ as
   commit;
   -- update if value domain of the cde has changed
   for cur in (select mec_id, de.val_dom_item_id, de.val_dom_ver_nr, nvl(mec.chng_desc_txt,'') chng_desc_txt, mec.val_dom_item_id current_val_dom_item_id,
-  mec.val_dom_ver_nr current_val_dom_ver_nr , MEC_PHY_NM, me.ITEM_PHY_OBJ_NM me_phy_nm from nci_mdl_elmnt_char mec, de de, nci_mdl_elmnt me where me.MDL_ITEM_ID =v_mdl_id
+  mec.val_dom_ver_nr current_val_dom_ver_nr , MEC_PHY_NM, me.ITEM_PHY_OBJ_NM me_phy_nm, mec.cde_item_id, mec.cde_ver_nr from nci_mdl_elmnt_char mec, de de, nci_mdl_elmnt me where me.MDL_ITEM_ID =v_mdl_id
   and me.MDL_ITEM_VER_NR= v_mdl_ver_nr and me.item_id = mec.MDL_ELMNT_ITEM_ID and me.ver_nr =mec.MDL_ELMNT_VER_NR and mec.cde_item_id = de.item_id and
   mec.cde_ver_nr = de.ver_nr and (mec.val_dom_item_id <> de.val_dom_item_id or mec.val_dom_ver_nr <> de.val_dom_ver_nr)) loop
     --update nci_mdl_elmnt_char set ( VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, chng_desc_txt)=
@@ -1442,13 +1473,22 @@ as
       showrow := t_row();
           ihook.setColumnValue(showrow,'Element Physical Name', cur.me_phy_nm);
           ihook.setColumnValue(showrow,'Characteristic Physical Name', cur.mec_phy_nm);
+          ihook.setColumnValue(showrow,'Current CDE Item ID', cur.cde_item_id);
+          ihook.setColumnValue(showrow,'Current CDE Version', cur.cde_ver_nr);
           ihook.setColumnValue(showrow,'Change Type', 'VD');
           ihook.setColumnValue(showrow,'New Item ID', cur.val_dom_item_id);
           ihook.setColumnValue(showrow,'New Version', cur.val_dom_ver_nr);
+          ihook.setColumnValue(showrow,'New Item Name', '');        
           ihook.setColumnValue(showrow,'Current Item ID', cur.current_val_Dom_ITEM_ID);
           ihook.setColumnValue(showrow,'Current Version', cur.current_val_dom_VER_NR);
+          ihook.setColumnValue(showrow,'Current Item Name', '');        
           ihook.setColumnValue(showrow,'MEC_ID', cur.mec_id);
-          
+           for curx in (Select item_nm from admin_item where item_id =  cur.val_dom_item_id and ver_nr =  cur.val_dom_ver_nr) loop
+          ihook.setColumnValue(showrow,'New Item Name', curx.item_nm);        
+          end loop;
+          for curx in (Select item_nm from admin_item where item_id = cur.current_val_Dom_ITEM_ID and ver_nr = cur.current_val_Dom_ver_nr) loop
+          ihook.setColumnValue(showrow,'Current Item Name', curx.item_nm);        
+          end loop;
           showrows.extend;
                     showrows (showrows.last) := showrow;
         
@@ -1456,7 +1496,7 @@ as
   commit;
   -- update if dec of the cde has changed
    for cur in (select mec_id, de.de_conc_item_id, de.de_conc_ver_nr, nvl(mec.chng_desc_txt,'') chng_desc_txt, mec.de_conc_item_id current_de_conc_item_id,
-   mec.de_conc_ver_nr current_de_conc_ver_nr ,MEC_PHY_NM, me.ITEM_PHY_OBJ_NM me_phy_nm from nci_mdl_elmnt_char mec, de de, nci_mdl_elmnt me where me.MDL_ITEM_ID =v_mdl_id
+   mec.de_conc_ver_nr current_de_conc_ver_nr ,MEC_PHY_NM, me.ITEM_PHY_OBJ_NM me_phy_nm , mec.cde_item_id, mec.cde_ver_nr  from nci_mdl_elmnt_char mec, de de, nci_mdl_elmnt me where me.MDL_ITEM_ID =v_mdl_id
   and me.MDL_ITEM_VER_NR= v_mdl_ver_nr and me.item_id = mec.MDL_ELMNT_ITEM_ID and me.ver_nr =mec.MDL_ELMNT_VER_NR and mec.cde_item_id = de.item_id and
   mec.cde_ver_nr = de.ver_nr and (mec.de_conc_item_id <> de.de_conc_item_id or mec.de_conc_ver_nr <> de.de_conc_ver_nr)) loop
     --update nci_mdl_elmnt_char set ( de_conc_ITEM_ID, de_conc_VER_NR, chng_desc_txt)=
@@ -1465,13 +1505,23 @@ as
     showrow := t_row();
           ihook.setColumnValue(showrow,'Element Physical Name', cur.me_phy_nm);
           ihook.setColumnValue(showrow,'Characteristic Physical Name', cur.mec_phy_nm);
+          ihook.setColumnValue(showrow,'Current CDE Item ID', cur.cde_item_id);
+          ihook.setColumnValue(showrow,'Current CDE Version', cur.cde_ver_nr);
           ihook.setColumnValue(showrow,'Change Type', 'DEC');
           ihook.setColumnValue(showrow,'New Item ID', cur.de_conc_item_id);
           ihook.setColumnValue(showrow,'New Version', cur.de_conc_ver_nr);
+          ihook.setColumnValue(showrow,'New Item Name', '');        
           ihook.setColumnValue(showrow,'Current Item ID', cur.current_de_conc_ITEM_ID);
           ihook.setColumnValue(showrow,'Current Version', cur.current_de_conc_VER_NR);
+          ihook.setColumnValue(showrow,'Current Item Name', '');        
           ihook.setColumnValue(showrow,'MEC_ID', cur.mec_id);
           
+           for curx in (Select item_nm from admin_item where item_id = cur.de_conc_item_id and ver_nr = cur.de_conc_ver_nr) loop
+          ihook.setColumnValue(showrow,'New Item Name', curx.item_nm);        
+          end loop;
+          for curx in (Select item_nm from admin_item where item_id = cur.current_de_conc_ITEM_ID and ver_nr = cur.current_de_conc_ver_nr) loop
+          ihook.setColumnValue(showrow,'Current Item Name', curx.item_nm);        
+          end loop;
           showrows.extend;
                     showrows (showrows.last) := showrow;
       
@@ -1479,7 +1529,9 @@ as
   commit;
   
   if (v_err > 0) then
-  v_msg := 'Duplicate CDEs found for the following. No CDE was attached. ' || v_msg;
+  ----jira 4190: Change error message
+  --v_msg := 'Duplicate CDEs found for the following. No CDE was attached. ' || v_msg;
+  v_msg := 'Duplicate alternate names found for the CS for these characteristics so no CDE was attached. ' || v_msg;
   end if;
   if (showrows.count > 0) then
      hookoutput.question := getAssociateCDEQuestion ;
@@ -1487,9 +1539,35 @@ as
              showrowset := t_showablerowset (showrows, 'Characteristic', 4, 'multi');
        	 hookoutput.showrowset := showrowset;
         end if;
+        hookoutput.message := v_msg;
+        
   end if;
+  
   if (v_invocationnumber = 1) then
-  i := 1;
+
+
+  for i in 1..hookinput.selectedrowset.rowset.count  loop
+            showrow := hookinput.selectedrowset.rowset(i);
+   
+   if (ihook.getColumnValue(showrow,'Change Type') = 'VD') then
+  update nci_mdl_elmnt_char set  VAL_DOM_ITEM_ID = ihook.getColumnValue(showrow,'New Item ID') , VAL_DOM_VER_NR = ihook.getColumnValue(showrow,'New Version') ,
+  chng_desc_txt= chng_desc_txt || ' Updated VD to ' || ihook.getColumnValue(showrow,'New Item ID') || ';'
+    where  mec_id = ihook.getColumnValue(showrow,'MEC_ID');
+   end if;
+    if (ihook.getColumnValue(showrow,'Change Type') = 'DEC') then
+  update nci_mdl_elmnt_char set  DE_CONC_ITEM_ID = ihook.getColumnValue(showrow,'New Item ID') , DE_CONC_VER_NR = ihook.getColumnValue(showrow,'New Version') ,
+  chng_desc_txt= chng_desc_txt || ' Updated DEC to ' || ihook.getColumnValue(showrow,'New Item ID') || ';'
+    where  mec_id = ihook.getColumnValue(showrow,'MEC_ID');
+   end if;
+    if (ihook.getColumnValue(showrow,'Change Type') = 'CDE') then
+  update nci_mdl_elmnt_char set   (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, chng_desc_txt)=
+  (select item_id, ver_nr , DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, 'Updated CDE to ' || Item_id from de where item_id = ihook.getColumnValue(showrow,'New Item ID') and
+  VER_NR = ihook.getColumnValue(showrow,'New Version'))
+    where  mec_id = ihook.getColumnValue(showrow,'MEC_ID');
+   end if;
+   end loop;
+   commit;
+   
  --   if ( curcde.item_id is not null and curchar.cde_item_id is not null) then -- prompt
   /*          update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, chng_desc_txt)
             = (select curcde.ITEM_ID, curcde.VER_NR, curcde.DE_CONC_ITEM_ID, curcde.DE_CONC_VER_NR, curcde.VAL_DOM_ITEM_Id, curcde.VAL_DOM_VER_NR, 'Updated CDE to: ' || curchar.cde_item_id from dual)
@@ -1529,11 +1607,20 @@ commit;
   hookoutput.invocationnumber  := hookinput.invocationnumber;
   hookoutput.originalrowset    := hookinput.originalrowset;
   
-  row_ori :=  hookInput.originalRowset.rowset(1);
+    if hookinput.originalrowset.rowset.count < 1 then
+        hookoutput.message := 'A model must be selected to run this command.';
+    elsif hookinput.originalrowset.rowset.count = 1 then
   
-  spUpdateModelCDEAssocSub (ihook.getColumnValue(row_ori,'ITEM_ID'),ihook.getColumnValue(row_ori,'VER_NR'), v_cnt,'F', v_msg, hookinput.invocationnumber, hookinput,hookoutput);
+        row_ori :=  hookInput.originalRowset.rowset(1);
   
- --hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated. ' || v_msg;
+        spUpdateModelCDEAssocSub (ihook.getColumnValue(row_ori,'ITEM_ID'),ihook.getColumnValue(row_ori,'VER_NR'), v_cnt,'F', v_msg, hookinput.invocationnumber, hookinput,hookoutput);
+
+        hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated. Select Flattended View to view results. ' || v_msg;
+
+    else
+        hookoutput.message := 'Please select exactly one model to run this command.';
+    end if;
+    
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
@@ -2324,8 +2411,7 @@ as
     v_tab_item_ver  t_item_ver:= t_item_ver();
     v_tab_item_nm  t_item_nm:= t_item_nm();
    v_tab_model_nm  t_item_nm:= t_item_nm();
-   
-    v_tab_val_dom    tab_admin_item_pk := tab_admin_item_pk();
+   v_tab_context_nm t_item_nm := t_item_nm();
     
     v_item_id		 number;
     v_ver_nr		 number;
@@ -2346,7 +2432,7 @@ begin
     for i in 1 .. hookInput.originalRowset.Rowset.count loop
         row_cur := hookInput.originalRowset.Rowset(i);
 
-        for rec in (  select distinct cde_item_id, cde_ver_nr, ai.item_nm from nci_mdl_elmnt_char mec, nci_mdl_elmnt me, admin_item ai
+        for rec in (  select distinct cde_item_id, cde_ver_nr, ai.item_nm, ai.cntxt_nm_dn from nci_mdl_elmnt_char mec, nci_mdl_elmnt me, admin_item ai
         --MEC_PHY_NM, me.ITEM_PHY_OBJ_NM me_phy_nm from nci_mdl_elmnt_char mec, de de, nci_mdl_elmnt me 
         where me.MDL_ITEM_ID =ihook.getColumnValue(row_cur,'ITEM_ID')
   and me.MDL_ITEM_VER_NR= ihook.getColumnValue(row_cur,'VER_NR') and me.item_id = mec.MDL_ELMNT_ITEM_ID and me.ver_nr =mec.MDL_ELMNT_VER_NR 
@@ -2360,9 +2446,11 @@ begin
                v_tab_item_nm.extend();
                v_tab_item_id.extend();
                v_tab_item_ver.extend();
+               v_tab_context_nm.extend();
                
             --    v_tab_val_mean_nm.extend();
                 v_tab_item_nm(v_tab_item_nm.count) := rec.cde_item_id || 'v' || rec.cde_ver_nr || ':' || rec.item_nm;
+                v_tab_context_nm(v_tab_context_nm.count) := rec.cntxt_nm_dn;
                -- v_tab_item_nm(v_tab_item_nm.count) := rec.cde_item_id || 'v' || rec.cde_ver_nr ;
                v_tab_item_id(v_tab_item_id.count) := rec.cde_item_id;
                v_tab_item_ver(v_tab_item_ver.count) := rec.cde_ver_nr;
@@ -2388,6 +2476,7 @@ begin
 
         row := t_row();
         ihook.setColumnValue(row,'CDE',v_tab_item_nm(i));
+        ihook.setColumnValue(row,'Owned By',v_tab_context_nm(i));
         --populate PVs for last column
         for j in 1 .. hookInput.originalRowset.Rowset.count loop
            row_cur := hookInput.originalRowset.Rowset(j);
