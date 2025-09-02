@@ -109,14 +109,14 @@ end;
         hookoutput.question := nci_11179.getQuestionGeneric ('Please select model to refresh.', 'Proceed') ;
     end loop;
   end if;
-  if (hookinput.invocationnumber = 1) then
+  if (hookinput.invocationnumber !=0) then
    row_sel := hookInput.selectedRowset.rowset(1);
 
   v_mdl_id := ihook.getColumnValue(row_sel,'Model Public Id');
   v_mdl_ver_nr := ihook.getColumnValue(row_sel,'Model Version');
-  nci_codemap.spUpdateModelCDEAssocSub (v_mdl_id,v_mdl_ver_nr, v_cnt,'F', v_msg);
+  nci_codemap.spUpdateModelCDEAssocSub (v_mdl_id,v_mdl_ver_nr, v_cnt,'F', v_msg, hookinput.invocationnumber -1, hookinput, hookoutput);
 
- hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated.' || v_msg;
+ --hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated.' || v_msg;
  end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
@@ -3433,4 +3433,3 @@ end if;
  end;
 END;
 /
-
