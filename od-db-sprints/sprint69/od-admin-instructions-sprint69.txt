@@ -1,1 +1,2 @@
 --TBD
+Delete objects as per Tracker 4102
