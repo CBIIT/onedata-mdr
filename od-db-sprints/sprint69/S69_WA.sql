@@ -1,4 +1,4 @@
-create or update TRIGGER TR_NCI_MDL_ELMNT_CHAR
+create or replace TRIGGER TR_NCI_MDL_ELMNT_CHAR
   BEFORE  UPDATE
   on NCI_MDL_ELMNT_CHAR
   for each row
@@ -19,7 +19,7 @@ BEGIN
      :new.DE_CONC_ITEM_ID := cur.DE_CONC_ITEM_ID;
      :new.DE_CONC_VER_NR := cur.DE_CONC_VER_NR;
 for cur1 in (select * from value_dom where item_id = cur.val_dom_item_id and ver_nr = cur.val_dom_ver_nr) loop
-  :new.vd_typ_id = cur1.val_dom_typ_id;
+  :new.vd_typ_id := cur1.val_dom_typ_id;
 end loop;
 end loop;
   
