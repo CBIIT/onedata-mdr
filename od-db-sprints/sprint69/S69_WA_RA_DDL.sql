@@ -596,4 +596,5 @@ vw_val_dom_ref_term tvdrt,
           and tdec.item_id (+)= tmec.cde_item_id
           and tdec.ver_nr (+)= tmec.cde_ver_nr;
 
+alter table nci_ds_hdr add PRMTR_ID number default 0;
 
