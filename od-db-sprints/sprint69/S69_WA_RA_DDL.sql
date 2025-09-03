@@ -362,3 +362,13 @@ update alt_def set lang_id = 1000 where creat_dt >= sysdate - 30 and lang_id is 
 commit;
 
 alter table nci_mdl_elmnt_char add (VD_TYP_ID integer);
+
+alter table nci_mdl_elmnt_char disable all triggers;
+
+update nci_mdl_elmnt_char  c set vd_typ_id = (Select val_dom_typ_id from value_dom vd where vd.item_id = c.val_dom_item_id and vd.ver_nr = c.val_dom_ver_nr)
+where c.val_dom_item_id is not null;
+commit;
+
+alter table nci_mdl_elmnt_char enable all triggers;
+
+
