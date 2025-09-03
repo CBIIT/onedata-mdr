@@ -360,3 +360,5 @@ commit;
 
 update alt_def set lang_id = 1000 where creat_dt >= sysdate - 30 and lang_id is null;
 commit;
+
+alter table nci_mdl_elmnt_char add (VD_TYP_ID integer);
