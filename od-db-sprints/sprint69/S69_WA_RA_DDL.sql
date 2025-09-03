@@ -468,4 +468,6 @@ and tmecd.VAL_DOM_ITEM_ID = vd.ITEM_ID (+)
 	  and tmecd.VAL_DOM_VER_NR = vd.VER_NR (+)
       and (pcode_sysgen is not null or mec_map_notes is not null);
 
-
+create sequence SEQ_DS_PRMTR_ID
+increment by 1
+start with 1;
