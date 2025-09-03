@@ -1373,7 +1373,7 @@ as
  showrows t_rows;
  showrow t_row;
  showrowset	t_showablerowset;
- 
+ v_vd_typ_id integer;
  BEGIN
   
   v_msg := '';
@@ -1438,9 +1438,11 @@ as
          --raise_application_Error(-20000, curchar.mec_phy_nm ||curchar.cde_item_id  || curcde.item_id);
           end if;
           if ( curchar.cde_item_id is null and curcde.item_id is not null) then
-            update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR)
-            = (select curcde.ITEM_ID, curcde.VER_NR, curcde.DE_CONC_ITEM_ID, curcde.DE_CONC_VER_NR, curcde.VAL_DOM_ITEM_Id, curcde.VAL_DOM_VER_NR from dual)
+            update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, vd_typ_id)
+            = (select curcde.ITEM_ID, curcde.VER_NR, curcde.DE_CONC_ITEM_ID, curcde.DE_CONC_VER_NR, curcde.VAL_DOM_ITEM_Id, curcde.VAL_DOM_VER_NR, vd.val_dom_typ_id from value_dom vd
+            where item_id = curcde.val_dom_item_id and ver_nr = curcde.val_dom_ver_nr)
             where  mec_id = curchar.mec_id;
+            
             v_cnt := v_cnt + 1;
           end if;    
         end loop;
@@ -1449,8 +1451,8 @@ as
    -- raise_application_Error(-20000, curchar.mec_phy_nm || curchar.cde_item_id || curchar.mec_id);
         if ( curchar.cde_item_id is not null) then
         --raise_application_Error(-20000, curchar.mec_phy_nm || curchar.cde_item_id || curchar.mec_id);
-            update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR)
-            = (select null, null, null, null, null, null from dual)
+            update nci_mdl_elmnt_char c set (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, VD_TYP_ID)
+            = (select null, null, null, null, null, null,null from dual)
             where mec_id = curchar.mec_id;
             v_cnt := v_cnt + 1;
           end if;
@@ -1494,6 +1496,7 @@ as
         
   end loop;
   commit;
+
   -- update if dec of the cde has changed
    for cur in (select mec_id, de.de_conc_item_id, de.de_conc_ver_nr, nvl(mec.chng_desc_txt,'') chng_desc_txt, mec.de_conc_item_id current_de_conc_item_id,
    mec.de_conc_ver_nr current_de_conc_ver_nr ,MEC_PHY_NM, me.ITEM_PHY_OBJ_NM me_phy_nm , mec.cde_item_id, mec.cde_ver_nr  from nci_mdl_elmnt_char mec, de de, nci_mdl_elmnt me where me.MDL_ITEM_ID =v_mdl_id
@@ -1526,7 +1529,37 @@ as
                     showrows (showrows.last) := showrow;
       
   end loop;
-  commit;
+
+  -- update if value domain type of the cde has changed
+  for cur in (select mec_id, de.val_dom_item_id, de.val_dom_ver_nr, nvl(mec.chng_desc_txt,'') chng_desc_txt, mec.val_dom_item_id current_val_dom_item_id,
+  mec.val_dom_ver_nr current_val_dom_ver_nr , MEC_PHY_NM, me.ITEM_PHY_OBJ_NM me_phy_nm, mec.cde_item_id, mec.cde_ver_nr,
+  mec.vd_typ_id, vd.val_dom_typ_id from nci_mdl_elmnt_char mec, 
+  de de, nci_mdl_elmnt me , value_dom vd where me.MDL_ITEM_ID =v_mdl_id
+  and me.MDL_ITEM_VER_NR= v_mdl_ver_nr and me.item_id = mec.MDL_ELMNT_ITEM_ID and me.ver_nr =mec.MDL_ELMNT_VER_NR and mec.cde_item_id = de.item_id and
+  mec.cde_ver_nr = de.ver_nr and mec.val_dom_item_id = de.val_dom_item_id and mec.val_dom_ver_nr = de.val_dom_ver_nr and de.val_dom_item_id = vd.item_id
+  and de.val_dom_ver_nr = vd.ver_nr and mec.vd_typ_id <> vd.val_dom_typ_id) loop
+    --update nci_mdl_elmnt_char set ( VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, chng_desc_txt)=
+    --(select cur.VAL_DOM_ITEM_Id, cur.VAL_DOM_VER_NR, cur.chng_desc_txt || 'Updated VD to ' || cur.val_dom_item_id from dual)
+    --where  mec_id = cur.mec_id;
+      showrow := t_row();
+          ihook.setColumnValue(showrow,'Element Physical Name', cur.me_phy_nm);
+          ihook.setColumnValue(showrow,'Characteristic Physical Name', cur.mec_phy_nm);
+          ihook.setColumnValue(showrow,'Current CDE Item ID', cur.cde_item_id);
+          ihook.setColumnValue(showrow,'Current CDE Version', cur.cde_ver_nr);
+          ihook.setColumnValue(showrow,'Change Type', 'WARNING: VD TYPE');
+         -- ihook.setColumnValue(showrow,'Current Item ID', cur.current_val_Dom_ITEM_ID);
+         -- ihook.setColumnValue(showrow,'Current Version', cur.current_val_dom_VER_NR);
+          ihook.setColumnValue(showrow,'MEC_ID', cur.mec_id);
+           for curx in (Select obj_key_desc from obj_key where obj_key_id = cur.vd_typ_id) loop
+          ihook.setColumnValue(showrow,'Current VD Type', curx.obj_key_desc);        
+          end loop;
+          for curx in (Select obj_key_desc from obj_key where obj_key_id = cur.val_dom_typ_id)  loop
+          ihook.setColumnValue(showrow,'New VD Type', curx.obj_key_Desc);        
+          end loop;
+          showrows.extend;
+                    showrows (showrows.last) := showrow;
+        
+  end loop;
   
   if (v_err > 0) then
   ----jira 4190: Change error message
@@ -1550,7 +1583,9 @@ as
             showrow := hookinput.selectedrowset.rowset(i);
    
    if (ihook.getColumnValue(showrow,'Change Type') = 'VD') then
+   select val_dom_typ_id into v_vd_typ_id from value_dom where item_id = ihook.getColumnValue(showrow,'New Item ID')  and ver_nr = ihook.getColumnValue(showrow,'New Version') ;
   update nci_mdl_elmnt_char set  VAL_DOM_ITEM_ID = ihook.getColumnValue(showrow,'New Item ID') , VAL_DOM_VER_NR = ihook.getColumnValue(showrow,'New Version') ,
+  vd_typ_id = v_vd_typ_id,
   chng_desc_txt= chng_desc_txt || ' Updated VD to ' || ihook.getColumnValue(showrow,'New Item ID') || ';'
     where  mec_id = ihook.getColumnValue(showrow,'MEC_ID');
    end if;
@@ -1560,9 +1595,10 @@ as
     where  mec_id = ihook.getColumnValue(showrow,'MEC_ID');
    end if;
     if (ihook.getColumnValue(showrow,'Change Type') = 'CDE') then
-  update nci_mdl_elmnt_char set   (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, chng_desc_txt)=
-  (select item_id, ver_nr , DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, 'Updated CDE to ' || Item_id from de where item_id = ihook.getColumnValue(showrow,'New Item ID') and
-  VER_NR = ihook.getColumnValue(showrow,'New Version'))
+  update nci_mdl_elmnt_char set   (CDE_ITEM_ID, CDE_VER_NR, DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, vd_typ_id, chng_desc_txt)=
+  (select de.item_id, de.ver_nr , DE_CONC_ITEM_ID, DE_CONC_VER_NR, VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, vd.val_dom_typ_id, 'Updated CDE to ' || de.Item_id from de , value_dom vd
+  where de.item_id = ihook.getColumnValue(showrow,'New Item ID') and
+  de.VER_NR = ihook.getColumnValue(showrow,'New Version') and vd.item_id = de.val_dom_item_id and vd.ver_nr = de.val_dom_ver_nr)
     where  mec_id = ihook.getColumnValue(showrow,'MEC_ID');
    end if;
    end loop;
