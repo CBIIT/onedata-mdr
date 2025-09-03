@@ -371,4 +371,101 @@ commit;
 
 alter table nci_mdl_elmnt_char enable all triggers;
 
+CREATE TABLE NCI_DS_PRMTR 
+   (	"BTCH_USR_NM" VARCHAR2(100 BYTE) COLLATE "USING_NLS_COMP", 
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate, 
+	"CREATED_DT" DATE DEFAULT sysdate, 
+	"CREATED_BY" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP", 
+	"REG_STUS_ID" NUMBER, 
+	"ADMIN_STUS_ID" NUMBER, 
+	"SRC_VAL_ID" NUMBER, 
+	"CS_ID" NUMBER, 
+	"CS_VER_NR" NUMBER(4,2), 
+	"CNTXT_ID" NUMBER, 
+	"CNTXT_VER_NR" NUMBER, 
+	"VAL_DOM_TYP_ID" NUMBER, 
+	"PRMTR_ID" NUMBER, 
+	"HDR_ID" NUMBER, 
+	"NUM_CDE_MTCH" NUMBER, 
+	"NUM_PV" NUMBER, 
+	"DT_SORT" TIMESTAMP (9), 
+	"DT_LST_MODIFIED" VARCHAR2(32 BYTE) COLLATE "USING_NLS_COMP", 
+	"MTCH_TYP" VARCHAR2(32 BYTE) COLLATE "USING_NLS_COMP", 
+	"MTCH_LMT" NUMBER, 
+	"ENTTY_NM" VARCHAR2(255 BYTE) COLLATE "USING_NLS_COMP", 
+	"ENTTY_NM_USR" VARCHAR2(255 BYTE) COLLATE "USING_NLS_COMP", 
+	 PRIMARY KEY ("PRMTR_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE
+   )  DEFAULT COLLATION "USING_NLS_COMP" SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+
+    insert into obj_typ(obj_typ_id, obj_typ_desc) values (63, 'DS Source Value Parameter');
+    commit;
+    insert into obj_key(obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (247, 'PV', 63, 'Sets the source value column to PV for CDE Match');
+    insert into obj_key(obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (248, 'VM', 63, 'Sets the source value column to VM for CDE Match');
+    commit;
+    
+alter table nci_ds_rslt add PERM_VAL_NM varchar2(64);
+
+alter table nci_ds_rslt_dtl add NUM_PV_MTCH number;
+
+
+--jira 4241
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW VW_MDL_MAP_RSLT ("MDL_MAP_ITEM_ID", "MDL_MAP_VER_NR", "MEC_MAP_NM", "MEC_PHY_NM", "MEC_LONG_NM", "VAL_DOM_TYP", "PCODE_SYSGEN", "MEC_MAP_NOTES", "TRNS_DESC_TXT", "PROV_ORG_ID", "PROV_CNTCT_ID", "PROV_RSN_TXT", "PROV_TYP_RVW_TXT", "PROV_RVW_DT", "PROV_APRV_DT", "CREAT_DT", "CREAT_USR_ID", "LST_UPD_DT", "LST_UPD_USR_ID", "CREAT_DT_X", "CREAT_USR_ID_X", "LST_UPD_DT_X", "LST_UPD_USR_ID_X", "FLD_DELETE", "S2P_TRN_DT", "LST_DEL_DT", "TRNS_RUL_NOT") DEFAULT COLLATION "USING_NLS_COMP"  AS 
+  select   map.MDL_MAP_ITEM_ID ,
+         map.mdl_map_ver_nr ,
+         map.MEC_MAP_NM,
+          tmed.ITEM_PHY_OBJ_NM ||  '.'  || tmecd."MEC_PHY_NM"  MEC_PHY_NM,
+        --    tmecd."MEC_PHY_NM",
+	   --       tmecd.MEC_LONG_NM,
+	          tmed.	ITEM_LONG_NM || '.' ||        tmecd.MEC_LONG_NM MEC_LONG_NM,
+	  decode(vd.val_dom_typ_id, 16, 'Enumerated by Reference', 17, 'Enumerated', 18, 'Non-enumerated', '') VAL_DOM_TYP,
+            map.PCODE_SYSGEN,
+	  MEC_MAP_NOTES,
+	  TRNS_DESC_TXT,
+	  PROV_ORG_ID,
+	  PROV_CNTCT_ID,
+	  PROV_RSN_TXT,
+	  	PROV_TYP_RVW_TXT,
+	  PROV_RVW_DT,
+	  PROV_APRV_DT,
+        sysdate creat_dt,
+	  'ONEDATA' creat_usr_id,	  
+	   sysdate lst_upd_dt,
+	  'ONEDATA' lst_upd_usr_id,
+        map.creat_dt creat_dt_x,
+	 map.creat_usr_id creat_usr_id_x,	  
+	  map.lst_upd_dt lst_upd_dt_x,
+	  map.lst_upd_usr_id lst_upd_usr_id_x,
+      0 FLD_DELETE,
+      sysdate S2P_TRN_DT,
+      sysdate LST_DEL_DT,
+      decode(map.TRANS_RUL_NOT, 122, 'Text', 124, 'SQL', 123, 'Pseudocode') TRNS_RUL_NOT
+	from
+     nci_MEC_MAP map,
+	  NCI_MDL_ELMNT tmed,NCI_MDL_ELMNT_CHAR tmecd, VALUE_DOM vd
+	where  	 tmed.item_id = tmecd.MDL_ELMNT_ITEM_ID
+	and tmed.ver_nr = tmecd.MDL_ELMNT_VER_NR  
+	  and tmecd.mec_id = map.TGT_MEC_ID_DERV
+      and map.map_deg in (86,87,120,129,130)
+and tmecd.VAL_DOM_ITEM_ID = vd.ITEM_ID (+)
+	  and tmecd.VAL_DOM_VER_NR = vd.VER_NR (+)
+      and (pcode_sysgen is not null or mec_map_notes is not null);
+
 
