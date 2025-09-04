@@ -46,3 +46,9 @@ update od_md_objcol set prop_val = 1000 where prop_id = 807 and (obj_id,proj_id,
 and nvl(pk_ind,0)<> 1)
 ;
 commit;
+
+insert into od_md_objcol (obj_id,proj_id, schm_id, col_id, clnt_id, prop_id, prop_val)
+select  obj_id, proj_id, schm_id, col_id,clnt_id, 807, 1000 from od_mdv_objcolhort where col_nm = 'LANG_ID'
+and nvl(pk_ind,0)<> 1
+and ( obj_id, proj_id, schm_id, col_id) not in (select obj_id, proj_id, schm_id, col_id from od_md_objcol where prop_id = 807);
+commit;
