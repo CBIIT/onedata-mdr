@@ -657,7 +657,7 @@ begin
     end if;
     
     if (v_csi_item_id <> 0) then --classification info not in VW_DE. need to create nested query
-        v_out_str := v_out_str || ' and (de.item_id,de.ver_nr) in (SELECT item_id, ver_nr FROM mvw_csi_form_node_de_rel WHERE csi_id = ' || to_char(v_csi_item_id) || ' and csi_ver = ' || to_char(v_csi_ver_nr) || ')';
+        v_out_str := v_out_str || ' and (de.item_id,de.ver_nr) in (SELECT item_id, ver_nr FROM mvw_csi_node_de_rel WHERE p_item_id = ' || to_char(v_csi_item_id) || ' and p_item_ver_nr = ' || to_char(v_csi_ver_nr) || ')';
     end if;
     
     if (v_val_dom_typ <> 0) then
@@ -689,6 +689,13 @@ AS
     v_src_val_list varchar2(1000);
     v_sys_msg varchar2(1000);
     v_mode varchar2(32);
+    --v_str, v_mtch_str, tmp_item_id, tmp_ver_nr, v_temp, v_pv_cde 
+    v_str varchar2(1000);
+    v_mtch_str varchar2(1000);
+    tmp_item_id number;
+    tmp_ver_nr number(4,2);
+    v_pv_cde number;
+    v_temp number;
     
 BEGIN
 --update last run
@@ -719,10 +726,14 @@ BEGIN
     commit;
 
 --set preferred cde if it is only match and it is exact
---    if (v_mtch_cnt = 1) then
---        raise_application_error(-20001, 'set preferred cde');
---    
---    end if;
+  if (v_mtch_cnt = 1) then
+    select rule_desc, mtch_desc_txt, item_id, ver_nr, nvl(num_pv_mtch,0), num_pv_in_cde into v_str, v_mtch_str, tmp_item_id, tmp_ver_nr, v_temp, v_pv_cde from nci_ds_rslt where hdr_id = v_hdr_id;
+    if (v_str like '%Exact Match%') then
+        update nci_ds_hdr set CDE_ITEM_ID = tmp_item_id, CDE_VER_NR = tmp_ver_nr, NUM_PV_IN_CDE = v_pv_cde, NUM_PV_MTCH = v_temp,
+        rule_desc = v_str, mtch_desc_txt = v_mtch_str where hdr_id = v_hdr_id;
+        commit;
+    end if;
+  end if;
     
 --update system message
     v_sys_msg := getDSSysMsg(v_hdr_id, v_mode);
@@ -951,7 +962,7 @@ BEGIN
 
 --assemble query    
     v_sql := v_insert || v_select || v_from || v_where || v_group_by;
-  --  raise_application_error(-20001, v_sql);
+  -- raise_application_error(-20001, v_sql);
     
 --execute query
     execute immediate v_sql;
@@ -1378,12 +1389,10 @@ BEGIN
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'E', 'C', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
-     --   spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'E', 'C');
-    --5. Synonym Exact Match
+   -- 5. Synonym Exact Match
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'E', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
-     --   spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'E', 'S'); 
      
     --No results above, run against non-enumerated CDEs
         if (getDSMtchCnt(v_hdr_id) = 0) then
@@ -1401,26 +1410,26 @@ BEGIN
         if (getDSMtchCnt(v_hdr_id) = 0) then --execute like matches
         --6. Long Name Like Match
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'L', 'P', v_mtch_lmt);
-            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'P', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+            --spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'P', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         --7. Question Text Like Match
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'L', 'Q', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
-            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'Q', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+            --spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'Q', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
         --8. Alternate Name Like Match
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'L', 'A', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
-            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'A', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+            --spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'A', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
         --9. Concept Like Match
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'L', 'C', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
-            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'C', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+            --spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'C', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
         --10. Synonym Like Match
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'L', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
-            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+           -- spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
             
             if (getDSMtchCnt(v_hdr_id) = 0) then --extend matching to Longest Word
@@ -2717,33 +2726,34 @@ BEGIN
     
     for cur in (select hdr_id,(count(*) - v_pv_cnt) cnt from nci_ds_dtl d where hdr_id = v_hdr_id group by hdr_id) loop
 
-        v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP, mtch_desc_txt, SCORE) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || '' (PV)'', ' 
+        v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP, mtch_desc_txt, SCORE) select * from (select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || '' (PV)'', ' 
             || '''' || 'CDE' || '''' || ', max(dtl.mtch_desc_txt), dtl.SCORE from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and v.de_ver_nr = ai.ver_nr and ' ||
             'dtl.hdr_id = ' || cur.hdr_id || ' and dtl.item_id = de_item_id and dtl.ver_nr = de_ver_nr and upper(v.perm_val_nm) in (select upper(' || v_src_dtl || ') from nci_ds_dtl where hdr_id = ' || cur.hdr_id
-            || ' and excl_pv_ind = 0) and (' || v_hdr_id || ', dtl.item_id, dtl.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt) and ROWNUM <= ' || v_mtch_lmt || ' group by de_item_id, de_ver_nr, dtl.rule_Desc, dtl.SCORE having count(*) = ' || cur.cnt || ' ' || v_order_by;
+            || ' and excl_pv_ind = 0) and (' || v_hdr_id || ', dtl.item_id, dtl.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt) group by de_item_id, de_ver_nr, dtl.rule_Desc, dtl.SCORE having count(*) = ' || cur.cnt || ' ' || v_order_by|| ') WHERE ROWNUM <= ' || v_mtch_lmt;
         execute immediate v_sql;
 
         if  (sql%rowcount = 0) then
-            v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP, mtch_desc_txt, SCORE) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || '' (VM)'', ' 
+            v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP, mtch_desc_txt, SCORE) select * from (select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || '' (VM)'', ' 
                 || '''' || 'CDE' || '''' || ', max(dtl.mtch_desc_txt), dtl.SCORE from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and v.de_ver_nr = ai.ver_nr and ' ||
                 'dtl.hdr_id = ' || cur.hdr_id || ' and dtl.item_id = de_item_id and dtl.ver_nr = de_ver_nr and upper(v.item_nm) in (select upper(' || v_src_dtl || ') from nci_ds_dtl where hdr_id = ' || cur.hdr_id 
-                || ' and excl_pv_ind = 0) and (' || v_hdr_id || ', dtl.item_id, dtl.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt) and ROWNUM <= ' || v_mtch_lmt || '  group by de_item_id, de_ver_nr, dtl.rule_Desc, dtl.SCORE having count(*) = ' || cur.cnt || ' ' || v_order_by;
+                || ' and excl_pv_ind = 0) and (' || v_hdr_id || ', dtl.item_id, dtl.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt) group by de_item_id, de_ver_nr, dtl.rule_Desc, dtl.SCORE having count(*) = ' || cur.cnt || ' ' || v_order_by || ') WHERE ROWNUM <= ' || v_mtch_lmt;
             execute immediate v_sql;
         end if;
 
 --same queries as above but with percent match
         if  (sql%rowcount = 0) then
-            v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP, mtch_desc_txt, SCORE) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || '' (PV)'', ' 
+            v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP, mtch_desc_txt, SCORE) select * from (select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || '' (PV)'', ' 
                 || '''' || 'CDE' || '''' || ', max(dtl.mtch_desc_txt), dtl.SCORE from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and v.de_ver_nr = ai.ver_nr and ' ||
                 'dtl.hdr_id = ' || cur.hdr_id || ' and dtl.item_id = de_item_id and dtl.ver_nr = de_ver_nr and upper(v.perm_val_nm) in (select upper(' || v_src_dtl || ') from nci_ds_dtl where hdr_id = ' || cur.hdr_id 
-                || ' and excl_pv_ind = 0) and (' || v_hdr_id || ', dtl.item_id, dtl.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt) and ROWNUM <= ' || v_mtch_lmt || ' group by de_item_id, de_ver_nr, dtl.rule_Desc, dtl.SCORE having count(*) >= ' || cur.cnt * v_mtch_pcnt || ' ' || v_order_by;
+                || ' and excl_pv_ind = 0) and (' || v_hdr_id || ', dtl.item_id, dtl.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt) group by de_item_id, de_ver_nr, dtl.rule_Desc, dtl.SCORE having count(*) >= ' || cur.cnt * v_mtch_pcnt || ' ' || v_order_by || ') WHERE ROWNUM <= ' || v_mtch_lmt;
             execute immediate v_sql;
         end if;
         if  (sql%rowcount = 0) then
-            v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP, mtch_desc_txt, SCORE) select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || '' (VM)'', ' 
+            v_sql := 'insert into nci_ds_rslt ( HDR_ID,ITEM_ID,VER_NR, NUM_PV_IN_SRC, NUM_PV_MTCH, RULE_DESC, MTCH_TYP, mtch_desc_txt, SCORE) select * from (select ' || cur.hdr_id || ', de_item_id item_id, de_ver_nr ver_nr, ' || cur.cnt || ', count(*), dtl.rule_Desc || '' (VM)'', ' 
                 || '''' || 'CDE' || '''' || ', max(dtl.mtch_desc_txt), dtl.SCORE from vw_nci_de_pv_lean v, admin_item ai, nci_ds_rslt_dtl dtl where nvl(ai.currnt_ver_ind,0) = 1 and v.de_item_id = ai.item_id and v.de_ver_nr = ai.ver_nr and ' ||
                 'dtl.hdr_id = ' || cur.hdr_id || ' and dtl.item_id = de_item_id and dtl.ver_nr = de_ver_nr and upper(v.item_nm) in (select upper(' || v_src_dtl || ') from nci_ds_dtl where hdr_id = ' || cur.hdr_id 
-                || ' and excl_pv_ind = 0) and (' || v_hdr_id || ', dtl.item_id, dtl.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt) and ROWNUM <= ' || v_mtch_lmt || ' group by de_item_id, de_ver_nr, dtl.rule_Desc, dtl.SCORE having count(*) >= ' || cur.cnt * v_mtch_pcnt || ' ' || v_order_by;
+                || ' and excl_pv_ind = 0) and (' || v_hdr_id || ', dtl.item_id, dtl.ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt) group by de_item_id, de_ver_nr, dtl.rule_Desc, dtl.SCORE having count(*) >= ' || cur.cnt * v_mtch_pcnt || ' ' || v_order_by || ') WHERE ROWNUM <= ' || v_mtch_lmt;
+            --raise_application_error(-20001, v_sql);
             execute immediate v_sql;
         end if;
     end loop;
@@ -3320,7 +3330,7 @@ elsif (v_pref='S' and v_typ='L') then
     v_length := 'syn_mtch_term';
     v_compLength := '';
 end if;
-    
+    v_sql := v_sql || ' and t.ADMIN_STUS_NM_DN not like ''%RETIRED%''';
     if (v_typ = 'R') then
         if  (v_pref in ('V', 'C')) then
                 v_sql := 'insert into nci_ds_rslt (hdr_id, item_id, ver_nr, rule_desc) select distinct ' ||  v_hdr_id || ', t.item_id, t.ver_nr, ''' || v_ruleDesc || ''' from ' 
@@ -3331,24 +3341,24 @@ end if;
                || v_tbl || ' t where ((t.' || v_mtchTerm || ' like (''' || v_entty_nm || ''' || '' |%'') or t.' || v_mtchTerm || ' like (''%| '' || ''' || v_entty_nm || ''') or t.' || v_mtchTerm || ' like (''%| '' || ''' || v_entty_nm || ''' || '' |%'') or t.' || v_mtchTerm || ' = ''' || v_entty_nm || ''') and ((' || v_hdr_id ||', item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt)))';
         --raise_application_error (-20000,v_sql);
         end if;
-        execute immediate v_sql;
-        v_cnt := SQL%ROWCOUNT;
-        commit;
+--        execute immediate v_sql;
+--        v_cnt := SQL%ROWCOUNT;
+--        commit;
     elsif (v_typ= 'U') then
         if (v_pref='S') then --unique condition format for Synonym
             v_sql := 'insert into nci_ds_rslt (hdr_id, item_id, ver_nr, rule_desc) select distinct ' ||  v_hdr_id || ', t.item_id, t.ver_nr, ''' || v_ruleDesc || ''' from ' 
                 || v_tbl || ' t where ((t.' || v_mtchTerm || ' like ( ''%'' || '''|| v_entty_nm || ''' || ''%'')) and (' || v_hdr_id ||', item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt))';
                 --raise_application_error (-20000,v_sql);
-            execute immediate v_sql;
-            v_cnt := SQL%ROWCOUNT;
-            commit;
+--            execute immediate v_sql;
+--            v_cnt := SQL%ROWCOUNT;
+--            commit;
         else
             v_sql := 'insert into nci_ds_rslt (hdr_id, item_id, ver_nr, rule_desc) select distinct ' ||  v_hdr_id || ', t.item_id, t.ver_nr, ''' || v_ruleDesc || ''' from ' 
                 || v_tbl || ' t where ((t.' || v_mtchTerm || ' like ( ''%'' || '''|| v_entty_nm || ''' || ''%'')) or (''' || v_entty_nm || ''' like (''%'' || t.' || v_mtchTerm || ' || ''%'') and length(' || v_length || ') >= ' || v_minlen ||')) and (' || v_hdr_id ||', item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt)';
                 -- raise_application_error (-20000,v_sql);
-        execute immediate v_sql;
-        v_cnt := SQL%ROWCOUNT;
-        commit;
+--        execute immediate v_sql;
+--        v_cnt := SQL%ROWCOUNT;
+--        commit;
         end if;
     elsif (v_typ='L') then
         v_word_cnt := nci_11179.getwordcount(v_entty_nm_with_space);
@@ -3378,10 +3388,14 @@ end if;
                 and (' || v_hdr_id ||', item_id, ver_nr) not in (select hdr_id, item_id, ver_nr from nci_ds_rslt)';
               --  raise_application_error (-20000,v_sql);
         end if;
-        execute immediate v_sql;
-        v_cnt := SQL%ROWCOUNT;
-        commit;
+--        execute immediate v_sql;
+--        v_cnt := SQL%ROWCOUNT;
+--        commit;
     end if;
+     v_sql := v_sql || ' and t.ADMIN_STUS_NM_DN not like ''%RETIRED%''';
+     execute immediate v_sql;
+     v_cnt := SQL%ROWCOUNT;
+     commit;
     end;
     
 procedure VMMatchSub49 ( v_hdr_id in number,  v_entty_nm in varchar2, v_entty_nm_with_space  in varchar2, v_typ in varchar2, v_pref in varchar2) AS
@@ -3853,4 +3867,3 @@ end;
 
 end;
 /
-
