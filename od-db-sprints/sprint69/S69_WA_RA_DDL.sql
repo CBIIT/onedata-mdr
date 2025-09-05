@@ -606,3 +606,18 @@ select 'Source' LVL_TYP, c.* from nci_mec_Map c
 union
 select 'Target' LVL_TYP, c.* from nci_mec_Map c
 
+	alter table NCI_MDL add ("PROV_ORG_ID" integer, 
+	"PROV_CNTCT_ID" integer, 
+	"PROV_RSN_TXT" VARCHAR2(4000 BYTE) , 
+	"PROV_TYP_RVW_TXT" VARCHAR2(4000 BYTE) , 
+	"PROV_RVW_DT" DATE, 
+	"PROV_APRV_DT" DATE);
+
+
+	alter table NCI_MDL_ELMNT add ("PROV_ORG_ID" integer, 
+	"PROV_CNTCT_ID" integer, 
+	"PROV_RSN_TXT" VARCHAR2(4000 BYTE) , 
+	"PROV_TYP_RVW_TXT" VARCHAR2(4000 BYTE) , 
+	"PROV_RVW_DT" DATE, 
+	"PROV_APRV_DT" DATE);
+
