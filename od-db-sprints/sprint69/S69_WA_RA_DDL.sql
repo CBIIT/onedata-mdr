@@ -601,3 +601,8 @@ alter table nci_ds_rslt_dtl add NUM_PV_MTCH number;
 
 
 
+create or replace view vw_nci_mec_map_for_view as 
+select 'Source' LVL_TYP, c.* from nci_mec_Map c
+union
+select 'Target' LVL_TYP, c.* from nci_mec_Map c
+
