@@ -604,7 +604,7 @@ alter table nci_ds_rslt_dtl add NUM_PV_MTCH number;
 create or replace view vw_nci_mec_map_for_view as 
 select 'Source' LVL_TYP, c.* from nci_mec_Map c
 union
-select 'Target' LVL_TYP, c.* from nci_mec_Map c
+select 'Target' LVL_TYP, c.* from nci_mec_Map c;
 
 	alter table NCI_MDL add ("PROV_ORG_ID" integer, 
 	"PROV_CNTCT_ID" integer, 
@@ -620,4 +620,7 @@ select 'Target' LVL_TYP, c.* from nci_mec_Map c
 	"PROV_TYP_RVW_TXT" VARCHAR2(4000 BYTE) , 
 	"PROV_RVW_DT" DATE, 
 	"PROV_APRV_DT" DATE);
+
+alter table nci_ds_hdr add MTCH_LMT number default 10;
+alter table nci_ds_hdr add SRC_VAL_ID number default 247;
 
