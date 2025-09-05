@@ -1,1 +1,4 @@
 --TBD
+delete the following objects:
+MEC Map for Model View
+MEC Map for Model View (CM)
