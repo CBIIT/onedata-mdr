@@ -50,8 +50,10 @@ procedure spStdWIP (v_data_in in clob, v_data_out out clob);
 function isDECnmSysGen (v_dec_id in number, v_dec_ver_nr in number, v_oc_id in number, v_oc_ver_nr in number, v_prop_id in number, v_prop_ver_nr in number) return boolean;
 function isDECnmSysGenNew (v_in_str varchar2) return boolean;
 function getItemTypeID (v_item_id in number, v_ver_nr in number) return number;
+function isHookInputSelected (v_hookinput in t_hookinput, v_col_nm in varchar2) return boolean;
 END;
 /
+
 create or replace PACKAGE BODY nci_11179_2 AS
 
 c_ver_suffix varchar2(5) := 'v1.00';
@@ -119,6 +121,22 @@ begin
                                            end if;
                     end if;
 end;
+
+function isHookInputSelected (v_hookinput in t_hookinput, v_col_nm in varchar2) return boolean
+IS
+    row_sel t_row;
+    isSelected boolean := false;
+BEGIN
+    row_sel := v_hookinput.selectedRowset.rowset(1);
+    if (ihook.getColumnValue(row_sel, v_col_nm) is not null) then
+        isSelected := true;
+        return isSelected;
+    end if;
+EXCEPTION
+    WHEN OTHERS THEN
+        isSelected := false;
+        return isSelected;
+END;
 
 function getCncptStrFromCncpt (v_item_id in number, v_ver_nr in number, v_admin_item_typ_id in number) return varchar2 is
 v_str varchar2(4000) := '';
@@ -437,14 +455,19 @@ AS
  forms t_forms;
   form1 t_form;
   v_cart_nm varchar2(255);
+  v_card boolean;
 
 begin
     hookinput := ihook.gethookinput (v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
---raise_application_error(-20000, v_usr_id);
-   --row_ori := hookInput.originalRowset.rowset(1);
-   -- v_cart_nm := nvl(ihook.getColumnValue(row_ori, 'CART_NM'),v_deflt_cart_nm);
+    v_card := isHookInputSelected(hookinput, 'CART_NM');
+    if v_card then
+        row_ori := hookInput.originalRowset.rowset(1);
+        v_cart_nm := nvl(ihook.getColumnValue(row_ori, 'CART_NM'),v_deflt_cart_nm);
+    else
+        v_cart_nm := v_deflt_cart_nm;
+    end if;
     if (hookinput.invocationnumber = 0) then   -- First invocation
          forms                  := t_forms();
         form1                  := t_form('Add Item to Collection (Hook)', 2,1);
@@ -2063,32 +2086,14 @@ end loop;
         and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR');
 
    --     v_tab_admin_item_nm(v_tab_admin_item_nm.count) := 'CDE:' || ihook.getColumnValue(row_cur,'ITEM_ID') || '-' || substr(ihook.getColumnValue(row_cur,'ITEM_NM'),1,75) || chr(13) || 'VD:' ||  substr(vd_id_nm,1,75) ;
-        v_tab_admin_item_nm(v_tab_admin_item_nm.count) := 'CDE:' || ihook.getColumnValue(row_cur,'ITEM_ID') || '-' || ihook.getColumnValue(row_cur,'VER_NR') || '-' || substr(ihook.getColumnValue(row_cur,'ITEM_NM'),1,85) || '-' ||  substr(vd_id_nm,1,85) ;
+        v_tab_admin_item_nm(v_tab_admin_item_nm.count) := 'PVs For CDE:' || ihook.getColumnValue(row_cur,'ITEM_ID') || '-' || ihook.getColumnValue(row_cur,'VER_NR') || '-' || substr(ihook.getColumnValue(row_cur,'ITEM_NM'),1,85) || '-' ||  substr(vd_id_nm,1,85) ;
      
     end loop;
   
     -- populating val means/perm vals
 
 -- Souuce value
-        for rec in (select perm_val_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
-                            
-
-            v_found := false;
-            for j in 1..v_tab_val_mean_cd.count loop
-                    v_found := v_found or v_tab_val_mean_cd(j)= rec.perm_val_nm ;
-                    --or v_tab_val_mean_nm(j)= rec.perm_val_nm;
-            end loop;
-            if not v_found then
-                v_tab_val_mean_cd.extend();
-                v_tab_val_mean_cd_disp.extend();
-                v_tab_val_mean_nm.extend();
-                v_tab_val_mean_cd(v_tab_val_mean_cd.count) := rec.perm_val_nm;
-            --    v_tab_val_mean_nm(v_tab_val_mean_nm.count) := rec.cncpt_concat_nm;
-               -- v_tab_val_mean_nm(v_tab_val_mean_nm.count) := rec.perm_val_nm;
-            end if;
-        end loop;
-
-
+    
   
     rows := t_rows();
     for i in 1 .. v_tab_val_mean_cd.count loop
@@ -2120,14 +2125,38 @@ end loop;
             k := k + 1;
         end loop;
      for rec in (select perm_val_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
-           if  v_tab_val_mean_cd(i)= rec.perm_val_nm then
+        for j in 1 .. rows_ori.count loop
+           if  instr(ihook.getColumnValue(row,v_tab_admin_item_nm(j)),rec.perm_val_nm ) > 0 then
+           --if  v_tab_val_mean_cd(i)= rec.perm_val_nm then
            --or v_tab_val_mean_nm(i)= rec.perm_val_nm then
             ihook.setColumnValue(row, 'Source',rec.perm_val_nm);
-            end if;
+           end if;
+           end loop;
         end loop;
        rows.extend; rows(rows.last) := row;
     end loop;
- 
+    
+    -- add source values not found
+     for rec in (select perm_val_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
+                            
+
+            v_found := false;
+            for j in 1..rows.count loop
+                  row_ori := rows(j);
+                  if (ihook.getCOlumnValue(row_ori,'Source') is not null) then
+                    v_found := v_found or ihook.getCOlumnValue(row_ori,'Source')= rec.perm_val_nm ;
+                    end if;
+                    --or v_tab_val_mean_nm(j)= rec.perm_val_nm;
+            end loop;
+            if not v_found then
+               row := t_row();
+               ihook.setColumnValue(row,'Source', rec.perm_val_nm);
+                  rows.extend; rows(rows.last) := row;
+               -- v_tab_val_mean_nm(v_tab_val_mean_nm.count) := rec.perm_val_nm;
+            end if;
+        end loop;
+
+
 if (rows.count > 0) then
     showRowset := t_showableRowset(rows, 'Permissible Value Comparison',4, 'unselectable');
     hookOutput.showRowset := showRowset;
@@ -2598,3 +2627,4 @@ begin
 end;
 end;
 /
+
