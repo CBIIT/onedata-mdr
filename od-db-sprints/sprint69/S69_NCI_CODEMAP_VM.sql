@@ -947,9 +947,9 @@ v_st_ts := systimestamp();
     elsif (nvl(cur1.map_deg,0) = 130 and ihook.getColumnValue(row_ori,'SOURCE_DOMAIN_TYPE') = 'ENUMERATED' and ihook.getColumnValue(row_ori,'TARGET_DOMAIN_TYPE') = 'ENUMERATED') then
         v_valid := false;
         v_val_stus_msg := v_val_stus_msg || 'Both Source and Target Domain Types are enumerated.';
-    elsif (nvl(cur1.map_deg,0) = 130 and ihook.getColumnValue(row_ori,'TARGET_DOMAIN_TYPE') is null and ihook.getColumnValue(row_ori,'SOURCE_DOMAIN_TYPE') is null) then
-        v_valid := false;
-        v_val_stus_msg := v_val_stus_msg || 'Both Source and Target Domain Types are null.';
+--    elsif (nvl(cur1.map_deg,0) = 130 and ihook.getColumnValue(row_ori,'TARGET_DOMAIN_TYPE') is null and ihook.getColumnValue(row_ori,'SOURCE_DOMAIN_TYPE') is null) then
+--        v_valid := false;
+--        v_val_stus_msg := v_val_stus_msg || 'Both Source and Target Domain Types are null.';
     end if;
     
  -- Rules id provided is incorrect.
