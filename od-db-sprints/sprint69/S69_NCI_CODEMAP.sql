@@ -1651,7 +1651,7 @@ commit;
   
         spUpdateModelCDEAssocSub (ihook.getColumnValue(row_ori,'ITEM_ID'),ihook.getColumnValue(row_ori,'VER_NR'), v_cnt,'F', v_msg, hookinput.invocationnumber, hookinput,hookoutput);
 
-        hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated. Select Flattended View to view results. ' || v_msg;
+        hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated. Select Flattened View to view results. ' || v_msg;
 
     else
         hookoutput.message := 'Please select exactly one model to run this command.';
