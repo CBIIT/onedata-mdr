@@ -53,7 +53,6 @@ function getItemTypeID (v_item_id in number, v_ver_nr in number) return number;
 function isHookInputSelected (v_hookinput in t_hookinput, v_col_nm in varchar2) return boolean;
 END;
 /
-
 create or replace PACKAGE BODY nci_11179_2 AS
 
 c_ver_suffix varchar2(5) := 'v1.00';
@@ -2032,6 +2031,7 @@ as
     v_id varchar2(1000);
     vd_id_nm varchar2(1000);
     v_hdr_id number;
+    v_test_str varchar(4000);
 begin
 
     hookInput := ihook.getHookInput(v_data_in);
@@ -2126,9 +2126,12 @@ end loop;
         end loop;
      for rec in (select perm_val_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
         for j in 1 .. rows_ori.count loop
-           if  instr(ihook.getColumnValue(row,v_tab_admin_item_nm(j)),rec.perm_val_nm ) > 0 then
-           --if  v_tab_val_mean_cd(i)= rec.perm_val_nm then
+        v_test_str:= ihook.getColumnValue(row,v_tab_admin_item_nm(j));
+       --    if  instr(ihook.getColumnValue(row,v_tab_admin_item_nm(j)),rec.perm_val_nm ) > 0 then
+          if  v_test_str= rec.perm_val_nm or  v_test_str like rec.perm_val_nm || '|%' 
+           or v_test_str like '%|' || rec.perm_val_nm || '|%' or v_test_str like '%|' || rec.perm_val_nm   then
            --or v_tab_val_mean_nm(i)= rec.perm_val_nm then
+           
             ihook.setColumnValue(row, 'Source',rec.perm_val_nm);
            end if;
            end loop;
@@ -2627,4 +2630,3 @@ begin
 end;
 end;
 /
-
