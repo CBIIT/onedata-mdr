@@ -45,7 +45,7 @@ CREATE materialized VIEW VW_NCI_DE_HORT_EXPANDED as
 	    and de.item_id = refdoc.item_id (+)
 	  and de.ver_nr = refdoc.ver_nr (+)
 	    and de.item_id = pvvm.de_item_id (+)
-	  and de.ver_nr = pvvm.de_ver_nr (+)
+	  and de.ver_nr = pvvm.de_ver_nr (+);
 	  
 
 
@@ -597,7 +597,6 @@ vw_val_dom_ref_term tvdrt,
           and tdec.ver_nr (+)= tmec.cde_ver_nr;
 
 alter table nci_ds_hdr add PRMTR_ID number default 0;
-alter table nci_ds_rslt_dtl add NUM_PV_MTCH number;
 
 
 
