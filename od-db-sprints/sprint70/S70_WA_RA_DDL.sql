@@ -88,3 +88,10 @@ WHERE ai.item_id                  = mdl.item_id
 	  and me.prov_cntct_id = me_cntct.entty_id (+)
 	  ;
 
+create view vw_mdl as select ai.*,
+m.PRMRY_MDL_LANG_ID, m.MDL_TYP_ID, m.ASSOC_NM_TYP_ID, 
+m.ASSOC_TBL_NM_TYP_ID, m.ASSOC_CS_ITEM_ID, m.ASSOC_CS_VER_NR, m.MAP_USG_TYP_ID, m.PROV_ORG_ID, m.PROV_CNTCT_ID, m.PROV_RSN_TXT, m.PROV_TYP_RVW_TXT, 
+m.PROV_RVW_DT, m.PROV_APRV_DT
+from admin_item ai, nci_mdl m
+where ai.item_id = m.item_id and ai.ver_nr = m.ver_nr and ai.admin_item_typ_id = 57;
+
