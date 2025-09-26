@@ -95,3 +95,9 @@ m.PROV_RVW_DT, m.PROV_APRV_DT
 from admin_item ai, nci_mdl m
 where ai.item_id = m.item_id and ai.ver_nr = m.ver_nr and ai.admin_item_typ_id = 57;
 
+	alter table NCI_MDL_ELMNT_CHAR add ("PROV_ORG_ID" integer, 
+	"PROV_CNTCT_ID" integer, 
+	"PROV_RSN_TXT" VARCHAR2(4000 BYTE) , 
+	"PROV_TYP_RVW_TXT" VARCHAR2(4000 BYTE) , 
+	"PROV_RVW_DT" DATE, 
+	"PROV_APRV_DT" DATE);
