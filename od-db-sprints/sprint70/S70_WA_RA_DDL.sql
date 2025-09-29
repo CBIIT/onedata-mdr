@@ -102,4 +102,4 @@ where ai.item_id = m.item_id and ai.ver_nr = m.ver_nr and ai.admin_item_typ_id =
 	"PROV_RVW_DT" DATE, 
 	"PROV_APRV_DT" DATE);
 
-alter table NCI_MDL_ELMNT_CHAR add (CMNTS_DESC_TXT varchar2(4000), CONSTNT_DESC_TXT varchar2(1000));
+alter table NCI_MDL_ELMNT_CHAR add (CONSTNT_DESC_TXT varchar2(1000));
