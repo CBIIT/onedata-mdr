@@ -103,3 +103,17 @@ where ai.item_id = m.item_id and ai.ver_nr = m.ver_nr and ai.admin_item_typ_id =
 	"PROV_APRV_DT" DATE);
 
 alter table NCI_MDL_ELMNT_CHAR add (CONSTNT_DESC_TXT varchar2(1000));
+
+
+  CREATE OR REPLACE VIEW VW_MDL_MAP AS
+  select ai."DATA_ID_STR",ai."ITEM_ID",ai."VER_NR",ai."CLSFCTN_SCHM_ID",ai."ITEM_DESC",ai."CNTXT_ITEM_ID",ai."CNTXT_VER_NR",ai."ITEM_LONG_NM",ai."ITEM_NM",ai."ADMIN_NOTES",
+	  ai."CHNG_DESC_TXT",ai."CREATION_DT",ai."EFF_DT",ai."ORIGIN",ai."UNRSLVD_ISSUE",ai."UNTL_DT",ai."CLSFCTN_SCHM_VER_NR",ai."ADMIN_ITEM_TYP_ID",ai."CURRNT_VER_IND",ai."ADMIN_STUS_ID",
+	  ai."REGSTR_STUS_ID",ai."REGISTRR_CNTCT_ID",ai."SUBMT_CNTCT_ID",ai."STEWRD_CNTCT_ID",ai."SUBMT_ORG_ID",ai."STEWRD_ORG_ID",ai."CREAT_DT",ai."CREAT_USR_ID",ai."LST_UPD_USR_ID",ai."FLD_DELETE",
+	  ai."LST_DEL_DT",ai."S2P_TRN_DT",ai."LST_UPD_DT",ai."LEGCY_CD",ai."CASE_FILE_ID",ai."REGSTR_AUTH_ID",ai."BTCH_NR",ai."ALT_KEY",ai."ABAC_ATTR",ai."NCI_IDSEQ",ai."ADMIN_STUS_NM_DN",ai."CNTXT_NM_DN",
+	  ai."REGSTR_STUS_NM_DN",ai."ORIGIN_ID",ai."ORIGIN_ID_DN",ai."DEF_SRC",ai."CREAT_USR_ID_X",ai."LST_UPD_USR_ID_X",ai."ITEM_NM_CURATED",ai."ITEM_NM_ID_VER",ai."ITEM_RPT_URL",ai."ITEM_DEEP_LINK",
+	  ai."RVWR_CMNTS",ai."MTCH_TERM_ADV",ai."MTCH_TERM",ai."LST_UPD_DT_X",
+m.SRC_MDL_ITEM_ID,m.SRC_MDL_VER_NR, m.TGT_MDL_ITEM_ID,m.TGT_MDL_VER_NR,  m.PROV_ORG_ID, m.PROV_CNTCT_ID, m.PROV_RSN_TXT, m.PROV_TYP_RVW_TXT, 
+m.PROV_RVW_DT, m.PROV_APRV_DT
+from admin_item ai, nci_mdl_map m
+where ai.item_id = m.item_id and ai.ver_nr = m.ver_nr and ai.admin_item_typ_id = 58;
+
