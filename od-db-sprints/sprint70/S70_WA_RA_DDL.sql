@@ -18,6 +18,17 @@
 		IMP_PROV_CNTCT varchar2(1000));
 
 
+alter table NCI_MDL_ELMNT_CHAR add (CONSTNT_DESC_TXT varchar2(1000));
+
+	alter table NCI_MDL_ELMNT_CHAR add ("PROV_ORG_ID" integer, 
+	"PROV_CNTCT_ID" integer, 
+	"PROV_RSN_TXT" VARCHAR2(4000 BYTE) , 
+	"PROV_TYP_RVW_TXT" VARCHAR2(4000 BYTE) , 
+	"PROV_RVW_DT" DATE, 
+	"PROV_APRV_DT" DATE);
+
+
+
   CREATE OR REPLACE  VIEW VW_MDL_IMP_TEMPLATE AS
   SELECT ' '                DO_NOT_USE,
        ' '                  BATCH_USER,
@@ -60,7 +71,14 @@
        decode(mec.FK_IND,1,'Yes','No')           MEC_FK_IND, 
        mec.                 FK_ELMNT_PHY_NM, 
        mec.                 FK_ELMNT_CHAR_PHY_NM, 
-       mec.cmnts_desc_txt                  COMMENTS            
+       mec.cmnts_desc_txt                  COMMENTS     ,
+	  mec.CONSTNT_DESC_TXT,
+	   mec_org.org_nm MEC_PROV_ORG_NM,
+	   mec_cntct.PRSN_FULL_NM_DERV MEC_PROV_CNTCT_NM,
+	    mec.PROV_RSN_TXT  MEC_PROV_RSN_TXT, 
+	mec.PROV_TYP_RVW_TXT MEC_PROV_TYP_RVW_TXT , 
+	mec.PROV_RVW_DT MEC_PROV_RVW_DT, 
+	mec.PROV_APRV_DT MEC_PROV_APRV_DT
 FROM admin_item            ai,
      nci_mdl               mdl,
      nci_mdl_elmnt         me,
@@ -71,7 +89,9 @@ FROM admin_item            ai,
 	  nci_org		   mdl_org,
 	  nci_org			me_org,
 	  nci_prsn			mdl_cntct,
-	  nci_prsn			me_cntct
+	  nci_prsn			me_cntct,
+	  	  nci_org			mec_org,
+	  nci_prsn			mec_cntct
 WHERE ai.item_id                  = mdl.item_id
   AND ai.ver_nr                   = mdl.ver_nr
   AND ai.admin_item_typ_id        = 57
@@ -86,6 +106,8 @@ WHERE ai.item_id                  = mdl.item_id
 	  and mdl.prov_cntct_id = mdl_cntct.entty_id (+)
 	  and me.prov_org_id = me_org.entty_id (+)
 	  and me.prov_cntct_id = me_cntct.entty_id (+)
+	    and mec.prov_org_id = mec_org.entty_id (+)
+	  and mec.prov_cntct_id = mec_cntct.entty_id (+)
 	  ;
 
 create view vw_mdl as select ai.*,
@@ -94,15 +116,6 @@ m.ASSOC_TBL_NM_TYP_ID, m.ASSOC_CS_ITEM_ID, m.ASSOC_CS_VER_NR, m.MAP_USG_TYP_ID, 
 m.PROV_RVW_DT, m.PROV_APRV_DT
 from admin_item ai, nci_mdl m
 where ai.item_id = m.item_id and ai.ver_nr = m.ver_nr and ai.admin_item_typ_id = 57;
-
-	alter table NCI_MDL_ELMNT_CHAR add ("PROV_ORG_ID" integer, 
-	"PROV_CNTCT_ID" integer, 
-	"PROV_RSN_TXT" VARCHAR2(4000 BYTE) , 
-	"PROV_TYP_RVW_TXT" VARCHAR2(4000 BYTE) , 
-	"PROV_RVW_DT" DATE, 
-	"PROV_APRV_DT" DATE);
-
-alter table NCI_MDL_ELMNT_CHAR add (CONSTNT_DESC_TXT varchar2(1000));
 
 
   CREATE OR REPLACE VIEW VW_MDL_MAP AS
