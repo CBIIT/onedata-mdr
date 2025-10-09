@@ -66,3 +66,13 @@ end loop;
 
 END;
 /
+
+alter table nci_mdl_elmnt_char disable all triggers;
+update nci_mdl_elmnt_char c set oc_cncpt_cd = (Select e.cncpt_concat from nci_admin_item_ext e, de_conc dec
+where dec.item_id= c.de_conc_item_id and dec.ver_nr = c.de_conc_ver_nr and dec.obj_cls_item_id = e.item_id and dec.obj_cls_Ver_nr = e.ver_nr);
+commit;
+update nci_mdl_elmnt_char c set prop_cncpt_cd = (Select e.cncpt_concat from nci_admin_item_ext e, de_conc dec
+where dec.item_id= c.de_conc_item_id and dec.ver_nr = c.de_conc_ver_nr and dec.prop_item_id = e.item_id and dec.prop_Ver_nr = e.ver_nr);
+commit;
+
+alter table nci_mdl_elmnt_char enable all triggers;
