@@ -20,6 +20,9 @@
 
 alter table NCI_MDL_ELMNT_CHAR add (CONSTNT_DESC_TXT varchar2(1000));
 
+    alter table nci_mdl_elmnt_char add (OC_CNCPT_CD varchar2(8000), PROP_CNCPT_CD varchar2(8000));
+    
+
 	alter table NCI_MDL_ELMNT_CHAR add ("PROV_ORG_ID" integer, 
 	"PROV_CNTCT_ID" integer, 
 	"PROV_RSN_TXT" VARCHAR2(4000 BYTE) , 
