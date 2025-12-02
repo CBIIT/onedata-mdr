@@ -6,7 +6,6 @@ create or replace PACKAGE            nci_codemap AS
   procedure spCreateModel ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure spUpdateModel ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);-- not used
   procedure spValidateModel ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2); -- Validate Import
-  procedure spVersionModel ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);-- not used. Create Version is used.
   procedure spCompareModel ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure spCreateMapGroup ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure getModelElementAction ( row_ori in out t_row, actions in out t_actions, v_mdl_hdr_id in number, v_mdl_elmnt_id in out number, v_ins_cnt in out number, v_upd_cnt in out number);
@@ -17,6 +16,7 @@ create or replace PACKAGE            nci_codemap AS
  procedure spDeleteModelAltNm ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure spValidateModelMap ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
   procedure spValidateModelAI ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2); -- Validate model from model maintenance
+  procedure spValidateModelAICodeGen ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2); -- Validate model from model maintenance
  procedure spUpdateModelCDEAssoc ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
  procedure spUpdateModelCDEAssocSub ( v_mdl_id in number, v_mdl_ver_nr in number, v_cnt in out integer, v_mode in varchar2, v_msg in out varchar2, v_invocationnumber in integer, hookinput in t_hookinput,
  hookoutput in out t_hookoutput);
@@ -230,11 +230,15 @@ v_ver := ihook.getColumnvalue(row_ori, 'SRC_MDL_VER');
 insert into NCI_MDL_ELMNT_CHAR (MEC_ID, MDL_ELMNT_ITEM_ID, MDL_ELMNT_VER_NR,SRC_DTTYPE,STD_DTTYPE_ID,SRC_MAX_CHAR,SRC_MIN_CHAR,SRC_UOM,UOM_ID,
 SRC_DEFLT_VAL,SRC_ENUM_SRC,MEC_LONG_NM,MEC_PHY_NM,MEC_DESC,CDE_ITEM_ID,CDE_VER_NR,DE_CONC_ITEM_ID,DE_CONC_VER_NR,VAL_DOM_ITEM_ID,
 CHAR_ORD,VAL_DOM_VER_NR,MDL_ELMNT_CHAR_TYP_ID, PK_IND,FK_IND,
-REQ_IND,FK_ELMNT_PHY_NM,FK_ELMNT_CHAR_PHY_NM, MDL_PK_IND, CMNTS_DESC_TXT)
+REQ_IND,FK_ELMNT_PHY_NM,FK_ELMNT_CHAR_PHY_NM, MDL_PK_IND, CMNTS_DESC_TXT, CONSTNT_DESC_TXT,prov_cntct_id, prov_org_id,
+PROV_RSN_TXT  ,PROV_TYP_RVW_TXT ,PROV_RVW_DT,PROV_APRV_DT 
+)
 values (v_mec_id, v_mdl_elmnt_id, v_ver, cur.SRC_DTTYPE, cur.STD_DTTYPE_ID,cur.SRC_MAX_CHAR,cur.SRC_MIN_CHAR, cur.SRC_UOM, cur.UOM_ID,
 v_temp_str, cur.SRC_ENUM_SRC,cur.MEC_LONG_NM, cur.MEC_PHY_NM, cur.MEC_DESC, cur.CDE_ITEM_ID, cur.CDE_VER_NR,cur.DE_CONC_ITEM_ID, cur.DE_CONC_VER_NR,cur.VAL_DOM_ITEM_ID,
 cur.CHAR_ORD,cur.VAL_DOM_VER_NR, cur.MDL_ELMNT_CHAR_TYP_ID,decode(nvl(upper(cur.PK_IND),'NO'),'YES',1,0),decode(nvl(upper(cur.FK_IND_TXT),'NO'),'YES',1,0),
-decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),cur.FK_ELMNT_PHY_NM, cur.FK_ELMNT_CHAR_PHY_NM,decode(nvl(upper(cur.MDL_PK_IND),'NO'),'YES',1,0), cur.cmnts_desc_txt);
+decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),cur.FK_ELMNT_PHY_NM, cur.FK_ELMNT_CHAR_PHY_NM,decode(nvl(upper(cur.MDL_PK_IND),'NO'),'YES',1,0), cur.cmnts_desc_txt,
+cur.CONSTNT_DESC_TXT, cur.prov_cntct_id, cur.prov_org_id,
+cur.PROV_RSN_TXT  ,cur.PROV_TYP_RVW_TXT ,cur.PROV_RVW_DT,cur.PROV_APRV_DT );
 
 insert into onedata_Ra.NCI_MDL_ELMNT_CHAR (MEC_ID, MDL_ELMNT_ITEM_ID, MDL_ELMNT_VER_NR,SRC_DTTYPE,STD_DTTYPE_ID,SRC_MAX_CHAR,SRC_MIN_CHAR,SRC_UOM,UOM_ID,
 SRC_DEFLT_VAL,SRC_ENUM_SRC,MEC_LONG_NM,MEC_PHY_NM,MEC_DESC,CDE_ITEM_ID,CDE_VER_NR,DE_CONC_ITEM_ID,DE_CONC_VER_NR,VAL_DOM_ITEM_ID,
@@ -276,7 +280,14 @@ MDL_PK_IND = decode(nvl(upper(cur.MDL_PK_IND),'NO'),'YES',1,0),
 REQ_IND = decode(nvl(upper(cur.SRC_MAND_IND),'NO'),'YES',132,'MANDATORY',132,'NO',133,'EXPECTED', 134,'NOT MANDATORY',133,133),
 FK_ELMNT_PHY_NM = cur.FK_ELMNT_PHY_NM,
 FK_ELMNT_CHAR_PHY_NM = cur.FK_ELMNT_CHAR_PHY_NM,
-cmnts_desc_txt = cur.cmnts_desc_txt
+cmnts_desc_txt = cur.cmnts_desc_txt,
+CONSTNT_DESC_TXT= cur.CONSTNT_DESC_TXT,
+prov_cntct_id= cur.prov_cntct_id, 
+prov_org_id= cur.prov_org_id,
+PROV_RSN_TXT = cur.PROV_RSN_TXT ,
+PROV_TYP_RVW_TXT= cur.PROV_TYP_RVW_TXT ,
+PROV_RVW_DT= cur.PROV_RVW_DT,
+PROV_APRV_DT= cur.PROV_APRV_DT
 where MEC_ID = v_mec_id;
 --ihook.setColumnValue(row,'MDL_ITEM_ID',v_mdl_hdr_id);
 v_upd_cnt := v_upd_cnt + SQL%ROWCOUNT;
@@ -455,9 +466,8 @@ ihook.setColumnValue(row,'PROV_ORG_ID',cur.PROV_ORG_ID);
 ihook.setColumnValue(row,'PROV_CNTCT_ID',cur.PROV_CNTCT_ID);
 ihook.setColumnValue(row,'PROV_RSN_TXT',cur.PROV_RSN_TXT);
 ihook.setColumnValue(row,'PROV_TYP_RVW_TXT',cur.PROV_TYP_RVW_TXT);
-ihook.setColumnValue(row,'PROV_RVW_DT',cur.PROV_RVW_DT);
-ihook.setColumnValue(row,'PROV_APRV_DT',cur.PROV_APRV_DT);
-
+ihook.setColumnValue(row,'PROV_RVW_DT',to_char(cur.PROV_RVW_DT, 'YYYY-MM-DD HH24:MI:SS'));
+ihook.setColumnValue(row,'PROV_APRV_DT',to_char(cur.PROV_APRV_DT, 'YYYY-MM-DD HH24:MI:SS'));
 
 
 if (v_temp = 0) then -- new characteristics
@@ -974,6 +984,90 @@ BEGIN
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
+
+procedure spValidateModelAICodeGen  ( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+     showRowset     t_showableRowset;
+
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+     row_sel t_row;
+    rows  t_rows;
+    row_ori t_row;
+  action_rows       t_rows := t_rows();
+  action_row		    t_row;
+  rowset            t_rowset;
+ v_item_id number;
+ v_ver_nr number(4,2);
+ v_assoc_tbl_nm_typ_id integer;
+ v_assoc_nm_typ_id integer;
+  rowform t_row;
+v_found boolean;
+msg1 varchar2(4000);
+v_valid boolean := true;
+ j integer;
+ msg varchar2(8000);
+ v_temp integer;
+ v_cs_item_id number;
+ v_cs_ver_nr number(4,2);
+ v_CNTCT_NM  VARCHAR2(100);  
+ v_ITEM_NM VARCHAR2(255);
+BEGIN
+  hookinput                    := Ihook.gethookinput (v_data_in);
+  hookoutput.invocationnumber  := hookinput.invocationnumber;
+  hookoutput.originalrowset    := hookinput.originalrowset;
+ 
+ row_ori :=  hookInput.originalRowset.rowset(1);
+ v_item_id := ihook.getColumnValue(row_ori,'ITEM_ID');
+ v_ver_nr := ihook.getColumnValue(row_ori,'VER_NR');
+ 
+ rows := t_rows();
+ 
+ j:= 0;
+ msg :='ERROR: Model cannot be Released.' ;
+ 
+   -- end if;
+    msg := '';
+    select listagg(me.ITEM_PHY_OBJ_NM,',') within group (order by me.ITEM_PHY_OBJ_NM) into msg from nci_mdl_elmnt me where 
+    me.mdl_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and me.mdl_item_ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')
+    and (item_id, ver_nr) in (select mec.mdl_elmnt_item_id, mec.mdl_elmnt_ver_nr 
+    from nci_mdl_elmnt_char mec, nci_mdl_elmnt me1 where me1.item_id = mec.mdl_elmnt_item_id 
+    and me1.ver_nr = mec.mdl_elmnt_ver_nr and 
+    me1.mdl_item_id = ihook.getColumnValue(row_ori,'ITEM_ID') and me1.mdl_item_ver_nr = ihook.getColumnValue(row_ori, 'VER_NR')
+    group by mec.mdl_elmnt_item_id, mec.mdl_elmnt_ver_nr
+    having sum(PK_IND) =0);
+   -- raise_application_error(-20000, nvl(msg,'Is Null'));
+    if (msg is not null) then
+       v_valid := false;
+         row := t_row();
+        --    ihook.setColumnValue(row,'Issue', 'Missing classifications for CDE: ' || msg1);
+            ihook.setColumnValue(row,'Issue', 'Natural Key missing for the elements:');
+            ihook.setColumnValue(row,'Details', msg);
+            rows.extend; rows(rows.last) := row;
+    end if;
+
+        IF ( v_valid = false ) THEN
+            -- raise_application_error(-20000, msg);
+            -- showRowset := t_showableRowset(rows, 'Issues with Model Validation for: ' || ihook.getColumnValue(row_ori, 'ITEM_NM') || ';' || ihook.getColumnValue(row_ori,'ITEM_ID') || 'v' || ihook.getColumnValue(row_ori,'VER_NR'),4, 'unselectable');
+            showrowset := t_showablerowset(
+                              rows,
+                              'Issues with Model Validation for: ',
+                              4,
+                              'unselectable');
+            hookoutput.showrowset := showrowset;
+            -- } 07/07/25 (RV Tracker DSRMWS-4066) 
+        ELSE
+
+           hookoutput.message := 'Model is valid. No issues found.';
+           
+   end if;
+   
+  V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+END;
+
    procedure spCreateEntityRel ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
    as
    hookInput t_hookInput;
@@ -1403,9 +1497,9 @@ ihook.setColumnValue(row,'VAL_DOM_VER_NR',cur.VAL_DOM_VER_NR);
 end loop;*/
 --end loop;
 end loop;
-         action := t_actionrowset(rowschar, 'Model Element Characteristics', 2,10,'update');
-        actions.extend;
-        actions(actions.last) := action;
+      ---   action := t_actionrowset(rowschar, 'Model Element Characteristics', 2,10,'update');
+       -- actions.extend;
+        --actions(actions.last) := action;
   
     
     rows := t_rows();
@@ -1423,7 +1517,7 @@ end loop;
        hookoutput.actions := actions;
  
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-   --nci_util.debugHook('GENERAL',v_data_out);
+   nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 procedure spUpdateModelCDEAssocSub ( v_mdl_id in number, v_mdl_ver_nr in number, v_cnt in out integer, v_mode in varchar2, v_msg in out varchar2, v_invocationnumber in integer,
@@ -1629,6 +1723,58 @@ as
                     showrows (showrows.last) := showrow;
         
   end loop;
+
+
+  -- SHow warning if DEC OC is changed
+  for cur in (select mec_id,  MEC_PHY_NM, me.ITEM_PHY_OBJ_NM me_phy_nm, mec.cde_item_id, mec.cde_ver_nr, mec.oc_cncpt_cd, e.cncpt_concat
+  from nci_mdl_elmnt_char mec, 
+  de de, nci_mdl_elmnt me , de_conc dec , nci_admin_item_ext e where me.MDL_ITEM_ID =v_mdl_id
+  and me.MDL_ITEM_VER_NR= v_mdl_ver_nr and me.item_id = mec.MDL_ELMNT_ITEM_ID and me.ver_nr =mec.MDL_ELMNT_VER_NR and mec.cde_item_id = de.item_id and
+  mec.cde_ver_nr = de.ver_nr and mec.de_conc_item_id = de.de_conc_item_id and mec.de_conc_ver_nr = de.de_conc_ver_nr and de.de_conc_item_id = dec.item_id
+  and de.de_conc_ver_nr = dec.ver_nr and dec.obj_cls_item_id = e.item_id and dec.obj_cls_ver_nr = e.ver_nr and mec.oc_cncpt_cd <> e.cncpt_concat) loop
+    --update nci_mdl_elmnt_char set ( VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, chng_desc_txt)=
+    --(select cur.VAL_DOM_ITEM_Id, cur.VAL_DOM_VER_NR, cur.chng_desc_txt || 'Updated VD to ' || cur.val_dom_item_id from dual)
+    --where  mec_id = cur.mec_id;
+      showrow := t_row();
+          ihook.setColumnValue(showrow,'Element Physical Name', cur.me_phy_nm);
+          ihook.setColumnValue(showrow,'Characteristic Physical Name', cur.mec_phy_nm);
+          ihook.setColumnValue(showrow,'Current CDE Item ID', cur.cde_item_id);
+          ihook.setColumnValue(showrow,'Current CDE Version', cur.cde_ver_nr);
+          ihook.setColumnValue(showrow,'Change Type', 'WARNING: Object Class Concepts');
+         -- ihook.setColumnValue(showrow,'Current Item ID', cur.current_val_Dom_ITEM_ID);
+         -- ihook.setColumnValue(showrow,'Current Version', cur.current_val_dom_VER_NR);
+          ihook.setColumnValue(showrow,'MEC_ID', cur.mec_id);
+          ihook.setColumnValue(showrow,'Current Concepts', cur.oc_cncpt_cd);        
+          ihook.setColumnValue(showrow,'New Concepts', cur.cncpt_concat);        
+          showrows.extend;
+                    showrows (showrows.last) := showrow;
+        
+  end loop;
+  -- SHow warning if DEC OC is changed
+  for cur in (select mec_id,  MEC_PHY_NM, me.ITEM_PHY_OBJ_NM me_phy_nm, mec.cde_item_id, mec.cde_ver_nr, mec.prop_cncpt_cd, e.cncpt_concat
+  from nci_mdl_elmnt_char mec, 
+  de de, nci_mdl_elmnt me , de_conc dec , nci_admin_item_ext e where me.MDL_ITEM_ID =v_mdl_id
+  and me.MDL_ITEM_VER_NR= v_mdl_ver_nr and me.item_id = mec.MDL_ELMNT_ITEM_ID and me.ver_nr =mec.MDL_ELMNT_VER_NR and mec.cde_item_id = de.item_id and
+  mec.cde_ver_nr = de.ver_nr and mec.de_conc_item_id = de.de_conc_item_id and mec.de_conc_ver_nr = de.de_conc_ver_nr and de.de_conc_item_id = dec.item_id
+  and de.de_conc_ver_nr = dec.ver_nr and dec.prop_item_id = e.item_id and dec.prop_ver_nr = e.ver_nr and mec.prop_cncpt_cd <> e.cncpt_concat) loop
+    --update nci_mdl_elmnt_char set ( VAL_DOM_ITEM_ID, VAL_DOM_VER_NR, chng_desc_txt)=
+    --(select cur.VAL_DOM_ITEM_Id, cur.VAL_DOM_VER_NR, cur.chng_desc_txt || 'Updated VD to ' || cur.val_dom_item_id from dual)
+    --where  mec_id = cur.mec_id;
+      showrow := t_row();
+          ihook.setColumnValue(showrow,'Element Physical Name', cur.me_phy_nm);
+          ihook.setColumnValue(showrow,'Characteristic Physical Name', cur.mec_phy_nm);
+          ihook.setColumnValue(showrow,'Current CDE Item ID', cur.cde_item_id);
+          ihook.setColumnValue(showrow,'Current CDE Version', cur.cde_ver_nr);
+          ihook.setColumnValue(showrow,'Change Type', 'WARNING: Property Concepts');
+         -- ihook.setColumnValue(showrow,'Current Item ID', cur.current_val_Dom_ITEM_ID);
+         -- ihook.setColumnValue(showrow,'Current Version', cur.current_val_dom_VER_NR);
+          ihook.setColumnValue(showrow,'MEC_ID', cur.mec_id);
+          ihook.setColumnValue(showrow,'Current Concepts', cur.prop_cncpt_cd);        
+          ihook.setColumnValue(showrow,'New Concepts', cur.cncpt_concat);        
+          showrows.extend;
+                    showrows (showrows.last) := showrow;
+        
+  end loop;
   
   if (v_err > 0) then
   ----jira 4190: Change error message
@@ -1670,6 +1816,17 @@ as
   de.VER_NR = ihook.getColumnValue(showrow,'New Version') and vd.item_id = de.val_dom_item_id and vd.ver_nr = de.val_dom_ver_nr)
     where  mec_id = ihook.getColumnValue(showrow,'MEC_ID');
    end if;
+    if (ihook.getColumnValue(showrow,'Change Type') = 'WARNING: Property Concepts') then
+  update nci_mdl_elmnt_char set prop_cncpt_cd = ihook.getColumnValue(showrow,'New Concepts'),
+  chng_desc_txt= chng_desc_txt || ' Updated Property Concepts to ' || ihook.getColumnValue(showrow,'New Concepts') || ';'
+    where  mec_id = ihook.getColumnValue(showrow,'MEC_ID');
+   end if;
+    if (ihook.getColumnValue(showrow,'Change Type') = 'WARNING: Object Class Concepts') then
+  update nci_mdl_elmnt_char set oc_cncpt_cd = ihook.getColumnValue(showrow,'New Concepts'),
+  chng_desc_txt= chng_desc_txt || ' Updated Object Class Concepts to ' || ihook.getColumnValue(showrow,'New Concepts') || ';'
+    where  mec_id = ihook.getColumnValue(showrow,'MEC_ID');
+   end if;
+  
    end loop;
    commit;
    
@@ -1720,7 +1877,7 @@ commit;
   
         spUpdateModelCDEAssocSub (ihook.getColumnValue(row_ori,'ITEM_ID'),ihook.getColumnValue(row_ori,'VER_NR'), v_cnt,'F', v_msg, hookinput.invocationnumber, hookinput,hookoutput);
 
-        hookoutput.message := 'CDE refresh complete. ' || v_cnt || ' characteristics updated. Select Flattened View to view results. ' || v_msg;
+        hookoutput.message := 'CDE refresh complete.  Select Flattened View to view results. ' || v_msg;
 
     else
         hookoutput.message := 'Please select exactly one model to run this command.';
@@ -1812,10 +1969,29 @@ end loop;
      update nci_stg_mdl_elmnt_char set ctl_val_msg = 'ERROR: CDE ID/Version not valid. '|| cde_item_id || 'v' || cde_ver_nr || '.' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
      and (cde_item_id, cde_ver_nr) not in (select item_id, ver_nr from de);
   commit;
+  
+   update nci_stg_mdl_elmnt_char set ctl_val_msg = nvl(ctl_val_msg,'') || 'ERROR: Provenance Contact is not in the list. ' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
+     and imp_prov_cntct is not null and prov_cntct_id is null;
+  commit;
+  
+  
+   update nci_stg_mdl_elmnt_char set ctl_val_msg = nvl(ctl_val_msg,'') ||'ERROR: Provenance Organization is not in the list. ' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
+     and imp_prov_org is not null and prov_org_id is null;
+  commit;
   -- update nci_stg_mdl_elmnt_char set ctl_val_msg = nvl(ctl_val_msg,'ERROR: ') || ' Max lenght cannot be null. ' where SRC_MAX_CHAR is null and mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID');
      
  -- commit;
-   update nci_stg_mdl_elmnt set ctl_val_msg = 'ERROR: Issues found at Characteristic level. ' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
+
+  update nci_stg_mdl_elmnt set ctl_val_msg = nvl(ctl_val_msg,'') || 'ERROR: Provenance Contact is not in the list. ' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
+     and imp_prov_cntct is not null and prov_cntct_id is null;
+  commit;
+  
+  
+   update nci_stg_mdl_elmnt set ctl_val_msg = nvl(ctl_val_msg,'') ||'ERROR: Provenance Organization is not in the list. ' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
+     and imp_prov_org is not null and prov_org_id is null;
+  commit;
+ 
+   update nci_stg_mdl_elmnt set ctl_val_msg = nvl(ctl_val_msg, '') || 'ERROR: Issues found at Characteristic level. ' where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID')
      and (ITEM_PHY_OBJ_NM) in (select ME_ITEM_LONG_NM from nci_stg_mdl_elmnt_char where mdl_imp_id = ihook.getColumnValue(row_ori, 'MDL_IMP_ID') and ctl_val_msg is not null);
   commit;
   
@@ -1840,7 +2016,7 @@ end loop;
     end loop;
     v_char_val_stus_msg := substr(v_char_val_stus_msg, 2, length(v_char_val_stus_msg));
    -- v_val_stus_msg := v_val_stus_msg || 'Characteristic: ' || v_temp || ' error(s) found in specified CDE Item Id/Version or max character is blank.' || chr(13);
-    v_val_stus_msg := v_val_stus_msg || 'Characteristic: ' || v_temp || ' error(s) found in specified CDE Item Id/Version.' || chr(13) || 'Check the following: ' || v_char_val_stus_msg;
+    v_val_stus_msg := v_val_stus_msg || 'Characteristic: ' || v_temp || ' error(s) found.' || chr(13) || 'Check the following: ' || v_char_val_stus_msg;
 
 end if;
  -- validate ME type id else default Semantic Model - Class. Physical Model - Table
@@ -2233,35 +2409,6 @@ end if;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 end;
 
-
-   procedure spVersionModel ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
-   as
-   hookInput t_hookInput;
-  hookOutput t_hookOutput := t_hookOutput();
-    showRowset     t_showableRowset;
-row t_row;
-  rows  t_rows;
-    row_ori t_row;
-    row_sel t_row;
-    v_id integer;
-    v_id integer;
-  action_rows       t_rows := t_rows();
-  action_row		    t_row;
-  rowset            t_rowset;
-  v_mdl_hdr_id number;
- i integer;
- BEGIN
-  hookinput                    := Ihook.gethookinput (v_data_in);
-  hookoutput.invocationnumber  := hookinput.invocationnumber;
-  hookoutput.originalrowset    := hookinput.originalrowset;
-  
-  row_ori :=  hookInput.originalRowset.rowset(1);
-  rows := t_rows();
-  
- raise_application_error (-20000,'Work in progress');
-
-    V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-end;
 
   PROCEDURE spGenerateModelView
   (
@@ -2698,7 +2845,15 @@ begin
         BULK COLLECT INTO v_cde_item_id, v_cde_ver_nr,v_cde_item_nm, v_cde_cntxt_nm;
      
 
-        -- cs/csi
+        
+        when 51 then -- cs/csi
+         EXECUTE IMMEDIATE
+         'select distinct ai.item_id, ai.ver_nr, ai.ITEM_NM, ai.cntxt_nm_dn from admin_item ai, nci_admin_item_rel r
+        where r.P_ITEM_ID = ' || ihook.getColumnValue(row_cur,'ITEM_ID')
+        || ' and r.P_ITEM_VER_NR= ' || ihook.getColumnValue(row_cur,'VER_NR')
+        || ' and r.rel_typ_id = 65 and r.c_item_id = ai.ITEM_ID and r.c_item_ver_nr = ai.VER_NR '
+        BULK COLLECT INTO v_cde_item_id, v_cde_ver_nr,v_cde_item_nm, v_cde_cntxt_nm;
+         
         
         when 50 then -- protocol
          EXECUTE IMMEDIATE
@@ -2784,7 +2939,17 @@ begin
         ' and de_ver_nr = ' || v_tab_item_ver(i) 
         BULK COLLECT INTO v_result_nm;
         
+        when 51 then-- CS/CSI
 
+        EXECUTE IMMEDIATE
+         'select 	distinct ITEM_NM from admin_item   ai, nci_admin_item_rel r
+        where r.P_ITEM_ID = ' || ihook.getColumnValue(row_cur,'ITEM_ID')
+        || ' and r.P_ITEM_VER_NR= ' || ihook.getColumnValue(row_cur,'VER_NR')
+        || ' and r.rel_typ_id = 65 and r.p_item_id = ai.ITEM_ID and r.c_item_ver_nr = ai.VER_NR '
+        || ' and r.c_item_id = ' || v_tab_item_id(i) || 
+        ' and r.c_item_ver_nr = ' || v_tab_item_ver(i) 
+        BULK COLLECT INTO v_result_nm;
+        
         
         end case;
            
