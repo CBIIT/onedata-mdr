@@ -142,3 +142,97 @@ m.PROV_RVW_DT, m.PROV_APRV_DT, ai.MDL_MAP_SNAME
 from admin_item ai, nci_mdl_map m
 where ai.item_id = m.item_id and ai.ver_nr = m.ver_nr and ai.admin_item_typ_id = 58;
 
+create or replace view vw_NCI_MODULE_DE_SHORT as SELECT FRM.ITEM_LONG_NM FRM_ITEM_LONG_NM, FRM.ITEM_NM FRM_ITEM_NM, FRM.ITEM_ID FRM_ITEM_ID, FRM.VER_NR FRM_VER_NR,  FRM.CNTXT_NM_DN FRM_CNTXT_NM_DN,
+  FRM.ADMIN_STUS_NM_DN FRM_ADMIN_STUS_NM_DN, FRM.REGSTR_STUS_NM_DN FRM_REGSTR_STUS_NM_DN,
+FRM.CNTXT_ITEM_ID FRM_CNTXT_ITEM_ID, FRM.CNTXT_VER_NR FRM_CNTXT_VER_NR,
+AIR.P_ITEM_ID MOD_ITEM_ID, AIR.P_ITEM_VER_NR MOD_VER_NR,
+AIR.C_ITEM_ID DE_ITEM_ID, AIR.C_ITEM_VER_NR DE_VER_NR, AIR.DISP_ORD QUEST_DISP_ORD,FRM_MOD.DISP_ORD MOD_DISP_ORD,
+ FRM.ITEM_ID ||'v'||FRM.VER_NR FRM_ITEM_VER_NR
+FROM  NCI_ADMIN_ITEM_REL_ALT_KEY AIR, 
+ADMIN_ITEM FRM, NCI_ADMIN_ITEM_REL FRM_MOD 
+WHERE  AIR.REL_TYP_ID = 63
+AND FRM.ITEM_ID = FRM_MOD.P_ITEM_ID AND FRM.VER_NR = FRM_MOD.P_ITEM_VER_NR 
+AND FRM_MOD.REL_TYP_ID IN (61,62)
+AND FRM.ADMIN_ITEM_TYP_ID IN ( 54,55)
+
+	
+  CREATE OR REPLACE VIEW VW_NCI_PROT_DE_REL_SHORT AS
+  SELECT  distinct 
+           prot.P_ITEM_ID PROT_ITEM_ID,
+           prot.P_ITEM_VER_NR PROT_VER_NR,
+           ak.c_item_id item_id,
+           ak.c_item_ver_nr ver_nr,
+	  prot.P_ITEM_ID || 'v' ||prot.P_ITEM_VER_NR PROT_ITEM_VER_NR,
+      ai.item_nm prot_nm,
+      p.protcl_id
+           FROM NCI_ADMIN_ITEM_REL r, NCI_ADMIN_ITEM_REL_ALT_KEY ak , nci_admin_item_rel prot, admin_item ai, nci_protcl p
+     WHERE  ak.P_ITEM_ID = r.C_ITEM_ID and ak.P_ITEM_VER_NR = r.C_ITEM_VER_NR and
+	   r.rel_typ_id = 61 
+  and r.p_item_id = prot.c_item_id 
+  and r.p_item_ver_nr = prot.c_item_ver_nr and prot.rel_typ_id=60 and prot.p_item_id = ai.item_id and prot.p_item_ver_nr = ai.ver_nr
+  and ai.item_id = p.item_id and ai.ver_nr = p.ver_nr
+  and nvl(ak.fld_delete,0) = 0;
+
+
+drop materialized view VW_NCI_DE_HORT_EXPANDED;
+
+  CREATE MATERIALIZED VIEW VW_NCI_DE_HORT_EXPANDED AS 
+	  SELECT DE.ITEM_ID, DE.VER_NR,   
+        DE.DE_CONC_ITEM_ID,
+           DE.DE_CONC_VER_NR,
+           DE.VAL_DOM_VER_NR,
+           DE.VAL_DOM_ITEM_ID,
+           DE.REP_CLS_VER_NR,
+           DE.REP_CLS_ITEM_ID,
+           nvl(DE.DERV_DE_IND,0) DERV_DE_IND,
+           DE.DERV_MTHD,
+           DE.DERV_RUL,
+           DE.DERV_TYP_ID,
+           DE.CONCAT_CHAR,
+          DE.CREAT_USR_ID,
+           DE.LST_UPD_USR_ID,
+           DE.FLD_DELETE,
+           DE.LST_DEL_DT,
+           DE.S2P_TRN_DT,
+           DE.LST_UPD_DT,
+           DE.CREAT_DT,
+           DE_CONC.OBJ_CLS_ITEM_ID,
+           DE_CONC.OBJ_CLS_VER_NR,
+           DE_CONC.PROP_ITEM_ID,
+           DE_CONC.PROP_VER_NR,
+          alt.altnm,
+	      refdoc.refdesc,
+	  pvvm.pv,
+	  pvvm.vm,
+	  pvvm.vm_cncpt,
+	  frm.frm_nm,
+	  frm.frm_item_ver_nr,
+	  prot.prot_nm,
+	  prot.prot_id
+	  FROM --ADMIN_ITEM,
+           DE,
+           DE_CONC,
+          (select distinct item_id, ver_nr, substr(LISTAGG(nm_desc, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as altnm from alt_nms group by item_id, ver_nr)  alt,
+	      (select  item_id, ver_nr, substr(LISTAGG(ref_desc, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as refdesc from ref group by item_id, ver_nr) refdoc,
+		(select  de_item_id,de_ver_nr, substr(LISTAGG(PERM_VAL_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as PV,
+	   substr( LISTAGG(ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as VM ,
+	  substr(LISTAGG(CNCPT_CONCAT, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as VM_CNCPT  from VW_NCI_DE_PV group by de_item_id, de_ver_nr) PVVM,
+	(select  de_item_id,de_ver_nr, substr(LISTAGG(FRM_ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as FRM_NM,
+	   substr( LISTAGG(FRM_ITEM_VER_NR, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as FRM_ITEM_VER_NR
+	    from VW_NCI_MODULE_DE_SHORT group by de_item_id, de_ver_nr) FRM,
+    (select  item_id,ver_nr, substr(LISTAGG(PROT_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as PROT_NM,
+	   substr( LISTAGG(PROTCL_ID, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as PROT_ID
+	    from VW_NCI_PROT_DE_REL_SHORT group by item_id, ver_nr) PROT
+     WHERE   DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID
+            AND DE.DE_CONC_VER_NR = DE_CONC.VER_NR
+	  and de.item_id = alt.item_id (+)
+	  and de.ver_nr = alt.ver_nr (+)
+	    and de.item_id = refdoc.item_id (+)
+	  and de.ver_nr = refdoc.ver_nr (+)
+	    and de.item_id = pvvm.de_item_id (+)
+	  and de.ver_nr = pvvm.de_ver_nr (+)
+		    and de.item_id = frm.de_item_id (+)
+	  and de.ver_nr = frm.de_ver_nr (+)
+	     and de.item_id = prot.item_id (+)
+	  and de.ver_nr = prot.ver_nr (+)
+;
