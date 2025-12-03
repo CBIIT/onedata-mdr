@@ -188,7 +188,6 @@ AND FRM.ADMIN_ITEM_TYP_ID IN ( 54,55)
         FROM NCI_ADMIN_ITEM_REL ak, VW_CLSFCTN_SCHM_ITEM ai
      WHERE     ak.P_ITEM_ID = ai.ITEM_ID
            AND ak.P_ITEM_VER_NR = ai.VER_NR;
-
 drop materialized view VW_NCI_DE_HORT_EXPANDED;
 
   CREATE MATERIALIZED VIEW VW_NCI_DE_HORT_EXPANDED AS 
@@ -223,7 +222,9 @@ drop materialized view VW_NCI_DE_HORT_EXPANDED;
 	  frm.frm_nm,
 	  frm.frm_item_ver_nr,
 	  prot.prot_nm,
-	  prot.prot_id
+	  prot.prot_id,
+      cscsi.csi_nm,
+      cscsi.cs_nm
 	  FROM --ADMIN_ITEM,
            DE,
            DE_CONC,
@@ -237,7 +238,10 @@ drop materialized view VW_NCI_DE_HORT_EXPANDED;
 	    from VW_NCI_MODULE_DE_SHORT group by de_item_id, de_ver_nr) FRM,
     (select  item_id,ver_nr, substr(LISTAGG(PROT_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as PROT_NM,
 	   substr( LISTAGG(PROTCL_ID, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as PROT_ID
-	    from VW_NCI_PROT_DE_REL_SHORT group by item_id, ver_nr) PROT
+	    from VW_NCI_PROT_DE_REL_SHORT group by item_id, ver_nr) PROT,
+    (select  de_item_id,de_ver_nr, substr(LISTAGG(ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by DE_ITEM_ID),1,16000) as CSI_NM,
+	   substr( LISTAGG(CS_ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by DE_ITEM_ID),1,16000) as CS_NM
+	    from VW_CSI_ONLY_DE_REL_SHORT group by de_item_id, de_ver_nr) CSCSI
      WHERE   DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID
             AND DE.DE_CONC_VER_NR = DE_CONC.VER_NR
 	  and de.item_id = alt.item_id (+)
@@ -250,8 +254,9 @@ drop materialized view VW_NCI_DE_HORT_EXPANDED;
 	  and de.ver_nr = frm.de_ver_nr (+)
 	     and de.item_id = prot.item_id (+)
 	  and de.ver_nr = prot.ver_nr (+)
+         and de.item_id = cscsi.de_item_id (+)
+	  and de.ver_nr = cscsi.de_ver_nr (+)
 ;
-
 /*
   CREATE OR REPLACE FORCE EDITIONABLE VIEW "ONEDATA_WA"."VW_NCI_MODULE_DE" ("FRM_ITEM_LONG_NM", "FRM_ITEM_NM", "FRM_ITEM_ID", "FRM_VER_NR", "FRM_CNTXT_NM_DN", "FRM_ADMIN_STUS_NM_DN", "FRM_REGSTR_STUS_NM_DN", "FRM_CNTXT_ITEM_ID", "FRM_CNTXT_VER_NR", "MOD_ITEM_ID", "MOD_VER_NR", "DE_ITEM_ID", "DE_VER_NR", "QUEST_DISP_ORD", "MOD_DISP_ORD", "MOD_ITEM_NM", "INSTR", "MOD_ITEM_LONG_NM", "MOD_ITEM_DESC", "ADMIN_ITEM_TYP_NM", "NCI_PUB_ID", "NCI_VER_NR", "CNTXT_NM_DN", "DE_ITEM_NM", "DE_ITEM_DESC", "DE_CNTXT_ITEM_ID", "DE_CNTXT_VER_NR", "DE_ADMIN_STUS_NM_DN", "DE_REGSTR_STUS_NM_DN", "DE_CURRNT_VER_IND", "CREAT_DT", "CREAT_USR_ID", "LST_UPD_USR_ID", "FLD_DELETE", "LST_DEL_DT", "S2P_TRN_DT", "LST_UPD_DT", "QUEST_LONG_TXT", "QUEST_TXT", "DE_ADMIN_STUS_ID", "DE_REGSTR_STUS_ID", "ADMIN_ITEM_TYP_ID", "FRM_ITEM_VER_NR") DEFAULT COLLATION "USING_NLS_COMP"  AS 
   SELECT FRM.ITEM_LONG_NM FRM_ITEM_LONG_NM, FRM.ITEM_NM FRM_ITEM_NM, FRM.ITEM_ID FRM_ITEM_ID, FRM.VER_NR FRM_VER_NR,  FRM.CNTXT_NM_DN FRM_CNTXT_NM_DN,
