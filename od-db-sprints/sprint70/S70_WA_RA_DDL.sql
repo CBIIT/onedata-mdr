@@ -177,6 +177,17 @@ AND FRM.ADMIN_ITEM_TYP_ID IN ( 54,55)
   and ai.item_id = p.item_id and ai.ver_nr = p.ver_nr
   and nvl(ak.fld_delete,0) = 0;
 
+  CREATE OR REPLACE  VIEW VW_CSI_ONLY_DE_REL_SHORT  AS
+  SELECT 
+           ai.ITEM_NM,
+           ai.CS_ITEM_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ak.C_ITEM_ID DE_ITEM_ID,
+           ak.C_ITEM_VER_NR DE_VER_nr
+        FROM NCI_ADMIN_ITEM_REL ak, VW_CLSFCTN_SCHM_ITEM ai
+     WHERE     ak.P_ITEM_ID = ai.ITEM_ID
+           AND ak.P_ITEM_VER_NR = ai.VER_NR;
 
 drop materialized view VW_NCI_DE_HORT_EXPANDED;
 
@@ -288,17 +299,4 @@ AND AIR.C_ITEM_VER_NR = DE.VER_NR
 and FRM_MOD.P_ITEM_ID = -1;
 
 */
-
-
-  CREATE OR REPLACE  VIEW VW_CSI_ONLY_DE_REL_SHORT  AS
-  SELECT 
-           ai.ITEM_NM,
-           ai.CS_ITEM_NM,
-           ai.ITEM_ID,
-           ai.VER_NR,
-           ak.C_ITEM_ID,
-           ak.C_ITEM_VER_NR,
-        FROM NCI_ADMIN_ITEM_REL ak, VW_CLSFCTN_SCHM_ITEM ai
-     WHERE     ak.P_ITEM_ID = ai.ITEM_ID
-           AND ak.P_ITEM_VER_NR = ai.VER_NR;
 
