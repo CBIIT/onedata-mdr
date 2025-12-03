@@ -288,3 +288,17 @@ AND AIR.C_ITEM_VER_NR = DE.VER_NR
 and FRM_MOD.P_ITEM_ID = -1;
 
 */
+
+
+  CREATE OR REPLACE  VIEW VW_CSI_ONLY_DE_REL_SHORT  AS
+  SELECT 
+           ai.ITEM_NM,
+           ai.CS_ITEM_NM,
+           ai.ITEM_ID,
+           ai.VER_NR,
+           ak.C_ITEM_ID,
+           ak.C_ITEM_VER_NR,
+        FROM NCI_ADMIN_ITEM_REL ak, VW_CLSFCTN_SCHM_ITEM ai
+     WHERE     ak.P_ITEM_ID = ai.ITEM_ID
+           AND ak.P_ITEM_VER_NR = ai.VER_NR;
+
