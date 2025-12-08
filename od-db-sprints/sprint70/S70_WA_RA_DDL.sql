@@ -188,6 +188,7 @@ AND FRM.ADMIN_ITEM_TYP_ID IN ( 54,55)
         FROM NCI_ADMIN_ITEM_REL ak, VW_CLSFCTN_SCHM_ITEM ai
      WHERE     ak.P_ITEM_ID = ai.ITEM_ID
            AND ak.P_ITEM_VER_NR = ai.VER_NR;
+
 drop materialized view VW_NCI_DE_HORT_EXPANDED;
 
   CREATE MATERIALIZED VIEW VW_NCI_DE_HORT_EXPANDED AS 
@@ -228,19 +229,19 @@ drop materialized view VW_NCI_DE_HORT_EXPANDED;
 	  FROM --ADMIN_ITEM,
            DE,
            DE_CONC,
-          (select distinct item_id, ver_nr, substr(LISTAGG(nm_desc, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as altnm from alt_nms group by item_id, ver_nr)  alt,
-	      (select  item_id, ver_nr, substr(LISTAGG(ref_desc, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as refdesc from ref group by item_id, ver_nr) refdoc,
-		(select  de_item_id,de_ver_nr, substr(LISTAGG(PERM_VAL_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as PV,
-	   substr( LISTAGG(ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as VM ,
-	  substr(LISTAGG(CNCPT_CONCAT, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as VM_CNCPT  from VW_NCI_DE_PV group by de_item_id, de_ver_nr) PVVM,
-	(select  de_item_id,de_ver_nr, substr(LISTAGG(FRM_ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as FRM_NM,
-	   substr( LISTAGG(FRM_ITEM_VER_NR, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,16000) as FRM_ITEM_VER_NR
+          (select distinct item_id, ver_nr, substr(LISTAGG(nm_desc, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,32000) as altnm from alt_nms group by item_id, ver_nr)  alt,
+	      (select  item_id, ver_nr, substr(LISTAGG(ref_desc, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,32000) as refdesc from ref group by item_id, ver_nr) refdoc,
+		(select  de_item_id,de_ver_nr, substr(LISTAGG(PERM_VAL_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,32000) as PV,
+	   substr( LISTAGG(ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,32000) as VM ,
+	  substr(LISTAGG(CNCPT_CONCAT, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,32000) as VM_CNCPT  from VW_NCI_DE_PV group by de_item_id, de_ver_nr) PVVM,
+	(select  de_item_id,de_ver_nr, substr(LISTAGG(FRM_ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,32000) as FRM_NM,
+	   substr( LISTAGG(FRM_ITEM_VER_NR, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by de_ITEM_ID),1,32000) as FRM_ITEM_VER_NR
 	    from VW_NCI_MODULE_DE_SHORT group by de_item_id, de_ver_nr) FRM,
-    (select  item_id,ver_nr, substr(LISTAGG(PROT_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as PROT_NM,
-	   substr( LISTAGG(PROTCL_ID, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,16000) as PROT_ID
+    (select  item_id,ver_nr, substr(LISTAGG(PROT_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,32000) as PROT_NM,
+	   substr( LISTAGG(PROTCL_ID, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by ITEM_ID),1,32000) as PROT_ID
 	    from VW_NCI_PROT_DE_REL_SHORT group by item_id, ver_nr) PROT,
-    (select  de_item_id,de_ver_nr, substr(LISTAGG(ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by DE_ITEM_ID),1,16000) as CSI_NM,
-	   substr( LISTAGG(CS_ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by DE_ITEM_ID),1,16000) as CS_NM
+    (select  de_item_id,de_ver_nr, substr(LISTAGG(ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by DE_ITEM_ID),1,32000) as CSI_NM,
+	   substr( LISTAGG(CS_ITEM_NM, ',' ON OVERFLOW TRUNCATE) WITHIN GROUP (ORDER by DE_ITEM_ID),1,32000) as CS_NM
 	    from VW_CSI_ONLY_DE_REL_SHORT group by de_item_id, de_ver_nr) CSCSI
      WHERE   DE.DE_CONC_ITEM_ID = DE_CONC.ITEM_ID
             AND DE.DE_CONC_VER_NR = DE_CONC.VER_NR
