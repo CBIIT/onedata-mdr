@@ -3352,24 +3352,31 @@ v_open_paren integer;
 v_close_paren integer;
 v_sub_str varchar2(100);
 v_src_Str varchar2(8000);
+maxnum integer;
 BEGIN
- 
+ --raise_application_error (-20000, 'heree');
  select obj_key_id into v_func_query from obj_key where obj_key_desc = 'QUERY' and obj_typ_id = 51;
  
- for cur in (select mec_map_nm, min(mec_sub_grp_nbr) min_mec_sub_grp_nbr, max(mec_sub_grp_nbr) max_mec_sub_grp_nbr from  nci_mec_map where mdl_map_item_id = v_item_id and mdl_map_ver_nr = v_ver_nr
+ for cur in (select mec_map_nm, min(mec_sub_grp_nbr) min_mec_sub_grp_nbr from  nci_mec_map where mdl_map_item_id = v_item_id and mdl_map_ver_nr = v_ver_nr
  and tgt_func_id = v_func_query and ctl_val_msg is null group by mec_map_nm) loop
  i := cur.min_mec_sub_grp_nbr;
+ for cur1 in (select  max(mec_sub_grp_nbr) max_mec_sub_grp_nbr from  nci_mec_map where mdl_map_item_id = v_item_id and mdl_map_ver_nr = v_ver_nr and mec_map_nm = cur.mec_map_nm
+ group by mec_map_nm) loop
+ 
+ maxnum := cur1.max_mec_sub_grp_nbr;
+ end loop;
  --if (min_mec_sub_grp_nbr = max_mec_sub_grp_nbr) then
  
  --exit loop;
  --end if;
+ --raise_application_error(-20000, cur.min_mec_sub_grp_nbr || ' ' || maxnum);end if;
  j := 1;
  for curgrp in (select mecm_id, mec_map_nm,tgt_func_id,TGT_FUNC_PARAM, svd.val_dom_typ_id src_Vd_typ_id, tvd.val_dom_typ_id  tgt_vd_typ_id, mec_sub_grp_nbr 
  from nci_mec_map map, nci_mdl_elmnt_char smec, value_dom svd, nci_mdl_elmnt_char tmec, value_dom tvd 
  where  mdl_map_item_id = v_item_id and mdl_map_ver_nr = v_ver_nr and mec_map_nm = cur.mec_map_nm
- and mec_sub_grp_nbr >= cur.min_mec_sub_grp_nbr and mec_sub_grp_nbr <= cur.max_mec_sub_grp_nbr and map.src_mec_id = smec.mec_id and map.tgt_mec_id = tmec.mec_id
- and smec.val_dom_item_id = svd.item_id and smec.val_dom_ver_nr = svd.ver_nr and
- tmec.val_dom_item_id = tvd.item_id and tmec.val_dom_ver_nr = tvd.ver_nr and tgt_func_param is not null
+ and mec_sub_grp_nbr >= cur.min_mec_sub_grp_nbr and mec_sub_grp_nbr <= maxnum and map.src_mec_id = smec.mec_id (+) and map.tgt_mec_id = tmec.mec_id (+)
+ and smec.val_dom_item_id = svd.item_id (+) and smec.val_dom_ver_nr = svd.ver_nr (+) and
+ tmec.val_dom_item_id = tvd.item_id (+) and tmec.val_dom_ver_nr = tvd.ver_nr  (+)and tgt_func_param is not null
  order by mec_sub_grp_nbr) loop
  if curgrp.mec_sub_grp_nbr = cur.min_mec_sub_grp_nbr then
     v_src_vd_typ_id := curgrp.src_vd_typ_id;
@@ -3415,6 +3422,9 @@ end if;
     v_max_word:= nci_11179.getWordCountDelim(v_str,',');
 v_sub_str := trim(nci_11179.getWordDelim(v_str,j,v_max_word,','));
 v_src_str := curgrp.tgt_func_param;
+--if (cur.mec_map_nm = 'LOCATION.LDS_ADDRESS_HISTORY.state.ADDRESS_STATE' and j = 3 ) then
+--raise_application_error(-20000, v_sub_str || ' ' || v_src_str);
+--end if; 
 if (substr(v_sub_str, length(v_sub_Str) -1,1) = '*') then
  
  v_src_str := substr(v_src_str,1,  length(v_sub_Str) -1);
@@ -3429,7 +3439,7 @@ end if;
  ihook.setColumnValue(row, 'Characteristic Group', curgrp.mec_map_nm);
   rows.extend;    rows(rows.last) := row;
   end if;
- 
+ j := j+ 1;
  -- choose specific group
   end loop;
  end loop;  
