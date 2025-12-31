@@ -1,4 +1,4 @@
-TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
+create or replace TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
 declare 
 v_item_typ_nm varchar2(100);
 v_param_Val varchar2(255);
