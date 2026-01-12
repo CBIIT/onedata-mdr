@@ -68,3 +68,17 @@ end if;
 END ;
 
 /
+
+create or replace TRIGGER OD_TR_ALT_KEY  BEFORE INSERT  on NCI_ADMIN_ITEM_REL_ALT_KEY
+  for each row
+         BEGIN    IF (:NEW.NCI_PUB_ID<= 0  or :NEW.NCI_PUB_ID is null)  THEN
+         select od_seq_ADMIN_ITEM.nextval
+    into :new.NCI_PUB_ID  from  dual ;
+
+END IF;
+
+--:new.nci_idseq := nci_11179.cmr_guid;
+END ;
+/
+
+
