@@ -81,4 +81,14 @@ END IF;
 END ;
 /
 
+create or replace TRIGGER OD_TR_QUEST_VV BEFORE INSERT  ON NCI_QUEST_VALID_VALUE
+  for each row
+BEGIN    IF (:NEW.NCI_PUB_ID<= 0  or :NEW.NCI_PUB_ID is null)  THEN
+         select od_seq_ADMIN_ITEM.nextval
+    into :new.NCI_PUB_ID  from  dual ;   END IF;
+-- :new.nci_idseq := nci_11179.cmr_guid();
+ END ;
+
+
+/
 
