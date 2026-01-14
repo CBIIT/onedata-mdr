@@ -92,3 +92,4 @@ BEGIN    IF (:NEW.NCI_PUB_ID<= 0  or :NEW.NCI_PUB_ID is null)  THEN
 
 /
 
+drop trigger tr_nci_ref;
