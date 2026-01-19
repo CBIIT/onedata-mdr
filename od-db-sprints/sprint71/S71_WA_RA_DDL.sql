@@ -20,3 +20,12 @@
 	 
 alter table NCI_STG_CDE_CREAT add NEW_VER_NR number(4,2);
 alter table NCI_STG_CDE_CREAT add ADMIN_NOTES varchar2(4000);
+
+create or replace view vw_admin_item_with_retired_concept as
+select ai.item_id item_id, ai.ver_nr ver_nr, o.obj_key_desc Admin_item_type,  ai.item_nm Admin_item_nm, ai.cntxt_nm_dn Admin_item_context, ai.admin_stus_nm_dn Admin_item_status,
+c.item_id cncpt_item_id, c.ver_nr cncpt_ver_nr, c.item_nm cncpt_name, c.item_long_nm cncpt_code, c.lst_upd_dt date_cncpt_retired, c.chng_desc_txt cncpt_comments
+from admin_item ai, cncpt_admin_item r, obj_key o,
+(select item_id, ver_nr, item_nm, item_long_nm,lst_upd_dt, CHNG_DESC_TXT from admin_item where admin_item_typ_id = 49 and admin_stus_nm_dn like 'RETIRED%'
+and lst_upd_dt >= sysdate - 60) c
+where  c.item_id = r.cncpt_item_id and c.ver_nr = r.cncpt_ver_nr and ai.admin_item_typ_id = o.obj_key_id
+and r.item_id = ai.item_id and r.ver_nr = ai.ver_nr
