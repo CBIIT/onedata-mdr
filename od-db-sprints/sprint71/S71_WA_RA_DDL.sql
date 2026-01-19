@@ -19,3 +19,4 @@
         VM.VER_NR = e.VER_NR ;
 	 
 alter table NCI_STG_CDE_CREAT add NEW_VER_NR number(4,2);
+alter table NCI_STG_CDE_CREAT add ADMIN_NOTES varchar2(4000);
