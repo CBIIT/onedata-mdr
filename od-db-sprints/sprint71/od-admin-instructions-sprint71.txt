@@ -1,1 +1,2 @@
---TBD
+--OD Admin Manual Steps
+1. Delete objects and folders per Jira-4102
