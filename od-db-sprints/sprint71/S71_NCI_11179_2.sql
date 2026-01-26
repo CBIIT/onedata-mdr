@@ -126,6 +126,25 @@ if (v_admin_item_typ ='VD') then
     hookOutput.message := 'Value Domain Dependency';
 end if;
 
+
+if (v_admin_item_typ ='CDE') then
+
+    /* Iterate through all the selected Data Elements */
+    for i in 1 .. hookInput.originalRowset.Rowset.count loop
+        row := t_row();
+        row_cur := hookInput.originalRowset.Rowset(i);
+        ihook.setColumnValue(row,'CDE_ITEM_ID', ihook.getColumnValue(row_cur,'IMP_UPD_DEC_ID'));
+        ihook.setColumnValue(row,'CDE_VER_NR', ihook.getColumnValue(row_cur,'IMP_UPD_DEC_VER'));
+        rows.extend; rows(rows.last) := row;
+    end loop;
+
+    showRowset := t_showableRowset(rows, 'CDE Dependency Object',2, 'unselectable');
+  --  showRowset := t_showableRowset(rows, 'Data Element Concepts',2, 'unselectable');
+    hookOutput.showRowset := showRowset;
+
+    hookOutput.message := 'Data Element Dependency';
+end if;
+
     v_data_out := ihook.getHookOutput(hookOutput);
 
 end;
