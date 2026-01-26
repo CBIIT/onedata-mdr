@@ -29,3 +29,20 @@ from admin_item ai, cncpt_admin_item r, obj_key o,
 and lst_upd_dt >= sysdate - 60) c
 where  c.item_id = r.cncpt_item_id and c.ver_nr = r.cncpt_ver_nr and ai.admin_item_typ_id = o.obj_key_id
 and r.item_id = ai.item_id and r.ver_nr = ai.ver_nr
+
+
+  CREATE OR REPLACE VIEW VW_DE_DEPENDENCY AS
+  SELECT distinct frm_mod.p_item_Id item_id , frm_mod.p_item_ver_nr ver_nr, air.c_item_id cde_item_id, air.c_item_ver_nr cde_ver_nr,
+sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, 0 FLD_DELETE, sysdate LST_DEL_DT, sysdate S2P_TRN_DT,  sysdate LST_UPD_DT
+FROM  NCI_ADMIN_ITEM_REL_ALT_KEY AIR,
+NCI_ADMIN_ITEM_REL FRM_MOD 
+WHERE  AIR.REL_TYP_ID = 63
+AND FRM_MOD.C_ITEM_ID = AIR.P_ITEM_ID AND FRM_MOD.C_ITEM_VER_NR = AIR.P_ITEM_VER_NR
+AND FRM_MOD.REL_TYP_ID IN (61,62)
+union
+select distinct mdl.item_id item_id, mdl.ver_nr, mec.cde_item_id, mec.cde_ver_nr de_ver_nr,
+sysdate CREAT_DT, 'ONEDATA' CREAT_USR_ID, 'ONEDATA' LST_UPD_USR_ID, 0 FLD_DELETE, sysdate LST_DEL_DT, sysdate S2P_TRN_DT,  sysdate LST_UPD_DT
+from nci_mdl mdl, nci_mdl_elmnt me, nci_mdl_elmnt_char mec
+where mdl.item_id = me.mdl_item_id and mdl.ver_nr = me.mdl_item_ver_nr and
+me.item_id = mec.mdl_elmnt_item_id and me.ver_nr = mec.mdl_elmnt_ver_nr
+
