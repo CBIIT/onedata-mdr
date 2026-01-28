@@ -48,9 +48,7 @@ function getDECCreateForm (v_rowset1 in t_rowset, v_rowset2 in t_rowset) return 
 procedure spBulkUpdateDEC ( v_data_in IN CLOB,    v_data_out OUT CLOB,    v_usr_id  IN varchar2);
 
 END;
-
 /
-
 create or replace PACKAGE BODY nci_DEC_MGMT AS
 
 -- All DEC creation and import routines.
@@ -2188,7 +2186,7 @@ begin
         ihook.setColumnValue(row,'VER_NR',ihook.getColumnValue(rowform,'NEW_VER_NR') );
        ihook.setColumnValue(row,'CURRNT_VER_IND', 1);
         ihook.setColumnValue(row,'ADMIN_ITEM_TYP_ID', 2);
-            
+        
             if (trim(ihook.getColumnValue(rowform,'DEC_ITEM_LONG_NM')) is null or upper(ihook.getColumnValue(rowform,'DEC_ITEM_LONG_NM')) = 'SYSGEN') then
              v_short_nm := nci_11179_2.getStdShortName(ihook.getColumnValue(rowform, 'ITEM_1_ID'), ihook.getColumnValue(rowform, 'ITEM_1_VER_NR')) || ':' ||
              nci_11179_2.getStdShortName(ihook.getColumnValue(rowform, 'ITEM_2_ID'), ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'));
@@ -2206,8 +2204,15 @@ begin
 
          ihook.setColumnValue(row,'REGSTR_STUS_ID',9); 
          --origin
-       ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',nvl(ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID'),1) );
-        ihook.setColumnValue(row,'CONC_DOM_VER_NR',nvl(ihook.getColumnValue(rowform,'CONC_DOM_VER_NR'),1) );
+        if (ihook.getColumnValue(rowform, 'CONC_DOM_ITEM_ID') is  not null) then
+            ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',ihook.getColumnValue(rowform,'CONC_DOM_ITEM_ID') );
+            ihook.setColumnValue(row,'CONC_DOM_VER_NR',ihook.getColumnValue(rowform,'CONC_DOM_VER_NR' ));
+        else
+         for cur in (select * from de_conc where item_id = v_item_id and ver_nr = v_ver_nr) loop
+            ihook.setColumnValue(row,'CONC_DOM_ITEM_ID',cur.CONC_DOM_ITEM_ID );
+            ihook.setColumnValue(row,'CONC_DOM_VER_NR',cur.CONC_DOM_VER_NR);
+        end loop;       
+        end if;
         ihook.setColumnValue(row,'OBJ_CLS_ITEM_ID',nvl(ihook.getColumnValue(rowform, 'ITEM_1_ID'),1) );
         ihook.setColumnValue(row,'OBJ_CLS_VER_NR',nvl(ihook.getColumnValue(rowform, 'ITEM_1_VER_NR'),1) );
         ihook.setColumnValue(row,'PROP_ITEM_ID',nvl(ihook.getColumnValue(rowform, 'ITEM_2_ID'),1));
@@ -2434,4 +2439,3 @@ end;
 
 END;
 /
-
