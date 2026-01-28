@@ -4,7 +4,6 @@ S71_WA_RA_DDL.sql
 -- Run as ONEDATA_WA DDL scripts
 S71_WA_RA_DDL.sql
 S71_WA.sql
-S71_NCI_DS.sql
 S71_NCI_11179.sql
 S71_NCI_11179_2.sql
 S71_NCI_CHNG_MGMT.sql
