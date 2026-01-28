@@ -3991,7 +3991,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
             and ver_nr = ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR');
             select item_nm, item_desc into v_vd_item_nm, v_vd_item_def from admin_item where item_id =ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID')
             and ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR');
-            ihook.setColumnValue(row_ori, 'ITEM_LONG_NM',v_item_long_nm);
+            ihook.setColumnValue(row_ori, 'ITEM_LONG_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_LONG_NM'),v_item_long_nm));
             ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),substr(v_dec_item_def || ':' || v_vd_item_def,1,4000)));
             
         end if;
