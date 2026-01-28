@@ -822,30 +822,10 @@ BEGIN
         v_mtch_cond := v_entty_nm || ' = r.MTCH_TERM and de.item_id = r.item_id and de.ver_nr = r.ver_nr';
 
     end if;
-
---Rule ID 4: Concept Exact Match
-    if (v_mode = 'E' and v_term = 'C') then
-        v_rule_id := 4;
-        v_rule_desc := to_char(v_rule_id) || '. Concept Exact Match';
-        v_max_word := 'max(de.item_nm)';
-        v_frm_tbls := 'vw_cncpt c, vw_de de, vw_nci_de_cncpt r';
-        v_mtch_cond := upper(v_entty_nm) || ' = c.MTCH_TERM and c.item_id = r.cncpt_item_id and c.ver_nr = r.cncpt_ver_nr and r.de_item_id = de.item_id and de_ver_nr = de.ver_nr';
-
-    end if;
     
---Rule ID 5: Synonym Exact Match    
-    if (v_mode = 'E' and v_term = 'S') then
-        v_rule_id := 5;
-        v_rule_desc := to_char(v_rule_id) || '. Synonym Exact Match';
-        v_max_word := 'max(de.item_nm)';
-        v_frm_tbls := 'vw_cncpt c, vw_de de, vw_nci_de_cncpt r';
-        v_mtch_cond := upper(v_entty_nm) || ' = upper(c.SYN) and c.item_id = r.cncpt_item_id and c.ver_nr = r.cncpt_ver_nr and r.de_item_id = de.item_id and de_ver_nr = de.ver_nr';
-
-    end if;
-    
---Rule ID 6: Long Name Like Match
+--Rule ID 4: Long Name Like Match
     if (v_mode = 'L' and v_term = 'P') then
-        v_rule_id := 6;
+        v_rule_id := 4;
         v_rule_desc := to_char(v_rule_id) || '. Long Name Like Match';
         v_max_word := 'max(de.item_nm)';
         v_frm_tbls := 'vw_de de';
@@ -853,9 +833,9 @@ BEGIN
 
     end if;
 
---Rule ID 7: Question Text Like Match
+--Rule ID 5: Question Text Like Match
     if (v_mode = 'L' and v_term = 'Q') then
-        v_rule_id := 7;
+        v_rule_id := 5;
         v_rule_desc := to_char(v_rule_id) || '. Question Text Like Match';
         v_max_word := 'max(r.ref_desc)';
         v_frm_tbls := 'ref r, obj_key ok, vw_de de';
@@ -867,9 +847,9 @@ BEGIN
 
     end if;
 
---Rule ID 8: Alternate Name Like Match
+--Rule ID 6: Alternate Name Like Match
     if (v_mode = 'L' and v_term = 'A') then
-        v_rule_id := 8;
+        v_rule_id := 6;
         v_rule_desc := to_char(v_rule_id) || '. Alternate Name Like Match';
         v_max_word := 'max(r.nm_desc)';
         v_frm_tbls := 'alt_nms r, vw_de de';
@@ -881,29 +861,9 @@ BEGIN
    
     end if;
     
---Rule ID 9: Concepts Like Match
-    if (v_mode = 'L' and v_term = 'C') then
-        v_rule_id := 9;
-        v_rule_desc := to_char(v_rule_id) || '. Concept Like Match';
-        v_max_word := 'max(de.item_nm)';
-        v_frm_tbls := 'vw_cncpt c, vw_de de, vw_nci_de_cncpt r';
-        v_mtch_cond := '((instr(c.MTCH_TERM, ' || v_entty_nm || ',1) > 0 ) or (instr(' || upper(v_entty_nm) || ', c.MTCH_TERM,1) > 0 )) and length(c.mtch_term) > ' || v_mtch_min_len || ' and c.item_id = r.cncpt_item_id and c.ver_nr = r.cncpt_ver_nr and de_item_id = de.item_id and de_ver_nr = de.ver_nr';
-
-    end if;
-    
---Rule ID 10: Synonym Like Match
-    if (v_mode = 'L' and v_term = 'S') then
-        v_rule_id := 10;
-        v_rule_desc := to_char(v_rule_id) || '. Synonym Like Match';
-        v_max_word := 'max(de.item_nm)';
-        v_frm_tbls := 'vw_cncpt c, vw_de de, vw_nci_de_cncpt r';
-        v_mtch_cond := '((instr(upper(c.SYN), ' || upper(v_entty_nm) || ',1) > 0 ) or (instr(' || upper(v_entty_nm) || ', upper(c.SYN),1) > 0 )) and length(c.syn) > ' || v_mtch_min_len || ' and c.item_id = r.cncpt_item_id and c.ver_nr = r.cncpt_ver_nr and de_item_id = de.item_id and de_ver_nr = de.ver_nr';
-
-    end if;
-    
---Rule ID 11 (non-enum): Long Name Reverse Like Match
+--Rule ID 7: Long Name Reverse Like Match
     if (v_mode = 'R' and v_term = 'P') then
-        v_rule_id := 11;
+        v_rule_id := 7;
         v_rule_desc := to_char(v_rule_id) || '. Long Name Reverse Like Match';
         v_max_word := 'max(de.item_nm)';
         v_frm_tbls := 'vw_de de';
@@ -911,9 +871,9 @@ BEGIN
 
     end if;
 
---Rule ID 12 (non-enum): Question Text Reverse Like Match
+--Rule ID 8: Question Text Reverse Like Match
     if (v_mode = 'R' and v_term = 'Q') then
-        v_rule_id := 12;
+        v_rule_id := 8;
         v_rule_desc := to_char(v_rule_id) || '. Question Text Reverse Like Match';
         v_max_word := 'max(r.ref_desc)';
         v_frm_tbls := 'ref r, obj_key ok, vw_de de';
@@ -921,9 +881,9 @@ BEGIN
 
     end if;
     
---Rule ID 13 (non-enum): Alternate Name Reverse Like Match
+--Rule ID 9: Alternate Name Reverse Like Match
     if (v_mode = 'R' and v_term = 'A') then
-        v_rule_id := 13;
+        v_rule_id := 9;
         v_rule_desc := to_char(v_rule_id) || '. Alternate Name Reverse Like Match';
         v_max_word := 'max(r.nm_desc)';
         v_frm_tbls := 'alt_nms r, vw_de de';
@@ -931,7 +891,47 @@ BEGIN
 
     end if;
 
-    --Rule ID 14: Concepts Reverse Match
+--Rule ID 10: Concept Exact Match
+    if (v_mode = 'E' and v_term = 'C') then
+        v_rule_id := 10;
+        v_rule_desc := to_char(v_rule_id) || '. Concept Exact Match';
+        v_max_word := 'max(de.item_nm)';
+        v_frm_tbls := 'vw_cncpt c, vw_de de, vw_nci_de_cncpt r';
+        v_mtch_cond := upper(v_entty_nm) || ' = c.MTCH_TERM and c.item_id = r.cncpt_item_id and c.ver_nr = r.cncpt_ver_nr and r.de_item_id = de.item_id and de_ver_nr = de.ver_nr';
+
+    end if;
+    
+--Rule ID 11: Synonym Exact Match    
+    if (v_mode = 'E' and v_term = 'S') then
+        v_rule_id := 11;
+        v_rule_desc := to_char(v_rule_id) || '. Synonym Exact Match';
+        v_max_word := 'max(de.item_nm)';
+        v_frm_tbls := 'vw_cncpt c, vw_de de, vw_nci_de_cncpt r';
+        v_mtch_cond := upper(v_entty_nm) || ' = upper(c.SYN) and c.item_id = r.cncpt_item_id and c.ver_nr = r.cncpt_ver_nr and r.de_item_id = de.item_id and de_ver_nr = de.ver_nr';
+
+    end if;
+    
+--Rule ID 12: Concepts Like Match
+    if (v_mode = 'L' and v_term = 'C') then
+        v_rule_id := 12;
+        v_rule_desc := to_char(v_rule_id) || '. Concept Like Match';
+        v_max_word := 'max(de.item_nm)';
+        v_frm_tbls := 'vw_cncpt c, vw_de de, vw_nci_de_cncpt r';
+        v_mtch_cond := '((instr(c.MTCH_TERM, ' || v_entty_nm || ',1) > 0 ) or (instr(' || upper(v_entty_nm) || ', c.MTCH_TERM,1) > 0 )) and length(c.mtch_term) > ' || v_mtch_min_len || ' and c.item_id = r.cncpt_item_id and c.ver_nr = r.cncpt_ver_nr and de_item_id = de.item_id and de_ver_nr = de.ver_nr';
+
+    end if;
+    
+--Rule ID 13: Synonym Like Match
+    if (v_mode = 'L' and v_term = 'S') then
+        v_rule_id := 13;
+        v_rule_desc := to_char(v_rule_id) || '. Synonym Like Match';
+        v_max_word := 'max(de.item_nm)';
+        v_frm_tbls := 'vw_cncpt c, vw_de de, vw_nci_de_cncpt r';
+        v_mtch_cond := '((instr(upper(c.SYN), ' || upper(v_entty_nm) || ',1) > 0 ) or (instr(' || upper(v_entty_nm) || ', upper(c.SYN),1) > 0 )) and length(c.syn) > ' || v_mtch_min_len || ' and c.item_id = r.cncpt_item_id and c.ver_nr = r.cncpt_ver_nr and de_item_id = de.item_id and de_ver_nr = de.ver_nr';
+
+    end if;
+    
+--Rule ID 14: Concepts Reverse Match
     if (v_mode = 'R' and v_term = 'C') then
         v_rule_id := 14;
         v_rule_desc := to_char(v_rule_id) || '. Concept Reverse Match';
@@ -1310,7 +1310,7 @@ elsif (v_mode = 'E') then -- runs the Longest Word Like matches
         
 --Rule ID 7: Longest name match to CDE Long Name
         v_sql := 'insert into nci_ds_rslt_dtl (hdr_id, mtch_typ, item_id, ver_nr, perm_val_nm, rule_id, score, rule_desc, mtch_desc_txt)
-                    select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''' , de.item_id, de.ver_nr, ''NA'', 4, 100, ''7. Longest Term Like Match'' ,
+                    select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''' , de.item_id, de.ver_nr, ''NA'', 4, 20, ''16. Longest Term Like Match'' ,
                     max(de.item_nm) from vw_de  de 
                     where ((MTCH_TERM_ADV  like ''%' || v_sel_word || '%'') or  (''' ||   v_sel_word || ''' like ''%'' || MTCH_TERM_ADV || ''%'' )) and length(mtch_term_adv) >= length(''' ||  v_sel_word || ''') ' ||
                     ' and currnt_ver_ind = 1 and de.val_dom_typ_id = 17 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
@@ -1321,7 +1321,7 @@ elsif (v_mode = 'E') then -- runs the Longest Word Like matches
         
 --Rule ID 8: Longest name match to Question Text
         v_sql := 'insert into nci_ds_rslt_dtl (hdr_id, mtch_typ, item_id, ver_nr, perm_val_nm, rule_id, score, rule_desc, mtch_desc_txt)
-                    select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''' , de.item_id, de.ver_nr, ''NA'', 4, 100, ''8. Longest Term Question Text Like Match'' ,
+                    select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''' , de.item_id, de.ver_nr, ''NA'', 4, 15, ''17. Longest Term Question Text Like Match'' ,
                     max(r.ref_desc) from   ref r , obj_key ok, vw_de de
                     where ((r.MTCH_TERM_ADV  like ''%' || v_sel_word || '%'') or  (''' ||   v_sel_word || ''' like ''%'' || r.MTCH_TERM_ADV || ''%'' )) and length(r.mtch_term_adv) >= length(''' ||  v_sel_word || ''') ' ||
                     ' and currnt_ver_ind = 1 and de.val_dom_typ_id = 17 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
@@ -1333,7 +1333,7 @@ elsif (v_mode = 'E') then -- runs the Longest Word Like matches
        
 --Rule ID 9: Longest name match to Alternate name
         v_sql := 'insert into nci_ds_rslt_dtl (hdr_id, mtch_typ, item_id, ver_nr, perm_val_nm, rule_id, score, rule_desc, mtch_desc_txt)
-                    select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''' , de.item_id, de.ver_nr, ''NA'', 4, 100, ''9. Longest Term Alt Name Like Match'' ,
+                    select ' ||  v_hdr_id || ', ''' || v_mtch_typ || ''' , de.item_id, de.ver_nr, ''NA'', 4, 10, ''18. Longest Term Alt Name Like Match'' ,
                     max(r.nm_desc) from   alt_nms r,  vw_de de
                     where ((r.MTCH_TERM_ADV  like ''%' || v_sel_word || '%'') or  (''' ||   v_sel_word || ''' like ''%'' || r.MTCH_TERM_ADV || ''%'' )) and length(r.mtch_term_adv) >= length(''' ||  v_sel_word || ''') ' ||
                     ' and currnt_ver_ind = 1 and de.val_dom_typ_id = 17 and de.ADMIN_STUS_NM_DN not like ''%RETIRED%''
@@ -1408,9 +1408,11 @@ BEGIN
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'E', 'A', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
 
-        --if (getDSMtchCnt(v_hdr_id) = 0) then --execute like matches
+      --  if (getDSMtchCnt(v_hdr_id) = 0) then --execute like matches
         --6. Long Name Like Match
+        if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then   
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'L', 'P', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+        end if;
             if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
                 spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'P', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
             end if;
@@ -1430,9 +1432,11 @@ BEGIN
                 spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'A', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
             end if;
        -- end if;
-        --if (getDSMtchCnt(v_hdr_id) = 0) then --execute reverse like matches
+      --  if (getDSMtchCnt(v_hdr_id) = 0) then --execute reverse like matches
         --9. Long Name Like Match
+           if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then   
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'R', 'P', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+           end if;
             if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
                 spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'R', 'P', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
             end if;
@@ -1450,12 +1454,15 @@ BEGIN
             if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
                 spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'R', 'A', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
             end if;
-        --end if;
+      --  end if;
 
         --Run Concept/Synonym Matches
         --if (getDSMtchCnt(v_hdr_id) = 0) then
     --4. Concept Exact Match
-            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'E', 'C', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+            if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then   
+              spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'E', 'C', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+            end if;
+            
    -- 5. Synonym Exact Match
             if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
                 spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'E', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
@@ -1469,9 +1476,9 @@ BEGIN
                 spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'L', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
              --spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
             end if;
-       -- end if;
-         --   if (getDSMtchCnt(v_hdr_id) = 0) then --extend matching to Longest Word
-                spDSClearResults(v_hdr_id, v_mtch_typ);
+        --end if;
+           -- if (getDSMtchCnt(v_hdr_id) = 0) then --extend matching to Longest Word
+            --    spDSClearResults(v_hdr_id, v_mtch_typ);
                 
             --Step 3a: insert extended results into nci_ds_rslt_dtl
                 spDSMatchEnumStaging(v_hdr_id, v_entty_nm, v_entty_nm_like, v_filter_str, v_mtch_typ, 'E'); --runs match for Longest Word
@@ -1479,7 +1486,7 @@ BEGIN
             --Step3b: compare source values to extended matches' PV/VMs and insert qualified matches into nci_ds_rslt
                 spDSSubPVVM(v_hdr_id, v_mtch_typ, v_entty_nm, getDSSrcDtl(v_src_val_id), v_mtch_lmt);
             
-        --    end if;
+         --  end if;
         
     else --non-enumerated
  --   spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'E', 'C');
@@ -1491,12 +1498,6 @@ BEGIN
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'E', 'A', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
-            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'E', 'C', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
-        end if;
-        if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
-            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'E', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
-        end if;
-        if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'P', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
@@ -1506,12 +1507,6 @@ BEGIN
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'A', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then 
-            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'C', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
-        end if;
-        if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then 
-            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
-        end if;
-        if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then 
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'R', 'P', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then 
@@ -1519,6 +1514,18 @@ BEGIN
         end if;
         if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then 
             spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'R', 'A', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+        end if;
+        if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
+            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'E', 'C', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+        end if;
+        if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
+            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'E', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+        end if;
+        if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then 
+            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'C', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
+        end if;
+        if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then 
+            spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
         end if;
     end if;
     
