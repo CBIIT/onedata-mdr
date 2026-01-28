@@ -3974,13 +3974,14 @@ for i in 1..hookinput.originalRowset.rowset.count loop
             and ver_nr = ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR');
             select item_nm, item_desc into v_vd_item_nm, v_vd_item_def from admin_item where item_id =ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID')
             and ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR');
+            ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),substr(v_dec_item_def || ':' || v_vd_item_def,1,4000)));
             
             else
             /*
             select item_nm, item_desc into v_dec_item_nm, v_dec_item_def from admin_item where item_id = tmp_dec_id and ver_nr = tmp_dec_ver_nr;
             select item_nm, item_desc into v_vd_item_nm, v_vd_item_def from admin_item where item_id = tmp_vd_id and ver_nr = tmp_vd_ver_nr;*/
             select item_nm, item_desc into v_dec_item_nm, v_dec_item_def from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
-            v_vd_item_nm := ''; v_vd_item_def := '';
+            ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),v_dec_item_def));
             end if;
         end if; -- v_mode = 'U'
         if (v_mode = 'N') then 
@@ -3991,13 +3992,13 @@ for i in 1..hookinput.originalRowset.rowset.count loop
             select item_nm, item_desc into v_vd_item_nm, v_vd_item_def from admin_item where item_id =ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID')
             and ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR');
             ihook.setColumnValue(row_ori, 'ITEM_LONG_NM',v_item_long_nm);
+            ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),substr(v_dec_item_def || ':' || v_vd_item_def,1,4000)));
             
         end if;
         end if; -- Val ind
         
             ihook.setColumnValue(row_ori, 'ITEM_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255)));
-            ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),substr(v_dec_item_def || ':' || v_vd_item_def,1,4000)));
-            ihook.setColumnValue(row_ori, 'CDE_ITEM_LONG_NM',ihook.getColumnValue(row_ori, 'ITEM_LONG_NM'));
+          --  ihook.setColumnValue(row_ori, 'CDE_ITEM_LONG_NM',ihook.getColumnValue(row_ori, 'ITEM_LONG_NM'));
             ihook.setColumnValue(row_ori,'GEN_DE_NM', ihook.getColumnValue(row_ori,'ITEM_NM'));
             ihook.setColumnValue(row_ori,'PROCESS_DT_CHAR',TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS') );
     
