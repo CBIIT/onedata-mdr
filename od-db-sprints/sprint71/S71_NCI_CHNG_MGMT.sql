@@ -3238,9 +3238,12 @@ BEGIN
             ihook.setColumnValue(row, 'PREF_QUEST_TXT',(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT')));
         end if;
 
-        ihook.setColumnValue(row,'ITEM_NM', ihook.getColumnValue(rowform, 'ITEM_NM'));
-        ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_LONG_NM'));
-        ihook.setColumnValue(row,'ITEM_DESC', ihook.getColumnValue(rowform, 'ITEM_DESC'));
+    ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_LONG_NM'));
+        
+       for cur in (select * from admin_item where item_id = v_item_id and ver_nr = v_ver_nr) loop -- original name/desc
+        ihook.setColumnValue(row,'ITEM_NM', nvl(ihook.getColumnValue(rowform, 'ITEM_NM'),cur.item_nm));
+        ihook.setColumnValue(row,'ITEM_DESC', nvl(ihook.getColumnValue(rowform, 'ITEM_DESC'), cur.item_desc));
+        end loop;
         ihook.setColumnValue(row,'ADMIN_NOTES', ihook.getColumnValue(rowform, 'ADMIN_NOTES'));
         
         if (v_op = 'C') then 
@@ -3319,7 +3322,8 @@ BEGIN
             ihook.setColumnValue(row, 'CONCAT_CHAR', ihook.getColumnValue(rowform, 'ITEM_1_NM'));
         end if;
     
-     ihook.setColumnValue(row,'REF_NM', substr(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),1,255));
+   --  ihook.setColumnValue(row,'REF_NM', substr(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),1,255));
+   ihook.setColumnValue(row,'REF_NM', 'PQT');
      ihook.setColumnValue(row,'REF_DESC', ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'));
      ihook.setColumnValue(row,'LANG_ID', 1000);
      ihook.setColumnValue(row,'NCI_CNTXT_ITEM_ID',ihook.getColumnValue(rowform, 'CNTXT_ITEM_ID')  );
@@ -3338,6 +3342,21 @@ BEGIN
             actions(actions.last) := action;
             ihook.setColumnValue(rowform, 'CTL_VAL_MSG',  'CDE Updated Successfully' ||  chr(13)) ;
 
+    if (ihook.getColumnValue(rowform, 'PREF_QUEST_TXT') is not null) then
+   
+            action := t_actionrowset(rows, 'References (for Delete Hook)', 2,97,'delete');
+            actions.extend;
+            actions(actions.last) := action;
+   
+            action := t_actionrowset(rows, 'References (for Delete Hook)', 2,98,'purge');
+            actions.extend;
+            actions(actions.last) := action;
+   
+            action := t_actionrowset(rows, 'References (for Edit)', 2,99,'insert');
+            actions.extend;
+            actions(actions.last) := action;
+        end if;
+        
         end if;
         
         if (v_op  in ('N', 'C')) then 
@@ -3348,14 +3367,26 @@ BEGIN
             action := t_actionrowset(rows, 'Data Element', 2,11,'insert');
             actions.extend;
             actions(actions.last) := action;
-            
-            action := t_actionrowset(rows, 'References (for Edit)', 2,12,'insert');
-            actions.extend;
-            actions(actions.last) := action;
         
             -- Copy children    
             nci_11179.spCreateCommonChildrenNCI (actions , v_item_id , v_ver_nr ,v_item_id ,ihook.getColumnValue(rowform,'NEW_VER_NR')  , v_usr_id) ;
             
+            
+    if (ihook.getColumnValue(rowform, 'PREF_QUEST_TXT') is not null) then
+   
+            action := t_actionrowset(rows, 'References (for Delete Hook)', 2,97,'delete');
+            actions.extend;
+            actions(actions.last) := action;
+   
+            action := t_actionrowset(rows, 'References (for Delete Hook)', 2,98,'purge');
+            actions.extend;
+            actions(actions.last) := action;
+   
+            action := t_actionrowset(rows, 'References (for Edit)', 2,99,'insert');
+            actions.extend;
+            actions(actions.last) := action;
+        end if;
+        
             -- remove latest version from original
             rows := t_rows();
             row := t_row();
@@ -3373,6 +3404,7 @@ BEGIN
        
         end if;
         
+            
     ihook.setColumnValue(rowform, 'CTL_VAL_STUS', 'PROCESSED');
 
 
