@@ -3254,6 +3254,8 @@ BEGIN
             v_new_ver_nr := v_ver_nr;
         end if;
         if (v_op = 'N') then
+            nci_11179.spReturnAIRow (v_item_id, v_ver_nr ,row);
+            nci_11179.spReturnSubtypeRow (v_item_id , v_ver_nr, 4,row) ;
             v_new_ver_nr := ihook.getColumnValue(rowform, 'NEW_VER_NR');
             ihook.setColumnValue(rowform,'ADMIN_STUS_ID',65);
                ihook.setColumnValue(rowform,'REGSTR_STUS_ID',9);
@@ -3312,9 +3314,9 @@ BEGIN
         if (ihook.getColumnValue(rowform, 'UNTL_DT') is not null) then
             ihook.setColumnValue(row, 'UNTL_DT', ihook.getColumnValue(rowform, 'UNTL_DT'));
         end if;
-        if (ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') is not null) then --admin notes
-            ihook.setColumnValue(row, 'ADMIN_NOTES', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG'));
-        end if;
+       -- if (ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') is not null) then --admin notes
+       --     ihook.setColumnValue(row, 'ADMIN_NOTES', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG'));
+       -- end if;
         if (ihook.getColumnValue(rowform, 'ITEM_1_DEF') is not null) then --change description
             ihook.setColumnValue(row, 'CHNG_DESC_TXT', ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
         end if;
@@ -3370,9 +3372,11 @@ BEGIN
         
             -- Copy children    
             nci_11179.spCreateCommonChildrenNCI (actions , v_item_id , v_ver_nr ,v_item_id ,ihook.getColumnValue(rowform,'NEW_VER_NR')  , v_usr_id) ;
+            -- Copy derived components
+            nci_11179.spCreateCDEDervComp (actions , v_item_id , v_ver_nr ,v_item_id ,ihook.getColumnValue(rowform,'NEW_VER_NR')  , v_usr_id) ;
             
-            
-    if (ihook.getColumnValue(rowform, 'PREF_QUEST_TXT') is not null) then
+
+    if ( ihook.getColumnValue(rowform, 'IMP_PREF_QUEST_TXT') is not null) then -- if null then copying from existing version which will be done in the copy children
    
             action := t_actionrowset(rows, 'References (for Delete Hook)', 2,97,'delete');
             actions.extend;
@@ -3390,7 +3394,7 @@ BEGIN
             -- remove latest version from original
             rows := t_rows();
             row := t_row();
-            ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
+            ihook.setColumnValue(row, 'CURRNT_VER_IND', 0);
             ihook.setColumnValue(row,'ITEM_ID', v_item_id);
             ihook.setColumnValue(row,'VER_NR', v_ver_nr);
             
