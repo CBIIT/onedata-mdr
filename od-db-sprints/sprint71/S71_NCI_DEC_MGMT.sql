@@ -2195,10 +2195,11 @@ begin
              nci_11179_2.getStdShortName(ihook.getColumnValue(rowform, 'ITEM_2_ID'), ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'));
             elsif ihook.getColumnValue(rowform,'DEC_ITEM_LONG_NM') is not null then
                 v_short_nm := ihook.getColumnValue(rowform,'DEC_ITEM_LONG_NM');    
-            else
-                if (regexp_like(ihook.getColumnValue(row,'ITEM_LONG_NM') ,'(.*)v(.*):(.*)v(.*)') = false) then
+            elsif  (regexp_like(ihook.getColumnValue(row,'ITEM_LONG_NM') ,'(.*)v(.*):(.*)v(.*)') = false) then
                 v_short_nm := ihook.getColumnValue(row,'ITEM_LONG_NM');
-                end if;
+            else
+                 v_short_nm := nci_11179_2.getStdShortName(ihook.getColumnValue(rowform, 'ITEM_1_ID'), ihook.getColumnValue(rowform, 'ITEM_1_VER_NR')) || ':' ||
+             nci_11179_2.getStdShortName(ihook.getColumnValue(rowform, 'ITEM_2_ID'), ihook.getColumnValue(rowform, 'ITEM_2_VER_NR'));
             end if;
          ihook.setColumnValue(row,'ITEM_LONG_NM', v_short_nm);
 
