@@ -3234,17 +3234,11 @@ c_ver_suffix varchar2(5) := 'v1.00';
 BEGIN
        rows := t_rows();
       row := t_row();
-               if (ihook.getColumnValue(rowform, 'PREF_QUEST_TXT') is not null) then
-            ihook.setColumnValue(row, 'PREF_QUEST_TXT',(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT')));
-        end if;
-
-    ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_LONG_NM'));
         
        for cur in (select * from admin_item where item_id = v_item_id and ver_nr = v_ver_nr) loop -- original name/desc
         ihook.setColumnValue(row,'ITEM_NM', nvl(ihook.getColumnValue(rowform, 'ITEM_NM'),cur.item_nm));
         ihook.setColumnValue(row,'ITEM_DESC', nvl(ihook.getColumnValue(rowform, 'ITEM_DESC'), cur.item_desc));
         end loop;
-        ihook.setColumnValue(row,'ADMIN_NOTES', ihook.getColumnValue(rowform, 'ADMIN_NOTES'));
         
         if (v_op = 'C') then 
              v_id := nci_11179.getItemId;
@@ -3266,6 +3260,12 @@ BEGIN
         
         ihook.setColumnValue(row,'ITEM_ID', v_id);
         ihook.setColumnValue(row,'VER_NR', v_new_ver_nr);
+        ihook.setColumnValue(row,'ADMIN_NOTES', ihook.getColumnValue(rowform, 'ADMIN_NOTES'));
+               if (ihook.getColumnValue(rowform, 'PREF_QUEST_TXT') is not null) then
+            ihook.setColumnValue(row, 'PREF_QUEST_TXT',(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT')));
+        end if;
+
+    ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_LONG_NM'));
                ihook.setColumnValue(row,'DE_CONC_ITEM_ID', ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID'));
                ihook.setColumnValue(row,'DE_CONC_VER_NR', ihook.getColumnValue(rowform, 'DE_CONC_VER_NR'));
       ihook.setColumnValue(row,'VAL_DOM_ITEM_ID', ihook.getColumnValue(rowform, 'VAL_DOM_ITEM_ID'));
@@ -3344,7 +3344,7 @@ BEGIN
             actions(actions.last) := action;
             ihook.setColumnValue(rowform, 'CTL_VAL_MSG',  'CDE Updated Successfully' ||  chr(13)) ;
 
-    if (ihook.getColumnValue(rowform, 'PREF_QUEST_TXT') is not null) then
+    if (ihook.getColumnValue(rowform, 'IMP_PREF_QUEST_TXT') is not null) then
    
             action := t_actionrowset(rows, 'References (for Delete Hook)', 2,97,'delete');
             actions.extend;
