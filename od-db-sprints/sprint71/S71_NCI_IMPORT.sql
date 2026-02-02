@@ -806,6 +806,7 @@ begin
     hookOutput.originalRowset := hookInput.originalRowset;
     rows := t_rows();
 
+   -- raise_application_error(-20000,hookinput.originalRowset.rowset.count);
     for i in 1..hookinput.originalRowset.rowset.count loop
 
         row_ori := hookInput.originalRowset.rowset(i);
@@ -849,8 +850,14 @@ begin
                 ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') ||  'New version already exists.' || chr(13));
                 v_val_ind := false;
             end if;
+                 select count(*) into v_cnt from admin_item where admin_item_typ_id = 2 and item_id = ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') and ver_nr = ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR') and currnt_ver_ind = 1;
+            if (v_cnt < 1) then
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') ||  'Specified version is not the latest version.' || chr(13));
+                v_val_ind := false;
             end if;
-        
+            end if;
+       
+   
             -- Specific DEC should be valid
             if (ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') is not null and v_mode in ('U','N','V','NV')) then --specifies intent to update/version
                 select count(*) into v_dec_fnd from de_conc where ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') = de_conc.item_id and ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR') = de_conc.ver_nr;--jira 3149 execute update instead
@@ -990,7 +997,6 @@ begin
         end if;
         if  v_mode in ('C','U','N') and v_val_ind = true then -- X
    
-            rows := t_rows();
             nci_dec_mgmt.createValAIWithConcept(row_ori , 1,5,'C','DROP-DOWN',actions); -- OC
             nci_dec_mgmt.createValAIWithConcept(row_ori , 2,6,'C','DROP-DOWN',actions); -- Property
 
@@ -1004,6 +1010,7 @@ begin
                 nci_dec_mgmt.createVersionDECImport(row_ori, actions, v_item_id, v_ver_nr, v_usr_id); 
             end if;
         end if; --X
+      --  rows.extend; rows(rows.last) := row_ori;
    else -- processed
         ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'Row already processed.');
    end if; -- only if not processed     
@@ -4033,9 +4040,10 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         
    else
     ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'Row already PROCESSED');
-   end if;    
+   end if;
+     rows.extend; rows(rows.last) := row_ori;
+  
 end loop;
-    rows.extend; rows(rows.last) := row_ori;
    
 action := t_actionrowset(rows, 'CDE Update', 2,10,'update');
 actions.extend;
@@ -4133,6 +4141,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
                 v_val_ind := false;
                 ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'New Version Number not specified' || chr(13));
         end if;
+        
         
            if ( ihook.getColumnValue(row_ori, 'NEW_VER_NR') is  not null and ihook.getColumnValue(row_ori, 'NEW_VER_NR') <= v_ver_nr) then
                 v_val_ind := false;
@@ -4292,15 +4301,18 @@ for i in 1..hookinput.originalRowset.rowset.count loop
                 end loop;
             end if;
             
+         --   raise_application_error(-20000, ihook.getColumnValue(row_ori,'ADMIN_NOTES'));
             nci_chng_mgmt.spCDEValUpdate(row_ori, v_mode, actions, v_val_ind, v_item_id, v_ver_nr, v_usr_id);
         end if;
-        
+    rows.extend; rows(rows.last) := row_ori;
+       
    else
     ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', 'Row already PROCESSED');
+          rows.extend; rows(rows.last) := row_ori;
+  
    end if;    
 end loop;
-    rows.extend; rows(rows.last) := row_ori;
-   
+    
 action := t_actionrowset(rows, 'CDE Update', 2,10,'update');
 actions.extend;
 actions(actions.last) := action;
