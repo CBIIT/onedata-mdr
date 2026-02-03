@@ -3820,6 +3820,23 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         v_ver_nr := ihook.getColumnValue(row_ori, 'IMP_UPD_DEC_VER'); --reusing existing column instead of creating new one
         cde_nm_ind := false;
         cde_long_nm_ind := false;
+    
+        -- set DEC and VD if not provided
+        
+        for cur in (Select * from de where item_id = v_item_id and ver_nr = v_ver_nr) loop
+         if (ihook.getColumnValue(row_ori, 'ITEM_1_ID') is null and ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') is null ) then
+            ihook.setColumnValue(row_ori, 'DE_CONC_ITEM_ID', cur.DE_CONC_ITEM_ID);
+            ihook.setColumnValue(row_ori, 'DE_CONC_VER_NR', cur.DE_CONC_VER_NR);
+            
+         end if;
+         if (ihook.getColumnValue(row_ori, 'ITEM_2_ID') is null and ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') is null ) then
+            ihook.setColumnValue(row_ori, 'VAL_DOM_ITEM_ID', cur.VAL_DOM_ITEM_ID);
+            ihook.setColumnValue(row_ori, 'VAL_DOM_VER_NR', cur.VAL_DOM_VER_NR);
+            
+         end if;
+         
+        end loop;
+    
       -- START CDE ID/Version validation
       
       --  if v_mode in ('U', 'N') then
@@ -4114,6 +4131,22 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         v_ver_nr := ihook.getColumnValue(row_ori, 'IMP_UPD_DEC_VER'); --reusing existing column instead of creating new one
         cde_nm_ind := false;
         cde_long_nm_ind := false;
+        
+        -- set DEC and VD if not provided
+        
+        for cur in (Select * from de where item_id = v_item_id and ver_nr = v_ver_nr) loop
+         if (ihook.getColumnValue(row_ori, 'ITEM_1_ID') is null and ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') is null ) then
+            ihook.setColumnValue(row_ori, 'DE_CONC_ITEM_ID', cur.DE_CONC_ITEM_ID);
+            ihook.setColumnValue(row_ori, 'DE_CONC_VER_NR', cur.DE_CONC_VER_NR);
+            
+         end if;
+         if (ihook.getColumnValue(row_ori, 'ITEM_2_ID') is null and ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') is null ) then
+            ihook.setColumnValue(row_ori, 'VAL_DOM_ITEM_ID', cur.VAL_DOM_ITEM_ID);
+            ihook.setColumnValue(row_ori, 'VAL_DOM_VER_NR', cur.VAL_DOM_VER_NR);
+            
+         end if;
+         
+        end loop;
       -- START CDE ID/Version validation
       
             if (ihook.getColumnValue(row_ori, 'IMP_UPD_DEC_VER') is null or ihook.getColumnValue(row_ori, 'IMP_UPD_DEC_VER') = '') then
