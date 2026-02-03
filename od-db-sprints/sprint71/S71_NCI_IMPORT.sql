@@ -37,6 +37,7 @@ function FormatConceptString (v_str in varchar2) return varchar2;
 procedure spPVVMUpdate ( row_ori in out t_row, actions in out t_actions, rowais in out t_rows, rowiucs in out t_rows, rowcdvms in out t_rows, rowpvs in out t_rows, rowaltnms in out t_rows, row_pvvms in out t_rows);
 END;
 /
+
 create or replace PACKAGE BODY            nci_import AS
 
 procedure spDeleteProcImports
@@ -3824,6 +3825,11 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         -- set DEC and VD if not provided
         
         for cur in (Select * from de where item_id = v_item_id and ver_nr = v_ver_nr) loop
+         tmp_dec_id := cur.de_conc_item_id;
+         tmp_dec_ver_nr := cur.de_conc_ver_nr;
+         tmp_vd_id := cur.val_dom_item_id;
+         tmp_vd_ver_nr := cur.val_dom_ver_nr;
+         
          if (ihook.getColumnValue(row_ori, 'ITEM_1_ID') is null and ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') is null ) then
             ihook.setColumnValue(row_ori, 'DE_CONC_ITEM_ID', cur.DE_CONC_ITEM_ID);
             ihook.setColumnValue(row_ori, 'DE_CONC_VER_NR', cur.DE_CONC_VER_NR);
@@ -3969,7 +3975,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         end if;
         if (v_val_ind = true) then 
     
-            select de_conc_item_id, de_conc_ver_nr, val_dom_item_id, val_dom_ver_nr into tmp_dec_id, tmp_dec_ver_nr, tmp_vd_id, tmp_vd_ver_nr from de where item_id = v_item_id and ver_nr = v_ver_nr;
+         --   select de_conc_item_id, de_conc_ver_nr, val_dom_item_id, val_dom_ver_nr into tmp_dec_id, tmp_dec_ver_nr, tmp_vd_id, tmp_vd_ver_nr from de where item_id = v_item_id and ver_nr = v_ver_nr;
                 if (ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') != tmp_dec_id or ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR') != tmp_dec_ver_nr) then
                     cde_nm_ind := true;
                 end if;
@@ -4120,7 +4126,6 @@ begin
     hookOutput.invocationNumber := hookInput.invocationNumber;
     hookOutput.originalRowset := hookInput.originalRowset;
     rows := t_rows();
-  
 for i in 1..hookinput.originalRowset.rowset.count loop
     row_ori := hookInput.originalRowset.rowset(i);
   
@@ -4135,6 +4140,11 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         -- set DEC and VD if not provided
         
         for cur in (Select * from de where item_id = v_item_id and ver_nr = v_ver_nr) loop
+         tmp_dec_id := cur.de_conc_item_id;
+         tmp_dec_ver_nr := cur.de_conc_ver_nr;
+         tmp_vd_id := cur.val_dom_item_id;
+         tmp_vd_ver_nr := cur.val_dom_ver_nr;
+         
          if (ihook.getColumnValue(row_ori, 'ITEM_1_ID') is null and ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') is null ) then
             ihook.setColumnValue(row_ori, 'DE_CONC_ITEM_ID', cur.DE_CONC_ITEM_ID);
             ihook.setColumnValue(row_ori, 'DE_CONC_VER_NR', cur.DE_CONC_VER_NR);
@@ -4268,20 +4278,33 @@ for i in 1..hookinput.originalRowset.rowset.count loop
                 v_val_ind  := false;
         end if;
         if (v_val_ind = true) then 
-            cde_long_nm_ind := true;
-            cde_nm_ind := true;
+                if (ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') != tmp_dec_id or ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR') != tmp_dec_ver_nr) then
+                    cde_nm_ind := true;
+                end if;
+                if (ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') != tmp_vd_id or ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') != tmp_vd_ver_nr) then
+                    cde_nm_ind := true; 
+               end if;
+       
+            if (cde_nm_ind = true) then -- DEC or VD changed
             select item_nm, item_desc into v_dec_item_nm, v_dec_item_def from admin_item where item_id = ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID')
             and ver_nr = ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR');
             select item_nm, item_desc into v_vd_item_nm, v_vd_item_def from admin_item where item_id =ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID')
             and ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR');
-            ihook.setColumnValue(row_ori, 'ITEM_LONG_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_LONG_NM'),v_item_long_nm));
             ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),substr(v_dec_item_def || ':' || v_vd_item_def,1,4000)));
+            ihook.setColumnValue(row_ori, 'ITEM_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255)));
             
+            else
+              select item_nm, item_desc into v_dec_item_nm, v_dec_item_def from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
+            ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),v_dec_item_def));
+            
+            ihook.setColumnValue(row_ori, 'ITEM_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),v_dec_item_nm ));
+           end if; 
+          
         end if; -- Val ind
         
-            ihook.setColumnValue(row_ori, 'ITEM_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255)));
-          --  ihook.setColumnValue(row_ori, 'CDE_ITEM_LONG_NM',ihook.getColumnValue(row_ori, 'ITEM_LONG_NM'));
-            ihook.setColumnValue(row_ori,'GEN_DE_NM', ihook.getColumnValue(row_ori,'ITEM_NM'));
+           --  select de_conc_item_id, de_conc_ver_nr, val_dom_item_id, val_dom_ver_nr into tmp_dec_id, tmp_dec_ver_nr, tmp_vd_id, tmp_vd_ver_nr from de where item_id = v_item_id and ver_nr = v_ver_nr;
+         ihook.setColumnValue(row_ori,'GEN_DE_NM', ihook.getColumnValue(row_ori,'ITEM_NM'));    
+           
             ihook.setColumnValue(row_ori,'PROCESS_DT_CHAR',TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS') );
     
             for cur in (select ai.item_id item_id from admin_item ai, de de
