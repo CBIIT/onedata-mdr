@@ -180,7 +180,7 @@ end loop;
         actions(actions.last) := action;
         hookoutput.actions := actions;
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
- --nci_util.debugHook('GENERAL',v_data_out);
+ nci_util.debugHook('GENERAL',v_data_out);
 end;
 
 
@@ -886,7 +886,7 @@ begin
 
             -- If no OC or Prop Concept 1 not found
             if (ihook.getColumnValue(row_ori, 'CNCPT_1_ITEM_ID_1') is null or ihook.getColumnValue(row_ori, 'CNCPT_2_ITEM_ID_1') is null) then
-                ihook.setColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_IMPORT_VAL_MSG') || 'ERROR: OC or PROP missing.' || chr(13));
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: OC or PROP missing.' || chr(13));
                 v_val_ind:= false;
             end if;
      
@@ -4379,3 +4379,4 @@ end;
 
 end;
 /
+
