@@ -37,7 +37,6 @@ function FormatConceptString (v_str in varchar2) return varchar2;
 procedure spPVVMUpdate ( row_ori in out t_row, actions in out t_actions, rowais in out t_rows, rowiucs in out t_rows, rowcdvms in out t_rows, rowpvs in out t_rows, rowaltnms in out t_rows, row_pvvms in out t_rows);
 END;
 /
-
 create or replace PACKAGE BODY            nci_import AS
 
 procedure spDeleteProcImports
@@ -3859,10 +3858,10 @@ for i in 1..hookinput.originalRowset.rowset.count loop
                     end if;
                 end if;   
             end if;
-            select count(*) into v_cnt from admin_item where admin_item_typ_id = 4 and item_id = v_item_id and ver_nr = v_ver_nr and currnt_ver_ind = 1;
+            select count(*) into v_cnt from admin_item where admin_item_typ_id = 4 and item_id = v_item_id and ver_nr = v_ver_nr;
             if (v_cnt < 1) then
                 v_val_ind := false;
-                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') ||'Invalid CDE Public ID or Version. Or specified version is not the latest version'|| chr(13));
+                ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori,'CTL_VAL_MSG') ||'Invalid CDE Public ID or Version.'|| chr(13));
             end if;
        -- end if;
  -- END CDE ID/VERSION validation
@@ -4379,4 +4378,3 @@ end;
 
 end;
 /
-
