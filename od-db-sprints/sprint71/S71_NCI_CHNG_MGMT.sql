@@ -1413,7 +1413,40 @@ Warning: PQT null, default used
         row := t_row();
 
     -- Item name - DE name if specified; DEC NAme - specified/found/generated; vd name - specified/generated
-   --     raise_application_error(-20000, 'Front' || v_dec_item_id);
+   --     raise_application_error(-20000, 'Front' || v_dec_item_id);             select item_nm, item_desc into v_dec_item_nm, v_dec_item_def from admin_item where item_id = v_dec_item_id and ver_nr = v_dec_ver_nr;
+
+
+                select item_nm, item_desc into v_dec_item_nm, v_dec_item_def from admin_item where item_id = v_dec_item_id and ver_nr = v_dec_ver_nr;
+
+                select item_nm, item_desc into v_vd_item_nm, v_vd_item_def from admin_item where item_id = v_vd_item_id and ver_nr = v_vd_ver_nr;
+
+        if (ihook.getColumnValue(rowform, 'CDE_ITEM_NM') is not null) then
+            ihook.setColumnValue(row, 'ITEM_NM',ihook.getColumnValue(rowform, 'CDE_ITEM_NM'));
+        else
+            ihook.setColumnValue(row, 'ITEM_NM',substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255));
+        end if;
+        -- jira 1870
+        if (ihook.getColumnValue(rowform, 'CDE_ITEM_LONG_NM') is not null) then
+            ihook.setColumnValue(row, 'ITEM_LONG_NM',ihook.getColumnValue(rowform, 'CDE_ITEM_LONG_NM'));
+        end if;
+        ihook.setColumnValue(rowform,'GEN_DE_NM', ihook.getColumnValue(row,'ITEM_NM'));
+        -- Generated dte
+      --    ihook.setColumnValue(rowform,'PROCESS_DT',to_char(sysdate, DEFAULT_TS_FORMAT) );
+      ihook.setColumnValue(rowform,'PROCESS_DT_CHAR',TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS') );
+    
+    -- item def - DEC def - specified/found.genetered; vd def - specified/generated
+ --  raise_application_error(-20000, 'Above ' || v_dec_item_def || 'After');
+   -- raise_application_error(-20000, 'Above ' );
+
+   --       ihook.setColumnValue(row, 'ITEM_DESC',substr(v_dec_item_def || ':' || v_vd_item_def,1,4000));
+          if (ihook.getColumnValue(rowform, 'CDE_ITEM_DESC') is not null) then
+            ihook.setColumnValue(row, 'ITEM_DESC',ihook.getColumnValue(rowform, 'CDE_ITEM_DESC'));
+        else
+          ihook.setColumnValue(row, 'ITEM_DESC',substr(v_dec_item_def || ':' || v_vd_item_def,1,4000));
+          end if;
+            ihook.setColumnValue(row, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || ihook.getColumnValue(row, 'ITEM_NM')|| ' does not have Preferred Question Text.'   ));
+            ihook.setColumnValue(rowform, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || ihook.getColumnValue(row, 'ITEM_NM')|| ' does not have Preferred Question Text.'   ));
+
 
                           ihook.setColumnValue(row, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || ihook.getColumnValue(row, 'ITEM_NM')|| ' does not have Preferred Question Text.'   ));
             ihook.setColumnValue(rowform, 'PREF_QUEST_TXT',nvl(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),'Data Element ' || ihook.getColumnValue(row, 'ITEM_NM')|| ' does not have Preferred Question Text.'   ));
