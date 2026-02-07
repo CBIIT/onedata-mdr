@@ -37,6 +37,7 @@ function getSemanticMapQuestion (v_msg in varchar2) return t_question;
 function isHookInputSelected (v_hookinput in t_hookinput, v_col_nm in varchar2) return boolean;
 END;
 /
+
 create or replace PACKAGE BODY            nci_codemap_mm AS
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
@@ -3418,6 +3419,12 @@ BEGIN
         v_str := 'XWALK, SOURCE, SOURCE_TERMINOLOGY*, SOURCE_*, TARGET_TERMINOLOGY*, TARGET_*';
          end if;
      
+       if (v_src_vd_typ_id =16 and v_tgt_vd_typ_id= 18) then
+   
+        v_func_str := 'QUERY';
+        v_str := 'SOURCE';
+         end if;
+     
 end if;
     v_max_word:= nci_11179.getWordCountDelim(v_str,',');
   --  raise_Application_error(-20000, v_str ||'-'|| v_max_word || '-'|| j ||'-'||curgrp.mec_map_nm ||'-'|| curgrp.mec_sub_grp_nbr);
@@ -3464,4 +3471,3 @@ END;
  
 END;
 /
-
