@@ -3433,7 +3433,18 @@ end if;
 END ;
 /
 
-create or replace PROCEDURE            spUpdateCMRGUID 
+	create or replace TRIGGER OD_TR_ALT_KEY  BEFORE INSERT  on NCI_ADMIN_ITEM_REL_ALT_KEY
+  for each row
+         BEGIN    IF (:NEW.NCI_PUB_ID<= 0  or :NEW.NCI_PUB_ID is null)  THEN
+         select od_seq_ADMIN_ITEM.nextval
+    into :new.NCI_PUB_ID  from  dual ;
+
+END IF;
+
+:new.nci_idseq := nci_11179.cmr_guid;
+END ;
+/
+	create or replace PROCEDURE            spUpdateCMRGUID 
 AS
 i int;
  BEGIN
@@ -3449,7 +3460,14 @@ i int;
   commit;
   
   
+  for cur in (select * from nci_admin_item_rel_alt_key where NCI_IDSEQ is null) loop
+     update nci_admin_item_rel_alt_key set nci_idseq  =nci_11179.cmr_guid where NCI_PUB_ID = cur.NCI_PUB_ID and NCI_VER_NR = cur.NCI_VER_NR;
+  end loop;
+  commit;
+  
+  
 END;
 /
+	
 
 execute spUpdateCMRGUID;
