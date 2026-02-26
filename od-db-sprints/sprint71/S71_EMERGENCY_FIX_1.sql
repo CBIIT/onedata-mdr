@@ -6096,7 +6096,7 @@ BEGIN    IF (:NEW.NCI_PUB_ID<= 0  or :NEW.NCI_PUB_ID is null)  THEN
     into :new.NCI_PUB_ID  from  dual ;   END IF;
  :new.nci_idseq := nci_11179.cmr_guid();
  END ;
-
+/
 
 create or replace TRIGGER OD_TR_ADMIN_ITEM  BEFORE INSERT ON ADMIN_ITEM for each row
 declare 
