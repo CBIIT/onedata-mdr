@@ -3433,3 +3433,23 @@ end if;
 END ;
 /
 
+create or replace PROCEDURE            spUpdateCMRGUID 
+AS
+i int;
+ BEGIN
+  
+  for cur in (select * from nci_quest_valid_Value where NCI_IDSEQ is null) loop
+     update nci_quest_valid_value set nci_idseq  =nci_11179.cmr_guid where NCI_PUB_ID = cur.NCI_PUB_ID and NCI_VER_NR = cur.NCI_VER_NR;
+  end loop;
+  commit;
+  
+  for cur in (select * from admin_item where NCI_IDSEQ is null) loop
+     update admin_item set nci_idseq  =nci_11179.cmr_guid where ITEM_ID = cur.ITEM_ID and VER_NR = cur.VER_NR;
+  end loop;
+  commit;
+  
+  
+END;
+/
+
+execute spUpdateCMRGUID;
