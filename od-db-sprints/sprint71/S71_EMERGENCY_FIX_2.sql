@@ -55,3 +55,42 @@ CREATE OR REPLACE TRIGGER OD_TR_REF_DOC  BEFORE INSERT  on REF_DOC  for each row
   END ;          
 /
 
+create or replace PROCEDURE            spUpdateCMRGUID2
+AS
+i int;
+ BEGIN
+  
+  for cur in (select * from alt_nms where NCI_IDSEQ is null) loop
+     update alt_nms set nci_idseq  =nci_11179.cmr_guid where nm_id = cur.nm_id;
+  end loop;
+  commit;
+  
+  for cur in (select * from alt_def where NCI_IDSEQ is null) loop
+     update alt_def set nci_idseq  =nci_11179.cmr_guid where def_id = cur.def_id;
+  end loop;
+  commit;
+  
+  
+  for cur in (select * from ref where NCI_IDSEQ is null) loop
+     update ref set nci_idseq  =nci_11179.cmr_guid where ref_id = cur.ref_id;
+  end loop;
+  commit;
+  
+  
+  for cur in (select * from ref_doc where NCI_IDSEQ is null) loop
+     update ref_doc set nci_idseq  =nci_11179.cmr_guid where ref_doc_id = cur.ref_doc_id;
+  end loop;
+  commit;
+  
+  
+  for cur in (select * from perm_val where NCI_IDSEQ is null) loop
+     update perm_val set nci_idseq  =nci_11179.cmr_guid where val_id = cur.val_id;
+  end loop;
+  commit;
+  
+END;
+/
+
+
+execute spUpdateCMRGUID2;
+
