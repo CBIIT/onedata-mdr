@@ -80,3 +80,6 @@ VALUE_DOM.VER_NR = TERM.VER_NR (+)
 and 
 VALUE_DOM.REP_CLS_ITEM_ID = prt.ITEM_ID (+) AND
 VALUE_DOM.REP_CLS_VER_NR = prt.VER_NR (+);
+
+
+alter table NCI_STG_CDE_CREAT add ( CDE_ITEM_ID number, CDE_VER_NR number(4,2), IMP_CDE_ITEM_ID number, IMP_CDE_VER_NR number(4,2));
