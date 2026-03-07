@@ -116,8 +116,8 @@ if (v_admin_item_typ ='VD') then
     for i in 1 .. hookInput.originalRowset.Rowset.count loop
         row := t_row();
         row_cur := hookInput.originalRowset.Rowset(i);
-        ihook.setColumnValue(row,'VAL_DOM_ITEM_ID', ihook.getColumnValue(row_cur,'VAL_DOM_ITEM_ID'));
-        ihook.setColumnValue(row,'VAL_DOM_VER_NR', ihook.getColumnValue(row_cur,'VAL_DOM_VER_NR'));
+        ihook.setColumnValue(row,'VAL_DOM_ITEM_ID', nvl(ihook.getColumnValue(row_cur,'VAL_DOM_ITEM_ID'),ihook.getColumnValue(row_cur,'ITEM_ID') ));
+        ihook.setColumnValue(row,'VAL_DOM_VER_NR', nvl(ihook.getColumnValue(row_cur,'VAL_DOM_VER_NR'),ihook.getColumnValue(row_cur,'VER_NR')));
         rows.extend; rows(rows.last) := row;
     end loop;
 
@@ -135,8 +135,8 @@ if (v_admin_item_typ ='CDE') then
     for i in 1 .. hookInput.originalRowset.Rowset.count loop
         row := t_row();
         row_cur := hookInput.originalRowset.Rowset(i);
-        ihook.setColumnValue(row,'CDE_ITEM_ID', ihook.getColumnValue(row_cur,'IMP_UPD_DEC_ID'));
-        ihook.setColumnValue(row,'CDE_VER_NR', ihook.getColumnValue(row_cur,'IMP_UPD_DEC_VER'));
+        ihook.setColumnValue(row,'CDE_ITEM_ID', nvl(ihook.getColumnValue(row_cur,'IMP_UPD_DEC_ID'),ihook.getColumnValue(row_cur,'ITEM_ID') ));
+        ihook.setColumnValue(row,'CDE_VER_NR', nvl(ihook.getColumnValue(row_cur,'IMP_UPD_DEC_VER'),ihook.getColumnValue(row_cur,'VER_NR')));
         rows.extend; rows(rows.last) := row;
     end loop;
 
@@ -2732,4 +2732,5 @@ end;
 
 
 end;
+
 /
