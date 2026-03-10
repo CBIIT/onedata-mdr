@@ -90,3 +90,6 @@ alter table nci_ds_hdr add DESC_COL varchar2(500);
 update nci_ds_hdr ds set ds.DESC_COL = (select two.ENTTY_NM || ' | ' || two.BTCH_NM from nci_ds_hdr two where two.HDR_ID = ds.HDR_ID);
 commit;
 
+--jira 9319
+alter table nci_ds_rslt add CDE_PREF_IND number default 0;
+
