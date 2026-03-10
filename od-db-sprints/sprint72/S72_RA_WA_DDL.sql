@@ -85,3 +85,8 @@ VALUE_DOM.REP_CLS_VER_NR = prt.VER_NR (+);
 alter table NCI_STG_CDE_CREAT add ( CDE_ITEM_ID number, CDE_VER_NR number(4,2), IMP_CDE_ITEM_ID number, IMP_CDE_VER_NR number(4,2));
 alter table NCI_STG_CDE_CREAT add (CURRNT_VAL_ITEM_NM varchar2(255));
 
+--jira 9316
+alter table nci_ds_hdr add DESC_COL varchar2(500);
+update nci_ds_hdr ds set ds.DESC_COL = (select two.ENTTY_NM || ' | ' || two.BTCH_NM from nci_ds_hdr two where two.HDR_ID = ds.HDR_ID);
+commit;
+
