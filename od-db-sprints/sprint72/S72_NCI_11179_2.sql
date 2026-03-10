@@ -1479,6 +1479,7 @@ as
     --jira 3977
     type t_perm_val_nm is table of perm_val.perm_val_nm%type;
     v_tab_perm_val_nm t_perm_val_nm := t_perm_val_nm();
+    v_tab_cde_pv t_perm_val_nm := t_perm_val_nm();
     v_perm_val_nm_list varchar2(4000);
 
     v_item_id		 number;
@@ -1516,21 +1517,26 @@ v_unmtch_cnt := 0;
     for i in 1 .. hookInput.originalRowset.Rowset.count loop
         row_cur := hookInput.originalRowset.Rowset(i);
 
-        for rec in (  select nci_val_mean_item_id, nci_val_mean_ver_nr, cncpt_concat, cncpt_concat_nm from perm_val pv, nci_admin_item_ext ext, de
-        where pv.val_dom_item_id=de.val_dom_item_id and de.item_id = ihook.getColumnValue(row_cur,'ITEM_ID')
-        and pv.val_dom_ver_nr=de.val_dom_ver_nr and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR') and pv.fld_delete=0 and
-        pv.nci_val_mean_item_id = ext.item_id and pv.nci_val_mean_ver_nr = ext.ver_nr) loop
+        for rec in (  select nci_val_mean_item_id, nci_val_mean_ver_nr, cncpt_concat, cncpt_concat_nm, perm_val_nm, vm.item_nm val_mean_nm 
+        from perm_val pv, nci_admin_item_ext ext, de, admin_item vm
+        where   pv.val_dom_item_id=de.val_dom_item_id and pv.val_dom_ver_nr=de.val_dom_ver_nr 
+                and de.item_id = ihook.getColumnValue(row_cur,'ITEM_ID') and de.ver_nr = ihook.getColumnValue(row_cur,'VER_NR')
+                and ext.item_id = vm.item_id and ext.ver_nr = vm.ver_nr
+                and pv.nci_val_mean_item_id = ext.item_id and pv.nci_val_mean_ver_nr = ext.ver_nr
+                and pv.fld_delete=0) loop
 
             v_found := false;
            -- raise_application_error(-20001, v_tab_val_mean_cd.count);
-          --  for j in 1..v_tab_val_mean_cd.count loop
-          --          v_found := v_found or v_tab_val_mean_cd(j)=rec.cncpt_concat;
-          --  end loop;
+         --  for j in 1..v_tab_val_mean_cd.count loop
+         --           v_found := v_found or v_tab_val_mean_cd(j)=rec.cncpt_concat;
+         --  end loop;
             if not v_found then
                 v_tab_val_mean_cd.extend();
                 v_tab_val_mean_nm.extend();
+                v_tab_cde_pv.extend();
                 v_tab_val_mean_cd(v_tab_val_mean_cd.count) := rec.cncpt_concat;
-               v_tab_val_mean_nm(v_tab_val_mean_nm.count) := rec.cncpt_concat_nm;
+               v_tab_val_mean_nm(v_tab_val_mean_nm.count) := rec.val_mean_nm; --rec.cncpt_concat_nm
+               v_tab_cde_pv(v_tab_cde_pv.count) := rec.perm_val_nm;
                -- v_tab_val_mean_nm(v_tab_val_mean_nm.count) := 'mn test';
             end if;
         end loop;
@@ -1587,14 +1593,15 @@ v_unmtch_cnt := 0;
                 end loop;
             end if;
 --raise_application_error(-20000,v_mode || v_perm_val_nm);
-
+/*
             if (v_mode = 'CDE') then -- if called from CDE Match
                 SELECT lst_run_typ INTO v_run_typ FROM nci_ds_hdr WHERE hdr_id = v_hdr_id;
                 v_rule_desc := ihook.getColumnValue(row_ori, 'RULE_DESC');
-                if (instr(v_rule_desc, '(PV)') <> 0) then
+                if (instr(v_rule_desc, 'PV') <> 0) then
                     if (v_run_typ LIKE '%PV%') then
                         for cur1 in (select perm_val_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
-                            if (upper(nvl(cur1.entty_nm_usr,cur1.perm_Val_nm)) = upper(v_tab_val_mean_nm(i))  or upper(nvl(cur1.entty_nm_usr,cur1.perm_Val_nm)) = upper(substr(v_perm_val_nm,2))) then
+                           -- if (upper(nvl(cur1.entty_nm_usr,cur1.perm_Val_nm)) = upper(v_tab_val_mean_nm(i))  or upper(nvl(cur1.entty_nm_usr,cur1.perm_Val_nm)) = upper(substr(v_perm_val_nm,2))) then
+                            if (upper(nvl(cur1.entty_nm_usr,cur1.perm_Val_nm)) = upper(v_tab_cde_pv(i))  or upper(nvl(cur1.entty_nm_usr,cur1.perm_Val_nm)) = upper(substr(v_perm_val_nm,2))) then
                                 ihook.setColumnValue(row, v_src_lbl, nvl(cur1.entty_nm_usr,cur1.perm_Val_nm));
                               --  ihook.setColumnValue(row, v_src_lbl, upper(v_tab_val_mean_nm(i)));
                                 v_tab_perm_val_nm.extend();
@@ -1625,10 +1632,59 @@ v_unmtch_cnt := 0;
                         for cur1 in (select val_mean_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
                         --if (upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) in (upper(v_tab_val_mean_nm(j)),upper(v_tab_val_mean_nm(i))) or upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) = upper(substr(v_perm_val_nm,2))) then
                           --  if (upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) = upper(v_tab_val_mean_nm(i)) or upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) = upper(substr(v_perm_val_nm,2))) then
-                            if (upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) = upper(v_tab_val_mean_nm(j))) then
+                            if (upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) = upper(v_tab_val_mean_nm(i))) then
                                 ihook.setColumnValue(row, v_src_lbl, nvl(cur1.entty_nm_usr,cur1.val_mean_nm));
                                 v_tab_perm_val_nm.extend();
                                 v_tab_perm_val_nm(v_tab_perm_val_nm.count) := upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm));
+                            end if;
+                        end loop; 
+                    end if;
+                end if;
+            end if;
+            **/
+            --below is case sensitive 9296
+            if (v_mode = 'CDE') then -- if called from CDE Match
+                SELECT lst_run_typ INTO v_run_typ FROM nci_ds_hdr WHERE hdr_id = v_hdr_id;
+                v_rule_desc := ihook.getColumnValue(row_ori, 'RULE_DESC');
+                if (instr(v_rule_desc, 'PV') <> 0) then
+                    if (v_run_typ LIKE '%PV%') then
+                        for cur1 in (select perm_val_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
+                           -- if (upper(nvl(cur1.entty_nm_usr,cur1.perm_Val_nm)) = upper(v_tab_val_mean_nm(i))  or upper(nvl(cur1.entty_nm_usr,cur1.perm_Val_nm)) = upper(substr(v_perm_val_nm,2))) then
+                            if (nvl(cur1.entty_nm_usr,cur1.perm_Val_nm) = v_tab_cde_pv(i)  or nvl(cur1.entty_nm_usr,cur1.perm_Val_nm) = substr(v_perm_val_nm,2)) then
+                                ihook.setColumnValue(row, v_src_lbl, nvl(cur1.entty_nm_usr,cur1.perm_Val_nm));
+                              --  ihook.setColumnValue(row, v_src_lbl, upper(v_tab_val_mean_nm(i)));
+                                v_tab_perm_val_nm.extend();
+                                v_tab_perm_val_nm(v_tab_perm_val_nm.count) := nvl(cur1.entty_nm_usr,cur1.perm_Val_nm);
+                            end if;
+                        end loop; 
+                    else
+                        for cur1 in (select val_mean_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
+                        --if (upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) in (upper(v_tab_val_mean_nm(j)),upper(v_tab_val_mean_nm(i))) or upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) = upper(substr(v_perm_val_nm,2))) then
+                            if (nvl(cur1.entty_nm_usr,cur1.val_mean_nm) = v_tab_val_mean_nm(j) or nvl(cur1.entty_nm_usr,cur1.val_mean_nm) = substr(v_perm_val_nm,2)) then
+                                ihook.setColumnValue(row, v_src_lbl, nvl(cur1.entty_nm_usr,cur1.val_mean_nm));
+                                v_tab_perm_val_nm.extend();
+                                v_tab_perm_val_nm(v_tab_perm_val_nm.count) := nvl(cur1.entty_nm_usr,cur1.val_mean_nm);
+                            end if;
+                        end loop; 
+                    end if;    
+                else -- matched to VM Concept names
+                    if (v_run_typ LIKE '%PV%') then
+                        for cur1 in (select perm_val_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
+                           -- if (upper(nvl(cur1.entty_nm_usr,cur1.perm_Val_nm)) = upper(v_tab_val_mean_nm(i))  or upper(nvl(cur1.entty_nm_usr,cur1.perm_Val_nm)) = upper(substr(v_perm_val_nm,2))) then
+                            if nvl(cur1.entty_nm_usr,cur1.perm_Val_nm) = v_tab_val_mean_nm(i)  then
+                                ihook.setColumnValue(row, v_src_lbl, nvl(cur1.entty_nm_usr,cur1.perm_Val_nm));
+                                v_tab_perm_val_nm.extend();
+                                v_tab_perm_val_nm(v_tab_perm_val_nm.count) := nvl(cur1.entty_nm_usr,cur1.perm_Val_nm);
+                            end if;
+                        end loop; 
+                    else
+                        for cur1 in (select val_mean_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
+                        --if (upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) in (upper(v_tab_val_mean_nm(j)),upper(v_tab_val_mean_nm(i))) or upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) = upper(substr(v_perm_val_nm,2))) then
+                          --  if (upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) = upper(v_tab_val_mean_nm(i)) or upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) = upper(substr(v_perm_val_nm,2))) then
+                            if nvl(cur1.entty_nm_usr,cur1.val_mean_nm) = v_tab_val_mean_nm(i) then
+                                ihook.setColumnValue(row, v_src_lbl, nvl(cur1.entty_nm_usr,cur1.val_mean_nm));
+                                v_tab_perm_val_nm.extend();
+                                v_tab_perm_val_nm(v_tab_perm_val_nm.count) := nvl(cur1.entty_nm_usr,cur1.val_mean_nm);
                             end if;
                         end loop; 
                     end if;
@@ -1651,7 +1707,10 @@ if v_tab_perm_val_nm.count > 0 then
         for cur2 in (select perm_val_nm, entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
             v_pv_mtchd := false;
             for p in 1..v_tab_perm_val_nm.count loop
-                if upper(nvl(cur2.entty_nm_usr,cur2.perm_val_nm)) = v_tab_perm_val_nm(p) then
+             /* 9296   if upper(nvl(cur2.entty_nm_usr,cur2.perm_val_nm)) = v_tab_perm_val_nm(p) then
+                    v_pv_mtchd := true;
+                end if; */
+                if nvl(cur2.entty_nm_usr,cur2.perm_val_nm) = v_tab_perm_val_nm(p) then
                     v_pv_mtchd := true;
                 end if;
             end loop;
@@ -1694,16 +1753,16 @@ if (rows.count > 0) then
         select count(*) into v_tmp from nci_ds_dtl where hdr_id = v_hdr_id and excl_pv_ind = 1;
         if (v_tmp = 0) then
             if (v_unmtch_cnt = 0) then
-                hookoutput.message := '<p style="text-align:left"><strong>Excluded Values:</strong> ' || '<i>None</i>' || '<BR>' || '<strong>Unmatched Values: </strong>' || nvl(LTRIM(v_perm_val_nm_list, ', '), '<i>None</i>') || '</p>';
+                hookoutput.message := '<p style="text-align:left"><strong>Excluded Values:</strong> ' || '<i>None</i>' || '<BR>' || '<strong>Unmatched Source Values: </strong>' || nvl(LTRIM(v_perm_val_nm_list, ', '), '<i>None</i>') || '</p>';
             else
-                hookoutput.message := '<p style="text-align:left"><strong>Excluded Values:</strong> ' || '<i>None</i>' || '<BR>' || '<strong>Unmatched Values: </strong>' || nvl(LTRIM(v_perm_val_nm_list, ', ') || ',<i> and ' || v_unmtch_cnt || ' more...</i>', '<i>None</i>') || '</p>';
+                hookoutput.message := '<p style="text-align:left"><strong>Excluded Values:</strong> ' || '<i>None</i>' || '<BR>' || '<strong>Unmatched Source Values: </strong>' || nvl(LTRIM(v_perm_val_nm_list, ', ') || ',<i> and ' || v_unmtch_cnt || ' more...</i>', '<i>None</i>') || '</p>';
             end if;
         elsif (v_tmp > 0) then
             if (v_unmtch_cnt = 0) then
-                hookoutput.message := '<p style="text-align:left"><strong>Excluded Values:</strong> ' || nci_ds.getPVExclusionList(v_hdr_id) || '<BR>' || '<strong>Unmatched Values: </strong>' || nvl(LTRIM(v_perm_val_nm_list, ', '), '<i>None</i>') || '</p>';
+                hookoutput.message := '<p style="text-align:left"><strong>Excluded Values:</strong> ' || nci_ds.getPVExclusionList(v_hdr_id) || '<BR>' || '<strong>Unmatched Source Values: </strong>' || nvl(LTRIM(v_perm_val_nm_list, ', '), '<i>None</i>') || '</p>';
             --LTRIM(v_perm_val_nm_list, ', ')
             else
-                hookoutput.message := SUBSTR('<p style="text-align:left"><strong>Excluded Values:</strong> ' || nci_ds.getPVExclusionList(v_hdr_id) || '<BR>' || '<strong>Unmatched Values: </strong>' || nvl(LTRIM(v_perm_val_nm_list, ', ') || ',<i> and ' || v_unmtch_cnt || ' more...</i>', '<i>None</i>') || '</p>', 0, 4000);
+                hookoutput.message := SUBSTR('<p style="text-align:left"><strong>Excluded Values:</strong> ' || nci_ds.getPVExclusionList(v_hdr_id) || '<BR>' || '<strong>Unmatched Source Values: </strong>' || nvl(LTRIM(v_perm_val_nm_list, ', ') || ',<i> and ' || v_unmtch_cnt || ' more...</i>', '<i>None</i>') || '</p>', 0, 4000);
             end if;
         end if;
         hookoutput.message := SUBSTR('<p style="text-align:left"><strong>Last Run:</strong> ' || v_run_typ || hookoutput.message, 0, 4000);
@@ -2725,12 +2784,11 @@ function isShortNmSysGen (v_in_str in varchar2) return boolean is
 sysgen_ind boolean;
 begin
     sysgen_ind := regexp_like(v_in_str, '[0-9][v]{1}[0-9]');
-    
+
     return sysgen_ind;
 
 end;
 
 
 end;
-
 /
