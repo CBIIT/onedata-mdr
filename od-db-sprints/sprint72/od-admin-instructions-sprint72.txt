@@ -1,1 +1,3 @@
---TBD
+--OD Admin Instructions for Sprint 72
+1. Jira 9355 -- Add 'Browse Forms by Classifications' to GUEST favorites
+2. Jira 9333 -- Remove Context Name from CDE and DEC Bulk Update Versions' interchange mapping
