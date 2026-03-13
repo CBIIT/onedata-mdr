@@ -3290,6 +3290,7 @@ BEGIN
              --  ihook.setColumnValue(rowform,'REGSTR_STUS_ID',9);
                ihook.setColumnValue(row, 'ADMIN_ITEM_TYP_ID', 4);
                ihook.setColumnValue(row, 'CURRNT_VER_IND', 1);
+        ihook.setColumnValue(row,'CHNG_DESC_TXT', ihook.getColumnValue(rowform, 'CHNG_DESC_TXT'));
                
          end if;
         
@@ -3355,12 +3356,14 @@ BEGIN
        -- if (ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG') is not null) then --admin notes
        --     ihook.setColumnValue(row, 'ADMIN_NOTES', ihook.getColumnValue(rowform, 'CTL_IMPORT_VAL_MSG'));
        -- end if;
-        if (ihook.getColumnValue(rowform, 'ITEM_1_DEF') is not null) then --change description
+     --  raise_application_error(-20000, ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
+        if (ihook.getColumnValue(rowform, 'ITEM_1_DEF') is not null and v_op <> 'N') then --change description
             ihook.setColumnValue(row, 'CHNG_DESC_TXT', ihook.getColumnValue(rowform, 'ITEM_1_DEF'));
         end if;
         if (ihook.getColumnValue(rowform, 'ITEM_1_NM') is not null) then
             ihook.setColumnValue(row, 'CONCAT_CHAR', ihook.getColumnValue(rowform, 'ITEM_1_NM'));
         end if;
+    -- raise_application_error(-20000, ihook.getColumnValue(row, 'CHNG_DESC_TXT'));
     
    --  ihook.setColumnValue(row,'REF_NM', substr(ihook.getColumnValue(rowform, 'PREF_QUEST_TXT'),1,255));
    ihook.setColumnValue(row,'REF_NM', 'PQT');
