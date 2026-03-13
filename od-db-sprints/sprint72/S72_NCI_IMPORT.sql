@@ -30,7 +30,7 @@ procedure spDeleteProcImports;
 procedure spCreateValDefImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode varchar2);
 procedure spPostDECUpdateImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure spUpdateValCDEUpdate (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode in varchar2);
-procedure spUpdateValCDECreateVer (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode in varchar2);
+procedure spUpdateValCDECreateVer (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2, v_mode in varchar2); -- Bulk Create CDE
 procedure spPostCDEUpdateImport (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 --procedure spValPVVMImportOLD (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 procedure spValPVVMUpdate (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
@@ -4491,6 +4491,10 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         if ( v_mode  in ( 'N') and v_val_ind = true) then  
             for cur in (select * from admin_item where admin_item_typ_id = 4 and item_id = v_item_id and ver_nr = v_ver_nr) loop
                ihook.setColumnValue (row_ori, 'ADMIN_NOTES',  ihook.getColumnValue(row_ori,'ADMIN_NOTES') || ' ' || nvl(cur.admin_notes,''));
+         -- Change Notes
+                    ihook.setColumnValue (row_ori, 'CHNG_DESC_TXT',trim(nvl(cur.CHNG_DESC_TXT,'') ||' '||   ihook.getColumnValue(row_ori, 'ITEM_1_DEF')));
+    -- raise_application_error(-20000, ihook.getColumnValue(row_ori, 'CHNG_DESC_TXT'));
+        --       ihook.setColumnValue (row_ori, 'ADMIN_NOTES',  ihook.getColumnValue(row_ori,'ADMIN_NOTES') || ' ' || nvl(cur.admin_notes,''));
             end loop;
             ihook.setColumnValue (row_ori, 'IMP_PREF_QUEST_TXT', ihook.getColumnValue(row_ori, 'PREF_QUEST_TXT')); -- to send to create version
             if (ihook.getColumNValue(row_ori, 'PREF_QUEST_TXT') is null) then
@@ -4510,6 +4514,7 @@ for i in 1..hookinput.originalRowset.rowset.count loop
 
    end if;    
 end loop;
+--raise_application_error(-20000, ihook.getColumnValue(row_ori,'VAL_DOM_ITEM_ID'));
 
 action := t_actionrowset(rows, 'CDE Bulk Create Version', 2,10,'update');
 actions.extend;
