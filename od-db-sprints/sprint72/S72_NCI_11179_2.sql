@@ -135,8 +135,8 @@ if (v_admin_item_typ ='CDE') then
     for i in 1 .. hookInput.originalRowset.Rowset.count loop
         row := t_row();
         row_cur := hookInput.originalRowset.Rowset(i);
-        ihook.setColumnValue(row,'CDE_ITEM_ID', nvl(ihook.getColumnValue(row_cur,'CDE_ITEM_ID'),ihook.getColumnValue(row_cur,'ITEM_ID') ));
-        ihook.setColumnValue(row,'CDE_VER_NR', nvl(ihook.getColumnValue(row_cur,'CDE_VER_NR'),ihook.getColumnValue(row_cur,'VER_NR')));
+        ihook.setColumnValue(row,'CDE_ITEM_ID', nvl(ihook.getColumnValue(row_cur,'IMP_CDE_ITEM_ID'),ihook.getColumnValue(row_cur,'ITEM_ID') ));
+        ihook.setColumnValue(row,'CDE_VER_NR', nvl(ihook.getColumnValue(row_cur,'IMP_CDE_VER_NR'),ihook.getColumnValue(row_cur,'VER_NR')));
         if (ihook.getcolumnvalue(row,'CDE_ITEM_ID') != '' or ihook.getcolumnvalue(row,'CDE_ITEM_ID') is not null ) then
         rows.extend; rows(rows.last) := row;
      --   raise_application_error(-20000,'Here'||ihook.getcolumnvalue(row,'CDE_ITEM_ID'));
@@ -2800,3 +2800,4 @@ end;
 
 end;
 /
+
