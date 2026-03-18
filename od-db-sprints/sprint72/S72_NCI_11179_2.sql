@@ -135,15 +135,19 @@ if (v_admin_item_typ ='CDE') then
     for i in 1 .. hookInput.originalRowset.Rowset.count loop
         row := t_row();
         row_cur := hookInput.originalRowset.Rowset(i);
-        ihook.setColumnValue(row,'CDE_ITEM_ID', nvl(ihook.getColumnValue(row_cur,'IMP_UPD_DEC_ID'),ihook.getColumnValue(row_cur,'ITEM_ID') ));
-        ihook.setColumnValue(row,'CDE_VER_NR', nvl(ihook.getColumnValue(row_cur,'IMP_UPD_DEC_VER'),ihook.getColumnValue(row_cur,'VER_NR')));
+        ihook.setColumnValue(row,'CDE_ITEM_ID', nvl(ihook.getColumnValue(row_cur,'CDE_ITEM_ID'),ihook.getColumnValue(row_cur,'ITEM_ID') ));
+        ihook.setColumnValue(row,'CDE_VER_NR', nvl(ihook.getColumnValue(row_cur,'CDE_VER_NR'),ihook.getColumnValue(row_cur,'VER_NR')));
+        if (ihook.getcolumnvalue(row,'CDE_ITEM_ID') != '' or ihook.getcolumnvalue(row,'CDE_ITEM_ID') is not null ) then
         rows.extend; rows(rows.last) := row;
+     --   raise_application_error(-20000,'Here'||ihook.getcolumnvalue(row,'CDE_ITEM_ID'));
+        end if;
     end loop;
 
+    if (rows.count > 0) then
     showRowset := t_showableRowset(rows, 'CDE Dependency Object',2, 'unselectable');
   --  showRowset := t_showableRowset(rows, 'Data Element Concepts',2, 'unselectable');
     hookOutput.showRowset := showRowset;
-
+   end if;
     hookOutput.message := 'Data Element Dependency';
 end if;
 
@@ -1527,9 +1531,9 @@ v_unmtch_cnt := 0;
 
             v_found := false;
            -- raise_application_error(-20001, v_tab_val_mean_cd.count);
-         --  for j in 1..v_tab_val_mean_cd.count loop
-         --           v_found := v_found or v_tab_val_mean_cd(j)=rec.cncpt_concat;
-         --  end loop;
+       --   for j in 1..v_tab_val_mean_cd.count loop
+        --            v_found := v_found or v_tab_val_mean_cd(j)=rec.cncpt_concat;
+        --   end loop;
             if not v_found then
                 v_tab_val_mean_cd.extend();
                 v_tab_val_mean_nm.extend();
@@ -1660,7 +1664,8 @@ v_unmtch_cnt := 0;
                     else
                         for cur1 in (select val_mean_nm,entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
                         --if (upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) in (upper(v_tab_val_mean_nm(j)),upper(v_tab_val_mean_nm(i))) or upper(nvl(cur1.entty_nm_usr,cur1.val_mean_nm)) = upper(substr(v_perm_val_nm,2))) then
-                            if (nvl(cur1.entty_nm_usr,cur1.val_mean_nm) = v_tab_val_mean_nm(j) or nvl(cur1.entty_nm_usr,cur1.val_mean_nm) = substr(v_perm_val_nm,2)) then
+                           -- if (nvl(cur1.entty_nm_usr,cur1.val_mean_nm) = v_tab_val_mean_nm(j) or nvl(cur1.entty_nm_usr,cur1.val_mean_nm) = substr(v_perm_val_nm,2)) then
+                            if (nvl(cur1.entty_nm_usr,cur1.val_mean_nm) = v_tab_cde_pv(i) or nvl(cur1.entty_nm_usr,cur1.val_mean_nm) = substr(v_perm_val_nm,2)) then
                                 ihook.setColumnValue(row, v_src_lbl, nvl(cur1.entty_nm_usr,cur1.val_mean_nm));
                                 v_tab_perm_val_nm.extend();
                                 v_tab_perm_val_nm(v_tab_perm_val_nm.count) := nvl(cur1.entty_nm_usr,cur1.val_mean_nm);
@@ -1729,7 +1734,10 @@ if v_tab_perm_val_nm.count > 0 then
         for cur2 in (select val_mean_nm, entty_nm_usr from NCI_DS_DTL where hdr_id = v_hdr_id and excl_pv_ind = 0 and nvl(fld_delete,0) <> 1) loop
             v_pv_mtchd := false;
             for p in 1..v_tab_perm_val_nm.count loop
-                if upper(nvl(cur2.entty_nm_usr, cur2.val_mean_nm)) = v_tab_perm_val_nm(p) then
+               -- if upper(nvl(cur2.entty_nm_usr, cur2.val_mean_nm)) = v_tab_perm_val_nm(p) then
+               --     v_pv_mtchd := true;
+             --   end if;
+               if nvl(cur2.entty_nm_usr, cur2.val_mean_nm) = v_tab_perm_val_nm(p) then
                     v_pv_mtchd := true;
                 end if;
             end loop;
