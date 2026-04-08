@@ -684,7 +684,8 @@ function getCDEAIParameterEditForm (v_rowset in t_rowset) return t_forms is
   form1 t_form;
 begin
     forms                  := t_forms();
-    form1                  := t_form('DS Entity to Match CDE AI Parameters', 2,1);
+    --form1                  := t_form('DS Entity to Match CDE AI Parameters', 2,1);
+    form1                  := t_form('DS Entity to Match Parameters AI', 2,1);
    -- form1                  := t_form('DS Entity to Match Parameters IS', 2,1);
     form1.rowset           := v_rowset;
     forms.extend;    forms(forms.last) := form1;
@@ -1058,8 +1059,8 @@ AS
     v_src_val number;
     v_run_dt timestamp;
     v_dt_str varchar2(32);
-    v_entty_nm varchar2(255);
-    v_entty_nm_usr varchar2(255);
+    v_entty_nm varchar2(5000);
+    v_entty_nm_usr varchar2(5000);
 BEGIN
     --get match details
     select num_cde_mtch, num_pv, dt_sort, dt_last_modified, entty_nm, entty_nm_usr into v_mtch_cde, v_src_val, v_run_dt, v_dt_str, v_entty_nm, v_entty_nm_usr
@@ -1413,6 +1414,7 @@ begin
             --raise_application_error(-20001, to_char(ihook.getColumnValue(row, 'HDR_ID')));
             action := t_actionrowset(rows, 'DS Entity to Match CDE AI Parameters', 2,1,'insert');
            -- action := t_actionrowset(rows, 'DS Entity to Match Parameters IS', 2,1,'insert');
+            --action := t_actionrowset(rows, 'DS Entity to Match Parameters AI', 2,1,'insert');
             actions.extend;
             actions(actions.last) := action;
 
@@ -1458,7 +1460,7 @@ AS
     v_csi_ver_nr number(4,2);
     v_val_dom_typ integer;
     v_hdr_id number;
-    v_entty_nm varchar2(255);
+    v_entty_nm varchar2(5000);
     v_flt_str  varchar2(4000);
     i integer := 0;
     v_mtch_lmt number := 10;
@@ -1470,7 +1472,7 @@ AS
     v_already integer :=0;
     v_sql varchar2(4000);
 
-    v_entty_nm_like varchar2(255);
+    v_entty_nm_like varchar2(5000);
     v_mtch_str varchar2(4000);
     v_cntxt_str varchar2(255);
     v_cnt integer;
@@ -4376,4 +4378,3 @@ end;
 
 end;
 /
-
