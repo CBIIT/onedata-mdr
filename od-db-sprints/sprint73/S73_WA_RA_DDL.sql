@@ -14,3 +14,7 @@ insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF) values (
 insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF) values (254,65,'PV Code', 'PV Code');
 insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF) values (255,65,'Value Meaning Long Name', 'Value Meaning Long Name');
 commit;
+
+alter table nci_ds_hdr modify (ENTTY_NM varchar2(4000), ENTTY_NM_USR varchar2(4000));
+
+alter table  nci_ds_prmtr modify (ENTTY_NM varchar2(4000), ENTTY_NM_USR varchar2(4000));
