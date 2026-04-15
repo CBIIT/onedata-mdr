@@ -2,7 +2,7 @@ alter table nci_ds_rslt add (src_mtch_engn varchar2(100) default 'CDE Match')
 
 
 alter table  NCI_DS_PRMTR add (THRESHOLD_1 int, THRESHOLD_2 int, VARIANT_1 int, VARIANT_2 int)
-
+/*
 insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (64, 'CDE Model Variant (CDE AI Matching)');
 insert into OBJ_TYP (OBJ_TYP_ID, OBJ_TYP_DESC) values (65, 'PV/VM Model Variant (CDE AI Matching)');
 commit;
@@ -16,6 +16,7 @@ insert into OBJ_KEY (OBJ_KEY_ID, OBJ_TYP_ID, OBJ_KEY_DESC, OBJ_KEY_DEF) values (
 Insert into OBJ_KEY (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values (267,'REDCap DD CDE Zipfile',31,'REDCap DD CDE Zipfile');
 Insert into OBJ_KEY (OBJ_KEY_ID, OBJ_KEY_DESC, OBJ_TYP_ID, OBJ_KEY_DEF) values (268,'REDCap DD Form ZipFile',31,'REDCap DD Form Zipfile');
 commit;
+*/
 
 alter table nci_ds_hdr modify (ENTTY_NM varchar2(4000), ENTTY_NM_USR varchar2(4000));
 
