@@ -179,4 +179,30 @@ STEWRD_CNTCT_ID, SUBMT_ORG_ID, STEWRD_ORG_ID, ai.CREAT_DT, ai.CREAT_USR_ID, ai.L
  where ADMIN_ITEM_TYP_ID = 51 and ai.item_id = csi.item_id and ai.ver_nr = csi.ver_nr and csi.p_item_id is not null and CS_ITEM_ID = cs.item_id and CS_ITEM_VER_NR = cs.ver_nr;
 
 
+set escape off;
+set define off;
+ 
+  CREATE OR REPLACE VIEW VW_LIST_USR_CART_NM_FORM ("CART_NM", "CART_NM_SPEC", "CNTCT_SECU_ID", "GUEST_USR_NM", "CART_USR_NM", "RETAIN_IND", 
+  "FORMAT_105_EXCEL", "FORMAT_115_EXCEL_REVIEW", "FORMAT_102_LEGACY_EXCEL", 
+  "FORMAT_113_PRINTER", "FORMAT_110_RAVE", "FORMAT_109_REDCAP", 
+  "CREAT_USR_ID", "LST_UPD_USR_ID", "FLD_DELETE", "LST_DEL_DT", "S2P_TRN_DT", "LST_UPD_DT", "CREAT_DT") DEFAULT COLLATION "USING_NLS_COMP"  AS 
+  SELECT CART_NM, CART_NM CART_NM_SPEC, CNTCT_SECU_ID, GUEST_USR_NM, CART_NM || ' : ' || CNTCT_SECU_ID CART_USR_NM, max(nvl(retain_ind,0)) RETAIN_IND, 
+  c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '&p_guest_usr_nm=' || trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '&formatid=105&type=usr\Form_Excel' FORMAT_105_EXCEL ,
+  c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '&p_guest_usr_nm=' ||  trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '&formatid=115&type=usr\Form_Review_Excel' FORMAT_115_EXCEL_REVIEW,--Form Review Excel -formatid of 115
+  c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '&p_guest_usr_nm=' ||  trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '&formatid=102&type=usr\Form_Legacy_Excel' FORMAT_102_LEGACY_EXCEL,
+  c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '&p_guest_usr_nm=' ||  trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '&formatid=113&type=usr\Form_Printer_Friendly' FORMAT_113_PRINTER,
+  c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '&p_guest_usr_nm=' ||  trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '&formatid=110&type=usr\Form_RAVE_ALS' FORMAT_110_RAVE,
+  c.PARAM_VAL || '/Downloads/frmdirect.dsp?p_cntct_secu_id=' || trim(replace(CNTCT_SECU_ID,' ' ,'%20')) || '&p_guest_usr_nm=' ||  trim(replace(GUEST_USR_NM,' ' ,'%20')) ||'&p_cart_nm=' || trim(replace(CART_NM,' ' ,'%20')) || '&formatid=109&type=usr\Form_RedCAP' FORMAT_109_REDCAP,
+           user CREAT_USR_ID,
+            user LST_UPD_USR_ID,
+            0 FLD_DELETE,
+           sysdate LST_DEL_DT,
+           sysdate S2P_TRN_DT,
+           sysdate LST_UPD_DT,
+           sysdate CREAT_DT
+           from NCI_USR_CART , NCI_MDR_CNTRL c where nvl(fld_delete,0)  =0  and  c.param_nm='DOWNLOAD_HOST' group by CART_NM, CNTCT_SECU_ID, GUEST_USR_NM , c.param_val;
+
+
+
+
 
