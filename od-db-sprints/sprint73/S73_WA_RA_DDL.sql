@@ -203,6 +203,8 @@ set define off;
            from NCI_USR_CART , NCI_MDR_CNTRL c where nvl(fld_delete,0)  =0  and  c.param_nm='DOWNLOAD_HOST' group by CART_NM, CNTCT_SECU_ID, GUEST_USR_NM , c.param_val;
 
 
+create or replace view vw_NCI_DS_RSLT 
+as select * from nci_ds_rslt;
 
 
 
