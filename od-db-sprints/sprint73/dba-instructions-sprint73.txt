@@ -1,3 +1,14 @@
 -- Run as ONEDATA_RA DDL scripts
+S73_WA_RA_DDL.sql
+S73_RA.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S73_WA_RA_DDL.sql
+S73_WA.sql
+S73_NCI_DS.sql
+S73_NCI_11179_2.sql
+S73_NCI_CHNG_MGMT.sql
+S73_NCI_IMPORT.sql
+
+-- Run as ONEDATA_RA DDL scripts
+S73_RA_2.sql
