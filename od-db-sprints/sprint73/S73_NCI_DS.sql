@@ -38,7 +38,7 @@ procedure spDSRunTest (v_data_in in clob, v_data_out out clob, v_user_id in varc
 function getQuestionDSParameters return t_question;
 function getDSParameterEditForm (v_rowset in t_rowset, v_mode in varchar2) return t_forms;
 procedure spDSMatch(v_hdr_id in number, v_user_id in varchar2, v_mtch_nm in varchar2, v_filter_str in varchar2, v_src_val_id in number, v_mtch_typ in varchar2);
-function getDSFilterString(v_reg_stus_id in number, v_admin_stus_id in number, v_cntxt_item_id in number, v_cntxt_ver_nr in number, v_csi_item_id in number, v_csi_ver_nr in number, v_val_dom_typ in number) return varchar2;
+function getDSFilterString(v_reg_stus_id in number, v_admin_stus_id in number, v_cntxt_item_id in number, v_cntxt_ver_nr in number, v_csi_item_id in number, v_csi_ver_nr in number, v_val_dom_typ in number, v_hdr_id in number) return varchar2;
 function isDSEnum(v_hdr_id in number) return boolean;
 procedure spDSMatchEnumStaging(v_hdr_id in number, v_entty_nm in varchar2, v_entty_nm_like in varchar2, v_filter_str in varchar2, v_mtch_typ in varchar2, v_mode in varchar2);
 function getSrcValFilterString(v_hdr_id in number, v_src_val_id in number) return varchar2;
@@ -59,9 +59,9 @@ function setprefCDEIndicator (v_hdr_id in number, v_cde_id in number, v_ver_nr i
 procedure spDSResultsPostHook (v_data_in in clob, v_data_out out clob, v_usr_id in varchar2);
 function getMatchConfirmation return t_question;
 procedure spDSRunBatch (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+function getDSContextStr (v_hdr_id in number) return varchar2;
 END;
 /
-
 create or replace PACKAGE BODY            nci_ds AS
 c_long_nm_len  integer := 30;
 c_nm_len integer := 255;
@@ -109,7 +109,7 @@ begin
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
 
-   nci_util.debugHook('GENERAL', v_data_in);
+  -- nci_util.debugHook('GENERAL', v_data_in);
   --  v_reg_str := '\(|\)|\;|\-|\_|\|';
     rows := t_rows();
     for i in 1..hookinput.originalrowset.rowset.count loop  --- Iterate through all the selected rows
@@ -700,9 +700,10 @@ end;
 
 --takes Reg Stus ID, Admin Stus ID, Cntxt ID and Ver, CSI ID and Ver, Val Dom Typ ID and returns a filter string to be used in dynamic sql query
 --query is based on VW_DE
-function getDSFilterString(v_reg_stus_id in number, v_admin_stus_id in number, v_cntxt_item_id in number, v_cntxt_ver_nr in number, v_csi_item_id in number, v_csi_ver_nr in number, v_val_dom_typ in number) return varchar2 IS
+function getDSFilterString(v_reg_stus_id in number, v_admin_stus_id in number, v_cntxt_item_id in number, v_cntxt_ver_nr in number, v_csi_item_id in number, v_csi_ver_nr in number, v_val_dom_typ in number, v_hdr_id in number) return varchar2 IS
     v_out_str varchar2(4000);
     v_cntxt_nm_dn varchar2(255);
+    v_temp_str varchar2(4000);
 begin
     v_out_str := '1=1';
 
@@ -718,9 +719,9 @@ begin
 
     if (v_cntxt_item_id <> 0) then
         select item_nm into v_cntxt_nm_dn from vw_cntxt where item_id = v_cntxt_item_id and ver_nr = v_cntxt_ver_nr;
-        v_out_str := v_out_str || ' and de.CNTXT_NM_DN=''' || v_cntxt_nm_dn || '''';     
+        v_out_str := v_out_str || ' and de.CNTXT_NM_DN=''' || v_cntxt_nm_dn || '''';   
     else
-        v_out_str := v_out_str || ' and de.CNTXT_NM_DN not in (''TEST'', ''Training'')' ;
+        v_out_str := v_out_str || ' and de.CNTXT_NM_DN not in (''TEST'', ''Training'')';
     end if;
 
     if (v_csi_item_id <> 0) then --classification info not in VW_DE. need to create nested query
@@ -1125,7 +1126,7 @@ BEGIN
     hookoutput.originalrowset.tablename := 'CDE Match';
     hookoutput.originalrowset.ObjectName := 'DS Entity to Match';
      V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
-     nci_util.debugHook('GENERAL', v_data_out);
+   --  nci_util.debugHook('GENERAL', v_data_out);
         spDSRun(v_data_in, v_data_out, v_user_id);
 /*
         v_src_val_id := ihook.getColumnValue(row_ori, 'SRC_VAL_ID');
@@ -1425,7 +1426,7 @@ begin
 
             V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
-nci_util.debugHook('GENERAL', v_data_out);
+--nci_util.debugHook('GENERAL', v_data_out);
         end if;    
     end if;
 EXCEPTION
@@ -1567,7 +1568,7 @@ begin
 
             V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
-            nci_util.debugHook('GENERAL', v_data_out);
+         --   nci_util.debugHook('GENERAL', v_data_out);
         end if;    
     end if;
 
@@ -1665,7 +1666,7 @@ begin
             v_mtch_lmt := nvl(ihook.getColumnValue(row_sel, 'MTCH_LMT'), v_mtch_lmt);
 
         --Use Variables to Build Filter String
-            v_flt_str := getDSFilterString(nvl(v_reg_stus_id,0), nvl(v_admin_stus_id,0), nvl(v_cntxt_item_id,0), nvl(v_cntxt_ver_nr,0), nvl(v_csi_item_id,0), nvl(v_csi_ver_nr,0), nvl(v_val_dom_typ,0));
+            v_flt_str := getDSFilterString(nvl(v_reg_stus_id,0), nvl(v_admin_stus_id,0), nvl(v_cntxt_item_id,0), nvl(v_cntxt_ver_nr,0), nvl(v_csi_item_id,0), nvl(v_csi_ver_nr,0), nvl(v_val_dom_typ,0), v_hdr_id);
         -- raise_application_error(-20001, v_flt_str);
 
         --Loop through all rows and run match
@@ -1673,7 +1674,9 @@ begin
             --set row to match and hdr_id
                 row_ori := hookInput.originalRowset.rowset(i);
                 v_hdr_id := ihook.getColumnValue(row_ori, 'HDR_ID');
-
+                if nvl(v_cntxt_item_id,0) = 0 then
+                    v_flt_str := v_flt_str || ' and ' || getDSContextStr(v_hdr_id);
+                end if;
             --set entity name to match against: user tip overrides
                 v_entty_nm := nvl(ihook.getColumnValue(row_ori, 'ENTTY_NM_USR'), ihook.getColumnValue(row_ori, 'ENTTY_NM'));
 
@@ -1978,19 +1981,19 @@ BEGIN
                 spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, v_enum, 'L', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
              --spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'L', 'S', (v_mtch_lmt-getDSMtchCnt(v_hdr_id)));
             end if;
-        --end if;
-           -- if (getDSMtchCnt(v_hdr_id) = 0) then --extend matching to Longest Word
-            --    spDSClearResults(v_hdr_id, v_mtch_typ);
+        --end if; */
+            if (getDSMtchCnt(v_hdr_id) = 0) then --extend matching to Longest Word
+               spDSClearResults(v_hdr_id, v_mtch_typ);
             if getDSMtchCnt(v_hdr_id) < v_mtch_lmt then
-            --Step 3a: insert extended results into nci_ds_rslt_dtl
+           -- Step 3a: insert extended results into nci_ds_rslt_dtl
                 spDSMatchEnumStaging(v_hdr_id, v_entty_nm, v_entty_nm_like, v_filter_str, v_mtch_typ, 'E'); --runs match for Longest Word
 
             --Step3b: compare source values to extended matches' PV/VMs and insert qualified matches into nci_ds_rslt
                 spDSSubPVVM(v_hdr_id, v_mtch_typ, v_entty_nm, getDSSrcDtl(v_src_val_id), v_mtch_lmt);
             end if;
 
-         --  end if;
-         */
+           end if;
+
 
     else --non-enumerated
  --   spDSSubDynmc(v_hdr_id, v_user_id, v_entty_nm, v_mtch_typ, v_src_val_id, v_filter_str, false, 'E', 'C');
@@ -2746,6 +2749,30 @@ BEGIN
 return v_src_dtl;
 END;
 
+function getDSContextStr (v_hdr_id in number) return varchar2 is
+    v_cntxt_str varchar2(4000);
+    v_temp number;
+    v_cnt number;
+BEGIN
+    select count(*) into v_temp from nci_ds_cntxt_sel where hdr_id = v_hdr_id;
+    --raise_application_error(-20001, to_char(v_hdr_id));
+    if v_temp > 0 THEN
+        v_cnt := 1;
+        for cur in (select cntxt_nm_dn from nci_ds_cntxt_sel where hdr_id = v_hdr_id) loop
+            if v_cnt = 1 then
+                v_cntxt_str := 'de.CNTXT_NM_DN in (''' || cur.cntxt_nm_dn || '''';
+                v_cnt:= v_cnt + 1;
+            ELSE
+                v_cntxt_str := v_cntxt_str || ',''' || cur.cntxt_nm_dn || '''';
+            end if;
+        end loop;
+        v_cntxt_str := v_cntxt_str || ')';
+    else
+        v_cntxt_str := '1=1';
+    end if;
+
+    return v_cntxt_str;
+END;
 
 function getPVFilterString (v_hdr_id in number) return varchar2 is
 v_pv_flt_str varchar2(4000);
@@ -3640,7 +3667,7 @@ begin
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
 
-   nci_util.debugHook('GENERAL', v_data_in);
+   --nci_util.debugHook('GENERAL', v_data_in);
   --  v_reg_str := '\(|\)|\;|\-|\_|\|';
     rows := t_rows();
     for i in 1..hookinput.originalrowset.rowset.count loop  --- Iterate through all the selected rows
@@ -4527,6 +4554,4 @@ select creat_usr_id into v_usr_id from nci_ds_hdr where HDR_ID = v_hdr_id;
 end;
 
 end;
-
 /
-
