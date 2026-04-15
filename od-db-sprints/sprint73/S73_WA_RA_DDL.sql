@@ -23,7 +23,6 @@ insert into obj_typ (obj_typ_id, obj_typ_desc) values (65, 'AI Model Variant - C
 insert into obj_typ (obj_typ_id , obj_typ_desc) values (66, 'AI Model Variant - PV');
 commit;
 
-insert into obj_key (obj_typ_id, obj_key_desc, obj_key_id) values (65, '',252);
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_id) values (65, 'All-mpnet-base-v2-FT', 252);
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_id) values (65, 'All-MiniLM-L6-v2-FT',253);
 insert into obj_key (obj_typ_id, obj_key_desc, obj_key_id) values (65, 'SapBERT-FT',254);
