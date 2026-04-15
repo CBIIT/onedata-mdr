@@ -54,7 +54,7 @@ insert into obj_key (obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (
 insert into obj_key (obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (251, 'Internal', 64, 'Indicates the item is marked for internal usage.');
 commit;
 
-alter table CLSFCTN_SCHM add ACCESS_LVL number;
+alter table CLSFCTN_SCHM add ACCESS_LVL number default 250;
 alter table CLSFCTN_SCHM disable all triggers;
 update CLSFCTN_SCHM set ACCESS_LVL = 250;
 commit;
