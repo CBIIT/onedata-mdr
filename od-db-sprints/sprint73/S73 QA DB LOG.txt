@@ -1,0 +1,547 @@
+## S73 QA DB LOG
+
+-- OneData RA
+
+@'C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint73\S73_WA_RA_DDL.sql'
+
+Table NCI_DS_RSLT altered.
+
+
+
+
+
+Table NCI_DS_PRMTR altered.
+
+
+
+
+
+Table NCI_DS_HDR altered.
+
+
+
+
+
+Table NCI_DS_PRMTR altered.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+Table NCI_DS_PRMTR altered.
+
+
+
+
+
+Table NCI_DS_PRMTR altered.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+Table CLSFCTN_SCHM altered.
+
+
+
+
+
+Table CLSFCTN_SCHM altered.
+
+
+
+
+
+756 rows updated.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+Table CLSFCTN_SCHM altered.
+
+
+
+
+
+Materialized view MVW_CSI_TREE_CDE dropped.
+
+
+
+
+
+Materialized view MVW_CSI_TREE_CDE created.
+
+
+
+
+
+View VW_CSI_TREE created.
+
+
+
+
+
+View VW_LIST_USR_CART_NM_FORM created.
+
+
+@'C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint73\S73_RA.sql'
+
+
+Grant succeeded.
+
+
+
+
+
+0 rows deleted.
+
+
+
+
+
+Commit complete.
+
+
+-- OneData WA
+
+@'C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint73\S73_WA_RA_DDL.sql'
+
+
+
+Table NCI_DS_RSLT altered.
+
+
+
+
+
+Table NCI_DS_PRMTR altered.
+
+
+
+
+
+Table NCI_DS_HDR altered.
+
+
+
+
+
+Table NCI_DS_PRMTR altered.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+Table NCI_DS_PRMTR altered.
+
+
+
+
+
+Table NCI_DS_PRMTR altered.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+1 row inserted.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+Table CLSFCTN_SCHM altered.
+
+
+
+
+
+Table CLSFCTN_SCHM altered.
+
+
+
+
+
+756 rows updated.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+Table CLSFCTN_SCHM altered.
+
+
+
+
+
+Materialized view MVW_CSI_TREE_CDE dropped.
+
+
+
+
+
+Materialized view MVW_CSI_TREE_CDE created.
+
+
+
+
+
+View VW_CSI_TREE created.
+
+
+
+View VW_LIST_USR_CART_NM_FORM created.
+
+
+@'C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint73\S73_WA.sql'
+
+
+Grant succeeded.
+
+
+@'C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint73\S73_NCI_DS.sql'
+@'C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint73\S73_NCI_11179_2.sql'
+@'C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint73\S73_NCI_CHNG_MGMT.sql'
+@'C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint73\S73_NCI_IMPORT.sql'
+@'C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint73\S73_NCI_11179.sql'
+
+
+
+Package NCI_DS compiled
+
+
+
+
+
+Package Body NCI_DS compiled
+
+
+
+
+
+Package NCI_11179_2 compiled
+
+
+
+
+
+Package Body NCI_11179_2 compiled
+
+
+
+
+
+Package NCI_CHNG_MGMT compiled
+
+
+
+
+
+Package Body NCI_CHNG_MGMT compiled
+
+
+
+
+
+Package NCI_IMPORT compiled
+
+
+
+
+
+Package Body NCI_IMPORT compiled
+
+
+
+
+
+Package NCI_11179 compiled
+
+
+
+
+
+Package Body NCI_11179 compiled
