@@ -203,8 +203,16 @@ set define off;
            from NCI_USR_CART , NCI_MDR_CNTRL c where nvl(fld_delete,0)  =0  and  c.param_nm='DOWNLOAD_HOST' group by CART_NM, CNTCT_SECU_ID, GUEST_USR_NM , c.param_val;
 
 
-create or replace view vw_NCI_DS_RSLT 
-as select * from nci_ds_rslt;
+  CREATE OR REPLACE  VIEW VW_NCI_DS_RSLT as
+  select "HDR_ID","ITEM_ID","VER_NR","RULE_ID","SCORE","RULE_DESC","USR_CMNTS","NUM_PV_IN_SRC","NUM_PV_IN_CDE","NUM_PV_MTCH","NM_MTCH_PRCNT",
+  "NUM_PV_MTCH_FUZZY","CREAT_DT","CREAT_USR_ID","LST_UPD_USR_ID","FLD_DELETE","LST_DEL_DT","S2P_TRN_DT","LST_UPD_DT","MTCH_DESC_TXT",
+  "MTCH_TYP","CDE_PREF_IND","SRC_MTCH_ENGN" from nci_ds_rslt
+  union
+  select hdr_id, null, null, null, null, null, null, null, null, null, null, 
+  null, h.creat_dt,h.creat_usr_id,"LST_UPD_USR_ID","FLD_DELETE","LST_DEL_DT","S2P_TRN_DT","LST_UPD_DT",null,
+  null, null, null from nci_ds_hdr h where hdr_id not in (select hdr_id from nci_ds_rslt) and MTCH_TYP_NM = 'CDE';
+
+
 
 
 
