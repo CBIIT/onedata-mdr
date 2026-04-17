@@ -210,7 +210,9 @@ set define off;
   union
   select hdr_id, 17175416, 1, null, null, null, null, null, null, null, null, 
   null, h.creat_dt,h.creat_usr_id,"LST_UPD_USR_ID","FLD_DELETE","LST_DEL_DT","S2P_TRN_DT","LST_UPD_DT",null,
-  null, null, null from nci_ds_hdr h where hdr_id not in (select hdr_id from nci_ds_rslt) and MTCH_TYP_NM = 'CDE';
+  'CDE', null, null from nci_ds_hdr h where hdr_id not in (select hdr_id from nci_ds_rslt) and MTCH_TYP_NM = 'CDE';
+
+
 
 
   CREATE TABLE NCI_DS_PRMTR_TEMP
