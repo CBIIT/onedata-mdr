@@ -376,6 +376,8 @@ when 229 then return 58;
 when 244 then return 58;
 when 245 then return 2;
 when 246 then return 3;
+when 267 then return 4;
+when 268 then return 54;
 
 else return 4;
 end case;
