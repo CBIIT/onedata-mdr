@@ -27,7 +27,7 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
     nvl(PRMRY_OBJ_CLS_IND,0) PRMRY_OBJ_CLS_IND,  decode(PRMRY_OBJ_CLS_IND,1,'Yes','') PRMRY_OBJ_CLS_IND_NM ,
     b.sys_path_final,
 	  b.lvl,
-    nvl(cncpt.PRMRY_RT_ORI_NM, ai.item_nm) CNCPT_ORI_NM,
+    nvl(cncpt.PRMRY_RT_ORI_NM, admin_item.item_nm) CNCPT_ORI_NM,
  'TEST' NCI_META_CUI
   --  xm.xmap_cd NCI_META_CUI
               FROM ADMIN_ITEM,  CNCPT, nci_admin_item_ext e, OBJ_KEY, (select item_id, ver_nr,  substr( LISTAGG(nm_desc, ' | ') WITHIN GROUP (ORDER by ITEM_ID),1,8000) AS SYN,
@@ -38,6 +38,3 @@ nvl(decode(trim(ADMIN_ITEM.DEF_SRC), 'NCI', '1-NCI', ADMIN_ITEM.DEF_SRC), 'No De
 	and cncpt.EVS_SRC_ID = OBJ_KEY.OBJ_KEY_ID (+) and admin_item.admin_stus_nm_dn = 'RELEASED' 
 	and ADMIN_ITEM.ITEM_ID = a.ITEM_ID (+) and ADMIN_ITEM.VER_NR = a.VER_NR (+)
     and admin_item.item_id = b.c_item_id  (+) and admin_item.ver_nr = b.c_item_ver_nr (+);
-
-   COMMENT ON MATERIALIZED VIEW "ONEDATA_WA"."VW_CNCPT"  IS 'snapshot table for snapshot ONEDATA_WA.VW_CNCPT';
-
