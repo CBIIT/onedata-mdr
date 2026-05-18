@@ -1,3 +1,12 @@
 -- Run as ONEDATA_RA DDL scripts
+S74_WA_RA_DDL.sql
+S74_RA.sql
 
 -- Run as ONEDATA_WA DDL scripts
+S74_WA_RA_DDL.sql
+S74_WA.sql
+S74_NCI_DS.sql
+S74_NCI_CODEMAP_MM.sql
+S74_NCI_VD.sel
+S74_NCI_POST_HOOK.sql
+
