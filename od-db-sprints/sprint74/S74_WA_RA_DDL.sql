@@ -166,3 +166,22 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  pv.val_dom_item_id = mec.val_dom_item_id and 
 	  pv.val_dom_Ver_nr = mec.val_dom_ver_nr
 	  
+--jira 9389
+
+alter table nci_ds_hdr modify THRESHOLD_1 number(38,0) default 40;
+alter table nci_ds_hdr modify THRESHOLD_2 number(38,0) default 40;
+alter table nci_ds_prmtr add src_mtch_engn varchar2(100) default 'CDE Match';
+
+alter table nci_ds_hdr disable all triggers;
+update nci_ds_hdr set threshold_1 = 40, threshold_2 = 40;
+commit;
+alter table nci_ds_hdr enable all triggers;
+
+insert into obj_key (obj_key_id, obj_key_desc, obj_typ_id) values (269, 'None: CDE Embedding Only', 66);
+commit;
+select * from obj_key order by obj_key_id asc;
+
+--jira
+
+update nci_dload_cstm_col_key set xpath = REPLACE(XPATH, '/permissibleValue/', '/permissibleValues/') where dload_typ = 'VD';
+commit;
