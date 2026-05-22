@@ -841,11 +841,11 @@ hookInput        t_hookInput;
     row_ori := hookInput.originalRowset.rowset (1);
           select nci_cntxt_item_id, nci_cntxt_ver_nr into v_item_id, v_ver_nr from ref where
         ref_id = ihook.getColumnValue(row_ori, 'NCI_REF_ID');
- if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_user_id) = false) then
+ --if (nci_11179_2.isUserAuth(v_item_id, v_ver_nr, v_user_id) = false) then
     -- raise_application_error(-20000, 'You are not authorized to insert/update or delete in this context. ' || v_item_id || ' ' || v_user_id);
-    raise_application_error(-20000, 'You are not authorized to insert/update or delete in this Context. ' );
-        return;
-    end if;
+   -- raise_application_error(-20000, 'You are not authorized to insert/update or delete in this Context. ' );
+     --   return;
+   -- end if;
 select count(*) into v_temp from obj_key ok, ref r  where obj_key_id = r.REF_TYP_ID and upper(obj_key_desc) like '%QUESTION TEXT%' and r.ref_id = ihook.getColumnValue(row_ori,'NCI_REF_ID');
 
  if ( v_temp > 0 ) then
