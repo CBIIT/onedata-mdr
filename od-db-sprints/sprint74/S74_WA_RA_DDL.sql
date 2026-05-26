@@ -164,7 +164,7 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  and PV.NCI_VAL_MEAN_ITEM_ID = vm.ITEM_ID and
 	PV.NCI_VAL_MEAN_VER_NR = vm.VER_NR and
 	  pv.val_dom_item_id = mec.val_dom_item_id and 
-	  pv.val_dom_Ver_nr = mec.val_dom_ver_nr
+	  pv.val_dom_Ver_nr = mec.val_dom_ver_nr;
 	  
 --jira 9389
 
@@ -185,3 +185,8 @@ select * from obj_key order by obj_key_id asc;
 
 update nci_dload_cstm_col_key set xpath = REPLACE(XPATH, '/permissibleValue/', '/permissibleValues/') where dload_typ = 'VD';
 commit;
+
+--lines added after DB comparison step
+alter table nci_ds_prmtr add CNCPT_IND number(1,0) default 0;
+alter table nci_ds_prmtr_temp add cncpt_ind number(1,0) default 0;
+alter table cncpt modify evs_src_id number(*,0) default 218;
