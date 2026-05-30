@@ -86,8 +86,9 @@ and nvl(vv.fld_delete,0) = 0;
              -- PV.VAL_DOM_ITEM_ID,
 		--PV.VAL_DOM_VER_NR , 
         VM.ITEM_NM VM_ITEM_NM, VM.ITEM_LONG_NM VM_ITEM_LONG_NM,
-                VM.ITEM_DESC VM_ITEM_DESC, NCI_VAL_MEAN_ITEM_ID, NCI_VAL_MEAN_VER_NR, vm.admin_stus_nm_dn VM_ADMIN_STUS_NM_DN
-from admin_item ai, nci_mdl mdl, nci_mdl_elmnt me, nci_mdl_elmnt_char mec, admin_item cde, PERM_VAL PV, ADMIN_ITEM VM	 
+                VM.ITEM_DESC VM_ITEM_DESC, NCI_VAL_MEAN_ITEM_ID, NCI_VAL_MEAN_VER_NR, vm.admin_stus_nm_dn VM_ADMIN_STUS_NM_DN,
+	  vd.val_dom_typ_id
+from admin_item ai, nci_mdl mdl, nci_mdl_elmnt me, nci_mdl_elmnt_char mec, admin_item cde, PERM_VAL PV, ADMIN_ITEM VM	, VALUE_DOM vd 
 where ai.item_id = mdl.item_id and ai.ver_nr = mdl.ver_nr and ai.admin_item_typ_id = 57 and mdl.item_id = me.mdl_item_id
 and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and me.ver_nr = mec.mdl_elmnt_ver_nr
 	and mec.cde_item_id = cde.item_id (+)
@@ -96,6 +97,8 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  and PV.NCI_VAL_MEAN_ITEM_ID = vm.ITEM_ID (+) and
 	PV.NCI_VAL_MEAN_VER_NR = vm.VER_NR (+) and
 	  mec.val_dom_item_id = pv.val_dom_item_id (+) and 
-	 mec.val_dom_ver_nr= pv.val_dom_Ver_nr (+) ;
+	 mec.val_dom_ver_nr= pv.val_dom_Ver_nr (+) and
+	  	  mec.val_dom_item_id = vd.item_id (+) and 
+	 mec.val_dom_ver_nr= vd.Ver_nr (+);
 
 
