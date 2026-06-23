@@ -101,4 +101,12 @@ and mdl.ver_nr = me.mdl_item_ver_nr and me.item_id = mec.mdl_elmnt_item_id and m
 	  	  mec.val_dom_item_id = vd.item_id (+) and 
 	 mec.val_dom_ver_nr= vd.Ver_nr (+);
 
+insert into obj_typ (obj_typ_id, obj_typ_desc) values (67, 'VM-Concept Match Preference');
+commit;
 
+insert into obj_key (obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (270, 'VMs Only', 67, 'V');
+insert into obj_key (obj_key_id, obj_key_desc, obj_typ_id, obj_key_def) values (271, 'Concepts Only', 67, 'C');
+commit;
+
+alter table nci_ds_prmtr_temp add MTCH_PREF number;
+alter table nci_ds_prmtr_temp add MTCH_RSTRCT number(1) default 0;
