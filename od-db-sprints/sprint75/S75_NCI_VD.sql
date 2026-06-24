@@ -32,8 +32,6 @@ procedure spVDValCreateImport ( rowform in out t_row , v_op  in varchar2, action
   procedure val_data_typ (imp_dttype in varchar2, out_dttype out number);
   procedure getVdGenName (rowai in out t_row, rowvd t_row, numpv integer);
   procedure getVdGenNamePostHook ( row in out t_row, rowvd t_row);
-  
-
 END;
 /
 create or replace PACKAGE BODY            nci_vd AS
@@ -747,24 +745,24 @@ AS
  v_ver_nr := ihook.getColumnValue(rowform, 'VAL_DOM_VER_NR');
            nci_11179.spReturnAIRow(v_item_id,v_ver_nr, row_ori_vd);
             nci_11179.spReturnSubtypeRow(v_item_id,v_ver_nr, 3, row_ori_vd);
-              if (   upper(ihook.getColumnValue(row_ori_vd, 'ADMIN_STUS_NM_DN')) in  ('RELEASED','RETIRED ARCHIVED')) then
+    if (   upper(ihook.getColumnValue(row_ori_vd, 'ADMIN_STUS_NM_DN')) in  ('RELEASED','RETIRED ARCHIVED')) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: VD is Released/Retired. Please use Edit VD hook to modify.' || chr(13));
                   v_val_ind  := false;
-       else
+    else
         if (   ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is null and ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_2') is not null ) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR:  Primary Rep Term is required if Qualifier specified.' || chr(13));
                   v_val_ind  := false;
         end if;
 
 
-            if (ihook.getColumnValue(row_ori_vd,'VAL_DOM_TYP_ID') is null) then  -- it is not a VD
+        if (ihook.getColumnValue(row_ori_vd,'VAL_DOM_TYP_ID') is null) then  -- it is not a VD
              ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: ID/Version specified is not a Value Domain.' || chr(13));
                   v_val_ind  := false;
-            else
+        else
             	ihook.setColumnValue(rowform, 'VAL_DOM_ITEM_ID_CREAT',v_item_id);
                 ihook.setColumnValue(rowform, 'VAL_DOM_VER_NR_CREAT',v_ver_nr);
 
-                  end if;
+        end if;
       /*  if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') is null ) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: VD Type is missing or invalid.' || chr(13));
                   v_val_ind  := false;
@@ -787,7 +785,7 @@ AS
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Specified Origin is invalid.' || chr(13));
                   v_val_ind  := false;
         end if;*/
-             if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') <>16 and ihook.getColumnValue(rowform, 'TERM_CNCPT_ITEM_ID') is not null  ) then 
+        if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') <>16 and ihook.getColumnValue(rowform, 'TERM_CNCPT_ITEM_ID') is not null  ) then 
                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'WARNING: Reference Terminology specified will be ignored. Only used for Enumerated By Reference VD.' || chr(13));
         end if;
 
@@ -795,35 +793,35 @@ AS
        -- end if;
         --raise_application_error(-20000,
           --   raise_application_error(-20000,'here');
-            if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') <>16 and ihook.getColumnValue(rowform, 'TERM_USE_TYP')  is not null  ) then 
+        if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') <>16 and ihook.getColumnValue(rowform, 'TERM_USE_TYP')  is not null  ) then 
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'WARNING: Reference Terminology - Data Value Source specified will be ignored. Only used for Enumerated By Reference VD.' || chr(13));
         end if;
         -- ENumerated by reference checks
         if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') =16 ) then 
-                  if (   ihook.getColumnValue(rowform, 'TERM_CNCPT_ITEM_ID') is  null and   ihook.getColumnValue(rowform, 'IMP_REF_TERM') is null) then
+            if (   ihook.getColumnValue(rowform, 'TERM_CNCPT_ITEM_ID') is  null and   ihook.getColumnValue(rowform, 'IMP_REF_TERM') is null) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR:  Either Reference Terminology or Data Source Value are missing. Both are required for Enumerated By Reference VD.' || chr(13));
                   v_val_ind  := false;
-        end if;
+            end if;
 
-                if (   ihook.getColumnValue(rowform, 'TERM_CNCPT_ITEM_ID') is  null and   ihook.getColumnValue(rowform, 'IMP_REF_TERM') is not null) then
+            if (   ihook.getColumnValue(rowform, 'TERM_CNCPT_ITEM_ID') is  null and   ihook.getColumnValue(rowform, 'IMP_REF_TERM') is not null) then
                       ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Specified Reference Terminology Concept is invalid.' || chr(13));
                   v_val_ind  := false;
-        end if;
-                      if (   ihook.getColumnValue(rowform, 'TERM_USE_TYP') is  null and   ihook.getColumnValue(rowform, 'IMP_TERM_USE_TYP') is null) then
+            end if;
+            if (   ihook.getColumnValue(rowform, 'TERM_USE_TYP') is  null and   ihook.getColumnValue(rowform, 'IMP_TERM_USE_TYP') is null) then
                   ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR:  Either Reference Terminology or Data Source Value are missing. Both are required for Enumerated By Reference VD.' || chr(13));
                   v_val_ind  := false;
-        end if;
-                if (   ihook.getColumnValue(rowform, 'TERM_USE_TYP') is  null and   ihook.getColumnValue(rowform, 'IMP_TERM_USE_TYP') is not null) then
+            end if;
+            if (   ihook.getColumnValue(rowform, 'TERM_USE_TYP') is  null and   ihook.getColumnValue(rowform, 'IMP_TERM_USE_TYP') is not null) then
                       ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Specified Reference Terminology - Data Value Source is invalid.' || chr(13));
                   v_val_ind  := false;
-        end if;
-     if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') =16 and upper(ihook.getColumnValue(rowform, 'IMP_CREAT_PV_VM')) not in ('YES','NO') 
-      and  nvl(ihook.getColumnValue(rowform, 'CREAT_PV_VM'),0) = 0  ) then 
+            end if;
+            if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') =16 and upper(ihook.getColumnValue(rowform, 'IMP_CREAT_PV_VM')) not in ('YES','NO') 
+            and  nvl(ihook.getColumnValue(rowform, 'CREAT_PV_VM'),0) = 0  ) then 
                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'WARNING: Create Reference Terminology PV/VM value should be Yes/No. No PV/VM will be created.' || chr(13));
-        end if;
-           if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') =16 and ihook.getColumnValue(rowform, 'IMP_CREAT_PV_VM') is null and  nvl(ihook.getColumnValue(rowform, 'CREAT_PV_VM'),0) = 0 ) then 
+            end if;
+            if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') =16 and ihook.getColumnValue(rowform, 'IMP_CREAT_PV_VM') is null and  nvl(ihook.getColumnValue(rowform, 'CREAT_PV_VM'),0) = 0 ) then 
                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'WARNING: Create Reference Terminology PV/VM value is blank. No PV/VM will be created.' || chr(13));
-        end if; 
+            end if; 
         end if;
         if (nci_import.ParseGaps (rowform , 3) > 0 and ihook.getColumnValue(rowform, 'CNCPT_3_ITEM_ID_1') is not null ) then
                     ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'ERROR: Gaps in concept drop-downs.' || chr(13));                      
@@ -832,7 +830,7 @@ AS
 
         -- combination of value domain types
 
-  if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID')= 18 and ihook.getColumnValue(row_ori_vd, 'VAL_DOM_TYP_ID') in (16,17)) then
+        if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID')= 18 and ihook.getColumnValue(row_ori_vd, 'VAL_DOM_TYP_ID') in (16,17)) then
                  ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform, 'CTL_VAL_MSG') || 'WARNING: All Permissible Values will be deleted.' || chr(13));
         end if;
         if (   ihook.getColumnValue(rowform, 'VAL_DOM_TYP_ID') in (17,18) and ihook.getColumnValue(row_ori_vd, 'VAL_DOM_TYP_ID') =18) then
@@ -856,11 +854,11 @@ AS
         end if; 
 
 */
-      if (ihook.getColumnValue(rowform, 'DTTYPE_ID') is not null ) then
+        if (ihook.getColumnValue(rowform, 'DTTYPE_ID') is not null ) then
       ihook.setColumnValue(rowform, 'NCI_STD_DTTYPE_ID', nci_11179_2.getStdDataType(ihook.getColumnValue(rowform, 'DTTYPE_ID')));
 
         end if;
-        end if; -- VD is released
+    end if; -- VD is released
 -- jira 1670.1 change status to Errors if validated indicator is false
     if (v_val_ind = false) then 
     ihook.setColumnValue(rowform, 'CTL_VAL_STUS', 'ERRORS');
@@ -873,21 +871,20 @@ AS
             select upper(nvl(nm_desc,item_nm)) into v_temp_nm from admin_item ai, alt_nms a, obj_key where ai.item_id = ihook.getColumnValue(rowform,'TERM_CNCPT_ITEM_ID') 
         and ai.ver_nr =  ihook.getColumnValue(rowform,'TERM_CNCPT_VER_NR')  and obj_typ_id = 11 and obj_key_desc = 'Ref Term Short Name' and a.nm_typ_id (+)= obj_key_id
         and a.item_id (+)= ihook.getColumnValue(rowform,'TERM_CNCPT_ITEM_ID')  and a.ver_nr (+)= ihook.getColumnValue(rowform,'TERM_CNCPT_VER_NR');
-           if  (instr(upper(nvl(ihook.getColumnValue(rowform, 'VAL_DOM_NM'),ihook.getColumnValue(rowform, 'ITEM_3_NM'))),v_temp_nm,1) =0) then
+            if  (instr(upper(nvl(ihook.getColumnValue(rowform, 'VAL_DOM_NM'),ihook.getColumnValue(rowform, 'ITEM_3_NM'))),v_temp_nm,1) =0) then
                 ihook.setColumnValue(rowform, 'CTL_VAL_MSG', ihook.getColumnValue(rowform,'CTL_VAL_MSG')  || 'WARNING: Reference Terminology Name not in the Optionally entered or Generated Value Domain Name.' || chr(13));
             end if;
         end if;
-else
+    else
 
-for currt in (Select item_nm from admin_item where item_id = ihook.getColumnValue(rowform, 'REP_CLS_ITEM_ID')
-and ver_nr = ihook.getColumnValue(rowform, 'REP_CLS_VER_NR')) loop
-ihook.setColumnValue(rowform ,'ITEM_3_NM',currt.item_nm);
+        for currt in (Select item_nm from admin_item where item_id = ihook.getColumnValue(rowform, 'REP_CLS_ITEM_ID')
+        and ver_nr = ihook.getColumnValue(rowform, 'REP_CLS_VER_NR')) loop
+            ihook.setColumnValue(rowform ,'ITEM_3_NM',currt.item_nm);
+        end loop;
 
-
-
-end loop;
-ihook.setColumnValue(rowform, 'CURRNT_VAL_ITEM_NM', nvl(ihook.getColumnValue(rowform, 'VAL_DOM_NM'),ihook.getColumnValue(rowform, 'ITEM_3_NM')));
-end if;
+    --ihook.setColumnValue(rowform, 'CURRNT_VAL_ITEM_NM', nvl(ihook.getColumnValue(rowform, 'VAL_DOM_NM'),ihook.getColumnValue(rowform, 'ITEM_3_NM')));
+    end if;
+    ihook.setColumnValue(rowform, 'CURRNT_VAL_ITEM_NM', nvl(ihook.getColumnValue(rowform, 'VAL_DOM_NM'),ihook.getColumnValue(rowform, 'ITEM_3_NM')));
   /* if (ihook.getColumnValue(rowform,'VAL_DOM_TYP_ID') = 16 and v_val_ind = true) then
         select item_nm into v_pv_nm from admin_item where item_id = ihook.getColumnValue(rowform,'TERM_CNCPT_ITEM_ID') and ver_nr =  ihook.getColumnValue(rowform,'TERM_CNCPT_VER_NR');
         ihook.setColumnValue(rowform,'ITEM_3_NM', v_pv_nm || ' ' || ihook.getColumnValue(rowform, 'ITEM_3_NM')  );
@@ -1323,7 +1320,7 @@ begin
     end if;
  if ihook.getColumnValue(rowform,'CNCPT_3_ITEM_ID_1') is not null then  -- Rep Term specified
 
-     ihook.setColumnValue(row,'ITEM_NM',  nvl(ihook.getColumnValue(rowform, 'VAL_DOM_NM'),ihook.getColumnValue(rowform, 'ITEM_3_NM'))  );
+     ihook.setColumnValue(row,'ITEM_NM', nvl(ihook.getColumnValue(rowform, 'CURRNT_VAL_ITEM_NM'), nvl(ihook.getColumnValue(rowform, 'VAL_DOM_NM'),ihook.getColumnValue(rowform, 'ITEM_3_NM')))  );
         ihook.setColumnValue(row,'ITEM_DESC',substr(ihook.getColumnValue(rowform, 'ITEM_3_DEF')  ,1,4000));
     ihook.setColumnValue(row,'REP_CLS_ITEM_ID', nvl(ihook.getColumnValue(rowform,'REP_CLS_ITEM_ID'), ihook.getColumnValue(rowform,'ITEM_3_ID')));
         ihook.setColumnValue(row,'REP_CLS_VER_NR',  nvl(ihook.getColumnValue(rowform,'REP_CLS_VER_NR'),ihook.getColumnValue(rowform,'ITEM_3_VER_NR')));
