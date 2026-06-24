@@ -4167,7 +4167,8 @@ for i in 1..hookinput.originalRowset.rowset.count loop
             --jira 9374
             ihook.setColumnValue(row_ori, 'CURRNT_VAL_ITEM_NM', ihook.getColumnValue(row_ori, 'ITEM_NM'));
           --  ihook.setColumnValue(row_ori, 'CDE_ITEM_LONG_NM',ihook.getColumnValue(row_ori, 'ITEM_LONG_NM'));
-            ihook.setColumnValue(row_ori,'GEN_DE_NM', ihook.getColumnValue(row_ori,'ITEM_NM'));
+          --  ihook.setColumnValue(row_ori,'GEN_DE_NM', ihook.getColumnValue(row_ori,'ITEM_NM'));
+            ihook.setColumnValue(row_ori,'GEN_DE_NM', substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255));
             ihook.setColumnValue(row_ori,'PROCESS_DT_CHAR',TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS') );
 
             for cur in (select ai.item_id item_id from admin_item ai, de de
@@ -4323,9 +4324,9 @@ for i in 1..hookinput.originalRowset.rowset.count loop
                     end loop;
                 end if;
                 if (ihook.getColumnValue(row_ori, 'IMP_CDE_VER_NR') is null or ihook.getColumnValue(row_ori, 'IMP_CDE_VER_NR') = '') then --- not valid
-                          ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
-                        v_val_ind := false;
-                        ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',ihook.getColumnValue(row_ori,'CTL_VAL_MSG') || 'CDE ID or Version missing.' || chr(13));  
+                    ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'ERRORS');
+                    v_val_ind := false;
+                    ihook.setColumnValue(row_ori, 'CTL_VAL_MSG',ihook.getColumnValue(row_ori,'CTL_VAL_MSG') || 'CDE ID or Version missing.' || chr(13));  
                  end if;
             else
                  select count(*) into v_cnt from  admin_item where admin_item_typ_id = 4 and item_id = ihook.getColumnValue(row_ori, 'IMP_CDE_ITEM_ID') and CURRNT_VER_IND = 1 and ver_nr = ihook.getColumnValue(row_ori, 'IMP_CDE_VER_NR') ;
@@ -4430,35 +4431,39 @@ for i in 1..hookinput.originalRowset.rowset.count loop
                 ihook.setColumnValue(row_ori, 'CTL_VAL_MSG', ihook.getColumnValue(row_ori, 'CTL_VAL_MSG') || 'ERROR: Specified Origin is invalid.' || chr(13));
                 v_val_ind  := false;
         end if;
+
+--name validation
         if (v_val_ind = true) then 
-                if (ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') != tmp_dec_id or ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR') != tmp_dec_ver_nr) then
-                    cde_nm_ind := true;
-                end if;
-                if (ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') != tmp_vd_id or ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') != tmp_vd_ver_nr) then
-                    cde_nm_ind := true; 
-               end if;
+            if (ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID') != tmp_dec_id or ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR') != tmp_dec_ver_nr 
+                or ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID') != tmp_vd_id or ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR') != tmp_vd_ver_nr) then
+                cde_nm_ind := true;
+            end if;
 
             if (cde_nm_ind = true) then -- DEC or VD changed
-            select item_nm, item_desc into v_dec_item_nm, v_dec_item_def from admin_item where item_id = ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID')
-            and ver_nr = ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR');
-            select item_nm, item_desc into v_vd_item_nm, v_vd_item_def from admin_item where item_id =ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID')
-            and ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR');
-            ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),substr(v_dec_item_def || ':' || v_vd_item_def,1,4000)));
-            ihook.setColumnValue(row_ori, 'ITEM_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255)));
+                select item_nm, item_desc into v_dec_item_nm, v_dec_item_def from admin_item where item_id = ihook.getColumnValue(row_ori, 'DE_CONC_ITEM_ID')
+                and ver_nr = ihook.getColumnValue(row_ori, 'DE_CONC_VER_NR');
+                select item_nm, item_desc into v_vd_item_nm, v_vd_item_def from admin_item where item_id =ihook.getColumnValue(row_ori, 'VAL_DOM_ITEM_ID')
+                and ver_nr = ihook.getColumnValue(row_ori, 'VAL_DOM_VER_NR');
 
-            else
-              select item_nm, item_desc into v_dec_item_nm, v_dec_item_def from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
-            ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),v_dec_item_def));
+                ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),substr(v_dec_item_def || ':' || v_vd_item_def,1,4000)));
+                ihook.setColumnValue(row_ori, 'ITEM_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255)));
+                ihook.setColumnValue(row_ori, 'CURRNT_VAL_ITEM_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255)));
+            else --DEC/VD not updated, use specified cde details or, if not provided, existing cde details
+                select item_nm, item_desc into v_dec_item_nm, v_dec_item_def from admin_item where item_id = v_item_id and ver_nr = v_ver_nr;
 
-            ihook.setColumnValue(row_ori, 'ITEM_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),v_dec_item_nm ));
-           end if; 
-
+                ihook.setColumnValue(row_ori, 'ITEM_DESC',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_DESC'),v_dec_item_def));
+                ihook.setColumnValue(row_ori, 'CURRNT_VAL_ITEM_NM', nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),v_dec_item_nm ));
+                ihook.setColumnValue(row_ori, 'ITEM_NM',nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),v_dec_item_nm ));
+            end if; 
+           --  select de_conc_item_id, de_conc_ver_nr, val_dom_item_id, val_dom_ver_nr into tmp_dec_id, tmp_dec_ver_nr, tmp_vd_id, tmp_vd_ver_nr from de where item_id = v_item_id and ver_nr = v_ver_nr;
+       --  ihook.setColumnValue(row_ori,'GEN_DE_NM', ihook.getColumnValue(row_ori,'ITEM_NM'));   
+            ihook.setColumnValue(row_ori,'GEN_DE_NM', substr(v_dec_item_nm || ' ' || v_vd_item_nm, 1, 255));   
         end if; -- Val ind
 
            --  select de_conc_item_id, de_conc_ver_nr, val_dom_item_id, val_dom_ver_nr into tmp_dec_id, tmp_dec_ver_nr, tmp_vd_id, tmp_vd_ver_nr from de where item_id = v_item_id and ver_nr = v_ver_nr;
-         ihook.setColumnValue(row_ori,'GEN_DE_NM', ihook.getColumnValue(row_ori,'ITEM_NM'));    
+      --   ihook.setColumnValue(row_ori,'GEN_DE_NM', ihook.getColumnValue(row_ori,'ITEM_NM'));    
          --jira 9374
-        ihook.setColumnValue(row_ori, 'CURRNT_VAL_ITEM_NM', ihook.getColumnValue(row_ori, 'ITEM_NM'));
+        ihook.setColumnValue(row_ori, 'CURRNT_VAL_ITEM_NM', nvl(ihook.getColumnValue(row_ori, 'CDE_ITEM_NM'),ihook.getColumnValue(row_ori, 'ITEM_NM')));
             ihook.setColumnValue(row_ori,'PROCESS_DT_CHAR',TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS') );
 
             for cur in (select ai.item_id item_id from admin_item ai, de de
@@ -4497,8 +4502,6 @@ for i in 1..hookinput.originalRowset.rowset.count loop
         else
           ihook.setColumnValue(row_ori, 'CTL_VAL_STUS', 'VALIDATED');
         end if;
-
-
 
         if ( v_mode  in ( 'N') and v_val_ind = true) then  
             for cur in (select * from admin_item where admin_item_typ_id = 4 and item_id = v_item_id and ver_nr = v_ver_nr) loop
