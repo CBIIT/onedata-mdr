@@ -3,6 +3,7 @@ S75_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S75_WA_RA_DDL.sql
+S75_WA.sql
 S75_NCI_DS.sql
 S75_NCI_CHNG_MGMT.sql
 S75_NCI_IMPORT.sql
