@@ -3482,7 +3482,7 @@ BEGIN
 
     ihook.setColumnValue(row,'ITEM_LONG_NM', ihook.getColumnValue(rowform, 'ITEM_LONG_NM'));
     ihook.setColumnValue(row,'ITEM_DESC', ihook.getColumnValue(rowform, 'ITEM_DESC'));
-    ihook.setColumnValue(row,'ITEM_NM', ihook.getColumnValue(rowform, 'ITEM_NM'));
+    ihook.setColumnValue(row,'ITEM_NM', nvl(ihook.getColumnValue(rowform, 'ITEM_NM'), ihook.getColumnValue(rowform, 'CURRNT_VAL_ITEM_NM')));
 
                ihook.setColumnValue(row,'DE_CONC_ITEM_ID', ihook.getColumnValue(rowform, 'DE_CONC_ITEM_ID'));
                ihook.setColumnValue(row,'DE_CONC_VER_NR', ihook.getColumnValue(rowform, 'DE_CONC_VER_NR'));
