@@ -110,3 +110,39 @@ commit;
 
 alter table nci_ds_prmtr_temp add MTCH_PREF number;
 alter table nci_ds_prmtr_temp add MTCH_RSTRCT number(1) default 0;
+
+--cde ai updates
+create materialized view MVW_CDE_VARIANT ("ITEM_NM", "ITEM_ID","CREAT_DT", "CREAT_USR_ID", "LST_UPD_USR_ID", "FLD_DELETE", "LST_DEL_DT", "S2P_TRN_DT", "LST_UPD_DT") 
+AS
+SELECT 
+    OBJ_KEY.OBJ_KEY_DESC ITEM_NM,
+    OBJ_KEY.OBJ_KEY_ID ITEM_ID,
+           OBJ_KEY.CREAT_DT,
+       OBJ_KEY.CREAT_USR_ID,
+       OBJ_KEY.LST_UPD_USR_ID,
+       OBJ_KEY.FLD_DELETE,
+      OBJ_KEY.LST_DEL_DT,
+       OBJ_KEY.S2P_TRN_DT,
+       OBJ_KEY.LST_UPD_DT
+FROM OBJ_KEY
+WHERE OBJ_TYP_ID = 65;
+
+create table NCI_DS_AI_MDL_SEL 
+   (	"HDR_ID" NUMBER NOT NULL ENABLE, 
+   "ITEM_ID" varchar2(100),
+   "ITEM_NM" varchar2(100),
+	"DT_LAST_MODIFIED" DATE, 
+	"CREAT_DT" DATE DEFAULT sysdate, 
+	"CREAT_USR" VARCHAR2(50 BYTE), 
+	"RETAIN_IND" NUMBER(1,0) DEFAULT 0, 
+	"CREAT_USR_ID" VARCHAR2(50 BYTE) DEFAULT user, 
+	"LST_UPD_USR_ID" VARCHAR2(50 BYTE) DEFAULT user, 
+	"FLD_DELETE" NUMBER(1,0) DEFAULT 0, 
+	"LST_DEL_DT" DATE DEFAULT sysdate, 
+	"S2P_TRN_DT" DATE DEFAULT sysdate, 
+	"LST_UPD_DT" DATE DEFAULT sysdate
+   ) 
+  TABLESPACE "USERS" ;
+ALTER TABLE NCI_DS_AI_MDL_SEL ADD PRIMARY KEY ("HDR_ID", "ITEM_ID");
+
+alter table nci_ds_prmtr_temp add VARIANT_1_LIST varchar2(100);
