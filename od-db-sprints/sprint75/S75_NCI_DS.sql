@@ -3887,7 +3887,7 @@ BEGIN
     end if;
     commit;
         end loop;
-        hookoutput.message := 'Matching complete. ' || to_char(v_cnt) || ' records processed.';
+        hookoutput.message := 'Matching complete for ' || v_btch_nm || '/' || v_btch_usr_nm || ': ' || to_char(v_cnt) || ' rows processed.';
     end if;
 end if;
    -- hookoutput.message := 'Matching complete. ' || to_char(v_cnt) || ' records processed.';
