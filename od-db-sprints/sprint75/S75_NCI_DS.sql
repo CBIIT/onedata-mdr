@@ -1514,6 +1514,7 @@ AS
     v_cde_var_nm varchar2(255);
     v_pv_var_nm varchar2(255) := 'None';
     v_var_str varchar2(255) := '';
+    v_cnt number := 0;
 
 
 begin
@@ -1557,7 +1558,7 @@ begin
                     --select obj_key_desc into v_cde_var_nm 
                     --from obj_key where obj_key_id = ihook.getmscolumnValue(row_sel, 'CDE_MDL_VARIANTS')(j) ;
                     v_var_str := ihook.getmscolumnValue(row_sel, 'CDE_MDL_VARIANTS')(j) || ' ' || v_var_str;
-
+                    v_cnt := v_cnt + 1;
 
                 end loop;
                --raise_application_error(-20001, v_var_str);
@@ -1601,7 +1602,13 @@ begin
                     select obj_key_desc into v_cde_var_nm from obj_key where obj_key_id = v_cde_var;
                     ihook.setColumnValue(row, 'VARIANT_1_NM', v_cde_var_nm);
                 end if; */
+                if v_cnt > 1 then
                  ihook.setColumnValue(row, 'VARIANT_1_NM', 'Multiple variants selected');
+                else
+                    select obj_key_desc into v_cde_var_nm from obj_key where obj_key_id = v_var_str;
+                    ihook.setColumnValue(row, 'VARIANT_1_NM', v_cde_var_nm);
+                   -- ihook.setColumnValue(row, 'VARIANT_1_NM', ihook.getmscolumnValue(row_sel, 'CDE_MDL_VARIANTS')(1));
+                 end if;
                 if nvl(v_pv_var, 0) <> 0 then
                     ihook.setColumnValue(row, 'VARIANT_2', v_pv_var);
                     select obj_key_desc into v_pv_var_nm from obj_key where obj_key_id = v_pv_var;
