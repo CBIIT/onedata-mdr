@@ -553,7 +553,7 @@ and  ai.item_id = b.item_id (+) and ai.ver_nr = b.ver_nr(+)
 and ai.item_id = cur.item_id and ai.ver_nr = cur.ver_nr) 
 where item_id = cur.item_id and ver_nr = cur.ver_nr;
 end loop;
-
+commit;
 --nci_data_audit.spLoadDataAudit(sysdate -2/24, sysdate);
     V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
