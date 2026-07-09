@@ -1,4 +1,4 @@
-create or alter TRIGGER TR_MEC_MAP_POST
+create or replace TRIGGER TR_MEC_MAP_POST
   AFTER UPDATE
   on NCI_MEC_MAP
   for each row
