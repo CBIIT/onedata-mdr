@@ -13,3 +13,12 @@ end if;
 END;
 */
 
+  CREATE OR REPLACE  TRIGGER OD_TR_DS_BTCH_HDR_UPD
+BEFORE UPDATE ON NCI_DS_BTCH_HDR
+for each row
+BEGIN
+  :new.DT_LAST_MODIFIED := TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS');
+  :new.DT_SORT := systimestamp();
+  :new.LST_UPD_DT := SYSDATE;
+END;
+/
