@@ -40,4 +40,14 @@ AND ADMIN_ITEM.VER_NR=VALUE_DOM.VER_NR ;
    );
 
 
+  CREATE OR REPLACE VIEW VW_NCI_DS_RSLT_BTCH AS
+  select r.HDR_ID,h.btch_usr_nm, h.btch_nm, r.ITEM_ID,r.VER_NR,r.RULE_ID,r.SCORE,r.RULE_DESC,r.USR_CMNTS,r.NUM_PV_IN_SRC,r.NUM_PV_IN_CDE,r.NUM_PV_MTCH,r.NM_MTCH_PRCNT,
+  r.NUM_PV_MTCH_FUZZY,r.CREAT_DT,r.CREAT_USR_ID,r.LST_UPD_USR_ID,r.FLD_DELETE,r.LST_DEL_DT,r.S2P_TRN_DT,r.LST_UPD_DT,r.MTCH_DESC_TXT,
+  r.MTCH_TYP,r.CDE_PREF_IND,r.SRC_MTCH_ENGN from nci_ds_rslt r, nci_ds_hdr h where r.hdr_id = h.hdr_id
+  union
+  select h.hdr_id, h.btch_usr_nm, h.btch_nm,17175416, 1, null, null, null, null, null, null, null, null, 
+  null, h.creat_dt,h.creat_usr_id,LST_UPD_USR_ID,FLD_DELETE,LST_DEL_DT,S2P_TRN_DT,LST_UPD_DT,null,
+  'CDE', null, null from nci_ds_hdr h where h.hdr_id not in (select hdr_id from nci_ds_rslt) and MTCH_TYP_NM = 'CDE';
+
+
 
