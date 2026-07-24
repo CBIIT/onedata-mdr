@@ -52,3 +52,8 @@ AND ADMIN_ITEM.VER_NR=VALUE_DOM.VER_NR ;
 
 alter table alt_nms add sem_equiv_ind integer;
 alter table ref add sem_equiv_ind integer;
+
+
+alter table NCI_DS_PRMTR add BTCH_NM varchar2(50);
+alter table NCI_DS_PRMTR_TEMP add BTCH_NM varchar2(50);
+
