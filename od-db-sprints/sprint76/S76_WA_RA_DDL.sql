@@ -50,4 +50,5 @@ AND ADMIN_ITEM.VER_NR=VALUE_DOM.VER_NR ;
   'CDE', null, null from nci_ds_hdr h where h.hdr_id not in (select hdr_id from nci_ds_rslt) and MTCH_TYP_NM = 'CDE';
 
 
-
+alter table alt_nms add sem_equiv_ind integer;
+alter table ref add sem_equiv_ind integer;
