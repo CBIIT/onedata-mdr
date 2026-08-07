@@ -58,3 +58,6 @@ alter table ref add sem_equiv_ind integer;
 alter table NCI_DS_PRMTR add BTCH_NM varchar2(50);
 alter table NCI_DS_PRMTR_TEMP add BTCH_NM varchar2(50);
 
+delete from nci_ds_rslt where hdr_id not in (select hdr_id from nci_ds_hdr);
+commit;
+
