@@ -61,3 +61,5 @@ alter table NCI_DS_PRMTR_TEMP add BTCH_NM varchar2(50);
 delete from nci_ds_rslt where hdr_id not in (select hdr_id from nci_ds_hdr);
 commit;
 
+alter table nci_stg_cde_creat add SET_CUR_VER number(4,2);
+
