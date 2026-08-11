@@ -3,6 +3,7 @@ S76_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S76_WA_RA_DDL.sql
+S76_WA.sql
 S76_NCI_DS.sql
 S76_NCI_IMPORT.sql
 S76_NCI_POST_HOOK.sql
