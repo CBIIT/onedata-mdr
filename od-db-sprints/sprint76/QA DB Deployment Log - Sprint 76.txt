@@ -1,0 +1,259 @@
+#QA DB Deployment Log - Sprint 76
+
+## Onedata RA
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_WA_RA_DDL.sql"
+
+
+View VW_VALUE_DOM_BASIC created.
+
+
+
+
+
+Table NCI_DS_BTCH_HDR created.
+
+
+
+
+
+View VW_NCI_DS_RSLT_BTCH created.
+
+
+
+
+
+Table ALT_NMS altered.
+
+
+
+
+
+Table REF altered.
+
+
+
+
+
+Table NCI_DS_PRMTR altered.
+
+
+
+
+
+Table NCI_DS_PRMTR_TEMP altered.
+
+
+
+
+
+0 rows deleted.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+Table NCI_STG_CDE_CREAT altered.
+
+
+## Onedata WA
+
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_WA_RA_DDL.sql"
+
+
+View VW_VALUE_DOM_BASIC created.
+
+
+
+
+
+Table NCI_DS_BTCH_HDR created.
+
+
+
+
+
+View VW_NCI_DS_RSLT_BTCH created.
+
+
+
+
+
+Table ALT_NMS altered.
+
+
+
+
+
+Table REF altered.
+
+
+
+
+
+Table NCI_DS_PRMTR altered.
+
+
+
+
+
+Table NCI_DS_PRMTR_TEMP altered.
+
+
+
+
+
+4,036 rows deleted.
+
+
+
+
+
+Commit complete.
+
+
+
+
+
+Table NCI_STG_CDE_CREAT altered.
+
+
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_WA.sql"
+
+
+Trigger OD_TR_DS_BTCH_HDR_UPD compiled
+
+
+
+
+
+Trigger OD_TR_ADMIN_ITEM compiled
+
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_NCI_DS.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_NCI_IMPORT.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_NCI_POST_HOOK.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_NCI_VD.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_NCI_CODEMAP_MM.sql"
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_NCI_CODEMAP_VM.sql"
+
+
+
+Package NCI_DS compiled
+
+
+
+
+
+Package Body NCI_DS compiled
+
+
+
+
+
+Package NCI_IMPORT compiled
+
+
+
+
+
+Package Body NCI_IMPORT compiled
+
+
+
+
+
+Package NCI_POST_HOOK compiled
+
+
+
+
+
+Package Body NCI_POST_HOOK compiled
+
+
+
+
+
+Errors for PACKAGE BODY NCI_POST_HOOK:
+
+
+
+LINE/COL ERROR
+
+-------- -----------------------------------------------------------------
+
+368/1    PL/SQL: Statement ignored
+
+368/10   PLS-00302: component 'CREATEGENNAMEINC' must be declared
+
+
+
+Package NCI_VD compiled
+
+
+
+
+
+Package Body NCI_VD compiled
+
+
+
+
+
+Package NCI_CODEMAP_MM compiled
+
+
+
+
+
+Package Body NCI_CODEMAP_MM compiled
+
+
+
+
+
+Package NCI_CODEMAP_VM compiled
+
+
+
+
+
+Package Body NCI_CODEMAP_VM compiled
+
+
+-- to resolve error, NCI_UTIL package must be included in the deployment. Compile NCI_UTIL, then recompile NCI_POST_HOOK. Re-order DB instructions to put NCI_UTIL ahead of NCI_POST_HOOK
+
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_NCI_UTIL.sql"
+
+
+
+Package NCI_UTIL compiled
+
+
+
+
+
+Package Body NCI_UTIL compiled
+
+
+@"C:\Users\nashmt\Documents\caDSRII\Git\onedata-mdr\od-db-sprints\sprint76\S76_NCI_POST_HOOK.sql"
+
+
+Package NCI_POST_HOOK compiled
+
+
+
+
+
+Package Body NCI_POST_HOOK compiled
+
+
+
+
+
+
