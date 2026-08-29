@@ -1,0 +1,3 @@
+-- Run as ONEDATA_RA DDL scripts
+
+-- Run as ONEDATA_WA DDL scripts
