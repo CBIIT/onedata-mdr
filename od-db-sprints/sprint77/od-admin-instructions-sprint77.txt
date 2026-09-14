@@ -1,1 +1,3 @@
 --TBD
+In Guest User's Favorites section, should not see 'CDE Match Results Download'. It should be removed in Sprin 77.
+Click CDE Match link, it should open the new 'CDE Match Guest' CO, which has similar UI pages as 'CDE Match By Batch'. CDE Match Guest (New) should be added.
