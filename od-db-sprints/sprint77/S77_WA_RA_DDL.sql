@@ -41,6 +41,7 @@ and tmecd.VAL_DOM_ITEM_ID = vd.ITEM_ID (+)
 	  and tmecd.VAL_DOM_VER_NR = vd.VER_NR (+)
       and (pcode_sysgen is not null or mec_map_notes is not null);
 
+update obj_key set obj_key_desc = 'CDEMeta-SapBERT' where obj_key_id = 253;
 alter table nci_ds_hdr add VARIANT_1 number default 253;
 
 alter table nci_ds_hdr disable all triggers;
