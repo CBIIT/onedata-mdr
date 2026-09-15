@@ -54,5 +54,6 @@ update nci_ds_hdr set CDE_MDL_VARIANTS = 'CDEMeta-SapBERT';
 commit;
 alter table nci_ds_hdr enable all triggers;
 
+alter table nci_ds_prmtr_temp add MS_CNTXT varchar2(1000);
 
 
