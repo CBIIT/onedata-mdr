@@ -41,5 +41,18 @@ and tmecd.VAL_DOM_ITEM_ID = vd.ITEM_ID (+)
 	  and tmecd.VAL_DOM_VER_NR = vd.VER_NR (+)
       and (pcode_sysgen is not null or mec_map_notes is not null);
 
+alter table nci_ds_hdr add VARIANT_1 number default 253;
+
+alter table nci_ds_hdr disable all triggers;
+update nci_ds_hdr set VARIANT_1 = 253;
+commit;
+alter table nci_ds_hdr enable all triggers;
+
+alter table nci_ds_hdr add CDE_MDL_VARIANTS varchar2(100) default 'CDEMeta-SapBERT';
+alter table nci_ds_hdr disable all triggers;
+update nci_ds_hdr set CDE_MDL_VARIANTS = 'CDEMeta-SapBERT';
+commit;
+alter table nci_ds_hdr enable all triggers;
+
 
 
