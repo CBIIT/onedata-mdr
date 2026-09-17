@@ -22,6 +22,8 @@ alter table nci_ds_hdr add CDE_MDL_VARIANTS varchar2(100) default 'CDEMeta-SapBE
 alter table nci_ds_hdr disable all triggers;
 update nci_ds_hdr set CDE_MDL_VARIANTS = 'CDEMeta-SapBERT';
 commit;
+update nci_ds_hdr set MTCH_LMT = 10;
+commit;
 alter table nci_ds_hdr enable all triggers;
 
      
