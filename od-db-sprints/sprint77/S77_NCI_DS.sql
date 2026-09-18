@@ -1558,8 +1558,8 @@ AS
     i integer := 0;
     v_mtch_lmt number := 10;
     v_setPrefMsg varchar(100);
-    v_cde_thresh number(4,2) := 0.40;
-    v_pv_thresh number(4,2) := 0.40;
+    v_cde_thresh number(4,2);
+    v_pv_thresh number(4,2);
     v_cde_var number;
     v_pv_var number;
     v_id number;
@@ -1570,8 +1570,6 @@ AS
     v_pv_var_init number;
     v_cntxt_str varchar(255) := '';
     v_temp_str varchar2(255);
-
-
 begin
     hookinput := ihook.gethookinput(v_data_in);
     hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -1600,10 +1598,15 @@ begin
             v_src_val_id := ihook.getColumnValue(row_sel, 'SRC_VAL_ID');
             v_csi_item_id := ihook.getColumnValue(row_sel, 'CS_ID');
             v_csi_ver_nr := ihook.getColumnValue(row_sel, 'CS_VER_NR'); 
-            v_cde_thresh := nvl(ihook.getColumnValue(row_sel, 'THRESHOLD_1'), 40);
-            v_pv_thresh := nvl(ihook.getColumnValue(row_sel, 'THRESHOLD_2'),40);
+            v_cde_thresh := nvl(ihook.getColumnValue(row_sel, 'THRESHOLD_1'),.5);
+            v_pv_thresh := nvl(ihook.getColumnValue(row_sel, 'THRESHOLD_2'),.5);
+           --v_cde_thresh := v_cde_thresh * 100;
+           -- v_pv_thresh := v_pv_thresh * 100;
+           -- raise_application_error(-20001, to_char(v_cde_thresh) || ' ' || to_char(v_pv_thresh));
             v_cde_var := ihook.getColumnValue(row_sel, 'VARIANT_1');
             v_pv_var_init := nvl(ihook.getColumnValue(row_sel, 'VARIANT_2'), 269); --None, cde embedding only
+            v_reg_stus_id := ihook.getColumnValue(row_sel, 'REG_STUS_ID');
+            v_admin_stus_id := ihook.getColumnValue(row_sel, 'ADMIN_STUS_ID');
 
             v_mtch_lmt := nvl(ihook.getColumnValue(row_sel, 'MTCH_LMT'), v_mtch_lmt);
             for j in 1..ihook.getmsColumnValue(row_sel,'MS_CNTXT').count loop
@@ -1651,8 +1654,9 @@ begin
                 ihook.setColumnValue(row, 'ENTTY_NM', v_entty_nm);
                 --ihook.setColumnValue(row, 'SRC_VAL_ID', v_src_val_id);
                 ihook.setColumnValue(row, 'SRC_VAL_ID', 247);
-                ihook.setColumnValue(row, 'REG_STUS_ID', ihook.getColumnValue(row_ori, 'REG_STUS_ID'));
-                ihook.setColumnValue(row, 'ADMIN_STUS_ID', ihook.getColumnValue(row_ori, 'ADMIN_STUS_ID'));
+                ihook.setColumnValue(row, 'REG_STUS_ID', v_reg_stus_id);
+                ihook.setColumnValue(row, 'ADMIN_STUS_ID', v_admin_stus_id);
+                --raise_application_error(-20001, to_char(v_reg_stus_id) || ' ' || to_char(v_reg_stus_id));
                 ihook.setColumnValue(row, 'VAL_DOM_TYP_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID'));
                 if nvl(v_csi_item_id, 0) <> 0 then
                     ihook.setColumnValue(row, 'CS_ID', v_csi_item_id);
@@ -1706,7 +1710,7 @@ begin
 
             V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
-           --nci_util.debugHook('GENERAL', v_data_out);
+           nci_util.debugHook('GENERAL', v_data_out);
         end if;    
     end if;
 
@@ -3759,7 +3763,7 @@ row := t_row();
             ihook.setColumnValue(row, 'HDR_ID', ihook.getColumnValue(row_ori, 'HDR_ID'));
             ihook.setColumnValue(row, 'DE_CONC_ITEM_ID', ihook.getColumnValue(row_ori, 'ITEM_ID'));
             ihook.setColumnValue(row, 'DE_CONC_VER_NR', ihook.getColumnValue(row_ori, 'VER_NR'));
-            ihook.setColumnValue(row, 'SYS_MSG',getDSSysMsg(ihook.getColumnValue(row_ori, 'HDR_ID'), 'DECS', getDSMtchLmt(ihook.getColumnValue(row_ori, 'HDR_ID'))));
+            ihook.setColumnValue(row, 'SYS_MSG',getDSSysMsg(ihook.getColumnValue(row_ori, 'HDR_ID'), 'DECS', getDSMtchLmt(ihook.getColumnValue(row_ori, 'HDR_ID'))) || 'Selected DEC set to ' || ihook.getColumnValue(row_ori, 'ITEM_ID') || 'v' || ihook.getColumnValue(row_ori, 'VER_NR'));
             rows:= t_rows();
             rows.extend;
             rows(rows.last) := row;
@@ -4836,6 +4840,8 @@ BEGIN
     if (v_obj_nm = 'DS Batch Header') then -- delete batch header
      v_sql := 'DELETE FROM nci_ds_btch_hdr   ' || v_fltr_str ;
         execute immediate v_sql;
+      v_sql := 'DELETE FROM onedata_ra.nci_ds_btch_hdr   ' || v_fltr_str ;
+        execute immediate v_sql;
 
     end if;
            commit;
@@ -4906,7 +4912,7 @@ BEGIN
     end if;
     --3. System Message returns selected DEC details if set
         select count(*) into v_temp from nci_ds_hdr where hdr_id = v_hdr_id and de_conc_item_id is not null;
-    if (v_temp = 1 and v_op = 'DECS') then -- selected dec set, not called from post-hook
+    if (v_temp = 1 and v_op <> 'DECS') then -- selected dec set, not called from post-hook
         select de_conc_item_id, de_conc_ver_nr  into v_item_id, v_ver_nr
             from nci_ds_hdr d
             where d.hdr_id = v_hdr_id;
