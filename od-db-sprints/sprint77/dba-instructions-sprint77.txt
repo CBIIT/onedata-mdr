@@ -1,8 +1,11 @@
 -- Run as ONEDATA_RA DDL scripts
 S77_WA_RA_DDL.sql
+S77_1_WA_RA_DDL.sql
+S77_RA.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S77_WA_RA_DDL.sql
+S77_1_WA_RA_DDL.sql
 S77_WA.sql
 S77_NCI_DS.sql
 S77_NCI_11179_2.sql
