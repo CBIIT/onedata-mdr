@@ -23,3 +23,15 @@ alter table nci_ds_prmtr modify threshold_2 number(4,2);
 
 alter table nci_ds_prmtr enable all triggers;
 alter table nci_ds_prmtr_temp enable all triggers;
+
+alter table nci_ds_rslt disable all triggers;
+alter table nci_ds_rslt add score_temp number(38,4);
+update nci_ds_rslt set score_temp = score;
+commit;
+update nci_ds_rslt set score = null;
+commit;
+alter table nci_ds_rslt modify score number(38,4);
+update nci_ds_rslt set score = score_temp;
+commit;
+alter table nci_ds_rslt drop column score_temp;
+alter table nci_ds_rslt enable all triggers;
