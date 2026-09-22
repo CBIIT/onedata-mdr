@@ -1,3 +1,6 @@
+drop index idx_ref_mtch_term_adv;
+drop index idx_altnms_mtch_term_adv;
+
 CREATE INDEX "ONEDATA_WA"."IDX_REF_MTCH_TERM_ADV" ON "ONEDATA_WA"."REF" ("MTCH_TERM_ADV")
 
   PCTFREE 10 INITRANS 2 MAXTRANS 167 COMPUTE STATISTICS
