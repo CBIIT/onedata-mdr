@@ -1568,7 +1568,7 @@ AS
     v_var_str varchar2(255) := '';
     v_cnt number := 0;
     v_pv_var_init number;
-    v_cntxt_str varchar(255) := '';
+    v_cntxt_str varchar(1000) := '';
     v_temp_str varchar2(255);
 begin
     hookinput := ihook.gethookinput(v_data_in);
