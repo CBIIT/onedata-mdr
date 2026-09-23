@@ -9,3 +9,5 @@ S77_1_WA_RA_DDL.sql
 S77_WA.sql
 S77_NCI_DS.sql
 S77_NCI_11179_2.sql
+S77_WA_ALT_NMS_2.sql
+Unzip S77_NCI_WA_.sql
