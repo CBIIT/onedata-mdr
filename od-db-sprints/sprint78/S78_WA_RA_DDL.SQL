@@ -42,3 +42,7 @@ create table NCI_LLM_CNFG
       "S2P_TRN_DT" DATE DEFAULT sysdate,
       "LST_UPD_DT" DATE DEFAULT sysdate,
     primary key (LLM_MDL_VER, USE_CASE));
+
+
+  
+create unique index idxVW_CNCPT on vw_CNCPT (ITEM_ID, VER_NR);
