@@ -33,7 +33,7 @@ from REF;
 create table NCI_LLM_CNFG
 ( LLM_MDL_VER varchar2(255) not null,
   USE_CASE  varchar2(255) not null,
-  PARAM_VAL varchar(4000) not null,
+  PARAM_VAL varchar(32000) not null,
   "CREAT_DT" DATE DEFAULT sysdate,
       "CREAT_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user,
       "LST_UPD_USR_ID" VARCHAR2(50 BYTE) COLLATE "USING_NLS_COMP" DEFAULT user,
