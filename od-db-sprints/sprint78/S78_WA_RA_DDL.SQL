@@ -46,3 +46,6 @@ create table NCI_LLM_CNFG
 
   
 create unique index idxVW_CNCPT on vw_CNCPT (ITEM_ID, VER_NR);
+
+alter table ref modify mtch_scr default null;
+
