@@ -17,3 +17,13 @@ else
 end if;
 END;
 /
+
+create or replace TRIGGER OD_TR_DS_HDR_BTCH_INS  BEFORE INSERT  on  NCI_DS_BTCH_HDR 
+for each row
+
+         BEGIN    
+
+      :new.DESC_COL := :new.BTCH_USR_NM || ' | ' || :new.BTCH_NM;
+
+      END ;
+      /
