@@ -1,6 +1,7 @@
 create or replace PACKAGE            nci_ds AS
   procedure spDSRun ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
-  procedure spCDEAIRun ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+  procedure spCDEAIRun ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_mode in varchar2);
+  procedure spDSRunSemantic ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_mode in varchar2);
   procedure spVMMatch ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_typ in varchar2); -- v_typ - R - Restricted, U - Unrestricted, F - Fuzzzzy
   procedure spVMMatch49 ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_typ in varchar2, v_pref in varchar2); -- v_pref - V - VM only, C - Concept only, A - All
   procedure spVMMatchDynmc ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_typ in varchar2, v_pref in varchar2, v_ext in varchar2);
@@ -36,6 +37,7 @@ function getLastDSRun (v_hdr_id in number) return varchar2;
 procedure spDSRunOLD ( v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 procedure spDSSubPVVMDynmcSQL(v_hdr_id in number, v_mtch_typ in varchar2, v_entty_nm in varchar2, v_sel_word in varchar2, v_mtch_min_len in number, v_flt_str in varchar2, v_pv_cnt in number, v_src_dtl in varchar2, v_pv_filter in varchar2, v_mtch_pcnt in number);
 procedure spDSRunTest (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spDSRunKeyword (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
 --functions and procs specified below are part of the cde match refactoring 08/14/25
 function getQuestionDSParameters return t_question;
 function getDSParameterEditForm (v_rowset in t_rowset, v_mode in varchar2) return t_forms;
@@ -1395,6 +1397,158 @@ EXCEPTION
     --nci_util.debugHook('GENERAL', v_data_out);
 end;
 
+procedure spDSRunKeyword (v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    rows  t_rows;
+    row_ori t_row;
+
+    rowset t_rowset;
+    v_rowset t_rowset;
+
+    forms t_forms;
+    form1 t_form;
+    row_sel t_row;
+    v_src_val_id number;
+    v_reg_stus_id number;
+    v_admin_stus_id number;
+    v_cntxt_item_id number;
+    v_cntxt_ver_nr number(4,2);
+    v_csi_item_id number;
+    v_csi_ver_nr number(4,2);
+    v_val_dom_typ integer;
+    v_hdr_id number;
+    v_entty_nm varchar2(4000);
+    v_flt_str  varchar2(4000);
+    i integer := 0;
+    v_mtch_lmt number := 10;
+    v_mode varchar2(32);
+    v_id number;
+    v_cncpt_ind number;
+    v_cnt number := 0;
+    v_cntxt_str varchar2(4000);
+    v_error_msg varchar2(4000);
+    v_temp_str varchar2(4000);
+
+begin
+    hookinput := ihook.gethookinput(v_data_in);
+    hookoutput.invocationnumber  := hookinput.invocationnumber;
+    hookoutput.originalrowset    := hookinput.originalrowset;
+    rows := t_rows();
+    v_mode := 'NEW';
+
+    if (hookinput.invocationnumber = 0) then   -- First invocation
+
+        rowset := hookinput.originalrowset;
+
+        hookoutput.forms := getDSParameterEditForm(rowset, 'IS');
+        hookOutput.question := nci_ds.getQuestionDSParameters;
+        V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+        --nci_util.debugHook('GENERAL',v_data_out);
+	else
+
+        if (hookinput.answerid = 1) then
+            forms              := hookinput.forms;
+            form1              := forms(1);
+            row_sel            := form1.rowset.rowset(1);
+
+        --Set variables from form input
+            v_src_val_id := ihook.getColumnValue(row_sel, 'SRC_VAL_ID');
+            v_reg_stus_id := ihook.getColumnValue(row_sel, 'REG_STUS_ID');
+            v_admin_stus_id := ihook.getColumnValue(row_sel, 'ADMIN_STUS_ID');
+            v_cntxt_item_id := ihook.getColumnValue(row_sel, 'CNTXT_ID');
+            v_cntxt_ver_nr := ihook.getColumnValue(row_sel, 'CNTXT_VER_NR');
+            v_csi_item_id := ihook.getColumnValue(row_sel, 'CS_ID');
+            v_csi_ver_nr := ihook.getColumnValue(row_sel, 'CS_VER_NR');
+            v_val_dom_typ := ihook.getColumnValue(row_sel, 'VAL_DOM_TYP_ID'); 
+            v_mtch_lmt := nvl(ihook.getColumnValue(row_sel, 'MTCH_LMT'), v_mtch_lmt);
+           -- v_cncpt_ind := nvl(ihook.getColumnValue(row_sel, 'CNCPT_IND'), 0);
+            for j in 1..ihook.getmsColumnValue(row_sel,'MS_CNTXT').count loop
+                v_temp_str := REGEXP_SUBSTR(ihook.getmsColumnValue(row_sel, 'MS_CNTXT')(j), '[^v]+', 1, 1);
+                select cntxt_nm_dn into v_temp_str from vw_cntxt_ds where item_id = v_temp_str;
+                v_cntxt_str := v_temp_str || ',' || v_cntxt_str;
+                v_cnt := v_cnt + 1;
+            end loop;
+            v_cntxt_str := rtrim(v_cntxt_str, ',');
+  --          v_error_msg := v_cntxt_str || ' ' || v_error_msg;
+--raise_application_error(-20001, v_cntxt_str);
+        --Use Variables to Build Filter String
+          --  v_flt_str := getDSFilterString(nvl(v_reg_stus_id,0), nvl(v_admin_stus_id,0), nvl(v_cntxt_item_id,0), nvl(v_cntxt_ver_nr,0), nvl(v_csi_item_id,0), nvl(v_csi_ver_nr,0), nvl(v_val_dom_typ,0));
+
+        --Loop through all rows and insert into new object that triggers IS service on insert
+            for i in 1..hookinput.originalrowset.rowset.count loop
+            -- init row
+                row := t_row();
+            --set row to match and hdr_id
+                row_ori := hookInput.originalRowset.rowset(i);
+                v_hdr_id := ihook.getColumnValue(row_ori, 'HDR_ID');
+
+            --set entity name to match against: user tip overrides
+                v_entty_nm := nvl(ihook.getColumnValue(row_ori, 'ENTTY_NM_USR'), ihook.getColumnValue(row_ori, 'ENTTY_NM'));
+
+            --set row values for insert
+            select seq_ds_prmtr_id.nextval into v_id from dual;
+                ihook.setColumnValue(row, 'PRMTR_ID', v_id);
+                ihook.setColumnValue(row, 'HDR_ID', v_hdr_id);
+                --raise_application_error(-20001, ihook.getColumnValue(row, 'HDR_ID'));
+                ihook.setColumnValue(row, 'ENTTY_NM', v_entty_nm);
+                ihook.setColumnValue(row, 'SRC_VAL_ID', v_src_val_id);
+               -- if nvl(v_cntxt_str,'') <> '' then
+                    ihook.setColumnValue(row, 'MS_CNTXT', v_cntxt_str);
+              --  end if;
+               if nvl(v_reg_stus_id,0) <> 0 then
+                    ihook.setColumnValue(row, 'REG_STUS_ID', v_reg_stus_id);
+                end if;
+                if nvl(v_admin_stus_id,0) <> 0 then
+                    ihook.setColumnValue(row, 'ADMIN_STUS_ID',v_admin_stus_id);
+                end if;
+                /**if nvl(v_cntxt_item_id,0) <> 0 THEN
+                    ihook.setColumnValue(row, 'CNTXT_ID', v_cntxt_item_id);
+                end if;
+                if nvl(v_cntxt_ver_nr, 0) <> 0 then
+                    ihook.setColumnValue(row, 'CNTXT_VER_NR', v_cntxt_ver_nr);
+                end if; **/
+                if nvl(v_csi_item_id, 0) <> 0 then
+                    ihook.setColumnValue(row, 'CS_ID', v_csi_item_id);
+                end if;
+                if nvl(v_csi_ver_nr, 0) <> 0 then
+                    ihook.setColumnValue(row, 'CS_VER_NR', v_csi_ver_nr);
+                end if;
+                if nvl(v_val_dom_typ, 0) <> 0 then
+                    ihook.setColumnValue(row, 'VAL_DOM_TYP_ID', v_val_dom_typ);
+                end if;
+
+                ihook.setColumnValue(row, 'MTCH_LMT', v_mtch_lmt);
+
+
+                --
+            rows.extend(); rows(rows.last) := row;
+
+            end loop;
+            action := t_actionrowset(rows, 'DS Entity to Match Parameters IS', 2,1,'insert');
+
+            actions.extend;
+            actions(actions.last) := action;
+
+            hookoutput.actions := actions;
+            --raise_application_error(-20001, to_char(hookinput.invocationnumber));
+
+            V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+
+--nci_util.debugHook('GENERAL', v_data_out);
+        end if;    
+    end if;
+EXCEPTION
+    WHEN OTHERS THEN
+    raise_application_error(-20001, v_error_msg || 'There was an internal processing error. Please report this to your OneData Administrator.');
+    --nci_util.debugHook('GENERAL', v_data_out);
+end;
+
 procedure spDSRunBatch (v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
 AS
     hookInput t_hookInput;
@@ -1561,7 +1715,7 @@ end;
 
 
 
-procedure spCDEAIRun (v_data_in in clob, v_data_out out clob, v_user_id in varchar2)
+procedure spCDEAIRun (v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_mode in varchar2)
 AS
     hookInput t_hookInput;
     hookOutput t_hookOutput := t_hookOutput();
@@ -1614,13 +1768,12 @@ begin
 
     if (hookinput.invocationnumber = 0) then   -- First invocation
 
-
-    if (hookinput.originalrowset.objectname = 'DS Batch Header') then
-     row:= hookInput.originalRowset.rowset(1);
-    hookoutput.forms := getCDEAIBatchParameterEditForm(row);
-    else
-     rowset := hookinput.originalrowset;
-        hookoutput.forms := getCDEAIParameterEditForm(rowset);
+        if (hookinput.originalrowset.objectname = 'DS Batch Header' or v_mode = 'BTCH') then
+            row:= hookInput.originalRowset.rowset(1);
+            hookoutput.forms := getCDEAIBatchParameterEditForm(row);
+        else
+            rowset := hookinput.originalrowset;
+            hookoutput.forms := getCDEAIParameterEditForm(rowset);
         end if;
         hookOutput.question := nci_ds.getQuestionDSParameters;
         V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
@@ -1665,7 +1818,7 @@ begin
                 end loop;  **/
                --raise_application_error(-20001, v_var_str);
         --Loop through all rows and insert into new object that triggers IS service on insert
-          if (hookinput.originalrowset.objectname <> 'DS Batch Header') then
+          if (hookinput.originalrowset.objectname <> 'DS Batch Header' and v_mode = 'SEL') then
             for i in 1..hookinput.originalrowset.rowset.count loop
 
             -- init row
@@ -1746,7 +1899,244 @@ begin
             actions.extend;
             actions(actions.last) := action;
          end if; -- not ds batch heeader
-          if (hookinput.originalrowset.objectname = 'DS Batch Header') then
+          if (hookinput.originalrowset.objectname = 'DS Batch Header' or v_mode = 'BTCH') then
+      --    raise_application_error(-20000,'Tests');
+                row := t_row();
+                row_ori := hookinput.originalrowset.rowset(1);
+                 select seq_ds_prmtr_id.nextval into v_id from dual;
+                ihook.setColumnValue(row, 'PRMTR_ID', v_id);
+                ihook.setColumnValue(row, 'BTCH_NM', ihook.getColumnValue(row_ori, 'BTCH_NM'));
+                ihook.setColumnValue(row, 'BTCH_USR_NM', ihook.getColumnValue(row_ori, 'BTCH_USR_NM'));
+         --      ihook.setColumnValue(row, 'VARIANT_1', ihook.getColumnValue(row_sel, 'VARIANT_1'));
+           ihook.setColumnValue(row, 'VARIANT_2',v_pv_var_init); --None, cde embedding only
+
+              --  ihook.setColumnValue(row, 'ENTTY_NM', v_entty_nm);
+                ihook.setColumnValue(row, 'SRC_VAL_ID', 247);
+                ihook.setColumnValue(row, 'REG_STUS_ID', v_reg_stus_id);
+                ihook.setColumnValue(row, 'ADMIN_STUS_ID', v_admin_stus_id);
+                --raise_application_error(-20001, to_char(v_reg_stus_id) || ' ' || to_char(v_reg_stus_id));
+                ihook.setColumnValue(row, 'VAL_DOM_TYP_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID'));
+                if nvl(v_csi_item_id, 0) <> 0 then
+                    ihook.setColumnValue(row, 'CS_ID', v_csi_item_id);
+                end if;
+                if nvl(v_csi_ver_nr, 0) <> 0 then
+                    ihook.setColumnValue(row, 'CS_VER_NR', v_csi_ver_nr);
+                end if;
+                if nvl(v_cde_thresh, 0) <> 0 then
+                    ihook.setColumnValue(row, 'THRESHOLD_1', v_cde_thresh);
+                end if;
+                if nvl(v_pv_thresh, 0) <> 0 then
+                    ihook.setColumnValue(row, 'THRESHOLD_2', v_pv_thresh);
+                end if;
+                ihook.setColumnValue(row, 'MTCH_LMT', v_mtch_lmt);
+                ihook.setColumnValue(row, 'DT_LAST_MODIFIED', TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS'));
+                ihook.setColumnValue(row, 'SRC_MTCH_ENGN', 'CDE AI Match');
+                --for multi-select UPDATE: hard-code CDEMeta-SapBERT as it is only allowable option
+                ihook.setColumnValue(row, 'VARIANT_1', '253');
+                ihook.setColumnValue(row, 'VARIANT_1_LIST', '253');
+                ihook.setColumnValue(row, 'MS_CNTXT', nvl(v_cntxt_str, ''));
+               -- raise_application_error(-20001, v_cntxt_str);
+
+
+            rows.extend(); rows(rows.last) := row;
+
+            action := t_actionrowset(rows, 'DS Batch Parameter (for CDE AI Batch Trigger)', 2,1,'insert');
+
+            actions.extend;
+            actions(actions.last) := action;
+          end if;
+            hookoutput.actions := actions;
+            V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+       end if;    
+    end if;
+
+end;
+
+procedure spDSRunSemantic (v_data_in in clob, v_data_out out clob, v_user_id in varchar2, v_mode in varchar2)
+AS
+    hookInput t_hookInput;
+    hookOutput t_hookOutput := t_hookOutput();
+
+    actions t_actions := t_actions();
+    action t_actionRowset;
+    row t_row;
+    rows  t_rows;
+    row_ori t_row;
+
+    rowset t_rowset;
+    v_rowset t_rowset;
+
+    forms t_forms;
+    form1 t_form;
+    row_sel t_row;
+    v_src_val_id number;
+    v_reg_stus_id number;
+    v_admin_stus_id number;
+    v_cntxt_item_id number;
+    v_cntxt_ver_nr number(4,2);
+    v_csi_item_id number;
+    v_csi_ver_nr number(4,2);
+    v_val_dom_typ integer;
+    v_hdr_id number;
+    v_entty_nm varchar2(4000);
+    v_flt_str  varchar2(4000);
+    i integer := 0;
+    v_mtch_lmt number := 10;
+    v_setPrefMsg varchar(100);
+    v_cde_thresh number(4,2);
+    v_pv_thresh number(4,2);
+    v_cde_var number;
+    v_pv_var number;
+    v_id number;
+    v_cde_var_nm varchar2(255);
+    v_pv_var_nm varchar2(255) := 'None';
+    v_var_str varchar2(255) := '';
+    v_cnt number := 0;
+    v_pv_var_init number;
+    v_cntxt_str varchar(1000) := '';
+    v_temp_str varchar2(255);
+begin
+    hookinput := ihook.gethookinput(v_data_in);
+    hookoutput.invocationnumber  := hookinput.invocationnumber;
+    hookoutput.originalrowset    := hookinput.originalrowset;
+    rows := t_rows();
+
+   --DS Batch Header
+
+    if (hookinput.invocationnumber = 0) then   -- First invocation
+
+        if (hookinput.originalrowset.objectname = 'DS Batch Header' or v_mode = 'BTCH') then
+            row:= hookInput.originalRowset.rowset(1);
+            hookoutput.forms := getCDEAIBatchParameterEditForm(row);
+        else
+            rowset := hookinput.originalrowset;
+            hookoutput.forms := getCDEAIParameterEditForm(rowset);
+        end if;
+        hookOutput.question := nci_ds.getQuestionDSParameters;
+        V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
+--nci_util.debugHook('GENERAL',v_data_out);
+    else
+        if (hookinput.answerid = 1) then
+            forms              := hookinput.forms;
+            form1              := forms(1);
+            row_sel            := form1.rowset.rowset(1);
+        --Set variables from form input
+            v_src_val_id := ihook.getColumnValue(row_sel, 'SRC_VAL_ID');
+            v_csi_item_id := ihook.getColumnValue(row_sel, 'CS_ID');
+            v_csi_ver_nr := ihook.getColumnValue(row_sel, 'CS_VER_NR'); 
+            v_cde_thresh := nvl(ihook.getColumnValue(row_sel, 'THRESHOLD_1'),.5);
+            v_pv_thresh := nvl(ihook.getColumnValue(row_sel, 'THRESHOLD_2'),.5);
+           --v_cde_thresh := v_cde_thresh * 100;
+           -- v_pv_thresh := v_pv_thresh * 100;
+           -- raise_application_error(-20001, to_char(v_cde_thresh) || ' ' || to_char(v_pv_thresh));
+            v_cde_var := ihook.getColumnValue(row_sel, 'VARIANT_1');
+            v_pv_var_init := nvl(ihook.getColumnValue(row_sel, 'VARIANT_2'), 269); --None, cde embedding only
+            v_reg_stus_id := ihook.getColumnValue(row_sel, 'REG_STUS_ID');
+            v_admin_stus_id := ihook.getColumnValue(row_sel, 'ADMIN_STUS_ID');
+
+            v_mtch_lmt := nvl(ihook.getColumnValue(row_sel, 'MTCH_LMT'), v_mtch_lmt);
+            for j in 1..ihook.getmsColumnValue(row_sel,'MS_CNTXT').count loop
+                v_temp_str := REGEXP_SUBSTR(ihook.getmsColumnValue(row_sel, 'MS_CNTXT')(j), '[^v]+', 1, 1);
+                select cntxt_nm_dn into v_temp_str from vw_cntxt_ds where item_id = v_temp_str;
+                v_cntxt_str := v_temp_str || ',' || v_cntxt_str;
+                v_cnt := v_cnt + 1;
+            end loop;
+            v_cntxt_str := rtrim(v_cntxt_str, ',');
+
+
+         /**       for j in 1..ihook.getmscolumnvalue(row_sel, 'CDE_MDL_VARIANTS').count loop
+
+                    --v_cde_var := ihook.getMSColumnValue(row_sel, 'CDE_MDL_VARIANTS');
+                    --select obj_key_desc into v_cde_var_nm 
+                    --from obj_key where obj_key_id = ihook.getmscolumnValue(row_sel, 'CDE_MDL_VARIANTS')(j) ;
+                    v_var_str := ihook.getmscolumnValue(row_sel, 'CDE_MDL_VARIANTS')(j) || ' ' || v_var_str;
+                    v_cnt := v_cnt + 1;
+
+                end loop;  **/
+               --raise_application_error(-20001, v_var_str);
+        --Loop through all rows and insert into new object that triggers IS service on insert
+          if (hookinput.originalrowset.objectname <> 'DS Batch Header' and v_mode = 'SEL') then
+            for i in 1..hookinput.originalrowset.rowset.count loop
+
+            -- init row
+                row := t_row();
+                row_ori := t_row();
+            --set row to match and hdr_id
+                row_ori := hookInput.originalRowset.rowset(i);
+                v_hdr_id := ihook.getColumnValue(row_ori, 'HDR_ID');
+       /*     if (getDSSrcValCnt(v_hdr_id, 0) <> 0) then
+                --v_pv_var := nvl(ihook.getColumnValue(row_sel, 'VARIANT_2'),266);
+                v_pv_var := nvl(v_pv_var_init, 266);
+                else
+                v_pv_var := 269; --None, cde embedding only
+            end if;
+        */
+        v_pv_var := v_pv_var_init;
+            --set entity name to match against: user tip overrides
+                v_entty_nm := nvl(ihook.getColumnValue(row_ori, 'ENTTY_NM_USR'), ihook.getColumnValue(row_ori, 'ENTTY_NM'));
+
+            --set row values for insert
+            select seq_ds_prmtr_id.nextval into v_id from dual;
+                ihook.setColumnValue(row, 'PRMTR_ID', v_id);
+                ihook.setColumnValue(row, 'HDR_ID', v_hdr_id);
+                ihook.setColumnValue(row, 'BTCH_NM', ihook.getColumnValue(row_ori, 'BTCH_NM'));
+                ihook.setColumnValue(row, 'BTCH_USR_NM', ihook.getColumnValue(row_ori, 'BTCH_USR_NM'));
+                ihook.setColumnValue(row, 'ENTTY_NM', v_entty_nm);
+                --ihook.setColumnValue(row, 'SRC_VAL_ID', v_src_val_id);
+                ihook.setColumnValue(row, 'SRC_VAL_ID', 247);
+                ihook.setColumnValue(row, 'REG_STUS_ID', v_reg_stus_id);
+                ihook.setColumnValue(row, 'ADMIN_STUS_ID', v_admin_stus_id);
+                --raise_application_error(-20001, to_char(v_reg_stus_id) || ' ' || to_char(v_reg_stus_id));
+                ihook.setColumnValue(row, 'VAL_DOM_TYP_ID', ihook.getColumnValue(row_ori, 'VAL_DOM_TYP_ID'));
+                if nvl(v_csi_item_id, 0) <> 0 then
+                    ihook.setColumnValue(row, 'CS_ID', v_csi_item_id);
+                end if;
+                if nvl(v_csi_ver_nr, 0) <> 0 then
+                    ihook.setColumnValue(row, 'CS_VER_NR', v_csi_ver_nr);
+                end if;
+                if nvl(v_cde_thresh, 0) <> 0 then
+                    ihook.setColumnValue(row, 'THRESHOLD_1', v_cde_thresh);
+                end if;
+                if nvl(v_pv_thresh, 0) <> 0 then
+                    ihook.setColumnValue(row, 'THRESHOLD_2', v_pv_thresh);
+                end if;
+           /*     if nvl(v_cde_var, 0) <> 0 then
+                    ihook.setColumnValue(row, 'VARIANT_1', v_cde_var);
+                    select obj_key_desc into v_cde_var_nm from obj_key where obj_key_id = v_cde_var;
+                    ihook.setColumnValue(row, 'VARIANT_1_NM', v_cde_var_nm);
+                end if; */
+                if v_cnt > 1 then
+                 ihook.setColumnValue(row, 'VARIANT_1_NM', 'Multiple variants selected');
+                else
+                -- hard code CDEMeta-SapBERT model
+                    select obj_key_desc into v_cde_var_nm from obj_key where obj_key_id = 253;
+                    ihook.setColumnValue(row, 'VARIANT_1_NM', v_cde_var_nm);
+                   -- ihook.setColumnValue(row, 'VARIANT_1_NM', ihook.getmscolumnValue(row_sel, 'CDE_MDL_VARIANTS')(1));
+                 end if;
+                if nvl(v_pv_var, 0) <> 0 then
+                    ihook.setColumnValue(row, 'VARIANT_2', v_pv_var);
+                    select obj_key_desc into v_pv_var_nm from obj_key where obj_key_id = v_pv_var;
+                    ihook.setColumnValue(row, 'VARIANT_2_NM',v_pv_var_nm);
+
+                end if;
+                ihook.setColumnValue(row, 'MTCH_LMT', v_mtch_lmt);
+                ihook.setColumnValue(row, 'DT_LAST_MODIFIED', TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS'));
+                ihook.setColumnValue(row, 'SRC_MTCH_ENGN', 'CDE AI Match');
+                --for multi-select UPDATE: hard-code CDEMeta-SapBERT as it is only allowable option
+                ihook.setColumnValue(row, 'VARIANT_1_LIST', '253');
+                ihook.setColumnValue(row, 'MS_CNTXT', nvl(v_cntxt_str, ''));
+               -- raise_application_error(-20001, v_cntxt_str);
+
+
+            rows.extend(); rows(rows.last) := row;
+
+            end loop;
+            action := t_actionrowset(rows, 'DS Entity to Match CDE AI Parameters (for insert)', 2,1,'insert');
+
+            actions.extend;
+            actions(actions.last) := action;
+         end if; -- not ds batch heeader
+          if (hookinput.originalrowset.objectname = 'DS Batch Header' or v_mode = 'BTCH') then
       --    raise_application_error(-20000,'Tests');
                 row := t_row();
                 row_ori := hookinput.originalrowset.rowset(1);
@@ -4853,6 +5243,7 @@ procedure spBatchDelete (v_data_in in clob, v_data_out out clob, v_usr_id in var
     row_sel t_row;
     v_hdr_id integer;
     v_is_auth boolean;
+    v_user_id varchar2(100);
     v_err_msg varchar2(512);
       showRowset     t_showableRowset;
   v_fltr_str varchar2(4000);
@@ -4863,72 +5254,88 @@ BEGIN
     hookoutput.invocationnumber  := hookinput.invocationnumber;
     hookoutput.originalrowset    := hookinput.originalrowset;
 
---raise_application_error(-20000,hookinput.ta
-     row_ori := hookInput.originalRowset.rowset(1);
-     -- DS Batch Header or DS Entity To Match
+    --raise_application_error(-20000,hookinput.ta
+    row_ori := hookInput.originalRowset.rowset(1);
+    -- DS Batch Header or DS Entity To Match
     v_obj_nm := hookinput.originalrowset.objectname;
+    v_is_auth := true;
     if (hookinput.invocationnumber = 0 and v_obj_nm = 'DS Entity To Match') then
-    rows := t_rows();
-    row := t_row();
+        rows := t_rows();
+        row := t_row();
 
-
-       ihook.setColumnValue(row, 'Deletion Type', 'All rows with Batch User: ' || ihook.getColumnValue(row_ori,'BTCH_USR_NM'));
-       ihook.setColumnValue(row, 'Deletion ID', 1);
-     rows.extend; rows(rows.last) := row;
-     ihook.setColumnValue(row, 'Deletion Type', 'All rows with Batch Name: ' || ihook.getColumnValue(row_ori,'BTCH_NM'));
-       ihook.setColumnValue(row, 'Deletion ID', 2);
-     rows.extend; rows(rows.last) := row;
-     ihook.setColumnValue(row, 'Deletion Type', 'All rows with Batch Name/Batch User: ' || ihook.getColumnValue(row_ori,'BTCH_NM') || '/' ||  ihook.getColumnValue(row_ori,'BTCH_USR_NM'));
-       ihook.setColumnValue(row, 'Deletion ID', 3);
-     rows.extend; rows(rows.last) := row;
+        ihook.setColumnValue(row, 'Deletion Type', 'All rows with Batch User: ' || ihook.getColumnValue(row_ori,'BTCH_USR_NM'));
+        ihook.setColumnValue(row, 'Deletion ID', 1);
+        rows.extend; rows(rows.last) := row;
+        ihook.setColumnValue(row, 'Deletion Type', 'All rows with Batch Name: ' || ihook.getColumnValue(row_ori,'BTCH_NM'));
+        ihook.setColumnValue(row, 'Deletion ID', 2);
+        rows.extend; rows(rows.last) := row;
+        ihook.setColumnValue(row, 'Deletion Type', 'All rows with Batch Name/Batch User: ' || ihook.getColumnValue(row_ori,'BTCH_NM') || '/' ||  ihook.getColumnValue(row_ori,'BTCH_USR_NM'));
+        ihook.setColumnValue(row, 'Deletion ID', 3);
+        rows.extend; rows(rows.last) := row;
         showrowset := t_showablerowset (rows, 'Model Selection', 4, 'single');
-       	 hookoutput.showrowset := showrowset;
-         hookoutput.question := nci_11179.getQuestionGeneric('Please select option.', 'Delete');
+       	hookoutput.showrowset := showrowset;
+        hookoutput.question := nci_11179.getQuestionGeneric('Please select option.', 'Delete');
+    end if;
 
-     end if;
-     if (hookinput.invocationnumber = 0 and v_obj_nm = 'DS Batch Header') then
-           hookoutput.question := nci_11179.getQuestionGeneric('Please confirm deletion for Batch Name/Batch User: ' || ihook.getColumnValue(row_ori,'BTCH_NM') || '/' ||  ihook.getColumnValue(row_ori,'BTCH_USR_NM'), 'Delete');
+    if (hookinput.invocationnumber = 0 and v_obj_nm = 'DS Batch Header') then
+        hookoutput.question := nci_11179.getQuestionGeneric('Please confirm deletion for Batch Name/Batch User: ' || ihook.getColumnValue(row_ori,'BTCH_NM') || '/' ||  ihook.getColumnValue(row_ori,'BTCH_USR_NM'), 'Delete');
+    end if;
 
-     end if;
     if (hookinput.invocationnumber = 1) then
-    if (v_obj_nm <> 'DS Batch Header') then
-      row_sel := hookInput.selectedRowset.rowset(1);
-      if (ihook.getColumnValue(row_sel,'Deletion ID') = 2) then -- batch name
-        v_fltr_str := ' where btch_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_NM') || '''';
-    end if;
-     if (ihook.getColumnValue(row_sel,'Deletion ID') = 1) then -- batch user
-        v_fltr_str := ' where btch_usr_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_USR_NM') || '''' ;
-    end if;
-      if (ihook.getColumnValue(row_sel,'Deletion ID') = 3 ) then -- batch user/name
-        v_fltr_str := ' where btch_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_NM') || ''' and btch_usr_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_USR_NM') || '''' ;
-    end if;
-   else
-        v_fltr_str := ' where btch_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_NM') || ''' and btch_usr_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_USR_NM') || '''' ;
-   end if;
-    v_fltr_str := v_fltr_str || ' and MTCH_TYP_NM = ''' || nvl(ihook.getColumnValue(row_ori,'MTCH_TYP_NM'),'CDE') || '''';
-
-     v_sql := 'DELETE FROM nci_ds_cntxt_sel WHERE hdr_id  in (Select hdr_id from nci_ds_hdr  ' || v_fltr_str || ')';
-   -- raise_application_error (-20000, v_sql);
-    execute immediate v_sql;
-     v_sql := 'DELETE FROM nci_ds_rslt_dtl WHERE hdr_id  in (Select hdr_id from nci_ds_hdr  ' || v_fltr_str || ')';
-    execute immediate v_sql;
-     v_sql := 'DELETE FROM nci_ds_rslt WHERE hdr_id  in (Select hdr_id from nci_ds_hdr  ' || v_fltr_str || ')';
-    execute immediate v_sql;
-    v_sql := 'DELETE FROM nci_ds_prmtr WHERE hdr_id  in (Select hdr_id from nci_ds_hdr  ' || v_fltr_str || ')';
-    execute immediate v_sql;
-    v_sql := 'DELETE FROM nci_ds_dtl WHERE hdr_id  in (Select hdr_id from nci_ds_hdr  ' || v_fltr_str || ')';
-    execute immediate v_sql;
-    v_sql := 'DELETE FROM nci_ds_hdr   ' || v_fltr_str ;
-    execute immediate v_sql;
-    if (v_obj_nm = 'DS Batch Header') then -- delete batch header
-     v_sql := 'DELETE FROM nci_ds_btch_hdr   ' || v_fltr_str ;
-        execute immediate v_sql;
-      v_sql := 'DELETE FROM onedata_ra.nci_ds_btch_hdr   ' || v_fltr_str ;
-        execute immediate v_sql;
-
-    end if;
-           commit;
+        --add authorization check
+        select creat_usr_id into v_user_id from nci_ds_btch_hdr where BTCH_NM = ihook.getColumnValue(row_ori,'BTCH_NM') and BTCH_USR_NM = ihook.getColumnValue(row_ori,'BTCH_USR_NM');
+        if (upper(v_usr_id) <> upper(v_user_id) and nci_11179_2.isUserAdmin(v_usr_id) = false) then 
+            v_is_auth := false;
+            v_err_msg := '<strong>You are not authorized to delete this batch:<br>Batch Name: </strong>' || ihook.getColumnValue(row_ori, 'BTCH_NM') || '  <strong>Batch User: </strong>' || ihook.getColumnValue(row_ori, 'BTCH_USR_NM');
+            --raise_application_error(-20000, 'You are not authorized to delete this record: ' || v_err_msg);
+        else 
+            v_is_auth := true;
         end if;
+
+        if (v_is_auth = true) then
+            if (v_obj_nm <> 'DS Batch Header') then
+                row_sel := hookInput.selectedRowset.rowset(1);
+                if (ihook.getColumnValue(row_sel,'Deletion ID') = 2) then -- batch name
+                    v_fltr_str := ' where btch_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_NM') || '''';
+                end if;
+                if (ihook.getColumnValue(row_sel,'Deletion ID') = 1) then -- batch user
+                    v_fltr_str := ' where btch_usr_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_USR_NM') || '''' ;
+                end if;
+                if (ihook.getColumnValue(row_sel,'Deletion ID') = 3 ) then -- batch user/name
+                    v_fltr_str := ' where btch_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_NM') || ''' and btch_usr_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_USR_NM') || '''' ;
+                end if;
+            else
+                v_fltr_str := ' where btch_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_NM') || ''' and btch_usr_nm = ''' || ihook.getColumnValue(row_ori,'BTCH_USR_NM') || '''' ;
+            end if;
+            v_fltr_str := v_fltr_str || ' and MTCH_TYP_NM = ''' || nvl(ihook.getColumnValue(row_ori,'MTCH_TYP_NM'),'CDE') || '''';
+
+            v_sql := 'DELETE FROM nci_ds_cntxt_sel WHERE hdr_id  in (Select hdr_id from nci_ds_hdr  ' || v_fltr_str || ')';
+   -- raise_application_error (-20000, v_sql);
+            execute immediate v_sql;
+            v_sql := 'DELETE FROM nci_ds_rslt_dtl WHERE hdr_id  in (Select hdr_id from nci_ds_hdr  ' || v_fltr_str || ')';
+            execute immediate v_sql;
+            v_sql := 'DELETE FROM nci_ds_rslt WHERE hdr_id  in (Select hdr_id from nci_ds_hdr  ' || v_fltr_str || ')';
+            execute immediate v_sql;
+            v_sql := 'DELETE FROM nci_ds_prmtr WHERE hdr_id  in (Select hdr_id from nci_ds_hdr  ' || v_fltr_str || ')';
+            execute immediate v_sql;
+            v_sql := 'DELETE FROM nci_ds_dtl WHERE hdr_id  in (Select hdr_id from nci_ds_hdr  ' || v_fltr_str || ')';
+            execute immediate v_sql;
+            v_sql := 'DELETE FROM nci_ds_hdr   ' || v_fltr_str ;
+            execute immediate v_sql;
+            if (v_obj_nm = 'DS Batch Header') then -- delete batch header
+                v_sql := 'DELETE FROM nci_ds_btch_hdr   ' || v_fltr_str ;
+                execute immediate v_sql;
+                v_sql := 'DELETE FROM onedata_ra.nci_ds_btch_hdr   ' || v_fltr_str ;
+                execute immediate v_sql;
+            end if;
+            commit;
+        end if;
+    end if;
+
+    if (v_is_auth = false) then
+        hookoutput.message := v_err_msg;
+    end if;
+
 V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 END;
 
