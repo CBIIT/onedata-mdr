@@ -1,3 +1,61 @@
+create or replace PACKAGE nci_11179_2 AS
+function getGenericForm (v_obj_nm in varchar2) return t_forms ;
+procedure spNCICompareDE (v_data_in in clob, v_data_out out clob);
+procedure spNCIComparePV (v_data_in in clob, v_data_out out clob);
+procedure spNCICompareVD (v_data_in in clob, v_data_out out clob);
+procedure spNCICompareDEC (v_data_in in clob, v_data_out out clob);
+procedure spShowDataAudit (v_data_in in clob, v_data_out out clob);
+procedure spNCICompareVM (v_data_in in clob, v_data_out out clob);
+procedure spCreateValueMap (input_rows in t_rows, output_rows in out t_rows, v_src_alt_nm_typ in integer, v_tgt_alt_nm_typ in integer);
+procedure spNCIShowVMDependency (v_data_in in clob, v_data_out out clob);
+procedure spNCIShowVMDependencyDS (v_data_in in clob, v_data_out out clob, v_mode in varchar2);
+procedure spNCIShowVMDependencySubset (v_data_in in clob, v_data_out out clob, v_mode in varchar2);
+procedure spNCIShowVMDependencyComb (v_data_in in clob, v_data_out out clob);
+procedure spNCIShowPVDependencyComb (v_data_in in clob, v_data_out out clob);
+function isUserAuth(v_item_id in number, v_ver_nr in number,v_user_id in varchar2) return boolean;
+function isUserAdmin(v_user_id in varchar2) return boolean;
+procedure spCheckUserAuth (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure setStdAttr(row in out t_row);
+procedure resetAuditAttr(row in out t_row, v_user_id in varchar2);
+procedure setItemLongNm(row in out t_row, v_id in number);
+procedure stdAIValidation(rowai in t_row,  v_item_typ_id in number, v_valid in out boolean, v_err_str out varchar2);
+procedure stdCncptRowValidation(rowcncpt in t_row, v_idx in number, v_valid in out boolean, v_err_str in out varchar2);
+function getStdShortName (v_item_id in number, v_ver_nr in number) return varchar2;
+function getStdDataType (v_data_typ_id in number) return number;
+function getLegacyDataType (v_data_typ_id in number) return number;
+function getLangId (v_lang_nm in varchar2) return number;
+function getCncptStrFromCncpt (v_item_id in number, v_ver_nr in number, v_admin_item_typ_id in number) return varchar2;
+function getCncptStrFromForm (rowform in t_row, v_admin_item_typ_id in number, idx in integer) return varchar2;
+PROCEDURE spShowVersionDependency (v_data_in in clob, v_data_out out clob, v_admin_item_typ in out varchar2);
+
+procedure spComparePVFromCDEMatchCDEList(v_data_in in clob, v_data_out out clob);
+
+function getGenericQuestion (v_quest_str in varchar2, v_cmd_str in varchar2, v_id in integer)  return t_question ;
+
+procedure copyDDEComponents (v_src_item_id in number, v_src_ver_nr in number, v_tgt_item_id in number, v_tgt_ver_nr in number, actions in out t_actions);
+function getCollectionId return integer;
+function getDloadItemTyp (v_fmt_id in integer) return integer;
+procedure spBulkUpdateContext (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+procedure spBulkUpdateCSI (v_data_in in clob, v_data_out out clob, v_user_id in varchar2);
+function isCSParentCSIValid(row in t_row) return boolean;
+function isDDE(v_item_id in number, v_ver_nr in number) return boolean;
+function isDDEparent(v_item_id in number, v_ver_nr in number) return boolean;
+function isDDEchild(v_item_id in number, v_ver_nr in number) return boolean;
+
+procedure spAddAIToCartID (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
+procedure spShowCharCount (v_data_in in clob, v_data_out out clob);
+procedure updCSIHier (row_ori in t_row ,actions in out t_actions);
+procedure spDeleteLog ( v_data_in in clob, v_data_out out clob);
+procedure AddItemToCart(v_item_id in number, v_ver_nr in number, v_usr_id in varchar2, v_cart_nm in varchar2, v_retain_ind in number,  rowscart in out t_rows) ;
+procedure spDeleteObjKey (v_data_in in clob, v_data_out out clob, v_usr_id  IN varchar2);
+procedure spStdWIP (v_data_in in clob, v_data_out out clob);
+function isDECnmSysGen (v_dec_id in number, v_dec_ver_nr in number, v_oc_id in number, v_oc_ver_nr in number, v_prop_id in number, v_prop_ver_nr in number) return boolean;
+function isDECnmSysGenNew (v_in_str varchar2) return boolean;
+function isShortNmSysGen (v_in_str varchar2) return boolean;
+function getItemTypeID (v_item_id in number, v_ver_nr in number) return number;
+function isHookInputSelected (v_hookinput in t_hookinput, v_col_nm in varchar2) return boolean;
+END;
+/
 create or replace PACKAGE BODY nci_11179_2 AS
 
 c_ver_suffix varchar2(5) := 'v1.00';
@@ -2773,3 +2831,4 @@ end;
 
 
 end;
+/
