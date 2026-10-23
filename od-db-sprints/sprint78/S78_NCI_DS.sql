@@ -1496,7 +1496,9 @@ begin
                 ihook.setColumnValue(row, 'PRMTR_ID', v_id);
                 ihook.setColumnValue(row, 'HDR_ID', v_hdr_id);
                 --raise_application_error(-20001, ihook.getColumnValue(row, 'HDR_ID'));
-                ihook.setColumnValue(row, 'ENTTY_NM', v_entty_nm);
+                --ihook.setColumnValue(row, 'ENTTY_NM', v_entty_nm);
+                ihook.setColumnValue(row, 'ENTTY_NM', ihook.getColumnValue(row_ori, 'ENTTY_NM'));
+                ihook.setColumnValue(row, 'ENTTY_NM_USR', ihook.getColumnValue(row_ori, 'ENTTY_NM_USR'));
                 ihook.setColumnValue(row, 'SRC_VAL_ID', v_src_val_id);
                -- if nvl(v_cntxt_str,'') <> '' then
                     ihook.setColumnValue(row, 'MS_CNTXT', v_cntxt_str);
@@ -1525,7 +1527,6 @@ begin
 
                 ihook.setColumnValue(row, 'MTCH_LMT', v_mtch_lmt);
 
-
                 --
             rows.extend(); rows(rows.last) := row;
 
@@ -1540,7 +1541,7 @@ begin
 
             V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
 
---nci_util.debugHook('GENERAL', v_data_out);
+nci_util.debugHook('GENERAL', v_data_out);
         end if;    
     end if;
 EXCEPTION
@@ -2081,7 +2082,9 @@ begin
                 ihook.setColumnValue(row, 'HDR_ID', v_hdr_id);
                 ihook.setColumnValue(row, 'BTCH_NM', ihook.getColumnValue(row_ori, 'BTCH_NM'));
                 ihook.setColumnValue(row, 'BTCH_USR_NM', ihook.getColumnValue(row_ori, 'BTCH_USR_NM'));
-                ihook.setColumnValue(row, 'ENTTY_NM', v_entty_nm);
+                --ihook.setColumnValue(row, 'ENTTY_NM', v_entty_nm);
+                ihook.setColumnValue(row, 'ENTTY_NM', ihook.getColumnValue(row_ori, 'ENTTY_NM'));
+                ihook.setColumnValue(row, 'ENTTY_NM_USR', ihook.getColumnValue(row_ori, 'ENTTY_NM_USR'));
                 --ihook.setColumnValue(row, 'SRC_VAL_ID', v_src_val_id);
                 ihook.setColumnValue(row, 'SRC_VAL_ID', 247);
                 ihook.setColumnValue(row, 'REG_STUS_ID', v_reg_stus_id);
@@ -2167,7 +2170,7 @@ begin
                 end if;
                 ihook.setColumnValue(row, 'MTCH_LMT', v_mtch_lmt);
                 ihook.setColumnValue(row, 'DT_LAST_MODIFIED', TO_CHAR(SYSDATE, 'MM/DD/YY HH24:MI:SS'));
-                ihook.setColumnValue(row, 'SRC_MTCH_ENGN', 'CDE AI Match');
+                ihook.setColumnValue(row, 'SRC_MTCH_ENGN', 'CDE Semantic Match');
                 --for multi-select UPDATE: hard-code CDEMeta-SapBERT as it is only allowable option
                 ihook.setColumnValue(row, 'VARIANT_1', '253');
                 ihook.setColumnValue(row, 'VARIANT_1_LIST', '253');
