@@ -56,7 +56,8 @@ function isShortNmSysGen (v_in_str varchar2) return boolean;
 function getItemTypeID (v_item_id in number, v_ver_nr in number) return number;
 function isHookInputSelected (v_hookinput in t_hookinput, v_col_nm in varchar2) return boolean;
 END;
-/create or replace PACKAGE BODY nci_11179_2 AS
+/
+create or replace PACKAGE BODY nci_11179_2 AS
 
 c_ver_suffix varchar2(5) := 'v1.00';
 v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
