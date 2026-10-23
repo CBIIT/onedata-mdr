@@ -30,7 +30,7 @@ PROCEDURE spShowVersionDependency (v_data_in in clob, v_data_out out clob, v_adm
 
 procedure spComparePVFromCDEMatchCDEList(v_data_in in clob, v_data_out out clob);
 
-procedure spDeleteRefDoc( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2);
+procedure spDeleteCOmmonChildren( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2, v_typ in varchar2);
 function getGenericQuestion (v_quest_str in varchar2, v_cmd_str in varchar2, v_id in integer)  return t_question ;
 
 procedure copyDDEComponents (v_src_item_id in number, v_src_ver_nr in number, v_tgt_item_id in number, v_tgt_ver_nr in number, actions in out t_actions);
@@ -56,8 +56,7 @@ function isShortNmSysGen (v_in_str varchar2) return boolean;
 function getItemTypeID (v_item_id in number, v_ver_nr in number) return number;
 function isHookInputSelected (v_hookinput in t_hookinput, v_col_nm in varchar2) return boolean;
 END;
-/
-create or replace PACKAGE BODY nci_11179_2 AS
+/create or replace PACKAGE BODY nci_11179_2 AS
 
 c_ver_suffix varchar2(5) := 'v1.00';
 v_dflt_txt    varchar2(100) := 'Enter text or auto-generated.';
@@ -76,7 +75,7 @@ begin
 end;
 
 
-procedure spDeleteRefDoc( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2)
+procedure spDeleteCOmmonChildren( v_data_in IN CLOB, v_data_out OUT CLOB, v_user_id  IN varchar2, v_typ in varchar2)
 AS
     hookInput t_hookInput;
     hookOutput t_hookOutput := t_hookOutput();
@@ -90,6 +89,8 @@ AS
  v_src number;
  v_tgt number;
   rowform t_row;
+ -- v_str varchar2(1000);
+  
 BEGIN
   hookinput                    := Ihook.gethookinput (v_data_in);
   hookoutput.invocationnumber  := hookinput.invocationnumber;
@@ -97,13 +98,19 @@ BEGIN
   v_found := false;
   v_str := '';
 
+    case v_typ 
+    when 'REF_DOC' then v_str := 'Reference Document(s) and associated attachments blobs';
+    when 'BLOBS' then v_str := 'associated attachments blobs';
+    
+    end case;
   if (hookinput.invocationnumber = 0) then
-            hookoutput.question := nci_form_curator.getProceedQuestion('Confirm', 'Please confirm deletion of Reference Document(s) and associated attachments blobs.');
+            hookoutput.question := nci_form_curator.getProceedQuestion('Confirm', 'Please confirm deletion of: ' || v_str);
     end if;
 if (hookinput.invocationnumber = 1) then
 
     for i in 1..hookInput.originalRowset.rowset.count loop
         row_ori :=  hookInput.originalRowset.rowset(i);
+        if (v_typ = 'REF_DOC') then
         v_ref_id := ihook.getColumnValue(row_ori,'REF_ID');
  
        delete from ref_doc where NCI_REF_ID = v_ref_id; 
@@ -113,9 +120,19 @@ if (hookinput.invocationnumber = 1) then
         delete from ref where ref_id = v_ref_id; 
         delete from onedata_ra.ref where ref_id = v_ref_id; 
         commit;
+        end if;
+        if (v_typ = 'BLOBS') then
+        v_ref_id := ihook.getColumnValue(row_ori,'REF_DOC_ID');
+ 
+       delete from ref_doc where REF_DOC_ID = v_ref_id; 
+        delete from onedata_ra.ref_doc where REF_DOC_ID = v_ref_id; 
+       -- commit;
+        commit;
+        end if;
+        
     end loop;
 
-hookoutput.message := hookInput.originalRowset.rowset.count ||  ' Reference Document(s) deleted.';
+hookoutput.message := hookInput.originalRowset.rowset.count ||  v_str || ' deleted.';
 end if;
 
   V_DATA_OUT := IHOOK.GETHOOKOUTPUT (HOOKOUTPUT);
