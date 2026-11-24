@@ -3,6 +3,14 @@ S79_WA_RA_DDL.sql
 
 -- Run as ONEDATA_WA DDL scripts
 S79_WA_RA_DDL.sql
+S79_NCI_API.sql
+S79_NCI_11179.sql
 S79_WA.sql
 S79_NCI_11179_2.sql
 S79_NCI_DS.sql
+S79_NCI_DEC_MGMT.sql
+S79_NCI_CODEMAP.sql
+
+Run as ONEDATA_MD
+S79_MD.sql
+
